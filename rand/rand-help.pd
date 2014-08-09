@@ -1,0 +1,29 @@
+#N canvas 1003 160 483 345 10;
+#X text 210 26 RAND;
+#X floatatom 292 217 5 0 0 0 - - -, f 5;
+#X obj 238 274 print;
+#X obj 238 173 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+1;
+#X msg 163 194 seed 123;
+#X obj 238 237 rand 4;
+#X text 34 60 Similar to [random] but with current time (time.h) worked
+into the seed. It means that by default \, the same sequence won't
+resurface from restarting pd. You can send the message "peek" to view
+the current state of the seed. Seeding now optionally accepts an empty
+parameter to allow rand to reseed automatically.;
+#X msg 124 196 seed;
+#X msg 143 233 peek;
+#X obj 238 194 metro 200;
+#X obj 247 217 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X connect 1 0 5 1;
+#X connect 3 0 9 0;
+#X connect 4 0 5 0;
+#X connect 4 0 8 0;
+#X connect 5 0 2 0;
+#X connect 7 0 5 0;
+#X connect 7 0 8 0;
+#X connect 8 0 5 0;
+#X connect 9 0 5 0;
+#X connect 10 0 5 0;
+#X coords 0 345 1 344 85 60 0;

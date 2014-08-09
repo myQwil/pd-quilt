@@ -1,0 +1,37 @@
+#N canvas 122 517 537 337 10;
+#X obj 268 191 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X floatatom 349 175 5 0 0 0 - - -, f 5;
+#X obj 286 223 print;
+#X obj 253 163 metro 200;
+#X obj 253 139 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X text 356 190 default: 3 \, 2;
+#X floatatom 323 156 5 0 0 0 - - -, f 5;
+#X text 361 155 range;
+#X obj 105 174 metro 200;
+#X obj 105 150 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 105 224 print;
+#X obj 105 199 randv 2 1;
+#X floatatom 156 155 5 0 0 0 - - -, f 5;
+#X text 386 174 count;
+#X text 89 74 specify how many times you want to allow the same number
+to occur in a row;
+#X obj 346 223 print not;
+#X obj 165 224 print not;
+#X text 90 42 RANDV;
+#X obj 286 190 randv;
+#X connect 0 0 18 0;
+#X connect 1 0 18 2;
+#X connect 3 0 18 0;
+#X connect 4 0 3 0;
+#X connect 6 0 18 1;
+#X connect 8 0 11 0;
+#X connect 9 0 8 0;
+#X connect 11 0 10 0;
+#X connect 11 1 16 0;
+#X connect 12 0 8 1;
+#X connect 18 0 2 0;
+#X connect 18 1 15 0;
+#X coords 0 337 1 336 85 60 0;

@@ -1,0 +1,32 @@
+#N canvas 433 495 538 287 10;
+#X obj 64 108 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X floatatom 64 218 5 0 0 0 - - -, f 5;
+#X floatatom 88 89 5 0 0 0 - - -, f 5;
+#X floatatom 99 134 5 0 0 0 - - -, f 5;
+#X floatatom 139 134 5 0 0 0 - - -, f 5;
+#X text 106 118 min;
+#X text 146 118 max;
+#X floatatom 110 218 5 0 0 0 - - -, f 5;
+#X obj 292 160 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X floatatom 292 215 5 0 0 0 - - -, f 5;
+#X floatatom 366 215 5 0 0 0 - - -, f 5;
+#X text 114 200 original random number;
+#X text 86 72 random range;
+#X text 116 168 default: 100 \, 0 \, 1;
+#X obj 292 187 grand 2 2 5;
+#X text 315 159 2 steps between 2 and 5;
+#X text 251 21 GRAND;
+#X obj 64 169 grand;
+#X text 91 37 random number generator that uses [graid] logic;
+#X connect 0 0 17 0;
+#X connect 2 0 17 1;
+#X connect 3 0 17 2;
+#X connect 4 0 17 3;
+#X connect 8 0 14 0;
+#X connect 14 0 9 0;
+#X connect 14 1 10 0;
+#X connect 17 0 1 0;
+#X connect 17 1 7 0;
+#X coords 0 287 1 286 85 60 0;
