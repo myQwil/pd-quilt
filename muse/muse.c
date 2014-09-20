@@ -18,8 +18,7 @@ double getnote(t_muse *x, int d) {
 	int oct = d/n - (dn<0 ? 1:0); // floor negatives
 	d = (dn+n) % n; // modulo always positive
 	double step = (d ? x->x_scl[d] : 0);
-	double note = root + step + (oct * x->x_oct);
-	return note;
+	return (root + step + (oct * x->x_oct));
 }
 
 void muse_float(t_muse *x, t_float f) {
