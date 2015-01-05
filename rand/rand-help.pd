@@ -1,21 +1,40 @@
-#N canvas 1003 160 483 345 10;
-#X text 210 26 RAND;
-#X floatatom 292 217 5 0 0 0 - - -, f 5;
-#X obj 238 274 print;
-#X obj 238 173 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+#N canvas 641 275 548 345 10;
+#X text 239 30 RAND;
+#X floatatom 208 203 5 0 0 0 - - -, f 5;
+#X obj 154 260 print;
+#X obj 154 159 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X msg 163 194 seed 123;
-#X obj 238 237 rand 4;
-#X text 34 60 Similar to [random] but with current time (time.h) worked
+#X msg 79 180 seed 123;
+#X obj 154 223 rand 4;
+#X text 63 55 Similar to [random] but with current time (time.h) worked
 into the seed. It means that by default \, the same sequence won't
 resurface from restarting pd. You can send the message "peek" to view
 the current state of the seed. Seeding now optionally accepts an empty
 parameter to allow rand to reseed automatically.;
-#X msg 124 196 seed;
-#X msg 143 233 peek;
-#X obj 238 194 metro 200;
-#X obj 247 217 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X msg 40 182 seed;
+#X msg 59 219 peek;
+#X obj 154 180 metro 200;
+#X obj 163 203 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
+#X obj 269 194 rand 3 6;
+#X obj 269 173 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X floatatom 295 174 5 0 0 0 - - -, f 5;
+#X floatatom 334 174 5 0 0 0 - - -, f 5;
+#X text 301 158 min;
+#X text 341 158 max;
+#X floatatom 269 216 5 0 0 0 - - -, f 5;
+#X text 332 195 2 args create boundaries;
+#X text 332 209 (number between 3 and 6);
+#X obj 241 273 rand 2 3 5 7 11 13 17;
+#X obj 241 253 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X floatatom 241 295 5 0 0 0 - - -, f 5;
+#X text 264 251 more than 2 args creates a list;
+#X text 290 294 number between the first;
+#X text 290 308 seven prime numbers;
+#X floatatom 400 273 5 0 0 0 - - -, f 5;
+#X text 438 272 changes 17;
 #X connect 1 0 5 1;
 #X connect 3 0 9 0;
 #X connect 4 0 5 0;
@@ -26,4 +45,11 @@ parameter to allow rand to reseed automatically.;
 #X connect 8 0 5 0;
 #X connect 9 0 5 0;
 #X connect 10 0 5 0;
+#X connect 11 0 17 0;
+#X connect 12 0 11 0;
+#X connect 13 0 11 1;
+#X connect 14 0 11 2;
+#X connect 20 0 22 0;
+#X connect 21 0 20 0;
+#X connect 26 0 20 7;
 #X coords 0 345 1 344 85 60 0;
