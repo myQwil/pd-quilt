@@ -1,59 +1,93 @@
 #include "../m_pd.h"
 #include <time.h>
 
+/* -------------------------- rand -------------------------- */
+
 static t_class *rand_class;
 
 typedef struct _rand {
 	t_object x_obj;
-	t_float x_f;
-	int x_thym;
-	unsigned int x_state; // roll-over odometer
+	t_float x_max, x_min, *x_vec;
+	unsigned int x_state;
+	int x_c;
 } t_rand;
 
-int add_thym(void) {
-	return time(0) % 31536000; // seconds in a year
+static int rand_addthym(void) {
+	int thym = time(0) % 31536000; // seconds in a year
+	return thym + !(thym%2); // odd numbers only
 }
 
-int timeseed(int thym) {
+static int rand_timeseed(int thym) {
 	static unsigned int rand_nextseed = 1489853723;
 	rand_nextseed = rand_nextseed * thym + 938284287;
 	return (rand_nextseed & 0x7fffffff);
 }
 
-void rand_seed(t_rand *x, t_symbol *s, int argc, t_atom *argv) {
-	x->x_state = x->x_thym =
-		(!argc ? add_thym() : atom_getfloat(argv));
+static void rand_seed(t_rand *x, t_symbol *s, int argc, t_atom *argv) {
+	x->x_state = (argc ? atom_getfloat(argv) : rand_addthym());
 }
 
-void rand_peek(t_rand *x, t_symbol *s) {
-	post("%s%s%u (%d)", s->s_name, (*s->s_name ? ": " : ""),
-		x->x_state, x->x_thym);
+static void rand_peek(t_rand *x, t_symbol *s) {
+	post("%s%s%u", s->s_name, (*s->s_name ? ": " : ""), x->x_state);
 }
 
-void rand_bang(t_rand *x) {
-	int n=x->x_f, nval;
-	int range = (n < 1 ? 1 : n);
-	x->x_state = x->x_state * 472940017 + 832416023;
-	nval = ((double)range) * ((double)x->x_state) / 4294967296;
-	outlet_float(x->x_obj.ob_outlet, nval);
+static void rand_bang(t_rand *x) {
+	int c=x->x_c, nval;
+	unsigned int randval = x->x_state;
+	x->x_state = randval = randval * 472940017 + 832416023;
+
+	if (c>2) {
+		nval = ((double)c) * ((double)randval)
+			 * (1./4294967296.);
+		outlet_float(x->x_obj.ob_outlet, x->x_vec[nval]);
+	} else {
+		int min=x->x_min, n=x->x_max-min, b=(c>1);
+		int range = (n==0 ? 1*!b : n);
+		range += ((n<0 ? -1:1)*b);
+		nval = ((double)range) * ((double)randval)
+			 * (1./4294967296.);
+		nval += min;
+		outlet_float(x->x_obj.ob_outlet, nval);
+	}
 }
 
-void *rand_new(t_floatarg f) {
+static void *rand_new(t_symbol *s, int argc, t_atom *argv) {
 	t_rand *x = (t_rand *)pd_new(rand_class);
-	x->x_f = f;
-	x->x_thym = add_thym();
-	x->x_state = timeseed(x->x_thym);
-	floatinlet_new(&x->x_obj, &x->x_f);
+	x->x_c = argc;
+	if (argc>2) {
+		x->x_vec = (t_float *)getbytes(argc * sizeof(*x->x_vec));
+		int i; t_float *fp;
+		for (i=argc, fp=x->x_vec; i--; argv++, fp++) {
+			*fp = atom_getfloat(argv);
+			floatinlet_new(&x->x_obj, fp);
+		}
+	} else {
+		t_float max=0, min=0;
+		switch (argc) {
+			case 2: min = atom_getfloat(argv+1);
+			/* no break */
+			case 1: max = atom_getfloat(argv);
+		}
+		x->x_max=max, x->x_min=min;
+		x->x_state = rand_timeseed(rand_addthym());
+		floatinlet_new(&x->x_obj, &x->x_max);
+		if (argc>1) floatinlet_new(&x->x_obj, &x->x_min);
+	}
 	outlet_new(&x->x_obj, &s_float);
 	return (x);
 }
 
+static void rand_free(t_rand *x) {
+	int c=x->x_c;
+	if (c>2) freebytes(x->x_vec, c * sizeof(*x->x_vec));
+}
+
 void rand_setup(void) {
 	rand_class = class_new(gensym("rand"),
-		(t_newmethod)rand_new, 0,
+		(t_newmethod)rand_new, (t_method)rand_free,
 		sizeof(t_rand), 0,
-		A_DEFFLOAT, 0);
-		
+		A_GIMME, 0);
+
 	class_addbang(rand_class, rand_bang);
 	class_addmethod(rand_class, (t_method)rand_seed,
 		gensym("seed"), A_GIMME, 0);

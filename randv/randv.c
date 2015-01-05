@@ -11,17 +11,18 @@ typedef struct _randv {
 	t_outlet *f_out, *o_out;
 } t_randv;
 
-int add_thym(void) {
-	return time(0) % 31536000; // seconds in a year
+static int randv_addthym(void) {
+	int thym = time(0) % 31536000; // seconds in a year
+	return thym + !(thym%2); // odd numbers only
 }
 
-int timeseed(int thym) {
+static int randv_timeseed(int thym) {
 	static unsigned int randv_nextseed = 1601075945;
 	randv_nextseed = randv_nextseed * thym + 938284287;
 	return (randv_nextseed & 0x7fffffff);
 }
 
-int nextr(t_randv *x, int n) {
+static int nextr(t_randv *x, int n) {
 	int nval;
 	int range = (n < 1 ? 1 : n);
 	x->x_state = x->x_state * 472940017 + 832416023;
@@ -29,17 +30,17 @@ int nextr(t_randv *x, int n) {
 	return nval;
 }
 
-void randv_seed(t_randv *x, t_symbol *s, int argc, t_atom *argv) {
+static void randv_seed(t_randv *x, t_symbol *s, int argc, t_atom *argv) {
 	x->x_state = x->x_thym =
-		(!argc ? add_thym() : atom_getfloat(argv));
+		(!argc ? randv_addthym() : atom_getfloat(argv));
 }
 
-void randv_peek(t_randv *x, t_symbol *s) {
+static void randv_peek(t_randv *x, t_symbol *s) {
 	post("%s%s%u (%d)", s->s_name, (*s->s_name ? ": " : ""),
 		x->x_state, x->x_thym);
 }
 
-void randv_bang(t_randv *x) {
+static void randv_bang(t_randv *x) {
 	int m=x->x_max, f=nextr(x, x->x_f);
 	int max = (m < 1 ? 1 : m);
 	if (f == x->x_prev) {
@@ -54,13 +55,13 @@ void randv_bang(t_randv *x) {
 	outlet_float(x->x_obj.ob_outlet, f);
 }
 
-void *randv_new(t_floatarg f, t_floatarg max) {
+static void *randv_new(t_floatarg f, t_floatarg max) {
 	t_randv *x = (t_randv *)pd_new(randv_class);
 	x->x_f = (f < 1 ? 3 : f);
 	x->x_max = (max < 1 ? 2 : max);
-	x->x_thym = add_thym();
-	x->x_state = timeseed(x->x_thym);
-	
+	x->x_thym = randv_addthym();
+	x->x_state = randv_timeseed(x->x_thym);
+
 	floatinlet_new(&x->x_obj, &x->x_f);
 	floatinlet_new(&x->x_obj, &x->x_max);
 	outlet_new(&x->x_obj, &s_float);
@@ -72,7 +73,7 @@ void randv_setup(void) {
 		(t_newmethod)randv_new, 0,
 		sizeof(t_randv), 0,
 		A_DEFFLOAT, A_DEFFLOAT, 0);
-	
+
 	class_addbang(randv_class, randv_bang);
 	class_addmethod(randv_class, (t_method)randv_seed,
 		gensym("seed"), A_GIMME, 0);
