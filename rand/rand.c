@@ -7,7 +7,7 @@ static t_class *rand_class;
 
 typedef struct _rand {
 	t_object x_obj;
-	t_float x_max, x_min, *x_vec;
+	t_float x_min, x_max, *x_vec;
 	unsigned int x_state;
 	int x_c;
 } t_rand;
@@ -64,11 +64,11 @@ static void *rand_new(t_symbol *s, int argc, t_atom *argv) {
 	} else {
 		t_float min=0, max=0;
 		switch (argc) {
-			case 2:
-				max=atom_getfloat(argv+1);
-				min=atom_getfloat(argv);
-			break;
-			case 1: max=atom_getfloat(argv);
+		  case 2:
+			max=atom_getfloat(argv+1);
+			min=atom_getfloat(argv);
+		  break;
+		  case 1: max=atom_getfloat(argv);
 		}
 		x->x_min=min, x->x_max=max;
 		x->x_state = rand_timeseed(rand_addthym());

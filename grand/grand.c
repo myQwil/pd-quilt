@@ -7,7 +7,7 @@ static t_class *grand_class;
 
 typedef struct _grand {
 	t_object x_obj;
-	t_float x_max, x_min, x_f;
+	t_float x_min, x_max, x_f;
 	t_outlet *g_out, *r_out;
 	unsigned int x_state;
 	int x_c;
@@ -49,18 +49,18 @@ static void *grand_new(t_symbol *s, int argc, t_atom *argv) {
 	t_grand *x = (t_grand *)pd_new(grand_class);
 	t_float min=0, max=1, scale=1000;
 	switch (argc) {
-		case 3: scale=atom_getfloat(argv+2);
-		/* no break */
-		case 2:
-			max=atom_getfloat(argv+1);
-			min=atom_getfloat(argv);
-		break;
-		case 1: max=atom_getfloat(argv);
+	  case 3: scale=atom_getfloat(argv+2);
+	  /* no break */
+	  case 2:
+		max=atom_getfloat(argv+1);
+		min=atom_getfloat(argv);
+	  break;
+	  case 1: max=atom_getfloat(argv);
 	}
-	x->x_max=max, x->x_min=min, x->x_f=scale;
+	x->x_min=min, x->x_max=max, x->x_f=scale;
 	x->x_state = grand_timeseed(grand_addthym());
 	x->x_c=argc;
-	
+
 	floatinlet_new(&x->x_obj, &x->x_min);
 	floatinlet_new(&x->x_obj, &x->x_max);
 	if (argc>2) floatinlet_new(&x->x_obj, &x->x_f);
