@@ -47,20 +47,22 @@ static void grand_bang(t_grand *x) {
 
 static void *grand_new(t_symbol *s, int argc, t_atom *argv) {
 	t_grand *x = (t_grand *)pd_new(grand_class);
-	t_float max=1, min=0, scale=1000;
+	t_float min=0, max=1, scale=1000;
 	switch (argc) {
 		case 3: scale=atom_getfloat(argv+2);
 		/* no break */
-		case 2: min=atom_getfloat(argv+1);
-		/* no break */
+		case 2:
+			max=atom_getfloat(argv+1);
+			min=atom_getfloat(argv);
+		break;
 		case 1: max=atom_getfloat(argv);
 	}
 	x->x_max=max, x->x_min=min, x->x_f=scale;
 	x->x_state = grand_timeseed(grand_addthym());
 	x->x_c=argc;
-
-	floatinlet_new(&x->x_obj, &x->x_max);
+	
 	floatinlet_new(&x->x_obj, &x->x_min);
+	floatinlet_new(&x->x_obj, &x->x_max);
 	if (argc>2) floatinlet_new(&x->x_obj, &x->x_f);
 	x->g_out = outlet_new(&x->x_obj, &s_float); // gradient value
 	x->r_out = outlet_new(&x->x_obj, &s_float); // random value

@@ -16,19 +16,21 @@ static void graid_float(t_graid *x, t_float f) {
 
 static void *graid_new(t_symbol *s, int argc, t_atom *argv) {
 	t_graid *x = (t_graid *)pd_new(graid_class);
-	t_float max=1, min=0, scale=100;
+	t_float min=0, max=1, scale=100;
 	switch (argc) {
 		case 3: scale=atom_getfloat(argv+2);
 		/* no break */
-		case 2: min=atom_getfloat(argv+1);
-		/* no break */
+		case 2:
+			max=atom_getfloat(argv+1);
+			min=atom_getfloat(argv);
+		break;
 		case 1: max=atom_getfloat(argv);
 	}
-	x->x_max=max, x->x_min=min, x->x_f=scale;
+	x->x_min=min, x->x_max=max, x->x_f=scale;
 	
-	floatinlet_new(&x->x_obj, &x->x_max);
 	floatinlet_new(&x->x_obj, &x->x_min);
-	if (argc>2) floatinlet_new(&x->x_obj, &x->x_f);
+	floatinlet_new(&x->x_obj, &x->x_max);
+	floatinlet_new(&x->x_obj, &x->x_f);
 	outlet_new(&x->x_obj, &s_float);
 	return (x);
 }

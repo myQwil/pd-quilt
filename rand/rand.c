@@ -62,16 +62,18 @@ static void *rand_new(t_symbol *s, int argc, t_atom *argv) {
 			floatinlet_new(&x->x_obj, fp);
 		}
 	} else {
-		t_float max=0, min=0;
+		t_float min=0, max=0;
 		switch (argc) {
-			case 2: min = atom_getfloat(argv+1);
-			/* no break */
-			case 1: max = atom_getfloat(argv);
+			case 2:
+				max=atom_getfloat(argv+1);
+				min=atom_getfloat(argv);
+			break;
+			case 1: max=atom_getfloat(argv);
 		}
-		x->x_max=max, x->x_min=min;
+		x->x_min=min, x->x_max=max;
 		x->x_state = rand_timeseed(rand_addthym());
-		floatinlet_new(&x->x_obj, &x->x_max);
 		if (argc>1) floatinlet_new(&x->x_obj, &x->x_min);
+		floatinlet_new(&x->x_obj, &x->x_max);
 	}
 	outlet_new(&x->x_obj, &s_float);
 	return (x);
