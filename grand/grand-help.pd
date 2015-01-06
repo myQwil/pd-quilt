@@ -1,24 +1,24 @@
-#N canvas 553 506 451 287 10;
+#N canvas 551 507 451 287 10;
 #X obj 45 161 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
-#X floatatom 45 229 5 0 0 0 - - -, f 5;
-#X floatatom 106 162 5 0 0 0 - - -, f 5;
-#X floatatom 67 162 5 0 0 0 - - -, f 5;
+#X floatatom 45 229 5 0 0 0 - - -;
+#X floatatom 106 162 5 0 0 0 - - -;
+#X floatatom 67 162 5 0 0 0 - - -;
 #X text 113 146 min;
 #X text 74 146 max;
-#X floatatom 91 229 5 0 0 0 - - -, f 5;
+#X floatatom 91 229 5 0 0 0 - - -;
 #X obj 209 175 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X floatatom 209 230 5 0 0 0 - - -, f 5;
-#X floatatom 283 230 5 0 0 0 - - -, f 5;
+#X floatatom 209 230 5 0 0 0 - - -;
+#X floatatom 283 230 5 0 0 0 - - -;
 #X text 208 28 GRAND;
 #X obj 45 197 grand;
-#X obj 311 48 graid;
+#X obj 277 48 graid;
 #X text 73 48 random number generator that uses graid logic;
 #X text 139 73 default:;
 #X obj 199 72 grand 1 0 1000;
 #X obj 209 202 grand 5 2 2;
-#X floatatom 283 153 5 0 0 0 - - -, f 5;
+#X floatatom 283 153 5 0 0 0 - - -;
 #X text 276 137 scale;
 #X text 128 228 raw int;
 #X text 232 174 2 steps between 5 and 2;
