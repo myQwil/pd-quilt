@@ -13,19 +13,19 @@ typedef struct _grand {
 	int x_c;
 } t_grand;
 
-static int grand_addthym(void) {
+static int grand_time(void) {
 	int thym = time(0) % 31536000; // seconds in a year
 	return thym + !(thym%2); // odd numbers only. even numbers cause duplicate seeds
 }
 
-static int grand_timeseed(int thym) {
-	static unsigned int grand_nextseed = 1590964831;
-	grand_nextseed = grand_nextseed * thym + 938284287;
-	return (grand_nextseed & 0x7fffffff);
+static int grand_makeseed(void) {
+	static unsigned int grand_next = 1590964831;
+	grand_next = grand_next * grand_time() + 938284287;
+	return (grand_next & 0x7fffffff);
 }
 
 static void grand_seed(t_grand *x, t_symbol *s, int argc, t_atom *argv) {
-	x->x_state = (argc ? atom_getfloat(argv) : grand_addthym());
+	x->x_state = (argc ? atom_getfloat(argv) : grand_time());
 }
 
 static void grand_peek(t_grand *x, t_symbol *s) {
@@ -37,17 +37,16 @@ static void grand_bang(t_grand *x) {
 	int scale = (n==0 ? 1 : n);
 	int b = ((n<0 ? -1:1)*(x->x_c>1));
 	double min=x->x_min, range=x->x_max-min;
-	unsigned int randval = x->x_state;
-	x->x_state = randval = randval * 472940017 + 832416023;
-	nval = ((double)scale+b) * ((double)randval)
-		 * (1./4294967296.);
+	unsigned int grandval = x->x_state;
+	x->x_state = grandval = grandval * 472940017 + 832416023;
+	nval = ((double)scale+b) * grandval * (1./4294967296.);
 	outlet_float(x->r_out, nval);
 	outlet_float(x->g_out, nval / (scale / range) + min);
 }
 
 static void *grand_new(t_symbol *s, int argc, t_atom *argv) {
 	t_grand *x = (t_grand *)pd_new(grand_class);
-	t_float min=0, max=1, scale=1000;
+	t_float min=0, max=1, scale=2147483647;
 	switch (argc) {
 	  case 3: scale=atom_getfloat(argv+2);
 	  /* no break */
@@ -58,7 +57,7 @@ static void *grand_new(t_symbol *s, int argc, t_atom *argv) {
 	  case 1: max=atom_getfloat(argv);
 	}
 	x->x_min=min, x->x_max=max, x->x_f=scale;
-	x->x_state = grand_timeseed(grand_addthym());
+	x->x_state = grand_makeseed();
 	x->x_c=argc;
 
 	floatinlet_new(&x->x_obj, &x->x_min);

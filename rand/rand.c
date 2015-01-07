@@ -12,19 +12,19 @@ typedef struct _rand {
 	int x_c;
 } t_rand;
 
-static int rand_addthym(void) {
+static int rand_time(void) {
 	int thym = time(0) % 31536000; // seconds in a year
 	return thym + !(thym%2); // odd numbers only
 }
 
-static int rand_timeseed(int thym) {
-	static unsigned int rand_nextseed = 1489853723;
-	rand_nextseed = rand_nextseed * thym + 938284287;
-	return (rand_nextseed & 0x7fffffff);
+static int rand_makeseed() {
+	static unsigned int rand_next = 1489853723;
+	rand_next = rand_next * rand_time() + 938284287;
+	return (rand_next & 0x7fffffff);
 }
 
 static void rand_seed(t_rand *x, t_symbol *s, int argc, t_atom *argv) {
-	x->x_state = (argc ? atom_getfloat(argv) : rand_addthym());
+	x->x_state = (argc ? atom_getfloat(argv) : rand_time());
 }
 
 static void rand_peek(t_rand *x, t_symbol *s) {
@@ -37,16 +37,12 @@ static void rand_bang(t_rand *x) {
 	x->x_state = randval = randval * 472940017 + 832416023;
 
 	if (c>2) {
-		nval = ((double)c) * ((double)randval)
-			 * (1./4294967296.);
+		nval = (double)c * randval * (1./4294967296.);
 		outlet_float(x->x_obj.ob_outlet, x->x_vec[nval]);
 	} else {
 		int min=x->x_min, n=x->x_max-min, b=(c>1);
-		int range = (n==0 ? 1*!b : n);
-		range += ((n<0 ? -1:1)*b);
-		nval = ((double)range) * ((double)randval)
-			 * (1./4294967296.);
-		nval += min;
+		int range = (n==0 ? 1*!b : n) + ((n<0 ? -1:1)*b);
+		nval = (double)range * randval * (1./4294967296.) + min;
 		outlet_float(x->x_obj.ob_outlet, nval);
 	}
 }
@@ -71,7 +67,7 @@ static void *rand_new(t_symbol *s, int argc, t_atom *argv) {
 		  case 1: max=atom_getfloat(argv);
 		}
 		x->x_min=min, x->x_max=max;
-		x->x_state = rand_timeseed(rand_addthym());
+		x->x_state = rand_makeseed();
 		if (argc>1) floatinlet_new(&x->x_obj, &x->x_min);
 		floatinlet_new(&x->x_obj, &x->x_max);
 	}
