@@ -34,7 +34,7 @@ static void grand_peek(t_grand *x, t_symbol *s) {
 
 static void grand_bang(t_grand *x) {
 	int n=x->x_f, nval;
-	int scale = (n==0 ? 1 : n);
+	int scale = (!n ? 1 : n);
 	int b = ((n<0 ? -1:1)*(x->x_c>1));
 	double min=x->x_min, range=x->x_max-min;
 	unsigned int grandval = x->x_state;
@@ -62,7 +62,7 @@ static void *grand_new(t_symbol *s, int argc, t_atom *argv) {
 
 	floatinlet_new(&x->x_obj, &x->x_min);
 	floatinlet_new(&x->x_obj, &x->x_max);
-	if (argc>2) floatinlet_new(&x->x_obj, &x->x_f);
+	floatinlet_new(&x->x_obj, &x->x_f);
 	x->g_out = outlet_new(&x->x_obj, &s_float); // gradient value
 	x->r_out = outlet_new(&x->x_obj, &s_float); // random value
 	return (x);

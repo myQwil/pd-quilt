@@ -32,16 +32,16 @@ static void rind_peek(t_rind *x, t_symbol *s) {
 
 static void rind_bang(t_rind *x) {
 	double min=x->x_min, n=x->x_max-min, nval;
-	double range = (n==0 ? 1 : n);
+	double range = (!n ? 1 : n);
 	unsigned int rindval = x->x_state;
 	x->x_state = rindval = rindval * 472940017 + 832416023;
-	nval = (double)range * rindval * (1./4294967296.) + min;
+	nval = range * rindval * (1./4294967296.) + min;
 	outlet_float(x->x_obj.ob_outlet, nval);
 }
 
 static void *rind_new(t_symbol *s, int argc, t_atom *argv) {
 	t_rind *x = (t_rind *)pd_new(rind_class);
-	t_float min=0, max=0;
+	t_float min=0, max=1;
 	switch (argc) {
 	  case 2:
 		max=atom_getfloat(argv+1);

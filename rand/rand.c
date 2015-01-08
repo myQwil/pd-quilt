@@ -17,7 +17,7 @@ static int rand_time(void) {
 	return thym + !(thym%2); // odd numbers only
 }
 
-static int rand_makeseed() {
+static int rand_makeseed(void) {
 	static unsigned int rand_next = 1489853723;
 	rand_next = rand_next * rand_time() + 938284287;
 	return (rand_next & 0x7fffffff);
@@ -41,7 +41,7 @@ static void rand_bang(t_rand *x) {
 		outlet_float(x->x_obj.ob_outlet, x->x_vec[nval]);
 	} else {
 		int min=x->x_min, n=x->x_max-min, b=(c>1);
-		int range = (n==0 ? 1*!b : n) + ((n<0 ? -1:1)*b);
+		int range = (!n ? 1*!b : n) + ((n<0 ? -1:1)*b);
 		nval = (double)range * randval * (1./4294967296.) + min;
 		outlet_float(x->x_obj.ob_outlet, nval);
 	}
