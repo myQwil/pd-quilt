@@ -35,11 +35,11 @@ static void grand_peek(t_grand *x, t_symbol *s) {
 static void grand_bang(t_grand *x) {
 	int n=x->x_f, nval;
 	int scale = (!n ? 1 : n);
-	int b = ((n<0 ? -1:1)*(x->x_c>1));
+	int b = ((n<0? -1:1)*(x->x_c>1));
 	double min=x->x_min, range=x->x_max-min;
-	unsigned int grandval = x->x_state;
-	x->x_state = grandval = grandval * 472940017 + 832416023;
-	nval = ((double)scale+b) * grandval * (1./4294967296.);
+	unsigned int state = x->x_state;
+	x->x_state = state = state * 472940017 + 832416023;
+	nval = ((double)scale+b) * state * (1./4294967296.);
 	outlet_float(x->r_out, nval);
 	outlet_float(x->g_out, nval / (scale / range) + min);
 }

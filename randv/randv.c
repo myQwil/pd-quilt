@@ -24,10 +24,10 @@ static int randv_makeseed(void) {
 
 static int nextr(t_randv *x, int n) {
 	int nval;
-	int range = (n < 1 ? 1 : n);
-	unsigned int randval = x->x_state;
-	x->x_state = randval = randval * 472940017 + 832416023;
-	nval = (double)range * randval * (1./4294967296.);
+	int range = (n<1? 1:n);
+	unsigned int state = x->x_state;
+	x->x_state = state = state * 472940017 + 832416023;
+	nval = (double)range * state * (1./4294967296.);
 	return nval;
 }
 
@@ -41,11 +41,11 @@ static void randv_peek(t_randv *x, t_symbol *s) {
 
 static void randv_bang(t_randv *x) {
 	int n=x->x_f, m=x->x_max, f=nextr(x, n);
-	int max = (m < 1 ? 1 : m);
+	int max = (m<1? 1:m);
 	if (f == x->x_prev) {
 		if (x->x_i >= max) {
 			x->x_i = 1;
-			n = (n < 1 ? 1 : n);
+			n = (n<1? 1:n);
 			f = (nextr(x, n-1) + f+1) % n;
 		} else x->x_i++;
 	} else x->x_i = 1;
