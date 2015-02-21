@@ -59,7 +59,7 @@ static void *rand_new(t_symbol *s, int argc, t_atom *argv) {
 			floatinlet_new(&x->x_obj, fp);
 		}
 	} else {
-		t_float min=0, max=0;
+		t_float min=0, max=1;
 		switch (argc) {
 		  case 2:
 			max=atom_getfloat(argv+1);
