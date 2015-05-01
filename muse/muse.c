@@ -44,7 +44,7 @@ static void muse_list(t_muse *x, t_symbol *s, int ac, t_atom *av) {
 }
 
 static void muse_key(t_muse *x, t_symbol *s, int ac, t_atom *av) {
-	if (!ac||ac>=x->x_max)
+	if (!ac||ac>x->x_max)
 	{ pd_error(x, "muse: too many/few args"); return; }
 	
 	if (av->a_type == A_FLOAT) *x->x_scl = av->a_w.w_float;
