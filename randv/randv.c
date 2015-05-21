@@ -27,7 +27,7 @@ static int nextr(t_randv *x, int n) {
 	int range = (n<1? 1:n);
 	unsigned int state = x->x_state;
 	x->x_state = state = state * 472940017 + 832416023;
-	nval = (double)range * state * (1./4294967296.);
+	nval = (1./4294967296) * range * state;
 	return nval;
 }
 

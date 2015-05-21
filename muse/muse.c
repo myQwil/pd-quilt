@@ -22,15 +22,15 @@ static double getnote(t_muse *x, int d) {
 }
 
 static void muse_float(t_muse *x, t_float f) {
-	int d = f;
+	int d=f;
 	double note = getnote(x, d);
 	if (f!=d) {
-		if (f<0) d=f-1, f*=-1; else d=f+1;
-		double next = getnote(x, d);
-		note = (f-(int)f) / (1 / (next-note)) + note;
+		int b=f<0?-1:1;
+		double next = getnote(x, d+b);
+		note = b*(f-d) / (1 / (next-note)) + note;
 	}
-	outlet_float(x->f_out, mtof(note));
 	outlet_float(x->m_out, note);
+	outlet_float(x->f_out, mtof(note));
 }
 
 static void muse_list(t_muse *x, t_symbol *s, int ac, t_atom *av) {

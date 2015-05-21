@@ -37,12 +37,12 @@ static void rand_bang(t_rand *x) {
 	x->x_state = state = state * 472940017 + 832416023;
 
 	if (c>2) {
-		nval = (double)c * state * (1./4294967296.);
+		nval = (1./4294967296) * c * state;
 		outlet_float(x->x_obj.ob_outlet, x->x_vec[nval]);
 	} else {
-		int min=x->x_min, n=x->x_max-min, b=(n<0);
-		int range = (c>1? n+(b? -1:1) : (!n? 1:n));
-		double val = (double)range * state * (1./4294967296.) + min+b;
+		int min=x->x_min, n=x->x_max-min, b=n<0;
+		int range = (c>1 ? n+(b?-1:1) : (n?n:1));
+		double val = (1./4294967296) * range * state + min+b;
 		nval = val-(val<0);
 		outlet_float(x->x_obj.ob_outlet, nval);
 	}

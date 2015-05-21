@@ -32,10 +32,10 @@ static void rind_peek(t_rind *x, t_symbol *s) {
 
 static void rind_bang(t_rind *x) {
 	double min=x->x_min, n=x->x_max-min, nval;
-	double range = (!n? 1:n);
+	double range = n?n:1;
 	unsigned int state = x->x_state;
 	x->x_state = state = state * 472940017 + 832416023;
-	nval = range * state * (1./4294967296.) + min;
+	nval = (1./4294967296) * range * state + min;
 	outlet_float(x->x_obj.ob_outlet, nval);
 }
 
