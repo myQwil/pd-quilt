@@ -36,7 +36,7 @@ static void rand_bang(t_rand *x) {
 
 	if (c<3) {
 		int min=x->x_min, n=x->x_max-min, b=n<0;
-		int range = (c>1 ? n+b?-1:1 : n?n:1);
+		int range = (c>1 ? n+(b?-1:1) : (n?n:1));
 		double val = (1./4294967296) * range * state + min+b;
 		nval = val-(val<0);
 		outlet_float(x->x_obj.ob_outlet, nval); }
