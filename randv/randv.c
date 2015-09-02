@@ -38,12 +38,12 @@ static int nextr(t_randv *x, int n) {
 }
 
 static void randv_bang(t_randv *x) {
-	int n=x->x_f, max=x->x_max, f=nextr(x,n), i=x->x_i, d=f;
+	int n=x->x_f, max=x->x_max, f=nextr(x,n), i=x->x_i;
 	max = max<1?1:max;
 	if (f==x->x_prev) {
 		if (i>=max) {
 			i=1, n=n<1?1:n;
-			f = (nextr(x, n-1) + d+1) % n; }
+			f = (nextr(x, n-1) + f+1) % n; }
 		else i++; }
 	else i=1;
 	x->x_prev=f, x->x_i=i;
