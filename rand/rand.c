@@ -27,7 +27,13 @@ static void rand_seed(t_rand *x, t_symbol *s, int argc, t_atom *argv)
 { x->x_state = (argc ? atom_getfloat(argv) : rand_time()); }
 
 static void rand_peek(t_rand *x, t_symbol *s)
-{ post("%s%s%u", s->s_name, (*s->s_name ? ": " : ""), x->x_state); }
+{ post("%s%s%u", s->s_name, *s->s_name?": ":"", x->x_state); }
+
+static void rand_min(t_rand *x, t_floatarg f)
+{ x->x_min=f; }
+
+static void rand_max(t_rand *x, t_floatarg f)
+{ x->x_max=f; }
 
 static void rand_bang(t_rand *x) {
 	int c=x->x_c, nval;
@@ -47,34 +53,30 @@ static void rand_bang(t_rand *x) {
 
 static void *rand_new(t_symbol *s, int argc, t_atom *argv) {
 	t_rand *x = (t_rand *)pd_new(rand_class);
-	x->x_c = argc;
+	outlet_new(&x->x_obj, &s_float);
+	x->x_state = rand_makeseed();
+	x->x_c=argc;
 	if (argc<3) {
 		t_float min=0, max=1;
 		switch (argc) {
-		  case 2:
+		 case 2:
 			min=atom_getfloat(argv);
 			max=atom_getfloat(argv+1); break;
-		  case 1: max=atom_getfloat(argv); }
+		 case 1: max=atom_getfloat(argv); }
 		x->x_min=min, x->x_max=max;
-		// leave out min for [random] compatibility
-		if (argc>1) floatinlet_new(&x->x_obj, &x->x_min);
+		if (argc!=1) floatinlet_new(&x->x_obj, &x->x_min);
 		floatinlet_new(&x->x_obj, &x->x_max); }
 	else {
 		x->x_vec = (t_float *)getbytes(argc * sizeof(*x->x_vec));
 		int i; t_float *fp;
 		for (i=argc, fp=x->x_vec; i--; argv++, fp++) {
 			*fp = atom_getfloat(argv);
-			floatinlet_new(&x->x_obj, fp); }
-	}
-	x->x_state = rand_makeseed();
-	outlet_new(&x->x_obj, &s_float);
+			floatinlet_new(&x->x_obj, fp); }	}
 	return (x);
 }
 
-static void rand_free(t_rand *x) {
-	int c=x->x_c;
-	if (c>2) freebytes(x->x_vec, c * sizeof(*x->x_vec));
-}
+static void rand_free(t_rand *x)
+{ if (x->x_c>2) freebytes(x->x_vec, x->x_c * sizeof(*x->x_vec)); }
 
 void rand_setup(void) {
 	rand_class = class_new(gensym("rand"),
@@ -87,4 +89,8 @@ void rand_setup(void) {
 		gensym("seed"), A_GIMME, 0);
 	class_addmethod(rand_class, (t_method)rand_peek,
 		gensym("peek"), A_DEFSYM, 0);
+	class_addmethod(rand_class, (t_method)rand_min,
+		gensym("min"), A_FLOAT, 0);
+	class_addmethod(rand_class, (t_method)rand_max,
+		gensym("max"), A_FLOAT, 0);
 }

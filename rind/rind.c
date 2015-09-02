@@ -26,7 +26,13 @@ static void rind_seed(t_rind *x, t_symbol *s, int argc, t_atom *argv)
 { x->x_state = (argc ? atom_getfloat(argv) : rind_time()); }
 
 static void rind_peek(t_rind *x, t_symbol *s)
-{ post("%s%s%u", s->s_name, (*s->s_name ? ": " : ""), x->x_state); }
+{ post("%s%s%u", s->s_name, *s->s_name?": ":"", x->x_state); }
+
+static void rind_min(t_rind *x, t_floatarg f)
+{ x->x_min=f; }
+
+static void rind_max(t_rind *x, t_floatarg f)
+{ x->x_max=f; }
 
 static void rind_bang(t_rind *x) {
 	double min=x->x_min, n=x->x_max-min, nval;
@@ -39,17 +45,17 @@ static void rind_bang(t_rind *x) {
 
 static void *rind_new(t_symbol *s, int argc, t_atom *argv) {
 	t_rind *x = (t_rind *)pd_new(rind_class);
+	outlet_new(&x->x_obj, &s_float);
+	x->x_state = rind_makeseed();
 	t_float min=0, max=1;
 	switch (argc) {
-	  case 2:
+	 case 2:
 		min=atom_getfloat(argv);
 		max=atom_getfloat(argv+1); break;
-	  case 1: max=atom_getfloat(argv); }
+	 case 1: max=atom_getfloat(argv); }
 	x->x_min=min, x->x_max=max;
-	x->x_state = rind_makeseed();
-	floatinlet_new(&x->x_obj, &x->x_min);
+	if (argc!=1) floatinlet_new(&x->x_obj, &x->x_min);
 	floatinlet_new(&x->x_obj, &x->x_max);
-	outlet_new(&x->x_obj, &s_float);
 	return (x);
 }
 
@@ -64,4 +70,8 @@ void rind_setup(void) {
 		gensym("seed"), A_GIMME, 0);
 	class_addmethod(rind_class, (t_method)rind_peek,
 		gensym("peek"), A_DEFSYM, 0);
+	class_addmethod(rind_class, (t_method)rind_min,
+		gensym("min"), A_FLOAT, 0);
+	class_addmethod(rind_class, (t_method)rind_max,
+		gensym("max"), A_FLOAT, 0);
 }
