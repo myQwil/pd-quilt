@@ -1,6 +1,8 @@
 #include "../m_pd.h"
 #include <time.h>
 
+/* -------------------------- divrt -------------------------- */
+
 static t_class *divrt_class;
 
 typedef struct _divrt {
