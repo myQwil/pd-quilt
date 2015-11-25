@@ -33,10 +33,9 @@ static void *fton_new(t_symbol *s, int argc, t_atom *argv) {
 	switch (argc) {
 		case 2: tet = atom_getfloat(argv+1);
 		case 1: ref = atom_getfloat(argv); }
-	
+	x->x_ref=ref, x->x_tet=tet;
 	x->x_rt = 1./ (ref * pow(2,-69/tet));
 	x->x_st = 1./ (log(2) / tet);
-	
 	return (x);
 }
 
@@ -47,7 +46,7 @@ void fton_setup(void) {
 		A_GIMME, 0);
 		
 	class_addfloat(fton_class, fton_float);
-	class_sethelpsymbol(fton_class, gensym("ntof-help.pd"));
+	class_sethelpsymbol(fton_class, gensym("ntof.pd"));
 	class_addmethod(fton_class, (t_method)fton_ref,
 		gensym("ref"), A_FLOAT, 0);
 	class_addmethod(fton_class, (t_method)fton_tet,

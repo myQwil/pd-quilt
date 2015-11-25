@@ -36,6 +36,7 @@ static void *ntof_new(t_symbol *s, int argc, t_atom *argv) {
 	switch (argc) {
 		case 2: tet = atom_getfloat(argv+1);
 		case 1: ref = atom_getfloat(argv); }
+	x->x_ref=ref, x->x_tet=tet;
 	x->x_rt = ref * pow(2,-69/tet);
 	x->x_st = log(2) / tet;
 	return (x);

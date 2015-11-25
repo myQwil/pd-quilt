@@ -76,7 +76,7 @@ static void muse_float(t_muse *x, t_float f) {
 
 static void *muse_new(t_symbol *s, int argc, t_atom *argv) {
 	t_muse *x = (t_muse *)pd_new(muse_class);
-	t_float ref = x->x_ref = 440, tet = x->x_tet = 12;
+	t_float ref=x->x_ref=440, tet=x->x_tet=12;
 	
 	x->x_rt = ref * pow(2,-69/tet);
 	x->x_st = log(2) / tet;
