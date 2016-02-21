@@ -1,0 +1,33 @@
+#N canvas 630 568 337 261 10;
+#X obj 119 132 outlet;
+#X obj 66 132 f;
+#X obj 39 132 f;
+#X obj 39 152 - 1;
+#X obj 93 132 f;
+#X obj 93 152 + 1;
+#X obj 81 173 inlet;
+#X obj 100 89 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 117 89 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X floatatom 100 73 4 0 0 0 - - -, f 4;
+#X obj 49 9 inlet;
+#X text 55 196 cup-qube;
+#X obj 49 31 route - +;
+#X connect 1 0 9 0;
+#X connect 2 0 3 0;
+#X connect 3 0 1 0;
+#X connect 4 0 5 0;
+#X connect 5 0 1 0;
+#X connect 6 0 5 1;
+#X connect 6 0 3 1;
+#X connect 7 0 2 0;
+#X connect 8 0 4 0;
+#X connect 9 0 2 1;
+#X connect 9 0 4 1;
+#X connect 9 0 0 0;
+#X connect 10 0 12 0;
+#X connect 12 0 2 0;
+#X connect 12 1 4 0;
+#X connect 12 2 9 0;
+#X coords 0 -1 1 1 32 32 2 100 72;
