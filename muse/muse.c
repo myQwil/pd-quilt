@@ -40,14 +40,17 @@ static void muse_list(t_muse *x, t_symbol *s, int ac, t_atom *av)
 static void muse_skip(t_muse *x, t_symbol *s, int ac, t_atom *av)
 { muse_scale(x, ac, av, 2); }
 
-static void muse_size(t_muse *x, t_floatarg f) {
-	if (f<1 || f>x->x_max) {
+static void muse_size(t_muse *x, t_floatarg n) {
+	if (n<1 || n>x->x_max) {
 		pd_error(x, "muse: bad scale size"); return; }
-	x->x_n=f;
+	x->x_n=n;
 }
 
-static void muse_set(t_muse *x, t_floatarg i, t_floatarg f)
-{ if (i>=0 && i<x->x_max) *(x->x_scl+(int)i)=f; }
+static void muse_set(t_muse *x, t_floatarg i, t_floatarg f) {
+	if (i<0 || i>=x->x_max) {
+		pd_error(x, "muse: bad index range"); return; }
+	*(x->x_scl+(int)i)=f;
+}
 
 static void muse_octave(t_muse *x, t_floatarg f)
 { x->x_oct=f; }
