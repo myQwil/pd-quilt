@@ -3,10 +3,10 @@
 
 /* -------------------------- muse -------------------------- */
 
-t_float ntof(t_float f, t_float rt, t_float ln) {
+t_float ntof(t_float f, t_float rt, t_float st) {
 	if (f <= -1500) return(0);
-	else if (f > 1499) return(ntof(1499, rt, ln));
-	else return (rt * exp(ln*f));
+	else if (f > 1499) return(ntof(1499, rt, st));
+	else return (rt * exp(st*f));
 }
 
 static t_class *muse_class;
@@ -21,27 +21,33 @@ typedef struct _muse {
 	t_outlet *f_out, *m_out;/* frequency, midi */
 } t_muse;
 
-static void muse_list(t_muse *x, t_symbol *s, int ac, t_atom *av) {
-	if (!ac||ac>=x->x_max) {
+static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
+	if (!ac || ac+offset > x->x_max) {
 		pd_error(x, "muse: too many/few args"); return; }
-	int i; t_float *fp = x->x_scl+1;
-	x->x_n=ac+1;
+	int i;
+	t_float *fp = x->x_scl+offset;
+	x->x_n=ac+offset;
 	for (i=ac; i--; av++, fp++)
 		if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
 }
 
-static void muse_key(t_muse *x, t_symbol *s, int ac, t_atom *av) {
-	if (!ac||ac>x->x_max) {
-		pd_error(x, "muse: too many/few args"); return; }
-	if (av->a_type == A_FLOAT) *x->x_scl = av->a_w.w_float;
-	if (ac>1) muse_list(x, 0, ac-1, av+1);
-}
+static void muse_key(t_muse *x, t_symbol *s, int ac, t_atom *av)
+{ muse_scale(x, ac, av, 0); }
+
+static void muse_list(t_muse *x, t_symbol *s, int ac, t_atom *av)
+{ muse_scale(x, ac, av, 1); }
+
+static void muse_skip(t_muse *x, t_symbol *s, int ac, t_atom *av)
+{ muse_scale(x, ac, av, 2); }
 
 static void muse_size(t_muse *x, t_floatarg f) {
 	if (f<1 || f>x->x_max) {
 		pd_error(x, "muse: bad scale size"); return; }
 	x->x_n=f;
 }
+
+static void muse_set(t_muse *x, t_floatarg i, t_floatarg f)
+{ if (i<x->x_max) *(x->x_scl+(int)i)=f; }
 
 static void muse_octave(t_muse *x, t_floatarg f)
 { x->x_oct=f; }
@@ -52,6 +58,10 @@ static void muse_ref(t_muse *x, t_floatarg f)
 static void muse_tet(t_muse *x, t_floatarg f) {
 	x->x_rt = x->x_ref * pow(2,-69/f);
 	x->x_st = log(2) / (x->x_tet=f);
+}
+
+static void muse_octet(t_muse *x, t_floatarg f) {
+	muse_octave(x,f); muse_tet(x,f);
 }
 
 static double getnote(t_muse *x, int d) {
@@ -113,12 +123,18 @@ void muse_setup(void) {
 	class_addfloat(muse_class, muse_float);
 	class_addmethod(muse_class, (t_method)muse_key,
 		gensym("k"), A_GIMME, 0);
+	class_addmethod(muse_class, (t_method)muse_skip,
+		gensym("s"), A_GIMME, 0);
 	class_addmethod(muse_class, (t_method)muse_size,
-		gensym("n"), A_FLOAT, 0);
+		gensym("n"), A_FLOAT, 0);		
 	class_addmethod(muse_class, (t_method)muse_octave,
 		gensym("oct"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_ref,
 		gensym("ref"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_tet,
 		gensym("tet"), A_FLOAT, 0);
+	class_addmethod(muse_class, (t_method)muse_octet,
+		gensym("octet"), A_FLOAT, 0);
+	class_addmethod(muse_class, (t_method)muse_set,
+		gensym("set"), A_FLOAT, A_FLOAT, 0);
 }
