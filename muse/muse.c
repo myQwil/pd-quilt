@@ -47,7 +47,7 @@ static void muse_size(t_muse *x, t_floatarg f) {
 }
 
 static void muse_set(t_muse *x, t_floatarg i, t_floatarg f)
-{ if (i<x->x_max) *(x->x_scl+(int)i)=f; }
+{ if (i>=0 && i<x->x_max) *(x->x_scl+(int)i)=f; }
 
 static void muse_octave(t_muse *x, t_floatarg f)
 { x->x_oct=f; }
