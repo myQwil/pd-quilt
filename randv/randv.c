@@ -7,10 +7,9 @@ static t_class *randv_class;
 
 typedef struct _randv {
 	t_object x_obj;
-	t_float x_f, x_max;	// random value, max repeats
+	t_float x_n, x_max;	// range, max repeats
 	int x_prev, x_i;	// previous value, counter
 	unsigned int x_state;
-	t_outlet *f_out, *o_out;
 } t_randv;
 
 static int randv_time(void) {
@@ -40,7 +39,7 @@ static int nextr(t_randv *x, int n) {
 }
 
 static void randv_bang(t_randv *x) {
-	int n=x->x_f, max=x->x_max, f=nextr(x,n), i=x->x_i;
+	int n=x->x_n, max=x->x_max, f=nextr(x,n), i=x->x_i;
 	max = max<1?1:max;
 	if (f==x->x_prev) {
 		if (i>=max) {
@@ -52,13 +51,13 @@ static void randv_bang(t_randv *x) {
 	outlet_float(x->x_obj.ob_outlet, f);
 }
 
-static void *randv_new(t_floatarg f, t_floatarg max) {
+static void *randv_new(t_floatarg n, t_floatarg max) {
 	t_randv *x = (t_randv *)pd_new(randv_class);
-	x->x_f = f<1?3:f;
+	x->x_n = n<1?3:n;
 	x->x_max = max<1?2:max;
 	x->x_state = randv_makeseed();
 	outlet_new(&x->x_obj, &s_float);
-	floatinlet_new(&x->x_obj, &x->x_f);
+	floatinlet_new(&x->x_obj, &x->x_n);
 	floatinlet_new(&x->x_obj, &x->x_max);
 	return (x);
 }

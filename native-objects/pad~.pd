@@ -1,0 +1,17 @@
+#N canvas 741 311 333 179 10;
+#X obj 119 67 inlet;
+#X obj 161 23 loadbang;
+#X obj 161 45 \$1;
+#X obj 119 111 line~;
+#X obj 119 133 outlet~;
+#X obj 191 67 inlet;
+#X obj 161 67 sel;
+#X obj 119 89 pack 0 2;
+#X connect 0 0 7 0;
+#X connect 1 0 2 0;
+#X connect 2 0 6 0;
+#X connect 3 0 4 0;
+#X connect 5 0 7 1;
+#X connect 6 1 7 1;
+#X connect 7 0 3 0;
+#X coords 0 179 1 178 85 60 0;
