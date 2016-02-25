@@ -1,7 +1,27 @@
 #include "../m_pd.h"
 #include <math.h>
 
-/* -------------------------- muse -------------------------- */
+union inletunion {
+    t_symbol *iu_symto;
+    t_gpointer *iu_pointerslot;
+    t_float *iu_floatslot;
+    t_symbol **iu_symslot;
+    t_float iu_floatsignalvalue;
+};
+
+struct _inlet {
+    t_pd i_pd;
+    struct _inlet *i_next;
+    t_object *i_owner;
+    t_pd *i_dest;
+    t_symbol *i_symfrom;
+    union inletunion i_un;
+};
+
+#define i_symto i_un.iu_symto
+#define i_pointerslot i_un.iu_pointerslot
+#define i_floatslot i_un.iu_floatslot
+#define i_symslot i_un.iu_symslot
 
 t_float ntof(t_float f, t_float rt, t_float st) {
 	if (f <= -1500) return(0);
@@ -9,11 +29,13 @@ t_float ntof(t_float f, t_float rt, t_float st) {
 	else return (rt * exp(st*f));
 }
 
+/* -------------------------- muse -------------------------- */
+
 static t_class *muse_class;
 
 typedef struct _muse {
 	t_object x_obj;
-	t_int x_n, x_max;		/* # of notes in a scale */
+	t_int x_n, x_max, x_inl;/* # of notes in a scale, # of inlets */
 	t_float x_oct;			/* octave */
 	t_float x_ref, x_tet;	/* ref-pitch, # of tones */
 	t_float x_rt, x_st;		/* root tone, semi-tone */
@@ -24,10 +46,9 @@ typedef struct _muse {
 static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
 	if (!ac || ac+offset > x->x_max) {
 		pd_error(x, "muse: too many/few args"); return; }
-	int i;
 	t_float *fp = x->x_scl+offset;
 	x->x_n=ac+offset;
-	for (i=ac; i--; av++, fp++)
+	for (int i=ac; i--; av++, fp++)
 		if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
 }
 
@@ -41,8 +62,18 @@ static void muse_skip(t_muse *x, t_symbol *s, int ac, t_atom *av)
 { muse_scale(x, ac, av, 2); }
 
 static void muse_size(t_muse *x, t_floatarg n) {
-	if (n<1 || n>x->x_max) {
-		pd_error(x, "muse: bad scale size"); return; }
+	n = (int)n;
+	if (n>x->x_max) {
+		int size = x->x_max*2;
+		size = size<n?n:size;
+		x->x_scl = (t_float *)resizebytes(x->x_scl,
+			x->x_max * sizeof(t_float), size * sizeof(t_float));
+		x->x_max=size;
+		t_float *fp = x->x_scl;
+		t_inlet *ip = ((t_object *)x)->ob_inlet;
+		for (int i=x->x_inl; i--; fp++, ip=ip->i_next)
+			ip->i_floatslot = fp;
+	}
 	x->x_n=n;
 }
 
@@ -95,11 +126,11 @@ static void *muse_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_st = log(2) / tet;
 	
 	x->x_oct = tet;
-	x->x_max = argc>tet ? argc:tet;
-	x->x_scl = (t_float *)getbytes(x->x_max * sizeof(*x->x_scl));
+	x->x_max = x->x_inl = argc<2?2:argc;
+	x->x_scl = (t_float *)getbytes(x->x_max * sizeof(t_float));
 	
 	if (argc<2) {
-		*x->x_scl = (argc ? atom_getfloat(argv) : 0);
+		*x->x_scl = (argc ? atom_getfloat(argv) : 69);
 		floatinlet_new(&x->x_obj, x->x_scl);
 		*(x->x_scl+1)=7, x->x_n=2, argc=0; }
 	else x->x_n = argc;
@@ -114,7 +145,7 @@ static void *muse_new(t_symbol *s, int argc, t_atom *argv) {
 }
 
 static void muse_free(t_muse *x)
-{ freebytes(x->x_scl, x->x_max * sizeof(*x->x_scl)); }
+{ freebytes(x->x_scl, x->x_max * sizeof(t_float)); }
 
 void muse_setup(void) {
 	muse_class = class_new(gensym("muse"),
