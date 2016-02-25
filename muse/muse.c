@@ -82,7 +82,7 @@ static void muse_float(t_muse *x, t_float f) {
 	if (f!=d) {
 		int b = f<0?-1:1;
 		double next = getnote(x, d+b);
-		note = b*(f-d) / (1/(next-note)) + note; }
+		note += b*(f-d) / (1/(next-note)); }
 	outlet_float(x->m_out, note);
 	outlet_float(x->f_out, ntof(note, x->x_rt, x->x_st));
 }
