@@ -23,11 +23,8 @@ struct _inlet {
 #define i_floatslot i_un.iu_floatslot
 #define i_symslot i_un.iu_symslot
 
-t_float ntof(t_float f, t_float rt, t_float st) {
-	if (f <= -1500) return(0);
-	else if (f > 1499) return(ntof(1499, rt, st));
-	else return (rt * exp(st*f));
-}
+t_float ntof(t_float f, t_float rt, t_float st)
+{ return (rt * exp(st*f)); }
 
 /* -------------------------- muse -------------------------- */
 
@@ -43,9 +40,23 @@ typedef struct _muse {
 	t_outlet *f_out, *m_out;/* frequency, midi */
 } t_muse;
 
+static void muse_resize(t_muse *x, t_floatarg n) {
+	int size = x->x_max*2;
+	size = size<n?n:size;
+	x->x_scl = (t_float *)resizebytes(x->x_scl,
+		x->x_max * sizeof(t_float), size * sizeof(t_float));
+	x->x_max=size;
+	t_float *fp = x->x_scl;
+	t_inlet *ip = ((t_object *)x)->ob_inlet;
+	for (int i=x->x_inl; i--; fp++, ip=ip->i_next)
+		ip->i_floatslot = fp;
+}
+
+static void muse_peek(t_muse *x, t_symbol *s)
+{ post("%s%s%d", s->s_name, *s->s_name?": ":"", x->x_max); }
+
 static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
-	if (!ac || ac+offset > x->x_max) {
-		pd_error(x, "muse: too many/few args"); return; }
+	if (ac+offset>x->x_max) muse_resize(x,ac+offset);
 	t_float *fp = x->x_scl+offset;
 	x->x_n=ac+offset;
 	for (int i=ac; i--; av++, fp++)
@@ -62,25 +73,15 @@ static void muse_skip(t_muse *x, t_symbol *s, int ac, t_atom *av)
 { muse_scale(x, ac, av, 2); }
 
 static void muse_size(t_muse *x, t_floatarg n) {
-	n = (int)n;
-	if (n>x->x_max) {
-		int size = x->x_max*2;
-		size = size<n?n:size;
-		x->x_scl = (t_float *)resizebytes(x->x_scl,
-			x->x_max * sizeof(t_float), size * sizeof(t_float));
-		x->x_max=size;
-		t_float *fp = x->x_scl;
-		t_inlet *ip = ((t_object *)x)->ob_inlet;
-		for (int i=x->x_inl; i--; fp++, ip=ip->i_next)
-			ip->i_floatslot = fp;
-	}
-	x->x_n=n;
+	if (n>0) {
+		if (n>x->x_max) muse_resize(x,n);
+		x->x_n=n; }
 }
 
 static void muse_set(t_muse *x, t_floatarg i, t_floatarg f) {
-	if (i<0 || i>=x->x_max) {
-		pd_error(x, "muse: bad index range"); return; }
-	*(x->x_scl+(int)i)=f;
+	if (i>=0) {
+		if (i>=x->x_max) muse_resize(x,i+1);
+		*(x->x_scl+(int)i)=f; }
 }
 
 static void muse_octave(t_muse *x, t_floatarg f)
@@ -94,9 +95,8 @@ static void muse_tet(t_muse *x, t_floatarg f) {
 	x->x_st = log(2) / (x->x_tet=f);
 }
 
-static void muse_octet(t_muse *x, t_floatarg f) {
-	muse_octave(x,f); muse_tet(x,f);
-}
+static void muse_octet(t_muse *x, t_floatarg f)
+{ muse_octave(x,f); muse_tet(x,f); }
 
 static double getnote(t_muse *x, int d) {
 	int n=x->x_n, dn=d%n;
@@ -171,4 +171,6 @@ void muse_setup(void) {
 		gensym("octet"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_set,
 		gensym("set"), A_FLOAT, A_FLOAT, 0);
+	class_addmethod(muse_class, (t_method)muse_peek,
+		gensym("peek"), A_DEFSYM, 0);
 }

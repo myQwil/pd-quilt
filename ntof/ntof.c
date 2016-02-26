@@ -3,11 +3,8 @@
 
 /* -------------------------- ntof -------------------------- */
 
-t_float ntof(t_float f, t_float rt, t_float st) {
-	if (f <= -1500) return(0);
-	else if (f > 1499) return(ntof(1499, rt, st));
-	else return (rt * exp(st*f));
-}
+t_float ntof(t_float f, t_float rt, t_float st)
+{ return (rt * exp(st*f)); }
 
 static t_class *ntof_class;
 
