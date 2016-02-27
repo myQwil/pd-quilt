@@ -41,11 +41,12 @@ typedef struct _muse {
 } t_muse;
 
 static void muse_resize(t_muse *x, t_floatarg n) {
-	int size = x->x_max*2;
+	int size = 2*x->x_max;
 	size = size<n?n:size;
 	x->x_scl = (t_float *)resizebytes(x->x_scl,
 		x->x_max * sizeof(t_float), size * sizeof(t_float));
 	x->x_max=size;
+	
 	int i;
 	t_float *fp = x->x_scl;
 	t_inlet *ip = ((t_object *)x)->ob_inlet;
@@ -57,10 +58,11 @@ static void muse_peek(t_muse *x, t_symbol *s)
 { post("%s%s%d", s->s_name, *s->s_name?": ":"", x->x_max); }
 
 static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
-	if (ac+offset>x->x_max) muse_resize(x,ac+offset);
+	int n = x->x_n = ac+offset;
+	if (n>x->x_max) muse_resize(x,n);
+	
 	int i;
 	t_float *fp = x->x_scl+offset;
-	x->x_n=ac+offset;
 	for (i=ac; i--; av++, fp++)
 		if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
 }
