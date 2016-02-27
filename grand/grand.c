@@ -10,7 +10,7 @@ typedef struct _grand {
 	t_float x_min, x_max, x_f;
 	t_outlet *g_out, *r_out;
 	unsigned int x_state;
-	int x_c;
+	t_int x_c;
 } t_grand;
 
 static int grand_time(void) {

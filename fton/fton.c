@@ -4,7 +4,7 @@
 /* -------------------------- fton -------------------------- */
 
 t_float fton(t_float f, t_float rt, t_float st)
-{ return (f > 0 ? st * log(rt*f) : -1500); }
+{ return (f > 0 ? st * log(rt*f) : 0); }
 
 static t_class *fton_class;
 

@@ -9,7 +9,7 @@ typedef struct _rand {
 	t_object x_obj;
 	t_float x_min, x_max, *x_vec;
 	unsigned int x_state;
-	int x_c;
+	t_int x_c;
 } t_rand;
 
 static int rand_time(void) {

@@ -8,7 +8,7 @@ static t_class *randv_class;
 typedef struct _randv {
 	t_object x_obj;
 	t_float x_n, x_max;	// range, max repeats
-	int x_prev, x_i;	// previous value, counter
+	t_int x_prev, x_i;	// previous value, counter
 	unsigned int x_state;
 } t_randv;
 
