@@ -46,9 +46,10 @@ static void muse_resize(t_muse *x, t_floatarg n) {
 	x->x_scl = (t_float *)resizebytes(x->x_scl,
 		x->x_max * sizeof(t_float), size * sizeof(t_float));
 	x->x_max=size;
+	int i;
 	t_float *fp = x->x_scl;
 	t_inlet *ip = ((t_object *)x)->ob_inlet;
-	for (int i=x->x_inl; i--; fp++, ip=ip->i_next)
+	for (i=x->x_inl; i--; fp++, ip=ip->i_next)
 		ip->i_floatslot = fp;
 }
 
@@ -57,9 +58,10 @@ static void muse_peek(t_muse *x, t_symbol *s)
 
 static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
 	if (ac+offset>x->x_max) muse_resize(x,ac+offset);
+	int i;
 	t_float *fp = x->x_scl+offset;
 	x->x_n=ac+offset;
-	for (int i=ac; i--; av++, fp++)
+	for (i=ac; i--; av++, fp++)
 		if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
 }
 
