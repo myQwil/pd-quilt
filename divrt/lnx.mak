@@ -1,12 +1,12 @@
 ## Pd library template version 1.0.14
 # For instructions on how to use this template, see:
 #  http://puredata.info/docs/developer/MakefileTemplate
-LIBRARY_NAME = graid
+LIBRARY_NAME = divrt
 
 # add your .c source files, one object per file, to the SOURCES
 # variable, help files will be included automatically, and for GUI
 # objects, the matching .tcl file too
-SOURCES = graid.c
+SOURCES = divrt.c
 
 # list all pd objects (i.e. myobject.pd) files here, and their helpfiles will
 # be included automatically
