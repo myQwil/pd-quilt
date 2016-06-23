@@ -42,12 +42,12 @@ static int nextr(t_divrt *x, int n) {
 static void divrt_float(t_divrt *x, t_float f) {
 	int n=x->x_f, max=x->x_max, i=x->x_i, d=f;
 	max = max<1?1:max;
-	if (d==x->x_prev) {
-		if (i>=max) {
-			outlet_float(x->o_out, d);
+	if (d==x->x_prev)
+	{	if (i>=max)
+		{	outlet_float(x->o_out, d);
 			i=1, n=n<1?1:n;
-			d = (nextr(x, n-1) + d+1) % n; }
-		else i++; }
+			d = (nextr(x, n-1) + d+1) % n;   }
+		else i++;   }
 	else i=1;
 	x->x_prev=d, x->x_i=i;
 	outlet_float(x->f_out, d);

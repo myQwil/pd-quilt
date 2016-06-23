@@ -40,15 +40,15 @@ static void rand_bang(t_rand *x) {
 	unsigned int state = x->x_state;
 	x->x_state = state = state * 472940017 + 832416023;
 
-	if (c<3) {
-		int min=x->x_min, n=x->x_max-min, b=n<0;
+	if (c<3)
+	{	int min=x->x_min, n=x->x_max-min, b=n<0;
 		int range = (c>1 ? n+(b?-1:1) : (n?n:1));
 		double val = (1./4294967296) * range * state + min+b;
 		nval = val-(val<0);
-		outlet_float(x->x_obj.ob_outlet, nval); }
-	else {
-		nval = (1./4294967296) * c * state;
-		outlet_float(x->x_obj.ob_outlet, x->x_vec[nval]); }
+		outlet_float(x->x_obj.ob_outlet, nval);   }
+	else
+	{	nval = (1./4294967296) * c * state;
+		outlet_float(x->x_obj.ob_outlet, x->x_vec[nval]);   }
 }
 
 static void *rand_new(t_symbol *s, int argc, t_atom *argv) {
@@ -56,22 +56,22 @@ static void *rand_new(t_symbol *s, int argc, t_atom *argv) {
 	outlet_new(&x->x_obj, &s_float);
 	x->x_state = rand_makeseed();
 	x->x_c=argc;
-	if (argc<3) {
-		t_float min=0, max=1;
-		switch (argc) {
-		 case 2:
+	if (argc<3)
+	{	t_float min=0, max=1;
+		switch (argc)
+		{ case 2:
 			min=atom_getfloat(argv);
 			max=atom_getfloat(argv+1); break;
-		 case 1: max=atom_getfloat(argv); }
+		  case 1: max=atom_getfloat(argv);   }
 		x->x_min=min, x->x_max=max;
 		if (argc!=1) floatinlet_new(&x->x_obj, &x->x_min);
-		floatinlet_new(&x->x_obj, &x->x_max); }
-	else {
-		x->x_vec = (t_float *)getbytes(argc * sizeof(*x->x_vec));
+		floatinlet_new(&x->x_obj, &x->x_max);   }
+	else
+	{	x->x_vec = (t_float *)getbytes(argc * sizeof(*x->x_vec));
 		int i; t_float *fp;
-		for (i=argc, fp=x->x_vec; i--; argv++, fp++) {
-			*fp = atom_getfloat(argv);
-			floatinlet_new(&x->x_obj, fp); }	}
+		for (i=argc, fp=x->x_vec; i--; argv++, fp++)
+		{	*fp = atom_getfloat(argv);
+			floatinlet_new(&x->x_obj, fp);   }   }
 	return (x);
 }
 

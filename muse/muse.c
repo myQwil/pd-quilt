@@ -1,22 +1,20 @@
 #include "../m_pd.h"
 #include <math.h>
 
-union inletunion {
-    t_symbol *iu_symto;
-    t_gpointer *iu_pointerslot;
-    t_float *iu_floatslot;
-    t_symbol **iu_symslot;
-    t_float iu_floatsignalvalue;
-};
+union inletunion
+{	t_symbol *iu_symto;
+	t_gpointer *iu_pointerslot;
+	t_float *iu_floatslot;
+	t_symbol **iu_symslot;
+	t_float iu_floatsignalvalue;   };
 
-struct _inlet {
-    t_pd i_pd;
-    struct _inlet *i_next;
-    t_object *i_owner;
-    t_pd *i_dest;
-    t_symbol *i_symfrom;
-    union inletunion i_un;
-};
+struct _inlet
+{	t_pd i_pd;
+	struct _inlet *i_next;
+	t_object *i_owner;
+	t_pd *i_dest;
+	t_symbol *i_symfrom;
+	union inletunion i_un;   };
 
 #define i_symto i_un.iu_symto
 #define i_pointerslot i_un.iu_pointerslot
@@ -24,7 +22,7 @@ struct _inlet {
 #define i_symslot i_un.iu_symslot
 
 t_float ntof(t_float f, t_float rt, t_float st)
-{ return (rt * exp(st*f)); }
+{	return (rt * exp(st*f));   }
 
 /* -------------------------- muse -------------------------- */
 
@@ -77,15 +75,15 @@ static void muse_skip(t_muse *x, t_symbol *s, int ac, t_atom *av)
 { muse_scale(x, ac, av, 2); }
 
 static void muse_size(t_muse *x, t_floatarg n) {
-	if (n>0) {
-		if (n>x->x_max) muse_resize(x,n);
-		x->x_n=n; }
+	if (n>0)
+	{	if (n>x->x_max) muse_resize(x,n);
+		x->x_n=n;   }
 }
 
 static void muse_set(t_muse *x, t_floatarg i, t_floatarg f) {
-	if (i>=0) {
-		if (i>=x->x_max) muse_resize(x,i+1);
-		*(x->x_scl+(int)i)=f; }
+	if (i>=0)
+	{	if (i>=x->x_max) muse_resize(x,i+1);
+		*(x->x_scl+(int)i)=f;   }
 }
 
 static void muse_octave(t_muse *x, t_floatarg f)
@@ -114,10 +112,10 @@ static double getnote(t_muse *x, int d) {
 static void muse_float(t_muse *x, t_float f) {
 	int d=f;
 	double note = getnote(x, d);
-	if (f!=d) {
-		int b = f<0?-1:1;
+	if (f!=d)
+	{	int b = f<0?-1:1;
 		double next = getnote(x, d+b);
-		note += b*(f-d) / (1/(next-note)); }
+		note += b*(f-d) / (1/(next-note));   }
 	outlet_float(x->m_out, note);
 	outlet_float(x->f_out, ntof(note, x->x_rt, x->x_st));
 }
@@ -133,16 +131,16 @@ static void *muse_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_max = x->x_inl = argc<2?2:argc;
 	x->x_scl = (t_float *)getbytes(x->x_max * sizeof(t_float));
 	
-	if (argc<2) {
-		*x->x_scl = (argc ? atom_getfloat(argv) : 69);
+	if (argc<2)
+	{	*x->x_scl = (argc ? atom_getfloat(argv) : 69);
 		floatinlet_new(&x->x_obj, x->x_scl);
-		*(x->x_scl+1)=7, x->x_n=2, argc=0; }
+		*(x->x_scl+1)=7, x->x_n=2, argc=0;   }
 	else x->x_n = argc;
 	
 	int i; t_float *fp;
-	for (i=argc, fp=x->x_scl; i--; argv++, fp++) {
-		*fp = atom_getfloat(argv);
-		floatinlet_new(&x->x_obj, fp); }
+	for (i=argc, fp=x->x_scl; i--; argv++, fp++)
+	{	*fp = atom_getfloat(argv);
+		floatinlet_new(&x->x_obj, fp);   }
 	x->f_out = outlet_new(&x->x_obj, &s_float); // frequency
 	x->m_out = outlet_new(&x->x_obj, &s_float); // midi note
 	return (x);

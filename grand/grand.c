@@ -44,12 +44,12 @@ static void grand_bang(t_grand *x) {
 static void *grand_new(t_symbol *s, int argc, t_atom *argv) {
 	t_grand *x = (t_grand *)pd_new(grand_class);
 	t_float min=0, max=1, scale=2147483647;
-	switch (argc) {
-	 case 3: scale=atom_getfloat(argv+2); // no break
-	 case 2:
+	switch (argc)
+	{ case 3: scale=atom_getfloat(argv+2); // no break
+	  case 2:
 		max=atom_getfloat(argv+1);
 		min=atom_getfloat(argv); break;
-	 case 1: max=atom_getfloat(argv); }
+	  case 1: max=atom_getfloat(argv);   }
 	x->x_min=min, x->x_max=max, x->x_f=scale;
 	x->x_state = grand_makeseed();
 	x->x_c=argc;

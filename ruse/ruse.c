@@ -18,10 +18,9 @@ static void ruse_float(t_ruse *x, t_float f) {
 		rock=fmod(root,oct), fock=fmod(f-rock,oct);
 	int i, croc=(f-rock)/oct;
 	t_float *fp;
-	for (i=x->x_n, fp=x->x_scl; i--;) {
-		double item = (i?fp[i]:0);
-		if (fabs(fock-round) > fabs(item-fock)) round=item;
-	}
+	for (i=x->x_n, fp=x->x_scl; i--;)
+	{	double item = (i?fp[i]:0);
+		if (fabs(fock-round) > fabs(item-fock)) round=item;   }
 	if (fabs(fock-round) > fabs(oct-fock)) round=oct;
 	double note = oct*croc + rock + round;
 	outlet_float(x->m_out, note);
@@ -70,10 +69,9 @@ static void *ruse_new(t_symbol *s, int argc, t_atom *argv) {
 	} else x->x_n = argc;
 	
 	int i; t_float *fp;
-	for (i=argc, fp=x->x_scl; i--; argv++, fp++) {
-		*fp = atom_getfloat(argv);
-		floatinlet_new(&x->x_obj, fp);
-	}
+	for (i=argc, fp=x->x_scl; i--; argv++, fp++)
+	{	*fp = atom_getfloat(argv);
+		floatinlet_new(&x->x_obj, fp);   }
 	x->f_out = outlet_new(&x->x_obj, &s_float); // frequency
 	x->m_out = outlet_new(&x->x_obj, &s_float); // midi note
 	return (x);

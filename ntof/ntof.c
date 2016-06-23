@@ -30,9 +30,9 @@ static void *ntof_new(t_symbol *s, int argc, t_atom *argv) {
 	outlet_new(&x->x_obj, &s_float);
 	t_float ref=440, tet=12;
 	
-	switch (argc) {
-		case 2: tet = atom_getfloat(argv+1);
-		case 1: ref = atom_getfloat(argv); }
+	switch (argc)
+	{	case 2: tet = atom_getfloat(argv+1);
+		case 1: ref = atom_getfloat(argv);   }
 	x->x_ref=ref, x->x_tet=tet;
 	x->x_rt = ref * pow(2,-69/tet);
 	x->x_st = log(2) / tet;
@@ -44,7 +44,7 @@ void ntof_setup(void) {
 		(t_newmethod)ntof_new, 0,
 		sizeof(t_ntof), 0,
 		A_GIMME, 0);
-		
+	
 	class_addfloat(ntof_class, ntof_float);
 	class_addmethod(ntof_class, (t_method)ntof_ref,
 		gensym("ref"), A_FLOAT, 0);
