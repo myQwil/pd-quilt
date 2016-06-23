@@ -35,8 +35,7 @@ static void rind_max(t_rind *x, t_floatarg f)
 { x->x_max=f; }
 
 static void rind_bang(t_rind *x) {
-	double min=x->x_min, n=x->x_max-min, nval;
-	double range = n?n:1;
+	double min=x->x_min, range=x->x_max-min, nval;
 	unsigned int state = x->x_state;
 	x->x_state = state = state * 472940017 + 832416023;
 	nval = (1./4294967296) * range * state + min;
