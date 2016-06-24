@@ -65,8 +65,10 @@ static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
 		if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
 }
 
-static void muse_key(t_muse *x, t_symbol *s, int ac, t_atom *av)
-{ muse_scale(x, ac, av, 0); }
+static void muse_key(t_muse *x, t_symbol *s, int ac, t_atom *av) {
+	if (ac<2 && av->a_type == A_FLOAT) *x->x_scl = av->a_w.w_float;
+	else muse_scale(x, ac, av, 0);
+}
 
 static void muse_list(t_muse *x, t_symbol *s, int ac, t_atom *av)
 { muse_scale(x, ac, av, 1); }
@@ -128,7 +130,7 @@ static void *muse_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_st = log(2) / tet;
 	
 	x->x_oct = tet;
-	x->x_max = x->x_inl = argc<2?2:argc;
+	x->x_max = x->x_inl = argc?argc:1;
 	x->x_scl = (t_float *)getbytes(x->x_max * sizeof(t_float));
 	
 	if (argc<2)
