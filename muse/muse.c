@@ -80,7 +80,7 @@ static void muse_size(t_muse *x, t_floatarg n) {
 		x->x_n=n;   }
 }
 
-static void muse_set(t_muse *x, t_floatarg i, t_floatarg f) {
+static void muse_scl(t_muse *x, t_floatarg i, t_floatarg f) {
 	if (i>=0)
 	{	if (i>=x->x_max) muse_resize(x,i+1);
 		*(x->x_scl+(int)i)=f;   }
@@ -128,13 +128,15 @@ static void *muse_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_st = log(2) / tet;
 	
 	x->x_oct = tet;
-	x->x_max = x->x_inl = argc?argc:1;
+	x->x_max = x->x_inl = argc>1?argc:2;
 	x->x_scl = (t_float *)getbytes(x->x_max * sizeof(t_float));
 	
 	if (argc<2)
 	{	*x->x_scl = (argc ? atom_getfloat(argv) : 69);
 		floatinlet_new(&x->x_obj, x->x_scl);
-		*(x->x_scl+1)=7, x->x_n=2, argc=0;   }
+		*(x->x_scl+1) = (argc>1 ? atom_getfloat(argv+1) : 7);
+		floatinlet_new(&x->x_obj, x->x_scl+1);
+		x->x_n=2, argc=0;   }
 	else x->x_n = argc;
 	
 	int i; t_float *fp;
@@ -171,8 +173,8 @@ void muse_setup(void) {
 		gensym("tet"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_octet,
 		gensym("octet"), A_FLOAT, 0);
-	class_addmethod(muse_class, (t_method)muse_set,
-		gensym("set"), A_FLOAT, A_FLOAT, 0);
+	class_addmethod(muse_class, (t_method)muse_scl,
+		gensym("scl"), A_FLOAT, A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_peek,
 		gensym("peek"), A_DEFSYM, 0);
 }
