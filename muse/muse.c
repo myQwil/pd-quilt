@@ -65,14 +65,11 @@ static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
 		if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
 }
 
-static void muse_key(t_muse *x, t_symbol *s, int ac, t_atom *av)
+static void muse_list(t_muse *x, t_symbol *s, int ac, t_atom *av)
 {	if (ac) muse_scale(x, ac, av, 0);   }
 
-static void muse_list(t_muse *x, t_symbol *s, int ac, t_atom *av)
+static void muse_key(t_muse *x, t_symbol *s, int ac, t_atom *av)
 {	if (ac) muse_scale(x, ac, av, 1);   }
-
-static void muse_skip(t_muse *x, t_symbol *s, int ac, t_atom *av)
-{	if (ac) muse_scale(x, ac, av, 2);   }
 
 static void muse_size(t_muse *x, t_floatarg n) {
 	if (n>0)
@@ -161,8 +158,6 @@ void muse_setup(void) {
 	class_addfloat(muse_class, muse_float);
 	class_addmethod(muse_class, (t_method)muse_key,
 		gensym("k"), A_GIMME, 0);
-	class_addmethod(muse_class, (t_method)muse_skip,
-		gensym("s"), A_GIMME, 0);
 	class_addmethod(muse_class, (t_method)muse_size,
 		gensym("n"), A_FLOAT, 0);		
 	class_addmethod(muse_class, (t_method)muse_octave,
