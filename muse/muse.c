@@ -21,8 +21,8 @@ struct _inlet
 #define i_floatslot i_un.iu_floatslot
 #define i_symslot i_un.iu_symslot
 
-t_float ntof(t_float f, t_float rt, t_float st)
-{	return (rt * exp(st*f));   }
+t_float ntof(t_float f, t_float root, t_float semi)
+{	return (root * exp(semi*f));   }
 
 /* -------------------------- muse -------------------------- */
 
@@ -53,7 +53,7 @@ static void muse_resize(t_muse *x, t_floatarg n) {
 }
 
 static void muse_peek(t_muse *x, t_symbol *s)
-{ post("%s%s%d", s->s_name, *s->s_name?": ":"", x->x_max); }
+{	post("%s%s%d", s->s_name, *s->s_name?": ":"", x->x_max);   }
 
 static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
 	int n = x->x_n = ac+offset;
@@ -87,10 +87,10 @@ static void muse_scl(t_muse *x, t_floatarg i, t_floatarg f) {
 }
 
 static void muse_octave(t_muse *x, t_floatarg f)
-{ x->x_oct=f; }
+{	x->x_oct=f;   }
 
 static void muse_ref(t_muse *x, t_floatarg f)
-{ x->x_rt = (x->x_ref=f) * pow(2,-69/x->x_tet); }
+{	x->x_rt = (x->x_ref=f) * pow(2,-69/x->x_tet);   }
 
 static void muse_tet(t_muse *x, t_floatarg f) {
 	x->x_rt = x->x_ref * pow(2,-69/f);
@@ -98,13 +98,14 @@ static void muse_tet(t_muse *x, t_floatarg f) {
 }
 
 static void muse_octet(t_muse *x, t_floatarg f)
-{ muse_octave(x,f); muse_tet(x,f); }
+{	muse_octave(x,f);   muse_tet(x,f);   }
 
 static double getnote(t_muse *x, int d) {
-	int n=x->x_n, dn=d%n;
-	double root = x->x_scl[0];
-	int oct = d/n - (dn<0); // floor negatives
+	int n=x->x_n, dn=d%n,
+	oct = d/n - (dn<0); // floor negatives
 	d = (dn+n) % n; // modulo always positive
+	
+	double root = x->x_scl[0];
 	double step = (d ? x->x_scl[d] : 0);
 	return (root + step + (oct * x->x_oct));
 }
@@ -149,7 +150,7 @@ static void *muse_new(t_symbol *s, int argc, t_atom *argv) {
 }
 
 static void muse_free(t_muse *x)
-{ freebytes(x->x_scl, x->x_max * sizeof(t_float)); }
+{	freebytes(x->x_scl, x->x_max * sizeof(t_float));   }
 
 void muse_setup(void) {
 	muse_class = class_new(gensym("muse"),
@@ -164,7 +165,7 @@ void muse_setup(void) {
 	class_addmethod(muse_class, (t_method)muse_key,
 		gensym("k"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_size,
-		gensym("n"), A_FLOAT, 0);		
+		gensym("n"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_octave,
 		gensym("oct"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_ref,
