@@ -3,8 +3,8 @@
 
 /* -------------------------- fton -------------------------- */
 
-t_float fton(t_float f, t_float rt, t_float st)
-{ return (f > 0 ? st * log(rt*f) : 0); }
+t_float fton(t_float f, t_float root, t_float semi)
+{ return (semi * log(root*f)); }
 
 static t_class *fton_class;
 
@@ -33,9 +33,8 @@ static void *fton_new(t_symbol *s, int argc, t_atom *argv) {
 	switch (argc)
 	{	case 2: tet = atom_getfloat(argv+1);
 		case 1: ref = atom_getfloat(argv);   }
-	x->x_ref=ref, x->x_tet=tet;
-	x->x_rt = 1./ (ref * pow(2,-69/tet));
-	x->x_st = 1./ (log(2) / tet);
+	x->x_rt = 1./ ((x->x_ref=ref) * pow(2,-69/tet));
+	x->x_st = 1./ (log(2) / (x->x_tet=tet));
 	return (x);
 }
 

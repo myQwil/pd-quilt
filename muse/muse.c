@@ -104,9 +104,8 @@ static double getnote(t_muse *x, int d) {
 	int n=x->x_n, dn=d%n,
 	oct = d/n - (dn<0); // floor negatives
 	d = (dn+n) % n; // modulo always positive
-	
-	double root = x->x_scl[0];
-	double step = (d ? x->x_scl[d] : 0);
+	double root = x->x_scl[0],
+	step = (d ? x->x_scl[d] : 0);
 	return (root + step + (oct * x->x_oct));
 }
 

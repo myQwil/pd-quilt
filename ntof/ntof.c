@@ -3,8 +3,8 @@
 
 /* -------------------------- ntof -------------------------- */
 
-t_float ntof(t_float f, t_float rt, t_float st)
-{ return (rt * exp(st*f)); }
+t_float ntof(t_float f, t_float root, t_float semi)
+{ return (root * exp(semi*f)); }
 
 static t_class *ntof_class;
 
@@ -33,9 +33,8 @@ static void *ntof_new(t_symbol *s, int argc, t_atom *argv) {
 	switch (argc)
 	{	case 2: tet = atom_getfloat(argv+1);
 		case 1: ref = atom_getfloat(argv);   }
-	x->x_ref=ref, x->x_tet=tet;
-	x->x_rt = ref * pow(2,-69/tet);
-	x->x_st = log(2) / tet;
+	x->x_rt = (x->x_ref=ref) * pow(2,-69/tet);
+	x->x_st = log(2) / (x->x_tet=tet);
 	return (x);
 }
 
