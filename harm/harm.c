@@ -119,9 +119,9 @@ static double getnote(t_harm *x, int d) {
 }
 
 static void harm_bang(t_harm *x) {
-	int n=x->x_n, i;
+	int n=x->x_n+1, out=x->x_inl+1, i=n>out?out:n;
 	t_harmout *u;
-	for (i=n+1, u=x->x_out+i; u--, i--;)
+	for (u=x->x_out+i; u--, i--;)
 	{	double note = getnote(x, i);
 		int innn = ((i%n+n)%n);
 		i = (i && innn==0) ? n : innn;
@@ -148,7 +148,7 @@ static void *harm_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_oct = tet;
 	x->x_max = x->x_inl = argc>1?argc:2;
 	x->x_scl = (t_float *)getbytes(x->x_max * sizeof(t_float));
-	x->x_out = (t_harmout *)getbytes((x->x_max+1) * sizeof(*x->x_out));
+	x->x_out = (t_harmout *)getbytes((x->x_inl+1) * sizeof(*x->x_out));
 	t_harmout *u = x->x_out;
 	
 	if (argc<2)
