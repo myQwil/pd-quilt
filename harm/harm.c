@@ -67,7 +67,10 @@ static void harm_scale(t_harm *x, int ac, t_atom *av, int offset) {
 	int i;
 	t_float *fp = x->x_scl+offset;
 	for (i=ac; i--; av++, fp++)
-		if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
+	{	if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
+		/*else if (av->a_type == A_SYMBOL &&
+		  *av->a_w.w_symbol->s_name == '-')
+			post("%s", "hello world");*/   }
 }
 
 static void harm_list(t_harm *x, t_symbol *s, int ac, t_atom *av)
@@ -108,6 +111,15 @@ static void harm_octet(t_harm *x, t_floatarg f)
 static void harm_midi(t_harm *x, t_floatarg f)
 {	x->x_midi = f;   }
 
+// static void harm_pair(t_harm *x, t_floatarg i, t_floatarg f) {
+	// int n=x->x_n, d=i;
+	// //*(x->x_scl+(int)d)=f;
+	// int dnnn = ((d%n+n)%n);
+	// d = (d && dnnn==0) ? n : dnnn;
+	// outlet_float((x->x_out+d)->u_outlet,
+		// x->x_midi ? note : ntof(note, x->x_rt, x->x_st));
+// }
+
 static double getnote(t_harm *x, int d) {
 	int n=x->x_n, dn=d%n,
 	oct = d/n - (dn<0); // floor negatives
@@ -118,21 +130,21 @@ static double getnote(t_harm *x, int d) {
 }
 
 static void harm_bang(t_harm *x) {
-	int n=x->x_n+1, out=x->x_inl+1, i=n>out?out:n;
+	int n=x->x_n+1, i=x->x_inl+1;
+	i=n>i?i:n;
 	t_harmout *u;
 	for (u=x->x_out+i; u--, i--;)
 	{	double note = getnote(x, i);
-		int innn = ((i%n+n)%n);
-		i = (i && innn==0) ? n : innn;
 		outlet_float((x->x_out+i)->u_outlet,
 			x->x_midi ? note : ntof(note, x->x_rt, x->x_st));   }
 }
 
 static void harm_float(t_harm *x, t_float f) {
-	int n=x->x_n, d=f;
+	int n=x->x_n, i=x->x_inl, d=f;
+	n=n>i?i:n;
 	double note = getnote(x, d);
-	int dnnn = ((d%n+n)%n);
-	d = (d && dnnn==0) ? n : dnnn;
+	int dn = ((d%n+n)%n);
+	d = (d&&!dn) ? n : dn;
 	outlet_float((x->x_out+d)->u_outlet,
 		x->x_midi ? note : ntof(note, x->x_rt, x->x_st));
 }
