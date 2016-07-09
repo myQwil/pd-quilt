@@ -174,7 +174,7 @@ static void *harm_new(t_symbol *s, int argc, t_atom *argv) {
 	else x->x_n = argc;
 	
 	int i; t_float *fp;
-	u->u_outlet = outlet_new(&x->x_obj, &s_float); u++; // for 2 octaves
+	u->u_outlet = outlet_new(&x->x_obj, &s_float); u++; // for an extra octave
 	for (i=argc, fp=x->x_scl; i--; u++, argv++, fp++)
 	{	*fp = atom_getfloat(argv);
 		floatinlet_new(&x->x_obj, fp);
