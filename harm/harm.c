@@ -200,7 +200,7 @@ void harm_setup(void) {
 	class_addmethod(harm_class, (t_method)harm_key,
 		gensym("k"), A_FLOAT, 0);
 	class_addmethod(harm_class, (t_method)harm_size,
-		gensym("n"), A_FLOAT, 0);		
+		gensym("n"), A_FLOAT, 0);
 	class_addmethod(harm_class, (t_method)harm_octave,
 		gensym("oct"), A_FLOAT, 0);
 	class_addmethod(harm_class, (t_method)harm_ref,
