@@ -9,7 +9,7 @@ typedef struct _rand {
 	t_object x_obj;
 	t_float x_min, x_max, *x_vec;
 	unsigned int x_state;
-	t_int x_c;
+	t_int x_ac;
 } t_rand;
 
 static int rand_time(void) {
@@ -36,7 +36,7 @@ static void rand_max(t_rand *x, t_floatarg f)
 { x->x_max=f; }
 
 static void rand_bang(t_rand *x) {
-	int c=x->x_c, nval;
+	int c=x->x_ac, nval;
 	unsigned int state = x->x_state;
 	x->x_state = state = state * 472940017 + 832416023;
 
@@ -55,7 +55,7 @@ static void *rand_new(t_symbol *s, int argc, t_atom *argv) {
 	t_rand *x = (t_rand *)pd_new(rand_class);
 	outlet_new(&x->x_obj, &s_float);
 	x->x_state = rand_makeseed();
-	x->x_c=argc;
+	x->x_ac=argc;
 	if (argc<3)
 	{	t_float min=0, max=1;
 		switch (argc)
@@ -76,7 +76,7 @@ static void *rand_new(t_symbol *s, int argc, t_atom *argv) {
 }
 
 static void rand_free(t_rand *x)
-{ if (x->x_c>2) freebytes(x->x_vec, x->x_c * sizeof(*x->x_vec)); }
+{ if (x->x_ac>2) freebytes(x->x_vec, x->x_ac * sizeof(*x->x_vec)); }
 
 void rand_setup(void) {
 	rand_class = class_new(gensym("rand"),
