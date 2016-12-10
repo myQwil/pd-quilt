@@ -9,7 +9,7 @@ t_float ntof(t_float f, t_float root, t_float semi)
 static t_class *ntof_class;
 
 typedef struct _ntof {
-    t_object x_obj;
+	t_object x_obj;
 	t_float x_rt, x_st;		/* root tone, semi-tone */
 	t_float x_ref, x_tet;	/* ref-pitch, # of tones */
 } t_ntof;

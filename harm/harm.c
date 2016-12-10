@@ -159,7 +159,7 @@ static void *harm_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_oct = tet;
 	x->x_max = x->x_inl = argc>1?argc:2;
 	x->x_scl = (t_float *)getbytes(x->x_max * sizeof(t_float));
-	x->x_out = (t_harmout *)getbytes((x->x_inl+1) * sizeof(*x->x_out));
+	x->x_out = (t_harmout *)getbytes((x->x_inl+1) * sizeof(t_harmout));
 	t_harmout *u = x->x_out;
 	
 	if (argc<2)

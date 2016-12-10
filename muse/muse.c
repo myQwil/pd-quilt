@@ -72,18 +72,19 @@ static void muse_skip(t_muse *x, t_symbol *s, int ac, t_atom *av)
 {	if (ac) muse_scale(x, ac, av, 1);   }
 
 static void muse_key(t_muse *x, t_floatarg k)
-{	*x->x_scl = k;   }
+{	x->x_scl[0] = k;   }
+
+static void muse_scl(t_muse *x, t_floatarg j, t_floatarg f) {
+	int i=j;
+	if (i>=0)
+	{	if (i>=x->x_max) muse_resize(x,i+1);
+		x->x_scl[i] = f;   }
+}
 
 static void muse_size(t_muse *x, t_floatarg n) {
 	if (n>0)
 	{	if (n>x->x_max) muse_resize(x,n);
 		x->x_n=n;   }
-}
-
-static void muse_scl(t_muse *x, t_floatarg i, t_floatarg f) {
-	if (i>=0)
-	{	if (i>=x->x_max) muse_resize(x,i+1);
-		*(x->x_scl+(int)i)=f;   }
 }
 
 static void muse_octave(t_muse *x, t_floatarg f)
@@ -132,9 +133,9 @@ static void *muse_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_scl = (t_float *)getbytes(x->x_max * sizeof(t_float));
 	
 	if (argc<2)
-	{	*x->x_scl = (argc ? atom_getfloat(argv) : 69);
+	{	x->x_scl[0] = (argc ? atom_getfloat(argv) : 69);
 		floatinlet_new(&x->x_obj, x->x_scl);
-		*(x->x_scl+1) = (argc>1 ? atom_getfloat(argv+1) : 7);
+		x->x_scl[1] = (argc>1 ? atom_getfloat(argv+1) : 7);
 		floatinlet_new(&x->x_obj, x->x_scl+1);
 		x->x_n=2, argc=0;   }
 	else x->x_n = argc;

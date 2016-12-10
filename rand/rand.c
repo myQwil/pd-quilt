@@ -67,7 +67,7 @@ static void *rand_new(t_symbol *s, int argc, t_atom *argv) {
 		if (argc!=1) floatinlet_new(&x->x_obj, &x->x_min);
 		floatinlet_new(&x->x_obj, &x->x_max);   }
 	else
-	{	x->x_vec = (t_float *)getbytes(argc * sizeof(*x->x_vec));
+	{	x->x_vec = (t_float *)getbytes(argc * sizeof(t_float));
 		int i; t_float *fp;
 		for (i=argc, fp=x->x_vec; i--; argv++, fp++)
 		{	*fp = atom_getfloat(argv);
@@ -76,7 +76,7 @@ static void *rand_new(t_symbol *s, int argc, t_atom *argv) {
 }
 
 static void rand_free(t_rand *x)
-{ if (x->x_ac>2) freebytes(x->x_vec, x->x_ac * sizeof(*x->x_vec)); }
+{ if (x->x_ac>2) freebytes(x->x_vec, x->x_ac * sizeof(t_float)); }
 
 void rand_setup(void) {
 	rand_class = class_new(gensym("rand"),

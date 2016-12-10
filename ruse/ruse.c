@@ -58,7 +58,7 @@ static void *ruse_new(t_symbol *s, int argc, t_atom *argv) {
 	
 	x->x_oct = 12;
 	x->x_max = (argc > 12 ? argc : 12); // enough space for a chromatic scale
-	x->x_scl = (t_float *)getbytes(x->x_max * sizeof(*x->x_scl));
+	x->x_scl = (t_float *)getbytes(x->x_max * sizeof(t_float));
 	
 	if (argc < 2) {
 		*x->x_scl = (argc ? atom_getfloat(argv) : 0);
