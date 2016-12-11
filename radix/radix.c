@@ -11,38 +11,35 @@ typedef struct _radix {
 
 static void radix_float(t_radix *x, t_float f) {
 	char digit[32] = "0123456789NECDAFGHJKMPQRSTUVWXYZ";
-	int len = 8;
-	int newd[len], newf[len];
-	
-	int size=0, i=0, j, dp, flot, d=f, rad=x->x_rad;
+	int len=8, new[len],
+		i=0, j, size, dp, flot,
+		d=f, rad=x->x_rad;
 	if (rad<1||rad>32) rad = 16;
-	
-	do
-	{	newd[i] = (d<0?-1:1)*(d%rad);
-		d/=rad; i++;   }
+
+	do { new[i++] = (d<0?-1:1)*(d%rad); d/=rad; }
 	while (d!=0 && i<len);
-	size+=(dp=i); // decimal point
+	dp=i; // decimal point
 	
 	d=f;
 	if ((flot=(f!=d)))
-	{	t_float b; j=len-dp; i=0;
+	{	j=len-dp; t_float b;
 		do
 		{	f-=d; f*=(f<0?-1:1)*rad;
 			d=f, b=f-d; d+=(b-.999>=0);
 			if (b>-.005 && b<.005 && d==0) f=0;
-			else newf[i++] = d;   }
-		while (f!=0 && i<j);
-		size+=i;   }
-	char buf[size+1+flot];
-	for (j=0, i=dp-1; j<dp; j++, i--)
-		buf[j] = digit[newd[i]];
+			else new[i++] = d;   }
+		while (f!=0 && i<j);   }
 	
+	size=i+flot;
+	char buf[size+1];
+	for (j=0, i=dp-1; j<dp; j++, i--)
+		buf[j] = digit[new[i]];
 	if (flot)
 	{	buf[j++] = '.';
-		for (i=0; j<size+flot; j++, i++)
-			buf[j] = digit[newf[i]];   }
+		for (; j<size; j++)
+			buf[j] = digit[new[j-1]];   }
 	
-	buf[size+flot] = '\0';
+	buf[size] = '\0';
 	outlet_symbol(x->x_obj.ob_outlet, gensym(buf));
 }
 
