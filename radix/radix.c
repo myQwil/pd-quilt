@@ -1,25 +1,25 @@
 #include "../m_pd.h"
 
-/* -------------------------- nbase -------------------------- */
+/* -------------------------- radix -------------------------- */
 
-static t_class *nbase_class;
+static t_class *radix_class;
 
-typedef struct _nbase {
+typedef struct _radix {
 	t_object x_obj;
-	t_float x_base;
-} t_nbase;
+	t_float x_rad;
+} t_radix;
 
-static void nbase_float(t_nbase *x, t_float f) {
+static void radix_float(t_radix *x, t_float f) {
 	char digit[32] = "0123456789NECDAFGHJKMPQRSTUVWXYZ";
 	int len = 8;
 	int newd[len], newf[len];
 	
-	int size=0, i=0, j, dp, flot, d=f, base=x->x_base;
-	if (base<1||base>32) base = 16;
+	int size=0, i=0, j, dp, flot, d=f, rad=x->x_rad;
+	if (rad<1||rad>32) rad = 16;
 	
 	do
-	{	newd[i] = (d<0?-1:1)*(d%base);
-		d/=base; i++;   }
+	{	newd[i] = (d<0?-1:1)*(d%rad);
+		d/=rad; i++;   }
 	while (d!=0 && i<len);
 	size+=(dp=i); // decimal point
 	
@@ -27,7 +27,7 @@ static void nbase_float(t_nbase *x, t_float f) {
 	if ((flot=(f!=d)))
 	{	t_float b; j=len-dp; i=0;
 		do
-		{	f-=d; f*=(f<0?-1:1)*base;
+		{	f-=d; f*=(f<0?-1:1)*rad;
 			d=f, b=f-d; d+=(b-.999>=0);
 			if (b>-.005 && b<.005 && d==0) f=0;
 			else newf[i++] = d;   }
@@ -46,19 +46,19 @@ static void nbase_float(t_nbase *x, t_float f) {
 	outlet_symbol(x->x_obj.ob_outlet, gensym(buf));
 }
 
-static void *nbase_new(t_floatarg f) {
-	t_nbase *x = (t_nbase *)pd_new(nbase_class);
-	x->x_base = f;
-	floatinlet_new(&x->x_obj, &x->x_base);
+static void *radix_new(t_floatarg f) {
+	t_radix *x = (t_radix *)pd_new(radix_class);
+	x->x_rad = f;
+	floatinlet_new(&x->x_obj, &x->x_rad);
 	outlet_new(&x->x_obj, &s_symbol);
 	return (x);
 }
 
-void nbase_setup(void) {
-	nbase_class = class_new(gensym("nbase"),
-		(t_newmethod)nbase_new, 0,
-		sizeof(t_nbase), 0,
+void radix_setup(void) {
+	radix_class = class_new(gensym("radix"),
+		(t_newmethod)radix_new, 0,
+		sizeof(t_radix), 0,
 		A_DEFFLOAT, 0);
 	
-	class_addfloat(nbase_class, nbase_float);
+	class_addfloat(radix_class, radix_float);
 }

@@ -1,12 +1,12 @@
 ## Pd library template version 1.0.14
 # For instructions on how to use this template, see:
 #  http://puredata.info/docs/developer/MakefileTemplate
-LIBRARY_NAME = nbase
+LIBRARY_NAME = radix
 
 # add your .c source files, one object per file, to the SOURCES
 # variable, help files will be included automatically, and for GUI
 # objects, the matching .tcl file too
-SOURCES = nbase.c
+SOURCES = radix.c
 
 # list all pd objects (i.e. myobject.pd) files here, and their helpfiles will
 # be included automatically
@@ -38,7 +38,7 @@ UNITTESTS =
 ALL_CFLAGS = -I"$(PD_INCLUDE)"
 ALL_LDFLAGS =  
 SHARED_LDFLAGS =
-ALL_LIBS =
+ALL_LIBS = "c:/Progra~2/pd/bin/pd.dll"
 
 
 #------------------------------------------------------------------------------#
@@ -103,7 +103,7 @@ ifeq ($(UNAME),Darwin)
     SHARED_EXTENSION = dylib
     OS = macosx
     PD_PATH = /Applications/Pd-extended.app/Contents/Resources
-    OPT_CFLAGS = -ftree-vectorize -fast
+    OPT_CFLAGS = -ftree-vectorize -ftree-vectorizer-verbose=2 -fast
 # build universal 32-bit on 10.4 and 32/64 on newer
     ifeq ($(shell uname -r | sed 's|\([0-9][0-9]*\)\.[0-9][0-9]*\.[0-9][0-9]*|\1|'), 8)
       FAT_FLAGS = -arch ppc -arch i386 -mmacosx-version-min=10.4
