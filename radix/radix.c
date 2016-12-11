@@ -13,21 +13,19 @@ static void radix_float(t_radix *x, t_float f) {
 	t_float b;
 	char digit[32] = "0123456789NECDAFGHJKMPQRSTUVWXYZ";
 	int len=8, new[len],
-		i=0, j, size, dp, flot,
+		i=0, j, size, dp, flot=0,
 		d=f, rad=x->x_rad;
-	if (rad<1||rad>32) rad = 16;
+	if (rad<2) rad=2; else if (rad>32) rad=32;
 
-	do { new[i++] = (d<0?-1:1)*(d%rad); d/=rad; }
+	do{ new[i++] = (d<0?-1:1)*(d%rad); d/=rad; }
 	while (d!=0 && i<len);
 	dp=i; // decimal point
 	
-	d=f;
-	if ((flot=(f!=d)))
-	{	do
-		{	f-=d; f*=(f<0?-1:1)*rad;
+	if (i<len-1 && (flot=(f!=(d=f))))
+	{	do{ f-=d; f*=(f<0?-1:1)*rad;
 			d=f, b=f-d; d+=(b-.999>=0);
 			if (b>-.005 && b<.005 && d==0) f=0;
-			else new[i++] = d;   }
+			else new[i++] = d; }
 		while (f!=0 && i<len);   }
 	
 	size=i+flot;
@@ -45,7 +43,7 @@ static void radix_float(t_radix *x, t_float f) {
 
 static void *radix_new(t_floatarg f) {
 	t_radix *x = (t_radix *)pd_new(radix_class);
-	x->x_rad = f;
+	x->x_rad = f?f:16;
 	floatinlet_new(&x->x_obj, &x->x_rad);
 	outlet_new(&x->x_obj, &s_symbol);
 	return (x);
