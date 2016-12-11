@@ -28,7 +28,7 @@ static void nbase_float(t_nbase *x, t_float f) {
 	{	t_float b; j=len-dp; i=0;
 		do
 		{	f-=d; f*=(f<0?-1:1)*base;
-			d=f; b=f-d; d+=(b-.999>=0);
+			d=f, b=f-d; d+=(b-.999>=0);
 			if (b>-.005 && b<.005 && d==0) f=0;
 			else newf[i++] = d;   }
 		while (f!=0 && i<j);
