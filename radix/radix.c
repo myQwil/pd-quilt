@@ -10,6 +10,7 @@ typedef struct _radix {
 } t_radix;
 
 static void radix_float(t_radix *x, t_float f) {
+	t_float b;
 	char digit[32] = "0123456789NECDAFGHJKMPQRSTUVWXYZ";
 	int len=8, new[len],
 		i=0, j, size, dp, flot,
@@ -22,13 +23,12 @@ static void radix_float(t_radix *x, t_float f) {
 	
 	d=f;
 	if ((flot=(f!=d)))
-	{	j=len-dp; t_float b;
-		do
+	{	do
 		{	f-=d; f*=(f<0?-1:1)*rad;
 			d=f, b=f-d; d+=(b-.999>=0);
 			if (b>-.005 && b<.005 && d==0) f=0;
 			else new[i++] = d;   }
-		while (f!=0 && i<j);   }
+		while (f!=0 && i<len);   }
 	
 	size=i+flot;
 	char buf[size+1];

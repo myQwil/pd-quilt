@@ -1,4 +1,4 @@
-#N canvas 346 196 480 332 10;
+#N canvas 715 593 480 332 10;
 #X obj 259 65 cupqb;
 #X symbolatom 254 207 10 0 0 0 - - -, f 10;
 #X obj 254 185 radix 12;
@@ -51,11 +51,12 @@
 #X obj 341 44 cupqb;
 #X obj 325 21 b;
 #X obj 317 84 pow;
-#X obj 223 17 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+#X obj 223 17 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
 #X obj 241 17 metro;
 #X floatatom 280 17 5 0 0 0 - - -, f 5;
-#X msg 244 38 +;
+#X msg 232 42 +;
+#X obj 259 42 ii 1300;
 #X connect 0 0 12 0;
 #X connect 2 0 1 0;
 #X connect 3 0 12 0;
@@ -111,4 +112,5 @@
 #X connect 53 0 55 0;
 #X connect 54 0 53 1;
 #X connect 55 0 4 0;
+#X connect 56 0 54 0;
 #X coords 0 0 1 1 85 60 0;
