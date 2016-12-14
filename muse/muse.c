@@ -1,4 +1,5 @@
 #include "../m_pd.h"
+#include <stdlib.h>
 #include <math.h>
 
 union inletunion
@@ -55,6 +56,15 @@ static void muse_resize(t_muse *x, t_floatarg n) {
 static void muse_peek(t_muse *x, t_symbol *s)
 {	post("%s%s%d", s->s_name, *s->s_name?": ":"", x->x_max);   }
 
+static void muse_operate(t_float *fp, t_atom *av) {
+	char *cp = av->a_w.w_symbol->s_name;
+	if (cp[0]=='f')
+	{		 if (cp[1]=='+') *fp += atof(cp+2);
+		else if (cp[1]=='-') *fp -= atof(cp+2);
+		else if (cp[1]=='*') *fp *= atof(cp+2);
+		else if (cp[1]=='/') *fp /= atof(cp+2);   }
+}
+
 static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
 	int n = x->x_n = ac+offset;
 	if (n>x->x_max) muse_resize(x,n);
@@ -63,6 +73,7 @@ static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
 	t_float *fp = x->x_scl+offset;
 	for (i=ac; i--; av++, fp++)
 		if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
+		else if (av->a_type == A_SYMBOL) muse_operate(fp, av);
 }
 
 static void muse_list(t_muse *x, t_symbol *s, int ac, t_atom *av)
@@ -71,8 +82,10 @@ static void muse_list(t_muse *x, t_symbol *s, int ac, t_atom *av)
 static void muse_skip(t_muse *x, t_symbol *s, int ac, t_atom *av)
 {	if (ac) muse_scale(x, ac, av, 1);   }
 
-static void muse_key(t_muse *x, t_floatarg k)
-{	x->x_scl[0] = k;   }
+static void muse_key(t_muse *x, t_symbol *s, int ac, t_atom *av) {
+	if (av->a_type == A_FLOAT) x->x_scl[0] = av->a_w.w_float;
+	else if (av->a_type == A_SYMBOL) muse_operate(x->x_scl, av);
+}
 
 static void muse_scl(t_muse *x, t_floatarg j, t_floatarg f) {
 	int i=j;
@@ -163,7 +176,7 @@ void muse_setup(void) {
 	class_addmethod(muse_class, (t_method)muse_skip,
 		gensym("s"), A_GIMME, 0);
 	class_addmethod(muse_class, (t_method)muse_key,
-		gensym("k"), A_FLOAT, 0);
+		gensym("k"), A_GIMME, 0);
 	class_addmethod(muse_class, (t_method)muse_size,
 		gensym("n"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_octave,

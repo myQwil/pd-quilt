@@ -6,14 +6,14 @@
 #X obj 93 132 f;
 #X obj 93 152 + 1;
 #X obj 81 173 inlet;
-#X floatatom 100 73 4 0 0 0 - - -;
+#X floatatom 100 72 5 0 0 0 - - -, f 5;
 #X obj 49 9 inlet;
 #X text 55 196 cup-qube;
 #X obj 49 31 route - +;
-#X obj 100 89 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+#X obj 100 89 bng 15 250 50 0 empty empty empty 17 7 0 10 -243850 -75900
 -1;
-#X obj 117 89 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
+#X obj 117 89 bng 15 250 50 0 empty empty empty 17 7 0 10 -243850 -75900
+-65358;
 #X connect 1 0 7 0;
 #X connect 2 0 3 0;
 #X connect 3 0 1 0;

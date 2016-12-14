@@ -1,4 +1,5 @@
 #include "../m_pd.h"
+#include <stdlib.h>
 #include <math.h>
 
 union inletunion
@@ -60,6 +61,15 @@ static void harm_resize(t_harm *x, t_floatarg n) {
 static void harm_peek(t_harm *x, t_symbol *s)
 {	post("%s%s%d", s->s_name, *s->s_name?": ":"", x->x_max);   }
 
+static void harm_operate(t_float *fp, t_atom *av) {
+	char *cp = av->a_w.w_symbol->s_name;
+	if (cp[0]=='f')
+	{		 if (cp[1]=='+') *fp += atof(cp+2);
+		else if (cp[1]=='-') *fp -= atof(cp+2);
+		else if (cp[1]=='*') *fp *= atof(cp+2);
+		else if (cp[1]=='/') *fp /= atof(cp+2);   }
+}
+
 static void harm_scale(t_harm *x, int ac, t_atom *av, int offset) {
 	int n = x->x_n = ac+offset;
 	if (n>x->x_max) harm_resize(x,n);
@@ -67,10 +77,8 @@ static void harm_scale(t_harm *x, int ac, t_atom *av, int offset) {
 	int i;
 	t_float *fp = x->x_scl+offset;
 	for (i=ac; i--; av++, fp++)
-	{	if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
-		/*else if (av->a_type == A_SYMBOL &&
-		  *av->a_w.w_symbol->s_name == '-')
-			post("%s", "hello world");*/   }
+		if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
+		else if (av->a_type == A_SYMBOL) harm_operate(fp, av);
 }
 
 static void harm_list(t_harm *x, t_symbol *s, int ac, t_atom *av)
@@ -79,19 +87,22 @@ static void harm_list(t_harm *x, t_symbol *s, int ac, t_atom *av)
 static void harm_skip(t_harm *x, t_symbol *s, int ac, t_atom *av)
 {	if (ac) harm_scale(x, ac, av, 1);   }
 
-static void harm_key(t_harm *x, t_floatarg k)
-{	*x->x_scl = k;   }
+static void harm_key(t_harm *x, t_symbol *s, int ac, t_atom *av) {
+	if (av->a_type == A_FLOAT) x->x_scl[0] = av->a_w.w_float;
+	else if (av->a_type == A_SYMBOL) harm_operate(x->x_scl, av);
+}
+
+static void harm_scl(t_harm *x, t_floatarg j, t_floatarg f) {
+	int i=j;
+	if (i>=0)
+	{	if (i>=x->x_max) harm_resize(x,i+1);
+		x->x_scl[i] = f;   }
+}
 
 static void harm_size(t_harm *x, t_floatarg n) {
 	if (n>0)
 	{	if (n>x->x_max) harm_resize(x,n);
 		x->x_n=n;   }
-}
-
-static void harm_scl(t_harm *x, t_floatarg i, t_floatarg f) {
-	if (i>=0)
-	{	if (i>=x->x_max) harm_resize(x,i+1);
-		*(x->x_scl+(int)i)=f;   }
 }
 
 static void harm_octave(t_harm *x, t_floatarg f)
@@ -110,15 +121,6 @@ static void harm_octet(t_harm *x, t_floatarg f)
 
 static void harm_midi(t_harm *x, t_floatarg f)
 {	x->x_midi = f;   }
-
-// static void harm_pair(t_harm *x, t_floatarg i, t_floatarg f) {
-	// int n=x->x_n, d=i;
-	// //*(x->x_scl+(int)d)=f;
-	// int dnnn = ((d%n+n)%n);
-	// d = (d && dnnn==0) ? n : dnnn;
-	// outlet_float((x->x_out+d)->u_outlet,
-		// x->x_midi ? note : ntof(note, x->x_rt, x->x_st));
-// }
 
 static double getnote(t_harm *x, int d) {
 	int n=x->x_n, dn=d%n,
@@ -163,9 +165,9 @@ static void *harm_new(t_symbol *s, int argc, t_atom *argv) {
 	t_harmout *u = x->x_out;
 	
 	if (argc<2)
-	{	*x->x_scl = (argc ? atom_getfloat(argv) : 69);
+	{	x->x_scl[0] = (argc ? atom_getfloat(argv) : 69);
 		floatinlet_new(&x->x_obj, x->x_scl);
-		*(x->x_scl+1) = (argc>1 ? atom_getfloat(argv+1) : 7);
+		x->x_scl[1] = (argc>1 ? atom_getfloat(argv+1) : 7);
 		floatinlet_new(&x->x_obj, x->x_scl+1);
 		u->u_outlet = outlet_new(&x->x_obj, &s_float);
 		(u+1)->u_outlet = outlet_new(&x->x_obj, &s_float);
@@ -179,7 +181,6 @@ static void *harm_new(t_symbol *s, int argc, t_atom *argv) {
 	{	*fp = atom_getfloat(argv);
 		floatinlet_new(&x->x_obj, fp);
 		u->u_outlet = outlet_new(&x->x_obj, &s_float);   }
-	
 	return (x);
 }
 
@@ -198,7 +199,7 @@ void harm_setup(void) {
 	class_addmethod(harm_class, (t_method)harm_skip,
 		gensym("s"), A_GIMME, 0);
 	class_addmethod(harm_class, (t_method)harm_key,
-		gensym("k"), A_FLOAT, 0);
+		gensym("k"), A_GIMME, 0);
 	class_addmethod(harm_class, (t_method)harm_size,
 		gensym("n"), A_FLOAT, 0);
 	class_addmethod(harm_class, (t_method)harm_octave,
