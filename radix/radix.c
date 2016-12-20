@@ -11,7 +11,7 @@ typedef struct _radix {
 
 static void radix_float(t_radix *x, t_float f) {
 	t_float b;
-	char digit[32] = "0123456789NECDAFGHJKMPQRSTUVWXYZ";
+	char digit[32] = "0123456789NECDAFGHJKLMPQRTUVWXYZ";
 	int len=8, new[len],
 		i=0, j=0, dp, size, flot=0,
 		d=f, rad=x->x_rad, neg=(f<0);
