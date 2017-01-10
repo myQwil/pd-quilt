@@ -142,11 +142,14 @@ static void harm_bang(t_harm *x) {
 }
 
 static void harm_float(t_harm *x, t_float f) {
-	int n=x->x_n, i=x->x_inl, d=f;
-	n=n>i?i:n;
+	int n=x->x_inl, d=f;
 	double note = getnote(x, d);
-	int dn = ((d%n+n)%n);
-	d = (d&&!dn) ? n : dn;
+	if (f!=d)
+	{	int b = f<0?-1:1;
+		double next = getnote(x, d+b);
+		note += b*(f-d) * (next-note);   }
+	int dn = (d%n+n)%n;
+	d = (d&&!dn)?n:dn;
 	outlet_float((x->x_out+d)->u_outlet,
 		x->x_midi ? note : ntof(note, x->x_rt, x->x_st));
 }
@@ -212,6 +215,8 @@ void harm_setup(void) {
 		gensym("midi"), A_FLOAT, 0);
 	class_addmethod(harm_class, (t_method)harm_octet,
 		gensym("octet"), A_FLOAT, 0);
+	class_addmethod(harm_class, (t_method)harm_octet,
+		gensym("tect"), A_FLOAT, 0);
 	class_addmethod(harm_class, (t_method)harm_scl,
 		gensym("scl"), A_FLOAT, A_FLOAT, 0);
 	class_addmethod(harm_class, (t_method)harm_peek,

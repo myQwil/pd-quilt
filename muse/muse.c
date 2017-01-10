@@ -129,7 +129,7 @@ static void muse_float(t_muse *x, t_float f) {
 	if (f!=d)
 	{	int b = f<0?-1:1;
 		double next = getnote(x, d+b);
-		note += b*(f-d) / (1/(next-note));   }
+		note += b*(f-d) * (next-note);   }
 	outlet_float(x->m_out, note);
 	outlet_float(x->f_out, ntof(note, x->x_rt, x->x_st));
 }
@@ -187,6 +187,8 @@ void muse_setup(void) {
 		gensym("tet"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_octet,
 		gensym("octet"), A_FLOAT, 0);
+	class_addmethod(muse_class, (t_method)muse_octet,
+		gensym("tect"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_scl,
 		gensym("scl"), A_FLOAT, A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_peek,
