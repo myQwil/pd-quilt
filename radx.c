@@ -1,15 +1,15 @@
 #include "m_pd.h"
 
-/* -------------------------- radix -------------------------- */
+/* -------------------------- radx -------------------------- */
 
-static t_class *radix_class;
+static t_class *radx_class;
 
-typedef struct _radix {
+typedef struct _radx {
 	t_object x_obj;
 	t_float x_rad;
-} t_radix;
+} t_radx;
 
-static void radix_float(t_radix *x, t_float f) {
+static void radx_float(t_radx *x, t_float f) {
 	t_float b;
 	char digit[32] = "0123456789NECDAFGHJKLMPQRTUVWXYZ";
 	int len=8, new[len],
@@ -42,19 +42,19 @@ static void radix_float(t_radix *x, t_float f) {
 	outlet_symbol(x->x_obj.ob_outlet, gensym(buf));
 }
 
-static void *radix_new(t_floatarg f) {
-	t_radix *x = (t_radix *)pd_new(radix_class);
+static void *radx_new(t_floatarg f) {
+	t_radx *x = (t_radx *)pd_new(radx_class);
 	x->x_rad = f?f:16;
 	floatinlet_new(&x->x_obj, &x->x_rad);
 	outlet_new(&x->x_obj, &s_symbol);
 	return (x);
 }
 
-void radix_setup(void) {
-	radix_class = class_new(gensym("radix"),
-		(t_newmethod)radix_new, 0,
-		sizeof(t_radix), 0,
+void radx_setup(void) {
+	radx_class = class_new(gensym("radx"),
+		(t_newmethod)radx_new, 0,
+		sizeof(t_radx), 0,
 		A_DEFFLOAT, 0);
 	
-	class_addfloat(radix_class, radix_float);
+	class_addfloat(radx_class, radx_float);
 }

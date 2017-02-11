@@ -17,7 +17,7 @@ void ruse_setup(void);
 void harm_setup(void);
 void fton_setup(void);
 void ntof_setup(void);
-void radix_setup(void);
+void radx_setup(void);
 void same_setup(void);
 void sploat_setup(void);
 void gloat_setup(void);
@@ -39,7 +39,7 @@ void myQwil_setup(void) {
 	harm_setup();
 	fton_setup();
 	ntof_setup();
-	radix_setup();
+	radx_setup();
 	same_setup();
 	sploat_setup();
 	gloat_setup();

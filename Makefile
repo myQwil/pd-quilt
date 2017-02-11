@@ -6,7 +6,7 @@ LIBRARY_NAME = myqwil
 # add your .c source files, one object per file, to the SOURCES
 # variable, help files will be included automatically, and for GUI
 # objects, the matching .tcl file too
-SOURCES = graid.c divrt.c rand.c randv.c rind.c muse.c ruse.c harm.c fton.c ntof.c radix.c same.c sploat.c gloat.c
+SOURCES = graid.c divrt.c rand.c randv.c rind.c muse.c ruse.c harm.c fton.c ntof.c radx.c same.c sploat.c gloat.c
 
 # list all pd objects (i.e. myobject.pd) files here, and their helpfiles will
 # be included automatically
@@ -38,7 +38,7 @@ UNITTESTS =
 ALL_CFLAGS = -I"$(PD_INCLUDE)"
 ALL_LDFLAGS =  
 SHARED_LDFLAGS =
-ALL_LIBS = "c:/Progra~2/pd/bin/pd.dll"
+ALL_LIBS =
 
 
 #------------------------------------------------------------------------------#
@@ -239,7 +239,7 @@ ifeq (MINGW,$(findstring MINGW,$(UNAME)))
   ALL_CFLAGS += -mms-bitfields
   ALL_LDFLAGS += -s -shared -Wl,--enable-auto-import
   SHARED_LDFLAGS += -shared
-  ALL_LIBS += -L"$(PD_PATH)/src" -L"$(PD_PATH)/bin" -L"$(PD_PATH)/obj" \
+  ALL_LIBS += "c:/Progra~2/pd/bin/pd.dll" -L"$(PD_PATH)/src" -L"$(PD_PATH)/bin" -L"$(PD_PATH)/obj" \
 	-lpd -lwsock32 -lkernel32 -luser32 -lgdi32 -liberty $(LIBS_windows)
   STRIP = strip --strip-unneeded -R .note -R .comment
   DISTBINDIR=$(DISTDIR)-$(OS)
