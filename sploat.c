@@ -22,16 +22,16 @@ typedef struct _sploat {
 static void sploat_float(t_sploat *x, t_float f) {
 	ufloat uf;
 	uf.f = f;
-	outlet_float(x->m_out, uf.p.mantissa);
-	outlet_float(x->e_out, uf.p.exponent);
 	outlet_float(x->s_out, uf.p.sign);
+	outlet_float(x->e_out, uf.p.exponent);
+	outlet_float(x->m_out, uf.p.mantissa);
 }
 
 static void *sploat_new(t_floatarg f) {
 	t_sploat *x = (t_sploat *)pd_new(sploat_class);
-	x->s_out = outlet_new(&x->x_obj, &s_float);
-	x->e_out = outlet_new(&x->x_obj, &s_float);
 	x->m_out = outlet_new(&x->x_obj, &s_float);
+	x->e_out = outlet_new(&x->x_obj, &s_float);
+	x->s_out = outlet_new(&x->x_obj, &s_float);
 	return (x);
 }
 

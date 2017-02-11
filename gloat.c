@@ -21,17 +21,17 @@ typedef struct _gloat {
 
 static void gloat_bang(t_gloat *x) {
 	ufloat uf;
-	uf.p.mantissa = x->x_m;
-	uf.p.exponent = x->x_e;
 	uf.p.sign = x->x_s;
+	uf.p.exponent = x->x_e;
+	uf.p.mantissa = x->x_m;
 	outlet_float(x->x_obj.ob_outlet, uf.f);
 }
 
 static void *gloat_new(t_floatarg f) {
 	t_gloat *x = (t_gloat *)pd_new(gloat_class);
-	floatinlet_new(&x->x_obj, &x->x_s);
-	floatinlet_new(&x->x_obj, &x->x_e);
 	floatinlet_new(&x->x_obj, &x->x_m);
+	floatinlet_new(&x->x_obj, &x->x_e);
+	floatinlet_new(&x->x_obj, &x->x_s);
 	outlet_new(&x->x_obj, &s_float);
 	return (x);
 }
