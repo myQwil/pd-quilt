@@ -3,8 +3,9 @@
 
 /* -------------------------- fton -------------------------- */
 
-t_float fton(t_float f, t_float root, t_float semi)
-{ return (semi * log(root*f)); }
+t_float fton(t_float f, t_float root, t_float semi) {
+	return (semi * log(root*f));
+}
 
 static t_class *fton_class;
 
@@ -14,16 +15,18 @@ typedef struct _fton {
 	t_float x_ref, x_tet;	/* ref-pitch, # of tones */
 } t_fton;
 
-static void fton_ref(t_fton *x, t_floatarg f)
-{ x->x_rt = 1./ ((x->x_ref=f) * pow(2,-69/x->x_tet)); }
+static void fton_ref(t_fton *x, t_floatarg f) {
+	x->x_rt = 1./ ((x->x_ref=f) * pow(2,-69/x->x_tet));
+}
 
 static void fton_tet(t_fton *x, t_floatarg f) {
 	x->x_rt = 1./ (x->x_ref * pow(2,-69/f));
 	x->x_st = 1./ (log(2) / (x->x_tet=f));
 }
 
-static void fton_float(t_fton *x, t_float f)
-{ outlet_float(x->x_obj.ob_outlet, fton(f, x->x_rt, x->x_st)); }
+static void fton_float(t_fton *x, t_float f) {
+	outlet_float(x->x_obj.ob_outlet, fton(f, x->x_rt, x->x_st));
+}
 
 static void *fton_new(t_symbol *s, int argc, t_atom *argv) {
 	t_fton *x = (t_fton *)pd_new(fton_class);

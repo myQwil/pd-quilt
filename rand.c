@@ -23,17 +23,21 @@ static int rand_makeseed(void) {
 	return (rand_next & 0x7fffffff);
 }
 
-static void rand_seed(t_rand *x, t_symbol *s, int argc, t_atom *argv)
-{ x->x_state = (argc ? atom_getfloat(argv) : rand_time()); }
+static void rand_seed(t_rand *x, t_symbol *s, int argc, t_atom *argv) {
+	x->x_state = (argc ? atom_getfloat(argv) : rand_time());
+}
 
-static void rand_peek(t_rand *x, t_symbol *s)
-{ post("%s%s%u", s->s_name, *s->s_name?": ":"", x->x_state); }
+static void rand_peek(t_rand *x, t_symbol *s) {
+	post("%s%s%u", s->s_name, *s->s_name?": ":"", x->x_state);
+}
 
-static void rand_min(t_rand *x, t_floatarg f)
-{ x->x_min=f; }
+static void rand_min(t_rand *x, t_floatarg f) {
+	x->x_min=f;
+}
 
-static void rand_max(t_rand *x, t_floatarg f)
-{ x->x_max=f; }
+static void rand_max(t_rand *x, t_floatarg f) {
+	x->x_max=f;
+}
 
 static void rand_bang(t_rand *x) {
 	int c=x->x_ac, nval;
@@ -75,8 +79,9 @@ static void *rand_new(t_symbol *s, int argc, t_atom *argv) {
 	return (x);
 }
 
-static void rand_free(t_rand *x)
-{ if (x->x_ac>2) freebytes(x->x_vec, x->x_ac * sizeof(t_float)); }
+static void rand_free(t_rand *x) {
+	if (x->x_ac>2) freebytes(x->x_vec, x->x_ac * sizeof(t_float));
+}
 
 void rand_setup(void) {
 	rand_class = class_new(gensym("rand"),

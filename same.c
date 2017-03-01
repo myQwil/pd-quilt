@@ -17,8 +17,9 @@ static void *same_new(t_floatarg f) {
 	return (x);
 }
 
-static void same_bang(t_same *x)
-{ outlet_float(x->x_obj.ob_outlet, x->x_f); }
+static void same_bang(t_same *x) {
+	outlet_float(x->x_obj.ob_outlet, x->x_f);
+}
 
 static void same_float(t_same *x, t_float f) {
 	if (f!=x->x_f)
@@ -27,8 +28,9 @@ static void same_float(t_same *x, t_float f) {
 	else outlet_float(x->x_out2, f);
 }
 
-static void same_set(t_same *x, t_float f)
-{ x->x_f=f; }
+static void same_set(t_same *x, t_float f) {
+	x->x_f=f;
+}
 
 void same_setup(void) {
 	same_class = class_new(gensym("same"),

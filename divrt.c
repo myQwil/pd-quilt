@@ -24,11 +24,13 @@ static int divrt_makeseed(void) {
 	return (divrt_next & 0x7fffffff);
 }
 
-static void divrt_seed(t_divrt *x, t_symbol *s, int argc, t_atom *argv)
-{ x->x_state = (argc ? atom_getfloat(argv) : divrt_time()); }
+static void divrt_seed(t_divrt *x, t_symbol *s, int argc, t_atom *argv) {
+	x->x_state = (argc ? atom_getfloat(argv) : divrt_time());
+}
 
-static void divrt_peek(t_divrt *x, t_symbol *s)
-{ post("%s%s%u", s->s_name, *s->s_name?": ":"", x->x_state); }
+static void divrt_peek(t_divrt *x, t_symbol *s) {
+	post("%s%s%u", s->s_name, *s->s_name?": ":"", x->x_state);
+}
 
 static int nextr(t_divrt *x, int n) {
 	int nval;

@@ -3,8 +3,9 @@
 
 /* -------------------------- ntof -------------------------- */
 
-t_float ntof(t_float f, t_float root, t_float semi)
-{ return (root * exp(semi*f)); }
+t_float ntof(t_float f, t_float root, t_float semi) {
+	return (root * exp(semi*f));
+}
 
 static t_class *ntof_class;
 
@@ -14,16 +15,18 @@ typedef struct _ntof {
 	t_float x_ref, x_tet;	/* ref-pitch, # of tones */
 } t_ntof;
 
-static void ntof_ref(t_ntof *x, t_floatarg f)
-{ x->x_rt = (x->x_ref=f) * pow(2,-69/x->x_tet); }
+static void ntof_ref(t_ntof *x, t_floatarg f) {
+	x->x_rt = (x->x_ref=f) * pow(2,-69/x->x_tet);
+}
 
 static void ntof_tet(t_ntof *x, t_floatarg f) {
 	x->x_rt = x->x_ref * pow(2,-69/f);
 	x->x_st = log(2) / (x->x_tet=f);
 }
 
-static void ntof_float(t_ntof *x, t_float f)
-{ outlet_float(x->x_obj.ob_outlet, ntof(f, x->x_rt, x->x_st)); }
+static void ntof_float(t_ntof *x, t_float f) {
+	outlet_float(x->x_obj.ob_outlet, ntof(f, x->x_rt, x->x_st));
+}
 
 static void *ntof_new(t_symbol *s, int argc, t_atom *argv) {
 	t_ntof *x = (t_ntof *)pd_new(ntof_class);

@@ -2,28 +2,31 @@
 #include <stdlib.h>
 #include <math.h>
 
-union inletunion
-{	t_symbol *iu_symto;
+union inletunion {
+	t_symbol *iu_symto;
 	t_gpointer *iu_pointerslot;
 	t_float *iu_floatslot;
 	t_symbol **iu_symslot;
-	t_float iu_floatsignalvalue;   };
+	t_float iu_floatsignalvalue;
+};
 
-struct _inlet
-{	t_pd i_pd;
+struct _inlet {
+	t_pd i_pd;
 	struct _inlet *i_next;
 	t_object *i_owner;
 	t_pd *i_dest;
 	t_symbol *i_symfrom;
-	union inletunion i_un;   };
+	union inletunion i_un;
+};
 
 #define i_symto i_un.iu_symto
 #define i_pointerslot i_un.iu_pointerslot
 #define i_floatslot i_un.iu_floatslot
 #define i_symslot i_un.iu_symslot
 
-t_float ntof(t_float f, t_float root, t_float semi)
-{	return (root * exp(semi*f));   }
+t_float ntof(t_float f, t_float root, t_float semi) {
+	return (root * exp(semi*f));
+}
 
 /* -------------------------- harm -------------------------- */
 
@@ -58,16 +61,18 @@ static void harm_resize(t_harm *x, t_floatarg n) {
 		ip->i_floatslot = fp;
 }
 
-static void harm_peek(t_harm *x, t_symbol *s)
-{	post("%s%s%d", s->s_name, *s->s_name?": ":"", x->x_max);   }
+static void harm_peek(t_harm *x, t_symbol *s) {
+	post("%s%s%d", s->s_name, *s->s_name?": ":"", x->x_max);
+}
 
 static void harm_operate(t_float *fp, t_atom *av) {
 	char *cp = av->a_w.w_symbol->s_name;
-	if (cp[0]=='f')
-	{		 if (cp[1]=='+') *fp += atof(cp+2);
-		else if (cp[1]=='-') *fp -= atof(cp+2);
-		else if (cp[1]=='*') *fp *= atof(cp+2);
-		else if (cp[1]=='/') *fp /= atof(cp+2);   }
+	if (cp[1])
+	{	t_float f = cp[2] ? atof(cp+2) : 1;
+			 if (cp[1]=='+') *fp += f;
+		else if (cp[1]=='-') *fp -= f;
+		else if (cp[1]=='*') *fp *= f;
+		else if (cp[1]=='/') *fp /= f;   }
 }
 
 static void harm_scale(t_harm *x, int ac, t_atom *av, int offset) {
@@ -81,11 +86,13 @@ static void harm_scale(t_harm *x, int ac, t_atom *av, int offset) {
 		else if (av->a_type == A_SYMBOL) harm_operate(fp, av);   }
 }
 
-static void harm_list(t_harm *x, t_symbol *s, int ac, t_atom *av)
-{	if (ac) harm_scale(x, ac, av, 0);   }
+static void harm_list(t_harm *x, t_symbol *s, int ac, t_atom *av) {
+	if (ac) harm_scale(x, ac, av, 0);
+}
 
-static void harm_skip(t_harm *x, t_symbol *s, int ac, t_atom *av)
-{	if (ac) harm_scale(x, ac, av, 1);   }
+static void harm_do(t_harm *x, t_symbol *s, int ac, t_atom *av) {
+	if (ac) harm_scale(x, ac, av, 1);
+}
 
 static void harm_key(t_harm *x, t_symbol *s, int ac, t_atom *av) {
 	if (av->a_type == A_FLOAT) x->x_scl[0] = av->a_w.w_float;
@@ -105,22 +112,26 @@ static void harm_size(t_harm *x, t_floatarg n) {
 		x->x_n=n;   }
 }
 
-static void harm_octave(t_harm *x, t_floatarg f)
-{	x->x_oct=f;   }
+static void harm_octave(t_harm *x, t_floatarg f) {
+	x->x_oct=f;
+}
 
-static void harm_ref(t_harm *x, t_floatarg f)
-{	x->x_rt = (x->x_ref=f) * pow(2,-69/x->x_tet);   }
+static void harm_ref(t_harm *x, t_floatarg f) {
+	x->x_rt = (x->x_ref=f) * pow(2,-69/x->x_tet);
+}
 
 static void harm_tet(t_harm *x, t_floatarg f) {
 	x->x_rt = x->x_ref * pow(2,-69/f);
 	x->x_st = log(2) / (x->x_tet=f);
 }
 
-static void harm_octet(t_harm *x, t_floatarg f)
-{	harm_octave(x,f);   harm_tet(x,f);   }
+static void harm_octet(t_harm *x, t_floatarg f) {
+	harm_octave(x,f);   harm_tet(x,f);
+}
 
-static void harm_midi(t_harm *x, t_floatarg f)
-{	x->x_midi = f;   }
+static void harm_midi(t_harm *x, t_floatarg f) {
+	x->x_midi = f;
+}
 
 static double getnote(t_harm *x, int d) {
 	int n=x->x_n, dn=d%n,
@@ -187,8 +198,9 @@ static void *harm_new(t_symbol *s, int argc, t_atom *argv) {
 	return (x);
 }
 
-static void harm_free(t_harm *x)
-{	freebytes(x->x_scl, x->x_max * sizeof(t_float));   }
+static void harm_free(t_harm *x) {
+	freebytes(x->x_scl, x->x_max * sizeof(t_float));
+}
 
 void harm_setup(void) {
 	harm_class = class_new(gensym("harm"),
@@ -199,8 +211,8 @@ void harm_setup(void) {
 	class_addbang(harm_class, harm_bang);
 	class_addlist(harm_class, harm_list);
 	class_addfloat(harm_class, harm_float);
-	class_addmethod(harm_class, (t_method)harm_skip,
-		gensym("s"), A_GIMME, 0);
+	class_addmethod(harm_class, (t_method)harm_do, // solfege ref
+		gensym("d"), A_GIMME, 0);
 	class_addmethod(harm_class, (t_method)harm_key,
 		gensym("k"), A_GIMME, 0);
 	class_addmethod(harm_class, (t_method)harm_size,

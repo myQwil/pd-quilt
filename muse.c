@@ -2,28 +2,31 @@
 #include <stdlib.h>
 #include <math.h>
 
-union inletunion
-{	t_symbol *iu_symto;
+union inletunion {
+	t_symbol *iu_symto;
 	t_gpointer *iu_pointerslot;
 	t_float *iu_floatslot;
 	t_symbol **iu_symslot;
-	t_float iu_floatsignalvalue;   };
+	t_float iu_floatsignalvalue;
+};
 
-struct _inlet
-{	t_pd i_pd;
+struct _inlet {
+	t_pd i_pd;
 	struct _inlet *i_next;
 	t_object *i_owner;
 	t_pd *i_dest;
 	t_symbol *i_symfrom;
-	union inletunion i_un;   };
+	union inletunion i_un;
+};
 
 #define i_symto i_un.iu_symto
 #define i_pointerslot i_un.iu_pointerslot
 #define i_floatslot i_un.iu_floatslot
 #define i_symslot i_un.iu_symslot
 
-t_float ntof(t_float f, t_float root, t_float semi)
-{	return (root * exp(semi*f));   }
+t_float ntof(t_float f, t_float root, t_float semi) {
+	return (root * exp(semi*f));
+}
 
 /* -------------------------- muse -------------------------- */
 
@@ -53,16 +56,18 @@ static void muse_resize(t_muse *x, t_floatarg n) {
 		ip->i_floatslot = fp;
 }
 
-static void muse_peek(t_muse *x, t_symbol *s)
-{	post("%s%s%d", s->s_name, *s->s_name?": ":"", x->x_max);   }
+static void muse_peek(t_muse *x, t_symbol *s) {
+	post("%s%s%d", s->s_name, *s->s_name?": ":"", x->x_max);
+}
 
 static void muse_operate(t_float *fp, t_atom *av) {
 	char *cp = av->a_w.w_symbol->s_name;
-	if (cp[0]=='f')
-	{		 if (cp[1]=='+') *fp += atof(cp+2);
-		else if (cp[1]=='-') *fp -= atof(cp+2);
-		else if (cp[1]=='*') *fp *= atof(cp+2);
-		else if (cp[1]=='/') *fp /= atof(cp+2);   }
+	if (cp[1])
+	{	t_float f = cp[2] ? atof(cp+2) : 1;
+			 if (cp[1]=='+') *fp += f;
+		else if (cp[1]=='-') *fp -= f;
+		else if (cp[1]=='*') *fp *= f;
+		else if (cp[1]=='/') *fp /= f;   }
 }
 
 static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
@@ -76,11 +81,13 @@ static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
 		else if (av->a_type == A_SYMBOL) muse_operate(fp, av);   }
 }
 
-static void muse_list(t_muse *x, t_symbol *s, int ac, t_atom *av)
-{	if (ac) muse_scale(x, ac, av, 0);   }
+static void muse_list(t_muse *x, t_symbol *s, int ac, t_atom *av) {
+	if (ac) muse_scale(x, ac, av, 0);
+}
 
-static void muse_skip(t_muse *x, t_symbol *s, int ac, t_atom *av)
-{	if (ac) muse_scale(x, ac, av, 1);   }
+static void muse_do(t_muse *x, t_symbol *s, int ac, t_atom *av) {
+	if (ac) muse_scale(x, ac, av, 1);
+}
 
 static void muse_key(t_muse *x, t_symbol *s, int ac, t_atom *av) {
 	if (av->a_type == A_FLOAT) x->x_scl[0] = av->a_w.w_float;
@@ -100,19 +107,22 @@ static void muse_size(t_muse *x, t_floatarg n) {
 		x->x_n=n;   }
 }
 
-static void muse_octave(t_muse *x, t_floatarg f)
-{	x->x_oct=f;   }
+static void muse_octave(t_muse *x, t_floatarg f) {
+	x->x_oct=f;
+}
 
-static void muse_ref(t_muse *x, t_floatarg f)
-{	x->x_rt = (x->x_ref=f) * pow(2,-69/x->x_tet);   }
+static void muse_ref(t_muse *x, t_floatarg f) {
+	x->x_rt = (x->x_ref=f) * pow(2,-69/x->x_tet);
+}
 
 static void muse_tet(t_muse *x, t_floatarg f) {
 	x->x_rt = x->x_ref * pow(2,-69/f);
 	x->x_st = log(2) / (x->x_tet=f);
 }
 
-static void muse_octet(t_muse *x, t_floatarg f)
-{	muse_octave(x,f);   muse_tet(x,f);   }
+static void muse_octet(t_muse *x, t_floatarg f) {
+	muse_octave(x,f);   muse_tet(x,f);
+}
 
 static double getnote(t_muse *x, int d) {
 	int n=x->x_n, dn=d%n,
@@ -162,8 +172,9 @@ static void *muse_new(t_symbol *s, int argc, t_atom *argv) {
 	return (x);
 }
 
-static void muse_free(t_muse *x)
-{	freebytes(x->x_scl, x->x_max * sizeof(t_float));   }
+static void muse_free(t_muse *x) {
+	freebytes(x->x_scl, x->x_max * sizeof(t_float));
+}
 
 void muse_setup(void) {
 	muse_class = class_new(gensym("muse"),
@@ -173,8 +184,8 @@ void muse_setup(void) {
 		
 	class_addlist(muse_class, muse_list);
 	class_addfloat(muse_class, muse_float);
-	class_addmethod(muse_class, (t_method)muse_skip,
-		gensym("s"), A_GIMME, 0);
+	class_addmethod(muse_class, (t_method)muse_do, // solfege ref
+		gensym("d"), A_GIMME, 0);
 	class_addmethod(muse_class, (t_method)muse_key,
 		gensym("k"), A_GIMME, 0);
 	class_addmethod(muse_class, (t_method)muse_size,
