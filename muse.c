@@ -70,6 +70,22 @@ static void muse_operate(t_float *fp, t_atom *av) {
 		else if (cp[1]=='/') *fp /= f;   }
 }
 
+static void muse_key(t_muse *x, t_symbol *s, int ac, t_atom *av) {
+	if (av->a_type == A_FLOAT) x->x_scl[0] = av->a_w.w_float;
+	else if (av->a_type == A_SYMBOL) muse_operate(x->x_scl, av);
+}
+
+static void muse_scl(t_muse *x, t_symbol *s, int ac, t_atom *av) {
+	if (ac==2 && av->a_type == A_FLOAT)
+	{	int i = av->a_w.w_float;
+		if (i>=0)
+		{	if (i>=x->x_max) muse_resize(x,i+1);
+			if ((av+1)->a_type == A_FLOAT)
+				x->x_scl[i] = (av+1)->a_w.w_float;
+			else if ((av+1)->a_type == A_SYMBOL)
+				muse_operate(x->x_scl+i, av+1);   }   }
+}
+
 static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
 	int n = x->x_n = ac+offset;
 	if (n>x->x_max) muse_resize(x,n);
@@ -87,18 +103,6 @@ static void muse_list(t_muse *x, t_symbol *s, int ac, t_atom *av) {
 
 static void muse_do(t_muse *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac) muse_scale(x, ac, av, 1);
-}
-
-static void muse_key(t_muse *x, t_symbol *s, int ac, t_atom *av) {
-	if (av->a_type == A_FLOAT) x->x_scl[0] = av->a_w.w_float;
-	else if (av->a_type == A_SYMBOL) muse_operate(x->x_scl, av);
-}
-
-static void muse_scl(t_muse *x, t_floatarg j, t_floatarg f) {
-	int i=j;
-	if (i>=0)
-	{	if (i>=x->x_max) muse_resize(x,i+1);
-		x->x_scl[i] = f;   }
 }
 
 static void muse_size(t_muse *x, t_floatarg n) {
@@ -201,7 +205,7 @@ void muse_setup(void) {
 	class_addmethod(muse_class, (t_method)muse_octet,
 		gensym("tect"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_scl,
-		gensym("scl"), A_FLOAT, A_FLOAT, 0);
+		gensym("scl"), A_GIMME, 0);
 	class_addmethod(muse_class, (t_method)muse_peek,
 		gensym("peek"), A_DEFSYM, 0);
 }
