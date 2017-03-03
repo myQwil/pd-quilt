@@ -56,8 +56,16 @@ static void muse_resize(t_muse *x, t_floatarg n) {
 		ip->i_floatslot = fp;
 }
 
-static void muse_peek(t_muse *x, t_symbol *s) {
+static void muse_ptr(t_muse *x, t_symbol *s) {
 	post("%s%s%d", s->s_name, *s->s_name?": ":"", x->x_max);
+}
+
+static void muse_peek(t_muse *x, t_symbol *s) {
+	int i;
+	t_float *fp = x->x_scl;
+	if (*s->s_name) startpost("%s: ", s->s_name);
+	for (i=x->x_n; i--; fp++) startpost("%g ", *fp);
+	endpost();
 }
 
 static void muse_operate(t_float *fp, t_atom *av) {
@@ -84,6 +92,7 @@ static void muse_scl(t_muse *x, t_symbol *s, int ac, t_atom *av) {
 				x->x_scl[i] = (av+1)->a_w.w_float;
 			else if ((av+1)->a_type == A_SYMBOL)
 				muse_operate(x->x_scl+i, av+1);   }   }
+	else pd_error(x, "muse_scl: bad arguments");
 }
 
 static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
@@ -203,9 +212,11 @@ void muse_setup(void) {
 	class_addmethod(muse_class, (t_method)muse_octet,
 		gensym("octet"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_octet,
-		gensym("tect"), A_FLOAT, 0);
+		gensym("ot"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_scl,
 		gensym("scl"), A_GIMME, 0);
+	class_addmethod(muse_class, (t_method)muse_ptr,
+		gensym("ptr"), A_DEFSYM, 0);
 	class_addmethod(muse_class, (t_method)muse_peek,
 		gensym("peek"), A_DEFSYM, 0);
 }

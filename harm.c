@@ -61,8 +61,16 @@ static void harm_resize(t_harm *x, t_floatarg n) {
 		ip->i_floatslot = fp;
 }
 
-static void harm_peek(t_harm *x, t_symbol *s) {
+static void harm_ptr(t_harm *x, t_symbol *s) {
 	post("%s%s%d", s->s_name, *s->s_name?": ":"", x->x_max);
+}
+
+static void harm_peek(t_harm *x, t_symbol *s) {
+	int i;
+	t_float *fp = x->x_scl;
+	if (*s->s_name) startpost("%s: ", s->s_name);
+	for (i=x->x_n; i--; fp++) startpost("%g ", *fp);
+	endpost();
 }
 
 static void harm_operate(t_float *fp, t_atom *av) {
@@ -89,6 +97,7 @@ static void harm_scl(t_harm *x, t_symbol *s, int ac, t_atom *av) {
 				x->x_scl[i] = (av+1)->a_w.w_float;
 			else if ((av+1)->a_type == A_SYMBOL)
 				harm_operate(x->x_scl+i, av+1);   }   }
+	else pd_error(x, "harm_scl: bad arguments");
 }
 
 static void harm_scale(t_harm *x, int ac, t_atom *av, int offset) {
@@ -232,9 +241,11 @@ void harm_setup(void) {
 	class_addmethod(harm_class, (t_method)harm_octet,
 		gensym("octet"), A_FLOAT, 0);
 	class_addmethod(harm_class, (t_method)harm_octet,
-		gensym("tect"), A_FLOAT, 0);
+		gensym("ot"), A_FLOAT, 0);
 	class_addmethod(harm_class, (t_method)harm_scl,
 		gensym("scl"), A_GIMME, 0);
+	class_addmethod(harm_class, (t_method)harm_ptr,
+		gensym("ptr"), A_DEFSYM, 0);
 	class_addmethod(harm_class, (t_method)harm_peek,
 		gensym("peek"), A_DEFSYM, 0);
 }
