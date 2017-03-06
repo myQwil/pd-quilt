@@ -1,0 +1,8 @@
+#N canvas 225 135 334 130 10;
+#X obj 90 36 inlet~;
+#X obj 187 36 inlet~;
+#X obj 90 67 throw~ L;
+#X obj 187 67 throw~ R;
+#X connect 0 0 2 0;
+#X connect 1 0 3 0;
+#X coords 0 130 1 129 85 60 0;
