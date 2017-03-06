@@ -313,7 +313,7 @@ install-doc:
 		$(INSTALL_DATA) $(HELPPATCHES) \
 			$(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)
 	$(INSTALL_DATA) README.md $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)/README.md
-	$(INSTALL_DATA) LICENSE.txt $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)/LICENSE.txt
+	$(INSTALL_DATA) LICENSE $(DESTDIR)$(objectsdir)/$(LIBRARY_NAME)/LICENSE
 
 install-examples:
 	test -z "$(strip $(EXAMPLES))" || \
@@ -372,7 +372,7 @@ $(ORIGDIR):
 dist: $(DISTDIR)
 	$(INSTALL_DATA) Makefile  $(DISTDIR)
 	$(INSTALL_DATA) README.md $(DISTDIR)
-	$(INSTALL_DATA) LICENSE.txt $(DISTDIR)
+	$(INSTALL_DATA) LICENSE $(DISTDIR)
 	$(INSTALL_DATA) $(LIBRARY_NAME)-meta.pd  $(DISTDIR)
 	test -z "$(strip $(ALLSOURCES))" || \
 		$(INSTALL_DATA) $(ALLSOURCES)  $(DISTDIR)
