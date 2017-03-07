@@ -435,4 +435,3 @@
 #X connect 84 0 31 0;
 #X connect 85 0 34 0;
 #X connect 86 0 37 0;
-#X coords 0 0 1 1 85 60 0;

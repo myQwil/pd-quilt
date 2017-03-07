@@ -1,6 +1,6 @@
-#N canvas 641 275 548 345 10;
+#N canvas 714 319 525 350 10;
 #X text 239 30 RAND;
-#X floatatom 208 192 5 0 0 0 - - -;
+#X floatatom 208 192 5 0 0 0 - - -, f 5;
 #X obj 154 249 print;
 #X obj 154 148 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
@@ -19,21 +19,21 @@ parameter to allow rand to reseed automatically.;
 #X obj 269 183 rand 3 6;
 #X obj 269 162 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X floatatom 295 163 5 0 0 0 - - -;
-#X floatatom 334 163 5 0 0 0 - - -;
+#X floatatom 295 163 5 0 0 0 - - -, f 5;
+#X floatatom 334 163 5 0 0 0 - - -, f 5;
 #X text 301 147 min;
 #X text 341 147 max;
-#X floatatom 269 205 5 0 0 0 - - -;
+#X floatatom 269 205 5 0 0 0 - - -, f 5;
 #X text 332 184 2 args create boundaries;
 #X text 332 198 (number between 3 and 6);
 #X obj 241 262 rand 2 3 5 7 11 13 17;
 #X obj 241 242 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X floatatom 241 284 5 0 0 0 - - -;
+#X floatatom 241 284 5 0 0 0 - - -, f 5;
 #X text 264 240 more than 2 args creates a list;
 #X text 290 283 number between the first;
 #X text 290 297 seven prime numbers;
-#X floatatom 400 262 5 0 0 0 - - -;
+#X floatatom 400 262 5 0 0 0 - - -, f 5;
 #X text 438 261 changes 17;
 #X connect 1 0 5 1;
 #X connect 3 0 9 0;
@@ -52,4 +52,3 @@ parameter to allow rand to reseed automatically.;
 #X connect 20 0 22 0;
 #X connect 21 0 20 0;
 #X connect 26 0 20 7;
-#X coords 0 345 1 344 85 60 0;

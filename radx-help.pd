@@ -1,4 +1,4 @@
-#N canvas 723 383 541 429 10;
+#N canvas 685 300 540 430 10;
 #X obj 293 129 cupqb;
 #X symbolatom 284 284 10 0 0 0 - - -, f 10;
 #X obj 284 262 radx 12;
@@ -92,8 +92,8 @@
 #X obj 290 189 cupqb;
 #X obj 274 192 b, f 1;
 #X floatatom 186 309 5 0 0 0 - - -, f 5;
-#X text 196 17 RADX - number base converter;
-#X text 161 35 displays results in the form of a symbol;
+#X text 196 27 RADX - number base converter;
+#X text 161 45 displays results in the form of a symbol;
 #X connect 0 0 59 0;
 #X connect 2 0 1 0;
 #X connect 3 0 55 0;
@@ -155,4 +155,3 @@
 #X connect 61 0 62 0;
 #X connect 62 0 55 0;
 #X connect 63 0 27 1;
-#X coords 0 0 1 1 85 60 0;

@@ -1,4 +1,4 @@
-#N canvas 799 250 480 443 10;
+#N canvas 700 265 480 440 10;
 #X floatatom 276 281 5 0 255 0 - - -, f 5;
 #X floatatom 311 281 5 0 1 0 - - -, f 5;
 #X floatatom 186 281 14 0 0 0 - - -, f 14;
@@ -84,4 +84,3 @@ of a float;
 #X connect 37 0 38 0;
 #X connect 37 0 39 0;
 #X connect 39 0 9 0;
-#X coords 0 0 1 1 85 60 0;
