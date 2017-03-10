@@ -44,7 +44,7 @@ typedef struct _harm {
 	t_float x_rt, x_st;		/* root tone, semi-tone */
 	t_float *x_scl;			/* scale-input values */
 	t_harmout *x_out;		/* outlets */
-	t_int x_midi;			/* switch between midi notes and frequency */
+	t_int x_midi, x_all;	/* midi-note and all-note toggles */
 } t_harm;
 
 static void harm_resize(t_harm *x, t_floatarg n) {
@@ -146,6 +146,10 @@ static void harm_midi(t_harm *x, t_floatarg f) {
 	x->x_midi = f;
 }
 
+static void harm_all(t_harm *x, t_floatarg f) {
+	x->x_all = f;
+}
+
 static double getnote(t_harm *x, int d) {
 	int n=x->x_n, dn=d%n,
 	oct = d/n - (dn<0); // floor negatives
@@ -156,13 +160,13 @@ static double getnote(t_harm *x, int d) {
 }
 
 static void harm_bang(t_harm *x) {
-	int n=x->x_n+1, i=x->x_inl+1;
-	i=n>i?i:n;
+	int n=x->x_n, i=x->x_inl;
+	i = x->x_all ? i+1 : (n>i?i:n);
 	t_harmout *u;
 	for (u=x->x_out+i; u--, i--;)
 	{	double note = getnote(x, i);
-		outlet_float((x->x_out+i)->u_outlet,
-			x->x_midi ? note : ntof(note, x->x_rt, x->x_st));   }
+		outlet_float(u->u_outlet, x->x_midi ?
+			note : ntof(note, x->x_rt, x->x_st));   }
 }
 
 static void harm_float(t_harm *x, t_float f) {
@@ -174,8 +178,8 @@ static void harm_float(t_harm *x, t_float f) {
 		note += b*(f-d) * (next-note);   }
 	int dn = (d%n+n)%n;
 	d = (d&&!dn)?n:dn;
-	outlet_float((x->x_out+d)->u_outlet,
-		x->x_midi ? note : ntof(note, x->x_rt, x->x_st));
+	outlet_float((x->x_out+d)->u_outlet, x->x_midi ?
+		note : ntof(note, x->x_rt, x->x_st));
 }
 
 static void *harm_new(t_symbol *s, int argc, t_atom *argv) {
@@ -238,6 +242,8 @@ void harm_setup(void) {
 		gensym("tet"), A_FLOAT, 0);
 	class_addmethod(harm_class, (t_method)harm_midi,
 		gensym("midi"), A_FLOAT, 0);
+	class_addmethod(harm_class, (t_method)harm_all,
+		gensym("all"), A_FLOAT, 0);
 	class_addmethod(harm_class, (t_method)harm_octet,
 		gensym("octet"), A_FLOAT, 0);
 	class_addmethod(harm_class, (t_method)harm_octet,

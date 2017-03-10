@@ -1,8 +1,8 @@
-#N canvas 701 284 549 446 10;
-#X obj 139 107 cupqb;
-#X obj 169 418 dac~;
-#X obj 474 232 * 100;
-#X floatatom 473 205 5 0 0 0 - - -, f 5;
+#N canvas 1014 291 549 496 10;
+#X obj 139 157 cupqb;
+#X obj 169 468 dac~;
+#X obj 474 282 * 100;
+#X floatatom 473 255 5 0 0 0 - - -, f 5;
 #N canvas 839 405 450 323 inst 0;
 #X obj 189 229 *~;
 #X obj 213 185 ad~ 1;
@@ -33,14 +33,14 @@
 #X connect 11 0 9 0;
 #X connect 12 0 11 0;
 #X connect 13 0 6 0;
-#X restore 48 284 pd inst;
-#X obj 474 255 s dcay;
-#X obj 175 107 cupqb;
-#X floatatom 236 379 5 0 0 0 - - -, f 5;
-#X obj 236 398 / 1000;
-#X floatatom 428 205 5 0 0 0 - - -, f 5;
-#X obj 429 255 s atak;
-#N canvas 870 155 450 300 chords 0;
+#X restore 48 334 pd inst;
+#X obj 474 305 s dcay;
+#X obj 175 157 cupqb;
+#X floatatom 236 429 5 0 0 0 - - -, f 5;
+#X obj 236 448 / 1000;
+#X floatatom 428 255 5 0 0 0 - - -, f 5;
+#X obj 429 305 s atak;
+#N canvas 678 159 450 323 chords 1;
 #X msg 180 35 k 40;
 #X msg 170 56 k 38;
 #X msg 176 100 k 33;
@@ -65,6 +65,7 @@
 #X msg 207 202 d r m+ f s l+ t+;
 #X msg 320 116 d d+ m+ s+ t+;
 #X msg 321 137 d d- m- s- t-;
+#X msg 119 67 d 4 7;
 #X connect 0 0 4 0;
 #X connect 1 0 4 0;
 #X connect 2 0 4 0;
@@ -88,84 +89,85 @@
 #X connect 21 0 4 0;
 #X connect 22 0 4 0;
 #X connect 23 0 4 0;
-#X restore 76 72 pd chords;
-#X floatatom 301 375 5 0 0 0 - - -, f 5;
-#X obj 301 404 s pmnto;
-#X obj 52 75 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+#X connect 24 0 4 0;
+#X restore 76 122 pd chords;
+#X floatatom 301 425 5 0 0 0 - - -, f 5;
+#X obj 301 454 s pmnto;
+#X obj 52 125 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
-#X obj 211 109 cupqb;
-#X obj 247 111 cupqb;
-#X obj 283 113 cupqb;
-#X obj 320 115 cupqb;
-#X obj 48 307 *~;
-#X floatatom 74 303 5 0 100 0 - - -, f 5;
-#X obj 74 322 / 100;
-#X obj 172 383 *~;
-#X obj 172 361 /~ 6;
-#X msg 397 98 \$1;
-#X obj 108 307 *~;
-#X floatatom 134 303 5 0 100 0 - - -, f 5;
-#X obj 134 322 / 100;
-#X obj 168 307 *~;
-#X floatatom 194 303 5 0 100 0 - - -, f 5;
-#X obj 194 322 / 100;
-#X obj 228 307 *~;
-#X floatatom 254 303 5 0 100 0 - - -, f 5;
-#X obj 254 322 / 100;
-#X obj 288 307 *~;
-#X floatatom 314 303 5 0 100 0 - - -, f 5;
-#X obj 314 322 / 100;
-#X obj 348 307 *~;
-#X floatatom 374 303 5 0 100 0 - - -, f 5;
-#X obj 374 322 / 100;
-#X obj 277 232 unpack 1 2 3 4 5 6;
-#X msg 184 163 0;
-#X msg 211 165 1;
-#X msg 247 167 2;
-#X msg 283 169 3;
-#X msg 320 171 4;
-#X obj 244 75 unpack 5 4 3 2 1;
-#X obj 78 100 t b a;
-#X msg 312 18 octet 16;
-#X msg 218 18 octet 12;
-#X msg 312 39 44 39 35 29 33;
-#X msg 218 39 33 29 26 22 42;
-#X msg 397 75 12;
-#X msg 413 78 1;
-#X msg 278 212 100 100 85 85 100 70;
-#X obj 405 184 ii;
-#X obj 142 219 harm 40 19 18 21 26;
-#X obj 320 151 t b f;
-#X obj 283 149 t b f;
-#X obj 247 147 t b f;
-#X obj 211 145 t b f;
-#X obj 175 143 t b f;
-#X msg 150 51 n 5;
-#X obj 198 68 t a b;
-#X obj 151 244 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 211 159 cupqb;
+#X obj 247 161 cupqb;
+#X obj 283 163 cupqb;
+#X obj 320 165 cupqb;
+#X obj 48 357 *~;
+#X floatatom 74 353 5 0 100 0 - - -, f 5;
+#X obj 74 372 / 100;
+#X obj 172 433 *~;
+#X obj 172 411 /~ 6;
+#X msg 397 148 \$1;
+#X obj 108 357 *~;
+#X floatatom 134 353 5 0 100 0 - - -, f 5;
+#X obj 134 372 / 100;
+#X obj 168 357 *~;
+#X floatatom 194 353 5 0 100 0 - - -, f 5;
+#X obj 194 372 / 100;
+#X obj 228 357 *~;
+#X floatatom 254 353 5 0 100 0 - - -, f 5;
+#X obj 254 372 / 100;
+#X obj 288 357 *~;
+#X floatatom 314 353 5 0 100 0 - - -, f 5;
+#X obj 314 372 / 100;
+#X obj 348 357 *~;
+#X floatatom 374 353 5 0 100 0 - - -, f 5;
+#X obj 374 372 / 100;
+#X obj 277 282 unpack 1 2 3 4 5 6;
+#X msg 184 213 0;
+#X msg 211 215 1;
+#X msg 247 217 2;
+#X msg 283 219 3;
+#X msg 320 221 4;
+#X obj 244 125 unpack 5 4 3 2 1;
+#X obj 78 150 t b a;
+#X msg 312 68 octet 16;
+#X msg 218 68 octet 12;
+#X msg 312 89 44 39 35 29 33;
+#X msg 218 89 33 29 26 22 42;
+#X msg 397 125 12;
+#X msg 413 128 1;
+#X msg 278 262 100 100 85 85 100 70;
+#X obj 405 234 ii;
+#X obj 142 269 harm 40 19 18 21 26;
+#X obj 320 201 t b f;
+#X obj 283 199 t b f;
+#X obj 247 197 t b f;
+#X obj 211 195 t b f;
+#X obj 175 193 t b f;
+#X msg 150 101 n 5;
+#X obj 198 118 t a b;
+#X obj 151 294 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 169 244 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 169 294 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 187 244 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 187 294 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 205 244 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 205 294 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 223 244 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 223 294 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 241 244 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 241 294 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 470 378 s z;
-#X obj 420 318 unpack 1 2 3 4;
-#X floatatom 478 346 5 0 0 0 - - -, f 5;
-#X obj 429 232 * 10;
-#X msg 156 163 5;
-#X msg 370 173 5;
-#X obj 370 148 t b a;
-#X obj 446 106 cupqb;
-#X msg 370 128 scl 5 \$1;
-#X obj 102 15 cupqb;
-#X msg 102 52 n \$1;
-#X msg 416 294 6 60 300 25;
+#X obj 470 428 s z;
+#X obj 420 368 unpack 1 2 3 4;
+#X floatatom 478 396 5 0 0 0 - - -, f 5;
+#X obj 429 282 * 10;
+#X msg 156 213 5;
+#X msg 370 223 5;
+#X obj 370 198 t b a;
+#X obj 446 156 cupqb;
+#X msg 370 178 scl 5 \$1;
+#X obj 102 65 cupqb;
+#X msg 102 102 n \$1;
+#X msg 416 344 6 60 300 25;
 #N canvas 801 405 450 323 inst 0;
 #X obj 189 229 *~;
 #X obj 213 185 ad~ 1;
@@ -196,7 +198,7 @@
 #X connect 11 0 9 0;
 #X connect 12 0 11 0;
 #X connect 13 0 6 0;
-#X restore 108 284 pd inst;
+#X restore 108 334 pd inst;
 #N canvas 801 405 450 323 inst 0;
 #X obj 189 229 *~;
 #X obj 213 185 ad~ 1;
@@ -227,7 +229,7 @@
 #X connect 11 0 9 0;
 #X connect 12 0 11 0;
 #X connect 13 0 6 0;
-#X restore 168 284 pd inst;
+#X restore 168 334 pd inst;
 #N canvas 801 405 450 323 inst 0;
 #X obj 189 229 *~;
 #X obj 213 185 ad~ 1;
@@ -258,7 +260,7 @@
 #X connect 11 0 9 0;
 #X connect 12 0 11 0;
 #X connect 13 0 6 0;
-#X restore 228 284 pd inst;
+#X restore 228 334 pd inst;
 #N canvas 801 405 450 323 inst 0;
 #X obj 189 229 *~;
 #X obj 213 185 ad~ 1;
@@ -289,7 +291,7 @@
 #X connect 11 0 9 0;
 #X connect 12 0 11 0;
 #X connect 13 0 6 0;
-#X restore 288 284 pd inst;
+#X restore 288 334 pd inst;
 #N canvas 801 405 450 323 inst 0;
 #X obj 189 229 *~;
 #X obj 213 185 ad~ 1;
@@ -320,7 +322,13 @@
 #X connect 11 0 9 0;
 #X connect 12 0 11 0;
 #X connect 13 0 6 0;
-#X restore 348 284 pd inst;
+#X restore 348 334 pd inst;
+#X text 261 11 HARM;
+#X text 108 27 uses similar logic as [muse] but with multiple outlets
+to create chords;
+#X msg 52 258 all 1;
+#X text 25 225 use all outlets;
+#X text 47 238 on bang;
 #X connect 0 0 56 0;
 #X connect 2 0 5 0;
 #X connect 3 0 2 0;
@@ -435,3 +443,4 @@
 #X connect 84 0 31 0;
 #X connect 85 0 34 0;
 #X connect 86 0 37 0;
+#X connect 89 0 56 0;
