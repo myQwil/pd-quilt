@@ -160,8 +160,8 @@ static double getnote(t_harm *x, int d) {
 }
 
 static void harm_bang(t_harm *x) {
-	int n=x->x_n, i=x->x_inl;
-	i = x->x_all ? i+1 : (n>i?i:n);
+	int n=x->x_n, i=x->x_inl+1;
+	i = x->x_all ? i : (n>i?i:n);
 	t_harmout *u;
 	for (u=x->x_out+i; u--, i--;)
 	{	double note = getnote(x, i);
