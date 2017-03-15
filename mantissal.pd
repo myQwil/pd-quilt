@@ -1,12 +1,12 @@
-#N canvas 719 355 498 300 10;
+#N canvas 719 355 510 300 10;
 #X obj 221 38 inlet;
-#X obj 221 59 s in;
-#X obj 462 95 r in;
-#X obj 382 95 r in;
-#X obj 302 95 r in;
-#X obj 222 95 r in;
-#X obj 142 95 r in;
-#X obj 62 95 r in;
+#X obj 221 59 s \$0-in;
+#X obj 462 95 r \$0-in;
+#X obj 382 95 r \$0-in;
+#X obj 302 95 r \$0-in;
+#X obj 222 95 r \$0-in;
+#X obj 142 95 r \$0-in;
+#X obj 62 95 r \$0-in;
 #X obj 462 226 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
 #X obj 442 226 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
