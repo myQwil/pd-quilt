@@ -35,26 +35,13 @@ static t_class *muse_class;
 typedef struct _muse {
 	t_object x_obj;
 	t_int x_n, x_max, x_inl;/* # of notes in a scale, # of inlets */
-	t_float x_oct;			/* octave */
-	t_float x_ref, x_tet;	/* ref-pitch, # of tones */
-	t_float x_rt, x_st;		/* root tone, semi-tone */
-	t_float *x_scl;			/* scale-input values */
+	unsigned x_imp:1;		/* implicit scale size toggle */
+	t_float x_oct,			/* # of notes between octaves */
+		x_ref, x_tet,		/* ref-pitch, # of tones */
+		x_rt, x_st,			/* root tone, semi-tone */
+		*x_scl;				/* scale-input values */
 	t_outlet *f_out, *m_out;/* frequency, midi */
 } t_muse;
-
-static void muse_resize(t_muse *x, t_floatarg n) {
-	int size = 2*x->x_max;
-	size = size<n?n:size;
-	x->x_scl = (t_float *)resizebytes(x->x_scl,
-		x->x_max * sizeof(t_float), size * sizeof(t_float));
-	x->x_max=size;
-	
-	int i;
-	t_float *fp = x->x_scl;
-	t_inlet *ip = ((t_object *)x)->ob_inlet;
-	for (i=x->x_inl; i--; fp++, ip=ip->i_next)
-		ip->i_floatslot = fp;
-}
 
 static void muse_ptr(t_muse *x, t_symbol *s) {
 	post("%s%s%d", s->s_name, *s->s_name?": ":"", x->x_max);
@@ -78,9 +65,18 @@ static void muse_operate(t_float *fp, t_atom *av) {
 		else if (cp[1]=='/') *fp /= f;   }
 }
 
-static void muse_key(t_muse *x, t_symbol *s, int ac, t_atom *av) {
-	if (av->a_type == A_FLOAT) x->x_scl[0] = av->a_w.w_float;
-	else if (av->a_type == A_SYMBOL) muse_operate(x->x_scl, av);
+static void muse_resize(t_muse *x, t_floatarg n) {
+	int size = 2*x->x_max;
+	size = size<n?n:size;
+	x->x_scl = (t_float *)resizebytes(x->x_scl,
+		x->x_max * sizeof(t_float), size * sizeof(t_float));
+	x->x_max=size;
+	
+	int i;
+	t_float *fp = x->x_scl;
+	t_inlet *ip = ((t_object *)x)->ob_inlet;
+	for (i=x->x_inl; i--; fp++, ip=ip->i_next)
+		ip->i_floatslot = fp;
 }
 
 static void muse_scl(t_muse *x, t_symbol *s, int ac, t_atom *av) {
@@ -95,10 +91,17 @@ static void muse_scl(t_muse *x, t_symbol *s, int ac, t_atom *av) {
 	else pd_error(x, "muse_scl: bad arguments");
 }
 
-static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
+static void muse_key(t_muse *x, t_symbol *s, int ac, t_atom *av) {
+	if (av->a_type == A_FLOAT) x->x_scl[0] = av->a_w.w_float;
+	else if (av->a_type == A_SYMBOL) muse_operate(x->x_scl, av);
+}
+
+static void muse_imp(t_muse *x, int ac, int offset) {
 	int n = x->x_n = ac+offset;
 	if (n>x->x_max) muse_resize(x,n);
-	
+}
+
+static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
 	int i;
 	t_float *fp = x->x_scl+offset;
 	for (i=ac; i--; av++, fp++)
@@ -106,18 +109,36 @@ static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
 		else if (av->a_type == A_SYMBOL) muse_operate(fp, av);   }
 }
 
-static void muse_list(t_muse *x, t_symbol *s, int ac, t_atom *av) {
-	if (ac) muse_scale(x, ac, av, 0);
+static void muse_scimp(t_muse *x, int ac, t_atom *av, int offset) {
+	if (x->x_imp) muse_imp(x, ac, offset);
+	muse_scale(x, ac, av, offset);
 }
 
 static void muse_do(t_muse *x, t_symbol *s, int ac, t_atom *av) {
-	if (ac) muse_scale(x, ac, av, 1);
+	if (ac) muse_scimp(x, ac, av, 1);
+}
+
+static void muse_list(t_muse *x, t_symbol *s, int ac, t_atom *av) {
+	if (ac) muse_scimp(x, ac, av, 0);
+}
+
+static void muse_im(t_muse *x, t_symbol *s, int ac, t_atom *av) {
+	muse_imp(x, ac, 0);
+	if (ac) muse_scale(x, ac, av, 0);
+}
+
+static void muse_ex(t_muse *x, t_symbol *s, int ac, t_atom *av) {
+	if (ac) muse_scale(x, ac, av, 0);
 }
 
 static void muse_size(t_muse *x, t_floatarg n) {
 	if (n>0)
 	{	if (n>x->x_max) muse_resize(x,n);
 		x->x_n=n;   }
+}
+
+static void muse_implicit(t_muse *x, t_floatarg f) {
+	x->x_imp=f;
 }
 
 static void muse_octave(t_muse *x, t_floatarg f) {
@@ -160,6 +181,7 @@ static void muse_float(t_muse *x, t_float f) {
 static void *muse_new(t_symbol *s, int argc, t_atom *argv) {
 	t_muse *x = (t_muse *)pd_new(muse_class);
 	t_float ref=x->x_ref=440, tet=x->x_tet=12;
+	x->x_imp=1;
 	
 	x->x_rt = ref * pow(2,-69/tet);
 	x->x_st = log(2) / tet;
@@ -197,12 +219,26 @@ void muse_setup(void) {
 		
 	class_addlist(muse_class, muse_list);
 	class_addfloat(muse_class, muse_float);
-	class_addmethod(muse_class, (t_method)muse_do, // solfege ref
-		gensym("d"), A_GIMME, 0);
+	class_addmethod(muse_class, (t_method)muse_ptr,
+		gensym("ptr"), A_DEFSYM, 0);
+	class_addmethod(muse_class, (t_method)muse_peek,
+		gensym("peek"), A_DEFSYM, 0);
+	class_addmethod(muse_class, (t_method)muse_scl,
+		gensym("scl"), A_GIMME, 0);
 	class_addmethod(muse_class, (t_method)muse_key,
 		gensym("k"), A_GIMME, 0);
+	class_addmethod(muse_class, (t_method)muse_do,
+		gensym("d"), A_GIMME, 0);
+	class_addmethod(muse_class, (t_method)muse_list,
+		gensym("l"), A_GIMME, 0);
+	class_addmethod(muse_class, (t_method)muse_im,
+		gensym("i"), A_GIMME, 0);
+	class_addmethod(muse_class, (t_method)muse_ex,
+		gensym("x"), A_GIMME, 0);
 	class_addmethod(muse_class, (t_method)muse_size,
 		gensym("n"), A_FLOAT, 0);
+	class_addmethod(muse_class, (t_method)muse_implicit,
+		gensym("imp"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_octave,
 		gensym("oct"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_ref,
@@ -213,10 +249,4 @@ void muse_setup(void) {
 		gensym("octet"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_octet,
 		gensym("ot"), A_FLOAT, 0);
-	class_addmethod(muse_class, (t_method)muse_scl,
-		gensym("scl"), A_GIMME, 0);
-	class_addmethod(muse_class, (t_method)muse_ptr,
-		gensym("ptr"), A_DEFSYM, 0);
-	class_addmethod(muse_class, (t_method)muse_peek,
-		gensym("peek"), A_DEFSYM, 0);
 }
