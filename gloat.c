@@ -3,9 +3,10 @@
 typedef union {
 	t_float f;
 	struct {
-		unsigned int mantissa : 23;
-		unsigned int exponent : 8;
-		unsigned int sign : 1;
+		unsigned
+			mantissa : 23,
+			exponent :	8,
+				sign :	1;
 	} u;
 } ufloat;
 

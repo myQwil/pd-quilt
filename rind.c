@@ -8,7 +8,7 @@ static t_class *rind_class;
 typedef struct _rind {
 	t_object x_obj;
 	t_float x_min, x_max;
-	unsigned int x_state;
+	unsigned x_state;
 } t_rind;
 
 static int rind_time(void) {
@@ -17,7 +17,7 @@ static int rind_time(void) {
 }
 
 static int rind_makeseed(void) {
-	static unsigned int rind_next = 1378742615;
+	static unsigned rind_next = 1378742615;
 	rind_next = rind_next * rind_time() + 938284287;
 	return (rind_next & 0x7fffffff);
 }
@@ -40,7 +40,7 @@ static void rind_max(t_rind *x, t_floatarg f) {
 
 static void rind_bang(t_rind *x) {
 	double min=x->x_min, range=x->x_max-min, nval;
-	unsigned int state = x->x_state;
+	unsigned state = x->x_state;
 	x->x_state = state = state * 472940017 + 832416023;
 	nval = (1./4294967296) * range * state + min;
 	outlet_float(x->x_obj.ob_outlet, nval);

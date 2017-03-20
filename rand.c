@@ -8,7 +8,7 @@ static t_class *rand_class;
 typedef struct _rand {
 	t_object x_obj;
 	t_float x_min, x_max, *x_vec;
-	unsigned int x_state;
+	unsigned x_state;
 	t_int x_ac;
 } t_rand;
 
@@ -18,7 +18,7 @@ static int rand_time(void) {
 }
 
 static int rand_makeseed(void) {
-	static unsigned int rand_next = 1489853723;
+	static unsigned rand_next = 1489853723;
 	rand_next = rand_next * rand_time() + 938284287;
 	return (rand_next & 0x7fffffff);
 }
@@ -41,12 +41,12 @@ static void rand_max(t_rand *x, t_floatarg f) {
 
 static void rand_bang(t_rand *x) {
 	int c=x->x_ac, nval;
-	unsigned int state = x->x_state;
+	unsigned state = x->x_state;
 	x->x_state = state = state * 472940017 + 832416023;
 
 	if (c<3)
 	{	int min=x->x_min, n=x->x_max-min, b=n<0;
-		int range = (c>1 ? n+(b?-1:1) : (n?n:1));
+		int range = (c!=1 ? n+(b?-1:1) : (n?n:1));
 		double val = (1./4294967296) * range * state + min+b;
 		nval = val-(val<0);
 		outlet_float(x->x_obj.ob_outlet, nval);   }

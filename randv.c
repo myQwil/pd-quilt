@@ -9,7 +9,7 @@ typedef struct _randv {
 	t_object x_obj;
 	t_float x_n, x_max;	// range, max repeats
 	t_int x_prev, x_i;	// previous value, counter
-	unsigned int x_state;
+	unsigned x_state;
 } t_randv;
 
 static int randv_time(void) {
@@ -18,7 +18,7 @@ static int randv_time(void) {
 }
 
 static int randv_makeseed(void) {
-	static unsigned int randv_next = 1601075945;
+	static unsigned randv_next = 1601075945;
 	randv_next = randv_next * randv_time() + 938284287;
 	return (randv_next & 0x7fffffff);
 }
@@ -34,7 +34,7 @@ static void randv_peek(t_randv *x, t_symbol *s) {
 static int nextr(t_randv *x, int n) {
 	int nval;
 	int range = n<1?1:n;
-	unsigned int state = x->x_state;
+	unsigned state = x->x_state;
 	x->x_state = state = state * 472940017 + 832416023;
 	nval = (1./4294967296) * range * state;
 	return nval;

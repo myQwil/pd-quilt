@@ -9,7 +9,7 @@ typedef struct _divrt {
 	t_object x_obj;
 	t_float x_f, x_max;	// random value, max repeats
 	t_int x_prev, x_i;	// previous value, counter
-	unsigned int x_state;
+	unsigned x_state;
 	t_outlet *f_out, *o_out;
 } t_divrt;
 
@@ -19,7 +19,7 @@ static int divrt_time(void) {
 }
 
 static int divrt_makeseed(void) {
-	static unsigned int divrt_next = 1267631501;
+	static unsigned divrt_next = 1267631501;
 	divrt_next = divrt_next * divrt_time() + 938284287;
 	return (divrt_next & 0x7fffffff);
 }
@@ -35,7 +35,7 @@ static void divrt_peek(t_divrt *x, t_symbol *s) {
 static int nextr(t_divrt *x, int n) {
 	int nval;
 	int range = n<1?1:n;
-	unsigned int state = x->x_state;
+	unsigned state = x->x_state;
 	x->x_state = state = state * 472940017 + 832416023;
 	nval = (1./4294967296) * range * state;
 	return nval;
