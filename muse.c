@@ -91,20 +91,14 @@ static void muse_scl(t_muse *x, t_symbol *s, int ac, t_atom *av) {
 	else pd_error(x, "muse_scl: bad arguments");
 }
 
-static void muse_key(t_muse *x, t_symbol *s, int ac, t_atom *av) {
-	if (av->a_type == A_FLOAT) x->x_scl[0] = av->a_w.w_float;
-	else if (av->a_type == A_SYMBOL) muse_operate(x->x_scl, av);
-}
-
 static void muse_imp(t_muse *x, int ac, int offset) {
 	int n = x->x_n = ac+offset;
 	if (n>x->x_max) muse_resize(x,n);
 }
 
 static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
-	int i;
 	t_float *fp = x->x_scl+offset;
-	for (i=ac; i--; av++, fp++)
+	for (; ac--; av++, fp++)
 	{	if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
 		else if (av->a_type == A_SYMBOL) muse_operate(fp, av);   }
 }
@@ -159,11 +153,12 @@ static void muse_octet(t_muse *x, t_floatarg f) {
 }
 
 static double getnote(t_muse *x, int d) {
-	int n=x->x_n, dn=d%n, b=(dn<0), oct = d/n-b;
-	d = n*b+dn;
-	double root = x->x_scl[0],
-		   step = (d ? x->x_scl[d] : 0);
-	return (root + step + (oct * x->x_oct));
+	int n=x->x_n, p=d%n, b=p<0,
+	o = d/n-b;
+	d = b*n+p;
+	t_float root = x->x_scl[0],
+		step = d ? x->x_scl[d] : 0;
+	return (x->x_oct*o + root+step);
 }
 
 static void muse_float(t_muse *x, t_float f) {
@@ -224,8 +219,6 @@ void muse_setup(void) {
 		gensym("peek"), A_DEFSYM, 0);
 	class_addmethod(muse_class, (t_method)muse_scl,
 		gensym("scl"), A_GIMME, 0);
-	class_addmethod(muse_class, (t_method)muse_key,
-		gensym("k"), A_GIMME, 0);
 	class_addmethod(muse_class, (t_method)muse_do,
 		gensym("d"), A_GIMME, 0);
 	class_addmethod(muse_class, (t_method)muse_list,

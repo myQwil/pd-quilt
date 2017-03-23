@@ -96,20 +96,14 @@ static void harm_scl(t_harm *x, t_symbol *s, int ac, t_atom *av) {
 	else pd_error(x, "harm_scl: bad arguments");
 }
 
-static void harm_key(t_harm *x, t_symbol *s, int ac, t_atom *av) {
-	if (av->a_type == A_FLOAT) x->x_scl[0] = av->a_w.w_float;
-	else if (av->a_type == A_SYMBOL) harm_operate(x->x_scl, av);
-}
-
 static void harm_imp(t_harm *x, int ac, int offset) {
 	int n = x->x_n = ac+offset;
 	if (n>x->x_max) harm_resize(x,n);
 }
 
 static void harm_scale(t_harm *x, int ac, t_atom *av, int offset) {
-	int i;
 	t_float *fp = x->x_scl+offset;
-	for (i=ac; i--; av++, fp++)
+	for (; ac--; av++, fp++)
 	{	if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
 		else if (av->a_type == A_SYMBOL) harm_operate(fp, av);   }
 }
@@ -172,11 +166,12 @@ static void harm_octet(t_harm *x, t_floatarg f) {
 }
 
 static double getnote(t_harm *x, int d) {
-	int n=x->x_n, dn=d%n, b=(dn<0), oct = d/n-b;
-	d = n*b+dn;
-	double root = x->x_scl[0],
-		   step = (d ? x->x_scl[d] : 0);
-	return (root + step + (oct * x->x_oct));
+	int n=x->x_n, p=d%n, b=p<0,
+	o = d/n-b;
+	d = b*n+p;
+	t_float root = x->x_scl[0],
+		step = d ? x->x_scl[d] : 0;
+	return (x->x_oct*o + root+step);
 }
 
 static void harm_float(t_harm *x, t_float f) {
@@ -186,8 +181,8 @@ static void harm_float(t_harm *x, t_float f) {
 	{	int b = f<0?-1:1;
 		double next = getnote(x, d+b);
 		note += b*(f-d) * (next-note);   }
-	int dn=d%n; if (dn<0) dn+=n;
-	d = (d&&!dn)?n:dn;
+	int p=d%n; if (p<0) p+=n;
+	d = (d&&!p)?n:p;
 	outlet_float((x->x_out+d)->u_outlet, x->x_midi ?
 		note : ntof(note, x->x_rt, x->x_st));
 }
@@ -255,8 +250,6 @@ void harm_setup(void) {
 		gensym("peek"), A_DEFSYM, 0);
 	class_addmethod(harm_class, (t_method)harm_scl,
 		gensym("scl"), A_GIMME, 0);
-	class_addmethod(harm_class, (t_method)harm_key,
-		gensym("k"), A_GIMME, 0);
 	class_addmethod(harm_class, (t_method)harm_do,
 		gensym("d"), A_GIMME, 0);
 	class_addmethod(harm_class, (t_method)harm_list,
