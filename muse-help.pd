@@ -17,7 +17,7 @@ results in more inlets.;
 #X obj 370 311 cupqb;
 #X obj 405 311 cupqb;
 #X obj 476 311 cupqb;
-#X obj 63 182 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+#X obj 63 182 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
 #X floatatom 84 177 5 0 0 0 - - -, f 5;
 #X obj 41 336 *~;
@@ -82,7 +82,7 @@ results in more inlets.;
 #X obj 248 423 / 100;
 #X obj 193 145 cupqb;
 #X obj 403 383 muse 33 2 4 5 7 9 11;
-#X obj 146 331 % 4;
+#X obj 146 331 mod 4;
 #N canvas 935 186 672 660 commands 0;
 #X msg 31 78 n \$1;
 #X text 462 408 non-numbers are skipped;
@@ -162,7 +162,7 @@ results in more inlets.;
 #X obj 76 61 cupqb;
 #X msg 76 99 oct \$1;
 #X text 74 42 # notes per octave;
-#X obj 385 292 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+#X obj 385 292 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
 #X msg 385 310 imp \$1;
 #X text 431 302 turn off implicit scale size;
@@ -260,7 +260,7 @@ results in more inlets.;
 #X obj 585 376 s mus;
 #X msg 410 253 12;
 #X obj 94 300 sound;
-#X floatatom 174 331 5 0 0 0 - - -, f 5;
+#X floatatom 184 331 5 0 0 0 - - -, f 5;
 #X obj 215 375 b, f 1;
 #X connect 0 0 2 0;
 #X connect 0 0 2 1;

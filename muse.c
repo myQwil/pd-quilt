@@ -159,11 +159,10 @@ static void muse_octet(t_muse *x, t_floatarg f) {
 }
 
 static double getnote(t_muse *x, int d) {
-	int n=x->x_n, dn=d%n,
-	oct = d/n - (dn<0); // floor negatives
-	d = (dn+n) % n; // modulo always positive
+	int n=x->x_n, dn=d%n, b=(dn<0), oct = d/n-b;
+	d = n*b+dn;
 	double root = x->x_scl[0],
-	step = (d ? x->x_scl[d] : 0);
+		   step = (d ? x->x_scl[d] : 0);
 	return (root + step + (oct * x->x_oct));
 }
 

@@ -172,12 +172,24 @@ static void harm_octet(t_harm *x, t_floatarg f) {
 }
 
 static double getnote(t_harm *x, int d) {
-	int n=x->x_n, dn=d%n,
-	oct = d/n - (dn<0); // floor negatives
-	d = (dn+n) % n; // modulo always positive
+	int n=x->x_n, dn=d%n, b=(dn<0), oct = d/n-b;
+	d = n*b+dn;
 	double root = x->x_scl[0],
-	step = (d ? x->x_scl[d] : 0);
+		   step = (d ? x->x_scl[d] : 0);
 	return (root + step + (oct * x->x_oct));
+}
+
+static void harm_float(t_harm *x, t_float f) {
+	int n=x->x_inl, d=f;
+	double note = getnote(x, d);
+	if (f!=d)
+	{	int b = f<0?-1:1;
+		double next = getnote(x, d+b);
+		note += b*(f-d) * (next-note);   }
+	int dn=d%n; if (dn<0) dn+=n;
+	d = (d&&!dn)?n:dn;
+	outlet_float((x->x_out+d)->u_outlet, x->x_midi ?
+		note : ntof(note, x->x_rt, x->x_st));
 }
 
 static void harm_bang(t_harm *x) {
@@ -188,19 +200,6 @@ static void harm_bang(t_harm *x) {
 	{	double note = getnote(x, i);
 		outlet_float(u->u_outlet, x->x_midi ?
 			note : ntof(note, x->x_rt, x->x_st));   }
-}
-
-static void harm_float(t_harm *x, t_float f) {
-	int n=x->x_inl, d=f;
-	double note = getnote(x, d);
-	if (f!=d)
-	{	int b = f<0?-1:1;
-		double next = getnote(x, d+b);
-		note += b*(f-d) * (next-note);   }
-	int dn = (d%n+n)%n;
-	d = (d&&!dn)?n:dn;
-	outlet_float((x->x_out+d)->u_outlet, x->x_midi ?
-		note : ntof(note, x->x_rt, x->x_st));
 }
 
 static void *harm_new(t_symbol *s, int argc, t_atom *argv) {
