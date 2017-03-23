@@ -7,10 +7,9 @@ static t_class *divrt_class;
 
 typedef struct _divrt {
 	t_object x_obj;
-	t_float x_f, x_max;	// random value, max repeats
+	t_float x_n, x_max;	// range, max repeats
 	t_int x_prev, x_i;	// previous value, counter
 	unsigned x_state;
-	t_outlet *f_out, *o_out;
 } t_divrt;
 
 static int divrt_time(void) {
@@ -33,8 +32,7 @@ static void divrt_peek(t_divrt *x, t_symbol *s) {
 }
 
 static int nextr(t_divrt *x, int n) {
-	int nval;
-	int range = n<1?1:n;
+	int range = n<1?1:n, nval;
 	unsigned state = x->x_state;
 	x->x_state = state = state * 472940017 + 832416023;
 	nval = (1./4294967296) * range * state;
@@ -42,28 +40,26 @@ static int nextr(t_divrt *x, int n) {
 }
 
 static void divrt_float(t_divrt *x, t_float f) {
-	int n=x->x_f, max=x->x_max, i=x->x_i, d=f;
+	int n=x->x_n, max=x->x_max, i=x->x_i, d=f;
 	max = max<1?1:max;
 	if (d==x->x_prev)
 	{	if (i>=max)
-		{	outlet_float(x->o_out, d);
-			i=1, n=n<1?1:n;
+		{	i=1, n=n<1?1:n;
 			d = (nextr(x, n-1) + d+1) % n;   }
 		else i++;   }
 	else i=1;
 	x->x_prev=d, x->x_i=i;
-	outlet_float(x->f_out, d);
+	outlet_float(x->x_obj.ob_outlet, d);
 }
 
-static void *divrt_new(t_floatarg f, t_floatarg max) {
+static void *divrt_new(t_floatarg n, t_floatarg max) {
 	t_divrt *x = (t_divrt *)pd_new(divrt_class);
-	x->x_f = f<1?3:f;
+	x->x_n = n<1?3:n;
 	x->x_max = max<1?2:max;
 	x->x_state = divrt_makeseed();
-	floatinlet_new(&x->x_obj, &x->x_f);
+	outlet_new(&x->x_obj, &s_float);
+	floatinlet_new(&x->x_obj, &x->x_n);
 	floatinlet_new(&x->x_obj, &x->x_max);
-	x->f_out = outlet_new(&x->x_obj, &s_float);
-	x->o_out = outlet_new(&x->x_obj, &s_float); // old value
 	return (x);
 }
 

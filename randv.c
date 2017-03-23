@@ -32,8 +32,7 @@ static void randv_peek(t_randv *x, t_symbol *s) {
 }
 
 static int nextr(t_randv *x, int n) {
-	int nval;
-	int range = n<1?1:n;
+	int range = n<1?1:n, nval;
 	unsigned state = x->x_state;
 	x->x_state = state = state * 472940017 + 832416023;
 	nval = (1./4294967296) * range * state;
@@ -41,16 +40,16 @@ static int nextr(t_randv *x, int n) {
 }
 
 static void randv_bang(t_randv *x) {
-	int n=x->x_n, max=x->x_max, f=nextr(x,n), i=x->x_i;
+	int n=x->x_n, max=x->x_max, i=x->x_i, d=nextr(x,n);
 	max = max<1?1:max;
-	if (f==x->x_prev)
+	if (d==x->x_prev)
 	{	if (i>=max)
 		{	i=1, n=n<1?1:n;
-			f = (nextr(x, n-1) + f+1) % n;   }
+			d = (nextr(x, n-1) + d+1) % n;   }
 		else i++;   }
 	else i=1;
-	x->x_prev=f, x->x_i=i;
-	outlet_float(x->x_obj.ob_outlet, f);
+	x->x_prev=d, x->x_i=i;
+	outlet_float(x->x_obj.ob_outlet, d);
 }
 
 static void *randv_new(t_floatarg n, t_floatarg max) {
@@ -69,7 +68,7 @@ void randv_setup(void) {
 		(t_newmethod)randv_new, 0,
 		sizeof(t_randv), 0,
 		A_DEFFLOAT, A_DEFFLOAT, 0);
-
+	
 	class_addbang(randv_class, randv_bang);
 	class_addmethod(randv_class, (t_method)randv_seed,
 		gensym("seed"), A_GIMME, 0);

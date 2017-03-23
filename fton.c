@@ -11,8 +11,8 @@ static t_class *fton_class;
 
 typedef struct _fton {
 	t_object x_obj;
-	t_float x_rt, x_st;		/* root tone, semi-tone */
-	t_float x_ref, x_tet;	/* ref-pitch, # of tones */
+	t_float x_rt, x_st,		/* root tone, semi-tone */
+		x_ref, x_tet;		/* ref-pitch, # of tones */
 } t_fton;
 
 static void fton_ref(t_fton *x, t_floatarg f) {
@@ -46,7 +46,7 @@ void fton_setup(void) {
 		(t_newmethod)fton_new, 0,
 		sizeof(t_fton), 0,
 		A_GIMME, 0);
-		
+	
 	class_addfloat(fton_class, fton_float);
 	class_sethelpsymbol(fton_class, gensym("ntof.pd"));
 	class_addmethod(fton_class, (t_method)fton_ref,

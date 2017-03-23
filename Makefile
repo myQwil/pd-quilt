@@ -6,7 +6,7 @@ LIBRARY_NAME = myqwil
 # add your .c source files, one object per file, to the SOURCES
 # variable, help files will be included automatically, and for GUI
 # objects, the matching .tcl file too
-SOURCES = graid.c divrt.c rand.c randv.c rind.c muse.c ruse.c harm.c fton.c ntof.c radx.c same.c sploat.c gloat.c
+SOURCES = graid.c divrt.c rand.c randv.c rind.c muse.c ruse.c harm.c fton.c ntof.c radx.c same.c sploat.c gloat.c woq.c logb.c
 
 # list all pd objects (i.e. myobject.pd) files here, and their helpfiles will
 # be included automatically

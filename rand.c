@@ -45,8 +45,8 @@ static void rand_bang(t_rand *x) {
 	x->x_state = state = state * 472940017 + 832416023;
 
 	if (c<3)
-	{	int min=x->x_min, n=x->x_max-min, b=n<0;
-		int range = (c!=1 ? n+(b?-1:1) : (n?n:1));
+	{	int min=x->x_min, n=x->x_max-min, b=n<0,
+			range = (c!=1 ? n+(b?-1:1) : (n?n:1));
 		double val = (1./4294967296) * range * state + min+b;
 		nval = val-(val<0);
 		outlet_float(x->x_obj.ob_outlet, nval);   }
@@ -88,7 +88,7 @@ void rand_setup(void) {
 		(t_newmethod)rand_new, (t_method)rand_free,
 		sizeof(t_rand), 0,
 		A_GIMME, 0);
-
+	
 	class_addbang(rand_class, rand_bang);
 	class_addmethod(rand_class, (t_method)rand_seed,
 		gensym("seed"), A_GIMME, 0);
