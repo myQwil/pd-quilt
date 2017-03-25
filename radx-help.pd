@@ -48,7 +48,7 @@
 #X obj 335 121 cupqb;
 #X obj 371 121 cupqb;
 #X obj 360 98 b, f 1;
-#X obj 347 161 pow;
+#X obj 347 161 woq;
 #X obj 221 90 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -220350
 0 1;
 #X obj 239 90 metro;

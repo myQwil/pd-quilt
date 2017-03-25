@@ -154,11 +154,11 @@ static void muse_octet(t_muse *x, t_floatarg f) {
 
 static double getnote(t_muse *x, int d) {
 	int n=x->x_n, p=d%n, b=p<0,
-	o = d/n-b;
+	q = d/n-b;
 	d = b*n+p;
 	t_float root = x->x_scl[0],
 		step = d ? x->x_scl[d] : 0;
-	return (x->x_oct*o + root+step);
+	return (x->x_oct*q + root+step);
 }
 
 static void muse_float(t_muse *x, t_float f) {

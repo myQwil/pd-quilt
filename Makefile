@@ -6,7 +6,7 @@ LIBRARY_NAME = myqwil
 # add your .c source files, one object per file, to the SOURCES
 # variable, help files will be included automatically, and for GUI
 # objects, the matching .tcl file too
-SOURCES = graid.c divrt.c rand.c randv.c rind.c muse.c ruse.c harm.c fton.c ntof.c radx.c same.c sploat.c gloat.c woq.c logb.c
+SOURCES = graid.c muse.c ruse.c harm.c fton.c ntof.c radx.c same.c sploat.c gloat.c woq.c logb.c divrt.c rand.c randv.c rind.c
 
 # list all pd objects (i.e. myobject.pd) files here, and their helpfiles will
 # be included automatically
@@ -38,7 +38,7 @@ UNITTESTS =
 ALL_CFLAGS = -I"$(PD_INCLUDE)"
 ALL_LDFLAGS =  
 SHARED_LDFLAGS =
-ALL_LIBS =
+ALL_LIBS = 
 
 
 #------------------------------------------------------------------------------#
@@ -48,6 +48,7 @@ ALL_LIBS =
 #------------------------------------------------------------------------------#
 
 # these can be set from outside without (usually) breaking the build
+CPPFLAGS =
 CFLAGS = -Wall -W -g
 LDFLAGS =
 LIBS =
@@ -103,7 +104,7 @@ ifeq ($(UNAME),Darwin)
     SHARED_EXTENSION = dylib
     OS = macosx
     PD_PATH = /Applications/Pd-extended.app/Contents/Resources
-    OPT_CFLAGS = -ftree-vectorize -fast
+    OPT_CFLAGS = -ftree-vectorize -ftree-vectorizer-verbose=2 -fast
 # build universal 32-bit on 10.4 and 32/64 on newer
     ifeq ($(shell uname -r | sed 's|\([0-9][0-9]*\)\.[0-9][0-9]*\.[0-9][0-9]*|\1|'), 8)
       FAT_FLAGS = -arch ppc -arch i386 -mmacosx-version-min=10.4
@@ -232,14 +233,14 @@ ifeq (MINGW,$(findstring MINGW,$(UNAME)))
   EXTENSION = dll
   SHARED_EXTENSION = dll
   OS = windows
-  PD_PATH = "c:/Progra~2/pd"
+  PD_PATH = $(shell cd "$$PROGRAMFILES (x86)/pd" && pwd)
   # MinGW doesn't seem to include cc so force gcc
   CC=gcc
   OPT_CFLAGS = -O3 -funroll-loops -fomit-frame-pointer
   ALL_CFLAGS += -mms-bitfields
   ALL_LDFLAGS += -s -shared -Wl,--enable-auto-import
   SHARED_LDFLAGS += -shared
-  ALL_LIBS += "c:/Progra~2/pd/bin/pd.dll" -L"$(PD_PATH)/src" -L"$(PD_PATH)/bin" -L"$(PD_PATH)/obj" \
+  ALL_LIBS += -L"$(PD_PATH)/src" -L"$(PD_PATH)/bin" -L"$(PD_PATH)/obj" \
 	-lpd -lwsock32 -lkernel32 -luser32 -lgdi32 -liberty $(LIBS_windows)
   STRIP = strip --strip-unneeded -R .note -R .comment
   DISTBINDIR=$(DISTDIR)-$(OS)
@@ -248,7 +249,7 @@ endif
 # in case somebody manually set the HELPPATCHES above
 HELPPATCHES ?= $(SOURCES:.c=-help.pd) $(PDOBJECTS:.pd=-help.pd)
 
-ALL_CFLAGS := $(ALL_CFLAGS) $(CFLAGS) $(OPT_CFLAGS)
+ALL_CFLAGS := $(ALL_CFLAGS) $(OPT_CFLAGS) $(CPPFLAGS) $(CFLAGS)
 ALL_LDFLAGS := $(LDFLAGS) $(ALL_LDFLAGS)
 ALL_LIBS := $(LIBS) $(ALL_LIBS)
 
