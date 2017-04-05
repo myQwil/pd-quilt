@@ -1,13 +1,8 @@
 #include "m_pd.h"
 
 typedef union {
-	t_float f;
-	struct {
-		unsigned
-			mantissa : 23,
-			exponent :	8,
-				sign :	1;
-	} u;
+	float f;
+	struct { unsigned mant:23,expo:8,sign:1; } u;
 } ufloat;
 
 /* -------------------------- sploat -------------------------- */
@@ -20,20 +15,25 @@ typedef struct _sploat {
 	t_outlet *m_out, *e_out, *s_out;
 } t_sploat;
 
+static void sploat_peek(t_sploat *x, t_symbol *s) {
+	ufloat uf = {.f=x->x_f};
+	post("%s%s0x%x %u %u = %g",
+		s->s_name, *s->s_name?": ":"",
+		uf.u.mant, uf.u.expo, uf.u.sign, uf.f);
+}
+
 static void sploat_bang(t_sploat *x) {
-	ufloat uf;
-	uf.f = x->x_f;
+	ufloat uf = {.f=x->x_f};
 	outlet_float(x->s_out, uf.u.sign);
-	outlet_float(x->e_out, uf.u.exponent);
-	outlet_float(x->m_out, uf.u.mantissa);
+	outlet_float(x->e_out, uf.u.expo);
+	outlet_float(x->m_out, uf.u.mant);
 }
 
 static void sploat_float(t_sploat *x, t_float f) {
-	ufloat uf;
-	uf.f = x->x_f = f;
+	ufloat uf = {.f=x->x_f=f};
 	outlet_float(x->s_out, uf.u.sign);
-	outlet_float(x->e_out, uf.u.exponent);
-	outlet_float(x->m_out, uf.u.mantissa);
+	outlet_float(x->e_out, uf.u.expo);
+	outlet_float(x->m_out, uf.u.mant);
 }
 
 static void *sploat_new(t_floatarg f) {
@@ -54,4 +54,6 @@ void sploat_setup(void) {
 	
 	class_addbang(sploat_class, sploat_bang);
 	class_addfloat(sploat_class, sploat_float);
+	class_addmethod(sploat_class, (t_method)sploat_peek,
+		gensym("peek"), A_DEFSYM, 0);
 }

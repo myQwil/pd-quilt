@@ -6,7 +6,12 @@ LIBRARY_NAME = myqwil
 # add your .c source files, one object per file, to the SOURCES
 # variable, help files will be included automatically, and for GUI
 # objects, the matching .tcl file too
-SOURCES = graid.c muse.c ruse.c harm.c fton.c ntof.c radx.c same.c sploat.c gloat.c woq.c logb.c divrt.c rand.c randv.c rind.c
+SOURCES = graid.c muse.c ruse.c harm.c fton.c ntof.c radx.c same.c \
+		  sploat.c gloat.c woq.c logb.c divrt.c rand.c randv.c rind.c 0x21.c \
+		  0x230x2b.c 0x230x2d.c 0x230x2a.c 0x230x2f.c 0x23pow.c 0x23max.c 0x23min.c \
+		  0x230x3d0x3d.c 0x230x210x3d.c 0x230x3e.c 0x230x3c.c 0x230x3e0x3d.c 0x230x3c0x3d.c \
+		  0x230x26.c 0x230x260x26.c 0x230x7c.c 0x230x7c0x7c.c 0x230x3c0x3c.c 0x230x3e0x3e.c \
+		  0x230x25.c 0x23mod.c 0x23div.c
 
 # list all pd objects (i.e. myobject.pd) files here, and their helpfiles will
 # be included automatically
@@ -22,7 +27,7 @@ MANUAL =
 # list them here.  This can be anything from header files, test patches,
 # documentation, etc.  README.txt and LICENSE.txt are required and therefore
 # automatically included
-EXTRA_DIST = myqwil.c
+EXTRA_DIST = 
 
 # unit tests and related files here, in the 'unittests' subfolder
 UNITTESTS = 

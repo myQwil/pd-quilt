@@ -1,0 +1,10 @@
+#N canvas 719 355 450 300 10;
+#X text 200 30 NOT;
+#X text 152 46 shorthand for [== 0];
+#X obj 204 107 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+1;
+#X obj 204 127 !, f 1;
+#X obj 204 149 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X connect 2 0 3 0;
+#X connect 3 0 4 0;

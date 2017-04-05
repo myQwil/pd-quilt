@@ -220,10 +220,12 @@ static void *harm_new(t_symbol *s, int argc, t_atom *argv) {
 		(u+1)->u_outlet = outlet_new(&x->x_obj, &s_float);
 		(u+2)->u_outlet = outlet_new(&x->x_obj, &s_float);
 		x->x_n=2, argc=0;   }
-	else x->x_n = argc;
+	else
+	{	x->x_n = argc;
+		u->u_outlet = outlet_new(&x->x_obj, &s_float); // extra octave
+		u++;   }
 	
 	int i; t_float *fp;
-	u->u_outlet = outlet_new(&x->x_obj, &s_float); u++; // for an extra octave
 	for (i=argc, fp=x->x_scl; i--; u++, argv++, fp++)
 	{	*fp = atom_getfloat(argv);
 		floatinlet_new(&x->x_obj, fp);

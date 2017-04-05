@@ -48,7 +48,7 @@ void fton_setup(void) {
 		A_GIMME, 0);
 	
 	class_addfloat(fton_class, fton_float);
-	class_sethelpsymbol(fton_class, gensym("ntof.pd"));
+	class_sethelpsymbol(fton_class, gensym("ntof"));
 	class_addmethod(fton_class, (t_method)fton_ref,
 		gensym("ref"), A_FLOAT, 0);
 	class_addmethod(fton_class, (t_method)fton_tet,

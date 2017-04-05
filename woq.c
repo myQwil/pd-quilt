@@ -1,20 +1,6 @@
 #include "m_pd.h"
+#include "binop.h"
 #include <math.h>
-
-typedef struct _binop {
-	t_object x_obj;
-	t_float x_f1;
-	t_float x_f2;
-} t_binop;
-
-static void *binop_new(t_class *floatclass, t_floatarg f) {
-	t_binop *x = (t_binop *)pd_new(floatclass);
-	outlet_new(&x->x_obj, &s_float);
-	floatinlet_new(&x->x_obj, &x->x_f2);
-	x->x_f1 = 0;
-	x->x_f2 = f;
-	return (x);
-}
 
 /* ------------------------ woq -------------------------------- */
 
@@ -25,12 +11,24 @@ static void *woq_new(t_floatarg f) {
 }
 
 static void woq_bang(t_binop *x) {
-	outlet_float(x->x_obj.ob_outlet, powf(x->x_f2, x->x_f1));
+	if (x->x_f2 >= 0)
+		outlet_float(x->x_obj.ob_outlet, powf(x->x_f2, x->x_f1));
+	else if (x->x_f1 <= -1 || x->x_f1 >= 1 || x->x_f1 == 0)
+		outlet_float(x->x_obj.ob_outlet, powf(x->x_f2, x->x_f1));
+	else
+	{	pd_error(x, "pow: calculation resulted in a NaN");
+		outlet_float(x->x_obj.ob_outlet, 0);   }
 }
 
 static void woq_float(t_binop *x, t_float f) {
 	x->x_f1 = f;
-	outlet_float(x->x_obj.ob_outlet, powf(x->x_f2, x->x_f1));
+	if (x->x_f2 >= 0)
+		outlet_float(x->x_obj.ob_outlet, powf(x->x_f2, x->x_f1));
+	else if (x->x_f1 <= -1 || x->x_f1 >= 1 || x->x_f1 == 0)
+		outlet_float(x->x_obj.ob_outlet, powf(x->x_f2, x->x_f1));
+	else
+	{	pd_error(x, "pow: calculation resulted in a NaN");
+		outlet_float(x->x_obj.ob_outlet, 0);   }
 }
 
 void woq_setup(void) {
