@@ -28,7 +28,7 @@ static void hot_ls_proxy_float(t_hotbinop_proxy *x, t_float f) {
 	outlet_float(m->x_obj.ob_outlet, (int)m->x_f1 << (int)(m->x_f2=f));
 }
 
-void setup_0x230x7c(void) {
+void setup_0x230x3c0x3c(void) {
 	hot_ls_class = class_new(gensym("#<<"),
 		(t_newmethod)hot_ls_new, (t_method)hotbinop_free,
 		sizeof(t_hotbinop), 0,
@@ -46,5 +46,5 @@ void setup_0x230x7c(void) {
 }
 
 void setup(void) {
-	setup_0x230x7c();
+	setup_0x230x3c0x3c();
 }

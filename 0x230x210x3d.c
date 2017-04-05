@@ -28,7 +28,7 @@ static void hot_ne_proxy_float(t_hotbinop_proxy *x, t_float f) {
 	outlet_float(m->x_obj.ob_outlet, m->x_f1 != (m->x_f2=f));
 }
 
-void setup_0x230x3d0x3d(void) {
+void setup_0x230x210x3d(void) {
 	hot_ne_class = class_new(gensym("#!="),
 		(t_newmethod)hot_ne_new, (t_method)hotbinop_free,
 		sizeof(t_hotbinop), 0,
@@ -46,5 +46,5 @@ void setup_0x230x3d0x3d(void) {
 }
 
 void setup(void) {
-	setup_0x230x3d0x3d();
+	setup_0x230x210x3d();
 }

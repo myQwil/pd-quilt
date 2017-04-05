@@ -18,9 +18,7 @@ static void logb_bang(t_binop *x) {
 
 static void logb_float(t_binop *x, t_float f) {
 	x->x_f1 = f;
-	float f2 = (x->x_f2 > 0 ? logf(x->x_f2) : 0);
-	outlet_float(x->x_obj.ob_outlet,
-		(x->x_f1 > 0 && f2 ? logf(x->x_f1) / f2 : -1000));
+	logb_bang(x);
 }
 
 void logb_setup(void) {

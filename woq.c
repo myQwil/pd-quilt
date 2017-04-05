@@ -22,13 +22,7 @@ static void woq_bang(t_binop *x) {
 
 static void woq_float(t_binop *x, t_float f) {
 	x->x_f1 = f;
-	if (x->x_f2 >= 0)
-		outlet_float(x->x_obj.ob_outlet, powf(x->x_f2, x->x_f1));
-	else if (x->x_f1 <= -1 || x->x_f1 >= 1 || x->x_f1 == 0)
-		outlet_float(x->x_obj.ob_outlet, powf(x->x_f2, x->x_f1));
-	else
-	{	pd_error(x, "pow: calculation resulted in a NaN");
-		outlet_float(x->x_obj.ob_outlet, 0);   }
+	woq_bang(x);
 }
 
 void woq_setup(void) {
