@@ -13,7 +13,7 @@ typedef struct _rind {
 
 static int rind_time(void) {
 	int thym = time(0) % 31536000; // seconds in a year
-	return thym + !(thym%2); // odd numbers only
+	return (thym|1); // odd numbers only
 }
 
 static int rind_makeseed(void) {

@@ -14,7 +14,7 @@ typedef struct _randv {
 
 static int randv_time(void) {
 	int thym = time(0) % 31536000; // seconds in a year
-	return thym + !(thym%2); // odd numbers only
+	return (thym|1); // odd numbers only
 }
 
 static int randv_makeseed(void) {
