@@ -22,7 +22,7 @@ static void radx_float(t_radx *x, t_float f) {
 					  "ghijkmnopqrstuvw"
 					  "xyzACDEFGHJKLMNP"
 					  "QRSTUVWXYZ?!@#$%";
-					 
+	
 	int radx = x->x_radx,
 		neg = (f<0),
 		i=0, dp,
