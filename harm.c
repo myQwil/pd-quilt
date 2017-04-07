@@ -32,10 +32,6 @@ t_float ntof(t_float f, t_float root, t_float semi) {
 
 static t_class *harm_class;
 
-typedef struct harmout {
-	t_outlet *u_outlet;
-} t_harmout;
-
 typedef struct _harm {
 	t_object x_obj;
 	t_int x_n, x_max, x_inl;/* # of notes in a scale, # of inlets */
@@ -45,7 +41,7 @@ typedef struct _harm {
 		x_ref, x_tet,		/* ref-pitch, # of tones */
 		x_rt, x_st,			/* root tone, semi-tone */
 		*x_scl;				/* scale-input values */
-	t_harmout *x_out;		/* outlets */
+	t_outlet **x_outs;		/* outlets */
 } t_harm;
 
 static void harm_ptr(t_harm *x, t_symbol *s) {
@@ -134,6 +130,7 @@ static void harm_size(t_harm *x, t_floatarg n) {
 	if (n>0)
 	{	if (n>x->x_max) harm_resize(x,n);
 		x->x_n=n;   }
+	else x->x_n=1;
 }
 
 static void harm_implicit(t_harm *x, t_floatarg f) {
@@ -183,17 +180,17 @@ static void harm_float(t_harm *x, t_float f) {
 		note += b*(f-d) * (next-note);   }
 	int p=d%n; if (p<0) p+=n;
 	d = (d&&!p)?n:p;
-	outlet_float((x->x_out+d)->u_outlet, x->x_midi ?
+	outlet_float(x->x_outs[d], x->x_midi ?
 		note : ntof(note, x->x_rt, x->x_st));
 }
 
 static void harm_bang(t_harm *x) {
 	int n=x->x_n, i=x->x_inl+1;
 	i = x->x_all ? i : (n>i?i:n);
-	t_harmout *u;
-	for (u=x->x_out+i; u--, i--;)
+	t_outlet **o;
+	for (o=x->x_outs+i; o--, i--;)
 	{	double note = getnote(x, i);
-		outlet_float(u->u_outlet, x->x_midi ?
+		outlet_float(*o, x->x_midi ?
 			note : ntof(note, x->x_rt, x->x_st));   }
 }
 
@@ -206,35 +203,32 @@ static void *harm_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_st = log(2) / tet;
 	
 	x->x_oct = tet;
-	x->x_max = x->x_inl = argc>1?argc:2;
+	x->x_max = x->x_inl = x->x_n = argc<2 ? 2:argc;
 	x->x_scl = (t_float *)getbytes(x->x_max * sizeof(t_float));
-	x->x_out = (t_harmout *)getbytes((x->x_inl+1) * sizeof(t_harmout));
-	t_harmout *u = x->x_out;
+	x->x_outs = (t_outlet **)getbytes((x->x_inl+1) * sizeof(t_outlet *));
+	t_outlet **o = x->x_outs;
+	o[0] = outlet_new(&x->x_obj, &s_float);
 	
 	if (argc<2)
 	{	x->x_scl[0] = (argc ? atom_getfloat(argv) : 69);
 		floatinlet_new(&x->x_obj, x->x_scl);
 		x->x_scl[1] = (argc>1 ? atom_getfloat(argv+1) : 7);
 		floatinlet_new(&x->x_obj, x->x_scl+1);
-		u->u_outlet = outlet_new(&x->x_obj, &s_float);
-		(u+1)->u_outlet = outlet_new(&x->x_obj, &s_float);
-		(u+2)->u_outlet = outlet_new(&x->x_obj, &s_float);
-		x->x_n=2, argc=0;   }
-	else
-	{	x->x_n = argc;
-		u->u_outlet = outlet_new(&x->x_obj, &s_float); // extra octave
-		u++;   }
+		o[1] = outlet_new(&x->x_obj, &s_float);
+		o[2] = outlet_new(&x->x_obj, &s_float);
+		argc=0;   }
 	
-	int i; t_float *fp;
-	for (i=argc, fp=x->x_scl; i--; u++, argv++, fp++)
+	t_float *fp;
+	for (fp=x->x_scl; o++, argc--; argv++, fp++)
 	{	*fp = atom_getfloat(argv);
 		floatinlet_new(&x->x_obj, fp);
-		u->u_outlet = outlet_new(&x->x_obj, &s_float);   }
+		*o = outlet_new(&x->x_obj, &s_float);   }
 	return (x);
 }
 
 static void harm_free(t_harm *x) {
 	freebytes(x->x_scl, x->x_max * sizeof(t_float));
+	freebytes(x->x_outs, (x->x_inl+1) * sizeof(t_outlet *));
 }
 
 void harm_setup(void) {

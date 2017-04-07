@@ -129,6 +129,7 @@ static void muse_size(t_muse *x, t_floatarg n) {
 	if (n>0)
 	{	if (n>x->x_max) muse_resize(x,n);
 		x->x_n=n;   }
+	else x->x_n=1;
 }
 
 static void muse_implicit(t_muse *x, t_floatarg f) {
@@ -181,7 +182,7 @@ static void *muse_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_st = log(2) / tet;
 	
 	x->x_oct = tet;
-	x->x_max = x->x_inl = argc>1?argc:2;
+	x->x_max = x->x_inl = x->x_n = argc<2 ? 2:argc;
 	x->x_scl = (t_float *)getbytes(x->x_max * sizeof(t_float));
 	
 	if (argc<2)
@@ -189,11 +190,10 @@ static void *muse_new(t_symbol *s, int argc, t_atom *argv) {
 		floatinlet_new(&x->x_obj, x->x_scl);
 		x->x_scl[1] = (argc>1 ? atom_getfloat(argv+1) : 7);
 		floatinlet_new(&x->x_obj, x->x_scl+1);
-		x->x_n=2, argc=0;   }
-	else x->x_n = argc;
+		argc=0;   }
 	
-	int i; t_float *fp;
-	for (i=argc, fp=x->x_scl; i--; argv++, fp++)
+	t_float *fp;
+	for (fp=x->x_scl; argc--; argv++, fp++)
 	{	*fp = atom_getfloat(argv);
 		floatinlet_new(&x->x_obj, fp);   }
 	x->f_out = outlet_new(&x->x_obj, &s_float); // frequency
