@@ -30,11 +30,11 @@ static void rind_peek(t_rind *x, t_symbol *s) {
 	post("%s%s%u", s->s_name, *s->s_name?": ":"", x->x_state);
 }
 
-static void rind_min(t_rind *x, t_floatarg f) {
+static void rind_min(t_rind *x, t_float f) {
 	x->x_min=f;
 }
 
-static void rind_max(t_rind *x, t_floatarg f) {
+static void rind_max(t_rind *x, t_float f) {
 	x->x_max=f;
 }
 

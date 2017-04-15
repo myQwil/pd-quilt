@@ -51,7 +51,7 @@
 #X msg 48 101 x \$1;
 #X obj 48 62 cupqb;
 #X obj 282 23 cupqb;
-#X msg 222 94 scl \$2 \$1;
+#X msg 222 94 set \$2 \$1;
 #X obj 243 71 pack;
 #X obj 244 23 cupqb;
 #X msg 205 176 d r 3 f s 8 10;
@@ -180,7 +180,7 @@
 #X msg 370 223 5;
 #X obj 370 198 t b a;
 #X obj 446 156 cupqb;
-#X msg 370 178 scl 5 \$1;
+#X msg 370 178 set 5 \$1;
 #X obj 102 65 cupqb;
 #X msg 102 102 n \$1;
 #X msg 416 344 6 60 300 25;

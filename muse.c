@@ -2,29 +2,16 @@
 #include <stdlib.h>
 #include <math.h>
 
-union inletunion {
-	t_symbol *iu_symto;
-	t_gpointer *iu_pointerslot;
-	t_float *iu_floatslot;
-	t_symbol **iu_symslot;
-	t_float iu_floatsignalvalue;
-};
-
 struct _inlet {
 	t_pd i_pd;
 	struct _inlet *i_next;
 	t_object *i_owner;
 	t_pd *i_dest;
 	t_symbol *i_symfrom;
-	union inletunion i_un;
+	t_float *i_floatslot;
 };
 
-#define i_symto i_un.iu_symto
-#define i_pointerslot i_un.iu_pointerslot
-#define i_floatslot i_un.iu_floatslot
-#define i_symslot i_un.iu_symslot
-
-t_float ntof(t_float f, t_float root, t_float semi) {
+t_float ntof(t_float f, double root, double semi) {
 	return (root * exp(semi*f));
 }
 
@@ -34,11 +21,11 @@ static t_class *muse_class;
 
 typedef struct _muse {
 	t_object x_obj;
-	t_int x_n, x_max, x_inl;/* # of notes in a scale, # of inlets */
+	int x_n, x_max, x_inl;	/* # of notes in a scale, # of inlets */
 	unsigned x_imp:1;		/* implicit scale size toggle */
+	double x_rt, x_st;		/* root tone, semi-tone */
 	t_float x_oct,			/* # of notes between octaves */
 		x_ref, x_tet,		/* ref-pitch, # of tones */
-		x_rt, x_st,			/* root tone, semi-tone */
 		*x_scl;				/* scale-input values */
 	t_outlet *f_out, *m_out;/* frequency, midi */
 } t_muse;
@@ -65,9 +52,10 @@ static void muse_operate(t_float *fp, t_atom *av) {
 		else if (cp[1]=='/') *fp /= f;   }
 }
 
-static void muse_resize(t_muse *x, t_floatarg n) {
+static void muse_resize(t_muse *x, t_float n) {
 	int size = 2*x->x_max;
-	size = size<n?n:size;
+	if (size<n) size=n;
+	if (size>1024) size=1024;
 	x->x_scl = (t_float *)resizebytes(x->x_scl,
 		x->x_max * sizeof(t_float), size * sizeof(t_float));
 	x->x_max=size;
@@ -79,16 +67,16 @@ static void muse_resize(t_muse *x, t_floatarg n) {
 		ip->i_floatslot = fp;
 }
 
-static void muse_scl(t_muse *x, t_symbol *s, int ac, t_atom *av) {
+static void muse_set(t_muse *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac==2 && av->a_type == A_FLOAT)
 	{	int i = av->a_w.w_float;
-		if (i>=0)
+		if (i>=0 && i<1024)
 		{	if (i>=x->x_max) muse_resize(x,i+1);
 			if ((av+1)->a_type == A_FLOAT)
 				x->x_scl[i] = (av+1)->a_w.w_float;
 			else if ((av+1)->a_type == A_SYMBOL)
 				muse_operate(x->x_scl+i, av+1);   }   }
-	else pd_error(x, "muse_scl: bad arguments");
+	else pd_error(x, "muse_set: bad arguments");
 }
 
 static void muse_imp(t_muse *x, int ac, int offset) {
@@ -108,7 +96,7 @@ static void muse_scimp(t_muse *x, int ac, t_atom *av, int offset) {
 	muse_scale(x, ac, av, offset);
 }
 
-static void muse_do(t_muse *x, t_symbol *s, int ac, t_atom *av) {
+static void muse_doremi(t_muse *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac) muse_scimp(x, ac, av, 1);
 }
 
@@ -125,31 +113,32 @@ static void muse_ex(t_muse *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac) muse_scale(x, ac, av, 0);
 }
 
-static void muse_size(t_muse *x, t_floatarg n) {
+static void muse_size(t_muse *x, t_float n) {
 	if (n>0)
-	{	if (n>x->x_max) muse_resize(x,n);
+	{	if (n>1024) return;
+		if (n>x->x_max) muse_resize(x,n);
 		x->x_n=n;   }
 	else x->x_n=1;
 }
 
-static void muse_implicit(t_muse *x, t_floatarg f) {
+static void muse_implicit(t_muse *x, t_float f) {
 	x->x_imp=f;
 }
 
-static void muse_octave(t_muse *x, t_floatarg f) {
+static void muse_octave(t_muse *x, t_float f) {
 	x->x_oct=f;
 }
 
-static void muse_ref(t_muse *x, t_floatarg f) {
+static void muse_ref(t_muse *x, t_float f) {
 	x->x_rt = (x->x_ref=f) * pow(2,-69/x->x_tet);
 }
 
-static void muse_tet(t_muse *x, t_floatarg f) {
+static void muse_tet(t_muse *x, t_float f) {
 	x->x_rt = x->x_ref * pow(2,-69/f);
 	x->x_st = log(2) / (x->x_tet=f);
 }
 
-static void muse_octet(t_muse *x, t_floatarg f) {
+static void muse_octet(t_muse *x, t_float f) {
 	muse_octave(x,f);   muse_tet(x,f);
 }
 
@@ -217,9 +206,9 @@ void muse_setup(void) {
 		gensym("ptr"), A_DEFSYM, 0);
 	class_addmethod(muse_class, (t_method)muse_peek,
 		gensym("peek"), A_DEFSYM, 0);
-	class_addmethod(muse_class, (t_method)muse_scl,
-		gensym("scl"), A_GIMME, 0);
-	class_addmethod(muse_class, (t_method)muse_do,
+	class_addmethod(muse_class, (t_method)muse_set,
+		gensym("set"), A_GIMME, 0);
+	class_addmethod(muse_class, (t_method)muse_doremi,
 		gensym("d"), A_GIMME, 0);
 	class_addmethod(muse_class, (t_method)muse_list,
 		gensym("l"), A_GIMME, 0);

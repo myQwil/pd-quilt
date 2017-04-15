@@ -8,7 +8,7 @@ static t_class *divrt_class;
 typedef struct _divrt {
 	t_object x_obj;
 	t_float x_n, x_max;	// range, max repeats
-	t_int x_prev, x_i;	// previous value, counter
+	int x_prev, x_i;	// previous value, counter
 	unsigned x_state;
 } t_divrt;
 

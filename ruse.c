@@ -7,7 +7,7 @@ static t_class *ruse_class;
 
 typedef struct _ruse {
 	t_object x_obj;
-	t_int x_n, x_max;		/* # of notes in a scale */
+	int x_n, x_max;		/* # of notes in a scale */
 	t_float x_oct;			/* octave */
 	t_float *x_scl;			/* scale-input values */
 	t_outlet *f_out, *m_out;/* frequency, midi */
@@ -45,11 +45,11 @@ static void ruse_key(t_ruse *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac>1) ruse_list(x, 0, ac-1, av+1);
 }
 
-static void ruse_size(t_ruse *x, t_floatarg f) {
+static void ruse_size(t_ruse *x, t_float f) {
 	x->x_n = f;
 }
 
-static void ruse_octave(t_ruse *x, t_floatarg f) {
+static void ruse_octave(t_ruse *x, t_float f) {
 	x->x_oct = f;
 }
 

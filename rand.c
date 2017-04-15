@@ -9,7 +9,7 @@ typedef struct _rand {
 	t_object x_obj;
 	t_float x_min, x_max, *x_vec;
 	unsigned x_state;
-	t_int x_ac;
+	int x_ac;
 } t_rand;
 
 static int rand_time(void) {
@@ -31,11 +31,11 @@ static void rand_peek(t_rand *x, t_symbol *s) {
 	post("%s%s%u", s->s_name, *s->s_name?": ":"", x->x_state);
 }
 
-static void rand_min(t_rand *x, t_floatarg f) {
+static void rand_min(t_rand *x, t_float f) {
 	x->x_min=f;
 }
 
-static void rand_max(t_rand *x, t_floatarg f) {
+static void rand_max(t_rand *x, t_float f) {
 	x->x_max=f;
 }
 

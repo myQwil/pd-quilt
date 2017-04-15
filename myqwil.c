@@ -23,7 +23,7 @@ void sploat_setup(void);
 void gloat_setup(void);
 
 
-/* ------------------------ setup routine ------------------------- */
+/* ------------------------ setup routine ------------------------ */
 
 void myQwil_setup(void) {
 	myQwil_class = class_new(gensym("myQwil"), myQwil_new, 0,
