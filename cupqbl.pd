@@ -7,7 +7,7 @@
 #X obj 286 172 f;
 #X obj 286 197 + 1;
 #X obj 210 213 inlet;
-#X floatatom 210 112 5 0 0 0 - - -, f 5;
+#X floatatom 210 112 5 0 0 0 - - -;
 #X obj 210 131 bng 18 250 50 0 empty empty empty 17 7 0 10 -243850
 -75900 -1;
 #X obj 229 131 bng 18 250 50 0 empty empty empty 17 7 0 10 -243850

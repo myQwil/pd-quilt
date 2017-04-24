@@ -1,11 +1,11 @@
-#N canvas 719 355 450 300 10;
-#X text 203 21 LOGB;
-#X text 54 49 specify the log's base as the creation argument or with
-the second inlet.;
-#X floatatom 200 182 0 0 0 0 - - -;
-#X floatatom 200 125 0 0 0 0 - - -;
-#X floatatom 250 125 0 0 0 0 - - -;
-#X obj 200 155 logb 2;
-#X connect 3 0 5 0;
-#X connect 4 0 5 1;
-#X connect 5 0 2 0;
+#N canvas 719 355 450 300 12;
+#X floatatom 203 182 0 0 0 0 - - -;
+#X floatatom 203 116 0 0 0 0 - - -;
+#X floatatom 262 116 0 0 0 0 - - -;
+#X obj 203 151 logb 2;
+#X text 203 34 LOG BASE;
+#X text 40 57 log's base as the creation argument or second inlet.
+;
+#X connect 1 0 3 0;
+#X connect 2 0 3 1;
+#X connect 3 0 0 0;

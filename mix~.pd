@@ -1,10 +1,10 @@
-#N canvas 719 355 450 300 10;
-#X obj 159 102 catch~ L;
-#X obj 159 156 *~;
-#X obj 262 102 catch~ R;
-#X obj 262 156 *~;
-#X obj 214 125 inlet~;
-#X obj 205 173 dac~;
+#N canvas 719 355 450 300 12;
+#X obj 150 89 catch~ L;
+#X obj 150 152 *~;
+#X obj 271 89 catch~ R;
+#X obj 271 152 *~;
+#X obj 215 116 inlet~;
+#X obj 204 172 dac~;
 #X connect 0 0 1 0;
 #X connect 1 0 5 0;
 #X connect 2 0 3 0;

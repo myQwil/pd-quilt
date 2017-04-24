@@ -1,19 +1,19 @@
-#N canvas 719 355 450 300 10;
-#X obj 189 199 osc~;
-#X obj 189 222 *~;
-#X floatatom 231 207 5 0 0 0 - - -, f 5;
-#X obj 231 226 * 0.01;
-#X obj 179 249 dac~;
-#X floatatom 195 178 5 0 0 0 - - -, f 5;
-#X floatatom 237 178 5 0 0 0 - - -, f 5;
-#X text 276 178 midi note;
-#X text 189 25 RUSE;
-#X obj 189 151 ruse 69 2 4 5 7 9 11;
-#X floatatom 189 104 5 0 0 0 - - -, f 5;
-#X floatatom 150 150 5 0 0 0 - - -, f 5;
-#X text 75 51 similar to [muse] but the received float value is interpreted
+#N canvas 719 355 450 300 12;
+#X obj 184 210 osc~;
+#X obj 184 237 *~;
+#X floatatom 233 220 0 0 0 0 - - -;
+#X obj 233 242 * 0.01;
+#X obj 172 269 dac~;
+#X floatatom 191 186 0 0 0 0 - - -;
+#X floatatom 240 186 0 0 0 0 - - -;
+#X text 285 186 midi note;
+#X text 217 17 RUSE;
+#X obj 184 154 ruse 69 2 4 5 7 9 11;
+#X floatatom 184 100 0 0 0 0 - - -;
+#X floatatom 138 153 0 0 0 0 - - -;
+#X text 41 38 similar to [muse] but the received float value is interpreted
 as a literal midi note \, and rounds to the nearest scale note;
-#X obj 189 125 / 10;
+#X obj 184 124 / 10;
 #X connect 0 0 1 0;
 #X connect 1 0 4 0;
 #X connect 1 0 4 1;

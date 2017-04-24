@@ -7,8 +7,8 @@ LIBRARY_NAME = myqwil
 # variable, help files will be included automatically, and for GUI
 # objects, the matching .tcl file too
 SOURCES = graid.c muse.c ruse.c harm.c fton.c ntof.c radx.c same.c \
-		  sploat.c gloat.c woq.c logb.c divrt.c rand.c randv.c rind.c !.c \
-		  0x3c0x3e.c 0x3e0x3c.c \#0x3c0x3e.c \#0x3e0x3c.c \
+		  sploat.c gloat.c woq.c logb.c divrt.c rand.c randv.c rind.c \
+		  0x3c0x3e.c 0x3e0x3c.c \#0x3c0x3e.c \#0x3e0x3c.c !.c !~.c \
 		  \#+.c \#-.c \#0x2a.c \#0x2f.c \#pow.c \#max.c \#min.c \
 		  \#==.c \#!=.c \#0x3e.c \#0x3c.c \#0x3e=.c \#0x3c=.c \
 		  \#&.c \#&&.c \#0x7c.c \#0x7c0x7c.c \#0x3c0x3c.c \#0x3e0x3e.c \

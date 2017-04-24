@@ -1,4 +1,4 @@
-#N canvas 719 355 450 425 10;
+#N canvas 718 293 450 425 10;
 #X text 255 263 efficient kick drum;
 #X text 306 285 ajf;
 #X obj 170 49 inlet;

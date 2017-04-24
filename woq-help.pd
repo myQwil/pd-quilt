@@ -1,12 +1,11 @@
-#N canvas 719 355 450 300 10;
-#X text 211 26 [woq];
-#X floatatom 205 170 0 0 0 0 - - -;
-#X floatatom 205 113 0 0 0 0 - - -;
-#X floatatom 255 113 0 0 0 0 - - -;
-#X obj 205 143 woq 2;
-#X text 72 46 similar to [pow] \, except the second inlet and creation
-argument assign the base \, and the first inlet assigns the exponent
-;
-#X connect 2 0 4 0;
-#X connect 3 0 4 1;
-#X connect 4 0 1 0;
+#N canvas 719 355 450 300 12;
+#X text 214 20 WOQ;
+#X text 32 44 reverse of POW. The second inlet and creation argument
+assign the base \, and the first inlet assigns the exponent;
+#X floatatom 197 188 0 0 0 0 - - -;
+#X floatatom 197 122 0 0 0 0 - - -;
+#X floatatom 256 122 0 0 0 0 - - -;
+#X obj 197 157 woq 2;
+#X connect 3 0 5 0;
+#X connect 4 0 5 1;
+#X connect 5 0 2 0;
