@@ -1,7 +1,7 @@
 #N canvas 719 355 450 300 12;
-#X text 193 9 HOT BINOPS 3;
+#X text 188 9 HOT BINOPS 3;
 #X text 117 27 & \, | \, && \, || \, << \, >> \, % \, mod \, div;
-#X text 141 56 arithmetic with hot inlets;
+#X text 138 51 arithmetic with hot inlets;
 #X floatatom 65 97 0 0 0 0 - - -;
 #X floatatom 100 97 0 0 0 0 - - -;
 #X floatatom 65 155 0 0 0 0 - - -;

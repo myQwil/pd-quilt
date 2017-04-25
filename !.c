@@ -2,33 +2,33 @@
 
 /* -------------------------- logical negation -------------------------- */
 
-static t_class *not_class;
+static t_class *lnot_class;
 
-typedef struct _not {
+typedef struct _lnot {
 	t_object x_obj;
 	t_float x_f1;
-} t_not;
+} t_lnot;
 
-static void not_bang(t_not *x) {
+static void lnot_bang(t_lnot *x) {
 	outlet_float(x->x_obj.ob_outlet, !x->x_f1);
 }
 
-static void not_float(t_not *x, t_float f) {
+static void lnot_float(t_lnot *x, t_float f) {
 	outlet_float(x->x_obj.ob_outlet, !(x->x_f1=f));
 }
 
-static void *not_new(t_floatarg f) {
-	t_not *x = (t_not *)pd_new(not_class);
+static void *lnot_new(t_floatarg f) {
+	t_lnot *x = (t_lnot *)pd_new(lnot_class);
 	outlet_new(&x->x_obj, &s_float);
 	x->x_f1 = f;
 	return (x);
 }
 
 void setup_0x21(void) {
-	not_class = class_new(gensym("!"),
-		(t_newmethod)not_new, 0,
-		sizeof(t_not), 0,
+	lnot_class = class_new(gensym("!"),
+		(t_newmethod)lnot_new, 0,
+		sizeof(t_lnot), 0,
 		A_DEFFLOAT, 0);
-	class_addbang(not_class, not_bang);
-	class_addfloat(not_class, (t_method)not_float);
+	class_addbang(lnot_class, lnot_bang);
+	class_addfloat(lnot_class, lnot_float);
 }

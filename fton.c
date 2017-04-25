@@ -48,23 +48,22 @@ static void fton_float(t_fton *x, t_float f) {
 
 static void *fton_new(t_symbol *s, int argc, t_atom *argv) {
 	t_fton *x = (t_fton *)pd_new(fton_class);
+	outlet_new(&x->x_obj, &s_float);
 	
 	t_pd *pref = pd_new(fton_ref_class);
 	x->p_ref = pref;
 	((t_fton_proxy *)pref)->p_master = x;
+	inlet_new(&x->x_obj, pref, 0, 0);
 	
 	t_pd *ptet = pd_new(fton_tet_class);
 	x->p_tet = ptet;
 	((t_fton_proxy *)ptet)->p_master = x;
-	
-	outlet_new(&x->x_obj, &s_float);
-	inlet_new(&x->x_obj, pref, 0, 0);
 	inlet_new(&x->x_obj, ptet, 0, 0);
 	
 	t_float ref=440, tet=12;
 	switch (argc)
-	{	case 2: tet = atom_getfloat(argv+1);
-		case 1: ref = atom_getfloat(argv);   }
+	{ case 2: tet = atom_getfloat(argv+1);
+	  case 1: ref = atom_getfloat(argv); }
 	x->x_rt = 1./ ((x->x_ref=ref) * pow(2,-69/tet));
 	x->x_st = 1./ (log(2) / (x->x_tet=tet));
 	return (x);

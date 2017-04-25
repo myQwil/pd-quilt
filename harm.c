@@ -176,10 +176,10 @@ static void harm_float(t_harm *x, t_float f) {
 static void harm_bang(t_harm *x) {
 	int n=x->x_n, i=x->x_inl+1;
 	i = x->x_all ? i : (n>i?i:n);
-	t_outlet **o;
-	for (o=x->x_outs+i; o--, i--;)
+	t_outlet **op;
+	for (op=x->x_outs+i; op--, i--;)
 	{	double note = getnote(x, i);
-		outlet_float(*o, x->x_midi ?
+		outlet_float(*op, x->x_midi ?
 			note : ntof(note, x->x_rt, x->x_st));   }
 }
 
@@ -195,23 +195,23 @@ static void *harm_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_max = x->x_inl = x->x_n = argc<2 ? 2:argc;
 	x->x_scl = (t_float *)getbytes(x->x_max * sizeof(t_float));
 	x->x_outs = (t_outlet **)getbytes((x->x_inl+1) * sizeof(t_outlet *));
-	t_outlet **o = x->x_outs;
-	o[0] = outlet_new(&x->x_obj, &s_float);
+	t_outlet **op = x->x_outs;
+	op[0] = outlet_new(&x->x_obj, &s_float);
 	
 	if (argc<2)
 	{	x->x_scl[0] = (argc ? atom_getfloat(argv) : 69);
 		floatinlet_new(&x->x_obj, x->x_scl);
 		x->x_scl[1] = (argc>1 ? atom_getfloat(argv+1) : 7);
 		floatinlet_new(&x->x_obj, x->x_scl+1);
-		o[1] = outlet_new(&x->x_obj, &s_float);
-		o[2] = outlet_new(&x->x_obj, &s_float);
+		op[1] = outlet_new(&x->x_obj, &s_float);
+		op[2] = outlet_new(&x->x_obj, &s_float);
 		argc=0;   }
 	
 	t_float *fp;
-	for (fp=x->x_scl; o++, argc--; argv++, fp++)
+	for (fp=x->x_scl; op++, argc--; argv++, fp++)
 	{	*fp = atom_getfloat(argv);
 		floatinlet_new(&x->x_obj, fp);
-		*o = outlet_new(&x->x_obj, &s_float);   }
+		*op = outlet_new(&x->x_obj, &s_float);   }
 	return (x);
 }
 
@@ -227,8 +227,8 @@ void harm_setup(void) {
 		A_GIMME, 0);
 	
 	class_addbang(harm_class, harm_bang);
-	class_addlist(harm_class, harm_list);
 	class_addfloat(harm_class, harm_float);
+	class_addlist(harm_class, harm_list);
 	class_addmethod(harm_class, (t_method)harm_ptr,
 		gensym("ptr"), A_DEFSYM, 0);
 	class_addmethod(harm_class, (t_method)harm_peek,

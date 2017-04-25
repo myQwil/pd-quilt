@@ -49,16 +49,14 @@ static void rind_bang(t_rind *x) {
 static void *rind_new(t_symbol *s, int argc, t_atom *argv) {
 	t_rind *x = (t_rind *)pd_new(rind_class);
 	outlet_new(&x->x_obj, &s_float);
-	x->x_state = rind_makeseed();
-	t_float min=0, max=1;
-	switch (argc)
-	{ case 2:
-		min=atom_getfloat(argv);
-		max=atom_getfloat(argv+1); break;
-	  case 1: max=atom_getfloat(argv);   }
-	x->x_min=min, x->x_max=max;
-	if (argc!=1) floatinlet_new(&x->x_obj, &x->x_min);
 	floatinlet_new(&x->x_obj, &x->x_max);
+	floatinlet_new(&x->x_obj, &x->x_min);
+	t_float max=1, min=0;
+	switch (argc)
+	{ case 2: min=atom_getfloat(argv+1);
+	  case 1: max=atom_getfloat(argv); }
+	x->x_max=max, x->x_min=min;
+	x->x_state = rind_makeseed();
 	return (x);
 }
 

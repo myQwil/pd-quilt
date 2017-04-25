@@ -38,11 +38,11 @@ static void sploat_float(t_sploat *x, t_float f) {
 
 static void *sploat_new(t_floatarg f) {
 	t_sploat *x = (t_sploat *)pd_new(sploat_class);
-	x->x_f = f;
-	floatinlet_new(&x->x_obj, &x->x_f);
 	x->m_out = outlet_new(&x->x_obj, &s_float);
 	x->e_out = outlet_new(&x->x_obj, &s_float);
 	x->s_out = outlet_new(&x->x_obj, &s_float);
+	floatinlet_new(&x->x_obj, &x->x_f);
+	x->x_f = f;
 	return (x);
 }
 

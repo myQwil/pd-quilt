@@ -48,23 +48,22 @@ static void ntof_float(t_ntof *x, t_float f) {
 
 static void *ntof_new(t_symbol *s, int argc, t_atom *argv) {
 	t_ntof *x = (t_ntof *)pd_new(ntof_class);
+	outlet_new(&x->x_obj, &s_float);
 	
 	t_pd *pref = pd_new(ntof_ref_class);
 	x->p_ref = pref;
 	((t_ntof_proxy *)pref)->p_master = x;
+	inlet_new(&x->x_obj, pref, 0, 0);
 	
 	t_pd *ptet = pd_new(ntof_tet_class);
 	x->p_tet = ptet;
 	((t_ntof_proxy *)ptet)->p_master = x;
-	
-	outlet_new(&x->x_obj, &s_float);
-	inlet_new(&x->x_obj, pref, 0, 0);
 	inlet_new(&x->x_obj, ptet, 0, 0);
 	
 	t_float ref=440, tet=12;
 	switch (argc)
-	{	case 2: tet = atom_getfloat(argv+1);
-		case 1: ref = atom_getfloat(argv);   }
+	{ case 2: tet = atom_getfloat(argv+1);
+	  case 1: ref = atom_getfloat(argv); }
 	x->x_rt = (x->x_ref=ref) * pow(2,-69/tet);
 	x->x_st = log(2) / (x->x_tet=tet);
 	return (x);

@@ -44,14 +44,14 @@ static void gloat_float(t_gloat *x, t_float f) {
 
 static void *gloat_new(t_symbol *s, int argc, t_atom *argv) {
 	t_gloat *x = (t_gloat *)pd_new(gloat_class);
-	switch (argc)
-	{	case 3: x->x_s = atom_getfloat(argv+2);
-		case 2: x->x_e = atom_getfloat(argv+1);
-		case 1: x->x_m = atom_getfloat(argv);   }
+	outlet_new(&x->x_obj, &s_float);
 	floatinlet_new(&x->x_obj, &x->x_m);
 	floatinlet_new(&x->x_obj, &x->x_e);
 	floatinlet_new(&x->x_obj, &x->x_s);
-	outlet_new(&x->x_obj, &s_float);
+	switch (argc)
+	{ case 3: x->x_s = atom_getfloat(argv+2);
+	  case 2: x->x_e = atom_getfloat(argv+1);
+	  case 1: x->x_m = atom_getfloat(argv); }
 	return (x);
 }
 

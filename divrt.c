@@ -54,12 +54,12 @@ static void divrt_float(t_divrt *x, t_float f) {
 
 static void *divrt_new(t_floatarg n, t_floatarg max) {
 	t_divrt *x = (t_divrt *)pd_new(divrt_class);
-	x->x_n = n<1?3:n;
-	x->x_max = max<1?2:max;
-	x->x_state = divrt_makeseed();
 	outlet_new(&x->x_obj, &s_float);
 	floatinlet_new(&x->x_obj, &x->x_n);
 	floatinlet_new(&x->x_obj, &x->x_max);
+	x->x_state = divrt_makeseed();
+	x->x_max = max<1?2:max;
+	x->x_n = n<1?3:n;
 	return (x);
 }
 

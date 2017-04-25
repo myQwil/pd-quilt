@@ -24,7 +24,7 @@ void setup_0x3e0x3c(void) {
 		A_DEFFLOAT, 0);
 	
 	class_addbang(gtlt_class, gtlt_bang);
-	class_addfloat(gtlt_class, (t_method)gtlt_float);
+	class_addfloat(gtlt_class, gtlt_float);
 	class_sethelpsymbol(gtlt_class, gensym("ne-aliases"));
 }
 

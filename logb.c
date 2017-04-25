@@ -28,5 +28,5 @@ void logb_setup(void) {
 		A_DEFFLOAT, 0);
 	
 	class_addbang(logb_class, logb_bang);
-	class_addfloat(logb_class, (t_method)logb_float);
+	class_addfloat(logb_class, logb_float);
 }

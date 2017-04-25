@@ -22,9 +22,9 @@ parameter to allow rand to reseed automatically.;
 #X floatatom 262 216 0 0 0 0 - - -;
 #X text 329 190 2 args create boundaries;
 #X text 329 207 (number between 3 and 6);
-#X text 299 148 min;
+#X text 299 148 max;
 #X floatatom 292 167 0 0 0 0 - - -;
-#X text 346 148 max;
+#X text 346 148 min;
 #X floatatom 338 167 0 0 0 0 - - -;
 #X obj 209 254 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;

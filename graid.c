@@ -16,6 +16,10 @@ static void graid_float(t_graid *x, t_float f) {
 
 static void *graid_new(t_symbol *s, int argc, t_atom *argv) {
 	t_graid *x = (t_graid *)pd_new(graid_class);
+	outlet_new(&x->x_obj, &s_float);
+	floatinlet_new(&x->x_obj, &x->x_min);
+	floatinlet_new(&x->x_obj, &x->x_max);
+	floatinlet_new(&x->x_obj, &x->x_scl);
 	t_float min=0, max=1, scale=100;
 	switch (argc)
 	{ case 3: scale=atom_getfloat(argv+2); // no break
@@ -24,11 +28,6 @@ static void *graid_new(t_symbol *s, int argc, t_atom *argv) {
 		min=atom_getfloat(argv); break;
 	  case 1: max=atom_getfloat(argv);   }
 	x->x_min=min, x->x_max=max, x->x_scl=scale;
-	
-	floatinlet_new(&x->x_obj, &x->x_min);
-	floatinlet_new(&x->x_obj, &x->x_max);
-	floatinlet_new(&x->x_obj, &x->x_scl);
-	outlet_new(&x->x_obj, &s_float);
 	return (x);
 }
 

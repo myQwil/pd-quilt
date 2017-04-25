@@ -61,15 +61,13 @@ static void *rand_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_state = rand_makeseed();
 	x->x_ac=argc;
 	if (argc<3)
-	{	t_float min=0, max=1;
+	{	floatinlet_new(&x->x_obj, &x->x_max);
+		floatinlet_new(&x->x_obj, &x->x_min);
+		t_float max=1, min=0;
 		switch (argc)
-		{ case 2:
-			min=atom_getfloat(argv);
-			max=atom_getfloat(argv+1); break;
-		  case 1: max=atom_getfloat(argv);   }
-		x->x_min=min, x->x_max=max;
-		if (argc!=1) floatinlet_new(&x->x_obj, &x->x_min);
-		floatinlet_new(&x->x_obj, &x->x_max);   }
+		{ case 2: min=atom_getfloat(argv+1);
+		  case 1: max=atom_getfloat(argv); }
+		x->x_max=max, x->x_min=min;   }
 	else
 	{	x->x_vec = (t_float *)getbytes(argc * sizeof(t_float));
 		int i; t_float *fp;

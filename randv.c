@@ -54,12 +54,12 @@ static void randv_bang(t_randv *x) {
 
 static void *randv_new(t_floatarg n, t_floatarg max) {
 	t_randv *x = (t_randv *)pd_new(randv_class);
-	x->x_n = n<1?3:n;
-	x->x_max = max<1?2:max;
-	x->x_state = randv_makeseed();
 	outlet_new(&x->x_obj, &s_float);
 	floatinlet_new(&x->x_obj, &x->x_n);
 	floatinlet_new(&x->x_obj, &x->x_max);
+	x->x_state = randv_makeseed();
+	x->x_max = max<1?2:max;
+	x->x_n = n<1?3:n;
 	return (x);
 }
 
