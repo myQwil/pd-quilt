@@ -13,7 +13,7 @@ SOURCES = graid.c muse.c ruse.c harm.c fton.c ntof.c radx.c same.c \
 		  \#==.c \#!=.c \#0x3e.c \#0x3c.c \#0x3e=.c \#0x3c=.c \
 		  \#&.c \#&&.c \#0x7c.c \#0x7c0x7c.c \#0x3c0x3c.c \#0x3e0x3e.c \
 		  \#%.c \#mod.c \#div.c @%.c @mod.c @div.c \
-		  @-.c @0x2f.c @pow.c @0x3c0x3c.c @0x3e0x3e.c
+		  @-.c @0x2f.c @pow.c @0x3c0x3c.c @0x3e0x3e.c ^.c \#^.c
 
 # list all pd objects (i.e. myobject.pd) files here, and their helpfiles will
 # be included automatically
