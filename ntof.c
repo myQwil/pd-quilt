@@ -23,18 +23,18 @@ typedef struct _ntof_proxy {
 	t_ntof *p_master;
 } t_ntof_proxy;
 
-static void ntof_ref(t_ntof *x, t_float f) {
+static void ntof_ref(t_ntof *x, t_floatarg f) {
 	x->x_rt = (x->x_ref=f) * pow(2,-69/x->x_tet);
+}
+
+static void ntof_tet(t_ntof *x, t_floatarg f) {
+	x->x_rt = x->x_ref * pow(2,-69/f);
+	x->x_st = log(2) / (x->x_tet=f);
 }
 
 static void ntof_ref_float(t_ntof_proxy *x, t_float f) {
 	t_ntof *m = x->p_master;
 	ntof_ref(m, f);
-}
-
-static void ntof_tet(t_ntof *x, t_float f) {
-	x->x_rt = x->x_ref * pow(2,-69/f);
-	x->x_st = log(2) / (x->x_tet=f);
 }
 
 static void ntof_tet_float(t_ntof_proxy *x, t_float f) {

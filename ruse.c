@@ -45,11 +45,11 @@ static void ruse_key(t_ruse *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac>1) ruse_list(x, 0, ac-1, av+1);
 }
 
-static void ruse_size(t_ruse *x, t_float f) {
+static void ruse_size(t_ruse *x, t_floatarg f) {
 	x->x_n = f;
 }
 
-static void ruse_octave(t_ruse *x, t_float f) {
+static void ruse_octave(t_ruse *x, t_floatarg f) {
 	x->x_oct = f;
 }
 

@@ -23,18 +23,18 @@ typedef struct _fton_proxy {
 	t_fton *p_master;
 } t_fton_proxy;
 
-static void fton_ref(t_fton *x, t_float f) {
+static void fton_ref(t_fton *x, t_floatarg f) {
 	x->x_rt = 1./ ((x->x_ref=f) * pow(2,-69/x->x_tet));
+}
+
+static void fton_tet(t_fton *x, t_floatarg f) {
+	x->x_rt = 1./ (x->x_ref * pow(2,-69/f));
+	x->x_st = 1./ (log(2) / (x->x_tet=f));
 }
 
 static void fton_ref_float(t_fton_proxy *x, t_float f) {
 	t_fton *m = x->p_master;
 	fton_ref(m, f);
-}
-
-static void fton_tet(t_fton *x, t_float f) {
-	x->x_rt = 1./ (x->x_ref * pow(2,-69/f));
-	x->x_st = 1./ (log(2) / (x->x_tet=f));
 }
 
 static void fton_tet_float(t_fton_proxy *x, t_float f) {

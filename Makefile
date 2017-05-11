@@ -6,8 +6,8 @@ LIBRARY_NAME = myqwil
 # add your .c source files, one object per file, to the SOURCES
 # variable, help files will be included automatically, and for GUI
 # objects, the matching .tcl file too
-SOURCES = graid.c muse.c ruse.c harm.c fton.c ntof.c radx.c same.c \
-		  sploat.c gloat.c logb.c divrt.c rand.c randv.c rind.c \
+SOURCES = graid.c muse.c ruse.c harm.c radx.c same.c logb.c \
+		  fton.c ntof.c sploat.c gloat.c rand.c rind.c \
 		  0x3c0x3e.c 0x3e0x3c.c \#0x3c0x3e.c \#0x3e0x3c.c !.c !~.c \
 		  \#+.c \#-.c \#0x2a.c \#0x2f.c \#pow.c \#max.c \#min.c \
 		  \#==.c \#!=.c \#0x3e.c \#0x3c.c \#0x3e=.c \#0x3c=.c \
@@ -56,7 +56,7 @@ ALL_LIBS =
 
 # these can be set from outside without (usually) breaking the build
 CPPFLAGS =
-CFLAGS = -Wall -W -g
+CFLAGS = -Wall -W -Wno-unused-parameter -g
 LDFLAGS =
 LIBS =
 
