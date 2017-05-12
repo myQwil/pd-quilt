@@ -17,9 +17,9 @@ static t_class *rand_class;
 typedef struct _rand {
 	t_object x_obj;
 	t_float *x_fp, x_pr;	/* previous number */
-	unsigned x_state;
 	int x_c, x_in, x_p,		/* count notes, inlets, pointer */
 		x_rc, x_rx,	x_nop;	/* repeat count, max, and toggle */
+	unsigned x_state, x_swat;
 } t_rand;
 
 #define MAX 1024
@@ -36,11 +36,11 @@ static int rand_makeseed(void) {
 }
 
 static void rand_seed(t_rand *x, t_symbol *s, int ac, t_atom *av) {
-	x->x_state = (ac ? atom_getfloat(av) : rand_time());
+	x->x_state = x->x_swat = (ac ? atom_getfloat(av) : rand_time());
 }
 
 static void rand_state(t_rand *x, t_symbol *s) {
-	post("%s%s%u", s->s_name, *s->s_name?": ":"", x->x_state);
+	post("%s%s%u %u", s->s_name, *s->s_name?": ":"", x->x_state, x->x_swat);
 }
 
 static void rand_ptr(t_rand *x, t_symbol *s) {
@@ -95,9 +95,10 @@ static void rand_max(t_rand *x, t_floatarg f) {
 	x->x_rx = f;
 }
 
-double nextr(t_rand *x, int n) {
-	x->x_state = x->x_state * 472940017 + 832416023;
-	return (1./4294967296) * n * x->x_state;
+double nextr(t_rand *x, int n, int swap) {
+	unsigned *sp = (swap ? &x->x_swat : &x->x_state), state=*sp;
+	*sp = state = state * 472940017 + 832416023;
+	return (1./4294967296) * n * state;
 }
 
 static void swapr(t_rand *x, int *i, t_float fi, int n, int d, int mn, int b) {
@@ -106,7 +107,7 @@ static void swapr(t_rand *x, int *i, t_float fi, int n, int d, int mn, int b) {
 	if (fi==pr) // same as previous value
 	{	if (rc>=rx) // count reached max
 		{	rc=1;
-			double f = *i-mn+d+nextr(x,n-d);
+			double f = *i-mn+d+nextr(x,n-d,1);
 			*i = (int)f%n + mn+b-(f<0);   }
 		else rc++;   }
 	else rc=1;
@@ -118,19 +119,35 @@ static void rand_bang(t_rand *x) {
 	t_float *fp = x->x_fp;
 	if (c<3)
 	{	int mx=fp[0], mn=fp[1], n=mx-mn, b=n<0, d=b?-1:1;
-		if (c>1) n+=d;
-		double f = nextr(x,n) + mn+b;
+		if (c>1) n+=d; else n=n?n:1;
+		double f = nextr(x,n,0) + mn+b;
 		i = f-(f<0);
 		if (x->x_nop)
 		{	swapr(x,&i,i,n,d,mn,b);
 			x->x_pr=i;   }
 		outlet_float(x->x_obj.ob_outlet, i);   }
 	else
-	{	i = nextr(x,c);
+	{	i = nextr(x,c,0);
 		if (x->x_nop)
 		{	swapr(x,&i,fp[i],c,1,0,0);
 			x->x_pr=fp[i];   }
 		outlet_float(x->x_obj.ob_outlet, fp[i]);   }
+}
+
+static void rand_float(t_rand *x, t_float f) {
+	int c=x->x_c, i=f;
+	t_float *fp = x->x_fp;
+	if (x->x_nop)
+	{	if (c<3)
+		{	int mx=fp[0], mn=fp[1], n=mx-mn, b=n<0, d=b?-1:1;
+			if (c>1) n+=d; else n=n?n:1;
+			swapr(x,&i,i,n,d,mn,b);
+			x->x_pr=i;
+			outlet_float(x->x_obj.ob_outlet, i);   }
+		else
+		{	swapr(x,&i,fp[i],c,1,0,0);
+			x->x_pr=fp[i];   
+			outlet_float(x->x_obj.ob_outlet, fp[i]);   }   }
 }
 
 static void *rand_new(t_symbol *s, int ac, t_atom *av) {
@@ -142,7 +159,8 @@ static void *rand_new(t_symbol *s, int ac, t_atom *av) {
 	for (; n--; fp++)
 	{	floatinlet_new(&x->x_obj, fp);
 		*fp = atom_getfloat(av++);   }
-	x->x_nop=0, x->x_rx=1, x->x_state=rand_makeseed();
+	x->x_nop=0, x->x_rx=1,
+	x->x_state = x->x_swat = rand_makeseed();
 	return (x);
 }
 
@@ -157,6 +175,7 @@ void rand_setup(void) {
 		A_GIMME, 0);
 	
 	class_addbang(rand_class, rand_bang);
+	class_addfloat(rand_class, rand_float);
 	class_addmethod(rand_class, (t_method)rand_seed,
 		gensym("seed"), A_GIMME, 0);
 	class_addmethod(rand_class, (t_method)rand_state,
