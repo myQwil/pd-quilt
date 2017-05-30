@@ -70,8 +70,7 @@ static void *ntof_new(t_symbol *s, int argc, t_atom *argv) {
 }
 
 static void ntof_free(t_ntof *x) {
-	pd_free(x->p_ref);
-	pd_free(x->p_tet);
+	pd_free(x->p_ref); pd_free(x->p_tet);
 }
 
 void ntof_setup(void) {

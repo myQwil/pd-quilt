@@ -70,8 +70,7 @@ static void *fton_new(t_symbol *s, int argc, t_atom *argv) {
 }
 
 static void fton_free(t_fton *x) {
-	pd_free(x->p_ref);
-	pd_free(x->p_tet);
+	pd_free(x->p_ref); pd_free(x->p_tet);
 }
 
 void fton_setup(void) {	

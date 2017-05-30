@@ -86,7 +86,6 @@ void ruse_setup(void) {
 		(t_newmethod)ruse_new, (t_method)ruse_free,
 		sizeof(t_ruse), 0,
 		A_GIMME, 0);
-	
 	class_addfloat(ruse_class, ruse_float);
 	class_addlist(ruse_class, ruse_list);
 	class_addmethod(ruse_class, (t_method)ruse_key,

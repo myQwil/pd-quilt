@@ -51,7 +51,6 @@ void sploat_setup(void) {
 		(t_newmethod)sploat_new, 0,
 		sizeof(t_sploat), 0,
 		A_DEFFLOAT, 0);
-	
 	class_addbang(sploat_class, sploat_bang);
 	class_addfloat(sploat_class, sploat_float);
 	class_addmethod(sploat_class, (t_method)sploat_peek,

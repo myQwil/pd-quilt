@@ -36,6 +36,5 @@ void graid_setup(void) {
 		(t_newmethod)graid_new, 0,
 		sizeof(t_graid), 0,
 		A_GIMME, 0);
-	
 	class_addfloat(graid_class, graid_float);
 }

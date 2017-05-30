@@ -26,7 +26,6 @@ void logb_setup(void) {
 		(t_newmethod)logb_new, 0,
 		sizeof(t_binop), 0,
 		A_DEFFLOAT, 0);
-	
 	class_addbang(logb_class, logb_bang);
 	class_addfloat(logb_class, logb_float);
 }

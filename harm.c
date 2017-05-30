@@ -216,7 +216,6 @@ void harm_setup(void) {
 		(t_newmethod)harm_new, (t_method)harm_free,
 		sizeof(t_harm), 0,
 		A_GIMME, 0);
-	
 	class_addbang(harm_class, harm_bang);
 	class_addfloat(harm_class, harm_float);
 	class_addlist(harm_class, harm_list);

@@ -192,7 +192,6 @@ void muse_setup(void) {
 		(t_newmethod)muse_new, (t_method)muse_free,
 		sizeof(t_muse), 0,
 		A_GIMME, 0);
-	
 	class_addfloat(muse_class, muse_float);
 	class_addlist(muse_class, muse_list);
 	class_addmethod(muse_class, (t_method)muse_ptr,

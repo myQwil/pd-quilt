@@ -65,7 +65,6 @@ void rind_setup(void) {
 		(t_newmethod)rind_new, 0,
 		sizeof(t_rind), 0,
 		A_GIMME, 0);
-	
 	class_addbang(rind_class, rind_bang);
 	class_addmethod(rind_class, (t_method)rind_seed,
 		gensym("seed"), A_GIMME, 0);

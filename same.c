@@ -37,7 +37,6 @@ void same_setup(void) {
 		(t_newmethod)same_new, 0,
 		sizeof(t_same), 0,
 		A_DEFFLOAT, 0);
-	
 	class_addbang(same_class, same_bang);
 	class_addfloat(same_class, same_float);
 	class_addmethod(same_class, (t_method)same_set, gensym("set"),
