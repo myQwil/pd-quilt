@@ -33,7 +33,7 @@ of a float;
 #X floatatom 357 211 0 0 0 0 - - -;
 #X obj 354 303 - 127;
 #X floatatom 397 303 0 0 0 0 - - -;
-#X obj 354 328 #pow 2;
+#X obj 354 328 @pow 2;
 #X obj 35 389 mantissa;
 #X connect 0 0 26 2;
 #X connect 0 0 29 0;

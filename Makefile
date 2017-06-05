@@ -56,7 +56,7 @@ ALL_LIBS =
 
 # these can be set from outside without (usually) breaking the build
 CPPFLAGS =
-CFLAGS = -Wall -W -Wno-unused-parameter -g
+CFLAGS = -Wall -W -Wno-unused-parameter -Wno-sign-compare -g
 LDFLAGS =
 LIBS =
 
