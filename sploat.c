@@ -2,8 +2,11 @@
 
 typedef union {
 	float f;
-	struct { unsigned mant:23,expo:8,sign:1; } u;
+	struct { unsigned mnt:23,exp:8,sgn:1; } u;
 } ufloat;
+#define mnt u.mnt
+#define exp u.exp
+#define sgn u.sgn
 
 /* -------------------------- sploat -------------------------- */
 
@@ -12,35 +15,33 @@ static t_class *sploat_class;
 typedef struct _sploat {
 	t_object x_obj;
 	t_float x_f;
-	t_outlet *m_out, *e_out, *s_out;
+	t_outlet *o_m, *o_e, *o_s;
 } t_sploat;
 
 static void sploat_peek(t_sploat *x, t_symbol *s) {
 	ufloat uf = {.f=x->x_f};
 	post("%s%s0x%x %u %u = %g",
 		s->s_name, *s->s_name?": ":"",
-		uf.u.mant, uf.u.expo, uf.u.sign, uf.f);
+		uf.mnt, uf.exp, uf.sgn, uf.f);
 }
 
 static void sploat_bang(t_sploat *x) {
 	ufloat uf = {.f=x->x_f};
-	outlet_float(x->s_out, uf.u.sign);
-	outlet_float(x->e_out, uf.u.expo);
-	outlet_float(x->m_out, uf.u.mant);
+	outlet_float(x->o_s, uf.sgn);
+	outlet_float(x->o_e, uf.exp);
+	outlet_float(x->o_m, uf.mnt);
 }
 
 static void sploat_float(t_sploat *x, t_float f) {
-	ufloat uf = {.f=x->x_f=f};
-	outlet_float(x->s_out, uf.u.sign);
-	outlet_float(x->e_out, uf.u.expo);
-	outlet_float(x->m_out, uf.u.mant);
+	x->x_f = f;
+	sploat_bang(x);
 }
 
 static void *sploat_new(t_floatarg f) {
 	t_sploat *x = (t_sploat *)pd_new(sploat_class);
-	x->m_out = outlet_new(&x->x_obj, &s_float);
-	x->e_out = outlet_new(&x->x_obj, &s_float);
-	x->s_out = outlet_new(&x->x_obj, &s_float);
+	x->o_m = outlet_new(&x->x_obj, &s_float);
+	x->o_e = outlet_new(&x->x_obj, &s_float);
+	x->o_s = outlet_new(&x->x_obj, &s_float);
 	floatinlet_new(&x->x_obj, &x->x_f);
 	x->x_f = f;
 	return (x);

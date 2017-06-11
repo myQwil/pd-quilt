@@ -2,8 +2,11 @@
 
 typedef union {
 	float f;
-	struct { unsigned mant:23,expo:8,sign:1; } u;
+	struct { unsigned mnt:23,exp:8,sgn:1; } u;
 } ufloat;
+#define mnt u.mnt
+#define exp u.exp
+#define sgn u.sgn
 
 /* -------------------------- gloat -------------------------- */
 
@@ -16,30 +19,27 @@ typedef struct _gloat {
 
 static void gloat_peek(t_gloat *x, t_symbol *s) {
 	ufloat fu =
-	{	.u.sign=x->x_s,
-		.u.expo=x->x_e,
-		.u.mant=x->x_m   };
+	{	.sgn=x->x_s,
+		.exp=x->x_e,
+		.mnt=x->x_m   };
 	float f=fu.f;
 	ufloat uf = {.f=f};
 	post("%s%s0x%x %u %u = %g",
 		s->s_name, *s->s_name?": ":"",
-		uf.u.mant, uf.u.expo, uf.u.sign, f);
+		uf.mnt, uf.exp, uf.sgn, f);
 }
 
 static void gloat_bang(t_gloat *x) {
 	ufloat uf =
-	{	.u.sign=x->x_s,
-		.u.expo=x->x_e,
-		.u.mant=x->x_m   };
+	{	.sgn=x->x_s,
+		.exp=x->x_e,
+		.mnt=x->x_m   };
 	outlet_float(x->x_obj.ob_outlet, uf.f);
 }
 
 static void gloat_float(t_gloat *x, t_float f) {
-	ufloat uf =
-	{	.u.sign=x->x_s,
-		.u.expo=x->x_e,
-		.u.mant=x->x_m=f   };
-	outlet_float(x->x_obj.ob_outlet, uf.f);
+	x->x_m = f;
+	gloat_bang(x);
 }
 
 static void *gloat_new(t_symbol *s, int argc, t_atom *argv) {
@@ -64,5 +64,5 @@ void gloat_setup(void) {
 	class_addfloat(gloat_class, gloat_float);
 	class_addmethod(gloat_class, (t_method)gloat_peek,
 		gensym("peek"), A_DEFSYM, 0);
-	class_sethelpsymbol(gloat_class, gensym("sploat.pd"));
+	class_sethelpsymbol(gloat_class, gensym("sploat"));
 }
