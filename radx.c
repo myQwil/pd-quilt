@@ -32,8 +32,8 @@ typedef struct _radx {
 	int x_p, x_erad;
 } t_radx;
 
-static void out(char *num, int *nl, const char *s, int l) {
-	for (; l--; s++) num[(*nl)++] = *s;
+static void out(char num[], int *i, const char *s, int l) {
+	for (; l--; s++) num[(*i)++] = *s;
 }
 
 static const char dgt[64] = {
@@ -183,9 +183,9 @@ static void fmt_fp(t_radx *f, long double y) {
 		l += ebuf-estr;
 	}
 
-	char num[p+12]; // -1.23456e+1111111\0
-	int nl=0;
-	out(&num[0], &nl, "-", neg);
+	char num[p+13]; // -1.23456e-10010101\0
+	int ni=0;
+	out(num, &ni, "-", neg);
 	
 	if ((t|32)=='f') {
 		if (a>r) a=r;
@@ -193,13 +193,13 @@ static void fmt_fp(t_radx *f, long double y) {
 			char *s = fmt_u(*d, buf+rp, radx);
 			if (d!=a) while (s>buf) *--s='0';
 			else if (s==buf+rp) *--s='0';
-			out(&num[0], &nl, s, buf+rp-s);
+			out(num, &ni, s, buf+rp-s);
 		}
-		if (p) out(&num[0], &nl, ".", 1);
+		if (p) out(num, &ni, ".", 1);
 		for (; d<z && p>0; d++, p-=rp) {
 			char *s = fmt_u(*d, buf+rp, radx);
 			while (s>buf) *--s='0';
-			out(&num[0], &nl, s, MIN(rp,p));
+			out(num, &ni, s, MIN(rp,p));
 		}
 	} else {
 		if (z<=a) z=a+1;
@@ -208,16 +208,16 @@ static void fmt_fp(t_radx *f, long double y) {
 			if (s==buf+rp) *--s='0';
 			if (d!=a) while (s>buf) *--s='0';
 			else {
-				out(&num[0], &nl, s++, 1);
-				if (p>0) out(&num[0], &nl, ".", 1);
+				out(num, &ni, s++, 1);
+				if (p>0) out(num, &ni, ".", 1);
 			}
-			out(&num[0], &nl, s, MIN(buf+rp-s, p));
+			out(num, &ni, s, MIN(buf+rp-s, p));
 			p -= buf+rp-s;
 		}
-		out(&num[0], &nl, estr, ebuf-estr);
+		out(num, &ni, estr, ebuf-estr);
 	}
 	
-	num[nl] = '\0';
+	num[ni] = '\0';
 	outlet_symbol(f->x_obj.ob_outlet, gensym(num));
 }
 
