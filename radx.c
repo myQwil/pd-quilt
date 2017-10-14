@@ -50,9 +50,6 @@ static char *fmt_u(uintmax_t x, char *s, int radx) {
 	return s;
 }
 
-// LDBL_MANT_DIG=64
-// LDBL_MAX_EXP=16384
-// LDBL_EPSILON=1.0842e-019
 static void fmt_fp(t_radx *f, long double y) {
 	int radx = f->x_radx;
 	if (radx<2) radx=2; else if (radx>64) radx=64;
@@ -229,36 +226,26 @@ static void radx_erad(t_radx *x, t_floatarg f) {
 	x->x_erad = f;
 }
 
-#ifdef _WIN32
 static void radx_float(t_radx *x, t_float f) {
 	ufloat uf = {.f=f};
 	int mt=uf.mnt, neg=uf.sgn;
 	
 	if (!isfinite(f))
 	{	const char *s;
-		if (f!=f)
-		{	if (mt==0x400000 && neg) s="-1.#IND";
-			else s=(neg?"-1.#QNAN":"1.#QNAN");   }
-		else s=(neg?"-1.#INF":"1.#INF");
+		#ifdef _WIN32
+			if (f!=f)
+			{	if (mt==0x400000 && neg) s="-1.#IND";
+				else s=(neg?"-1.#QNAN":"1.#QNAN");   }
+			else s=(neg?"-1.#INF":"1.#INF");
+		#else
+			if (f!=f) s=(neg?"-nan":"nan");
+			else s=(neg?"-inf":"inf");
+		#endif
 		outlet_symbol(x->x_obj.ob_outlet, gensym(s));
 		return;   }
 	
 	fmt_fp(x, f);
 }
-#else
-static void radx_float(t_radx *x, t_float f) {
-	int neg=signbit(f);
-	
-	if (!isfinite(f))
-	{	const char *s;
-		if (f!=f) s=(neg?"-nan":"nan");
-		else s=(neg?"-inf":"inf");
-		outlet_symbol(x->x_obj.ob_outlet, gensym(s));
-		return;   }
-	
-	fmt_fp(x, f);
-}
-#endif
 
 static void *radx_new(t_float f) {
 	t_radx *x = (t_radx *)pd_new(radx_class);
