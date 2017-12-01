@@ -2,8 +2,8 @@
 #X text 183 9 REVERSE BINOPS;
 #X text 121 27 - \, / \, pow \, << \, >> \, % \, mod \, div;
 #X text 124 51 binops with reversed operands;
-#X floatatom 138 92 0 0 0 0 - - -;
-#X floatatom 98 96 0 0 0 0 - - -;
+#X floatatom 106 97 0 0 0 0 - - -;
+#X floatatom 141 97 0 0 0 0 - - -;
 #X floatatom 106 155 0 0 0 0 - - -;
 #X obj 106 126 @-;
 #X floatatom 199 97 0 0 0 0 - - -;
@@ -34,6 +34,9 @@
 #X floatatom 420 213 0 0 0 0 - - -;
 #X floatatom 385 272 0 0 0 0 - - -;
 #X obj 385 242 @div;
+#X floatatom 32 97 0 0 0 0 - - -;
+#X floatatom 64 97 0 0 0 0 - - -;
+#X floatatom 32 156 0 0 0 0 - - -;
 #N canvas 257 341 450 346 @- 0;
 #X obj 209 170 -;
 #X obj 194 84 inlet;
@@ -47,10 +50,7 @@
 #X connect 3 0 0 0;
 #X connect 5 0 3 0;
 #X connect 5 1 0 1;
-#X restore 12 92 pd @-;
-#X floatatom 55 59 0 0 0 0 - - -;
-#X floatatom 15 63 0 0 0 0 - - -;
-#X floatatom 23 122 0 0 0 0 - - -;
+#X restore 32 126 pd @-;
 #X connect 3 0 6 1;
 #X connect 4 0 6 0;
 #X connect 6 0 5 0;
@@ -76,5 +76,5 @@
 #X connect 32 0 34 0;
 #X connect 34 0 33 0;
 #X connect 35 0 38 0;
-#X connect 36 0 35 1;
-#X connect 37 0 35 0;
+#X connect 36 0 38 1;
+#X connect 38 0 37 0;

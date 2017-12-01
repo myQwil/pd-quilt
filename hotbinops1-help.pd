@@ -30,6 +30,21 @@
 #X floatatom 327 213 0 0 0 0 - - -;
 #X floatatom 292 272 0 0 0 0 - - -;
 #X obj 292 242 #min;
+#X floatatom 32 37 0 0 0 0 - - -;
+#X floatatom 64 37 0 0 0 0 - - -;
+#X floatatom 32 96 0 0 0 0 - - -;
+#N canvas 257 341 450 346 #+ 0;
+#X obj 194 84 inlet;
+#X obj 235 84 inlet;
+#X obj 209 195 outlet;
+#X obj 209 170 +;
+#X obj 223 130 t b f;
+#X connect 0 0 3 0;
+#X connect 1 0 4 0;
+#X connect 3 0 2 0;
+#X connect 4 0 3 0;
+#X connect 4 1 3 1;
+#X restore 32 66 pd #+;
 #X connect 3 0 6 0;
 #X connect 4 0 6 1;
 #X connect 6 0 5 0;
@@ -51,3 +66,6 @@
 #X connect 27 0 30 0;
 #X connect 28 0 30 1;
 #X connect 30 0 29 0;
+#X connect 31 0 34 0;
+#X connect 32 0 34 1;
+#X connect 34 0 33 0;
