@@ -26,8 +26,12 @@ static void rind_seed(t_rind *x, t_symbol *s, int argc, t_atom *argv) {
 	x->x_state = (argc ? atom_getfloat(argv) : rind_time());
 }
 
-static void rind_peek(t_rind *x, t_symbol *s) {
+static void rind_ptr(t_rind *x, t_symbol *s) {
 	post("%s%s%u", s->s_name, *s->s_name?": ":"", x->x_state);
+}
+
+static void rind_peek(t_rind *x, t_symbol *s) {
+	post("%s%s%g %g", s->s_name, *s->s_name?": ":"", x->x_min, x->x_max);
 }
 
 static void rind_min(t_rind *x, t_floatarg f) {
@@ -68,6 +72,8 @@ void rind_setup(void) {
 	class_addbang(rind_class, rind_bang);
 	class_addmethod(rind_class, (t_method)rind_seed,
 		gensym("seed"), A_GIMME, 0);
+	class_addmethod(rind_class, (t_method)rind_ptr,
+		gensym("ptr"), A_DEFSYM, 0);
 	class_addmethod(rind_class, (t_method)rind_peek,
 		gensym("peek"), A_DEFSYM, 0);
 	class_addmethod(rind_class, (t_method)rind_min,
