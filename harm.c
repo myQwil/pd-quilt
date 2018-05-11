@@ -254,3 +254,7 @@ void harm_setup(void) {
 	class_addmethod(harm_class, (t_method)harm_octet,
 		gensym("ot"), A_FLOAT, 0);
 }
+
+void chrd_setup(void) {
+	harm_setup();
+}
