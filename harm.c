@@ -23,7 +23,7 @@ typedef struct _harm {
 	t_object x_obj;
 	int x_n, x_in, x_p,		/* count notes, inlets, pointer */
 		x_midi, x_all,		/* midi-note and all-note toggles */
-		x_imp;				/* implicit scale size toggle */
+		x_exp;				/* explicit scale size toggle */
 	double x_rt, x_st;		/* root tone, semi-tone */
 	t_float x_oct,			/* # of notes between octaves */
 		x_ref, x_tet,		/* ref-pitch, # of tones */
@@ -97,7 +97,7 @@ static void harm_scale(t_harm *x, int ac, t_atom *av, int offset) {
 }
 
 static void harm_scimp(t_harm *x, int ac, t_atom *av, int offset) {
-	if (x->x_imp) harm_imp(x, ac, offset);
+	if (!x->x_exp) harm_imp(x, ac, offset);
 	harm_scale(x, ac, av, offset);
 }
 
@@ -122,8 +122,8 @@ static void harm_size(t_harm *x, t_floatarg n) {
 	x->x_n = limtr(x,n,1);
 }
 
-static void harm_implicit(t_harm *x, t_floatarg f) {
-	x->x_imp = f;
+static void harm_explicit(t_harm *x, t_floatarg f) {
+	x->x_exp = f;
 }
 
 static void harm_midi(t_harm *x, t_floatarg f) {
@@ -202,7 +202,7 @@ static void *harm_new(t_symbol *s, int ac, t_atom *av) {
 	x->x_rt = ref * pow(2,-69/tet);
 	x->x_st = log(2) / tet;
 	x->x_oct = tet;
-	x->x_imp = 1;
+	x->x_exp = 0;
 	return (x);
 }
 
@@ -216,6 +216,8 @@ void harm_setup(void) {
 		(t_newmethod)harm_new, (t_method)harm_free,
 		sizeof(t_harm), 0,
 		A_GIMME, 0);
+	class_addcreator((t_newmethod)harm_new,
+		gensym("chrd"), A_GIMME, 0);
 	class_addbang(harm_class, harm_bang);
 	class_addfloat(harm_class, harm_float);
 	class_addlist(harm_class, harm_list);
@@ -235,8 +237,8 @@ void harm_setup(void) {
 		gensym("x"), A_GIMME, 0);
 	class_addmethod(harm_class, (t_method)harm_size,
 		gensym("n"), A_FLOAT, 0);
-	class_addmethod(harm_class, (t_method)harm_implicit,
-		gensym("imp"), A_FLOAT, 0);
+	class_addmethod(harm_class, (t_method)harm_explicit,
+		gensym("exp"), A_FLOAT, 0);
 	class_addmethod(harm_class, (t_method)harm_midi,
 		gensym("midi"), A_FLOAT, 0);
 	class_addmethod(harm_class, (t_method)harm_all,

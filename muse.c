@@ -22,7 +22,7 @@ static t_class *muse_class;
 typedef struct _muse {
 	t_object x_obj;
 	int x_n, x_in, x_p,		/* count notes, inlets, pointer */
-		x_imp;				/* implicit scale size toggle */
+		x_exp;				/* explicit scale size toggle */
 	double x_rt, x_st;		/* root tone, semi-tone */
 	t_float x_oct,			/* # of notes between octaves */
 		x_ref, x_tet,		/* ref-pitch, # of tones */
@@ -96,7 +96,7 @@ static void muse_scale(t_muse *x, int ac, t_atom *av, int offset) {
 }
 
 static void muse_scimp(t_muse *x, int ac, t_atom *av, int offset) {
-	if (x->x_imp) muse_imp(x, ac, offset);
+	if (!x->x_exp) muse_imp(x, ac, offset);
 	muse_scale(x, ac, av, offset);
 }
 
@@ -121,8 +121,8 @@ static void muse_size(t_muse *x, t_floatarg n) {
 	x->x_n = limtr(x,n,1);
 }
 
-static void muse_implicit(t_muse *x, t_floatarg f) {
-	x->x_imp = f;
+static void muse_explicit(t_muse *x, t_floatarg f) {
+	x->x_exp = f;
 }
 
 static void muse_octave(t_muse *x, t_floatarg f) {
@@ -179,7 +179,7 @@ static void *muse_new(t_symbol *s, int ac, t_atom *av) {
 	x->x_rt = ref * pow(2,-69/tet);
 	x->x_st = log(2) / tet;
 	x->x_oct = tet;
-	x->x_imp = 1;
+	x->x_exp = 0;
 	return (x);
 }
 
@@ -210,8 +210,8 @@ void muse_setup(void) {
 		gensym("x"), A_GIMME, 0);
 	class_addmethod(muse_class, (t_method)muse_size,
 		gensym("n"), A_FLOAT, 0);
-	class_addmethod(muse_class, (t_method)muse_implicit,
-		gensym("imp"), A_FLOAT, 0);
+	class_addmethod(muse_class, (t_method)muse_explicit,
+		gensym("exp"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_octave,
 		gensym("oct"), A_FLOAT, 0);
 	class_addmethod(muse_class, (t_method)muse_ref,

@@ -1,47 +1,115 @@
-#include "m_pd.h"
-
-static t_class *myQwil_class;
-
-static void *myQwil_new(void) {
-	t_object *x = (t_object *)pd_new(myQwil_class);
-	return (x);
-}
-
-void graid_setup(void);
-void divrt_setup(void);
-void rand_setup(void);
-void randv_setup(void);
-void rind_setup(void);
 void muse_setup(void);
-void ruse_setup(void);
 void harm_setup(void);
-void fton_setup(void);
+void rand_setup(void);
+void rind_setup(void);
 void ntof_setup(void);
-void radx_setup(void);
-void same_setup(void);
+void fton_setup(void);
+void graid_setup(void);
 void sploat_setup(void);
 void gloat_setup(void);
+void logb_setup(void);
+void ceil_setup(void);
+void same_setup(void);
+void radx_setup(void);
 
+void setup_0x21(void); // [!]
+void setup_0x21_tilde(void); // [!~]
+void setup_0x3c0x3e(void); // [<>] !=
+void setup_0x3e0x3c(void); // [><] !=
 
-/* ------------------------ setup routine ------------------------ */
+// hot binops
+void setup_0x23logb(void);
+void setup_0x230x3c0x3e(void); // [#<>]
+void setup_0x230x3e0x3c(void); // [#><]
+void setup_0x230x2b(void); // [#+]
+void setup_0x230x2d(void); // [#-]
+void setup_0x230x2a(void); // [#*]
+void setup_0x230x2f(void); // [#/]
+void setup_0x230x3e(void); // [#>]
+void setup_0x230x3c(void); // [#<]
+void setup_0x230x3d0x3d(void); // [#==]
+void setup_0x230x210x3d(void); // [#!=]
+void setup_0x230x3e0x3d(void); // [#>=]
+void setup_0x230x3c0x3d(void); // [#<=]
+void setup_0x230x7c(void); // [#|]
+void setup_0x230x7c0x7c(void); // [#||]
+void setup_0x230x26(void); // [#&]
+void setup_0x230x260x26(void); // [#&&]
+void setup_0x230x3c0x3c(void); // [#<<]
+void setup_0x230x3e0x3e(void); // [#>>]
+void setup_0x230x25(void); // [#%]
+void setup_0x230x5e(void); // [#^]
+void setup_0x23min(void);
+void setup_0x23max(void);
+void setup_0x23pow(void);
+void setup_0x23div(void);
+void setup_0x23mod(void);
+
+// reverse binops
+void setup_0x400x2d(void); // [@-]
+void setup_0x400x2f(void); // [@/]
+void setup_0x400x25(void); // [@%]
+void setup_0x400x3c0x3c(void); // [@<<]
+void setup_0x400x3e0x3e(void); // [@>>]
+void setup_0x40div(void);
+void setup_0x40mod(void);
+void setup_0x40pow(void);
 
 void myQwil_setup(void) {
-	myQwil_class = class_new(gensym("myQwil"), myQwil_new, 0,
-		sizeof(t_object), CLASS_NOINLET, 0);
-
-	graid_setup();
-	divrt_setup();
-	rand_setup();
-	randv_setup();
-	rind_setup();
 	muse_setup();
-	ruse_setup();
 	harm_setup();
-	fton_setup();
+	rand_setup();
+	rind_setup();
 	ntof_setup();
-	radx_setup();
-	same_setup();
+	fton_setup();
+	graid_setup();
 	sploat_setup();
 	gloat_setup();
-	post("myQwil loaded! ");
+	logb_setup();
+	ceil_setup();
+	same_setup();
+	radx_setup();
+
+	setup_0x21(); // [!]
+	setup_0x21_tilde(); // [!~]
+	setup_0x3c0x3e(); // [<>] !=
+	setup_0x3e0x3c(); // [><] !=
+
+	// hot binops
+	setup_0x23logb();
+	setup_0x230x3c0x3e(); // [#<>]
+	setup_0x230x3e0x3c(); // [#><]
+	setup_0x230x2b(); // [#+]
+	setup_0x230x2d(); // [#-]
+	setup_0x230x2a(); // [#*]
+	setup_0x230x2f(); // [#/]
+	setup_0x230x3e(); // [#>]
+	setup_0x230x3c(); // [#<]
+	setup_0x230x3d0x3d(); // [#==]
+	setup_0x230x210x3d(); // [#!=]
+	setup_0x230x3e0x3d(); // [#>=]
+	setup_0x230x3c0x3d(); // [#<=]
+	setup_0x230x7c(); // [#|]
+	setup_0x230x7c0x7c(); // [#||]
+	setup_0x230x26(); // [#&]
+	setup_0x230x260x26(); // [#&&]
+	setup_0x230x3c0x3c(); // [#<<]
+	setup_0x230x3e0x3e(); // [#>>]
+	setup_0x230x25(); // [#%]
+	setup_0x230x5e(); // [#^]
+	setup_0x23min();
+	setup_0x23max();
+	setup_0x23pow();
+	setup_0x23div();
+	setup_0x23mod();
+
+	// reverse binops
+	setup_0x400x2d(); // [@-]
+	setup_0x400x2f(); // [@/]
+	setup_0x400x25(); // [@%]
+	setup_0x400x3c0x3c(); // [@<<]
+	setup_0x400x3e0x3e(); // [@>>]
+	setup_0x40div();
+	setup_0x40mod();
+	setup_0x40pow();
 }

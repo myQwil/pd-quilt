@@ -347,6 +347,9 @@ to create chords;
 #X obj 52 259 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
 #X msg 52 278 all \$1;
+#X obj 39 174 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X msg 39 193 exp \$1;
 #X connect 0 0 56 0;
 #X connect 2 0 5 0;
 #X connect 3 0 2 0;
@@ -463,3 +466,5 @@ to create chords;
 #X connect 86 0 37 0;
 #X connect 91 0 92 0;
 #X connect 92 0 56 0;
+#X connect 93 0 94 0;
+#X connect 94 0 56 0;
