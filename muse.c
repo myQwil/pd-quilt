@@ -66,17 +66,16 @@ static void muse_resize(t_muse *x, int d) {
 		ip->i_floatslot = fp;
 }
 
-int limtr(t_muse *x, int n, int i) {
-	i=!i; // index/size toggle
-	int mx=MAX+i; n+=i;
-	if (n<1) n=1; else if (n>mx) n=mx;
+int limtr(t_muse *x, int n, int l) {
+	n+=l;
+	if (n<1) n=1; else if (n>MAX) n=MAX;
 	if (x->x_p<n) muse_resize(x,n);
-	return (n-i);
+	return (n-l);
 }
 
 static void muse_set(t_muse *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac==2 && av->a_type == A_FLOAT)
-	{	int i = limtr(x, av->a_w.w_float, 0);
+	{	int i = limtr(x, av->a_w.w_float, 1);
 		t_atomtype typ = (av+1)->a_type;
 		if (typ == A_FLOAT) x->x_scl[i] = (av+1)->a_w.w_float;
 		else if (typ == A_SYMBOL) muse_operate(x->x_scl+i, av+1);   }
@@ -118,7 +117,7 @@ static void muse_ex(t_muse *x, t_symbol *s, int ac, t_atom *av) {
 }
 
 static void muse_size(t_muse *x, t_floatarg n) {
-	x->x_n = limtr(x,n,1);
+	x->x_n = limtr(x,n,0);
 }
 
 static void muse_explicit(t_muse *x, t_floatarg f) {

@@ -17,7 +17,7 @@ static t_class *rand_class;
 typedef struct _rand {
 	t_object x_obj;
 	t_float *x_fp, x_pr;	/* previous number */
-	int x_c, x_in, x_p,		/* count notes, inlets, pointer */
+	int x_c, x_in, x_p,		/* arg count, inlets, pointer */
 		x_rc, x_rx,	x_nop;	/* repeat count, max, and toggle */
 	unsigned x_state, x_swat;
 } t_rand;
@@ -67,24 +67,23 @@ static void rand_resize(t_rand *x, int d) {
 		ip->i_floatslot = fp;
 }
 
-int limtr(t_rand *x, int n, int i) {
-	i=!i; // index/size toggle
-	int mx=MAX+i; n+=i;
-	if (n<1) n=1; else if (n>mx) n=mx;
+int limtr(t_rand *x, int n, int l) {
+	n+=l;
+	if (n<1) n=1; else if (n>MAX) n=MAX;
 	if (x->x_p<n) rand_resize(x,n);
-	return (n-i);
+	return (n-l);
 }
 
 static void rand_set(t_rand *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac==2 && av->a_type == A_FLOAT)
-	{	int i = limtr(x, av->a_w.w_float, 0);
+	{	int i = limtr(x, av->a_w.w_float, 1);
 		t_atomtype typ = (av+1)->a_type;
 		if (typ == A_FLOAT) x->x_fp[i] = (av+1)->a_w.w_float;   }
 	else pd_error(x, "rand_set: bad arguments");
 }
 
 static void rand_size(t_rand *x, t_floatarg n) {
-	x->x_c = limtr(x,n,1);
+	x->x_c = limtr(x,n,0);
 }
 
 static void rand_nop(t_rand *x, t_floatarg f) {

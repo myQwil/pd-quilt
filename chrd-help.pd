@@ -152,7 +152,7 @@
 #X msg 413 128 1;
 #X msg 278 262 100 100 85 85 100 70;
 #X obj 405 234 ii;
-#X obj 142 269 harm 40 19 18 21 26;
+#X obj 142 269 chrd 40 19 18 21 26;
 #X obj 320 201 t b f;
 #X obj 283 199 t b f;
 #X obj 247 197 t b f;
@@ -339,7 +339,7 @@
 #X connect 12 0 11 0;
 #X connect 13 0 6 0;
 #X restore 348 334 pd inst;
-#X text 261 11 HARM;
+#X text 261 11 CHRD;
 #X text 108 27 uses similar logic as [muse] but with multiple outlets
 to create chords;
 #X text 25 225 use all outlets;

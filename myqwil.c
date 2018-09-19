@@ -1,5 +1,5 @@
 void muse_setup(void);
-void harm_setup(void);
+void chrd_setup(void);
 void rand_setup(void);
 void rind_setup(void);
 void ntof_setup(void);
@@ -57,7 +57,7 @@ void setup_0x40pow(void);
 
 void myQwil_setup(void) {
 	muse_setup();
-	harm_setup();
+	chrd_setup();
 	rand_setup();
 	rind_setup();
 	ntof_setup();

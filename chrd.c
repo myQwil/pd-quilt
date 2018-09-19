@@ -15,11 +15,11 @@ t_float ntof(t_float f, double root, double semi) {
 	return (root * exp(semi*f));
 }
 
-/* -------------------------- harm -------------------------- */
+/* -------------------------- chrd -------------------------- */
 
-static t_class *harm_class;
+static t_class *chrd_class;
 
-typedef struct _harm {
+typedef struct _chrd {
 	t_object x_obj;
 	int x_n, x_in, x_p,		/* count notes, inlets, pointer */
 		x_midi, x_all,		/* midi-note and all-note toggles */
@@ -29,15 +29,15 @@ typedef struct _harm {
 		x_ref, x_tet,		/* ref-pitch, # of tones */
 		*x_scl;				/* scale intervals */
 	t_outlet **x_outs;		/* outlets */
-} t_harm;
+} t_chrd;
 
 #define MAX 1024
 
-static void harm_ptr(t_harm *x, t_symbol *s) {
+static void chrd_ptr(t_chrd *x, t_symbol *s) {
 	post("%s%s%d", s->s_name, *s->s_name?": ":"", x->x_p);
 }
 
-static void harm_peek(t_harm *x, t_symbol *s) {
+static void chrd_peek(t_chrd *x, t_symbol *s) {
 	int i;
 	t_float *fp = x->x_scl;
 	if (*s->s_name) startpost("%s: ", s->s_name);
@@ -45,7 +45,7 @@ static void harm_peek(t_harm *x, t_symbol *s) {
 	endpost();
 }
 
-static void harm_operate(t_float *fp, t_atom *av) {
+static void chrd_operate(t_float *fp, t_atom *av) {
 	char *cp = av->a_w.w_symbol->s_name;
 	if (cp[1])
 	{	t_float f = cp[2] ? atof(cp+2) : 1;
@@ -55,7 +55,7 @@ static void harm_operate(t_float *fp, t_atom *av) {
 		else if (cp[1]=='/') *fp /= f;   }
 }
 
-static void harm_resize(t_harm *x, int d) {
+static void chrd_resize(t_chrd *x, int d) {
 	int n=2, i;
 	while (n<MAX && n<d) n*=2;
 	x->x_scl = (t_float *)resizebytes(x->x_scl,
@@ -67,91 +67,90 @@ static void harm_resize(t_harm *x, int d) {
 		ip->i_floatslot = fp;
 }
 
-int limtr(t_harm *x, int n, int i) {
-	i=!i; // index/size toggle
-	int mx=MAX+i; n+=i;
-	if (n<1) n=1; else if (n>mx) n=mx;
-	if (x->x_p<n) harm_resize(x,n);
-	return (n-i);
+int limtr(t_chrd *x, int n, int l) {
+	n+=l;
+	if (n<1) n=1; else if (n>MAX) n=MAX;
+	if (x->x_p<n) chrd_resize(x,n);
+	return (n-l);
 }
 
-static void harm_set(t_harm *x, t_symbol *s, int ac, t_atom *av) {
+static void chrd_set(t_chrd *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac==2 && av->a_type == A_FLOAT)
-	{	int i = limtr(x, av->a_w.w_float, 0);
+	{	int i = limtr(x, av->a_w.w_float, 1);
 		t_atomtype typ = (av+1)->a_type;
 		if (typ == A_FLOAT) x->x_scl[i] = (av+1)->a_w.w_float;
-		else if (typ == A_SYMBOL) harm_operate(x->x_scl+i, av+1);   }
-	else pd_error(x, "harm_set: bad arguments");
+		else if (typ == A_SYMBOL) chrd_operate(x->x_scl+i, av+1);   }
+	else pd_error(x, "chrd_set: bad arguments");
 }
 
-static void harm_imp(t_harm *x, int ac, int offset) {
+static void chrd_imp(t_chrd *x, int ac, int offset) {
 	int n = x->x_n = ac+offset;
-	if (x->x_p<n) harm_resize(x,n);
+	if (x->x_p<n) chrd_resize(x,n);
 }
 
-static void harm_scale(t_harm *x, int ac, t_atom *av, int offset) {
+static void chrd_scale(t_chrd *x, int ac, t_atom *av, int offset) {
 	t_float *fp = x->x_scl+offset;
 	for (; ac--; av++, fp++)
 	{	if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
-		else if (av->a_type == A_SYMBOL) harm_operate(fp, av);   }
+		else if (av->a_type == A_SYMBOL) chrd_operate(fp, av);   }
 }
 
-static void harm_scimp(t_harm *x, int ac, t_atom *av, int offset) {
-	if (!x->x_exp) harm_imp(x, ac, offset);
-	harm_scale(x, ac, av, offset);
+static void chrd_scimp(t_chrd *x, int ac, t_atom *av, int offset) {
+	if (!x->x_exp) chrd_imp(x, ac, offset);
+	chrd_scale(x, ac, av, offset);
 }
 
-static void harm_doremi(t_harm *x, t_symbol *s, int ac, t_atom *av) {
-	if (ac) harm_scimp(x, ac, av, 1);
+static void chrd_doremi(t_chrd *x, t_symbol *s, int ac, t_atom *av) {
+	if (ac) chrd_scimp(x, ac, av, 1);
 }
 
-static void harm_list(t_harm *x, t_symbol *s, int ac, t_atom *av) {
-	if (ac) harm_scimp(x, ac, av, 0);
+static void chrd_list(t_chrd *x, t_symbol *s, int ac, t_atom *av) {
+	if (ac) chrd_scimp(x, ac, av, 0);
 }
 
-static void harm_im(t_harm *x, t_symbol *s, int ac, t_atom *av) {
-	harm_imp(x, ac, 0);
-	if (ac) harm_scale(x, ac, av, 0);
+static void chrd_im(t_chrd *x, t_symbol *s, int ac, t_atom *av) {
+	chrd_imp(x, ac, 0);
+	if (ac) chrd_scale(x, ac, av, 0);
 }
 
-static void harm_ex(t_harm *x, t_symbol *s, int ac, t_atom *av) {
-	if (ac) harm_scale(x, ac, av, 0);
+static void chrd_ex(t_chrd *x, t_symbol *s, int ac, t_atom *av) {
+	if (ac) chrd_scale(x, ac, av, 0);
 }
 
-static void harm_size(t_harm *x, t_floatarg n) {
-	x->x_n = limtr(x,n,1);
+static void chrd_size(t_chrd *x, t_floatarg n) {
+	x->x_n = limtr(x,n,0);
 }
 
-static void harm_explicit(t_harm *x, t_floatarg f) {
+static void chrd_explicit(t_chrd *x, t_floatarg f) {
 	x->x_exp = f;
 }
 
-static void harm_midi(t_harm *x, t_floatarg f) {
+static void chrd_midi(t_chrd *x, t_floatarg f) {
 	x->x_midi = f;
 }
 
-static void harm_all(t_harm *x, t_floatarg f) {
+static void chrd_all(t_chrd *x, t_floatarg f) {
 	x->x_all = f;
 }
 
-static void harm_octave(t_harm *x, t_floatarg f) {
+static void chrd_octave(t_chrd *x, t_floatarg f) {
 	x->x_oct = f;
 }
 
-static void harm_ref(t_harm *x, t_floatarg f) {
+static void chrd_ref(t_chrd *x, t_floatarg f) {
 	x->x_rt = (x->x_ref=f) * pow(2,-69/x->x_tet);
 }
 
-static void harm_tet(t_harm *x, t_floatarg f) {
+static void chrd_tet(t_chrd *x, t_floatarg f) {
 	x->x_rt = x->x_ref * pow(2,-69/f);
 	x->x_st = log(2) / (x->x_tet=f);
 }
 
-static void harm_octet(t_harm *x, t_floatarg f) {
-	harm_octave(x,f);   harm_tet(x,f);
+static void chrd_octet(t_chrd *x, t_floatarg f) {
+	chrd_octave(x,f);   chrd_tet(x,f);
 }
 
-double getnote(t_harm *x, int d) {
+double getnote(t_chrd *x, int d) {
 	int n=x->x_n, p=d%n, b=p<0,
 	q = d/n-b;
 	d = b*n+p;
@@ -160,7 +159,7 @@ double getnote(t_harm *x, int d) {
 	return (x->x_oct*q + root+step);
 }
 
-static void harm_float(t_harm *x, t_float f) {
+static void chrd_float(t_chrd *x, t_float f) {
 	int n=x->x_in, d=f;
 	double note = getnote(x, d);
 	if (f!=d)
@@ -173,7 +172,7 @@ static void harm_float(t_harm *x, t_float f) {
 		note : ntof(note, x->x_rt, x->x_st));
 }
 
-static void harm_bang(t_harm *x) {
+static void chrd_bang(t_chrd *x) {
 	int n=x->x_n, i=x->x_in+1;
 	i = x->x_all ? i : (n>i?i:n);
 	t_outlet **op;
@@ -183,8 +182,8 @@ static void harm_bang(t_harm *x) {
 			note : ntof(note, x->x_rt, x->x_st));   }
 }
 
-static void *harm_new(t_symbol *s, int ac, t_atom *av) {
-	t_harm *x = (t_harm *)pd_new(harm_class);
+static void *chrd_new(t_symbol *s, int ac, t_atom *av) {
+	t_chrd *x = (t_chrd *)pd_new(chrd_class);
 	
 	int n = x->x_n = x->x_in = x->x_p = ac<2?2:ac, i=0;
 	x->x_scl = (t_float *)getbytes(n * sizeof(t_float));
@@ -206,55 +205,51 @@ static void *harm_new(t_symbol *s, int ac, t_atom *av) {
 	return (x);
 }
 
-static void harm_free(t_harm *x) {
+static void chrd_free(t_chrd *x) {
 	freebytes(x->x_scl, x->x_p * sizeof(t_float));
 	freebytes(x->x_outs, (x->x_in+1) * sizeof(t_outlet *));
 }
 
-void harm_setup(void) {
-	harm_class = class_new(gensym("harm"),
-		(t_newmethod)harm_new, (t_method)harm_free,
-		sizeof(t_harm), 0,
-		A_GIMME, 0);
-	class_addcreator((t_newmethod)harm_new,
-		gensym("chrd"), A_GIMME, 0);
-	class_addbang(harm_class, harm_bang);
-	class_addfloat(harm_class, harm_float);
-	class_addlist(harm_class, harm_list);
-	class_addmethod(harm_class, (t_method)harm_ptr,
-		gensym("ptr"), A_DEFSYM, 0);
-	class_addmethod(harm_class, (t_method)harm_peek,
-		gensym("peek"), A_DEFSYM, 0);
-	class_addmethod(harm_class, (t_method)harm_set,
-		gensym("set"), A_GIMME, 0);
-	class_addmethod(harm_class, (t_method)harm_doremi,
-		gensym("d"), A_GIMME, 0);
-	class_addmethod(harm_class, (t_method)harm_list,
-		gensym("l"), A_GIMME, 0);
-	class_addmethod(harm_class, (t_method)harm_im,
-		gensym("i"), A_GIMME, 0);
-	class_addmethod(harm_class, (t_method)harm_ex,
-		gensym("x"), A_GIMME, 0);
-	class_addmethod(harm_class, (t_method)harm_size,
-		gensym("n"), A_FLOAT, 0);
-	class_addmethod(harm_class, (t_method)harm_explicit,
-		gensym("exp"), A_FLOAT, 0);
-	class_addmethod(harm_class, (t_method)harm_midi,
-		gensym("midi"), A_FLOAT, 0);
-	class_addmethod(harm_class, (t_method)harm_all,
-		gensym("all"), A_FLOAT, 0);
-	class_addmethod(harm_class, (t_method)harm_octave,
-		gensym("oct"), A_FLOAT, 0);
-	class_addmethod(harm_class, (t_method)harm_ref,
-		gensym("ref"), A_FLOAT, 0);
-	class_addmethod(harm_class, (t_method)harm_tet,
-		gensym("tet"), A_FLOAT, 0);
-	class_addmethod(harm_class, (t_method)harm_octet,
-		gensym("octet"), A_FLOAT, 0);
-	class_addmethod(harm_class, (t_method)harm_octet,
-		gensym("ot"), A_FLOAT, 0);
-}
-
 void chrd_setup(void) {
-	harm_setup();
+	chrd_class = class_new(gensym("chrd"),
+		(t_newmethod)chrd_new, (t_method)chrd_free,
+		sizeof(t_chrd), 0,
+		A_GIMME, 0);
+	class_addcreator((t_newmethod)chrd_new,
+		gensym("chrd"), A_GIMME, 0);
+	class_addbang(chrd_class, chrd_bang);
+	class_addfloat(chrd_class, chrd_float);
+	class_addlist(chrd_class, chrd_list);
+	class_addmethod(chrd_class, (t_method)chrd_ptr,
+		gensym("ptr"), A_DEFSYM, 0);
+	class_addmethod(chrd_class, (t_method)chrd_peek,
+		gensym("peek"), A_DEFSYM, 0);
+	class_addmethod(chrd_class, (t_method)chrd_set,
+		gensym("set"), A_GIMME, 0);
+	class_addmethod(chrd_class, (t_method)chrd_doremi,
+		gensym("d"), A_GIMME, 0);
+	class_addmethod(chrd_class, (t_method)chrd_list,
+		gensym("l"), A_GIMME, 0);
+	class_addmethod(chrd_class, (t_method)chrd_im,
+		gensym("i"), A_GIMME, 0);
+	class_addmethod(chrd_class, (t_method)chrd_ex,
+		gensym("x"), A_GIMME, 0);
+	class_addmethod(chrd_class, (t_method)chrd_size,
+		gensym("n"), A_FLOAT, 0);
+	class_addmethod(chrd_class, (t_method)chrd_explicit,
+		gensym("exp"), A_FLOAT, 0);
+	class_addmethod(chrd_class, (t_method)chrd_midi,
+		gensym("midi"), A_FLOAT, 0);
+	class_addmethod(chrd_class, (t_method)chrd_all,
+		gensym("all"), A_FLOAT, 0);
+	class_addmethod(chrd_class, (t_method)chrd_octave,
+		gensym("oct"), A_FLOAT, 0);
+	class_addmethod(chrd_class, (t_method)chrd_ref,
+		gensym("ref"), A_FLOAT, 0);
+	class_addmethod(chrd_class, (t_method)chrd_tet,
+		gensym("tet"), A_FLOAT, 0);
+	class_addmethod(chrd_class, (t_method)chrd_octet,
+		gensym("octet"), A_FLOAT, 0);
+	class_addmethod(chrd_class, (t_method)chrd_octet,
+		gensym("ot"), A_FLOAT, 0);
 }

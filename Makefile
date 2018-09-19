@@ -7,7 +7,7 @@
 # #== #!= #>= #<=
 # #| #|| #& #&&
 # #<< #>> #% #^
-  class.sources = muse.c harm.c rand.c rind.c ntof.c fton.c sploat.c gloat.c \
+  class.sources = muse.c chrd.c rand.c rind.c ntof.c fton.c sploat.c gloat.c \
 	logb.c 0x23logb.c graid.c same.c ceil.c radx.c !.c !~.c 0x5e.c \
 	0x3c0x3e.c 0x3e0x3c.c 0x230x3c0x3e.c 0x230x3e0x3c.c \
 	0x230x2b.c 0x230x2d.c 0x230x2a.c 0x230x2f.c 0x230x3e.c 0x230x3c.c \
@@ -20,7 +20,7 @@
 
   datafiles = !~-help.pd !-help.pd ^-help.pd 2^.pd ad.pd ad~.pd adac~.pd \
 	ceil-help.pd cpt.pd cupq.pd cupqb.pd cupqbl.pd fkick~.pd fmbloc~.pd \
-	freqm~.pd graid-help.pd harm-help.pd hotbinops1-help.pd hotbinops2-help.pd \
+	freqm~.pd graid-help.pd chrd-help.pd hotbinops1-help.pd hotbinops2-help.pd \
 	hotbinops3-help.pd logb-help.pd manscratch.pd mantissa.pd mantissal.pd \
 	mantouch.pd mantr.pd mix~.pd muse-help.pd ne-aliases-help.pd ntof-help.pd \
 	pad.pd pad~.pd radx-help.pd rand-help.pd revbinops-help.pd rind-help.pd \
