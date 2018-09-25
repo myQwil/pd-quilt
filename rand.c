@@ -55,35 +55,32 @@ static void rand_peek(t_rand *x, t_symbol *s) {
 	endpost();
 }
 
-static void rand_resize(t_rand *x, int d) {
-	int n=2, i;
-	while (n<MAX && n<d) n*=2;
-	x->x_fp = (t_float *)resizebytes(x->x_fp,
-		x->x_p * sizeof(t_float), n * sizeof(t_float));
-	x->x_p = n;
-	t_float *fp = x->x_fp;
-	t_inlet *ip = ((t_object *)x)->ob_inlet;
-	for (i=x->x_in; i--; fp++, ip=ip->i_next)
-		ip->i_floatslot = fp;
-}
-
-int limtr(t_rand *x, int n, int l) {
+static int rand_resize(t_rand *x, int n, int l) {
 	n+=l;
 	if (n<1) n=1; else if (n>MAX) n=MAX;
-	if (x->x_p<n) rand_resize(x,n);
+	if (x->x_p<n)
+	{	int d=2, i;
+		while (d<MAX && d<n) d*=2;
+		x->x_fp = (t_float *)resizebytes(x->x_fp,
+			x->x_p * sizeof(t_float), d * sizeof(t_float));
+		x->x_p = d;
+		t_float *fp = x->x_fp;
+		t_inlet *ip = ((t_object *)x)->ob_inlet;
+		for (i=x->x_in; i--; fp++, ip=ip->i_next)
+			ip->i_floatslot = fp;   }
 	return (n-l);
 }
 
 static void rand_set(t_rand *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac==2 && av->a_type == A_FLOAT)
-	{	int i = limtr(x, av->a_w.w_float, 1);
+	{	int i = rand_resize(x, av->a_w.w_float, 1);
 		t_atomtype typ = (av+1)->a_type;
 		if (typ == A_FLOAT) x->x_fp[i] = (av+1)->a_w.w_float;   }
 	else pd_error(x, "rand_set: bad arguments");
 }
 
 static void rand_size(t_rand *x, t_floatarg n) {
-	x->x_c = limtr(x,n,0);
+	x->x_c = rand_resize(x,n,0);
 }
 
 static void rand_nop(t_rand *x, t_floatarg f) {

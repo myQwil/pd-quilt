@@ -67,7 +67,7 @@ static void chrd_resize(t_chrd *x, int d) {
 		ip->i_floatslot = fp;
 }
 
-int limtr(t_chrd *x, int n, int l) {
+static int chrd_limtr(t_chrd *x, int n, int l) {
 	n+=l;
 	if (n<1) n=1; else if (n>MAX) n=MAX;
 	if (x->x_p<n) chrd_resize(x,n);
@@ -76,11 +76,15 @@ int limtr(t_chrd *x, int n, int l) {
 
 static void chrd_set(t_chrd *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac==2 && av->a_type == A_FLOAT)
-	{	int i = limtr(x, av->a_w.w_float, 1);
+	{	int i = chrd_limtr(x, av->a_w.w_float, 1);
 		t_atomtype typ = (av+1)->a_type;
 		if (typ == A_FLOAT) x->x_scl[i] = (av+1)->a_w.w_float;
 		else if (typ == A_SYMBOL) chrd_operate(x->x_scl+i, av+1);   }
 	else pd_error(x, "chrd_set: bad arguments");
+}
+
+static void chrd_size(t_chrd *x, t_floatarg n) {
+	x->x_n = chrd_limtr(x,n,0);
 }
 
 static void chrd_imp(t_chrd *x, int ac, int offset) {
@@ -117,10 +121,6 @@ static void chrd_ex(t_chrd *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac) chrd_scale(x, ac, av, 0);
 }
 
-static void chrd_size(t_chrd *x, t_floatarg n) {
-	x->x_n = limtr(x,n,0);
-}
-
 static void chrd_explicit(t_chrd *x, t_floatarg f) {
 	x->x_exp = f;
 }
@@ -150,7 +150,7 @@ static void chrd_octet(t_chrd *x, t_floatarg f) {
 	chrd_octave(x,f);   chrd_tet(x,f);
 }
 
-double getnote(t_chrd *x, int d) {
+static double chrd_getnote(t_chrd *x, int d) {
 	int n=x->x_n, p=d%n, b=p<0,
 	q = d/n-b;
 	d = b*n+p;
@@ -161,10 +161,10 @@ double getnote(t_chrd *x, int d) {
 
 static void chrd_float(t_chrd *x, t_float f) {
 	int n=x->x_in, d=f;
-	double note = getnote(x, d);
+	double note = chrd_getnote(x, d);
 	if (f!=d)
 	{	int b = f<0?-1:1;
-		double next = getnote(x, d+b);
+		double next = chrd_getnote(x, d+b);
 		note += b*(f-d) * (next-note);   }
 	int p=d%n; if (p<0) p+=n;
 	d = (d&&!p)?n:p;
@@ -177,7 +177,7 @@ static void chrd_bang(t_chrd *x) {
 	i = x->x_all ? i : (n>i?i:n);
 	t_outlet **op;
 	for (op=x->x_outs+i; op--, i--;)
-	{	double note = getnote(x, i);
+	{	double note = chrd_getnote(x, i);
 		outlet_float(*op, x->x_midi ?
 			note : ntof(note, x->x_rt, x->x_st));   }
 }

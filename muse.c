@@ -66,7 +66,7 @@ static void muse_resize(t_muse *x, int d) {
 		ip->i_floatslot = fp;
 }
 
-int limtr(t_muse *x, int n, int l) {
+static int muse_limtr(t_muse *x, int n, int l) {
 	n+=l;
 	if (n<1) n=1; else if (n>MAX) n=MAX;
 	if (x->x_p<n) muse_resize(x,n);
@@ -75,11 +75,15 @@ int limtr(t_muse *x, int n, int l) {
 
 static void muse_set(t_muse *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac==2 && av->a_type == A_FLOAT)
-	{	int i = limtr(x, av->a_w.w_float, 1);
+	{	int i = muse_limtr(x, av->a_w.w_float, 1);
 		t_atomtype typ = (av+1)->a_type;
 		if (typ == A_FLOAT) x->x_scl[i] = (av+1)->a_w.w_float;
 		else if (typ == A_SYMBOL) muse_operate(x->x_scl+i, av+1);   }
 	else pd_error(x, "muse_set: bad arguments");
+}
+
+static void muse_size(t_muse *x, t_floatarg n) {
+	x->x_n = muse_limtr(x,n,0);
 }
 
 static void muse_imp(t_muse *x, int ac, int offset) {
@@ -116,10 +120,6 @@ static void muse_ex(t_muse *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac) muse_scale(x, ac, av, 0);
 }
 
-static void muse_size(t_muse *x, t_floatarg n) {
-	x->x_n = limtr(x,n,0);
-}
-
 static void muse_explicit(t_muse *x, t_floatarg f) {
 	x->x_exp = f;
 }
@@ -141,7 +141,7 @@ static void muse_octet(t_muse *x, t_floatarg f) {
 	muse_octave(x,f);   muse_tet(x,f);
 }
 
-double getnote(t_muse *x, int d) {
+static double muse_getnote(t_muse *x, int d) {
 	int n=x->x_n, p=d%n, b=p<0,
 	q = d/n-b;
 	d = b*n+p;
@@ -152,10 +152,10 @@ double getnote(t_muse *x, int d) {
 
 static void muse_float(t_muse *x, t_float f) {
 	int d=f;
-	double note = getnote(x, d);
+	double note = muse_getnote(x, d);
 	if (f!=d)
 	{	int b = f<0?-1:1;
-		double next = getnote(x, d+b);
+		double next = muse_getnote(x, d+b);
 		note += b*(f-d) * (next-note);   }
 	outlet_float(x->m_out, note);
 	outlet_float(x->f_out, ntof(note, x->x_rt, x->x_st));
