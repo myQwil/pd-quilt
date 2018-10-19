@@ -6,7 +6,7 @@
 #X obj 222 111 % \$1;
 #X obj 254 83 inlet;
 #X obj 177 185 sel \$2;
-#X obj 229 152 inlet;
+#X obj 269 152 inlet;
 #X obj 177 211 outlet;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;

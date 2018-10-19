@@ -24,7 +24,7 @@
 	hotbinops3-help.pd logb-help.pd manscratch.pd mantissa.pd mantissal.pd \
 	mantouch.pd mantr.pd mix~.pd muse-help.pd ne-aliases-help.pd ntof-help.pd \
 	pad.pd pad~.pd radx-help.pd rand-help.pd revbinops-help.pd rind-help.pd \
-	ruse-help.pd same-help.pd sound.pd sploat-help.pd \
+	ruse-help.pd same-help.pd sploat-help.pd \
 	README.md LICENSE.md
 
   include Makefile.pdlibbuilder

@@ -55,12 +55,12 @@ static void chrd_operate(t_float *fp, t_atom *av) {
 		else if (cp[1]=='/') *fp /= f;   }
 }
 
-static void chrd_resize(t_chrd *x, int d) {
-	int n=2, i;
-	while (n<MAX && n<d) n*=2;
+static void chrd_resize(t_chrd *x, int n) {
+	int d=2, i;
+	while (d<MAX && d<n) d*=2;
 	x->x_scl = (t_float *)resizebytes(x->x_scl,
-		x->x_p * sizeof(t_float), n * sizeof(t_float));
-	x->x_p = n;
+		x->x_p * sizeof(t_float), d * sizeof(t_float));
+	x->x_p = d;
 	t_float *fp = x->x_scl;
 	t_inlet *ip = ((t_object *)x)->ob_inlet;
 	for (i=x->x_in; i--; fp++, ip=ip->i_next)
@@ -151,29 +151,32 @@ static void chrd_octet(t_chrd *x, t_floatarg f) {
 }
 
 static double chrd_getnote(t_chrd *x, int d) {
-	int n=x->x_n, p=d%n, b=p<0,
-	q = d/n-b;
-	d = b*n+p;
-	t_float root = x->x_scl[0],
-		step = d ? x->x_scl[d] : 0;
+	t_float root = x->x_scl[0];
+	if (d==0) return root;
+	
+	int n=x->x_n-1, i=(d-(d>0))%n,
+		b=i<0, q=(d-!b)/n-b;
+	i += b*n+1;
+	t_float step = x->x_scl[i];
 	return (x->x_oct*q + root+step);
 }
 
 static void chrd_float(t_chrd *x, t_float f) {
-	int n=x->x_in, d=f;
+	int d=f;
 	double note = chrd_getnote(x, d);
 	if (f!=d)
 	{	int b = f<0?-1:1;
 		double next = chrd_getnote(x, d+b);
 		note += b*(f-d) * (next-note);   }
-	int p=d%n; if (p<0) p+=n;
-	d = (d&&!p)?n:p;
-	outlet_float(x->x_outs[d], x->x_midi ?
+	int n=x->x_in-1, i=(d-(d>0))%n;
+	i += (i<0)*n+1;
+	if (d==0) i=0;
+	outlet_float(x->x_outs[i], x->x_midi ?
 		note : ntof(note, x->x_rt, x->x_st));
 }
 
 static void chrd_bang(t_chrd *x) {
-	int n=x->x_n, i=x->x_in+1;
+	int n=x->x_n, i=x->x_in;
 	i = x->x_all ? i : (n>i?i:n);
 	t_outlet **op;
 	for (op=x->x_outs+i; op--, i--;)
@@ -185,14 +188,13 @@ static void chrd_bang(t_chrd *x) {
 static void *chrd_new(t_symbol *s, int ac, t_atom *av) {
 	t_chrd *x = (t_chrd *)pd_new(chrd_class);
 	
-	int n = x->x_n = x->x_in = x->x_p = ac<2?2:ac, i=0;
+	int n = x->x_n = x->x_in = x->x_p = ac<3?3:ac, i=0;
 	x->x_scl = (t_float *)getbytes(n * sizeof(t_float));
-	x->x_outs = (t_outlet **)getbytes((n+1) * sizeof(t_outlet *));
+	x->x_outs = (t_outlet **)getbytes(n * sizeof(t_outlet *));
 	t_float *fp = x->x_scl;
 	t_outlet **op = x->x_outs;
-	fp[0]=69, fp[1]=7;
-	op[0] = outlet_new(&x->x_obj, &s_float);
-	for (; op++,n--; fp++,i++)
+	fp[0]=69, fp[1]=7, fp[2]=12;
+	for (; n--; op++,fp++,i++)
 	{	*op = outlet_new(&x->x_obj, &s_float);
 		floatinlet_new(&x->x_obj, fp);
 		if (i<ac) *fp = atom_getfloat(av++);   }
@@ -207,7 +209,7 @@ static void *chrd_new(t_symbol *s, int ac, t_atom *av) {
 
 static void chrd_free(t_chrd *x) {
 	freebytes(x->x_scl, x->x_p * sizeof(t_float));
-	freebytes(x->x_outs, (x->x_in+1) * sizeof(t_outlet *));
+	freebytes(x->x_outs, x->x_in * sizeof(t_outlet *));
 }
 
 void chrd_setup(void) {

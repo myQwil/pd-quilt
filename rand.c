@@ -17,7 +17,7 @@ static t_class *rand_class;
 typedef struct _rand {
 	t_object x_obj;
 	t_float *x_fp, x_pr;	/* previous number */
-	int x_c, x_in, x_p,		/* arg count, inlets, pointer */
+	int x_n, x_c, x_in, x_p,/* list size, arg count, inlets, pointer size */
 		x_rc, x_rx,	x_nop;	/* repeat count, max, and toggle */
 	unsigned x_state, x_swat;
 } t_rand;
@@ -74,13 +74,13 @@ static int rand_resize(t_rand *x, int n, int l) {
 static void rand_set(t_rand *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac==2 && av->a_type == A_FLOAT)
 	{	int i = rand_resize(x, av->a_w.w_float, 1);
-		t_atomtype typ = (av+1)->a_type;
-		if (typ == A_FLOAT) x->x_fp[i] = (av+1)->a_w.w_float;   }
+		if ((av+1)->a_type == A_FLOAT)
+			x->x_fp[i] = (av+1)->a_w.w_float;   }
 	else pd_error(x, "rand_set: bad arguments");
 }
 
 static void rand_size(t_rand *x, t_floatarg n) {
-	x->x_c = rand_resize(x,n,0);
+	x->x_n = rand_resize(x,n,0);
 }
 
 static void rand_nop(t_rand *x, t_floatarg f) {
@@ -123,7 +123,8 @@ static void rand_bang(t_rand *x) {
 			x->x_pr=i;   }
 		outlet_float(x->x_obj.ob_outlet, i);   }
 	else
-	{	i = nextr(x,c,0);
+	{	c = x->x_n;
+		i = nextr(x,c,0);
 		if (x->x_nop)
 		{	swapr(x,&i,fp[i],c,1,0,0);
 			x->x_pr=fp[i];   }
@@ -149,13 +150,16 @@ static void rand_float(t_rand *x, t_float f) {
 static void *rand_new(t_symbol *s, int ac, t_atom *av) {
 	t_rand *x = (t_rand *)pd_new(rand_class);
 	outlet_new(&x->x_obj, &s_float);
-	int n = x->x_c = x->x_in = x->x_p = ac<1?2:ac;
-	x->x_fp = (t_float *)getbytes(n * sizeof(t_float));
+	
+	int n = x->x_n = x->x_c = x->x_in = x->x_p = ac<1?2:ac;
+	if (ac==3 && (av+1)->a_type != A_FLOAT)
+		x->x_n = x->x_in = x->x_p = 2; // ex: [rand 3 or 6]
+	x->x_fp = (t_float *)getbytes(x->x_n * sizeof(t_float));
 	t_float *fp = x->x_fp;
-	for (; n--; fp++)
-	{	floatinlet_new(&x->x_obj, fp);
-		*fp = atom_getfloat(av++);   }
-	x->x_nop=0, x->x_rx=1,
+	for (; n--; av++)
+	{	if (!ac || av->a_type == A_FLOAT)
+		{	floatinlet_new(&x->x_obj, fp);
+			*fp++ = atom_getfloat(av);   }   }
 	x->x_state = x->x_swat = rand_makeseed();
 	return (x);
 }

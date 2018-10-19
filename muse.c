@@ -54,12 +54,12 @@ static void muse_operate(t_float *fp, t_atom *av) {
 		else if (cp[1]=='/') *fp /= f;   }
 }
 
-static void muse_resize(t_muse *x, int d) {
-	int n=2, i;
-	while (n<MAX && n<d) n*=2;
+static void muse_resize(t_muse *x, int n) {
+	int d=2, i;
+	while (d<MAX && d<n) d*=2;
 	x->x_scl = (t_float *)resizebytes(x->x_scl,
-		x->x_p * sizeof(t_float), n * sizeof(t_float));
-	x->x_p = n;
+		x->x_p * sizeof(t_float), d * sizeof(t_float));
+	x->x_p = d;
 	t_float *fp = x->x_scl;
 	t_inlet *ip = ((t_object *)x)->ob_inlet;
 	for (i=x->x_in; i--; fp++, ip=ip->i_next)
@@ -142,11 +142,10 @@ static void muse_octet(t_muse *x, t_floatarg f) {
 }
 
 static double muse_getnote(t_muse *x, int d) {
-	int n=x->x_n, p=d%n, b=p<0,
-	q = d/n-b;
-	d = b*n+p;
+	int n=x->x_n, i=d%n, b=i<0, q=d/n-b;
+	i += b*n;
 	t_float root = x->x_scl[0],
-		step = d ? x->x_scl[d] : 0;
+		step = i ? x->x_scl[i] : 0;
 	return (x->x_oct*q + root+step);
 }
 

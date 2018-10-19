@@ -29,15 +29,15 @@ to produce different results upon each restart of pd.;
 #X obj 287 85 r k;
 #X obj 209 269 r k;
 #X obj 24 153 r k;
-#X msg 265 220 peek;
+#X msg 265 245 peek;
 #X obj 238 131 random 4;
 #X floatatom 248 156 0 0 0 0 - - -;
-#X msg 265 244 state;
-#X text 306 244 print random state;
+#X msg 265 269 state;
+#X text 306 269 print random state;
 #X obj 239 295 rand 1 2 3.14159;
 #X obj 21 305 cupqb;
 #X msg 74 294 max \$1;
-#X obj 20 268 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
+#X obj 20 268 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
 #X text 94 316 default: 1;
 #X text 357 89 max;
@@ -51,7 +51,7 @@ to produce different results upon each restart of pd.;
 #X obj 255 343 cupqb;
 #X msg 295 349 n \$1;
 #X msg 352 73 state;
-#X text 299 220 print arg list;
+#X text 299 245 print arg list;
 #X floatatom 95 394 0 0 0 0 - - -;
 #X msg 38 391 nop 1;
 #X text 122 390 nop takes ints;
