@@ -51,7 +51,7 @@ static void rand_peek(t_rand *x, t_symbol *s) {
 	int i;
 	t_float *fp = x->x_fp;
 	if (*s->s_name) startpost("%s: ", s->s_name);
-	for (i=x->x_c; i--; fp++) startpost("%g ", *fp);
+	for (i=x->x_n; i--; fp++) startpost("%g ", *fp);
 	endpost();
 }
 
@@ -114,7 +114,11 @@ static void rand_bang(t_rand *x) {
 	int c=x->x_c, i;
 	t_float *fp = x->x_fp;
 	if (c<3)
-	{	int mx=fp[0], mn=fp[1], n=mx-mn, b=n<0, d=b?-1:1;
+	{	int mn, mx;
+		if (c<2) mn=0, mx=fp[0];
+		else mn=fp[0], mx=fp[1];
+		
+		int n=mx-mn, b=n<0, d=b?-1:1;
 		if (c>1) n+=d; else n=n?n:1;
 		double f = nextr(x,n,0) + mn+b;
 		i = f-(f<0);
@@ -136,7 +140,11 @@ static void rand_float(t_rand *x, t_float f) {
 	t_float *fp = x->x_fp;
 	if (x->x_nop)
 	{	if (c<3)
-		{	int mx=fp[0], mn=fp[1], n=mx-mn, b=n<0, d=b?-1:1;
+		{	int mn, mx;
+			if (c<2) mn=0, mx=fp[0];
+			else mn=fp[0], mx=fp[1];
+			
+			int n=mx-mn, b=n<0, d=b?-1:1;
 			if (c>1) n+=d; else n=n?n:1;
 			swapr(x,&i,i,n,d,mn,b);
 			x->x_pr=i;
@@ -150,10 +158,9 @@ static void rand_float(t_rand *x, t_float f) {
 static void *rand_new(t_symbol *s, int ac, t_atom *av) {
 	t_rand *x = (t_rand *)pd_new(rand_class);
 	outlet_new(&x->x_obj, &s_float);
-	
-	int n = x->x_n = x->x_c = x->x_in = x->x_p = ac<1?2:ac;
-	if (ac==3 && (av+1)->a_type != A_FLOAT)
-		x->x_n = x->x_in = x->x_p = 2; // ex: [rand 3 or 6]
+	int n = x->x_c = ac<1?2:ac;
+	x->x_n = x->x_in = x->x_p =
+		(ac==3 && (av+1)->a_type != A_FLOAT) ? 2 : n;
 	x->x_fp = (t_float *)getbytes(x->x_n * sizeof(t_float));
 	t_float *fp = x->x_fp;
 	for (; n--; av++)

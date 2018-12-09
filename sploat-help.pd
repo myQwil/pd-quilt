@@ -6,7 +6,7 @@
 #X obj 367 112 cupqbl;
 #X floatatom 338 187 0 0 0 0 - - -;
 #X obj 338 161 #pow;
-#X floatatom 242 354 0 0 0 0 - - -;
+#X floatatom 232 355 0 0 0 0 - - -;
 #X obj 261 130 cupqbl;
 #X floatatom 354 353 0 0 0 0 - - -;
 #X obj 163 112 cupqbl;
@@ -28,13 +28,14 @@ of a float;
 #X floatatom 193 86 0 0 0 0 - - -;
 #X obj 298 174 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 242 328 gloat 0 125 1;
+#X obj 232 329 gloat 0 125 1;
 #X obj 261 211 sploat -0.25;
 #X floatatom 357 211 0 0 0 0 - - -;
 #X obj 354 303 - 127;
 #X floatatom 397 303 0 0 0 0 - - -;
 #X obj 354 328 @pow 2;
 #X obj 35 389 mantissa;
+#X text 259 305 v cold inlet;
 #X connect 0 0 26 2;
 #X connect 0 0 29 0;
 #X connect 1 0 26 3;
