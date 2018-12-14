@@ -1,4 +1,4 @@
-#N canvas 719 355 450 300 12;
+#N canvas 1001 380 450 300 12;
 #X text 191 19 NTOF / FTON;
 #X text 32 42 similar to [mtof] and [ftom] with the added ability to
 change the reference pitch and the number of tones in an octave.;
@@ -17,9 +17,12 @@ change the reference pitch and the number of tones in an octave.;
 #X msg 380 156 tet \$1;
 #X text 209 155 # of tones. default: 12;
 #X text 384 105 funcs;
+#X obj 227 212 fton 432 13;
+#X floatatom 227 237 5 0 0 0 - - -, f 5;
 #X connect 2 0 3 0;
 #X connect 3 0 4 0;
 #X connect 3 0 5 0;
+#X connect 3 0 17 0;
 #X connect 5 0 6 0;
 #X connect 6 0 9 0;
 #X connect 6 0 9 1;
@@ -27,3 +30,4 @@ change the reference pitch and the number of tones in an octave.;
 #X connect 8 0 6 1;
 #X connect 10 0 3 2;
 #X connect 11 0 3 1;
+#X connect 17 0 18 0;

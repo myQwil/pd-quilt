@@ -1,10 +1,6 @@
 # pd-externals
 Externals I've made for pure data:
 
-## [divrt $1 $2] & [randv $1 $2]
-If a number repeats `$1` number of times, it swaps it with a different number within a range of `$2`.  
-`[divrt]` accepts floats while `[randv]` accepts bangs and generates its own random numbers.
-
 ## [ntof $1 $2] & [fton $1 $2]
 Similar to pd's `[mtof]` and `[ftom]` with the added ability to change the reference pitch(`$1`) and the # of tones in equal temperament(`$2`).
 
@@ -16,18 +12,15 @@ Similar to pd's `[mtof]` and `[ftom]` with the added ability to change the refer
 Creates `$3` number of steps between min and max values `$1` and `$2`.  
 It's essentially `[expr $f1 / ($f4 / ($f3 - $f2)) + $f2]`
 
-## [muse $...] & [harm $...]
+## [muse $...] & [chrd $...]
 `[muse]` Creates a monophonic musical scale and uses various messages to quickly change the structure of the scale  
-`[harm]` The chord equivalent of `[muse]` that produces multiple outlets based on the number of creation arguments specified
-
-## [ruse $...]
-Short for rounding muse. Rounds a midi note to the nearest note that fits within the specified scale.
+`[chrd]` The chord equivalent of `[muse]` that produces multiple outlets based on the number of creation arguments specified
 
 ## [radx $1]
 A number base converter. Outputs the result in the form of a symbol.  
 `$1` can be any value between 2 and 32.
 
-## [rand $1 $2 $...]
+## [rand $1 $2 $..]
 A random number generator that seeds with the current time so that the seed is always different even after restarting pd.  
 Accepts 2 arguments for a min and max value, or more than 2 arguments to create a list of numbers.
 

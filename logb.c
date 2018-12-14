@@ -1,5 +1,5 @@
 #include "m_pd.h"
-#include "binop.h"
+#include "rev/binop.h"
 #include <math.h>
 
 /* -------------------------- logb -------------------------- */
