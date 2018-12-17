@@ -3,7 +3,7 @@
   lib.name = myQwil
 
   class.sources = muse.c chrd.c rand.c rind.c ntof.c fton.c sploat.c gloat.c \
-	logb.c graid.c same.c ceil.c radx.c !.c !~.c 0x5e.c
+	logb.c graid.c same.c ceil.c radx.c !.c !~.c 0x5e.c gme~.c nsf~.c
 
   datafiles = !~-help.pd !-help.pd ^-help.pd 2^.pd ad.pd ad~.pd adac~.pd \
 	ceil-help.pd cpt.pd cupq.pd cupqb.pd cupqbl.pd fkick~.pd fmbloc~.pd \
