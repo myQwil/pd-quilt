@@ -82,18 +82,17 @@ static void nsf_tilde_info(t_nsf_tilde *x, t_symbol *s) {
 	{	Music_Emu *emu;
 		gme_info_t *info;
 		handle_error(gme_open_file(x->x_path->s_name, &emu, gme_info_only));
-		handle_error(gme_track_info(emu, &info, 0));
 
-		if (info)
-		{	int c = gme_track_count(emu);
+		if (emu)
+		{	handle_error(gme_track_info(emu, &info, 0));
+			int c = gme_track_count(emu);
 			startpost("%s", info->game);
 			if (info->song[0] != '\0') startpost(" - %s", info->song);
 			if (c>1) startpost(" | %d tracks", c);
-			startpost(" (%s)", x->x_path->s_name);
+			post(" (%s)", x->x_path->s_name);
 			gme_free_info(info);
 			gme_delete(emu);   }   }
-	else startpost("no track loaded");
-	endpost();
+	else post("no track loaded");
 }
 
 static void nsf_tilde_read(t_nsf_tilde *x, t_symbol *s) {
