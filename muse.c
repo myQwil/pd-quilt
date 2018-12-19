@@ -11,7 +11,7 @@ struct _inlet {
 	t_float *i_floatslot;
 };
 
-t_float ntof(t_float f, double root, double semi) {
+static t_float ntof(t_float f, double root, double semi) {
 	return (root * exp(semi*f));
 }
 
@@ -45,7 +45,7 @@ static void muse_peek(t_muse *x, t_symbol *s) {
 }
 
 static void muse_operate(t_float *fp, t_atom *av) {
-	char *cp = av->a_w.w_symbol->s_name;
+	const char *cp = av->a_w.w_symbol->s_name;
 	if (cp[1])
 	{	t_float f = cp[2] ? atof(cp+2) : 1;
 			 if (cp[1]=='+') *fp += f;

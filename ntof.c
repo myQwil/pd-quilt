@@ -3,7 +3,7 @@
 
 /* -------------------------- ntof -------------------------- */
 
-t_float ntof(t_float f, double root, double semi) {
+static t_float ntof(t_float f, double root, double semi) {
 	return (root * exp(semi*f));
 }
 

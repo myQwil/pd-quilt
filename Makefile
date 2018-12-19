@@ -12,4 +12,6 @@
 	ntof-help.pd pad.pd pad~.pd radx-help.pd rand-help.pd rind-help.pd \
 	same-help.pd sploat-help.pd README.md LICENSE.md
 
+  suppress-wunused = 'yes'
+
   include Makefile.pdlibbuilder
