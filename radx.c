@@ -85,7 +85,7 @@ under a 2-clause BSD license (license text in the source files). The
 included version has been heavily modified by Rich Felker in 2012, in
 the interests of size, simplicity, and namespace cleanliness.
 
-Much of the math library code (src/math/* and src/complex/*) is
+Much of the math library code (src/math/ * and src/complex/ *) is
 Copyright © 1993,2004 Sun Microsystems or
 Copyright © 2003-2011 David Schultz or
 Copyright © 2003-2009 Steven G. Kargl or
@@ -110,7 +110,7 @@ The smoothsort implementation (src/stdlib/qsort.c) is Copyright © 2011
 Valentin Ochs and is licensed under an MIT-style license.
 
 The BSD PRNG implementation (src/prng/random.c) and XSI search API
-(src/search/*.c) functions are Copyright © 2011 Szabolcs Nagy and
+(src/search/ *.c) functions are Copyright © 2011 Szabolcs Nagy and
 licensed under following terms: "Permission to use, copy, modify,
 and/or distribute this code for any purpose with or without fee is
 hereby granted. There is no warranty."
@@ -139,8 +139,8 @@ omission of copyright and license comments in each file is in the
 interest of source tree size.
 
 In addition, permission is hereby granted for all public header files
-(include/* and arch/* /bits/*) and crt files intended to be linked into
-applications (crt/*, ldso/dlstart.c, and arch/* /crt_arch.h) to omit
+(include/ * and arch/ * /bits/ *) and crt files intended to be linked into
+applications (crt/ *, ldso/dlstart.c, and arch/ * /crt_arch.h) to omit
 the copyright notice and permission notice otherwise required by the
 license, and to use these files without any requirement of
 attribution. These files include substantial contributions from:

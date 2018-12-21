@@ -46,7 +46,7 @@ static void chrd_peek(t_chrd *x, t_symbol *s) {
 }
 
 static void chrd_operate(t_float *fp, t_atom *av) {
-	char *cp = av->a_w.w_symbol->s_name;
+	const char *cp = av->a_w.w_symbol->s_name;
 	if (cp[1])
 	{	t_float f = cp[2] ? atof(cp+2) : 1;
 			 if (cp[1]=='+') *fp += f;
