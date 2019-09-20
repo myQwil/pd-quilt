@@ -1,33 +1,38 @@
-#N canvas 719 355 450 300 12;
-#X text 206 23 RIND;
-#X text 93 43 High precision random number generator;
-#X obj 38 93 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0 1
-;
-#X obj 38 118 metro 200;
-#X obj 48 144 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+#N canvas 715 348 450 325 12;
+#X obj 88 130 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 88 155 metro 200;
+#X obj 98 181 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
-#X floatatom 77 143 0 0 0 0 - - -;
-#X obj 38 211 print;
-#X obj 163 146 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X floatatom 127 180 0 0 0 0 - - -;
+#X obj 208 185 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 163 170 rind 3.2 6.7;
-#X floatatom 163 196 0 0 0 0 - - -;
-#X text 204 195 2 args create boundaries;
-#X text 204 211 (number between 3.2 and 6.7);
-#X floatatom 193 147 0 0 0 0 - - -;
-#X text 200 128 max;
-#X floatatom 238 147 0 0 0 0 - - -;
-#X text 247 128 min;
-#X obj 238 71 rind 1 0;
-#X text 174 71 default:;
-#X obj 38 168 rind 4;
-#X connect 2 0 3 0;
-#X connect 3 0 18 0;
-#X connect 4 0 18 0;
-#X connect 5 0 18 1;
-#X connect 7 0 8 0;
-#X connect 8 0 9 0;
-#X connect 12 0 8 1;
-#X connect 14 0 8 2;
-#X connect 18 0 6 0;
-#X coords 0 241 1 240 85 60 0;
+#X obj 226 205 rind 3.2 6.7;
+#X floatatom 226 231 0 0 0 0 - - -;
+#X text 207 256 2 args create boundaries;
+#X text 207 272 (number between 3.2 and 6.7);
+#X floatatom 266 180 0 0 0 0 - - -;
+#X text 266 163 max;
+#X floatatom 307 180 0 0 0 0 - - -;
+#X text 307 163 min;
+#X obj 223 86 rind 1 0;
+#X text 159 86 default:;
+#X obj 88 205 rind 4;
+#X floatatom 88 234 0 0 0 0 - - -;
+#X msg 220 136 peek;
+#X msg 260 136 state;
+#X obj 187 51 cnv 6 1 1 empty empty rind 6 0 0 14 -233017 -66577 0
+;
+#X text 88 62 High-precision random number generator;
+#X connect 0 0 1 0;
+#X connect 1 0 15 0;
+#X connect 2 0 15 0;
+#X connect 3 0 15 1;
+#X connect 4 0 5 0;
+#X connect 5 0 6 0;
+#X connect 9 0 5 1;
+#X connect 11 0 5 2;
+#X connect 15 0 16 0;
+#X connect 17 0 5 0;
+#X connect 18 0 5 0;
+#X coords 0 325 1 324 85 60 0;

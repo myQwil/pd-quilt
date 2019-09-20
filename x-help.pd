@@ -1,0 +1,67 @@
+#N canvas 693 321 490 368 12;
+#X obj 89 243 t a;
+#X msg 59 125 list 12;
+#X msg 77 149 list hi;
+#X obj 95 196 pointer;
+#X obj 66 303 is list;
+#X obj 131 303 is float;
+#X obj 204 303 is symbol;
+#X obj 283 303 is pointer;
+#X msg 234 125 list 12;
+#X msg 252 149 list hi;
+#X obj 270 196 pointer;
+#X obj 264 243 x a;
+#X msg 123 219 1 2 3;
+#X msg 311 244 1 2 3;
+#X obj 66 332 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 131 332 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 204 332 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 283 332 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 378 230 is p;
+#X obj 366 254 spigot;
+#X obj 366 278 pointer;
+#X obj 366 302 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 363 203 x;
+#N canvas 0 0 450 300 foo 0;
+#X restore 367 132 pd foo;
+#X msg 95 172 traverse pd-foo \, bang;
+#X msg 270 172 traverse pd-foo \, bang;
+#X obj 228 34 cnv 6 1 1 empty empty x 6 0 0 14 -233017 -66577 0;
+#X text 184 44 explicit trigger;
+#X text 33 65 A variation of [trigger] that sends 1-atom lists as the
+atom itself when either a number \, the letter 'a' \, or no creation
+args are used.;
+#X connect 0 0 4 0;
+#X connect 0 0 5 0;
+#X connect 0 0 6 0;
+#X connect 0 0 7 0;
+#X connect 0 0 22 0;
+#X connect 1 0 0 0;
+#X connect 2 0 0 0;
+#X connect 3 0 0 0;
+#X connect 4 0 14 0;
+#X connect 5 0 15 0;
+#X connect 6 0 16 0;
+#X connect 7 0 17 0;
+#X connect 8 0 11 0;
+#X connect 9 0 11 0;
+#X connect 10 0 11 0;
+#X connect 11 0 4 0;
+#X connect 11 0 5 0;
+#X connect 11 0 6 0;
+#X connect 11 0 7 0;
+#X connect 11 0 22 0;
+#X connect 12 0 0 0;
+#X connect 13 0 11 0;
+#X connect 18 0 19 1;
+#X connect 19 0 20 0;
+#X connect 20 0 21 0;
+#X connect 22 0 19 0;
+#X connect 22 1 18 0;
+#X connect 24 0 3 0;
+#X connect 25 0 10 0;

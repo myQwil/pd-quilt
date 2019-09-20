@@ -1,0 +1,19 @@
+#N canvas 719 355 450 300 12;
+#X obj 194 122 inlet~;
+#X obj 194 148 osc~;
+#X obj 194 173 *~;
+#X obj 238 173 inlet~;
+#X obj 194 199 +~;
+#X obj 250 199 inlet~;
+#X obj 194 225 osc~;
+#X obj 194 250 outlet~;
+#X obj 184 64 cnv 6 1 1 empty empty fmod~ 6 0 0 14 -233017 -66577 0
+;
+#X text 129 79 simple frequency modulator;
+#X connect 0 0 1 0;
+#X connect 1 0 2 0;
+#X connect 2 0 4 0;
+#X connect 3 0 2 1;
+#X connect 4 0 6 0;
+#X connect 5 0 4 1;
+#X connect 6 0 7 0;

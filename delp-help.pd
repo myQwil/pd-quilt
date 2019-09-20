@@ -1,0 +1,28 @@
+#N canvas 737 422 450 300 12;
+#X obj 174 245 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X floatatom 221 242 0 0 0 0 - - -;
+#X obj 136 171 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X msg 326 185 1;
+#X msg 158 119 tempo 1 msec \, 2000;
+#X msg 174 144 tempo 0.5 sec \, 5;
+#X obj 195 42 cnv 6 1 1 empty empty delp 6 0 0 14 -233017 -66577 0
+;
+#X obj 174 215 delp 2 0.5 sec;
+#X text 116 57 delay with pause functionality;
+#X obj 281 217 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X text 88 77 outputs the remaining time when paused;
+#X msg 189 179 pause;
+#X msg 82 161 stop;
+#X text 233 179 /resume;
+#X connect 2 0 7 0;
+#X connect 3 0 7 1;
+#X connect 4 0 7 0;
+#X connect 5 0 7 0;
+#X connect 7 0 0 0;
+#X connect 7 1 1 0;
+#X connect 7 2 9 0;
+#X connect 11 0 7 0;
+#X connect 12 0 7 0;

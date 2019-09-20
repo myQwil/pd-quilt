@@ -1,10 +1,13 @@
 #N canvas 719 355 450 300 12;
-#X obj 150 89 catch~ L;
-#X obj 150 152 *~;
-#X obj 271 89 catch~ R;
-#X obj 271 152 *~;
-#X obj 215 116 inlet~;
-#X obj 204 172 dac~;
+#X obj 143 131 catch~ L;
+#X obj 143 194 *~;
+#X obj 264 131 catch~ R;
+#X obj 264 194 *~;
+#X obj 210 131 inlet~;
+#X obj 197 244 dac~;
+#X obj 198 62 cnv 6 1 1 empty empty mix~ 6 0 0 14 -233017 -66577 0
+;
+#X text 117 76 works in conjunction with adac~;
 #X connect 0 0 1 0;
 #X connect 1 0 5 0;
 #X connect 2 0 3 0;

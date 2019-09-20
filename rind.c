@@ -26,20 +26,12 @@ static void rind_seed(t_rind *x, t_symbol *s, int argc, t_atom *argv) {
 	x->x_state = (argc ? atom_getfloat(argv) : rind_time());
 }
 
-static void rind_ptr(t_rind *x, t_symbol *s) {
+static void rind_state(t_rind *x, t_symbol *s) {
 	post("%s%s%u", s->s_name, *s->s_name?": ":"", x->x_state);
 }
 
 static void rind_peek(t_rind *x, t_symbol *s) {
-	post("%s%s%g %g", s->s_name, *s->s_name?": ":"", x->x_min, x->x_max);
-}
-
-static void rind_min(t_rind *x, t_floatarg f) {
-	x->x_min = f;
-}
-
-static void rind_max(t_rind *x, t_floatarg f) {
-	x->x_max = f;
+	post("%s%s%g <-> %g", s->s_name, *s->s_name?": ":"", x->x_max, x->x_min);
 }
 
 static void rind_bang(t_rind *x) {
@@ -50,17 +42,24 @@ static void rind_bang(t_rind *x) {
 	outlet_float(x->x_obj.ob_outlet, nval);
 }
 
-static void *rind_new(t_symbol *s, int argc, t_atom *argv) {
+static void rind_list(t_rind *x, t_symbol *s, int ac, t_atom *av) {
+	switch (ac)
+	{	case 2: if (av[1].a_type == A_FLOAT) x->x_min = av[1].a_w.w_float;
+		case 1: if (av[0].a_type == A_FLOAT) x->x_max = av[0].a_w.w_float;   }
+}
+
+static void *rind_new(t_symbol *s, int ac, t_atom *av) {
 	t_rind *x = (t_rind *)pd_new(rind_class);
 	outlet_new(&x->x_obj, &s_float);
+	
 	floatinlet_new(&x->x_obj, &x->x_max);
-	floatinlet_new(&x->x_obj, &x->x_min);
-	t_float max=1, min=0;
-	switch (argc)
-	{ case 2: min=atom_getfloat(argv+1);
-	  case 1: max=atom_getfloat(argv); }
-	x->x_max=max, x->x_min=min;
+	if (ac!=1) floatinlet_new(&x->x_obj, &x->x_min);
+	
+	switch (ac)
+	{	case 2: x->x_min = atom_getfloat(av+1);
+		case 1: x->x_max = atom_getfloat(av);   }
 	x->x_state = rind_makeseed();
+	
 	return (x);
 }
 
@@ -70,14 +69,11 @@ void rind_setup(void) {
 		sizeof(t_rind), 0,
 		A_GIMME, 0);
 	class_addbang(rind_class, rind_bang);
+	class_addlist(rind_class, rind_list);
 	class_addmethod(rind_class, (t_method)rind_seed,
 		gensym("seed"), A_GIMME, 0);
-	class_addmethod(rind_class, (t_method)rind_ptr,
-		gensym("ptr"), A_DEFSYM, 0);
+	class_addmethod(rind_class, (t_method)rind_state,
+		gensym("state"), A_DEFSYM, 0);
 	class_addmethod(rind_class, (t_method)rind_peek,
 		gensym("peek"), A_DEFSYM, 0);
-	class_addmethod(rind_class, (t_method)rind_min,
-		gensym("min"), A_FLOAT, 0);
-	class_addmethod(rind_class, (t_method)rind_max,
-		gensym("max"), A_FLOAT, 0);
 }

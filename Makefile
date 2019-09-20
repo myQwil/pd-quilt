@@ -2,16 +2,21 @@
 
   lib.name = myQwil
 
-  class.sources = muse.c chrd.c rand.c rind.c ntof.c fton.c sploat.c gloat.c \
-	logb.c graid.c same.c ceil.c radx.c !.c !~.c 0x5e.c gme~.c nsf~.c
+  class.sources = \
+	muse.c chrd.c rand.c rind.c ntof.c fton.c sploat.c gloat.c \
+	logb.c grdnt.c same.c ceil.c radix.c !.c !~.c 0x5e.c gme~.c gmes~.c \
+	x.c is.c pak.c unpak.c
 
-  datafiles = !~-help.pd !-help.pd ^-help.pd 2^.pd ad.pd ad~.pd adac~.pd \
-	ceil-help.pd cpt.pd cupq.pd cupqb.pd cupqbl.pd fkick~.pd fmbloc~.pd \
-	freqm~.pd graid-help.pd chrd-help.pd logb-help.pd manscratch.pd \
-	mantissa.pd mantissal.pd mantouch.pd mantr.pd mix~.pd muse-help.pd \
-	ntof-help.pd pad.pd pad~.pd radx-help.pd rand-help.pd rind-help.pd \
-	same-help.pd sploat-help.pd README.md LICENSE.md
+  datafiles = !-help.pd !~-help.pd ^-help.pd 2^.pd ad.pd ad~.pd adac~.pd \
+	bt.pd ct.pd cupq.pd cupq-help.pd cupqb.pd cupqb-help.pd fmod~.pd fmad~.pd \
+	muse-help.pd chrd-help.pd ceil-help.pd logb-help.pd phi.pd tie.pd mix~.pd \
+	mantissa.pd mantissal.pd mantouch.pd manscratch.pd mantr.pd gme-mask.pd \
+	ntof-help.pd pad.pd pad~.pd radix-help.pd rand-help.pd rind-help.pd \
+	same-help.pd sploat-help.pd is-help.pd pak-help.pd gme~-help.pd \
+	x-help.pd adsr.pd adsr-help.pd fkick~.pd grdnt-help.pd dep.pd dep-help.pd \
+	README.md LICENSE.md
 
   suppress-wunused = 'yes'
+  optimization.flags = -O0 -ffast-math -funroll-loops -fomit-frame-pointer
 
-  include Makefile.pdlibbuilder
+  include pd-lib-builder/Makefile.pdlibbuilder

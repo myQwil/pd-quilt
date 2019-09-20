@@ -1,3 +1,8 @@
 *.o
 *.zip
 *.*~
+
+# builds
+#*.pd_linux
+#*.pd_darwin
+#*.dll

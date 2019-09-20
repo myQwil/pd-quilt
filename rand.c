@@ -16,10 +16,17 @@ static t_class *rand_class;
 
 typedef struct _rand {
 	t_object x_obj;
-	t_float *x_fp, x_pr;	/* previous number */
-	int x_n, x_c, x_in, x_p,/* list size, arg count, inlets, pointer size */
-		x_rc, x_rx,	x_nop;	/* repeat count, max, and toggle */
-	unsigned x_state, x_swat;
+	t_float *x_fp;      /* number list */
+	t_float x_prv;      /* previous random number */
+	int x_n;            /* list size */
+	int x_c;            /* arg count */
+	int x_in;           /* number of inlets */
+	int x_p;            /* pointer size */
+	int x_rc;           /* repeat count */
+	int x_rx;           /* repeat max */
+	int x_nop;          /* no-repeat toggle */
+	unsigned x_state;   /* random state */
+	unsigned x_swap;    /* no-repeat state */
 } t_rand;
 
 #define MAX 1024
@@ -36,11 +43,13 @@ static int rand_makeseed(void) {
 }
 
 static void rand_seed(t_rand *x, t_symbol *s, int ac, t_atom *av) {
-	x->x_state = x->x_swat = (ac ? atom_getfloat(av) : rand_time());
+	x->x_state = x->x_swap = (ac ? atom_getfloat(av) : rand_time());
 }
 
 static void rand_state(t_rand *x, t_symbol *s) {
-	post("%s%s%u %u", s->s_name, *s->s_name?": ":"", x->x_state, x->x_swat);
+	startpost("%s%s%u", s->s_name, *s->s_name?": ":"", x->x_state);
+	if (x->x_nop) startpost(" %u", x->x_swap);
+	endpost();
 }
 
 static void rand_ptr(t_rand *x, t_symbol *s) {
@@ -48,15 +57,18 @@ static void rand_ptr(t_rand *x, t_symbol *s) {
 }
 
 static void rand_peek(t_rand *x, t_symbol *s) {
-	int i;
+	int i, c=x->x_c, n=x->x_n;
 	t_float *fp = x->x_fp;
 	if (*s->s_name) startpost("%s: ", s->s_name);
-	for (i=x->x_n; i--; fp++) startpost("%g ", *fp);
+	if (c<3) startpost("%g <-> %g", fp[0], fp[1]);
+	else for (; n--; fp++)
+	{	startpost("%g", *fp);
+		if (n) startpost(" | ");   }
 	endpost();
 }
 
 static int rand_resize(t_rand *x, int n, int l) {
-	n+=l;
+	n += l;
 	if (n<1) n=1; else if (n>MAX) n=MAX;
 	if (x->x_p<n)
 	{	int d=2, i;
@@ -71,16 +83,20 @@ static int rand_resize(t_rand *x, int n, int l) {
 	return (n-l);
 }
 
-static void rand_set(t_rand *x, t_symbol *s, int ac, t_atom *av) {
+static void rand_at(t_rand *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac==2 && av->a_type == A_FLOAT)
 	{	int i = rand_resize(x, av->a_w.w_float, 1);
 		if ((av+1)->a_type == A_FLOAT)
 			x->x_fp[i] = (av+1)->a_w.w_float;   }
-	else pd_error(x, "rand_set: bad arguments");
+	else pd_error(x, "rand_at: bad arguments");
 }
 
 static void rand_size(t_rand *x, t_floatarg n) {
-	x->x_n = rand_resize(x,n,0);
+	x->x_n = rand_resize(x, n, 0);
+}
+
+static void rand_count(t_rand *x, t_floatarg f) {
+	x->x_c = f;
 }
 
 static void rand_nop(t_rand *x, t_floatarg f) {
@@ -91,83 +107,85 @@ static void rand_max(t_rand *x, t_floatarg f) {
 	x->x_rx = f;
 }
 
-double nextr(t_rand *x, int n, int swap) {
-	unsigned *sp = (swap ? &x->x_swat : &x->x_state), state=*sp;
+double nextr(t_rand *x, double range, int swap) {
+	unsigned *sp = (swap ? &x->x_swap : &x->x_state), state=*sp;
 	*sp = state = state * 472940017 + 832416023;
-	return (1./4294967296) * n * state;
+	return (1./4294967296) * range * state;
 }
 
-static void swapr(t_rand *x, int *i, t_float fi, int n, int d, int mn, int b) {
-	t_float pr=x->x_pr;
+static t_float swapr(t_rand *x, int i, int rng, int min) {
 	int rc=x->x_rc, rx=x->x_rx;
-	if (fi==pr) // same as previous value
+	if (i==x->x_prv) // same as previous value
 	{	if (rc>=rx) // count reached max
 		{	rc=1;
-			double f = *i-mn+d+nextr(x,n-d,1);
-			*i = (int)f%n + mn+b-(f<0);   }
+			if (rng<0) min += rng, rng *= -1;
+			i += 1 + nextr(x, rng-1, 1) - min;
+			i = i % rng + min;   }
 		else rc++;   }
-	else rc=1;
-	x->x_rc=rc;
+	else rc = 1;
+
+	x->x_rc = rc;
+	x->x_prv = i;
+	return i;
 }
 
 static void rand_bang(t_rand *x) {
-	int c=x->x_c, i;
 	t_float *fp = x->x_fp;
-	if (c<3)
-	{	int mn, mx;
-		if (c<2) mn=0, mx=fp[0];
-		else mn=fp[0], mx=fp[1];
-		
-		int n=mx-mn, b=n<0, d=b?-1:1;
-		if (c>1) n+=d; else n=n?n:1;
-		double f = nextr(x,n,0) + mn+b;
-		i = f-(f<0);
-		if (x->x_nop)
-		{	swapr(x,&i,i,n,d,mn,b);
-			x->x_pr=i;   }
+	int c = x->x_c;
+	int i;
+	if (c<3) // range method
+	{	double min=fp[1], rng=fp[0]-min;
+		double d = nextr(x, rng, 0) + min;
+		i = d - (d<0); // floor negative values
+		if (x->x_nop) i = swapr(x, i, rng, min);
 		outlet_float(x->x_obj.ob_outlet, i);   }
-	else
+	else     // list method
 	{	c = x->x_n;
-		i = nextr(x,c,0);
-		if (x->x_nop)
-		{	swapr(x,&i,fp[i],c,1,0,0);
-			x->x_pr=fp[i];   }
+		i = nextr(x, c, 0);
+		if (x->x_nop) i = swapr(x, i, c, 0);
 		outlet_float(x->x_obj.ob_outlet, fp[i]);   }
 }
 
 static void rand_float(t_rand *x, t_float f) {
-	int c=x->x_c, i=f;
 	t_float *fp = x->x_fp;
-	if (x->x_nop)
-	{	if (c<3)
-		{	int mn, mx;
-			if (c<2) mn=0, mx=fp[0];
-			else mn=fp[0], mx=fp[1];
-			
-			int n=mx-mn, b=n<0, d=b?-1:1;
-			if (c>1) n+=d; else n=n?n:1;
-			swapr(x,&i,i,n,d,mn,b);
-			x->x_pr=i;
-			outlet_float(x->x_obj.ob_outlet, i);   }
-		else
-		{	swapr(x,&i,fp[i],c,1,0,0);
-			x->x_pr=fp[i];   
-			outlet_float(x->x_obj.ob_outlet, fp[i]);   }   }
+	int c = x->x_c;
+	if (c<3) // range method
+	{	int max=fp[0], min=fp[1], rng=max-min;
+		f = swapr(x, f, rng, min);
+		outlet_float(x->x_obj.ob_outlet, f);   }
+	else     // list method
+	{	int i = f;
+		c = x->x_n;
+		i = swapr(x, i, c, 0);
+		outlet_float(x->x_obj.ob_outlet, fp[i]);   }
+}
+
+static void rand_list(t_rand *x, t_symbol *s, int ac, t_atom *av) {
+	x->x_n = ac = rand_resize(x, ac, 0);
+	t_float *fp = x->x_fp;
+	for (; ac--; av++, fp++)
+		if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
 }
 
 static void *rand_new(t_symbol *s, int ac, t_atom *av) {
 	t_rand *x = (t_rand *)pd_new(rand_class);
 	outlet_new(&x->x_obj, &s_float);
-	int n = x->x_c = ac<1?2:ac;
-	x->x_n = x->x_in = x->x_p =
-		(ac==3 && (av+1)->a_type != A_FLOAT) ? 2 : n;
-	x->x_fp = (t_float *)getbytes(x->x_n * sizeof(t_float));
+	
+	int c = x->x_c = !ac ? 2 : ac;
+	// 3 args with a string in the middle creates a small list (ex: 7 or 9)
+	if (ac==3 && av[1].a_type != A_FLOAT)
+		c = 2, av[1] = av[2];
+	x->x_n = x->x_in = c;
+
+	// always have a pointer size of at least 2 numbers for min and max
+	x->x_p = c<2 ? 2 : c;
+
+	x->x_fp = (t_float *)getbytes(x->x_p * sizeof(t_float));
 	t_float *fp = x->x_fp;
-	for (; n--; av++)
-	{	if (!ac || av->a_type == A_FLOAT)
-		{	floatinlet_new(&x->x_obj, fp);
-			*fp++ = atom_getfloat(av);   }   }
-	x->x_state = x->x_swat = rand_makeseed();
+	for (; c--; av++, fp++)
+	{	floatinlet_new(&x->x_obj, fp);
+		*fp = atom_getfloat(av);   }
+	x->x_state = x->x_swap = rand_makeseed();
 	return (x);
 }
 
@@ -182,6 +200,7 @@ void rand_setup(void) {
 		A_GIMME, 0);
 	class_addbang(rand_class, rand_bang);
 	class_addfloat(rand_class, rand_float);
+	class_addlist(rand_class, rand_list);
 	class_addmethod(rand_class, (t_method)rand_seed,
 		gensym("seed"), A_GIMME, 0);
 	class_addmethod(rand_class, (t_method)rand_state,
@@ -190,10 +209,12 @@ void rand_setup(void) {
 		gensym("ptr"), A_DEFSYM, 0);
 	class_addmethod(rand_class, (t_method)rand_peek,
 		gensym("peek"), A_DEFSYM, 0);
-	class_addmethod(rand_class, (t_method)rand_set,
-		gensym("set"), A_GIMME, 0);
+	class_addmethod(rand_class, (t_method)rand_at,
+		gensym("@"), A_GIMME, 0);
 	class_addmethod(rand_class, (t_method)rand_size,
 		gensym("n"), A_FLOAT, 0);
+	class_addmethod(rand_class, (t_method)rand_count,
+		gensym("c"), A_FLOAT, 0);
 	class_addmethod(rand_class, (t_method)rand_nop,
 		gensym("nop"), A_FLOAT, 0);
 	class_addmethod(rand_class, (t_method)rand_max,

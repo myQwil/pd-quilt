@@ -1,15 +1,16 @@
 #N canvas 719 355 450 300 12;
-#X text 212 20 SAME;
-#X text 21 48 similar to [change] \, it passes input to the left outlet
-when the number is different \, and to the right when the number is
-the same.;
-#X obj 209 108 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 210 138 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X floatatom 209 131 0 0 0 0 - - -;
-#X obj 209 157 same;
-#X floatatom 199 188 0 0 0 0 - - -;
-#X floatatom 239 188 0 0 0 0 - - -;
+#X floatatom 210 161 0 0 0 0 - - -;
+#X obj 210 187 same;
+#X floatatom 200 218 0 0 0 0 - - -;
+#X floatatom 240 218 0 0 0 0 - - -;
+#X obj 186 54 cnv 6 1 1 empty empty same 6 0 0 14 -233017 -66577 0
+;
+#X text 32 68 similar to [change] in that it sends different values
+through the left outlet \, but also sends repeat values through the
+right outlet;
+#X connect 0 0 1 0;
+#X connect 1 0 2 0;
 #X connect 2 0 3 0;
-#X connect 3 0 4 0;
-#X connect 4 0 5 0;
-#X connect 4 1 6 0;
+#X connect 2 1 4 0;

@@ -4,13 +4,13 @@ void rand_setup(void);
 void rind_setup(void);
 void ntof_setup(void);
 void fton_setup(void);
-void graid_setup(void);
+void grdnt_setup(void);
 void sploat_setup(void);
 void gloat_setup(void);
 void logb_setup(void);
 void ceil_setup(void);
 void same_setup(void);
-void radx_setup(void);
+void radix_setup(void);
 
 void setup_0x21(void); // [!]
 void setup_0x21_tilde(void); // [!~]
@@ -62,13 +62,13 @@ void myQwil_setup(void) {
 	rind_setup();
 	ntof_setup();
 	fton_setup();
-	graid_setup();
+	grdnt_setup();
 	sploat_setup();
 	gloat_setup();
 	logb_setup();
 	ceil_setup();
 	same_setup();
-	radx_setup();
+	radix_setup();
 
 	setup_0x21(); // [!]
 	setup_0x21_tilde(); // [!~]
