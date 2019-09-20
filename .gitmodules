@@ -1,0 +1,3 @@
+[submodule "game-music-emu"]
+	path = game-music-emu
+	url = https://bitbucket.org/myQwil/game-music-emu.git
