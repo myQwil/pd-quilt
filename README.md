@@ -1,13 +1,16 @@
 # pdxtra
 Externals I've made for pure data:
 
-## [gme~ $...]
+## [gme~ $..] & [gmes~ $..]
 A Pd interface for the Game Music Emu library, created by Shay Green and maintained by Michael Pyne at https://bitbucket.org/mpyne/game-music-emu
+This repository includes a fork of the library as a submodule.
 Compatible formats include: AY, GBS, GYM, HES, KSS, NSF/NSFE, SAP, SPC, VGM/VGZ
-For args, it accepts a list of ints to determine which channels should be un-muted.
-To build gme~ , simply include libgme.so/dll/dylib in the linking phase of building.
+For args, it accepts a list of ints to determine which channels shouldn't be muted.
+Some formats work with gmes~ , the multi-channel version of gme~
+To build these externals , simply include libgme.so/dll/dylib in the linking phase of building.
+For Linux users, you might need to build statically, in which case you should add `-lubsan` to the linking phase, assuming ubsan is enabled.
 
-## [pak $...] & [unpack $...]
+## [pak $..] & [unpack $..]
 A lazy version of pack/unpack objects with anything inlets/outlets. While these objects allow for strict type checking as with pack/unpack, by default, they aim to allow for any atom type to pass through, and they refrain from printing out error messages even when the the strict type checker receives an incorrect atom type.
 
 ## [ntof $1 $2] & [fton $1 $2]
@@ -17,7 +20,7 @@ Similar to pd's `[mtof]` and `[ftom]` with the added ability to change the refer
 `[sploat]` Splits a float(`$1`) into its sign, exponent, and mantissa.  
 `[gloat]` Joins the mantissa(`$1`), exponent(`$2`), and sign(`$3`) to create a new float.
 
-## [muse $...] & [chrd $...]
+## [muse $..] & [chrd $..]
 `[muse]` Creates a musical scale and uses various messages to quickly change the structure of the scale
 `[chrd]` The chord equivalent of `[muse]` that produces multiple outlets based on the number of creation arguments specified
 
