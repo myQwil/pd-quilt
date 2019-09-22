@@ -18,6 +18,6 @@
 	README.md LICENSE.md
 
   suppress-wunused = 'yes'
-  optimization.flags = -O0 -ffast-math -funroll-loops -fomit-frame-pointer
+  #optimization.flags = -O0 -ffast-math -funroll-loops -fomit-frame-pointer
 
   include pd-lib-builder/Makefile.pdlibbuilder
