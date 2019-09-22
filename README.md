@@ -5,10 +5,10 @@ Externals I've made for pure data:
 A Pd interface for the Game Music Emu library, created by Shay Green and maintained by Michael Pyne at https://bitbucket.org/mpyne/game-music-emu
 This repository includes a fork of the library as a submodule.
 Compatible formats include: AY, GBS, GYM, HES, KSS, NSF/NSFE, SAP, SPC, VGM/VGZ
-For args, it accepts a list of ints to determine which channels shouldn't be muted.
-Some formats work with gmes~ , the multi-channel version of gme~
-To build these externals , simply include libgme.so/dll/dylib in the linking phase of building.
-For Linux users, you might need to build statically, in which case you should add `-lubsan` to the linking phase, assuming ubsan is enabled.
+If numbers are provided as creation args, the channels pertaining to the numbers will be the only channels that play, while the rest will be muted.
+Some formats work with gmes~ , the multi-channel version of gme~ .
+To build these externals, simply include libgme.so/dll/dylib in the linking phase of building.
+By default, the library will build and link statically. If you have ubsan enabled, be sure to add `-lubsan` to the linking phase.
 
 ## [pak $..] & [unpack $..]
 A lazy version of pack/unpack objects with anything inlets/outlets. While these objects allow for strict type checking as with pack/unpack, by default, they aim to allow for any atom type to pass through, and they refrain from printing out error messages even when the the strict type checker receives an incorrect atom type.
