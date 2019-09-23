@@ -90,13 +90,13 @@ static t_int *gme_tilde_perform(t_int *w) {
 			gme_tilde_start(x);   }
 		x->x_open = x->x_read = 0;   }
 
-	while (n--)
-	{	if (x->x_emu && x->x_play)
-		{	short buf [nch];
-			hnd_err(gme_play(x->x_emu, nch, buf));
+	if (x->x_emu && x->x_play)
+	{	short buf [nch];
+		while (n--)
+		{	hnd_err(gme_play(x->x_emu, nch, buf));
 			*out1++ = ((t_sample) buf[0]) / (t_sample) 32768;
-			*out2++ = ((t_sample) buf[1]) / (t_sample) 32768;   }
-		else *out1++ = *out2++ = 0;   }
+			*out2++ = ((t_sample) buf[1]) / (t_sample) 32768;   }   }
+	else while (n--) *out1++ = *out2++ = 0;
 	return (w+5);
 }
 
