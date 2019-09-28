@@ -165,7 +165,9 @@ static void gme_tilde_path(t_gme_tilde *x, t_symbol *s) {
 }
 
 static void gme_tilde_goto(t_gme_tilde *x, t_floatarg f) {
-	if (x->x_emu) gme_seek(x->x_emu, f);
+	if (x->x_emu)
+	{	gme_seek(x->x_emu, f);
+		gme_set_fade(x->x_emu, -1);   }
 }
 
 static void gme_tilde_tempo(t_gme_tilde *x, t_floatarg f) {
