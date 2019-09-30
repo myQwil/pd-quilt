@@ -1,15 +1,15 @@
 #N canvas 719 355 450 300 12;
-#X floatatom 191 219 0 0 0 0 - - -;
-#X floatatom 191 167 0 0 0 0 - - -;
-#X floatatom 237 167 0 0 0 0 - - -;
-#X text 40 91 log's base as the creation argument or second inlet.
+#X floatatom 189 219 0 0 0 0 - - -;
+#X floatatom 189 167 0 0 0 0 - - -;
+#X floatatom 235 167 0 0 0 0 - - -;
+#X text 38 91 log's base as the creation argument or second inlet.
 ;
-#X text 207 118 and;
-#X text 287 118 (hot binop);
-#X obj 164 118 logb;
-#X obj 242 118 #logb;
-#X obj 191 193 #logb 2;
-#X obj 189 74 cnv 6 1 1 empty empty logb 6 0 0 14 -233017 -66577 0
+#X text 205 118 and;
+#X text 285 118 (hot binop);
+#X obj 162 118 logb;
+#X obj 240 118 #logb;
+#X obj 189 193 #logb 2;
+#X obj 192 74 cnv 6 1 1 empty empty logb 6 0 0 14 -233017 -66577 0
 ;
 #X connect 1 0 8 0;
 #X connect 2 0 8 1;

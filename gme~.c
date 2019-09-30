@@ -207,7 +207,7 @@ static void gme_tilde_mask(t_gme_tilde *x, t_symbol *s, int ac, t_atom *av) {
 static void *gme_tilde_new(t_symbol *s, int ac, t_atom *av) {
 	t_gme_tilde *x = (t_gme_tilde *)pd_new(gme_tilde_class);
 	int i = nch;
-	for (; i-- ;) outlet_new(&x->x_obj, &s_signal);
+	while (i--) outlet_new(&x->x_obj, &s_signal);
 	x->l_out = outlet_new(&x->x_obj, &s_list);
 	if (ac) gme_tilde_solo(x, NULL, ac, av);
 	x->x_tempo = 1;
