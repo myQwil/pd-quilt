@@ -128,7 +128,7 @@
 #X obj 221 299 outlet~;
 #X obj 349 175 r dcay;
 #X obj 299 175 r atak;
-#X obj 142 179 pad~;
+#X obj 142 179 zp~;
 #X obj 175 140 r pmnto;
 #X msg 257 175 z \$1;
 #X obj 232 71 r z;
@@ -161,7 +161,7 @@
 #X obj 221 299 outlet~;
 #X obj 349 175 r dcay;
 #X obj 299 175 r atak;
-#X obj 142 179 pad~;
+#X obj 142 179 zp~;
 #X obj 175 140 r pmnto;
 #X msg 257 175 z \$1;
 #X obj 231 76 r z;
@@ -192,7 +192,7 @@
 #X obj 221 299 outlet~;
 #X obj 349 175 r dcay;
 #X obj 299 175 r atak;
-#X obj 142 179 pad~;
+#X obj 142 179 zp~;
 #X obj 175 140 r pmnto;
 #X msg 257 175 z \$1;
 #X obj 231 76 r z;
@@ -223,7 +223,7 @@
 #X obj 221 299 outlet~;
 #X obj 349 175 r dcay;
 #X obj 299 175 r atak;
-#X obj 142 179 pad~;
+#X obj 142 179 zp~;
 #X obj 175 140 r pmnto;
 #X msg 257 175 z \$1;
 #X obj 231 76 r z;
@@ -254,7 +254,7 @@
 #X obj 221 299 outlet~;
 #X obj 349 175 r dcay;
 #X obj 299 175 r atak;
-#X obj 142 179 pad~;
+#X obj 142 179 zp~;
 #X obj 175 140 r pmnto;
 #X msg 257 175 z \$1;
 #X obj 231 76 r z;
@@ -285,7 +285,7 @@
 #X obj 221 299 outlet~;
 #X obj 349 175 r dcay;
 #X obj 299 175 r atak;
-#X obj 142 179 pad~;
+#X obj 142 179 zp~;
 #X obj 175 140 r pmnto;
 #X msg 257 175 z \$1;
 #X obj 231 76 r z;

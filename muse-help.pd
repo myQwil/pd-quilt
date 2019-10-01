@@ -23,7 +23,7 @@
 #X obj 156 391 sel 0 1 2 3;
 #X floatatom 250 375 0 0 0 0 - - -;
 #X floatatom 268 452 0 0 0 0 - - -;
-#X obj 120 471 pad~ 1;
+#X obj 120 471 zp~ 1;
 #X floatatom 170 471 0 0 0 0 - - -;
 #N canvas 823 503 333 300 scaler 0;
 #X obj 108 198 sel;
@@ -239,7 +239,7 @@
 #X obj 122 275 t b f;
 #X floatatom 67 252 0 0 0 0 - - -;
 #X text 201 151 peak;
-#X obj 193 260 pad 1000;
+#X obj 193 260 zp 1000;
 #X msg 538 384 @ 6 \$1;
 #X msg 597 384 @ 7 \$1;
 #X obj 360 41 cnv 6 1 1 empty empty muse 6 0 0 14 -228856 -66577 0

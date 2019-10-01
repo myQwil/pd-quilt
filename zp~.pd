@@ -3,7 +3,7 @@
 #X obj 182 183 line~;
 #X obj 182 209 outlet~;
 #X obj 242 132 inlet;
-#X obj 190 60 cnv 6 1 1 empty empty pad~ 6 0 0 14 -233017 -66577 0
+#X obj 190 60 cnv 6 1 1 empty empty zp~ 6 0 0 14 -233017 -66577 0
 ;
 #X text 98 75 delay between value changes (signal);
 #X obj 182 158 pack 0 \$1;
