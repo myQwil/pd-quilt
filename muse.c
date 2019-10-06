@@ -1,6 +1,6 @@
 #include "m_pd.h"
-#include <stdlib.h> // atof
-#include <math.h>
+#include <stdlib.h> // strtof
+#include <math.h>   // exp, pow, log
 
 struct _inlet {
 	t_pd i_pd;
@@ -52,7 +52,7 @@ static void muse_peek(t_muse *x, t_symbol *s) {
 static void muse_operate(t_float *fp, t_atom *av) {
 	const char *cp = av->a_w.w_symbol->s_name;
 	if (cp[1])
-	{	t_float f = cp[2] ? atof(cp+2) : 1;
+	{	t_float f = cp[2] ? strtof(cp+2, NULL) : 1;
 			 if (cp[1]=='+') *fp += f;
 		else if (cp[1]=='-') *fp -= f;
 		else if (cp[1]=='*') *fp *= f;
