@@ -4,7 +4,7 @@
 
   class.sources = \
 	muse.c chrd.c rand.c rind.c ntof.c fton.c sploat.c gloat.c \
-	logb.c grdnt.c same.c ceil.c radix.c !.c !~.c 0x5e.c gme~.c gmes~.c \
+	grdnt.c same.c ceil.c radix.c !.c !~.c 0x5e.c gme~.c gmes~.c \
 	x.c is.c pak.c unpak.c
 
   datafiles = !-help.pd !~-help.pd ^-help.pd 2^.pd ad.pd ad~.pd adac~.pd \
