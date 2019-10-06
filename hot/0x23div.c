@@ -24,15 +24,13 @@ static void hdivm_float(t_hotbinop *x, t_float f) {
 	hdivm_bang(x);
 }
 
-static void hdivm_proxy_bang(t_hotbinop_proxy *x) {
-	t_hotbinop *m = x->p_master;
-	hdivm_bang(m);
+static void hdivm_proxy_bang(t_hotbinop_proxy *p) {
+	hdivm_bang(p->p_x);
 }
 
-static void hdivm_proxy_float(t_hotbinop_proxy *x, t_float f) {
-	t_hotbinop *m = x->p_master;
-	m->x_f2 = f;
-	hdivm_bang(m);
+static void hdivm_proxy_float(t_hotbinop_proxy *p, t_float f) {
+	p->p_x->x_f2 = f;
+	hdivm_bang(p->p_x);
 }
 
 void setup_0x23div(void) {

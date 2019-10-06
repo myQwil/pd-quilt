@@ -11,5 +11,6 @@
   datafiles = revbinops-help.pd rpak-help.pd
 
   suppress-wunused = 'yes'
+  #optimization.flags = -O0 -ffast-math -funroll-loops -fomit-frame-pointer
 
   include ../pd-lib-builder/Makefile.pdlibbuilder

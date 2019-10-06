@@ -15,17 +15,17 @@ static void hba_bang(t_hotbinop *x) {
 }
 
 static void hba_float(t_hotbinop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, (int)(x->x_f1=f) & (int)x->x_f2);
+	x->x_f1 = f;
+	hba_bang(x);
 }
 
-static void hba_proxy_bang(t_hotbinop_proxy *x) {
-	t_hotbinop *m = x->p_master;
-	outlet_float(m->x_obj.ob_outlet, (int)m->x_f1 & (int)m->x_f2);
+static void hba_proxy_bang(t_hotbinop_proxy *p) {
+	hba_bang(p->p_x);
 }
 
-static void hba_proxy_float(t_hotbinop_proxy *x, t_float f) {
-	t_hotbinop *m = x->p_master;
-	outlet_float(m->x_obj.ob_outlet, (int)m->x_f1 & (int)(m->x_f2=f));
+static void hba_proxy_float(t_hotbinop_proxy *p, t_float f) {
+	p->p_x->x_f2 = f;
+	hba_bang(p->p_x);
 }
 
 void setup_0x230x26(void) {

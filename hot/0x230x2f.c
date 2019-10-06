@@ -17,21 +17,16 @@ static void hdiv_bang(t_hotbinop *x) {
 
 static void hdiv_float(t_hotbinop *x, t_float f) {
 	x->x_f1 = f;
-	outlet_float(x->x_obj.ob_outlet,
-		(x->x_f2 != 0 ? x->x_f1 / x->x_f2 : 0));
+	hdiv_bang(x);
 }
 
-static void hdiv_proxy_bang(t_hotbinop_proxy *x) {
-	t_hotbinop *m = x->p_master;
-	outlet_float(m->x_obj.ob_outlet,
-		(m->x_f2 != 0 ? m->x_f1 / m->x_f2 : 0));
+static void hdiv_proxy_bang(t_hotbinop_proxy *p) {
+	hdiv_bang(p->p_x);
 }
 
-static void hdiv_proxy_float(t_hotbinop_proxy *x, t_float f) {
-	t_hotbinop *m = x->p_master;
-	m->x_f2 = f;
-	outlet_float(m->x_obj.ob_outlet,
-		(m->x_f2 != 0 ? m->x_f1 / m->x_f2 : 0));
+static void hdiv_proxy_float(t_hotbinop_proxy *p, t_float f) {
+	p->p_x->x_f2 = f;
+	hdiv_bang(p->p_x);
 }
 
 void setup_0x230x2f(void) {

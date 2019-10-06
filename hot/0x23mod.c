@@ -24,15 +24,13 @@ static void hmod_float(t_hotbinop *x, t_float f) {
 	hmod_bang(x);
 }
 
-static void hmod_proxy_bang(t_hotbinop_proxy *x) {
-	t_hotbinop *m = x->p_master;
-	hmod_bang(m);
+static void hmod_proxy_bang(t_hotbinop_proxy *p) {
+	hmod_bang(p->p_x);
 }
 
-static void hmod_proxy_float(t_hotbinop_proxy *x, t_float f) {
-	t_hotbinop *m = x->p_master;
-	m->x_f2 = f;
-	hmod_bang(m);
+static void hmod_proxy_float(t_hotbinop_proxy *p, t_float f) {
+	p->p_x->x_f2 = f;
+	hmod_bang(p->p_x);
 }
 
 void setup_0x23mod(void) {

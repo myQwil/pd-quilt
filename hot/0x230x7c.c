@@ -15,17 +15,17 @@ static void hbo_bang(t_hotbinop *x) {
 }
 
 static void hbo_float(t_hotbinop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, (int)(x->x_f1=f) | (int)x->x_f2);
+	x->x_f1 = f;
+	hbo_bang(x);
 }
 
-static void hbo_proxy_bang(t_hotbinop_proxy *x) {
-	t_hotbinop *m = x->p_master;
-	outlet_float(m->x_obj.ob_outlet, (int)m->x_f1 | (int)m->x_f2);
+static void hbo_proxy_bang(t_hotbinop_proxy *p) {
+	hbo_bang(p->p_x);
 }
 
-static void hbo_proxy_float(t_hotbinop_proxy *x, t_float f) {
-	t_hotbinop *m = x->p_master;
-	outlet_float(m->x_obj.ob_outlet, (int)m->x_f1 | (int)(m->x_f2=f));
+static void hbo_proxy_float(t_hotbinop_proxy *p, t_float f) {
+	p->p_x->x_f2 = f;
+	hbo_bang(p->p_x);
 }
 
 void setup_0x230x7c(void) {

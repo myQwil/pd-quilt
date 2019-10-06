@@ -17,21 +17,16 @@ static void hmax_bang(t_hotbinop *x) {
 
 static void hmax_float(t_hotbinop *x, t_float f) {
 	x->x_f1 = f;
-	outlet_float(x->x_obj.ob_outlet,
-		(x->x_f1 > x->x_f2 ? x->x_f1 : x->x_f2));
+	hmax_bang(x);
 }
 
-static void hmax_proxy_bang(t_hotbinop_proxy *x) {
-	t_hotbinop *m = x->p_master;
-	outlet_float(m->x_obj.ob_outlet,
-		(m->x_f1 > m->x_f2 ? m->x_f1 : m->x_f2));
+static void hmax_proxy_bang(t_hotbinop_proxy *p) {
+	hmax_bang(p->p_x);
 }
 
-static void hmax_proxy_float(t_hotbinop_proxy *x, t_float f) {
-	t_hotbinop *m = x->p_master;
-	m->x_f2 = f;
-	outlet_float(m->x_obj.ob_outlet,
-		(m->x_f1 > m->x_f2 ? m->x_f1 : m->x_f2));
+static void hmax_proxy_float(t_hotbinop_proxy *p, t_float f) {
+	p->p_x->x_f2 = f;
+	hmax_bang(p->p_x);
 }
 
 void setup_0x23max(void) {

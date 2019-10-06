@@ -12,13 +12,10 @@ static void *hpow_new(t_floatarg f) {
 }
 
 static void hpow_bang(t_hotbinop *x) {
-	if (x->x_f1 >= 0)
-		outlet_float(x->x_obj.ob_outlet, powf(x->x_f1, x->x_f2));
-	else if (x->x_f2 <= -1 || x->x_f2 >= 1 || x->x_f2 == 0)
-		outlet_float(x->x_obj.ob_outlet, powf(x->x_f1, x->x_f2));
-	else
-	{	pd_error(x, "pow: calculation resulted in a NaN");
-		outlet_float(x->x_obj.ob_outlet, 0);   }
+	t_float r = (x->x_f1 == 0 && x->x_f2 < 0) ||
+		(x->x_f1 < 0 && (x->x_f2 - (int)x->x_f2) != 0) ?
+			0 : pow(x->x_f1, x->x_f2);
+	outlet_float(x->x_obj.ob_outlet, r);
 }
 
 static void hpow_float(t_hotbinop *x, t_float f) {
@@ -26,15 +23,13 @@ static void hpow_float(t_hotbinop *x, t_float f) {
 	hpow_bang(x);
 }
 
-static void hpow_proxy_bang(t_hotbinop_proxy *x) {
-	t_hotbinop *m = x->p_master;
-	hpow_bang(m);
+static void hpow_proxy_bang(t_hotbinop_proxy *p) {
+	hpow_bang(p->p_x);
 }
 
-static void hpow_proxy_float(t_hotbinop_proxy *x, t_float f) {
-	t_hotbinop *m = x->p_master;
-	m->x_f2 = f;
-	hpow_bang(m);
+static void hpow_proxy_float(t_hotbinop_proxy *p, t_float f) {
+	p->p_x->x_f2 = f;
+	hpow_bang(p->p_x);
 }
 
 void setup_0x23pow(void) {

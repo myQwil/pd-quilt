@@ -12,9 +12,13 @@ static void *hlog_new(t_floatarg f) {
 }
 
 static void hlog_bang(t_hotbinop *x) {
-	float f2 = (x->x_f2 > 0 ? logf(x->x_f2) : 0);
-	outlet_float(x->x_obj.ob_outlet,
-		(x->x_f1 > 0 && f2 ? logf(x->x_f1) / f2 : -1000));
+	t_float r;
+	if (x->x_f1 <= 0)
+		r = -1000;
+	else if (x->x_f2 <= 0)
+		r = log(x->x_f1);
+	else r = log(x->x_f1)/log(x->x_f2);
+	outlet_float(x->x_obj.ob_outlet, r);
 }
 
 static void hlog_float(t_hotbinop *x, t_float f) {
