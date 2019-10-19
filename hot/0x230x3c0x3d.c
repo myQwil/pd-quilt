@@ -1,46 +1,32 @@
-#include "m_pd.h"
-#include "hotbinop.h"
+#include "hot.h"
 
 /* -------------------------- hot <= -------------------------- */
 
 static t_class *hle_class;
 static t_class *hle_proxy_class;
 
-static void *hle_new(t_floatarg f) {
-	return (hotbinop_new(hle_class, hle_proxy_class, f));
-}
-
-static void hle_bang(t_hotbinop *x) {
+static void hle_bang(t_hot *x) {
 	outlet_float(x->x_obj.ob_outlet, x->x_f1 <= x->x_f2);
 }
 
-static void hle_float(t_hotbinop *x, t_float f) {
-	x->x_f1 = f;
-	hle_bang(x);
-}
-
-static void hle_proxy_bang(t_hotbinop_proxy *p) {
-	hle_bang(p->p_x);
-}
-
-static void hle_proxy_float(t_hotbinop_proxy *p, t_float f) {
-	p->p_x->x_f2 = f;
-	hle_bang(p->p_x);
+static void *hle_new(t_symbol *s, int ac, t_atom *av) {
+	return (hot_new(hle_class, hle_proxy_class, hle_bang, s, ac, av));
 }
 
 void setup_0x230x3c0x3d(void) {
 	hle_class = class_new(gensym("#<="),
-		(t_newmethod)hle_new, (t_method)hotbinop_free,
-		sizeof(t_hotbinop), 0,
-		A_DEFFLOAT, 0);
+		(t_newmethod)hle_new, (t_method)hot_free,
+		sizeof(t_hot), 0,
+		A_GIMME, 0);
 	class_addbang(hle_class, hle_bang);
-	class_addfloat(hle_class, hle_float);
-	
+	class_addfloat(hle_class, hot_float);
+	class_addmethod(hle_class, (t_method)hot_loadbang,
+		gensym("loadbang"), A_DEFFLOAT, 0);
+
 	hle_proxy_class = class_new(gensym("_#<=_proxy"), 0, 0,
-		sizeof(t_hotbinop_proxy),
-		CLASS_PD | CLASS_NOINLET, 0);
-	class_addbang(hle_proxy_class, hle_proxy_bang);
-	class_addfloat(hle_proxy_class, hle_proxy_float);
-	
+		sizeof(t_hot_proxy), CLASS_PD | CLASS_NOINLET, 0);
+	class_addbang(hle_proxy_class, hot_proxy_bang);
+	class_addfloat(hle_proxy_class, hot_proxy_float);
+
 	class_sethelpsymbol(hle_class, gensym("hotbinops2"));
 }

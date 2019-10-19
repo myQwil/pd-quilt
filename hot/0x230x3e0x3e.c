@@ -1,46 +1,32 @@
-#include "m_pd.h"
-#include "hotbinop.h"
+#include "hot.h"
 
 /* -------------------------- hot >> -------------------------- */
 
 static t_class *hrs_class;
 static t_class *hrs_proxy_class;
 
-static void *hrs_new(t_floatarg f) {
-	return (hotbinop_new(hrs_class, hrs_proxy_class, f));
-}
-
-static void hrs_bang(t_hotbinop *x) {
+static void hrs_bang(t_hot *x) {
 	outlet_float(x->x_obj.ob_outlet, (int)x->x_f1 >> (int)x->x_f2);
 }
 
-static void hrs_float(t_hotbinop *x, t_float f) {
-	x->x_f1 = f;
-	hrs_bang(x);
-}
-
-static void hrs_proxy_bang(t_hotbinop_proxy *p) {
-	hrs_bang(p->p_x);
-}
-
-static void hrs_proxy_float(t_hotbinop_proxy *p, t_float f) {
-	p->p_x->x_f2 = f;
-	hrs_bang(p->p_x);
+static void *hrs_new(t_symbol *s, int ac, t_atom *av) {
+	return (hot_new(hrs_class, hrs_proxy_class, hrs_bang, s, ac, av));
 }
 
 void setup_0x230x3e0x3e(void) {
 	hrs_class = class_new(gensym("#>>"),
-		(t_newmethod)hrs_new, (t_method)hotbinop_free,
-		sizeof(t_hotbinop), 0,
-		A_DEFFLOAT, 0);
+		(t_newmethod)hrs_new, (t_method)hot_free,
+		sizeof(t_hot), 0,
+		A_GIMME, 0);
 	class_addbang(hrs_class, hrs_bang);
-	class_addfloat(hrs_class, hrs_float);
-	
+	class_addfloat(hrs_class, hot_float);
+	class_addmethod(hrs_class, (t_method)hot_loadbang,
+		gensym("loadbang"), A_DEFFLOAT, 0);
+
 	hrs_proxy_class = class_new(gensym("_#>>_proxy"), 0, 0,
-		sizeof(t_hotbinop_proxy),
-		CLASS_PD | CLASS_NOINLET, 0);
-	class_addbang(hrs_proxy_class, hrs_proxy_bang);
-	class_addfloat(hrs_proxy_class, hrs_proxy_float);
-	
+		sizeof(t_hot_proxy), CLASS_PD | CLASS_NOINLET, 0);
+	class_addbang(hrs_proxy_class, hot_proxy_bang);
+	class_addfloat(hrs_proxy_class, hot_proxy_float);
+
 	class_sethelpsymbol(hrs_class, gensym("hotbinops3"));
 }
