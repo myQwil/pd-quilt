@@ -4,7 +4,7 @@
 
   class.sources = \
 	muse.c chrd.c rand.c rind.c ntof.c fton.c sploat.c gloat.c \
-	grdnt.c same.c ceil.c radix.c !.c !~.c 0x5e.c gme~.c gmes~.c \
+	grdnt.c same.c ceil.c radix.c !.c !~.c 0x5e.c gme~.cpp gmes~.cpp \
 	x.c is.c pak.c unpak.c
 
   datafiles = !-help.pd !~-help.pd ^-help.pd 2^.pd ad.pd ad~.pd adac~.pd \
@@ -18,6 +18,7 @@
 	README.md LICENSE.md
 
   suppress-wunused = 'yes'
+  warn.flags = -Wall -Wshadow -Winline -Wstrict-aliasing
   #optimization.flags = -O0 -ffast-math -funroll-loops -fomit-frame-pointer
 
   include pd-lib-builder/Makefile.pdlibbuilder

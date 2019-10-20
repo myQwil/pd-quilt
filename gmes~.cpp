@@ -14,6 +14,15 @@ Shay Green <gblargg@gmail.com>
 
 #define nch 16
 
+#if defined MSW                   // when compiling for Windows
+#define EXPORT __declspec(dllexport)
+#elif __GNUC__ >= 4               // else, when compiling with GCC 4.0 or higher
+#define EXPORT __attribute__((visibility("default")))
+#endif
+#ifndef EXPORT
+#define EXPORT                    // empty definition for other cases
+#endif
+
 static void hnd_err( const char* str ) {
 	if (str) post("Error: %s", str);
 }
@@ -100,7 +109,7 @@ static t_int *gmes_tilde_perform(t_int *w) {
 		if (x->x_emu)
 		{	gmes_tilde_m3u(x, x->x_emu);
 			gme_ignore_silence(x->x_emu, 1);
-			gme_mute_voices(x->x_emu, x->x_mask);			
+			gme_mute_voices(x->x_emu, x->x_mask);
 			gme_set_tempo(x->x_emu, x->x_tempo);
 			if (x->x_track < 0 || x->x_track >= gme_track_count(x->x_emu))
 				x->x_track = 0;
@@ -130,16 +139,16 @@ static t_int *gmes_tilde_perform(t_int *w) {
 			*out16++ = ((t_sample) buf[15]) / (t_sample) 32768;   }
 		else *out1++ = *out2++ = *out3++ = *out4++ =
 			*out5++ = *out6++ = *out7++ = *out8++ =
-			*out9++ = *out10++ = *out11++ = *out12++ = 
+			*out9++ = *out10++ = *out11++ = *out12++ =
 			*out13++ = *out14++ = *out15++ = *out16++ = 0;   }
 	return (w+19);
 }
 
 static void gmes_tilde_dsp(t_gmes_tilde *x, t_signal **sp) {
 	dsp_add(gmes_tilde_perform, 18, x,
-		sp[0]->s_vec, sp[1]->s_vec, sp[2]->s_vec, sp[3]->s_vec, 
-		sp[4]->s_vec, sp[5]->s_vec, sp[6]->s_vec, sp[7]->s_vec, 
-		sp[8]->s_vec, sp[9]->s_vec, sp[10]->s_vec, sp[11]->s_vec, 
+		sp[0]->s_vec, sp[1]->s_vec, sp[2]->s_vec, sp[3]->s_vec,
+		sp[4]->s_vec, sp[5]->s_vec, sp[6]->s_vec, sp[7]->s_vec,
+		sp[8]->s_vec, sp[9]->s_vec, sp[10]->s_vec, sp[11]->s_vec,
 		sp[12]->s_vec, sp[13]->s_vec, sp[14]->s_vec, sp[15]->s_vec, sp[0]->s_n);
 }
 
@@ -256,7 +265,7 @@ static void gmes_tilde_free(t_gmes_tilde *x) {
 	gme_delete(x->x_info); x->x_info = NULL;
 }
 
-void gmes_tilde_setup(void) {
+extern "C" EXPORT void gmes_tilde_setup(void) {
 	gmes_tilde_class = class_new(gensym("gmes~"),
 		(t_newmethod)gmes_tilde_new, (t_method)gmes_tilde_free,
 		sizeof(t_gmes_tilde), 0,
@@ -286,7 +295,7 @@ void gmes_tilde_setup(void) {
 	class_addmethod(gmes_tilde_class, (t_method)gmes_tilde_mask,
 		gensym("mask"), A_GIMME, 0);
 	class_addmethod(gmes_tilde_class, (t_method)gmes_tilde_stop,
-		gensym("stop"), 0);
+		gensym("stop"), (t_atomtype)0);
 	class_addmethod(gmes_tilde_class, (t_method)gmes_tilde_bang,
-		gensym("play"), 0);
+		gensym("play"), (t_atomtype)0);
 }

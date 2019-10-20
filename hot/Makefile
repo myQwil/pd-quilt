@@ -15,6 +15,9 @@
 	0x23min.c 0x23max.c 0x23pow.c 0x23div.c 0x23mod.c 0x23log.c
 
   datafiles = hotbinops1-help.pd hotbinops2-help.pd hotbinops3-help.pd
+
+  suppress-wunused = 'yes'
+  warn.flags = -Wall -Wshadow -Winline -Wstrict-aliasing
   #optimization.flags = -O0 -ffast-math -funroll-loops -fomit-frame-pointer
 
   include ../pd-lib-builder/Makefile.pdlibbuilder

@@ -14,6 +14,15 @@ Shay Green <gblargg@gmail.com>
 
 #define nch 2
 
+#if defined MSW                   // when compiling for Windows
+#define EXPORT __declspec(dllexport)
+#elif __GNUC__ >= 4               // else, when compiling with GCC 4.0 or higher
+#define EXPORT __attribute__((visibility("default")))
+#endif
+#ifndef EXPORT
+#define EXPORT                    // empty definition for other cases
+#endif
+
 static void hnd_err( const char* str ) {
 	if (str) post("Error: %s", str);
 }
@@ -83,7 +92,7 @@ static t_int *gme_tilde_perform(t_int *w) {
 		if (x->x_emu)
 		{	gme_tilde_m3u(x, x->x_emu);
 			gme_ignore_silence(x->x_emu, 1);
-			gme_mute_voices(x->x_emu, x->x_mask);			
+			gme_mute_voices(x->x_emu, x->x_mask);
 			gme_set_tempo(x->x_emu, x->x_tempo);
 			if (x->x_track < 0 || x->x_track >= gme_track_count(x->x_emu))
 				x->x_track = 0;
@@ -219,7 +228,7 @@ static void gme_tilde_free(t_gme_tilde *x) {
 	gme_delete(x->x_info); x->x_info = NULL;
 }
 
-void gme_tilde_setup(void) {
+extern "C" EXPORT void gme_tilde_setup(void) {
 	gme_tilde_class = class_new(gensym("gme~"),
 		(t_newmethod)gme_tilde_new, (t_method)gme_tilde_free,
 		sizeof(t_gme_tilde), 0,
@@ -249,7 +258,7 @@ void gme_tilde_setup(void) {
 	class_addmethod(gme_tilde_class, (t_method)gme_tilde_mask,
 		gensym("mask"), A_GIMME, 0);
 	class_addmethod(gme_tilde_class, (t_method)gme_tilde_stop,
-		gensym("stop"), 0);
+		gensym("stop"), (t_atomtype)0);
 	class_addmethod(gme_tilde_class, (t_method)gme_tilde_bang,
-		gensym("play"), 0);
+		gensym("play"), (t_atomtype)0);
 }
