@@ -67,7 +67,9 @@ static void gmes_tilde_time(t_gmes_tilde *x, t_symbol *s, int ac, t_atom *av) {
 	Music_Emu *emu = gmes_tilde_emu(x);
 	hnd_err(gme_track_info(emu, &info, track));
 	if (info)
-	{	t_atom flts[] = {{A_FLOAT, {info->length}}, {A_FLOAT, {info->fade}}};
+	{	t_atom flts[] =
+		{	{A_FLOAT, {(t_float)info->length}},
+			{A_FLOAT, {(t_float)info->fade}}   };
 		outlet_list(x->l_out, 0, 2, flts);   }
 	gme_free_info(info);
 }
