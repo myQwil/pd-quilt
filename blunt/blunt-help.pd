@@ -1,0 +1,36 @@
+#N canvas 735 381 484 329 12;
+#X obj 202 42 cnv 6 1 1 empty empty Blunt! 6 0 0 14 -233017 -66577
+0;
+#X floatatom 52 133 0 0 0 0 - - -;
+#X obj 52 108 `f 5!;
+#X floatatom 100 133 0 0 0 0 - - -;
+#X text 51 86 exclamation point loadbangs the result;
+#X floatatom 156 133 0 0 0 0 - - -;
+#X obj 156 108 `pow 2 10!;
+#X msg 198 210 . \$1;
+#X msg 191 186 f2 \$1;
+#X text 235 210 sets f2 and outputs result;
+#X floatatom 156 173 0 0 0 0 - - -;
+#X floatatom 156 197 0 0 0 0 - - -;
+#X obj 191 246 `+;
+#X floatatom 125 197 0 0 0 0 - - -;
+#X floatatom 191 271 0 0 0 0 - - -;
+#X obj 100 108 `- 9 6;
+#X obj 82 134 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X text 233 108 operators use prefix notation;
+#X floatatom 43 201 0 0 0 0 - - -;
+#X obj 43 176 `i 3.78!;
+#X text 235 186 sets the 2nd value;
+#X text 135 54 assertive numbers and operators;
+#X connect 2 0 1 0;
+#X connect 6 0 5 0;
+#X connect 7 0 12 0;
+#X connect 8 0 12 0;
+#X connect 10 0 8 0;
+#X connect 11 0 7 0;
+#X connect 12 0 14 0;
+#X connect 13 0 12 0;
+#X connect 15 0 3 0;
+#X connect 16 0 15 0;
+#X connect 19 0 18 0;

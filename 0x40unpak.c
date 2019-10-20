@@ -21,13 +21,13 @@ static void *runpak_new(t_symbol *s, int argc, t_atom *argv) {
 	t_atom defarg[2], *ap;
 	t_runpakout *u;
 	int i;
-	
+
 	if (!argc)
 	{	argv = defarg;
 		argc = 2;
 		SETFLOAT(&defarg[0], 0);
 		SETFLOAT(&defarg[1], 0);   }
-	
+
 	x->x_n = argc;
 	x->x_vec = (t_runpakout *)getbytes(argc * sizeof(*x->x_vec));
 	for (i = 0, ap = argv+(argc-1), u = x->x_vec; i < argc; u++, ap--, i++)

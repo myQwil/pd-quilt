@@ -26,7 +26,7 @@ static void *rpak_new(t_symbol *s, int argc, t_atom *argv) {
 	t_rpak *x = (t_rpak *)pd_new(rpak_class);
 	t_atom defarg[2], *vp, *ap;
 	t_gpointer *gp;
-	
+
 	int nptr = 0;
 	int i;
 	if (!argc)
@@ -34,13 +34,13 @@ static void *rpak_new(t_symbol *s, int argc, t_atom *argv) {
 		argc = 2;
 		SETFLOAT(&defarg[0], 0);
 		SETFLOAT(&defarg[1], 0);   }
-	
+
 	x->x_n = argc;
 	x->x_vec = (t_atom *)getbytes(argc * sizeof(*x->x_vec));
 	x->x_outvec = (t_atom *)getbytes(argc * sizeof(*x->x_outvec));
 	x->x_type = (t_atomtype *)getbytes(argc * sizeof(*x->x_type));
 	x->x_ins = (t_rpak_proxy **)getbytes((argc-1) * sizeof(t_rpak_proxy *));
-	
+
 	for (i=argc, ap=argv; i--; ap++)
 	{	if (ap->a_type == A_FLOAT) nptr++;
 		else if (ap->a_type == A_SYMBOL)
@@ -75,7 +75,7 @@ static void *rpak_new(t_symbol *s, int argc, t_atom *argv) {
 				if (strcmp(nm, "a") && strcmp(nm, "any"))
 					SETSYMBOL(vp, ap->a_w.w_symbol);
 				else SETFLOAT(vp, 0);   }   }
-		
+
 		int hasptr = (*tp==A_POINTER || *tp==A_GIMME);
 		if (i)
 		{	*pp = (t_rpak_proxy *)pd_new(rpak_proxy_class);
@@ -110,7 +110,7 @@ static void rpak_bang(t_rpak *x) {
 			{	pd_error(x, "@pak: stale pointer %d", i);
 				return;   }
 			else gp++;   }
-	
+
 	/* reentrancy protection.  The first time through use the pre-allocated
 	x_outvec; if we're reentered we have to allocate new memory. */
 	t_atom *outvec;
