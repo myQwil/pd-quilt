@@ -9,7 +9,7 @@ static t_class *is_proxy_class;
 typedef struct _is {
 	t_object x_obj;
 	t_symbol *x_type;
-	struct _is_proxy *x_proxy;
+	struct _is_proxy *x_p;
 } t_is;
 
 typedef struct _is_proxy {
@@ -33,11 +33,11 @@ static void is_anything(t_is *x, t_symbol *s, int ac, t_atom *av) {
 
 static t_symbol *is_check(t_symbol *s) {
 	const char *name = s->s_name;
-	if (!strcmp(name, "b")) return gensym("bang");
-	else if (!strcmp(name, "f")) return gensym("float");
-	else if (!strcmp(name, "s")) return gensym("symbol");
-	else if (!strcmp(name, "l")) return gensym("list");
-	else if (!strcmp(name, "p")) return gensym("pointer");
+	if      (!strcmp(name, "b")) return &s_bang;
+	else if (!strcmp(name, "f")) return &s_float;
+	else if (!strcmp(name, "s")) return &s_symbol;
+	else if (!strcmp(name, "l")) return &s_list;
+	else if (!strcmp(name, "p")) return &s_pointer;
 	else return s;
 }
 
@@ -56,7 +56,7 @@ static void *is_new(t_symbol *s) {
 	t_is *x = (t_is *)pd_new(is_class);
 	t_is_proxy *p = (t_is_proxy *)pd_new(is_proxy_class);
 
-	x->x_proxy = p;
+	x->x_p = p;
 	p->p_owner = x;
 	x->x_type = (*s->s_name) ? is_check(s) : gensym("float");
 
@@ -66,7 +66,7 @@ static void *is_new(t_symbol *s) {
 }
 
 static void is_free(t_is *x) {
-	if (x->x_proxy) pd_free((t_pd *)x->x_proxy);
+	if (x->x_p) pd_free((t_pd *)x->x_p);
 }
 
 void is_setup(void) {
