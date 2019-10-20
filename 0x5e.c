@@ -24,4 +24,5 @@ void setup_0x5e(void) {
 		A_DEFFLOAT, 0);
 	class_addbang(xor_class, xor_bang);
 	class_addfloat(xor_class, xor_float);
+	class_sethelpsymbol(xor_class, gensym("0x5e"));
 }
