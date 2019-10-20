@@ -21,6 +21,10 @@ void setup_0x23max(void) {
 		A_GIMME, 0);
 	class_addbang(hmax_class, hmax_bang);
 	class_addfloat(hmax_class, hot_float);
+	class_addmethod(hmax_class, (t_method)hot_f2,
+		gensym("f2"), A_FLOAT, 0);
+	class_addmethod(hmax_class, (t_method)hot_skip,
+		gensym("."), A_GIMME, 0);
 	class_addmethod(hmax_class, (t_method)hot_loadbang,
 		gensym("loadbang"), A_DEFFLOAT, 0);
 

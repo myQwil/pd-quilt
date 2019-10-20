@@ -20,6 +20,10 @@ void setup_0x230x2a(void) {
 		A_GIMME, 0);
 	class_addbang(htimes_class, htimes_bang);
 	class_addfloat(htimes_class, hot_float);
+	class_addmethod(htimes_class, (t_method)hot_f2,
+		gensym("f2"), A_FLOAT, 0);
+	class_addmethod(htimes_class, (t_method)hot_skip,
+		gensym("."), A_GIMME, 0);
 	class_addmethod(htimes_class, (t_method)hot_loadbang,
 		gensym("loadbang"), A_DEFFLOAT, 0);
 

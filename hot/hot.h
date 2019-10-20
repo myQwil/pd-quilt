@@ -15,7 +15,7 @@ struct _hot {
 	t_object x_obj;
 	t_float x_f1;
 	t_float x_f2;
-	t_pd *x_proxy;
+	t_pd *x_p;
 	t_hotmethod x_bang;
 	int x_lb;
 };
@@ -30,6 +30,20 @@ static void hot_float(t_hot *x, t_float f) {
 	x->x_bang(x);
 }
 
+static void hot_f2(t_hot *x, t_floatarg f) {
+	x->x_f2 = f;
+}
+
+static void hot_skip(t_hot *x, t_symbol *s, int ac, t_atom *av) {
+	if (ac && av->a_type == A_FLOAT)
+		x->x_f2 = av->a_w.w_float;
+	x->x_bang(x);
+}
+
+static void hot_loadbang(t_hot *x, t_floatarg action) {
+	if (!action && x->x_lb) x->x_bang(x);
+}
+
 static void hot_proxy_bang(t_hot_proxy *p) {
 	t_hot *x = p->p_x;
 	x->x_bang(x);
@@ -41,16 +55,12 @@ static void hot_proxy_float(t_hot_proxy *p, t_float f) {
 	x->x_bang(x);
 }
 
-static void hot_loadbang(t_hot *x, t_floatarg action) {
-	if (!action && x->x_lb) x->x_bang(x);
-}
-
 static void *hot_new
 (t_class *fltclass, t_class *pxyclass,
  t_hotmethod fn, t_symbol *s, int ac, t_atom *av) {
 	t_hot *x = (t_hot *)pd_new(fltclass);
 	t_pd *proxy = pd_new(pxyclass);
-	x->x_proxy = proxy;
+	x->x_p = proxy;
 	((t_hot_proxy *)proxy)->p_x = x;
 	outlet_new(&x->x_obj, &s_float);
 	inlet_new(&x->x_obj, proxy, 0, 0);
@@ -74,5 +84,5 @@ static void *hot_new
 }
 
 static void hot_free(t_hot *x) {
-	pd_free(x->x_proxy);
+	pd_free(x->x_p);
 }

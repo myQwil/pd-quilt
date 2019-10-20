@@ -7,7 +7,10 @@ static t_class *hpc_proxy_class;
 
 static void hpc_bang(t_hot *x) {
 	int n2 = x->x_f2;
-	outlet_float(x->x_obj.ob_outlet, (int)x->x_f1 % (n2?n2:1));
+		/* apparently "%" raises an exception for INT_MIN and -1 */
+	if (n2 == -1)
+		outlet_float(x->x_obj.ob_outlet, 0);
+	else outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f1)) % (n2 ? n2 : 1));
 }
 
 static void *hpc_new(t_symbol *s, int ac, t_atom *av) {
@@ -21,6 +24,10 @@ void setup_0x230x25(void) {
 		A_GIMME, 0);
 	class_addbang(hpc_class, hpc_bang);
 	class_addfloat(hpc_class, hot_float);
+	class_addmethod(hpc_class, (t_method)hot_f2,
+		gensym("f2"), A_FLOAT, 0);
+	class_addmethod(hpc_class, (t_method)hot_skip,
+		gensym("."), A_GIMME, 0);
 	class_addmethod(hpc_class, (t_method)hot_loadbang,
 		gensym("loadbang"), A_DEFFLOAT, 0);
 

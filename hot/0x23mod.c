@@ -25,6 +25,10 @@ void setup_0x23mod(void) {
 		A_GIMME, 0);
 	class_addbang(hmod_class, hmod_bang);
 	class_addfloat(hmod_class, hot_float);
+	class_addmethod(hmod_class, (t_method)hot_f2,
+		gensym("f2"), A_FLOAT, 0);
+	class_addmethod(hmod_class, (t_method)hot_skip,
+		gensym("."), A_GIMME, 0);
 	class_addmethod(hmod_class, (t_method)hot_loadbang,
 		gensym("loadbang"), A_DEFFLOAT, 0);
 

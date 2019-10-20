@@ -27,6 +27,10 @@ void setup_0x23log(void) {
 		A_GIMME, 0);
 	class_addbang(hlog_class, hlog_bang);
 	class_addfloat(hlog_class, hot_float);
+	class_addmethod(hlog_class, (t_method)hot_f2,
+		gensym("f2"), A_FLOAT, 0);
+	class_addmethod(hlog_class, (t_method)hot_skip,
+		gensym("."), A_GIMME, 0);
 	class_addmethod(hlog_class, (t_method)hot_loadbang,
 		gensym("loadbang"), A_DEFFLOAT, 0);
 
@@ -35,5 +39,5 @@ void setup_0x23log(void) {
 	class_addbang(hlog_proxy_class, hot_proxy_bang);
 	class_addfloat(hlog_proxy_class, hot_proxy_float);
 
-	class_sethelpsymbol(hlog_class, gensym("log"));
+	class_sethelpsymbol(hlog_class, gensym("hotbinops1"));
 }
