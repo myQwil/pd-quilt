@@ -1,6 +1,7 @@
 #include "m_pd.h"
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 #ifdef _MSC_VER
 #define strtof(a,b) _atoldbl(a,*b)
@@ -39,10 +40,6 @@ static void pdint_bang(t_pdint *x) {
 	outlet_float(x->x_obj.ob_outlet, (t_float)(int64_t)(x->x_f));
 }
 
-static void pdint_loadbang(t_pdint *x, t_floatarg action) {
-	if (!action && x->x_lb) pdint_bang(x);
-}
-
 static void pdint_float(t_pdint *x, t_float f) {
 	outlet_float(x->x_obj.ob_outlet, (t_float)(int64_t)(x->x_f = f));
 }
@@ -53,13 +50,17 @@ static void pdint_send(t_pdint *x, t_symbol *s) {
 	else pd_error(x, "%s: no such object", s->s_name);
 }
 
+static void pdint_loadbang(t_pdint *x, t_floatarg action) {
+	if (!action && x->x_lb) pdint_bang(x);
+}
+
 /* --------------------- float ----------------------------------- */
 static t_class *pdfloat_class;
 
 typedef struct _pdfloat {
 	t_object x_obj;
 	t_float x_f;
-	int x_lb
+	int x_lb;
 } t_pdfloat;
 
 	/* "float," "symbol," and "bang" are special because
@@ -95,10 +96,6 @@ static void pdfloat_bang(t_pdfloat *x) {
 	outlet_float(x->x_obj.ob_outlet, x->x_f);
 }
 
-static void pdfloat_loadbang(t_pdfloat *x, t_floatarg action) {
-	if (!action && x->x_lb) pdfloat_bang(x);
-}
-
 static void pdfloat_float(t_pdfloat *x, t_float f) {
 	outlet_float(x->x_obj.ob_outlet, x->x_f = f);
 }
@@ -118,22 +115,31 @@ static void pdfloat_send(t_pdfloat *x, t_symbol *s) {
 	else pd_error(x, "%s: no such object", s->s_name);
 }
 
+static void pdfloat_loadbang(t_pdfloat *x, t_floatarg action) {
+	if (!action && x->x_lb) pdfloat_bang(x);
+}
 
 /* --------------------------------------------------------------- */
 /*                           arithmetics                           */
 /* --------------------------------------------------------------- */
 
-typedef struct _binop {
+typedef struct _blunt t_blunt;
+typedef void (*t_bluntmethod)(t_blunt *x);
+
+struct _blunt {
 	t_object x_obj;
 	t_float x_f1;
 	t_float x_f2;
+	t_bluntmethod x_bang;
 	int x_lb;
-} t_binop;
+};
 
-static void *binop_new(t_class *binopclass, t_symbol *s, int ac, t_atom *av) {
-	t_binop *x = (t_binop *)pd_new(binopclass);
+static void *blunt_new
+(t_class *bluntclass, t_bluntmethod fn, t_symbol *s, int ac, t_atom *av) {
+	t_blunt *x = (t_blunt *)pd_new(bluntclass);
 	outlet_new(&x->x_obj, &s_float);
 	floatinlet_new(&x->x_obj, &x->x_f2);
+	x->x_bang = fn;
 
 	if (ac>1 && av->a_type == A_FLOAT)
 	{	x->x_f1 = av->a_w.w_float;
@@ -152,414 +158,288 @@ static void *binop_new(t_class *binopclass, t_symbol *s, int ac, t_atom *av) {
 	return (x);
 }
 
+static void blunt_float(t_blunt *x, t_float f) {
+	x->x_f1 = f;
+	x->x_bang(x);
+}
+
+static void blunt_f2(t_blunt *x, t_floatarg f) {
+	x->x_f2 = f;
+}
+
+static void blunt_skip(t_blunt *x, t_symbol *s, int ac, t_atom *av) {
+	if (ac && av->a_type == A_FLOAT)
+		x->x_f2 = av->a_w.w_float;
+	x->x_bang(x);
+}
+
+static void blunt_loadbang(t_blunt *x, t_floatarg action) {
+	if (!action && x->x_lb) x->x_bang(x);
+}
+
 /* --------------------- binop1:  +, -, *, / --------------------- */
 
 /* --------------------- addition -------------------------------- */
 
-static t_class *binop1_plus_class;
+static t_class *b1_plus_class;
 
-static void *binop1_plus_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop1_plus_class, s, ac, av));
-}
-
-static void binop1_plus_bang(t_binop *x) {
+static void b1_plus_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet, x->x_f1 + x->x_f2);
 }
 
-static void binop1_plus_float(t_binop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, (x->x_f1 = f) + x->x_f2);
-}
-
-static void binop1_plus_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop1_plus_bang(x);
+static void *b1_plus_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b1_plus_class, b1_plus_bang, s, ac, av));
 }
 
 /* --------------------- subtraction ----------------------------- */
 
-static t_class *binop1_minus_class;
+static t_class *b1_minus_class;
 
-static void *binop1_minus_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop1_minus_class, s, ac, av));
-}
-
-static void binop1_minus_bang(t_binop *x) {
+static void b1_minus_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet, x->x_f1 - x->x_f2);
 }
 
-static void binop1_minus_float(t_binop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, (x->x_f1 = f) - x->x_f2);
-}
-
-static void binop1_minus_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop1_minus_bang(x);
+static void *b1_minus_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b1_minus_class, b1_minus_bang, s, ac, av));
 }
 
 /* --------------------- multiplication -------------------------- */
 
-static t_class *binop1_times_class;
+static t_class *b1_times_class;
 
-static void *binop1_times_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop1_times_class, s, ac, av));
-}
-
-static void binop1_times_bang(t_binop *x) {
+static void b1_times_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet, x->x_f1 * x->x_f2);
 }
 
-static void binop1_times_float(t_binop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, (x->x_f1 = f) * x->x_f2);
-}
-
-static void binop1_times_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop1_times_bang(x);
+static void *b1_times_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b1_times_class, b1_times_bang, s, ac, av));
 }
 
 /* --------------------- division -------------------------------- */
 
-static t_class *binop1_div_class;
+static t_class *b1_div_class;
 
-static void *binop1_div_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop1_div_class, s, ac, av));
-}
-
-static void binop1_div_bang(t_binop *x) {
+static void b1_div_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet,
 		(x->x_f2 != 0 ? x->x_f1 / x->x_f2 : 0));
 }
 
-static void binop1_div_float(t_binop *x, t_float f) {
-	x->x_f1 = f;
-	outlet_float(x->x_obj.ob_outlet,
-		(x->x_f2 != 0 ? x->x_f1 / x->x_f2 : 0));
+static void *b1_div_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b1_div_class, b1_div_bang, s, ac, av));
 }
 
-static void binop1_div_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop1_div_bang(x);
+/* --------------------- log ------------------------------------- */
+
+static t_class *b1_log_class;
+
+static void b1_log_bang(t_blunt *x) {
+    t_float r;
+    if (x->x_f1 <= 0)
+        r = -1000;
+    else if (x->x_f2 <= 0)
+        r = log(x->x_f1);
+    else r = log(x->x_f1)/log(x->x_f2);
+    outlet_float(x->x_obj.ob_outlet, r);
+}
+
+static void *b1_log_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b1_log_class, b1_log_bang, s, ac, av));
 }
 
 /* --------------------- pow ------------------------------------- */
 
-static t_class *binop1_pow_class;
+static t_class *b1_pow_class;
 
-static void *binop1_pow_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop1_pow_class, s, ac, av));
-}
-
-static void binop1_pow_bang(t_binop *x) {
+static void b1_pow_bang(t_blunt *x) {
 	t_float r = (x->x_f1 == 0 && x->x_f2 < 0) ||
 		(x->x_f1 < 0 && (x->x_f2 - (int)x->x_f2) != 0) ?
 			0 : pow(x->x_f1, x->x_f2);
 	outlet_float(x->x_obj.ob_outlet, r);
 }
 
-static void binop1_pow_float(t_binop *x, t_float f) {
-	x->x_f1 = f;
-	binop1_pow_bang(x);
-}
-
-static void binop1_pow_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop1_pow_bang(x);
+static void *b1_pow_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b1_pow_class, b1_pow_bang, s, ac, av));
 }
 
 /* --------------------- max ------------------------------------- */
 
-static t_class *binop1_max_class;
+static t_class *b1_max_class;
 
-static void *binop1_max_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop1_max_class, s, ac, av));
-}
-
-static void binop1_max_bang(t_binop *x) {
+static void b1_max_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet,
 		(x->x_f1 > x->x_f2 ? x->x_f1 : x->x_f2));
 }
 
-static void binop1_max_float(t_binop *x, t_float f) {
-	x->x_f1 = f;
-	outlet_float(x->x_obj.ob_outlet,
-		(x->x_f1 > x->x_f2 ? x->x_f1 : x->x_f2));
-}
-
-static void binop1_max_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop1_max_bang(x);
+static void *b1_max_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b1_max_class, b1_max_bang, s, ac, av));
 }
 
 /* --------------------- min ------------------------------------- */
 
-static t_class *binop1_min_class;
+static t_class *b1_min_class;
 
-static void *binop1_min_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop1_min_class, s, ac, av));
-}
-
-static void binop1_min_bang(t_binop *x) {
+static void b1_min_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet,
 		(x->x_f1 < x->x_f2 ? x->x_f1 : x->x_f2));
 }
 
-static void binop1_min_float(t_binop *x, t_float f) {
-	x->x_f1 = f;
-	outlet_float(x->x_obj.ob_outlet,
-		(x->x_f1 < x->x_f2 ? x->x_f1 : x->x_f2));
-}
-
-static void binop1_min_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop1_min_bang(x);
+static void *b1_min_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b1_min_class, b1_min_bang, s, ac, av));
 }
 
 /* --------------- binop2: ==, !=, >, <, >=, <=. ----------------- */
 
 /* --------------------- == -------------------------------------- */
 
-static t_class *binop2_ee_class;
+static t_class *b2_ee_class;
 
-static void *binop2_ee_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop2_ee_class, s, ac, av));
-}
-
-static void binop2_ee_bang(t_binop *x) {
+static void b2_ee_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet, x->x_f1 == x->x_f2);
 }
 
-static void binop2_ee_float(t_binop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, (x->x_f1 = f) == x->x_f2);
-}
-
-static void binop2_ee_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop2_ee_bang(x);
+static void *b2_ee_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b2_ee_class, b2_ee_bang, s, ac, av));
 }
 
 /* --------------------- != -------------------------------------- */
 
-static t_class *binop2_ne_class;
+static t_class *b2_ne_class;
 
-static void *binop2_ne_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop2_ne_class, s, ac, av));
-}
-
-static void binop2_ne_bang(t_binop *x) {
+static void b2_ne_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet, x->x_f1 != x->x_f2);
 }
 
-static void binop2_ne_float(t_binop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, (x->x_f1 = f) != x->x_f2);
-}
-
-static void binop2_ne_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop2_ne_bang(x);
+static void *b2_ne_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b2_ne_class, b2_ne_bang, s, ac, av));
 }
 
 /* --------------------- > --------------------------------------- */
 
-static t_class *binop2_gt_class;
+static t_class *b2_gt_class;
 
-static void *binop2_gt_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop2_gt_class, s, ac, av));
-}
-
-static void binop2_gt_bang(t_binop *x) {
+static void b2_gt_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet, x->x_f1 > x->x_f2);
 }
 
-static void binop2_gt_float(t_binop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, (x->x_f1 = f) > x->x_f2);
-}
-
-static void binop2_gt_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop2_gt_bang(x);
+static void *b2_gt_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b2_gt_class, b2_gt_bang, s, ac, av));
 }
 
 /* --------------------- < --------------------------------------- */
 
-static t_class *binop2_lt_class;
+static t_class *b2_lt_class;
 
-static void *binop2_lt_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop2_lt_class, s, ac, av));
-}
-
-static void binop2_lt_bang(t_binop *x) {
+static void b2_lt_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet, x->x_f1 < x->x_f2);
 }
 
-static void binop2_lt_float(t_binop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, (x->x_f1 = f) < x->x_f2);
-}
-
-static void binop2_lt_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop2_lt_bang(x);
+static void *b2_lt_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b2_lt_class, b2_lt_bang, s, ac, av));
 }
 
 /* --------------------- >= -------------------------------------- */
 
-static t_class *binop2_ge_class;
+static t_class *b2_ge_class;
 
-static void *binop2_ge_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop2_ge_class, s, ac, av));
-}
-
-static void binop2_ge_bang(t_binop *x) {
+static void b2_ge_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet, x->x_f1 >= x->x_f2);
 }
 
-static void binop2_ge_float(t_binop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, (x->x_f1 = f) >= x->x_f2);
-}
-
-static void binop2_ge_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop2_ge_bang(x);
+static void *b2_ge_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b2_ge_class, b2_ge_bang, s, ac, av));
 }
 
 /* --------------------- <= -------------------------------------- */
 
-static t_class *binop2_le_class;
+static t_class *b2_le_class;
 
-static void *binop2_le_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop2_le_class, s, ac, av));
-}
-
-static void binop2_le_bang(t_binop *x) {
+static void b2_le_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet, x->x_f1 <= x->x_f2);
 }
 
-static void binop2_le_float(t_binop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, (x->x_f1 = f) <= x->x_f2);
-}
-
-static void binop2_le_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop2_le_bang(x);
+static void *b2_le_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b2_le_class, b2_le_bang, s, ac, av));
 }
 
 /* ------- binop3: &, |, &&, ||, <<, >>, %, mod, div ------------- */
 
 /* --------------------- & --------------------------------------- */
 
-static t_class *binop3_ba_class;
+static t_class *b3_ba_class;
 
-static void *binop3_ba_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop3_ba_class, s, ac, av));
-}
-
-static void binop3_ba_bang(t_binop *x) {
+static void b3_ba_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f1)) & (int)(x->x_f2));
 }
 
-static void binop3_ba_float(t_binop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f1 = f)) & (int)(x->x_f2));
-}
-
-static void binop3_ba_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop3_ba_bang(x);
+static void *b3_ba_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b3_ba_class, b3_ba_bang, s, ac, av));
 }
 
 /* --------------------- && -------------------------------------- */
 
-static t_class *binop3_la_class;
+static t_class *b3_la_class;
 
-static void *binop3_la_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop3_la_class, s, ac, av));
-}
-
-static void binop3_la_bang(t_binop *x) {
+static void b3_la_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f1)) && (int)(x->x_f2));
 }
 
-static void binop3_la_float(t_binop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f1 = f)) && (int)(x->x_f2));
-}
-
-static void binop3_la_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop3_la_bang(x);
+static void *b3_la_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b3_la_class, b3_la_bang, s, ac, av));
 }
 
 /* --------------------- | --------------------------------------- */
 
-static t_class *binop3_bo_class;
+static t_class *b3_bo_class;
 
-static void *binop3_bo_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop3_bo_class, s, ac, av));
-}
-
-static void binop3_bo_bang(t_binop *x) {
+static void b3_bo_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f1)) | (int)(x->x_f2));
 }
 
-static void binop3_bo_float(t_binop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f1 = f)) | (int)(x->x_f2));
-}
-
-static void binop3_bo_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop3_bo_bang(x);
+static void *b3_bo_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b3_bo_class, b3_bo_bang, s, ac, av));
 }
 
 /* --------------------- || -------------------------------------- */
 
-static t_class *binop3_lo_class;
+static t_class *b3_lo_class;
 
-static void *binop3_lo_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop3_lo_class, s, ac, av));
-}
-
-static void binop3_lo_bang(t_binop *x) {
+static void b3_lo_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f1)) || (int)(x->x_f2));
 }
 
-static void binop3_lo_float(t_binop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f1 = f)) || (int)(x->x_f2));
-}
-
-static void binop3_lo_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop3_lo_bang(x);
+static void *b3_lo_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b3_lo_class, b3_lo_bang, s, ac, av));
 }
 
 /* --------------------- << -------------------------------------- */
 
-static t_class *binop3_ls_class;
+static t_class *b3_ls_class;
 
-static void *binop3_ls_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop3_ls_class, s, ac, av));
-}
-
-static void binop3_ls_bang(t_binop *x) {
+static void b3_ls_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f1)) << (int)(x->x_f2));
 }
 
-static void binop3_ls_float(t_binop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f1 = f)) << (int)(x->x_f2));
-}
-
-static void binop3_ls_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop3_ls_bang(x);
+static void *b3_ls_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b3_ls_class, b3_ls_bang, s, ac, av));
 }
 
 /* --------------------- >> -------------------------------------- */
 
-static t_class *binop3_rs_class;
+static t_class *b3_rs_class;
 
-static void *binop3_rs_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop3_rs_class, s, ac, av));
-}
-
-static void binop3_rs_bang(t_binop *x) {
+static void b3_rs_bang(t_blunt *x) {
 	outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f1)) >> (int)(x->x_f2));
 }
 
-static void binop3_rs_float(t_binop *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f1 = f)) >> (int)(x->x_f2));
-}
-
-static void binop3_rs_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop3_rs_bang(x);
+static void *b3_rs_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b3_rs_class, b3_rs_bang, s, ac, av));
 }
 
 /* --------------------- % --------------------------------------- */
 
-static t_class *binop3_pc_class;
+static t_class *b3_pc_class;
 
-static void *binop3_pc_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop3_pc_class, s, ac, av));
-}
-
-static void binop3_pc_bang(t_binop *x) {
+static void b3_pc_bang(t_blunt *x) {
 	int n2 = x->x_f2;
 		/* apparently "%" raises an exception for INT_MIN and -1 */
 	if (n2 == -1)
@@ -567,26 +447,15 @@ static void binop3_pc_bang(t_binop *x) {
 	else outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f1)) % (n2 ? n2 : 1));
 }
 
-static void binop3_pc_float(t_binop *x, t_float f) {
-	int n2 = x->x_f2;
-	if (n2 == -1)
-		outlet_float(x->x_obj.ob_outlet, 0);
-	else outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f1 = f)) % (n2 ? n2 : 1));
-}
-
-static void binop3_pc_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop3_pc_bang(x);
+static void *b3_pc_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b3_pc_class, b3_pc_bang, s, ac, av));
 }
 
 /* --------------------- mod ------------------------------------- */
 
-static t_class *binop3_mod_class;
+static t_class *b3_mod_class;
 
-static void *binop3_mod_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop3_mod_class, s, ac, av));
-}
-
-static void binop3_mod_bang(t_binop *x) {
+static void b3_mod_bang(t_blunt *x) {
 	int n2 = x->x_f2, result;
 	if (n2 < 0) n2 = -n2;
 	else if (!n2) n2 = 1;
@@ -595,24 +464,15 @@ static void binop3_mod_bang(t_binop *x) {
 	outlet_float(x->x_obj.ob_outlet, (t_float)result);
 }
 
-static void binop3_mod_float(t_binop *x, t_float f) {
-	x->x_f1 = f;
-	binop3_mod_bang(x);
-}
-
-static void binop3_mod_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop3_mod_bang(x);
+static void *b3_mod_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b3_mod_class, b3_mod_bang, s, ac, av));
 }
 
 /* --------------------- div ------------------------------------- */
 
-static t_class *binop3_div_class;
+static t_class *b3_div_class;
 
-static void *binop3_div_new(t_symbol *s, int ac, t_atom *av) {
-	return (binop_new(binop3_div_class, s, ac, av));
-}
-
-static void binop3_div_bang(t_binop *x) {
+static void b3_div_bang(t_blunt *x) {
 	int n1 = x->x_f1, n2 = x->x_f2, result;
 	if (n2 < 0) n2 = -n2;
 	else if (!n2) n2 = 1;
@@ -621,21 +481,15 @@ static void binop3_div_bang(t_binop *x) {
 	outlet_float(x->x_obj.ob_outlet, (t_float)result);
 }
 
-static void binop3_div_float(t_binop *x, t_float f) {
-	x->x_f1 = f;
-	binop3_div_bang(x);
+static void *b3_div_new(t_symbol *s, int ac, t_atom *av) {
+	return (blunt_new(b3_div_class, b3_div_bang, s, ac, av));
 }
-
-static void binop3_div_loadbang(t_binop *x, t_floatarg action) {
-	if (!action && x->x_lb) binop3_div_bang(x);
-}
-
 
 void blunt_setup(void) {
 
 	post("Blunt! 0.1.0");
 
-		/* ---------------- arithmetic --------------------- */
+		/* ---------------- connectives --------------------- */
 
 	pdint_class = class_new(gensym("int"), (t_newmethod)pdint_new, 0,
 		sizeof(t_pdint), 0, A_GIMME, 0);
@@ -660,192 +514,135 @@ void blunt_setup(void) {
 
 		/* ------------------ binop1 ----------------------- */
 
-	t_symbol *binop1_sym = gensym("operators");
-	t_symbol *binop23_sym = gensym("otherbinops");
+	b1_plus_class = class_new(gensym("+"), (t_newmethod)b1_plus_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b1_plus_class, b1_plus_bang);
 
-	binop1_plus_class = class_new(gensym("+"), (t_newmethod)binop1_plus_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop1_plus_class, binop1_plus_bang);
-	class_addfloat(binop1_plus_class, (t_method)binop1_plus_float);
-	class_sethelpsymbol(binop1_plus_class, binop1_sym);
-	class_addmethod(binop1_plus_class, (t_method)binop1_plus_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b1_minus_class = class_new(gensym("-"), (t_newmethod)b1_minus_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b1_minus_class, b1_minus_bang);
 
-	binop1_minus_class = class_new(gensym("-"),
-		(t_newmethod)binop1_minus_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop1_minus_class, binop1_minus_bang);
-	class_addfloat(binop1_minus_class, (t_method)binop1_minus_float);
-	class_sethelpsymbol(binop1_minus_class, binop1_sym);
-	class_addmethod(binop1_minus_class, (t_method)binop1_minus_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b1_times_class = class_new(gensym("*"), (t_newmethod)b1_times_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b1_times_class, b1_times_bang);
 
-	binop1_times_class = class_new(gensym("*"),
-		(t_newmethod)binop1_times_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop1_times_class, binop1_times_bang);
-	class_addfloat(binop1_times_class, (t_method)binop1_times_float);
-	class_sethelpsymbol(binop1_times_class, binop1_sym);
-	class_addmethod(binop1_times_class, (t_method)binop1_times_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b1_div_class = class_new(gensym("/"), (t_newmethod)b1_div_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b1_div_class, b1_div_bang);
 
-	binop1_div_class = class_new(gensym("/"),
-		(t_newmethod)binop1_div_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop1_div_class, binop1_div_bang);
-	class_addfloat(binop1_div_class, (t_method)binop1_div_float);
-	class_sethelpsymbol(binop1_div_class, binop1_sym);
-	class_addmethod(binop1_div_class, (t_method)binop1_div_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b1_log_class = class_new(gensym("log"), (t_newmethod)b1_log_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b1_log_class, b1_log_bang);
 
-	binop1_pow_class = class_new(gensym("pow"),
-		(t_newmethod)binop1_pow_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop1_pow_class, binop1_pow_bang);
-	class_addfloat(binop1_pow_class, (t_method)binop1_pow_float);
-	class_sethelpsymbol(binop1_pow_class, binop1_sym);
-	class_addmethod(binop1_pow_class, (t_method)binop1_pow_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b1_pow_class = class_new(gensym("pow"), (t_newmethod)b1_pow_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b1_pow_class, b1_pow_bang);
 
-	binop1_max_class = class_new(gensym("max"),
-		(t_newmethod)binop1_max_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop1_max_class, binop1_max_bang);
-	class_addfloat(binop1_max_class, (t_method)binop1_max_float);
-	class_sethelpsymbol(binop1_max_class, binop1_sym);
-	class_addmethod(binop1_max_class, (t_method)binop1_max_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b1_max_class = class_new(gensym("max"), (t_newmethod)b1_max_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b1_max_class, b1_max_bang);
 
-	binop1_min_class = class_new(gensym("min"),
-		(t_newmethod)binop1_min_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop1_min_class, binop1_min_bang);
-	class_addfloat(binop1_min_class, (t_method)binop1_min_float);
-	class_sethelpsymbol(binop1_min_class, binop1_sym);
-	class_addmethod(binop1_min_class, (t_method)binop1_min_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b1_min_class = class_new(gensym("min"), (t_newmethod)b1_min_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b1_min_class, b1_min_bang);
+
+	t_class *b1s[] = {
+		b1_plus_class, b1_minus_class, b1_times_class, b1_div_class,
+		b1_log_class, b1_pow_class, b1_max_class, b1_min_class
+	};
+	int i = sizeof(b1s) / sizeof*(b1s);
+	t_symbol *b1_sym = gensym("operators");
+	while (i--) {
+		class_addfloat(b1s[i], (t_method)blunt_float);
+		class_addmethod(b1s[i], (t_method)blunt_f2,
+			gensym("f2"), A_FLOAT, 0);
+		class_addmethod(b1s[i], (t_method)blunt_skip,
+			gensym("."), A_GIMME, 0);
+		class_addmethod(b1s[i], (t_method)blunt_loadbang,
+			gensym("loadbang"), A_DEFFLOAT, 0);
+		class_sethelpsymbol(b1s[i], b1_sym);
+	}
 
 		/* ------------------ binop2 ----------------------- */
 
-	binop2_ee_class = class_new(gensym("=="), (t_newmethod)binop2_ee_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop2_ee_class, binop2_ee_bang);
-	class_addfloat(binop2_ee_class, (t_method)binop2_ee_float);
-	class_sethelpsymbol(binop2_ee_class, binop23_sym);
-	class_addmethod(binop2_ee_class, (t_method)binop2_ee_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b2_ee_class = class_new(gensym("=="), (t_newmethod)b2_ee_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b2_ee_class, b2_ee_bang);
 
-	binop2_ne_class = class_new(gensym("!="), (t_newmethod)binop2_ne_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop2_ne_class, binop2_ne_bang);
-	class_addfloat(binop2_ne_class, (t_method)binop2_ne_float);
-	class_sethelpsymbol(binop2_ne_class, binop23_sym);
-	class_addmethod(binop2_ne_class, (t_method)binop2_ne_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b2_ne_class = class_new(gensym("!="), (t_newmethod)b2_ne_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b2_ne_class, b2_ne_bang);
 
-	binop2_gt_class = class_new(gensym(">"), (t_newmethod)binop2_gt_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop2_gt_class, binop2_gt_bang);
-	class_addfloat(binop2_gt_class, (t_method)binop2_gt_float);
-	class_sethelpsymbol(binop2_gt_class, binop23_sym);
-	class_addmethod(binop2_gt_class, (t_method)binop2_gt_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b2_gt_class = class_new(gensym(">"), (t_newmethod)b2_gt_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b2_gt_class, b2_gt_bang);
 
-	binop2_lt_class = class_new(gensym("<"), (t_newmethod)binop2_lt_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop2_lt_class, binop2_lt_bang);
-	class_addfloat(binop2_lt_class, (t_method)binop2_lt_float);
-	class_sethelpsymbol(binop2_lt_class, binop23_sym);
-	class_addmethod(binop2_lt_class, (t_method)binop2_lt_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b2_lt_class = class_new(gensym("<"), (t_newmethod)b2_lt_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b2_lt_class, b2_lt_bang);
 
-	binop2_ge_class = class_new(gensym(">="), (t_newmethod)binop2_ge_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop2_ge_class, binop2_ge_bang);
-	class_addfloat(binop2_ge_class, (t_method)binop2_ge_float);
-	class_sethelpsymbol(binop2_ge_class, binop23_sym);
-	class_addmethod(binop2_ge_class, (t_method)binop2_ge_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b2_ge_class = class_new(gensym(">="), (t_newmethod)b2_ge_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b2_ge_class, b2_ge_bang);
 
-	binop2_le_class = class_new(gensym("<="), (t_newmethod)binop2_le_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop2_le_class, binop2_le_bang);
-	class_addfloat(binop2_le_class, (t_method)binop2_le_float);
-	class_sethelpsymbol(binop2_le_class, binop23_sym);
-	class_addmethod(binop2_le_class, (t_method)binop2_le_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b2_le_class = class_new(gensym("<="), (t_newmethod)b2_le_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b2_le_class, b2_le_bang);
 
 		/* ------------------ binop3 ----------------------- */
 
-	binop3_ba_class = class_new(gensym("&"), (t_newmethod)binop3_ba_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop3_ba_class, binop3_ba_bang);
-	class_addfloat(binop3_ba_class, (t_method)binop3_ba_float);
-	class_sethelpsymbol(binop3_ba_class, binop23_sym);
-	class_addmethod(binop3_ba_class, (t_method)binop3_ba_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b3_ba_class = class_new(gensym("&"), (t_newmethod)b3_ba_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b3_ba_class, b3_ba_bang);
 
-	binop3_la_class = class_new(gensym("&&"), (t_newmethod)binop3_la_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop3_la_class, binop3_la_bang);
-	class_addfloat(binop3_la_class, (t_method)binop3_la_float);
-	class_sethelpsymbol(binop3_la_class, binop23_sym);
-	class_addmethod(binop3_la_class, (t_method)binop3_la_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b3_la_class = class_new(gensym("&&"), (t_newmethod)b3_la_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b3_la_class, b3_la_bang);
 
-	binop3_bo_class = class_new(gensym("|"), (t_newmethod)binop3_bo_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop3_bo_class, binop3_bo_bang);
-	class_addfloat(binop3_bo_class, (t_method)binop3_bo_float);
-	class_sethelpsymbol(binop3_bo_class, binop23_sym);
-	class_addmethod(binop3_bo_class, (t_method)binop3_bo_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b3_bo_class = class_new(gensym("|"), (t_newmethod)b3_bo_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b3_bo_class, b3_bo_bang);
 
-	binop3_lo_class = class_new(gensym("||"), (t_newmethod)binop3_lo_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop3_lo_class, binop3_lo_bang);
-	class_addfloat(binop3_lo_class, (t_method)binop3_lo_float);
-	class_sethelpsymbol(binop3_lo_class, binop23_sym);
-	class_addmethod(binop3_lo_class, (t_method)binop3_lo_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b3_lo_class = class_new(gensym("||"), (t_newmethod)b3_lo_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b3_lo_class, b3_lo_bang);
 
-	binop3_ls_class = class_new(gensym("<<"), (t_newmethod)binop3_ls_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop3_ls_class, binop3_ls_bang);
-	class_addfloat(binop3_ls_class, (t_method)binop3_ls_float);
-	class_sethelpsymbol(binop3_ls_class, binop23_sym);
-	class_addmethod(binop3_ls_class, (t_method)binop3_ls_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b3_ls_class = class_new(gensym("<<"), (t_newmethod)b3_ls_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b3_ls_class, b3_ls_bang);
 
-	binop3_rs_class = class_new(gensym(">>"), (t_newmethod)binop3_rs_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop3_rs_class, binop3_rs_bang);
-	class_addfloat(binop3_rs_class, (t_method)binop3_rs_float);
-	class_sethelpsymbol(binop3_rs_class, binop23_sym);
-	class_addmethod(binop3_rs_class, (t_method)binop3_rs_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b3_rs_class = class_new(gensym(">>"), (t_newmethod)b3_rs_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b3_rs_class, b3_rs_bang);
 
-	binop3_pc_class = class_new(gensym("%"), (t_newmethod)binop3_pc_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop3_pc_class, binop3_pc_bang);
-	class_addfloat(binop3_pc_class, (t_method)binop3_pc_float);
-	class_sethelpsymbol(binop3_pc_class, binop23_sym);
-	class_addmethod(binop3_pc_class, (t_method)binop3_pc_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b3_pc_class = class_new(gensym("%"), (t_newmethod)b3_pc_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b3_pc_class, b3_pc_bang);
 
-	binop3_mod_class = class_new(gensym("mod"), (t_newmethod)binop3_mod_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop3_mod_class, binop3_mod_bang);
-	class_addfloat(binop3_mod_class, (t_method)binop3_mod_float);
-	class_sethelpsymbol(binop3_mod_class, binop23_sym);
-	class_addmethod(binop3_mod_class, (t_method)binop3_mod_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b3_mod_class = class_new(gensym("mod"), (t_newmethod)b3_mod_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b3_mod_class, b3_mod_bang);
 
-	binop3_div_class = class_new(gensym("div"), (t_newmethod)binop3_div_new, 0,
-		sizeof(t_binop), 0, A_GIMME, 0);
-	class_addbang(binop3_div_class, binop3_div_bang);
-	class_addfloat(binop3_div_class, (t_method)binop3_div_float);
-	class_sethelpsymbol(binop3_div_class, binop23_sym);
-	class_addmethod(binop3_div_class, (t_method)binop3_div_loadbang,
-		gensym("loadbang"), A_DEFFLOAT, 0);
+	b3_div_class = class_new(gensym("div"), (t_newmethod)b3_div_new, 0,
+		sizeof(t_blunt), 0, A_GIMME, 0);
+	class_addbang(b3_div_class, b3_div_bang);
+
+	t_class *b23s[] = {
+		b2_ee_class, b2_ne_class,
+		b2_gt_class, b2_lt_class, b2_ge_class, b2_le_class,
+		b3_ba_class, b3_la_class, b3_bo_class, b3_lo_class,
+		b3_ls_class, b3_rs_class, b3_pc_class, b3_mod_class, b3_div_class
+	};
+	i = sizeof(b23s) / sizeof*(b23s);
+	t_symbol *b23_sym = gensym("otherbinops");
+	while (i--) {
+		class_addfloat(b23s[i], (t_method)blunt_float);
+		class_addmethod(b23s[i], (t_method)blunt_f2,
+			gensym("f2"), A_FLOAT, 0);
+		class_addmethod(b23s[i], (t_method)blunt_skip,
+			gensym("."), A_GIMME, 0);
+		class_addmethod(b23s[i], (t_method)blunt_loadbang,
+			gensym("loadbang"), A_DEFFLOAT, 0);
+		class_sethelpsymbol(b23s[i], b23_sym);
+	}
 }
