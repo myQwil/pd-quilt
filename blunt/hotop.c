@@ -75,9 +75,10 @@ static void *hot_new
 			x->x_f2 = av->a_w.w_float;
 		else if (av->a_type == A_SYMBOL)
 		{	const char *c = av->a_w.w_symbol->s_name;
-			if (c[strlen(c)-1] != '!') return 0;
-			x->x_f2 = strtof(c, NULL);
-			x->x_lb = 1;   }   }
+			if (c[strlen(c)-1] == '!')
+			{	x->x_f2 = strtof(c, NULL);
+				x->x_lb = 1;   }
+			else x->x_f2 = 0;   }   }
 
 	return (x);
 }
