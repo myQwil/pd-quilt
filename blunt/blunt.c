@@ -30,9 +30,10 @@ static void *num_new
 			x->x_f = av->a_w.w_float;
 		else if (av->a_type == A_SYMBOL)
 		{	const char *c = av->a_w.w_symbol->s_name;
-			if (c[strlen(c)-1] != '!') return 0;
-			x->x_f = strtof(c, NULL);
-			x->x_lb = 1;   }   }
+			if (c[strlen(c)-1] == '!')
+			{	x->x_f = strtof(c, NULL);
+				x->x_lb = 1;   }
+			else x->x_f = 0;   }   }
 
 	return (x);
 }
