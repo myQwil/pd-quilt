@@ -40,7 +40,7 @@ static void hot_skip(t_hot *x, t_symbol *s, int ac, t_atom *av) {
 }
 
 static void hot_loadbang(t_hot *x, t_floatarg action) {
-	if (!action && x->x_lb) x->x_bang(x);
+	if (x->x_lb && !action) x->x_bang(x);
 }
 
 static void pxy_bang(t_pxy *p) {

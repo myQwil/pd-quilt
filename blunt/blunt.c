@@ -42,14 +42,8 @@ static void num_float(t_num *x, t_float f) {
 	x->x_bang(x);
 }
 
-static void num_send(t_num *x, t_symbol *s) {
-	if (s->s_thing)
-		pd_float(s->s_thing, (t_float)(int64_t)x->x_f);
-	else pd_error(x, "%s: no such object", s->s_name);
-}
-
 static void num_loadbang(t_num *x, t_floatarg action) {
-	if (!action && x->x_lb) x->x_bang(x);
+	if (x->x_lb && !action) x->x_bang(x);
 }
 
 
@@ -58,6 +52,12 @@ static t_class *i_class;
 
 static void i_bang(t_num *x) {
 	outlet_float(x->x_obj.ob_outlet, (t_float)(int64_t)(x->x_f));
+}
+
+static void i_send(t_num *x, t_symbol *s) {
+	if (s->s_thing)
+		pd_float(s->s_thing, (t_float)(int64_t)x->x_f);
+	else pd_error(x, "%s: no such object", s->s_name);
 }
 
 static void *i_new(t_symbol *s, int ac, t_atom *av) {
@@ -78,6 +78,12 @@ static void f_symbol(t_num *x, t_symbol *s) {
 	if (f == 0 && s->s_name == str_end)
 		pd_error(x, "Couldn't convert %s to float.", s->s_name);
 	else outlet_float(x->x_obj.ob_outlet, x->x_f = f);
+}
+
+static void f_send(t_num *x, t_symbol *s) {
+	if (s->s_thing)
+		pd_float(s->s_thing, x->x_f);
+	else pd_error(x, "%s: no such object", s->s_name);
 }
 
 static void *f_new(t_symbol *s, int ac, t_atom *av) {
@@ -394,11 +400,13 @@ void blunt_setup(void) {
 	i_class = class_new(gensym("i"), (t_newmethod)i_new, 0,
 		sizeof(t_num), 0, A_GIMME, 0);
 	class_addcreator((t_newmethod)i_new, gensym("`i"), A_GIMME, 0);
+	class_addmethod(i_class, (t_method)i_send, gensym("send"), A_SYMBOL, 0);
 	class_addbang(i_class, i_bang);
 
 	f_class = class_new(gensym("f"), (t_newmethod)f_new, 0,
 		sizeof(t_num), 0, A_GIMME, 0);
 	class_addcreator((t_newmethod)f_new, gensym("`f"), A_GIMME, 0);
+	class_addmethod(f_class, (t_method)f_send, gensym("send"), A_SYMBOL, 0);
 	class_addbang(f_class, f_bang);
 	class_addsymbol(f_class, f_symbol);
 
@@ -408,8 +416,6 @@ void blunt_setup(void) {
 	t_symbol *num_sym = gensym("blunt");
 	while (i--)
 	{	class_addfloat(nums[i], num_float);
-		class_addmethod(nums[i], (t_method)num_send,
-			gensym("send"), A_SYMBOL, 0);
 		class_addmethod(nums[i], (t_method)num_loadbang,
 			gensym("loadbang"), A_DEFFLOAT, 0);
 		class_sethelpsymbol(nums[i], num_sym);   }
