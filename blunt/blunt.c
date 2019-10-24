@@ -266,7 +266,7 @@ static void *b2_le_new(t_symbol *s, int ac, t_atom *av) {
 	return (bop_new(b2_le_class, b2_le_bang, s, ac, av));
 }
 
-/* ------- binop3: &, |, &&, ||, <<, >>, %, ^, mod, div ------------- */
+/* ------- binop3: &, |, &&, ||, <<, >>, %, ^, mod, div ---------- */
 
 /* --------------------- & --------------------------------------- */
 static t_class *b3_ba_class;
