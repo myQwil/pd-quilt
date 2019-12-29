@@ -131,11 +131,11 @@ static void muse_octave(t_muse *x, t_floatarg f) {
 }
 
 static void muse_ref(t_muse *x, t_floatarg f) {
-	x->x_rt = (x->x_ref=f) * pow(2,-69/x->x_tet);
+	x->x_rt = pow(2, -69/x->x_tet) * (x->x_ref=f);
 }
 
 static void muse_tet(t_muse *x, t_floatarg f) {
-	x->x_rt = x->x_ref * pow(2,-69/f);
+	x->x_rt = pow(2, -69/f) * x->x_ref;
 	x->x_st = log(2) / (x->x_tet=f);
 }
 
@@ -178,7 +178,7 @@ static void *muse_new(t_symbol *s, int ac, t_atom *av) {
 		if (i<ac) *fp = atom_getfloat(av++);   }
 
 	double ref=x->x_ref=440, tet=x->x_tet=12;
-	x->x_rt = ref * pow(2,-69/tet);
+	x->x_rt = pow(2, -69/tet) * ref;
 	x->x_st = log(2) / tet;
 	x->x_oct = tet;
 	x->x_exp = 0;

@@ -1,15 +1,15 @@
-#N canvas 719 355 450 300 12;
-#X obj 194 122 inlet~;
-#X obj 194 148 osc~;
-#X obj 194 173 *~;
-#X obj 238 173 inlet~;
-#X obj 194 199 +~;
-#X obj 250 199 inlet~;
-#X obj 194 225 osc~;
-#X obj 194 250 outlet~;
-#X obj 184 64 cnv 6 1 1 empty empty fmod~ 6 0 0 14 -233017 -66577 0
+#N canvas 688 363 450 300 14;
+#X obj 194 102 inlet~;
+#X obj 194 128 osc~;
+#X obj 194 153 *~;
+#X obj 238 153 inlet~;
+#X obj 194 179 +~;
+#X obj 250 179 inlet~;
+#X obj 194 205 osc~;
+#X obj 194 230 outlet~;
+#X obj 184 44 cnv 6 1 1 empty empty fmod~ 6 0 0 14 -233017 -66577 0
 ;
-#X text 129 79 simple frequency modulator;
+#X text 129 59 simple frequency modulator;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 2 0 4 0;

@@ -1,21 +1,21 @@
-#N canvas 735 327 450 490 12;
-#X obj 65 202 timer;
+#N canvas 704 327 450 490 14;
+#X obj 60 202 timer;
 #X obj 229 168 unpack;
 #X obj 79 275 -;
-#X obj 65 227 t b f;
+#X obj 60 227 t b f;
 #X obj 43 275 f;
 #X obj 147 267 f;
-#X obj 107 123 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 107 123 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
 1;
 #X obj 97 141 sel;
-#X obj 248 380 line \$1 \$2;
-#X obj 248 412 outlet;
+#X obj 226 392 line \$1 \$2;
+#X obj 226 424 outlet;
 #X obj 97 35 inlet;
-#X obj 297 345 inlet;
-#X obj 340 345 inlet;
+#X obj 277 357 inlet;
+#X obj 324 357 inlet;
 #X obj 97 63 route pause float list;
 #X obj 197 107 t b l;
-#X obj 268 345 f;
+#X obj 246 357 f;
 #X obj 192 168 t;
 #X obj 79 302 t f f;
 #X obj 97 98 spigot;
@@ -24,7 +24,7 @@
 #X msg 325 77 0;
 #X obj 287 282 del;
 #X msg 109 202 stop;
-#X obj 163 345 grdnt;
+#X obj 141 357 grdnt;
 #X connect 0 0 3 0;
 #X connect 1 0 5 0;
 #X connect 1 0 24 1;
