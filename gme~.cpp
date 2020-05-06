@@ -23,7 +23,7 @@ Shay Green <gblargg@gmail.com>
 #define EXPORT                    // empty definition for other cases
 #endif
 
-static void hnd_err( const char* str ) {
+static void hnd_err( const char *str ) {
 	if (str) post("Error: %s", str);
 }
 
@@ -49,7 +49,7 @@ static void gme_tilde_m3u(t_gme_tilde *x, Music_Emu *emu) {
 	char m3u_path [256 + 5];
 	strncpy(m3u_path, x->x_path, 256);
 	m3u_path [256] = 0;
-	char* p = strrchr(m3u_path, '.');
+	char *p = strrchr(m3u_path, '.');
 	if (!p) p = m3u_path + strlen(m3u_path);
 	strcpy(p, ".m3u");
 	if (gme_load_m3u(emu, m3u_path)) { } // ignore error
@@ -69,28 +69,28 @@ static void gme_tilde_time(t_gme_tilde *x, t_symbol *s, int ac, t_atom *av) {
 	if (info)
 	{	t_atom flts[] =
 		{	{A_FLOAT, {(t_float)info->length}},
-			{A_FLOAT, {(t_float)info->fade}}   };
+			{A_FLOAT, {(t_float)info->fade_length}}   };
 		outlet_list(x->l_out, 0, 2, flts);   }
 	gme_free_info(info);
 }
 
 static void gme_tilde_start(t_gme_tilde *x) {
 	hnd_err(gme_start_track(x->x_emu, x->x_track));
-	gme_set_fade(x->x_emu, -1);
+	gme_set_fade(x->x_emu, -1, 0);
 	gme_tilde_time(x,0,0,0);
 	x->x_stop = 0, x->x_play = 1;
 }
 
 static t_int *gme_tilde_perform(t_int *w) {
 	t_gme_tilde *x = (t_gme_tilde *)(w[1]);
-	t_sample *out1 = (t_sample *)(w[2]);
-	t_sample *out2 = (t_sample *)(w[3]);
-	int n = (int)(w[4]);
+	int i;
+	t_sample *outs[nch];
+	for (i=nch; i--;) outs[i] = (t_sample *)(w[i+2]);
+	int n = (int)(w[nch+2]);
 
 	if (x->x_open)
 	{	gme_delete(x->x_emu); x->x_emu = NULL;
 		hnd_err(gme_open_file(x->x_path, &x->x_emu, sys_getsr(), 0));
-
 		if (x->x_emu)
 		{	gme_tilde_m3u(x, x->x_emu);
 			gme_ignore_silence(x->x_emu, 1);
@@ -102,13 +102,13 @@ static t_int *gme_tilde_perform(t_int *w) {
 		x->x_open = x->x_read = 0;   }
 
 	if (x->x_emu && x->x_play)
-	{	short buf [nch];
+	{	short buf[nch];
 		while (n--)
 		{	hnd_err(gme_play(x->x_emu, nch, buf));
-			*out1++ = ((t_sample) buf[0]) / (t_sample) 32768;
-			*out2++ = ((t_sample) buf[1]) / (t_sample) 32768;   }   }
-	else while (n--) *out1++ = *out2++ = 0;
-	return (w+5);
+			for (i=nch; i--;)
+				*outs[i]++ = ((t_sample) buf[i]) / (t_sample) 32768;   }   }
+	else while (n--) for (i=nch; i--;) *outs[i]++ = 0;
+	return (w+nch+3);
 }
 
 static void gme_tilde_dsp(t_gme_tilde *x, t_signal **sp) {
@@ -178,7 +178,7 @@ static void gme_tilde_path(t_gme_tilde *x, t_symbol *s) {
 static void gme_tilde_goto(t_gme_tilde *x, t_floatarg f) {
 	if (x->x_emu)
 	{	gme_seek(x->x_emu, f);
-		gme_set_fade(x->x_emu, -1);   }
+		gme_set_fade(x->x_emu, -1, 0);   }
 }
 
 static void gme_tilde_tempo(t_gme_tilde *x, t_floatarg f) {

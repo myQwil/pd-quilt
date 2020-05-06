@@ -23,7 +23,7 @@ Shay Green <gblargg@gmail.com>
 #define EXPORT                    // empty definition for other cases
 #endif
 
-static void hnd_err( const char* str ) {
+static void hnd_err( const char *str ) {
 	if (str) post("Error: %s", str);
 }
 
@@ -49,7 +49,7 @@ static void gmes_tilde_m3u(t_gmes_tilde *x, Music_Emu *emu) {
 	char m3u_path [256 + 5];
 	strncpy(m3u_path, x->x_path, 256);
 	m3u_path [256] = 0;
-	char* p = strrchr(m3u_path, '.');
+	char *p = strrchr(m3u_path, '.');
 	if (!p) p = m3u_path + strlen(m3u_path);
 	strcpy(p, ".m3u");
 	if (gme_load_m3u(emu, m3u_path)) { } // ignore error
@@ -69,45 +69,28 @@ static void gmes_tilde_time(t_gmes_tilde *x, t_symbol *s, int ac, t_atom *av) {
 	if (info)
 	{	t_atom flts[] =
 		{	{A_FLOAT, {(t_float)info->length}},
-			{A_FLOAT, {(t_float)info->fade}}   };
+			{A_FLOAT, {(t_float)info->fade_length}}   };
 		outlet_list(x->l_out, 0, 2, flts);   }
 	gme_free_info(info);
 }
 
 static void gmes_tilde_start(t_gmes_tilde *x) {
 	hnd_err(gme_start_track(x->x_emu, x->x_track));
-	gme_set_fade(x->x_emu, -1);
+	gme_set_fade(x->x_emu, -1, 0);
 	gmes_tilde_time(x,0,0,0);
 	x->x_stop = 0, x->x_play = 1;
 }
 
 static t_int *gmes_tilde_perform(t_int *w) {
 	t_gmes_tilde *x = (t_gmes_tilde *)(w[1]);
-
-	t_sample *out1 = (t_sample *)(w[2]);
-	t_sample *out2 = (t_sample *)(w[3]);
-	t_sample *out3 = (t_sample *)(w[4]);
-	t_sample *out4 = (t_sample *)(w[5]);
-	t_sample *out5 = (t_sample *)(w[6]);
-	t_sample *out6 = (t_sample *)(w[7]);
-	t_sample *out7 = (t_sample *)(w[8]);
-	t_sample *out8 = (t_sample *)(w[9]);
-
-	t_sample *out9 = (t_sample *)(w[10]);
-	t_sample *out10 = (t_sample *)(w[11]);
-	t_sample *out11 = (t_sample *)(w[12]);
-	t_sample *out12 = (t_sample *)(w[13]);
-	t_sample *out13 = (t_sample *)(w[14]);
-	t_sample *out14 = (t_sample *)(w[15]);
-	t_sample *out15 = (t_sample *)(w[16]);
-	t_sample *out16 = (t_sample *)(w[17]);
-
-	int n = (int)(w[18]);
+	int i;
+	t_sample *outs[nch];
+	for (i=nch; i--;) outs[i] = (t_sample *)(w[i+2]);
+	int n = (int)(w[nch+2]);
 
 	if (x->x_open)
 	{	gme_delete(x->x_emu); x->x_emu = NULL;
 		hnd_err(gme_open_file(x->x_path, &x->x_emu, sys_getsr(), 1));
-
 		if (x->x_emu)
 		{	gmes_tilde_m3u(x, x->x_emu);
 			gme_ignore_silence(x->x_emu, 1);
@@ -118,32 +101,14 @@ static t_int *gmes_tilde_perform(t_int *w) {
 			gmes_tilde_start(x);   }
 		x->x_open = x->x_read = 0;   }
 
-	while (n--)
-	{	if (x->x_emu && x->x_play)
-		{	short buf [nch];
-			hnd_err(gme_play(x->x_emu, nch, buf));
-			*out1++ = ((t_sample) buf[0]) / (t_sample) 32768;
-			*out2++ = ((t_sample) buf[1]) / (t_sample) 32768;
-			*out3++ = ((t_sample) buf[2]) / (t_sample) 32768;
-			*out4++ = ((t_sample) buf[3]) / (t_sample) 32768;
-			*out5++ = ((t_sample) buf[4]) / (t_sample) 32768;
-			*out6++ = ((t_sample) buf[5]) / (t_sample) 32768;
-			*out7++ = ((t_sample) buf[6]) / (t_sample) 32768;
-			*out8++ = ((t_sample) buf[7]) / (t_sample) 32768;
-
-			*out9++ = ((t_sample) buf[8]) / (t_sample) 32768;
-			*out10++ = ((t_sample) buf[9]) / (t_sample) 32768;
-			*out11++ = ((t_sample) buf[10]) / (t_sample) 32768;
-			*out12++ = ((t_sample) buf[11]) / (t_sample) 32768;
-			*out13++ = ((t_sample) buf[12]) / (t_sample) 32768;
-			*out14++ = ((t_sample) buf[13]) / (t_sample) 32768;
-			*out15++ = ((t_sample) buf[14]) / (t_sample) 32768;
-			*out16++ = ((t_sample) buf[15]) / (t_sample) 32768;   }
-		else *out1++ = *out2++ = *out3++ = *out4++ =
-			*out5++ = *out6++ = *out7++ = *out8++ =
-			*out9++ = *out10++ = *out11++ = *out12++ =
-			*out13++ = *out14++ = *out15++ = *out16++ = 0;   }
-	return (w+19);
+	if (x->x_emu && x->x_play)
+	{	short buf[nch];
+		while (n--)
+		{	hnd_err(gme_play(x->x_emu, nch, buf));
+			for (i=nch; i--;)
+				*outs[i]++ = ((t_sample) buf[i]) / (t_sample) 32768;   }   }
+	else while (n--) for (i=nch; i--;) *outs[i]++ = 0;
+	return (w+nch+3);
 }
 
 static void gmes_tilde_dsp(t_gmes_tilde *x, t_signal **sp) {
@@ -215,7 +180,9 @@ static void gmes_tilde_path(t_gmes_tilde *x, t_symbol *s) {
 }
 
 static void gmes_tilde_goto(t_gmes_tilde *x, t_floatarg f) {
-	if (x->x_emu) gme_seek(x->x_emu, f);
+	if (x->x_emu)
+	{	gme_seek(x->x_emu, f);
+		gme_set_fade(x->x_emu, -1, 0);   }
 }
 
 static void gmes_tilde_tempo(t_gmes_tilde *x, t_floatarg f) {

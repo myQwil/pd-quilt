@@ -1,4 +1,4 @@
-#N canvas 34 201 757 665 12;
+#N canvas 37 201 757 665 12;
 #X text 336 46 ADSR ENVELOPE;
 #X obj 143 66 inlet;
 #X text 454 82 attack;
@@ -40,6 +40,7 @@
 #X obj 133 534 pack 0 \$4;
 #X obj 259 573 line~;
 #X obj 259 598 outlet~;
+#X text 139 46 volume;
 #X connect 1 0 10 0;
 #X connect 3 0 11 0;
 #X connect 5 0 12 0;

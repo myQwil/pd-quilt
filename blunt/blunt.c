@@ -562,7 +562,7 @@ void blunt_setup(void) {
 	while (i--)
 	{	int j = 0, max = sizeof(bops[i]) / sizeof*(bops[i]);
 		for (; j < max; j++)
-		{	if (bops[i][j] == 0) break;
+		{	if (!bops[i][j]) break;
 			class_addfloat(bops[i][j], bop_float);
 			class_addmethod(bops[i][j], (t_method)bop_f2,
 				gensym("f2"), A_FLOAT, 0);
