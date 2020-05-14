@@ -31,4 +31,5 @@ void setup_0x21(void) {
 		A_DEFFLOAT, 0);
 	class_addbang(lnot_class, lnot_bang);
 	class_addfloat(lnot_class, lnot_float);
+	class_sethelpsymbol(lnot_class, gensym("0x21"));
 }

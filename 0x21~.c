@@ -31,6 +31,5 @@ void setup_0x21_tilde(void) {
 		A_DEFFLOAT, 0);
 	class_addbang(bnot_class, bnot_bang);
 	class_addfloat(bnot_class, bnot_float);
-	class_addcreator((t_newmethod)bnot_new,
-		gensym("~"), A_DEFFLOAT, 0);
+	class_sethelpsymbol(bnot_class, gensym("0x21~"));
 }
