@@ -73,11 +73,11 @@ static void *rrs_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *rpc_class;
 
 static void rpc_bang(t_bop *x) {
-    int n1 = x->x_f1;
-        /* apparently "%" raises an exception for INT_MIN and -1 */
-    if (n1 == -1)
-        outlet_float(x->x_obj.ob_outlet, 0);
-    else outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f2)) % (n1 ? n1 : 1));
+	int n1 = x->x_f1;
+		/* apparently "%" raises an exception for INT_MIN and -1 */
+	if (n1 == -1)
+		outlet_float(x->x_obj.ob_outlet, 0);
+	else outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f2)) % (n1 ? n1 : 1));
 }
 
 static void *rpc_new(t_symbol *s, int ac, t_atom *av) {

@@ -11,8 +11,8 @@ static t_class *ntof_class;
 
 typedef struct _ntof {
 	t_object x_obj;
-	double x_rt, x_st;		/* root tone, semi-tone */
-	t_float x_ref, x_tet;	/* ref-pitch, # of tones */
+	double x_rt, x_st;      /* root tone, semi-tone */
+	t_float x_ref, x_tet;   /* ref-pitch, # of tones */
 } t_ntof;
 
 static void ntof_ref(t_ntof *x, t_floatarg f) {

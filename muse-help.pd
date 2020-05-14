@@ -113,7 +113,7 @@
 #X obj 362 210 s mus;
 #X obj 285 375 s mus;
 #X obj 53 417 s mus;
-#X text 132 305 (optional label);
+#X text 132 305 optional label;
 #X msg 291 248 32 16 21 23;
 #X msg 108 385 d 4 7;
 #X msg 108 407 d m- s;

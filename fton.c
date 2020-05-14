@@ -11,8 +11,8 @@ static t_class *fton_class;
 
 typedef struct _fton {
 	t_object x_obj;
-	double x_rt, x_st;		/* root tone, semi-tone */
-	t_float x_ref, x_tet;	/* ref-pitch, # of tones */
+	double x_rt, x_st;      /* root tone, semi-tone */
+	t_float x_ref, x_tet;   /* ref-pitch, # of tones */
 } t_fton;
 
 static void fton_ref(t_fton *x, t_floatarg f) {

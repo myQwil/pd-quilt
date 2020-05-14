@@ -8,17 +8,17 @@ static t_class *pak_proxy_class;
 
 typedef struct _pak {
 	t_object x_obj;
-	t_int x_n, x_nptr, x_mute;	/* number of args, number of pointers, mute */
-	t_atom *x_vec, *x_outvec;	/* input values, space for output values */
-	t_atomtype *x_type;			/* value types */
-	t_gpointer *x_ptr;			/* the pointers */
-	struct _pak_proxy **x_ins;	/* proxy inlets */
+	t_int x_n, x_nptr, x_mute;  /* number of args, number of pointers, mute */
+	t_atom *x_vec, *x_outvec;   /* input values, space for output values */
+	t_atomtype *x_type;         /* value types */
+	t_gpointer *x_ptr;          /* the pointers */
+	struct _pak_proxy **x_ins;  /* proxy inlets */
 } t_pak;
 
 typedef struct _pak_proxy {
 	t_object p_obj;
-	t_int p_i;					/* inlet index */
-	t_gpointer *p_ptr;			/* reference to a pointer */
+	t_int p_i;                  /* inlet index */
+	t_gpointer *p_ptr;          /* reference to a pointer */
 	t_pak *p_owner;
 } t_pak_proxy;
 
