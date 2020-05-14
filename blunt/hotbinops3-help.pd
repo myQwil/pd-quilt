@@ -1,6 +1,6 @@
-#N canvas 719 355 508 371 12;
-#X text 137 54 & \, | \, && \, || \, << \, >> \, % \, mod \, div;
-#X text 158 78 arithmetic with hot inlets;
+#N canvas 719 355 508 371 14;
+#X text 122 54 & \, | \, && \, || \, << \, >> \, % \, mod \, div;
+#X text 143 78 arithmetic with hot inlets;
 #X floatatom 85 127 0 0 0 0 - - -;
 #X floatatom 120 127 0 0 0 0 - - -;
 #X floatatom 85 185 0 0 0 0 - - -;

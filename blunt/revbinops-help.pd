@@ -1,6 +1,6 @@
-#N canvas 718 357 517 382 12;
-#X text 148 63 - \, / \, pow \, << \, >> \, % \, mod \, div;
-#X text 151 87 binops with reversed operands;
+#N canvas 718 357 517 382 14;
+#X text 133 63 - \, / \, pow \, << \, >> \, % \, mod \, div;
+#X text 136 87 binops with reversed operands;
 #X floatatom 106 142 0 0 0 0 - - -;
 #X floatatom 141 142 0 0 0 0 - - -;
 #X floatatom 106 200 0 0 0 0 - - -;

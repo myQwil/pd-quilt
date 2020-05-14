@@ -1,13 +1,14 @@
-#N canvas 714 357 450 300 10;
-#X obj 203 207 + 1;
-#X obj 203 229 / 2;
-#X obj 203 185 sqrt;
-#X msg 203 163 5;
-#X obj 173 131 inlet;
-#X obj 203 251 outlet;
-#X obj 232 131 loadbang;
-#X obj 199 66 cnv 6 1 1 empty empty phi 6 0 0 14 -233017 -66577 0;
-#X text 176 83 the golden ratio;
+#N canvas 714 357 450 300 14;
+#X obj 93 163 + 1;
+#X obj 93 192 / 2;
+#X obj 93 134 sqrt;
+#X msg 93 105 5;
+#X obj 63 73 inlet;
+#X obj 93 221 outlet;
+#X obj 122 73 loadbang;
+#X obj 269 75 cnv 15 40 22 empty empty phi 2 10 0 16 -233017 -66577
+0;
+#X text 223 98 the golden ratio;
 #X connect 0 0 1 0;
 #X connect 1 0 5 0;
 #X connect 2 0 0 0;

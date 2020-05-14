@@ -1,4 +1,4 @@
-#N canvas 743 251 600 576 12;
+#N canvas 743 251 600 576 14;
 #X obj 255 62 openpanel;
 #X obj 67 185 gme~ 0;
 #X obj 71 397 *~;
@@ -29,7 +29,7 @@
 #X obj 82 30 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
 -1;
 #X msg 203 69 stop;
-#X floatatom 351 69 5 0 0 0 - - -, f 5;
+#X floatatom 351 69 5 0 0 0 - - -;
 #X obj 351 94 / 100;
 #X msg 351 119 tempo \$1;
 #X msg 67 138 info;
@@ -58,7 +58,7 @@
 #X obj 392 212 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10
 -262144 -1 -1 12700 1;
 #X obj 364 498 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10
--262144 -1 -1 9200 1;
+-262144 -1 -1 0 1;
 #X obj 251 473 *~;
 #X obj 313 473 *~;
 #X obj 436 109 loadbang;

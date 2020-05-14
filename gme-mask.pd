@@ -1,39 +1,42 @@
-#N canvas 632 266 510 465 10;
-#X obj 231 38 inlet;
-#X obj 132 226 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#N canvas 632 266 510 465 14;
+#X obj 88 47 inlet;
+#X obj 122 202 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 152 226 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 142 202 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 172 226 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 162 202 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 192 226 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 182 202 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 212 226 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 202 202 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 232 226 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 222 202 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 252 226 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 242 202 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 272 226 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 262 202 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
-#X obj 132 192 & 1;
-#X obj 152 172 2^ 1;
-#X obj 172 152 2^ 2;
-#X obj 192 132 2^ 3;
-#X obj 212 132 2^ 4;
-#X obj 232 152 2^ 5;
-#X obj 252 172 2^ 6;
-#X obj 272 192 2^ 7;
-#X obj 152 256 << 1;
-#X obj 172 276 << 2;
-#X obj 192 296 << 3;
-#X obj 212 316 << 4;
-#X obj 232 296 << 5;
-#X obj 252 276 << 6;
-#X obj 272 256 << 7;
-#X obj 65 419 outlet;
-#X obj 65 259 b, f 1;
-#X obj 65 371 expr $f1 + $f2 + $f3 + $f4 + $f5 + $f6 + $f7 + $f8;
+#X obj 122 168 & 1;
+#X obj 142 138 2^ 1;
+#X obj 162 108 2^ 2;
+#X obj 182 78 2^ 3;
+#X obj 202 50 2^ 4;
+#X obj 222 108 2^ 5;
+#X obj 242 138 2^ 6;
+#X obj 262 168 2^ 7;
+#X obj 142 232 << 1;
+#X obj 162 261 << 2;
+#X obj 182 288 << 3;
+#X obj 202 316 << 4;
+#X obj 222 288 << 5;
+#X obj 242 261 << 6;
+#X obj 262 232 << 7;
+#X obj 55 415 outlet;
+#X obj 55 255 b, f 1;
+#X obj 55 367 expr $f1 + $f2 + $f3 + $f4 + $f5 + $f6 + $f7 + $f8;
+#X obj 314 54 cnv 15 100 22 empty empty gme-mask 2 10 0 16 -233017
+-66577 0;
+#X text 241 79 simple channel-muter for gme~;
 #X connect 0 0 9 0;
 #X connect 0 0 10 0;
 #X connect 0 0 11 0;
@@ -74,4 +77,4 @@
 #X connect 23 0 26 7;
 #X connect 25 0 26 0;
 #X connect 26 0 24 0;
-#X coords 0 -1 1 1 162 22 2 130 224;
+#X coords 0 -1 1 1 162 22 2 120 200;

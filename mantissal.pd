@@ -1,6 +1,6 @@
-#N canvas 689 355 591 300 12;
-#X obj 284 26 inlet;
-#X obj 284 51 s \$0-in;
+#N canvas 689 355 591 300 14;
+#X obj 93 30 inlet;
+#X obj 93 55 s \$0-in;
 #X obj 492 93 r \$0-in;
 #X obj 412 93 r \$0-in;
 #X obj 332 93 r \$0-in;
@@ -76,6 +76,9 @@
 #X obj 92 206 2^ 20;
 #X obj 72 183 2^ 21;
 #X obj 52 159 2^ 22;
+#X obj 299 29 cnv 15 112 22 empty empty mantissal 2 10 0 16 -233017
+-66577 0;
+#X text 177 58 large representation of a 23-bit mantissa;
 #X connect 0 0 1 0;
 #X connect 2 0 31 0;
 #X connect 2 0 32 0;

@@ -1,11 +1,12 @@
-#N canvas 719 355 450 300 12;
-#X obj 182 143 inlet;
-#X obj 182 194 line;
-#X obj 182 220 outlet;
-#X obj 242 143 inlet;
-#X obj 195 63 cnv 6 1 1 empty empty zp 6 0 0 14 -233017 -66577 0;
-#X text 124 79 delay between value changes;
-#X obj 182 169 pack 0 \$1;
+#N canvas 719 355 450 300 14;
+#X obj 72 104 inlet;
+#X obj 72 161 line;
+#X obj 72 190 outlet;
+#X obj 132 104 inlet;
+#X obj 245 48 cnv 15 28 22 empty empty zp 2 10 0 16 -233017 -66577
+0;
+#X text 154 74 delay between value changes;
+#X obj 72 133 pack 0 \$1;
 #X connect 0 0 6 0;
 #X connect 1 0 2 0;
 #X connect 3 0 6 1;
