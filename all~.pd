@@ -1,0 +1,10 @@
+#N canvas 718 385 452 302 14;
+#X obj 143 116 catch~ L;
+#X obj 143 158 outlet~;
+#X obj 264 116 catch~ R;
+#X obj 264 158 outlet~;
+#X obj 198 64 cnv 6 1 1 empty empty all~ 6 0 0 14 -233017 -66577 0
+;
+#X text 177 77 stereo catch;
+#X connect 0 0 1 0;
+#X connect 2 0 3 0;

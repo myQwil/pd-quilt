@@ -1,0 +1,10 @@
+#N canvas 719 355 450 300 14;
+#X obj 141 115 inlet~;
+#X obj 141 157 throw~ L;
+#X obj 254 115 inlet~;
+#X obj 254 157 throw~ R;
+#X obj 190 60 cnv 6 1 1 empty empty add~ 6 0 0 14 -233017 -66577 0
+;
+#X text 163 77 stereo throw;
+#X connect 0 0 1 0;
+#X connect 2 0 3 0;
