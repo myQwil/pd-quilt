@@ -14,8 +14,7 @@
 #X obj 133 271 vline~;
 #X obj 133 297 outlet~;
 #X text 26 55 trigger delay;
-#X obj 305 67 cnv 15 40 22 empty empty ad~ 2 10 0 16 -228856 -66577
-0;
+#X obj 305 67 cnv 15 40 22 empty empty ad~ 2 10 0 16 -1 -262144 0;
 #X text 237 91 attack-decay (signal);
 #X obj 144 147 t;
 #X connect 0 0 1 0;

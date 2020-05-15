@@ -76,8 +76,8 @@
 #X obj 92 206 2^ 20;
 #X obj 72 183 2^ 21;
 #X obj 52 159 2^ 22;
-#X obj 299 29 cnv 15 112 22 empty empty mantissal 2 10 0 16 -233017
--66577 0;
+#X obj 299 29 cnv 15 112 22 empty empty mantissal 2 10 0 16 -1 -262144
+0;
 #X text 177 58 large representation of a 23-bit mantissa;
 #X connect 0 0 1 0;
 #X connect 2 0 31 0;

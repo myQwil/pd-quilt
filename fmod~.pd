@@ -7,8 +7,8 @@
 #X obj 230 189 inlet~;
 #X obj 174 218 osc~;
 #X obj 174 246 outlet~;
-#X obj 184 44 cnv 6 64 22 empty empty fmod~ 2 10 0 16 -233017 -66577
-0;
+#X obj 184 44 cnv 15 64 22 empty empty fmod~ 2 10 0 16 -1 -262144 0
+;
 #X text 109 69 simple frequency modulator;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;

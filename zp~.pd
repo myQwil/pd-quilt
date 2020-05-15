@@ -2,9 +2,8 @@
 #X obj 52 106 inlet;
 #X obj 52 163 line~;
 #X obj 52 192 outlet~;
-#X obj 112 106 inlet;
-#X obj 249 55 cnv 15 40 22 empty empty zp~ 2 10 0 16 -233017 -66577
-0;
+#X obj 121 106 inlet;
+#X obj 249 55 cnv 15 40 22 empty empty zp~ 2 10 0 16 -1 -262144 0;
 #X text 127 80 delay between value changes (signal);
 #X obj 52 135 pack 0 \$1;
 #X connect 0 0 6 0;

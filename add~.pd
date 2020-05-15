@@ -3,8 +3,8 @@
 #X obj 141 157 throw~ L;
 #X obj 254 115 inlet~;
 #X obj 254 157 throw~ R;
-#X obj 190 53 cnv 15 52 22 empty empty add~ 2 10 0 16 -233017 -66577
-0;
+#X obj 190 53 cnv 15 52 22 empty empty add~ 2 10 0 16 -1 -262144 0
+;
 #X text 163 77 stereo throw;
 #X connect 0 0 1 0;
 #X connect 2 0 3 0;

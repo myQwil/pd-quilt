@@ -3,8 +3,8 @@
 #X obj 143 158 outlet~;
 #X obj 264 116 catch~ R;
 #X obj 264 158 outlet~;
-#X obj 198 52 cnv 15 52 22 empty empty all~ 2 10 0 16 -233017 -66577
-0;
+#X obj 198 52 cnv 15 52 22 empty empty all~ 2 10 0 16 -1 -262144 0
+;
 #X text 177 77 stereo catch;
 #X connect 0 0 1 0;
 #X connect 2 0 3 0;

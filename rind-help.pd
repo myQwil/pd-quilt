@@ -1,29 +1,29 @@
-#N canvas 715 348 450 325 12;
-#X obj 88 130 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
-1;
-#X obj 88 155 metro 200;
-#X obj 98 181 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
-#X floatatom 127 180 0 0 0 0 - - -;
-#X obj 208 185 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
-#X obj 226 205 rind 3.2 6.7;
-#X floatatom 226 231 0 0 0 0 - - -;
-#X text 207 256 2 args create boundaries;
-#X text 207 272 (number between 3.2 and 6.7);
-#X floatatom 266 180 0 0 0 0 - - -;
-#X text 266 163 max;
-#X floatatom 307 180 0 0 0 0 - - -;
-#X text 307 163 min;
-#X obj 223 86 rind 1 0;
-#X text 159 86 default:;
-#X obj 88 205 rind 4;
-#X floatatom 88 234 0 0 0 0 - - -;
-#X msg 220 136 peek;
-#X msg 260 136 state;
-#X obj 187 51 cnv 6 1 1 empty empty rind 6 0 0 14 -233017 -66577 0
+#N canvas 715 348 450 325 14;
+#X obj 68 130 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
+0 1;
+#X obj 68 155 metro 200;
+#X obj 78 181 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+-262144;
+#X floatatom 107 180 0 0 0 0 - - -;
+#X obj 188 185 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+-262144;
+#X obj 206 205 rind 3.2 6.7;
+#X floatatom 206 231 0 0 0 0 - - -;
+#X text 167 256 2 args create boundaries;
+#X text 167 272 (number between 3.2 and 6.7);
+#X floatatom 246 180 0 0 0 0 - - -;
+#X text 246 163 max;
+#X floatatom 287 180 0 0 0 0 - - -;
+#X text 287 163 min;
+#X obj 203 86 rind 1 0;
+#X text 132 86 default:;
+#X obj 68 205 rind 4;
+#X floatatom 68 234 0 0 0 0 - - -;
+#X msg 200 136 peek;
+#X msg 244 136 state;
+#X obj 189 35 cnv 15 52 22 empty empty rind 2 10 0 16 -1 -262144 0
 ;
-#X text 88 62 High-precision random number generator;
+#X text 68 62 High-precision random number generator;
 #X connect 0 0 1 0;
 #X connect 1 0 15 0;
 #X connect 2 0 15 0;
@@ -35,4 +35,3 @@
 #X connect 15 0 16 0;
 #X connect 17 0 5 0;
 #X connect 18 0 5 0;
-#X coords 0 325 1 324 85 60 0;

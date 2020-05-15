@@ -82,11 +82,10 @@ static void unpak_list(t_unpak *x, t_symbol *s, int argc, t_atom *argv) {
 static void unpak_anything(t_unpak *x, t_symbol *s, int ac, t_atom *av) {
 	t_atom *av2 = (t_atom *)getbytes((ac + 1) * sizeof(t_atom));
 	int i;
-	for (i = 0; i < ac; i++)
-		av2[i + 1] = av[i];
+	for (i=0; i<ac; i++) av2[i+1] = av[i];
 	SETSYMBOL(av2, s);
 	unpak_list(x, 0, ac+1, av2);
-	freebytes(av2, (ac + 1) * sizeof(t_atom));
+	freebytes(av2, (ac+1) * sizeof(t_atom));
 }
 
 static void unpak_mute(t_unpak *x, t_floatarg f) {

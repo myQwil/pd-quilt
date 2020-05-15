@@ -40,8 +40,8 @@
 #X obj 229 583 line~;
 #X obj 229 611 outlet~;
 #X text 99 66 volume;
-#X obj 342 49 cnv 15 52 22 empty empty adsr 2 10 0 16 -233017 -66577
-0;
+#X obj 342 49 cnv 15 52 22 empty empty adsr 2 10 0 16 -1 -262144 0
+;
 #X connect 0 0 9 0;
 #X connect 2 0 10 0;
 #X connect 4 0 11 0;
@@ -94,4 +94,3 @@
 #X connect 36 0 24 0;
 #X connect 37 0 38 0;
 #X connect 38 0 39 0;
-#X coords 0 665 1 664 85 60 0;

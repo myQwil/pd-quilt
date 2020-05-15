@@ -15,7 +15,7 @@
 #X obj 132 191 vline~;
 #X obj 111 340 *~;
 #X obj 111 371 outlet~;
-#X obj 258 59 cnv 15 76 22 empty empty fkick~ 2 10 0 16 -233017 -66577
+#X obj 258 59 cnv 15 76 22 empty empty fkick~ 2 10 0 16 -1 -262144
 0;
 #X text 221 107 original patch by ajf;
 #X connect 1 0 2 0;

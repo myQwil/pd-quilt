@@ -1,4 +1,4 @@
-#N canvas 632 266 589 518 14;
+#N canvas 619 267 589 518 14;
 #X obj 82 54 inlet;
 #X obj 482 242 tgl 18 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
 1;
@@ -96,8 +96,8 @@ $f9 + $f10 + $f11 + $f12 + $f13 + $f14 + $f15 + $f16 + $f17 + $f18
 + $f19 + $f20 + $f21 + $f22 + $f23;
 #X obj 55 465 outlet;
 #X obj 30 278 b, f 1;
-#X obj 332 35 cnv 15 64 22 empty empty mantr 2 10 0 16 -233017 -66577
-0;
+#X obj 332 35 cnv 15 64 22 empty empty mantr 2 10 0 16 -1 -262144 0
+;
 #X text 226 63 sends and receives mantissa values;
 #X connect 0 0 24 0;
 #X connect 0 0 25 0;

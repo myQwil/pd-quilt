@@ -9,8 +9,7 @@
 #X msg 146 181 0 \$1;
 #X obj 119 224 line;
 #X obj 119 250 outlet;
-#X obj 312 46 cnv 15 28 22 empty empty ad 2 10 0 16 -228856 -66577
-0;
+#X obj 312 46 cnv 15 28 22 empty empty ad 2 10 0 16 -1 -262144 0;
 #X text 278 70 attack-decay;
 #X obj 90 72 t;
 #X connect 0 0 12 0;

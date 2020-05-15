@@ -1,4 +1,4 @@
-#N canvas 709 355 527 360 14;
+#N canvas 155 473 527 360 14;
 #X obj 68 67 inlet;
 #X obj 68 95 s \$0-in;
 #X obj 428 131 r \$0-in;
@@ -76,8 +76,8 @@
 #X obj 68 258 2^ 20;
 #X obj 50 228 2^ 21;
 #X obj 32 198 2^ 22;
-#X obj 265 59 cnv 15 100 22 empty empty mantissa 2 10 0 16 -233017
--66577 0;
+#X obj 265 59 cnv 15 100 22 empty empty mantissa 2 10 0 16 -1 -262144
+0;
 #X text 143 88 binary representation of a 23-bit mantissa;
 #X connect 0 0 1 0;
 #X connect 2 0 31 0;

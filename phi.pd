@@ -6,8 +6,7 @@
 #X obj 63 73 inlet;
 #X obj 93 221 outlet;
 #X obj 122 73 loadbang;
-#X obj 269 75 cnv 15 40 22 empty empty phi 2 10 0 16 -233017 -66577
-0;
+#X obj 269 75 cnv 15 40 22 empty empty phi 2 10 0 16 -1 -262144 0;
 #X text 223 98 the golden ratio;
 #X connect 0 0 1 0;
 #X connect 1 0 5 0;

@@ -1,4 +1,4 @@
-#N canvas 719 354 450 300 14;
+#N canvas 696 346 450 314 14;
 #X obj 55 107 inlet;
 #X obj 55 135 f;
 #X obj 117 243 outlet;
@@ -11,8 +11,8 @@
 #X obj 132 135 route float;
 #X obj 132 163 f;
 #X obj 170 163 b, f 2;
-#X obj 135 39 cnv 15 172 22 empty empty before-trigger 2 10 0 16 -233017
--66577 0;
+#X obj 135 39 cnv 15 172 22 empty empty before-trigger 2 10 0 16 -1
+-262144 0;
 #X text 76 68 send bang just before reaching count;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
@@ -28,4 +28,3 @@
 #X connect 10 0 4 1;
 #X connect 10 0 7 0;
 #X connect 11 0 10 0;
-#X coords 0 300 1 299 85 60 0;

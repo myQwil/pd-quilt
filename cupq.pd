@@ -1,4 +1,4 @@
-#N canvas 415 374 460 354 14;
+#N canvas 420 367 467 357 14;
 #X obj 192 88 inlet;
 #X obj 336 88 inlet;
 #X obj 212 171 * -1;
@@ -14,8 +14,8 @@
 #X obj 259 171 route set;
 #X obj 336 113 route set;
 #X obj 192 113 route set;
-#X obj 106 31 cnv 15 52 22 empty empty cupq 2 10 0 16 -233017 -66577
-0;
+#X obj 106 31 cnv 15 52 22 empty empty cupq 2 10 0 16 -1 -262144 0
+;
 #X text 20 58 forward/backward incrementer;
 #X connect 0 0 14 0;
 #X connect 1 0 13 0;

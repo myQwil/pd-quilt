@@ -6,8 +6,8 @@
 #X obj 228 165 inlet~;
 #X obj 186 194 osc~;
 #X obj 186 222 outlet~;
-#X obj 186 41 cnv 15 64 22 empty empty fmad~ 2 10 0 16 -233017 -66577
-0;
+#X obj 186 41 cnv 15 64 22 empty empty fmad~ 2 10 0 16 -1 -262144 0
+;
 #X text 99 63 additional frequency modulation;
 #X connect 0 0 1 0;
 #X connect 1 0 3 0;
