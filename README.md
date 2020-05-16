@@ -35,10 +35,10 @@ Accepts 2 arguments for a min and max value, or more than 2 arguments to create 
 ## [rind $1 $2]
 A high-precision random number generator. Allows for a max value, or min and max values to be specified.
 
-## [grdnt $1 $2 $3]
+## [span $1 $2 $3]
 Creates `$3` number of steps between min and max values `$1` and `$2`.
 Its function can essentially be recreated with the expression:
-`[expr $f1 / ($f4 / ($f3 - $f2)) + $f2]`
+`[expr $f1 * ($f3 - $f2) / $f4 + $f2]`
 
 ## [same]
 Similar to `[change]` except that it outputs duplicate values to a second outlet.

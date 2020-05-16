@@ -4,7 +4,7 @@ void rand_setup(void);
 void rind_setup(void);
 void ntof_setup(void);
 void fton_setup(void);
-void grdnt_setup(void);
+void span_setup(void);
 void sploat_setup(void);
 void gloat_setup(void);
 void logb_setup(void);
@@ -62,7 +62,7 @@ void myQwil_setup(void) {
 	rind_setup();
 	ntof_setup();
 	fton_setup();
-	grdnt_setup();
+	span_setup();
 	sploat_setup();
 	gloat_setup();
 	logb_setup();

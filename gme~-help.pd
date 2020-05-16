@@ -30,7 +30,7 @@
 #X text 295 281 get;
 #X text 295 258 set;
 #X msg 236 258 mask \$1;
-#X obj 265 178 cupqb;
+#X obj 275 168 cupqb;
 #X obj 156 596 cos~;
 #X obj 156 631 *~;
 #X obj 255 596 cos~;

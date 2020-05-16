@@ -4,7 +4,7 @@
 
   class.sources = \
 	muse.c chrd.c rand.c rind.c ntof.c fton.c sploat.c gloat.c \
-	grdnt.c same.c ceil.c radix.c 0x21.c 0x21~.c gme~.cpp gmes~.cpp \
+	span.c same.c ceil.c radix.c 0x21.c 0x21~.c gme~.cpp gmes~.cpp \
 	x.c is.c pak.c unpak.c 0x40pak.c 0x40unpak.c
 
   datafiles = 0x21-help.pd 0x21~-help.pd 2^.pd ad.pd ad~.pd adac~.pd same-help.pd \
@@ -13,7 +13,7 @@
 	mantissa.pd mantissab.pd mantissal.pd mancalc.pd mantr.pd gme-mask.pd \
 	ntof-help.pd zp.pd zp~.pd radix-help.pd rand-help.pd rind-help.pd \
 	sploat-help.pd is-help.pd pak-help.pd rpak-help.pd gme~-help.pd \
-	x-help.pd adsr.pd adsr-help.pd fkick~.pd grdnt-help.pd \
+	x-help.pd adsr.pd adsr-help.pd fkick~.pd span-help.pd \
 	dep.pd dep-help.pd linp.pd linp-help.pd linp~.pd linp~-help.pd \
 	README.md LICENSE.md
 

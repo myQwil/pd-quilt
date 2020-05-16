@@ -1,34 +1,35 @@
 #N canvas 404 369 450 337 14;
 #X obj 66 51 inlet;
-#X obj 265 51 inlet;
+#X obj 278 68 inlet;
 #X obj 45 156 * -1;
-#X obj 146 22 inlet;
+#X obj 148 7 inlet;
 #X obj 165 170 outlet;
-#X obj 216 86 + \$1;
+#X obj 218 71 + \$1;
 #X obj 45 121 1;
-#X obj 275 126 1;
+#X obj 298 140 1;
 #X obj 149 195 loadbang;
 #X obj 158 228 \$2;
 #X obj 144 256 sel;
-#X floatatom 180 120 5 0 0 0 - - -;
-#X obj 180 141 bng 21 250 50 0 empty empty empty 17 7 0 10 -243850
--75900 -1;
-#X obj 201 141 bng 21 250 50 0 empty empty empty 17 7 0 10 -243850
--75900 -1;
+#X floatatom 180 122 5 0 0 0 - #0-nbx -;
+#X obj 181 140 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
+-243850 -75900 -1;
+#X obj 201 140 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
+-243850 -75900 -1;
 #X obj 60 228 \$1;
 #X obj 65 256 sel;
-#X obj 146 47 route set;
-#X msg 154 86 set \$1;
+#X obj 148 32 route set;
+#X msg 156 71 set \$1;
 #X obj 66 76 route set;
-#X obj 265 76 route set;
+#X obj 278 93 route set;
 #X obj 298 204 cnv 15 64 22 empty empty cupqb 2 10 0 16 -1 -262144
 0;
 #X text 257 228 number-box cup duo;
+#X obj 238 32 s \$0-nbx;
 #X connect 0 0 18 0;
 #X connect 1 0 19 0;
 #X connect 2 0 5 0;
 #X connect 3 0 16 0;
-#X connect 5 0 11 0;
+#X connect 5 0 22 0;
 #X connect 6 0 2 0;
 #X connect 7 0 5 0;
 #X connect 8 0 9 0;
@@ -44,8 +45,8 @@
 #X connect 15 1 17 0;
 #X connect 16 0 5 1;
 #X connect 16 0 17 0;
-#X connect 16 1 11 0;
-#X connect 17 0 11 0;
+#X connect 16 1 22 0;
+#X connect 17 0 22 0;
 #X connect 18 0 6 1;
 #X connect 18 1 6 0;
 #X connect 19 0 7 1;
