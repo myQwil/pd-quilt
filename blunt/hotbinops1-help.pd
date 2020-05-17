@@ -1,9 +1,9 @@
 #N canvas 719 355 497 363 14;
 #X text 146 57 + \, - \, * \, / \, pow \, max \, min;
 #X text 143 81 arithmetic with hot inlets;
-#X floatatom 75 127 0 0 0 0 - - -;
-#X floatatom 110 127 0 0 0 0 - - -;
-#X floatatom 75 185 0 0 0 0 - - -;
+#X floatatom 55 137 0 0 0 0 - - -;
+#X floatatom 90 137 0 0 0 0 - - -;
+#X floatatom 55 195 0 0 0 0 - - -;
 #X floatatom 168 127 0 0 0 0 - - -;
 #X floatatom 203 127 0 0 0 0 - - -;
 #X floatatom 168 185 0 0 0 0 - - -;
@@ -24,10 +24,10 @@
 #X floatatom 397 243 0 0 0 0 - - -;
 #X floatatom 362 302 0 0 0 0 - - -;
 #X obj 362 272 #min;
-#X obj 186 40 cnv 6 1 1 empty empty hot-binops-1 6 0 0 14 -233017 -66577
+#X obj 178 30 cnv 15 148 22 empty empty hot-binops-1 2 10 0 16 -1 -262144
 0;
 #X obj 269 272 #max 8 2!;
-#X obj 75 156 #+ 123!;
+#X obj 55 166 #+ 123!;
 #X obj 168 156 #- 50 5!;
 #X obj 262 156 #*;
 #X obj 176 272 #pow 2 10!;
@@ -35,6 +35,8 @@
 #X floatatom 101 243 0 0 0 0 - - -;
 #X floatatom 66 302 0 0 0 0 - - -;
 #X obj 66 272 #log 1024 2!;
+#X msg 27 112 f2 45;
+#X msg 99 112 f1 234;
 #X connect 2 0 27 0;
 #X connect 3 0 27 1;
 #X connect 5 0 28 0;
@@ -59,3 +61,5 @@
 #X connect 31 0 34 0;
 #X connect 32 0 34 1;
 #X connect 34 0 33 0;
+#X connect 35 0 27 0;
+#X connect 36 0 27 1;

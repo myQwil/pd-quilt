@@ -4,9 +4,9 @@
 #X obj 72 190 outlet;
 #X obj 141 104 inlet;
 #X obj 245 48 cnv 15 28 22 empty empty zp 2 10 0 16 -1 -262144 0;
-#X text 154 74 delay between value changes;
 #X obj 72 133 pack 0 \$1;
-#X connect 0 0 6 0;
+#X text 154 74 ramp between value changes;
+#X connect 0 0 5 0;
 #X connect 1 0 2 0;
-#X connect 3 0 6 1;
-#X connect 6 0 1 0;
+#X connect 3 0 5 1;
+#X connect 5 0 1 0;

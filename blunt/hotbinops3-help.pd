@@ -33,7 +33,7 @@
 #X floatatom 441 243 0 0 0 0 - - -;
 #X floatatom 406 302 0 0 0 0 - - -;
 #X obj 406 272 #div;
-#X obj 194 34 cnv 6 1 1 empty empty hot-binops-3 6 0 0 14 -233017 -66577
+#X obj 182 29 cnv 15 148 22 empty empty hot-binops-3 2 10 0 16 -1 -262144
 0;
 #X obj 85 156 #& 53 29!;
 #X obj 178 156 #| 32 16!;

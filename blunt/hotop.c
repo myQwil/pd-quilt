@@ -54,6 +54,11 @@ static void pxy_float(t_pxy *p, t_float f) {
 	x->x_bang(x);
 }
 
+static void pxy_f1(t_pxy *p, t_floatarg f) {
+	t_hot *x = p->p_x;
+	x->x_f1 = f;
+}
+
 static void *hot_new
 (t_class *fltclass, t_class *pxyclass,
  t_hotmethod fn, t_symbol *s, int ac, t_atom *av) {
@@ -626,6 +631,8 @@ void hotop_setup(void) {
 
 			class_addbang(pxys[i][j], pxy_bang);
 			class_addfloat(pxys[i][j], pxy_float);
+			class_addmethod(pxys[i][j], (t_method)pxy_f1,
+				gensym("f1"), A_FLOAT, 0);
 
 			class_sethelpsymbol(hots[i][j], syms[i]);   }   }
 }

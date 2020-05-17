@@ -19,7 +19,7 @@
 #X floatatom 390 233 0 0 0 0 - - -;
 #X floatatom 355 292 0 0 0 0 - - -;
 #X obj 355 262 #<=;
-#X obj 176 42 cnv 6 1 1 empty empty hot-binops-2 6 0 0 14 -233017 -66577
+#X obj 166 36 cnv 15 148 22 empty empty hot-binops-2 2 10 0 16 -1 -262144
 0;
 #X obj 168 156 #== 0!;
 #X obj 262 156 #!= 3 4!;
