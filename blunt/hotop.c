@@ -33,9 +33,8 @@ static void hot_f2(t_hot *x, t_floatarg f) {
 	x->x_f2 = f;
 }
 
-static void hot_skip(t_hot *x, t_symbol *s, int ac, t_atom *av) {
-	if (ac && av->a_type == A_FLOAT)
-		x->x_f2 = av->a_w.w_float;
+static void hot_skip(t_hot *x, t_floatarg f) {
+	x->x_f2 = f;
 	x->x_bang(x);
 }
 
@@ -57,6 +56,12 @@ static void pxy_float(t_pxy *p, t_float f) {
 static void pxy_f1(t_pxy *p, t_floatarg f) {
 	t_hot *x = p->p_x;
 	x->x_f1 = f;
+}
+
+static void pxy_skip(t_pxy *p, t_floatarg f) {
+	t_hot *x = p->p_x;
+	x->x_f1 = f;
+	x->x_bang(x);
 }
 
 static void *hot_new
@@ -625,7 +630,7 @@ void hotop_setup(void) {
 			class_addmethod(hots[i][j], (t_method)hot_f2,
 				gensym("f2"), A_FLOAT, 0);
 			class_addmethod(hots[i][j], (t_method)hot_skip,
-				gensym("."), A_GIMME, 0);
+				gensym("."), A_FLOAT, 0);
 			class_addmethod(hots[i][j], (t_method)hot_loadbang,
 				gensym("loadbang"), A_DEFFLOAT, 0);
 
@@ -633,6 +638,8 @@ void hotop_setup(void) {
 			class_addfloat(pxys[i][j], pxy_float);
 			class_addmethod(pxys[i][j], (t_method)pxy_f1,
 				gensym("f1"), A_FLOAT, 0);
+			class_addmethod(pxys[i][j], (t_method)pxy_skip,
+				gensym("."), A_FLOAT, 0);
 
 			class_sethelpsymbol(hots[i][j], syms[i]);   }   }
 }

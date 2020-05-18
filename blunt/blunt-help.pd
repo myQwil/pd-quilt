@@ -1,5 +1,5 @@
 #N canvas 634 379 511 349 14;
-#X obj 206 42 cnv 6 1 1 empty empty Blunt! 6 0 0 16 -233017 -66577
+#X obj 210 32 cnv 15 72 22 empty empty Blunt! 2 10 0 16 -1 -262144
 0;
 #X floatatom 37 143 0 0 0 0 - - -;
 #X floatatom 102 143 0 0 0 0 - - -;
