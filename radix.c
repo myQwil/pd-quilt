@@ -171,6 +171,7 @@ obstacle to adoption, that text has been removed.
 typedef union {
 	float f;
 	struct { unsigned mnt:23,exp:8,sgn:1; } u;
+	unsigned u32;
 } ufloat;
 #define mnt u.mnt
 #define exp u.exp
@@ -191,8 +192,11 @@ static t_class *radix_class;
 
 typedef struct _radix {
 	t_object x_obj;
-	t_float x_b;
-	int x_p, x_e;
+	t_float x_base; // number base
+	int x_prec;     // precision
+	int x_e;        // e-notation base
+	uint64_t x_pwr;
+	int x_rp, x_up;
 } t_radix;
 
 static void out(char num[], int *i, const char *s, int l) {
@@ -214,18 +218,12 @@ static char *fmt_u(uintmax_t u, char *s, int radx) {
 }
 
 static void fmt_fp(t_radix *x, long double y) {
-	int radx = x->x_b;
-	if (radx<2) radx=2; else if (radx>64) radx=64;
-	
-	uint64_t b2=4294967296, pwr=radx*radx;
-	int rp=1, up=32;
-	while (pwr<b2) { rp++; pwr*=radx; }
-	pwr/=radx;
-	while (b2>pwr) { b2/=2; up--; }
-	
+	int radx = x->x_base;
+	uint64_t pwr = x->x_pwr;
+	int rp=x->x_rp, up=x->x_up;
 	int pr=rp-1, pu=up-1;
-	int neg=0, p=x->x_p, t='g';
-	
+	int neg=0, p=x->x_prec, t='g';
+
 	/* based on: musl-libc /src/stdio/vfprintf.c */
 	unsigned big[(LDBL_MANT_DIG+pu)/up + 1			// mantissa expansion
 		+ (LDBL_MAX_EXP+LDBL_MANT_DIG+pu+pr)/rp];	// exponent expansion 
@@ -233,19 +231,22 @@ static void fmt_fp(t_radix *x, long double y) {
 	int e2=0, e, i, j, l;
 	char buf[rp+LDBL_MANT_DIG/4];
 	char ebuf0[3*sizeof(int)], *ebuf=&ebuf0[3*sizeof(int)], *estr;
-	
+
 	if (signbit(y)) y=-y, neg=1;
 	y = frexpl(y, &e2) * 2;
 	if (y) y *= (1<<pu), e2-=up;
 	if (p<0) p=6;
-	
+
 	if (e2<0) a=r=z=big;
 	else a=r=z=big+sizeof(big)/sizeof(*big) - LDBL_MANT_DIG - 1;
 
-	do { *z=y; y=pwr*(y-*z++); } while (y);
+	do
+	{	*z = y;
+		y = pwr*(y-*z++);   }
+	while (y);
 
 	while (e2>0)
-	{	unsigned carry=0;
+	{	uint32_t carry=0;
 		int sh=MIN(up,e2);
 		for (d=z-1; d>=a; d--)
 		{	uint64_t u = ((uint64_t)*d<<sh)+carry;
@@ -254,12 +255,12 @@ static void fmt_fp(t_radix *x, long double y) {
 		if (carry) *--a = carry;
 		while (z>a && !z[-1]) z--;
 		e2-=sh;   }
-	
+
 	while (e2<0)
-	{	unsigned carry=0, *b;
+	{	uint32_t carry=0, *b;
 		int sh=MIN(rp,-e2), need=1+(p+LDBL_MANT_DIG/3U+pr)/rp;
 		for (d=a; d<z; d++)
-		{	unsigned rm = *d & ((1<<sh)-1);
+		{	uint32_t rm = *d & ((1<<sh)-1);
 			*d = (*d>>sh) + carry;
 			carry = (pwr>>sh) * rm;   }
 		if (!*a) a++;
@@ -269,14 +270,13 @@ static void fmt_fp(t_radix *x, long double y) {
 		if (z-b > need) z = b+need;
 		e2+=sh;   }
 
-	if (a<z)
-		for (i=radx, e=rp*(r-a); *a>=i; i*=radx, e++);
+	if (a<z) for (i=radx, e=rp*(r-a); *a>=i; i*=radx, e++);
 	else e=0;
 
 	/* Perform rounding: j is precision after the radix (possibly neg) */
 	j = p-e-1;
 	if (j < rp*(z-r-1))
-	{	unsigned u;
+	{	uint32_t u;
 		/* We avoid C's broken division of negative numbers */
 		d = r + 1 + ((j+rp*LDBL_MAX_EXP)/rp - LDBL_MAX_EXP);
 		j += rp*LDBL_MAX_EXP;
@@ -297,31 +297,30 @@ static void fmt_fp(t_radix *x, long double y) {
 			/* Decide whether to round by probing round+small */
 			if (round+small != round)
 			{	*d = *d + i;
-				while (*d > (pwr-1))
+				while (*d > pwr-1)
 				{	*d--=0;
 					if (d<a) *--a=0;
 					(*d)++;   }
 				for (i=radx, e=rp*(r-a); *a>=i; i*=radx, e++);   }   }
 		if (z>d+1) z=d+1;   }
-	
+
 	for (; z>a && !z[-1]; z--);
-	
+
 	if (!p) p++;
 	if (p>e && e>=-4)
 	{	t--; p-=e+1;   }
 	else
 	{	t-=2; p--;   }
-	
+
 	/* Count trailing zeros in last place */
-	if (z>a && z[-1])
-		for (i=radx, j=0; z[-1]%i==0; i*=radx, j++);
+	if (z>a && z[-1]) for (i=radx, j=0; z[-1]%i==0; i*=radx, j++);
 	else j=rp;
-	
+
 	if ((t|32)=='f')
 		p = MIN(p,MAX(0,rp*(z-r-1)-j));
 	else
 		p = MIN(p,MAX(0,rp*(z-r-1)+e-j));
-	
+
 	l = 1 + p + (p>0);
 	if ((t|32)=='f')
 	{	if (e>0) l+=e;   }
@@ -334,10 +333,11 @@ static void fmt_fp(t_radix *x, long double y) {
 		*--estr = t;
 		l += ebuf-estr;   }
 
-	char num[p+13]; // -1.23456e-10010101\0
+	// don't use p, it shrinks
+	char num[x->x_prec+13]; // -1.23456e-10010101\0
 	int ni=0;
 	out(num, &ni, "-", neg);
-	
+
 	if ((t|32)=='f')
 	{	if (a>r) a=r;
 		for (d=a; d<=r; d++)
@@ -345,7 +345,7 @@ static void fmt_fp(t_radix *x, long double y) {
 			if (d!=a) while (s>buf) *--s='0';
 			else if (s==buf+rp) *--s='0';
 			out(num, &ni, s, buf+rp-s);   }
-			
+
 		if (p) out(num, &ni, ".", 1);
 		for (; d<z && p>0; d++, p-=rp)
 		{	char *s = fmt_u(*d, buf+rp, radx);
@@ -363,17 +363,30 @@ static void fmt_fp(t_radix *x, long double y) {
 			out(num, &ni, s, MIN(buf+rp-s, p));
 			p -= buf+rp-s;   }
 		out(num, &ni, estr, ebuf-estr);   }
-	
+
 	num[ni] = '\0';
 	outlet_symbol(x->x_obj.ob_outlet, gensym(num));
 }
 
 static void radix_precision(t_radix *x, t_floatarg f) {
-	x->x_p = f;
+	x->x_prec = f;
+}
+
+static void radix_bounds(t_radix *x, t_float f) {
+	uint64_t b2=4294967296, pwr=f*f;
+	int rp=1, up=32;
+	while (pwr<b2) { rp++; pwr*=f; }
+	pwr/=f;
+	while (b2>pwr) { b2/=2; up--; }
+	x->x_pwr = pwr;
+	x->x_rp = rp;
+	x->x_up = up;
 }
 
 static void radix_base(t_radix *x, t_floatarg f) {
-	x->x_b = f;
+	if (f<2) f=2; else if (f>64) f=64;
+	x->x_base = f;
+	radix_bounds(x, f);
 }
 
 static void radix_ebase(t_radix *x, t_floatarg f) {
@@ -381,12 +394,12 @@ static void radix_ebase(t_radix *x, t_floatarg f) {
 }
 
 static void radix_be(t_radix *x, t_floatarg f) {
-	x->x_e = x->x_b = f;
+	x->x_e = x->x_base = f;
 }
 
 static void radix_float(t_radix *x, t_float f) {
 	ufloat uf = {.f=f};
-	if (!isfinite(f))
+	if ((uf.u32 & 0x7fbfffff) == 0x7f800000)
 	{	const char *s;
 		int neg = uf.sgn;
 		#ifdef _WIN32
@@ -401,16 +414,16 @@ static void radix_float(t_radix *x, t_float f) {
 		#endif
 		outlet_symbol(x->x_obj.ob_outlet, gensym(s));
 		return;   }
-	
 	fmt_fp(x, f);
 }
 
 static void *radix_new(t_float f) {
 	t_radix *x = (t_radix *)pd_new(radix_class);
 	outlet_new(&x->x_obj, &s_symbol);
-	floatinlet_new(&x->x_obj, &x->x_b);
-	x->x_e = x->x_b = f?f:16;
-	x->x_p = 6;
+	inlet_new(&x->x_obj, &x->x_obj.ob_pd, &s_float, gensym("base"));
+	x->x_e = x->x_base = f?f:16;
+	radix_bounds(x, f);
+	x->x_prec = 6;
 	return (x);
 }
 
@@ -425,13 +438,11 @@ void radix_setup(void) {
 	class_addmethod(radix_class, (t_method)radix_precision,
 		gensym("p"), A_FLOAT, 0);
 	class_addmethod(radix_class, (t_method)radix_base,
+		gensym("base"), A_FLOAT, 0);
+	class_addmethod(radix_class, (t_method)radix_base,
 		gensym("b"), A_FLOAT, 0);
 	class_addmethod(radix_class, (t_method)radix_ebase,
 		gensym("e"), A_FLOAT, 0);
 	class_addmethod(radix_class, (t_method)radix_be,
 		gensym("be"), A_FLOAT, 0);
-}
-
-void radx_setup(void) {
-	radix_setup();
 }

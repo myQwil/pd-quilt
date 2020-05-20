@@ -14,8 +14,8 @@
 #X floatatom 130 217 0 0 0 0 - - -;
 #X floatatom 196 291 0 0 0 0 - - -;
 #X obj 102 118 `- 9 6;
-#X obj 83 144 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
--1;
+#X obj 83 144 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+-262144;
 #X text 245 118 operators use prefix notation;
 #X text 240 206 sets the 2nd value;
 #X text 120 54 assertive numbers and operators;
