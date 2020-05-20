@@ -55,6 +55,5 @@ static void *bop_new
 			{	x->x_f2 = strtof(c, NULL);
 				x->x_lb = 1;   }
 			else x->x_f2 = 0;   }   }
-
 	return (x);
 }

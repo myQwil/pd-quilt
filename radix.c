@@ -199,16 +199,16 @@ typedef struct _radix {
 	int x_rp, x_up;
 } t_radix;
 
-static void out(char num[], int *i, const char *s, int l) {
-	for (; l--; s++) num[(*i)++] = *s;
-}
-
 static const char dgt[64] = {
 	"0123456789abcdef"
 	"ghijkmnopqrstuvw"
 	"xyzACDEFGHJKLMNP"
 	"QRTUVWXYZ?!@#%^&"
 };
+
+static void out(char num[], int *i, const char *s, int l) {
+	for (; l--; s++) num[(*i)++] = *s;
+}
 
 static char *fmt_u(uintmax_t u, char *s, int radx) {
 	unsigned v;

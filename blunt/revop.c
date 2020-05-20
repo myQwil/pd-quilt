@@ -1,5 +1,5 @@
 #include "bop.h"
-#include <math.h>
+#include "blunt.h"
 
 /* --------------------------------------------------------------- */
 /*                   reverse arithmetics                           */
@@ -9,24 +9,29 @@
 static t_class *rminus_class;
 
 static void rminus_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, x->x_f2 - x->x_f1);
+	outlet_float(x->x_obj.ob_outlet, blunt_minus(x->x_f2, x->x_f1));
 }
 
 static void *rminus_new(t_symbol *s, int ac, t_atom *av) {
 	return (bop_new(rminus_class, rminus_bang, s, ac, av));
 }
 
+/* --------------------- division -------------------------------- */
+static t_class *rdiv_class;
+
+static void rdiv_bang(t_bop *x) {
+	outlet_float(x->x_obj.ob_outlet, blunt_div(x->x_f2, x->x_f1));
+}
+
+static void *rdiv_new(t_symbol *s, int ac, t_atom *av) {
+	return (bop_new(rdiv_class, rdiv_bang, s, ac, av));
+}
+
 /* --------------------- log ------------------------------------- */
 static t_class *rlog_class;
 
 static void rlog_bang(t_bop *x) {
-	t_float r;
-	if (x->x_f2 <= 0)
-		r = -1000;
-	else if (x->x_f1 <= 0)
-		r = log(x->x_f2);
-	else r = log(x->x_f2) / log(x->x_f1);
-	outlet_float(x->x_obj.ob_outlet, r);
+	outlet_float(x->x_obj.ob_outlet, blunt_log(x->x_f2, x->x_f1));
 }
 
 static void *rlog_new(t_symbol *s, int ac, t_atom *av) {
@@ -37,10 +42,7 @@ static void *rlog_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *rpow_class;
 
 static void rpow_bang(t_bop *x) {
-	t_float r = (x->x_f2 == 0 && x->x_f1 < 0) ||
-		(x->x_f2 < 0 && (x->x_f1 - (int)x->x_f1) != 0) ?
-			0 : pow(x->x_f2, x->x_f1);
-	outlet_float(x->x_obj.ob_outlet, r);
+	outlet_float(x->x_obj.ob_outlet, blunt_pow(x->x_f2, x->x_f1));
 }
 
 static void *rpow_new(t_symbol *s, int ac, t_atom *av) {
@@ -51,7 +53,7 @@ static void *rpow_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *rls_class;
 
 static void rls_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f2)) << (int)(x->x_f1));
+	outlet_float(x->x_obj.ob_outlet, blunt_ls(x->x_f2, x->x_f1));
 }
 
 static void *rls_new(t_symbol *s, int ac, t_atom *av) {
@@ -62,7 +64,7 @@ static void *rls_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *rrs_class;
 
 static void rrs_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f2)) >> (int)(x->x_f1));
+	outlet_float(x->x_obj.ob_outlet, blunt_rs(x->x_f2, x->x_f1));
 }
 
 static void *rrs_new(t_symbol *s, int ac, t_atom *av) {
@@ -73,39 +75,18 @@ static void *rrs_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *rpc_class;
 
 static void rpc_bang(t_bop *x) {
-	int n1 = x->x_f1;
-		/* apparently "%" raises an exception for INT_MIN and -1 */
-	if (n1 == -1)
-		outlet_float(x->x_obj.ob_outlet, 0);
-	else outlet_float(x->x_obj.ob_outlet, ((int)(x->x_f2)) % (n1 ? n1 : 1));
+	outlet_float(x->x_obj.ob_outlet, blunt_pc(x->x_f2, x->x_f1));
 }
 
 static void *rpc_new(t_symbol *s, int ac, t_atom *av) {
 	return (bop_new(rpc_class, rpc_bang, s, ac, av));
 }
 
-/* --------------------- division -------------------------------- */
-static t_class *rdiv_class;
-
-static void rdiv_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet,
-		(x->x_f1 != 0 ? x->x_f2 / x->x_f1 : 0));
-}
-
-static void *rdiv_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(rdiv_class, rdiv_bang, s, ac, av));
-}
-
 /* --------------------- mod ------------------------------------- */
 static t_class *rmod_class;
 
 static void rmod_bang(t_bop *x) {
-	int n1 = x->x_f1, result;
-	if (n1 < 0) n1 = -n1;
-	else if (!n1) n1 = 1;
-	result = (int)x->x_f2 % n1;
-	if (result < 0) result += n1;
-	outlet_float(x->x_obj.ob_outlet, result);
+	outlet_float(x->x_obj.ob_outlet, blunt_mod(x->x_f2, x->x_f1));
 }
 
 static void *rmod_new(t_symbol *s, int ac, t_atom *av) {
@@ -116,12 +97,7 @@ static void *rmod_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *rdivm_class;
 
 static void rdivm_bang(t_bop *x) {
-	int n2 = x->x_f2, n1 = x->x_f1, result;
-	if (n1 < 0) n1 = -n1;
-	else if (!n1) n1 = 1;
-	if (n2 < 0) n2 -= (n1-1);
-	result = n2 / n1;
-	outlet_float(x->x_obj.ob_outlet, result);
+	outlet_float(x->x_obj.ob_outlet, blunt_divm(x->x_f2, x->x_f1));
 }
 
 static void *rdivm_new(t_symbol *s, int ac, t_atom *av) {
@@ -132,6 +108,10 @@ void revop_setup(void) {
 	rminus_class = class_new(gensym("@-"), (t_newmethod)rminus_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
 	class_addbang(rminus_class, rminus_bang);
+
+	rdiv_class = class_new(gensym("@/"), (t_newmethod)rdiv_new, 0,
+		sizeof(t_bop), 0, A_GIMME, 0);
+	class_addbang(rdiv_class, rdiv_bang);
 
 	rlog_class = class_new(gensym("@log"), (t_newmethod)rlog_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
@@ -153,10 +133,6 @@ void revop_setup(void) {
 		sizeof(t_bop), 0, A_GIMME, 0);
 	class_addbang(rpc_class, rpc_bang);
 
-	rdiv_class = class_new(gensym("@/"), (t_newmethod)rdiv_new, 0,
-		sizeof(t_bop), 0, A_GIMME, 0);
-	class_addbang(rdiv_class, rdiv_bang);
-
 	rmod_class = class_new(gensym("@mod"), (t_newmethod)rmod_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
 	class_addbang(rmod_class, rmod_bang);
@@ -166,8 +142,8 @@ void revop_setup(void) {
 	class_addbang(rdivm_class, rdivm_bang);
 
 	t_class *revs[] =
-	{	rminus_class, rlog_class, rpow_class, rls_class, rrs_class,
-		rpc_class, rdiv_class, rmod_class, rdivm_class   };
+	{	rminus_class, rdiv_class, rlog_class, rpow_class,
+		rls_class, rrs_class, rpc_class, rmod_class, rdivm_class   };
 
 	int i = sizeof(revs) / sizeof*(revs);
 	t_symbol *rev_sym = gensym("revbinops");
