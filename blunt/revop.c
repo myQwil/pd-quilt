@@ -107,48 +107,44 @@ static void *rdivm_new(t_symbol *s, int ac, t_atom *av) {
 void revop_setup(void) {
 	rminus_class = class_new(gensym("@-"), (t_newmethod)rminus_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
-	class_addbang(rminus_class, rminus_bang);
 
 	rdiv_class = class_new(gensym("@/"), (t_newmethod)rdiv_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
-	class_addbang(rdiv_class, rdiv_bang);
 
 	rlog_class = class_new(gensym("@log"), (t_newmethod)rlog_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
-	class_addbang(rlog_class, rlog_bang);
 
 	rpow_class = class_new(gensym("@pow"), (t_newmethod)rpow_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
-	class_addbang(rpow_class, rpow_bang);
 
 	rls_class = class_new(gensym("@<<"), (t_newmethod)rls_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
-	class_addbang(rls_class, rls_bang);
 
 	rrs_class = class_new(gensym("@>>"), (t_newmethod)rrs_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
-	class_addbang(rrs_class, rrs_bang);
 
 	rpc_class = class_new(gensym("@%"), (t_newmethod)rpc_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
-	class_addbang(rpc_class, rpc_bang);
 
 	rmod_class = class_new(gensym("@mod"), (t_newmethod)rmod_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
-	class_addbang(rmod_class, rmod_bang);
 
 	rdivm_class = class_new(gensym("@div"), (t_newmethod)rdivm_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
-	class_addbang(rdivm_class, rdivm_bang);
 
 	t_class *revs[] =
 	{	rminus_class, rdiv_class, rlog_class, rpow_class,
 		rls_class, rrs_class, rpc_class, rmod_class, rdivm_class   };
 
+	t_bopmethod rbangs[] =
+	{	rminus_bang, rdiv_bang, rlog_bang, rpow_bang,
+		rls_bang, rrs_bang, rpc_bang, rmod_bang, rdivm_bang   };
+
 	int i = sizeof(revs) / sizeof*(revs);
 	t_symbol *rev_sym = gensym("revbinops");
 	while (i--)
-	{	class_addfloat(revs[i], bop_float);
+	{	class_addbang(revs[i], rbangs[i]);
+		class_addfloat(revs[i], bop_float);
 		class_addmethod(revs[i], (t_method)bop_f2,
 			gensym("f2"), A_FLOAT, 0);
 		class_addmethod(revs[i], (t_method)bop_skip,

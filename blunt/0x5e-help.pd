@@ -4,10 +4,10 @@
 #X obj 210 76 #^;
 #X text 235 75 (hot binop);
 #X floatatom 21 113 0 0 0 0 - - -;
-#X obj 31 143 mantissa;
+#X obj 31 143 mantissab;
 #X floatatom 91 172 0 0 0 0 - - -;
 #X floatatom 21 196 0 0 0 0 - - -;
-#X obj 31 226 mantissa;
+#X obj 31 226 mantissab;
 #X obj 227 36 cnv 6 1 1 empty empty ^ 6 0 0 14 -233017 -66577 0;
 #X text 134 51 XOR - bitwise exclusive OR;
 #X obj 21 172 #^ -32!;

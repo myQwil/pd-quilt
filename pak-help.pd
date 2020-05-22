@@ -1,24 +1,24 @@
-#N canvas 617 230 725 524 14;
-#X obj 45 209 pointer;
-#X obj 217 301 print;
-#X msg 243 114 one 2 3;
-#X msg 317 114 4 five 6;
-#X msg 314 143 7 8 nine;
-#X obj 206 197 unpak any 2 3;
-#X text 125 69 lazy pack/unpack objects with 'anything' inlets/outlets
+#N canvas 617 230 760 535 14;
+#X obj 65 209 pointer;
+#X obj 237 301 print;
+#X msg 263 114 one 2 3;
+#X msg 337 114 4 five 6;
+#X msg 334 143 7 8 nine;
+#X obj 226 197 unpak any 2 3;
+#X text 145 69 lazy pack/unpack objects with 'anything' inlets/outlets
 ;
-#X text 295 303 and unrecognized types become lazy symbols;
-#X msg 107 209 hello;
-#X msg 157 209 12;
-#X text 317 353 'a' \, 'any' \, or number for 'anything';
-#X msg 127 330 1 2 three;
-#X text 323 282 with pak \, 'b' turns into a lazy 'bang';
-#X obj 198 277 pak hi b float;
-#X msg 321 227 yo 42 34;
-#X obj 198 357 unpak a 2 f;
-#X obj 214 239 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#X text 315 303 and unrecognized types become lazy symbols;
+#X msg 127 209 hello;
+#X msg 177 209 12;
+#X text 337 353 'a' \, 'any' \, or number for 'anything';
+#X msg 147 330 1 2 three;
+#X text 343 282 with pak \, 'b' turns into a lazy 'bang';
+#X obj 218 277 pak hi b float;
+#X msg 341 227 yo 42 34;
+#X obj 218 357 unpak a 2 f;
+#X obj 234 239 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#X obj 320 204 pointer;
+#X obj 340 204 pointer;
 #N canvas 572 393 450 323 out 0;
 #X obj 99 261 outlet;
 #X obj 153 261 outlet;
@@ -38,18 +38,18 @@
 #X connect 8 0 0 0;
 #X connect 8 1 1 0;
 #X connect 8 2 7 0;
-#X restore 274 400 pd out;
-#X floatatom 274 471 0 0 0 0 - - -;
-#X symbolatom 307 471 0 0 0 0 - - -;
-#X obj 313 426 pointer;
-#X obj 349 450 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#X restore 294 390 pd out;
+#X floatatom 294 475 0 0 0 0 - - -;
+#X symbolatom 334 475 0 0 0 0 - - -;
+#X obj 339 418 pointer;
+#X obj 379 446 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#X msg 169 128 . . 234;
-#X msg 262 228 . 6;
-#X text 43 128 "." skips args;
-#X obj 285 426 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#X msg 189 128 . . 234;
+#X msg 282 228 . 6;
+#X text 63 128 "." skips args;
+#X obj 309 426 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#X obj 294 449 symbol;
+#X obj 324 449 symbol;
 #N canvas 572 393 450 323 out 0;
 #X obj 99 261 outlet;
 #X obj 153 261 outlet;
@@ -69,15 +69,15 @@
 #X connect 8 0 0 0;
 #X connect 8 1 1 0;
 #X connect 8 2 7 0;
-#X restore 391 400 pd out;
-#X floatatom 391 471 0 0 0 0 - - -;
-#X symbolatom 424 471 0 0 0 0 - - -;
-#X obj 429 426 pointer;
-#X obj 466 450 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#X restore 411 390 pd out;
+#X floatatom 411 475 0 0 0 0 - - -;
+#X symbolatom 451 475 0 0 0 0 - - -;
+#X obj 455 418 pointer;
+#X obj 496 446 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#X obj 401 426 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#X obj 426 426 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#X obj 411 449 symbol;
+#X obj 441 449 symbol;
 #N canvas 572 393 450 323 out 0;
 #X obj 99 261 outlet;
 #X obj 153 261 outlet;
@@ -97,32 +97,32 @@
 #X connect 8 0 0 0;
 #X connect 8 1 1 0;
 #X connect 8 2 7 0;
-#X restore 157 400 pd out;
-#X floatatom 157 475 0 0 0 0 - - -;
-#X symbolatom 190 475 0 0 0 0 - - -;
-#X obj 196 426 pointer;
-#X obj 232 450 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#X restore 177 390 pd out;
+#X floatatom 177 475 0 0 0 0 - - -;
+#X symbolatom 217 475 0 0 0 0 - - -;
+#X obj 222 418 pointer;
+#X obj 262 446 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#X obj 168 426 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#X obj 192 426 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#X obj 177 449 symbol;
-#X msg 45 235 list \$1 1234;
-#X text 212 332 use f(loat) \, s(ymbol) \, or p(ointer) for strict
+#X obj 207 449 symbol;
+#X msg 65 235 list \$1 1234;
+#X text 232 332 use f(loat) \, s(ymbol) \, or p(ointer) for strict
 type;
-#X text 388 143 expect float but got symbol;
-#X text 18 330 type mismatch;
-#X text 407 253 acts as a bit mask. -1 mutes all;
-#X msg 414 232 mute 0;
-#X text 470 232 print all strict errors;
-#X text 415 211 error messages are off by default;
-#X msg 67 366 mute 0;
+#X text 408 143 expect float but got symbol;
+#X text 38 330 type mismatch;
+#X text 427 253 acts as a bit mask. -1 mutes all;
+#X msg 434 232 mute 0;
+#X text 490 232 print all strict errors;
+#X text 435 211 error messages are off by default;
+#X msg 87 366 mute 0;
 #N canvas 0 75 450 300 foo 0;
-#X restore 45 157 pd foo;
-#X msg 45 183 traverse pd-foo \, bang;
-#X msg 320 178 traverse pd-foo \, bang;
-#X obj 277 43 cnv 15 136 22 empty empty pak_&_unpak 2 10 0 16 -1 -262144
+#X restore 65 157 pd foo;
+#X msg 65 183 traverse pd-foo \, bang;
+#X msg 340 178 traverse pd-foo \, bang;
+#X obj 297 43 cnv 15 136 22 empty empty pak_&_unpak 2 10 0 16 -1 -262144
 0;
-#X msg 105 273 list bang;
+#X msg 125 273 list bang;
 #X connect 0 0 42 0;
 #X connect 2 0 5 0;
 #X connect 3 0 5 0;

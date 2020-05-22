@@ -4,18 +4,20 @@
 /* -------------------------- is -------------------------- */
 
 static t_class *is_class;
-static t_class *is_proxy_class;
+static t_class *is_proxy;
 
-typedef struct _is {
+typedef struct _is t_is;
+
+typedef struct _is_pxy {
+	t_object p_obj;
+	t_is *p_x;
+} t_is_pxy;
+
+struct _is {
 	t_object x_obj;
 	t_symbol *x_type;
-	struct _is_proxy *x_p;
-} t_is;
-
-typedef struct _is_proxy {
-	t_object p_obj;
-	t_is *p_owner;
-} t_is_proxy;
+	t_is_pxy *x_p;
+};
 
 static void is_peek(t_is *x, t_symbol *s) {
 	if (*s->s_name) startpost("%s: ", s->s_name);
@@ -41,8 +43,8 @@ static t_symbol *is_check(t_symbol *s) {
 	else return s;
 }
 
-static void is_proxy_anything(t_is_proxy *p, t_symbol *s, int ac, t_atom *av) {
-	p->p_owner->x_type = is_check(s);
+static void is_pxy_anything(t_is_pxy *p, t_symbol *s, int ac, t_atom *av) {
+	p->p_x->x_type = is_check(s);
 }
 
 static void is_type(t_is *x, t_symbol *s, int ac, t_atom *av) {
@@ -54,10 +56,10 @@ static void is_type(t_is *x, t_symbol *s, int ac, t_atom *av) {
 
 static void *is_new(t_symbol *s) {
 	t_is *x = (t_is *)pd_new(is_class);
-	t_is_proxy *p = (t_is_proxy *)pd_new(is_proxy_class);
+	t_is_pxy *p = (t_is_pxy *)pd_new(is_proxy);
 
 	x->x_p = p;
-	p->p_owner = x;
+	p->p_x = x;
 	x->x_type = (*s->s_name) ? is_check(s) : gensym("float");
 
 	inlet_new((t_object *)x, (t_pd *)p, 0, 0);
@@ -81,7 +83,7 @@ void is_setup(void) {
 	class_addmethod(is_class, (t_method)is_peek,
 		gensym("peek"), A_DEFSYM, 0);
 
-	is_proxy_class = class_new(gensym("_is_proxy"), 0, 0,
-		sizeof(t_is_proxy), CLASS_PD | CLASS_NOINLET, 0);
-	class_addanything(is_proxy_class, is_proxy_anything);
+	is_proxy = class_new(gensym("_is_pxy"), 0, 0,
+		sizeof(t_is_pxy), CLASS_PD | CLASS_NOINLET, 0);
+	class_addanything(is_proxy, is_pxy_anything);
 }
