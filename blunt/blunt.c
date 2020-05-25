@@ -25,6 +25,7 @@ static void *num_new
 	floatinlet_new(&x->x_obj, &x->x_f);
 	x->x_bang = fn;
 
+	x->x_f = x->x_lb = 0;
 	if (ac)
 	{	if (av->a_type == A_FLOAT)
 			x->x_f = av->a_w.w_float;

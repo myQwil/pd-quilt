@@ -79,6 +79,7 @@ static void *hot_new(t_class *fltclass, t_class *pxyclass,
 		av++;   }
 	else x->x_f1 = 0;
 
+	x->x_f2 = x->x_lb = 0;
 	if (ac)
 	{	if (av->a_type == A_FLOAT)
 			x->x_f2 = av->a_w.w_float;

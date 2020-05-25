@@ -46,6 +46,7 @@ static void *bop_new
 		av++;   }
 	else x->x_f1 = 0;
 
+	x->x_f2 = x->x_lb = 0;
 	if (ac)
 	{	if (av->a_type == A_FLOAT)
 			x->x_f2 = av->a_w.w_float;
