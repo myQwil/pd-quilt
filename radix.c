@@ -174,7 +174,6 @@ typedef union {
 	unsigned u32;
 } ufloat;
 #define mnt u.mnt
-#define exp u.exp
 #define sgn u.sgn
 
 #define MAX(a,b) ((a)>(b) ? (a):(b))
@@ -192,7 +191,7 @@ static t_class *radix_class;
 
 typedef struct _radix {
 	t_object x_obj;
-	t_float x_base; // number base
+	int x_base;     // number base
 	int x_prec;     // precision
 	int x_e;        // e-notation base
 	uint64_t x_pwr;
@@ -211,23 +210,23 @@ static void out(char num[], int *i, const char *s, int l) {
 }
 
 static char *fmt_u(uintmax_t u, char *s, int radx) {
-	unsigned v;
-	for (   ; u>UINT_MAX; u/=radx) *--s = dgt[u%radx];
-	for (v=u;          v; v/=radx) *--s = dgt[v%radx];
+	unsigned long v;
+	for (   ; u>ULONG_MAX; u/=radx) *--s = dgt[u%radx];
+	for (v=u;           v; v/=radx) *--s = dgt[v%radx];
 	return s;
 }
 
 static void fmt_fp(t_radix *x, long double y) {
 	int radx = x->x_base;
-	uint64_t pwr = x->x_pwr;
+	unsigned pwr = x->x_pwr;
 	int rp=x->x_rp, up=x->x_up;
 	int pr=rp-1, pu=up-1;
 	int neg=0, p=x->x_prec, t='g';
 
 	/* based on: musl-libc /src/stdio/vfprintf.c */
-	unsigned big[(LDBL_MANT_DIG+pu)/up + 1			// mantissa expansion
-		+ (LDBL_MAX_EXP+LDBL_MANT_DIG+pu+pr)/rp];	// exponent expansion 
-	unsigned *a, *d, *r, *z;
+	uint32_t big[(LDBL_MANT_DIG+pu)/up + 1			// mantissa expansion
+		+ (LDBL_MAX_EXP+LDBL_MANT_DIG+pu+pr)/rp];	// exponent expansion
+	uint32_t *a, *d, *r, *z;
 	int e2=0, e, i, j, l;
 	char buf[rp+LDBL_MANT_DIG/4];
 	char ebuf0[3*sizeof(int)], *ebuf=&ebuf0[3*sizeof(int)], *estr;
@@ -315,7 +314,6 @@ static void fmt_fp(t_radix *x, long double y) {
 	/* Count trailing zeros in last place */
 	if (z>a && z[-1]) for (i=radx, j=0; z[-1]%i==0; i*=radx, j++);
 	else j=rp;
-
 	if ((t|32)=='f')
 		p = MIN(p,MAX(0,rp*(z-r-1)-j));
 	else
@@ -326,14 +324,12 @@ static void fmt_fp(t_radix *x, long double y) {
 	{	if (e>0) l+=e;   }
 	else
 	{	int erad = x->x_e;
-		if (erad<2) erad=2; else if (erad>64) erad=64;
 		estr=fmt_u(e<0 ? -e : e, ebuf, erad);
 		while(ebuf-estr<LEAD) *--estr='0';
 		*--estr = (e<0 ? '-' : '+');
 		*--estr = t;
 		l += ebuf-estr;   }
 
-	// don't use p, it shrinks
 	char num[x->x_prec+13]; // -1.23456e-10010101\0
 	int ni=0;
 	out(num, &ni, "-", neg);
@@ -363,38 +359,44 @@ static void fmt_fp(t_radix *x, long double y) {
 			out(num, &ni, s, MIN(buf+rp-s, p));
 			p -= buf+rp-s;   }
 		out(num, &ni, estr, ebuf-estr);   }
-
 	num[ni] = '\0';
+
 	outlet_symbol(x->x_obj.ob_outlet, gensym(num));
 }
 
 static void radix_precision(t_radix *x, t_floatarg f) {
+	int m = FLT_MANT_DIG;
+	if      (f < 1) f = 1;
+	else if (f > m) f = m;
 	x->x_prec = f;
 }
 
-static void radix_bounds(t_radix *x, t_float f) {
-	uint64_t b2=4294967296, pwr=f*f;
-	int rp=1, up=32;
-	while (pwr<b2) { rp++; pwr*=f; }
-	pwr/=f;
-	while (b2>pwr) { b2/=2; up--; }
-	x->x_pwr = pwr;
-	x->x_rp = rp;
-	x->x_up = up;
+static int radix_bounds(t_float base) {
+	int m = sizeof(dgt) / sizeof*(dgt);
+	if      (base < 2) base = 2;
+	else if (base > m) base = m;
+	return base;
 }
 
 static void radix_base(t_radix *x, t_floatarg f) {
-	if (f<2) f=2; else if (f>64) f=64;
-	x->x_base = f;
-	radix_bounds(x, f);
+	unsigned base = x->x_base = radix_bounds(f);
+	unsigned b2 = -1, pwr = 1;
+	int rp = x->x_rp = log(b2) / log(base), up = 32;
+	for (;rp; base *= base)
+	{	if (rp & 1) pwr *= base;
+		rp >>= 1;   }
+	while (b2 > pwr) { up--; b2 >>= 1; }
+	x->x_pwr = pwr;
+	x->x_up = up;
 }
 
-static void radix_ebase(t_radix *x, t_floatarg f) {
-	x->x_e = f;
+static void radix_ebase(t_radix *x, t_floatarg base) {
+	x->x_e = radix_bounds(base);
 }
 
-static void radix_be(t_radix *x, t_floatarg f) {
-	x->x_e = x->x_base = f;
+static void radix_be(t_radix *x, t_floatarg base) {
+	radix_base(x, base);
+	x->x_e = x->x_base;
 }
 
 static void radix_float(t_radix *x, t_float f) {
@@ -421,8 +423,9 @@ static void *radix_new(t_float f) {
 	t_radix *x = (t_radix *)pd_new(radix_class);
 	outlet_new(&x->x_obj, &s_symbol);
 	inlet_new(&x->x_obj, &x->x_obj.ob_pd, &s_float, gensym("base"));
-	x->x_e = x->x_base = f?f:16;
-	radix_bounds(x, f);
+	x->x_base = f?f:16;
+	radix_base(x, f);
+	x->x_e = x->x_base;
 	x->x_prec = 6;
 	return (x);
 }

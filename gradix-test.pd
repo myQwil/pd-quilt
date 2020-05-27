@@ -1,0 +1,81 @@
+#N canvas 94 173 771 519 14;
+#X floatatom 217 38 0 2 64 0 - - -;
+#X msg 277 147 p \$1;
+#X floatatom 277 117 0 0 0 0 - - -;
+#X obj 99 67 cupqb;
+#X floatatom 148 87 0 0 0 0 - - -;
+#X msg 91 35 set 1;
+#X floatatom 156 124 0 0 0 0 - - -;
+#X msg 144 35 set 0.1;
+#X obj 99 124 @pow 2;
+#X floatatom 99 152 0 0 0 0 gatom - -;
+#X msg 217 147 be \$1;
+#X obj 32 371 s \$0-f;
+#X obj 398 179 r \$0-f;
+#X obj 145 374 mantissab;
+#X obj 88 371 sploat;
+#N canvas 1301 239 450 300 pcalc 0;
+#X obj 197 77 inlet;
+#X obj 197 131 @/ 24;
+#X obj 197 104 log 2;
+#X obj 197 185 outlet;
+#X obj 197 158 i;
+#X connect 0 0 2 0;
+#X connect 1 0 4 0;
+#X connect 2 0 1 0;
+#X connect 4 0 3 0;
+#X restore 277 87 pd pcalc;
+#X obj 88 179 gradix 23 22 0 0 0 0 empty empty base10 -52 11 0 11 -1
+-262144 -262144 10 6 10 0 10;
+#X obj 398 233 gradix 23 22 0 0 0 0 empty empty base12 -52 11 0 11
+-1 -262144 -262144 12 6 12 0 10;
+#X obj 398 260 gradix 23 22 0 0 0 0 empty empty base9 -52 11 0 11 -1
+-262144 -262144 9 7 9 0 10;
+#X obj 398 287 gradix 23 22 0 0 0 0 empty empty base6 -52 11 0 11 -1
+-262144 -262144 6 9 6 0 10;
+#X obj 398 314 gradix 23 22 0 0 0 0 empty empty base3 -52 11 0 11 -1
+-262144 -262144 3 14 3 0 10;
+#X obj 88 260 gradix 23 22 0 0 0 0 empty empty base16 -52 11 0 11 -1
+-262144 -262144 16 6 16 0 10;
+#X obj 88 287 gradix 23 22 0 0 0 0 empty empty base8 -52 11 0 11 -1
+-262144 -262144 8 8 8 0 10;
+#X obj 88 314 gradix 23 22 0 0 0 0 empty empty base4 -52 11 0 11 -1
+-262144 -262144 4 12 4 0 10;
+#X obj 88 342 gradix 35 22 0 0 0 0 empty empty base2 -52 11 0 11 -1
+-262144 -262144 2 24 2 0 10;
+#X obj 88 233 gradix 23 22 0 0 0 0 empty empty base32 -52 11 0 11 -1
+-262144 -262144 32 5 32 0 10;
+#X obj 88 206 gradix 23 22 0 0 0 0 empty empty base64 -52 11 0 11 -1
+-262144 -262144 64 4 64 0 10;
+#X obj 398 206 gradix 23 22 0 0 0 0 empty empty base24 -52 11 0 11
+-1 -262144 -262144 24 5 24 0 10;
+#X connect 0 0 10 0;
+#X connect 0 0 4 0;
+#X connect 0 0 15 0;
+#X connect 1 0 16 0;
+#X connect 2 0 1 0;
+#X connect 3 0 6 0;
+#X connect 3 0 8 0;
+#X connect 4 0 8 1;
+#X connect 5 0 3 2;
+#X connect 5 0 3 0;
+#X connect 7 0 3 2;
+#X connect 7 0 3 0;
+#X connect 8 0 9 0;
+#X connect 9 0 16 0;
+#X connect 10 0 16 0;
+#X connect 12 0 27 0;
+#X connect 14 0 13 0;
+#X connect 15 0 2 0;
+#X connect 16 0 26 0;
+#X connect 17 0 18 0;
+#X connect 18 0 19 0;
+#X connect 19 0 20 0;
+#X connect 21 0 22 0;
+#X connect 22 0 23 0;
+#X connect 23 0 24 0;
+#X connect 24 0 14 0;
+#X connect 24 0 11 0;
+#X connect 25 0 21 0;
+#X connect 26 0 25 0;
+#X connect 27 0 17 0;
