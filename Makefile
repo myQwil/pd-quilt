@@ -5,7 +5,7 @@
   class.sources = \
 	muse.c chrd.c rand.c rind.c ntof.c fton.c sploat.c gloat.c \
 	span.c same.c ceil.c radix.c 0x21.c 0x21~.c gme~.cpp gmes~.cpp \
-	x.c is.c pak.c unpak.c 0x40pak.c 0x40unpak.c gradix.c
+	x.c is.c pak.c unpak.c 0x40pak.c 0x40unpak.c
 
   datafiles = 0x21-help.pd 0x21~-help.pd 2^.pd ad.pd ad~.pd adac~.pd same-help.pd \
 	bt.pd ct.pd cupq.pd cupq-help.pd cupqb.pd cupqb-help.pd fmod~.pd fmad~.pd \

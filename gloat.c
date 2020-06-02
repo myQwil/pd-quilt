@@ -40,6 +40,10 @@ static void gloat_sign(t_gloat *x, t_floatarg f) {
 	x->x_uf.sgn = f;
 }
 
+static void gloat_f(t_gloat *x, t_floatarg f) {
+	x->x_uf.f = f;
+}
+
 static void gloat_float(t_gloat *x, t_float f) {
 	gloat_mantissa(x, f);
 	gloat_bang(x);
@@ -84,6 +88,8 @@ void gloat_setup(void) {
 		gensym("e"), A_FLOAT, 0);
 	class_addmethod(gloat_class, (t_method)gloat_sign,
 		gensym("s"), A_FLOAT, 0);
+	class_addmethod(gloat_class, (t_method)gloat_f,
+		gensym("f"), A_FLOAT, 0);
 	class_addmethod(gloat_class, (t_method)gloat_set,
 		gensym("set"), A_GIMME, 0);
 	class_addmethod(gloat_class, (t_method)gloat_peek,
