@@ -32,8 +32,12 @@ static void sploat_bang(t_sploat *x) {
 	outlet_float(x->o_m, uf.mnt);
 }
 
-static void sploat_float(t_sploat *x, t_float f) {
+static void sploat_set(t_sploat *x, t_floatarg f) {
 	x->x_f = f;
+}
+
+static void sploat_float(t_sploat *x, t_float f) {
+	sploat_set(x, f);
 	sploat_bang(x);
 }
 
@@ -43,7 +47,7 @@ static void *sploat_new(t_floatarg f) {
 	x->o_e = outlet_new(&x->x_obj, &s_float);
 	x->o_s = outlet_new(&x->x_obj, &s_float);
 	floatinlet_new(&x->x_obj, &x->x_f);
-	x->x_f = f;
+	sploat_set(x, f);
 	return (x);
 }
 
@@ -54,6 +58,8 @@ void sploat_setup(void) {
 		A_DEFFLOAT, 0);
 	class_addbang(sploat_class, sploat_bang);
 	class_addfloat(sploat_class, sploat_float);
+	class_addmethod(sploat_class, (t_method)sploat_set,
+		gensym("set"), A_FLOAT, 0);
 	class_addmethod(sploat_class, (t_method)sploat_peek,
 		gensym("peek"), A_DEFSYM, 0);
 }
