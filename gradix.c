@@ -18,10 +18,11 @@
 
 typedef union {
 	float f;
-	struct { unsigned mnt:23,exp:8,sgn:1; } u;
+	struct { unsigned mnt:23,ex:8,sgn:1; } u;
 	unsigned u32;
 } ufloat;
 #define mnt u.mnt
+#define ex  u.ex
 #define sgn u.sgn
 
 #define MAX(a,b) ((a)>(b) ? (a):(b))
@@ -39,16 +40,18 @@ typedef union {
 #include <unistd.h>
 #endif
 
-#define MINDIGITS 1
+#define MINDIGITS 0
 #define MINFONT   4
 
 // for a dark theme of pd
-#undef IEM_GUI_COLOR_SELECTED
-#undef IEM_GUI_COLOR_NORMAL
-#undef IEM_GUI_COLOR_EDITED
-#define IEM_GUI_COLOR_SELECTED   0x00FFFF
-#define IEM_GUI_COLOR_NORMAL     0xFCFCFC
-#define IEM_GUI_COLOR_EDITED     0xFFC0CB
+#undef PD_COLOR_FG
+#undef PD_COLOR_BG
+#undef PD_COLOR_SELECT
+#undef PD_COLOR_EDIT
+#define PD_COLOR_FG           0xFCFCFC
+#define PD_COLOR_BG           0x000000
+#define PD_COLOR_SELECT       0x00FFFF
+#define PD_COLOR_EDIT         0xFF9999
 
 typedef struct _gradix {
 	t_iemgui x_gui;
@@ -59,23 +62,26 @@ typedef struct _gradix {
 	double   x_min;
 	double   x_max;
 	double   x_k;
-	int      x_lin0_log1;
 	char     x_buf[40];
+	int      x_bufsize;
+	int      x_newsize;
 	int      x_numwidth;
+	int      x_lin0_log1;
 	int      x_log_height;
-	int x_base;     // number base
-	int x_prec;     // precision
-	int x_e;        // e-notation base
-	unsigned x_pwr; // largest base power inside of 32 bits
-	int x_bexp;     // base exponent
-	int x_texp;     // power of 2 exponent
+	int      x_zh;       // un-zoomed height
+	int      x_base;     // radix
+	int      x_prec;     // precision
+	int      x_e;        // e-notation radix
+	int      x_bexp;     // base exponent
+	int      x_texp;     // power of 2 exponent
+	unsigned x_pwr;      // largest base power inside of 32 bits
 } t_gradix;
 
-static const char dgt[64] = {
+static const char dgt[] = {
 	"0123456789abcdef"
 	"ghijkmnopqrstuvw"
 	"xyzACDEFGHJKLMNP"
-	"QRTUVWXYZ?!@#%^&"
+	"QRTUVWXYZ?!@#$%&"
 };
 
 /*------------------ global functions -------------------------*/
@@ -101,26 +107,22 @@ static void gradix_tick_wait(t_gradix *x) {
 }
 
 static void gradix_clip(t_gradix *x) {
-	if (!x->x_min && !x->x_max) return;
-	if      (x->x_val < x->x_min) x->x_val = x->x_min;
-	else if (x->x_val > x->x_max) x->x_val = x->x_max;
+	if (x->x_min || x->x_max)
+	{	if      (x->x_val < x->x_min) x->x_val = x->x_min;
+		else if (x->x_val > x->x_max) x->x_val = x->x_max;   }
 }
 
 static void gradix_calc_fontwidth(t_gradix *x) {
-	int w, f = 31;
-
-	if (x->x_gui.x_fsf.x_font_style == 1)
-		f = 27;
-	else if (x->x_gui.x_fsf.x_font_style == 2)
-		f = 25;
-
-	w = x->x_gui.x_fontsize * f * x->x_numwidth;
-	w /= 36;
-	x->x_gui.x_w = (w + (x->x_gui.x_h/2)/IEMGUI_ZOOM(x) + 4) * IEMGUI_ZOOM(x);
+	int rad = x->x_zh * IEMGUI_ZOOM(x) * 0.6667;
+	int w = x->x_numwidth;
+	if (!w)
+	{	w = x->x_bufsize;
+		if (w < 3) w = 3;   }
+	x->x_gui.x_w = w * glist_fontwidth(x->x_gui.x_glist) + rad;
 }
 
 static void gradix_precision(t_gradix *x, t_floatarg f) {
-	int m = FLT_MANT_DIG;
+	int m = ceil(FLT_MANT_DIG / log2(x->x_base));
 	if      (f < 1) f = 1;
 	else if (f > m) f = m;
 	x->x_prec = f;
@@ -167,18 +169,24 @@ static char *fmt_u(uintmax_t u, char *s, int radx) {
 
 static void gradix_ftoa(t_gradix *x) {
 	ufloat uf = {.f=x->x_val};
-	if ((uf.u32 & 0x7fbfffff) == 0x7f800000)
+	int size=0;
+	if (uf.ex == 0xFF)
 	{	int neg = uf.sgn;
 		#ifdef _WIN32
-			int mt = uf.mnt;
-			if (uf.f != uf.f)
-			{	if (mt==0x400000 && neg) strcpy(x->x_buf, "-1.#IND");
-				else strcpy(x->x_buf, (neg?"-1.#QNAN":"1.#QNAN"));   }
-			else strcpy(x->x_buf, (neg?"-1.#INF":"1.#INF"));
+			if (uf.mnt != 0)
+			{	if (uf.mnt == 0x400000 && neg)
+					size = 7, strcpy(x->x_buf, "-1.#IND");
+				else size = 7+neg,
+					 strcpy(x->x_buf, (neg ? "-1.#QNAN" : "1.#QNAN"));   }
+			else size = 6+neg,
+				 strcpy(x->x_buf, (neg ? "-1.#INF" : "1.#INF"));
 		#else
-			if (uf.f != uf.f) strcpy(x->x_buf, (neg?"-nan":"nan"));
+			if (uf.mnt != 0) strcpy(x->x_buf, (neg?"-nan":"nan"));
 			else strcpy(x->x_buf, (neg?"-inf":"inf"));
+			size = 3+neg;
 		#endif
+		x->x_newsize = (x->x_bufsize != size);
+		if (x->x_newsize) x->x_bufsize = size;
 		return;   }
 
 	long double y = x->x_val;
@@ -186,20 +194,23 @@ static void gradix_ftoa(t_gradix *x) {
 	unsigned pwr = x->x_pwr;
 	int bx=x->x_bexp, tx=x->x_texp;
 	int xb=bx-1, xt=tx-1;
-	int neg=0, p=x->x_prec, t='g';
+	int neg=0, t='g';
 
 	/* based on: musl-libc /src/stdio/vfprintf.c */
-	uint32_t big[(LDBL_MANT_DIG+xt)/tx + 1			// mantissa expansion
-		+ (LDBL_MAX_EXP+LDBL_MANT_DIG+xt+xb)/bx];	// exponent expansion
+	unsigned bigsize = (LDBL_MANT_DIG+xt)/tx + 1    // mantissa expansion
+		+ (LDBL_MAX_EXP+LDBL_MANT_DIG+xt+xb)/bx;    // exponent expansion
+	uint32_t big[bigsize];
 	uint32_t *a, *d, *r, *z;
 	int e2=0, e, i, j, l;
 	char buf[bx+LDBL_MANT_DIG/4];
 	char ebuf0[3*sizeof(int)], *ebuf=&ebuf0[3*sizeof(int)], *estr;
 
 	if (signbit(y)) y=-y, neg=1;
+	int p = (x->x_numwidth && x->x_prec >= x->x_numwidth)
+		  ? x->x_numwidth-neg : x->x_prec;
+
 	y = frexpl(y, &e2) * 2;
 	if (y) y *= (1<<xt), e2-=tx;
-	if (p<0) p=6;
 
 	if (e2<0) a=r=z=big;
 	else a=r=z=big+sizeof(big)/sizeof(*big) - LDBL_MANT_DIG - 1;
@@ -207,7 +218,7 @@ static void gradix_ftoa(t_gradix *x) {
 	do
 	{	*z = y;
 		y = pwr*(y-*z++);   }
-	while (y);
+	while (y && --bigsize);
 
 	while (e2>0)
 	{	uint32_t carry=0;
@@ -292,10 +303,10 @@ static void gradix_ftoa(t_gradix *x) {
 		estr=fmt_u(e<0 ? -e : e, ebuf, erad);
 		while(ebuf-estr<LEAD) *--estr='0';
 		*--estr = (e<0 ? '-' : '+');
-		*--estr = t;
+		*--estr = '^';
 		l += ebuf-estr;   }
 
-	char *num = x->x_buf;
+	char *num = x->x_buf, *dec=0, *nxt=0;
 	int ni=0;
 	out(num, &ni, "-", neg);
 
@@ -306,8 +317,9 @@ static void gradix_ftoa(t_gradix *x) {
 			if (d!=a) while (s>buf) *--s='0';
 			else if (s==buf+bx) *--s='0';
 			out(num, &ni, s, buf+bx-s);   }
-
-		if (p) out(num, &ni, ".", 1);
+		if (p)
+		{	dec = num+ni;
+			out(num, &ni, ".", 1);   }
 		for (; d<z && p>0; d++, p-=bx)
 		{	char *s = fmt_u(*d, buf+bx, radx);
 			while (s>buf) *--s='0';
@@ -320,45 +332,57 @@ static void gradix_ftoa(t_gradix *x) {
 			if (d!=a) while (s>buf) *--s='0';
 			else
 			{	out(num, &ni, s++, 1);
-				if (p>0) out(num, &ni, ".", 1);   }
+				if (p>0)
+				{	dec = num+ni;
+					out(num, &ni, ".", 1);   }   }
 			out(num, &ni, s, MIN(buf+bx-s, p));
 			p -= buf+bx-s;   }
+		nxt = num+ni;
 		out(num, &ni, estr, ebuf-estr);   }
 	num[ni] = '\0';
+	size = ni;
 
-	int bufsize, is_exp = 0, idecimal;
-	bufsize = (int)strlen(x->x_buf);
-	if (bufsize >= 5)/* if it is in exponential mode */
-	{	i = bufsize - 4;
-		if ((x->x_buf[i] == 'e') || (x->x_buf[i] == 'E'))
-			is_exp = 1;   }
-	if (bufsize > x->x_numwidth)/* if to reduce */
-	{	if (is_exp)
-		{	if (x->x_numwidth <= 5)
-			{	x->x_buf[0] = (y < 0.0 ? '-' : '+');
-				x->x_buf[1] = 0;   }
-			i = bufsize - 4;
-			for (idecimal = 0; idecimal < i; idecimal++)
-				if (x->x_buf[idecimal] == '.')
-					break;
-			if (idecimal > (x->x_numwidth - 4))
-			{	x->x_buf[0] = (y < 0.0 ? '-' : '+');
-				x->x_buf[1] = 0;   }
-			else
-			{	int new_exp_index = x->x_numwidth - 4;
-				int old_exp_index = bufsize - 4;
-
-				for (i = 0; i < 4; i++, new_exp_index++, old_exp_index++)
-					x->x_buf[new_exp_index] = x->x_buf[old_exp_index];
-				x->x_buf[x->x_numwidth] = 0;   }   }
+	if (x->x_numwidth > 0 && ni > x->x_numwidth)
+	{	if (!dec) dec = num+ni;
+		if (!nxt) nxt = num+ni;
+		int reduce = ni - x->x_numwidth;
+		if (nxt-dec >= reduce)
+		{	char *s1 = nxt-reduce;
+			ebuf = num+ni;
+			for (;nxt < ebuf; s1++, nxt++) *s1 = *nxt;
+			*s1 = '\0';
+			size = s1-num;   }
 		else
-		{	for (idecimal = 0; idecimal < bufsize; idecimal++)
-				if (x->x_buf[idecimal] == '.')
-					break;
-			if (idecimal > x->x_numwidth)
-			{	x->x_buf[0] = (y < 0.0 ? '-' : '+');
-				x->x_buf[1] = 0;   }
-			else x->x_buf[x->x_numwidth] = 0;   }   }
+		{	num[0] = (neg?'-':'+');
+			num[1] = '\0';   }   }
+	x->x_newsize = (x->x_bufsize != size);
+	if (x->x_newsize) x->x_bufsize = size;
+}
+
+static void gradix_zoom(t_gradix *x, t_floatarg zoom) {
+	t_iemgui *gui = &x->x_gui;
+	int oldzoom = gui->x_glist->gl_zoom;
+	if (oldzoom < 1) oldzoom = 1;
+	gui->x_w = (int)(gui->x_w)/oldzoom*(int)zoom;
+	gui->x_h = x->x_zh * (int)zoom - (zoom-1)*2;
+}
+
+static void gradix_border(t_gradix *x) {
+	gradix_calc_fontwidth(x);
+	t_glist *glist = x->x_gui.x_glist;
+	int xpos = text_xpix(&x->x_gui.x_obj, glist);
+	int ypos = text_ypix(&x->x_gui.x_obj, glist);
+	int w = x->x_gui.x_w, h = x->x_gui.x_h, corner = h/4;
+	t_canvas *canvas = glist_getcanvas(glist);
+
+	sys_vgui(".x%lx.c coords %lxBASE1 %d %d %d %d %d %d %d %d %d %d %d %d\n",
+		canvas, x,
+		xpos, ypos,
+		xpos + w - corner, ypos,
+		xpos + w, ypos + corner,
+		xpos + w, ypos + h,
+		xpos, ypos + h,
+		xpos, ypos);
 }
 
 static void gradix_draw_update(t_gobj *client, t_glist *glist) {
@@ -368,38 +392,39 @@ static void gradix_draw_update(t_gobj *client, t_glist *glist) {
 		{	if (x->x_buf[0])
 			{	char *cp = x->x_buf;
 				int sl = (int)strlen(x->x_buf);
-
 				x->x_buf[sl] = '>';
 				x->x_buf[sl+1] = 0;
 				if (sl >= x->x_numwidth)
 					cp += sl - x->x_numwidth + 1;
 				sys_vgui(".x%lx.c itemconfigure %lxNUMBER -fill #%06x -text {%s} \n",
-						 glist_getcanvas(glist), x,
-						 IEM_GUI_COLOR_EDITED, cp);
+					glist_getcanvas(glist), x,
+					PD_COLOR_EDIT, cp);
 				x->x_buf[sl] = 0;   }
 			else
 			{	gradix_ftoa(x);
+				if (!x->x_numwidth && x->x_newsize)
+					gradix_border(x);
 				sys_vgui(".x%lx.c itemconfigure %lxNUMBER -fill #%06x -text {%s} \n",
-						 glist_getcanvas(glist), x,
-						 IEM_GUI_COLOR_EDITED, x->x_buf);
+					glist_getcanvas(glist), x,
+					PD_COLOR_EDIT, x->x_buf);
 				x->x_buf[0] = 0;   }   }
 		else
 		{	gradix_ftoa(x);
+			if (!x->x_numwidth && x->x_newsize)
+				gradix_border(x);
 			sys_vgui(".x%lx.c itemconfigure %lxNUMBER -fill #%06x -text {%s} \n",
-					 glist_getcanvas(glist), x,
-					 (x->x_gui.x_fsf.x_selected ? IEM_GUI_COLOR_SELECTED : x->x_gui.x_fcol),
-					 x->x_buf);
+				glist_getcanvas(glist), x,
+				(x->x_gui.x_fsf.x_selected ? PD_COLOR_SELECT : x->x_gui.x_fcol),
+				x->x_buf);
 			x->x_buf[0] = 0;   }   }
 }
 
 static void gradix_draw_new(t_gradix *x, t_glist *glist) {
 	int xpos = text_xpix(&x->x_gui.x_obj, glist);
 	int ypos = text_ypix(&x->x_gui.x_obj, glist);
-	int iow = IOWIDTH * IEMGUI_ZOOM(x), ioh = OHEIGHT * IEMGUI_ZOOM(x);
-	int w = x->x_gui.x_w, fine = IEMGUI_ZOOM(x) - 1;
-	int h = x->x_gui.x_h - fine*2, half=h/2, rad=half-ioh;
-	int d = IEMGUI_ZOOM(x) + h/(34*IEMGUI_ZOOM(x));
-	int corner = h/4;
+	int zoom = IEMGUI_ZOOM(x), iow = IOWIDTH * zoom, ioh = OHEIGHT * zoom;
+	int w = x->x_gui.x_w, h = x->x_gui.x_h, d = zoom + h/(34*zoom);
+	int half=h/2, rad=half-ioh, fine=zoom-1, corner = h/4;
 	t_canvas *canvas = glist_getcanvas(glist);
 
 	sys_vgui(".x%lx.c create line %d %d %d %d %d %d %d %d %d %d %d %d "
@@ -411,51 +436,49 @@ static void gradix_draw_new(t_gradix *x, t_glist *glist) {
 		xpos + w, ypos + h,
 		xpos, ypos + h,
 		xpos, ypos,
-		IEMGUI_ZOOM(x), IEM_GUI_COLOR_NORMAL, x);
+		zoom, PD_COLOR_FG, x);
 	sys_vgui(".x%lx.c create arc %d %d %d %d -start 270 -extent 180 -width %d "
 		" -outline #%06x -tags %lxBASE2\n",
 		canvas,
-		xpos - rad, ypos + IEMGUI_ZOOM(x) + ioh,
-		xpos + rad, ypos + h - IEMGUI_ZOOM(x) - ioh,
-		IEMGUI_ZOOM(x), x->x_gui.x_fcol, x);
+		xpos - rad, ypos + zoom + ioh,
+		xpos + rad, ypos + h - zoom - ioh,
+		zoom, x->x_gui.x_fcol, x);
 	if (!x->x_gui.x_fsf.x_snd_able)
 		sys_vgui(".x%lx.c create rectangle %d %d %d %d "
-			" -fill grey -outline white -tags [list %lxOUT%d outlet]\n",
+			" -fill grey -outline #%06x -tags [list %lxOUT%d outlet]\n",
 			canvas,
-			xpos, ypos + h + IEMGUI_ZOOM(x) - ioh,
+			xpos, ypos + h + zoom - ioh,
 			xpos + iow, ypos + h,
-			x, 0);
+			PD_COLOR_FG, x, 0);
 	if (!x->x_gui.x_fsf.x_rcv_able)
 		sys_vgui(".x%lx.c create rectangle %d %d %d %d "
-			" -fill grey -outline white -tags [list %lxIN%d inlet]\n",
+			" -fill grey -outline #%06x -tags [list %lxIN%d inlet]\n",
 			canvas,
 			xpos, ypos,
-			xpos + iow, ypos - IEMGUI_ZOOM(x) + ioh,
-			x, 0);
+			xpos + iow, ypos - zoom + ioh,
+			PD_COLOR_FG, x, 0);
 	sys_vgui(".x%lx.c create text %d %d -text {%s} -anchor w "
 		" -font {{%s} -%d %s} -fill #%06x -tags [list %lxLABEL label text]\n",
-		canvas, xpos + x->x_gui.x_ldx * IEMGUI_ZOOM(x),
-		ypos + x->x_gui.x_ldy * IEMGUI_ZOOM(x) + fine*2,
+		canvas, xpos + x->x_gui.x_ldx * zoom,
+		ypos + x->x_gui.x_ldy * zoom + fine*2,
 		(strcmp(x->x_gui.x_lab->s_name, "empty") ? x->x_gui.x_lab->s_name : ""),
-		x->x_gui.x_font, x->x_gui.x_fontsize * IEMGUI_ZOOM(x), sys_fontweight,
+		x->x_gui.x_font, x->x_gui.x_fontsize * zoom, sys_fontweight,
 		x->x_gui.x_lcol, x);
 	gradix_ftoa(x);
 	sys_vgui(".x%lx.c create text %d %d -text {%s} -anchor w "
 		" -font {{%s} -%d %s} -fill #%06x -tags %lxNUMBER\n",
-		canvas, xpos + half + 2*IEMGUI_ZOOM(x) - fine, ypos + half + d - 1,
-		x->x_buf, x->x_gui.x_font, x->x_gui.x_fontsize * IEMGUI_ZOOM(x),
+		canvas, xpos + half + 2*zoom, ypos + half + d,
+		x->x_buf, x->x_gui.x_font, x->x_gui.x_fontsize * zoom,
 		sys_fontweight, (x->x_gui.x_fsf.x_change ?
-		IEM_GUI_COLOR_EDITED : x->x_gui.x_fcol), x);
+		PD_COLOR_EDIT : x->x_gui.x_fcol), x);
 }
 
 static void gradix_draw_move(t_gradix *x, t_glist *glist) {
 	int xpos = text_xpix(&x->x_gui.x_obj, glist);
 	int ypos = text_ypix(&x->x_gui.x_obj, glist);
-	int iow = IOWIDTH * IEMGUI_ZOOM(x), ioh = OHEIGHT * IEMGUI_ZOOM(x);
-	int w = x->x_gui.x_w, fine = IEMGUI_ZOOM(x) - 1;
-	int h = x->x_gui.x_h - fine*2, half=h/2, rad=half-ioh;
-	int d = IEMGUI_ZOOM(x) + h/(34*IEMGUI_ZOOM(x));
-	int corner = h/4;
+	int zoom = IEMGUI_ZOOM(x), iow = IOWIDTH * zoom, ioh = OHEIGHT * zoom;
+	int w = x->x_gui.x_w, h = x->x_gui.x_h, d = zoom + h/(34*zoom);
+	int half=h/2, rad=half-ioh, fine=zoom-1, corner = h/4;
 	t_canvas *canvas = glist_getcanvas(glist);
 
 	sys_vgui(".x%lx.c coords %lxBASE1 %d %d %d %d %d %d %d %d %d %d %d %d\n",
@@ -468,30 +491,28 @@ static void gradix_draw_move(t_gradix *x, t_glist *glist) {
 		xpos, ypos);
 	sys_vgui(".x%lx.c coords %lxBASE2 %d %d %d %d\n",
 		canvas, x,
-		xpos - rad, ypos + IEMGUI_ZOOM(x) + ioh,
-		xpos + rad, ypos + h - IEMGUI_ZOOM(x) - ioh);
+		xpos - rad, ypos + zoom + ioh,
+		xpos + rad, ypos + h - zoom - ioh);
 	if (!x->x_gui.x_fsf.x_snd_able)
 		sys_vgui(".x%lx.c coords %lxOUT%d %d %d %d %d\n",
 			canvas, x, 0,
-			xpos, ypos + h + IEMGUI_ZOOM(x) - ioh,
+			xpos, ypos + h + zoom - ioh,
 			xpos + iow, ypos + h);
 	if (!x->x_gui.x_fsf.x_rcv_able)
 		sys_vgui(".x%lx.c coords %lxIN%d %d %d %d %d\n",
 			canvas, x, 0,
 			xpos, ypos,
-			xpos + iow, ypos - IEMGUI_ZOOM(x) + ioh);
+			xpos + iow, ypos - zoom + ioh);
 	sys_vgui(".x%lx.c coords %lxLABEL %d %d\n",
 		canvas, x,
-		xpos + x->x_gui.x_ldx * IEMGUI_ZOOM(x),
-		ypos + x->x_gui.x_ldy * IEMGUI_ZOOM(x) + fine*2);
+		xpos + x->x_gui.x_ldx * zoom,
+		ypos + x->x_gui.x_ldy * zoom);
 	sys_vgui(".x%lx.c coords %lxNUMBER %d %d\n",
-		canvas, x,
-		xpos + half + 2*IEMGUI_ZOOM(x) - fine, ypos + half + d - 1);
+		canvas, x, xpos + half + 2*zoom, ypos + half + d);
 }
 
 static void gradix_draw_erase(t_gradix* x, t_glist* glist) {
 	t_canvas *canvas = glist_getcanvas(glist);
-
 	sys_vgui(".x%lx.c delete %lxBASE1\n", canvas, x);
 	sys_vgui(".x%lx.c delete %lxBASE2\n", canvas, x);
 	sys_vgui(".x%lx.c delete %lxLABEL\n", canvas, x);
@@ -504,7 +525,6 @@ static void gradix_draw_erase(t_gradix* x, t_glist* glist) {
 
 static void gradix_draw_config(t_gradix* x, t_glist* glist) {
 	t_canvas *canvas = glist_getcanvas(glist);
-
 	sys_vgui(".x%lx.c itemconfigure %lxLABEL -font {{%s} -%d %s} "
 		" -fill #%06x -text {%s} \n",
 		canvas, x,
@@ -514,35 +534,38 @@ static void gradix_draw_config(t_gradix* x, t_glist* glist) {
 	sys_vgui(".x%lx.c itemconfigure %lxNUMBER -font {{%s} -%d %s} -fill #%06x \n",
 		canvas, x,
 		x->x_gui.x_font, x->x_gui.x_fontsize * IEMGUI_ZOOM(x), sys_fontweight,
-		(x->x_gui.x_fsf.x_selected ? IEM_GUI_COLOR_SELECTED : x->x_gui.x_fcol));
-	sys_vgui(".x%lx.c itemconfigure %lxBASE1 -fill white\n", canvas, x);
+		(x->x_gui.x_fsf.x_selected ? PD_COLOR_SELECT : x->x_gui.x_fcol));
+	sys_vgui(".x%lx.c itemconfigure %lxBASE1 -fill #%06x\n", canvas, x,
+		PD_COLOR_FG);
 	sys_vgui(".x%lx.c itemconfigure %lxBASE2 -outline #%06x\n", canvas, x,
-		(x->x_gui.x_fsf.x_selected ? IEM_GUI_COLOR_SELECTED : x->x_gui.x_fcol));
+		(x->x_gui.x_fsf.x_selected ? PD_COLOR_SELECT : x->x_gui.x_fcol));
 }
 
 static void gradix_draw_io(t_gradix* x,t_glist* glist, int old_snd_rcv_flags) {
 	int xpos = text_xpix(&x->x_gui.x_obj, glist);
 	int ypos = text_ypix(&x->x_gui.x_obj, glist);
-	int iow = IOWIDTH * IEMGUI_ZOOM(x), ioh = OHEIGHT * IEMGUI_ZOOM(x);
+	int zoom = IEMGUI_ZOOM(x), iow = IOWIDTH * zoom, ioh = OHEIGHT * zoom;
 	t_canvas *canvas = glist_getcanvas(glist);
 
-	if ((old_snd_rcv_flags & IEM_GUI_OLD_SND_FLAG) && !x->x_gui.x_fsf.x_snd_able) {
-		sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags %lxOUT%d\n",
+	if ((old_snd_rcv_flags & IEM_GUI_OLD_SND_FLAG) && !x->x_gui.x_fsf.x_snd_able)
+	{	sys_vgui(".x%lx.c create rectangle %d %d %d %d "
+			" -fill grey -outline #%06x -tags %lxOUT%d\n",
 			canvas,
-			xpos, ypos + x->x_gui.x_h + IEMGUI_ZOOM(x) - ioh,
+			xpos, ypos + x->x_gui.x_h + zoom - ioh,
 			xpos + iow, ypos + x->x_gui.x_h,
-			x, 0);
+			PD_COLOR_FG, x, 0);
 		/* keep these above outlet */
 		sys_vgui(".x%lx.c raise %lxLABEL %lxOUT%d\n", canvas, x, x, 0);
 		sys_vgui(".x%lx.c raise %lxNUMBER %lxLABEL\n", canvas, x, x);   }
 	if (!(old_snd_rcv_flags & IEM_GUI_OLD_SND_FLAG) && x->x_gui.x_fsf.x_snd_able)
 		sys_vgui(".x%lx.c delete %lxOUT%d\n", canvas, x, 0);
-	if ((old_snd_rcv_flags & IEM_GUI_OLD_RCV_FLAG) && !x->x_gui.x_fsf.x_rcv_able) {
-		sys_vgui(".x%lx.c create rectangle %d %d %d %d -fill black -tags %lxIN%d\n",
+	if ((old_snd_rcv_flags & IEM_GUI_OLD_RCV_FLAG) && !x->x_gui.x_fsf.x_rcv_able)
+	{	sys_vgui(".x%lx.c create rectangle %d %d %d %d "
+			" -fill grey -outline #%06x -tags %lxIN%d\n",
 			canvas,
 			xpos, ypos,
-			xpos + iow, ypos - IEMGUI_ZOOM(x) + ioh,
-			x, 0);
+			xpos + iow, ypos - zoom + ioh,
+			PD_COLOR_FG, x, 0);
 		/* keep these above inlet */
 		sys_vgui(".x%lx.c raise %lxLABEL %lxIN%d\n", canvas, x, x, 0);
 		sys_vgui(".x%lx.c raise %lxNUMBER %lxLABEL\n", canvas, x, x);   }
@@ -560,14 +583,14 @@ static void gradix_draw_select(t_gradix *x, t_glist *glist) {
 			x->x_buf[0] = 0;
 			sys_queuegui(x, x->x_gui.x_glist, gradix_draw_update);   }
 		sys_vgui(".x%lx.c itemconfigure %lxBASE1 -fill #%06x\n",
-			canvas, x, IEM_GUI_COLOR_SELECTED);
+			canvas, x, PD_COLOR_SELECT);
 		sys_vgui(".x%lx.c itemconfigure %lxBASE2 -outline #%06x\n",
-			canvas, x, IEM_GUI_COLOR_SELECTED);
+			canvas, x, PD_COLOR_SELECT);
 		sys_vgui(".x%lx.c itemconfigure %lxNUMBER -fill #%06x\n",
-			canvas, x, IEM_GUI_COLOR_SELECTED);   }
+			canvas, x, PD_COLOR_SELECT);   }
 	else
 	{	sys_vgui(".x%lx.c itemconfigure %lxBASE1 -fill #%06x\n",
-			canvas, x, IEM_GUI_COLOR_NORMAL);
+			canvas, x, PD_COLOR_FG);
 		sys_vgui(".x%lx.c itemconfigure %lxBASE2 -outline #%06x\n",
 			canvas, x, x->x_gui.x_fcol);
 		sys_vgui(".x%lx.c itemconfigure %lxNUMBER -fill #%06x\n",
@@ -613,24 +636,21 @@ static void gradix_save(t_gobj *z, t_binbuf *b) {
 		clock_unset(x->x_clock_reset);
 		sys_queuegui(x, x->x_gui.x_glist, gradix_draw_update);   }
 	binbuf_addv(b, "ssiisiiffiisssiiiisssiiifi", gensym("#X"), gensym("obj"),
-				(int)x->x_gui.x_obj.te_xpix, (int)x->x_gui.x_obj.te_ypix,
-				gensym("gradix"), x->x_numwidth, x->x_gui.x_h/IEMGUI_ZOOM(x),
-				(t_float)x->x_min, (t_float)x->x_max,
-				x->x_lin0_log1, iem_symargstoint(&x->x_gui.x_isa),
-				srl[0], srl[1], srl[2],
-				x->x_gui.x_ldx, x->x_gui.x_ldy,
-				iem_fstyletoint(&x->x_gui.x_fsf), x->x_gui.x_fontsize,
-				bflcol[0], bflcol[1], bflcol[2],
-				x->x_base, x->x_prec, x->x_e,
-				x->x_val, x->x_log_height);
+		(int)x->x_gui.x_obj.te_xpix, (int)x->x_gui.x_obj.te_ypix,
+		gensym("gradix"), x->x_numwidth, x->x_zh,
+		(t_float)x->x_min, (t_float)x->x_max, x->x_lin0_log1,
+		iem_symargstoint(&x->x_gui.x_isa), srl[0], srl[1], srl[2],
+		x->x_gui.x_ldx, x->x_gui.x_ldy,
+		iem_fstyletoint(&x->x_gui.x_fsf), x->x_gui.x_fontsize,
+		bflcol[0], bflcol[1], bflcol[2],
+		x->x_base, x->x_prec, x->x_e, x->x_val, x->x_log_height);
 	binbuf_addv(b, ";");
 }
 
 static int gradix_check_minmax(t_gradix *x, double min, double max) {
 	int ret = 0;
-
 	if (x->x_lin0_log1)
-	{	if ((min == 0.0) && (max == 0.0))
+	{	if (min==0.0 && max==0.0)
 			max = 1.0;
 		if (max > 0.0)
 		{	if (min <= 0.0)
@@ -638,12 +658,14 @@ static int gradix_check_minmax(t_gradix *x, double min, double max) {
 		else
 		{	if (min > 0.0)
 				max = 0.01 * min;   }   }
+	else if (min==0.0 && max==0.0)
+		return(ret);
 	x->x_min = min;
 	x->x_max = max;
 	if (x->x_val < x->x_min)
 	{	x->x_val = x->x_min;
 		ret = 1;   }
-	if (x->x_val > x->x_max)
+	else if (x->x_val > x->x_max)
 	{	x->x_val = x->x_max;
 		ret = 1;   }
 	if (x->x_lin0_log1)
@@ -670,7 +692,7 @@ static void gradix_properties(t_gobj *z, t_glist *owner) {
 			%s %d %d \
 			%d %d \
 			#%06x #%06x #%06x\n",
-			x->x_numwidth, MINDIGITS, x->x_gui.x_h/IEMGUI_ZOOM(x), IEM_GUI_MINSIZE,
+			x->x_numwidth, MINDIGITS, x->x_zh, IEM_GUI_MINSIZE,
 			x->x_min, x->x_max, 0,/*no_schedule*/
 			x->x_lin0_log1, x->x_gui.x_isa.x_loadinit, -1,
 				x->x_log_height, /*no multi, but iem-characteristic*/
@@ -701,12 +723,11 @@ static void gradix_dialog(t_gradix *x, t_symbol *s, int argc, t_atom *argv) {
 	if (lilo != 0) lilo = 1;
 	x->x_lin0_log1 = lilo;
 	sr_flags = iemgui_dialog(&x->x_gui, srl, argc, argv);
-	if (w < MINDIGITS)
-		w = MINDIGITS;
+	if (w < MINDIGITS) w = MINDIGITS;
 	x->x_numwidth = w;
-	if (h < IEM_GUI_MINSIZE)
-		h = IEM_GUI_MINSIZE;
-	x->x_gui.x_h = h * IEMGUI_ZOOM(x);
+	if (h < IEM_GUI_MINSIZE) h = IEM_GUI_MINSIZE;
+	x->x_zh = h;
+	x->x_gui.x_h = h * IEMGUI_ZOOM(x) - (IEMGUI_ZOOM(x)-1)*2;
 	if (log_height < 10)
 		log_height = 10;
 	x->x_log_height = log_height;
@@ -723,9 +744,11 @@ static void gradix_dialog(t_gradix *x, t_symbol *s, int argc, t_atom *argv) {
 
 static void gradix_motion(t_gradix *x, t_floatarg dx, t_floatarg dy) {
 	double k2 = 1.0;
-
+	ufloat uf = {.f = x->x_val};
+	if (uf.ex > 148) k2 *= pow(2, uf.ex - 148);
 	if (x->x_gui.x_fsf.x_finemoved)
-		k2 = 1 / (double)(x->x_base * x->x_base);
+		k2 /= (double)(x->x_base * x->x_base);
+
 	if (x->x_lin0_log1)
 		x->x_val *= pow(x->x_k, -k2*dy);
 	else x->x_val -= k2*dy;
@@ -736,13 +759,14 @@ static void gradix_motion(t_gradix *x, t_floatarg dx, t_floatarg dy) {
 }
 
 static void gradix_set(t_gradix *x, t_floatarg f) {
-	if (x->x_val != f)
+	ufloat uf = {.f = f}, vf = {.f = x->x_val};
+	if (uf.u32 != vf.u32)
 	{	x->x_val = f;
 		gradix_clip(x);
 		sys_queuegui(x, x->x_gui.x_glist, gradix_draw_update);   }
 }
 
-static void gradix_float(t_gradix *x, t_floatarg f) {
+static void gradix_float(t_gradix *x, t_float f) {
 	gradix_set(x, f);
 	if (x->x_gui.x_fsf.x_put_in2out)
 		gradix_bang(x);
@@ -763,19 +787,14 @@ static void gradix_click(t_gradix *x, t_floatarg xpos, t_floatarg ypos,
 static int gradix_newclick(t_gobj *z, struct _glist *glist,
  int xpix, int ypix, int shift, int alt, int dbl, int doit) {
 	t_gradix* x = (t_gradix *)z;
-
 	if (doit)
 	{	gradix_click( x, (t_floatarg)xpix, (t_floatarg)ypix,
 			(t_floatarg)shift, 0, (t_floatarg)alt);
-		if (shift)
-			x->x_gui.x_fsf.x_finemoved = 1;
-		else
-			x->x_gui.x_fsf.x_finemoved = 0;
+		x->x_gui.x_fsf.x_finemoved = (shift != 0);
 		if (!x->x_gui.x_fsf.x_change)
 		{	clock_delay(x->x_clock_wait, 50);
 			x->x_gui.x_fsf.x_change = 1;
 			clock_delay(x->x_clock_reset, 3000);
-
 			x->x_buf[0] = 0;   }
 		else
 		{	x->x_gui.x_fsf.x_change = 0;
@@ -795,16 +814,14 @@ static void gradix_log_height(t_gradix *x, t_floatarg lh) {
 
 static void gradix_size(t_gradix *x, t_symbol *s, int ac, t_atom *av) {
 	int h, w;
-
 	w = (int)atom_getfloatarg(0, ac, av);
-	if (w < MINDIGITS)
-		w = MINDIGITS;
+	if (w < MINDIGITS) w = MINDIGITS;
 	x->x_numwidth = w;
 	if (ac > 1)
 	{	h = (int)atom_getfloatarg(1, ac, av);
-		if (h < IEM_GUI_MINSIZE)
-			h = IEM_GUI_MINSIZE;
-		x->x_gui.x_h = h * IEMGUI_ZOOM(x);   }
+		if (h < IEM_GUI_MINSIZE) h = IEM_GUI_MINSIZE;
+		x->x_zh = h;
+		x->x_gui.x_h = h * IEMGUI_ZOOM(x) - (IEMGUI_ZOOM(x)-1)*2;   }
 	gradix_calc_fontwidth(x);
 	iemgui_size((void *)x, &x->x_gui);
 }
@@ -894,7 +911,6 @@ static void gradix_key(void *z, t_floatarg fkey) {
 			sys_queuegui(x, x->x_gui.x_glist, gradix_draw_update);   }   }
 	else if ((c == '\b') || (c == 127))
 	{	int sl = (int)strlen(x->x_buf) - 1;
-
 		if (sl < 0)
 			sl = 0;
 		x->x_buf[sl] = 0;
@@ -926,9 +942,9 @@ static void *gradix_new(t_symbol *s, int argc, t_atom *argv) {
 	double min = 0, max = 0, v = 0.0;
 	int base=0, prec=0, e=0;
 
-	x->x_gui.x_bcol = 0x00;
-	x->x_gui.x_fcol = 0xFCFCFC;
-	x->x_gui.x_lcol = 0xFCFCFC;
+	x->x_gui.x_bcol = PD_COLOR_BG;
+	x->x_gui.x_fcol = PD_COLOR_FG;
+	x->x_gui.x_lcol = PD_COLOR_FG;
 
 	if (argc>=20 && IS_A_FLOAT(argv,0) && IS_A_FLOAT(argv,1)
 	 && IS_A_FLOAT(argv,2) && IS_A_FLOAT(argv,3)
@@ -960,13 +976,12 @@ static void *gradix_new(t_symbol *s, int argc, t_atom *argv) {
 	{	base = (int)atom_getfloatarg(0, argc, argv);
 		prec = (int)atom_getfloatarg(1, argc, argv);
 		e    = (int)atom_getfloatarg(2, argc, argv);   }
-	x->x_base = base ? base : 16;
-	x->x_prec = prec ? prec : 6;
-	gradix_base(x, x->x_base);
+	gradix_base(x, base ? base : 16);
+	gradix_precision(x, prec ? prec : 6);
 	x->x_e = e ? gradix_bounds(e) : x->x_base;
 
-	if (argc==21 && IS_A_FLOAT(argv,19))
-		log_height = (int)atom_getfloatarg(19, argc, argv);
+	if (argc==21 && IS_A_FLOAT(argv,20))
+		log_height = (int)atom_getfloatarg(20, argc, argv);
 	x->x_gui.x_draw = (t_iemfunptr)gradix_draw;
 	x->x_gui.x_fsf.x_snd_able = 1;
 	x->x_gui.x_fsf.x_rcv_able = 1;
@@ -999,7 +1014,7 @@ static void *gradix_new(t_symbol *s, int argc, t_atom *argv) {
 	if (w < MINDIGITS) w = MINDIGITS;
 	x->x_numwidth = w;
 	if (h < IEM_GUI_MINSIZE) h = IEM_GUI_MINSIZE;
-	x->x_gui.x_h = h;
+	x->x_gui.x_h = x->x_zh = h;
 
 	x->x_buf[0] = 0;
 	gradix_check_minmax(x, min, max);
@@ -1075,7 +1090,7 @@ void gradix_setup(void) {
 		gensym("be"), A_FLOAT, 0);
 	class_addmethod(gradix_class, (t_method)gradix_precision,
 		gensym("p"), A_FLOAT, 0);
-	class_addmethod(gradix_class, (t_method)iemgui_zoom,
+	class_addmethod(gradix_class, (t_method)gradix_zoom,
 		gensym("zoom"), A_CANT, 0);
 	gradix_widgetbehavior.w_getrectfn =    gradix_getrect;
 	gradix_widgetbehavior.w_displacefn =   iemgui_displace;
