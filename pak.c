@@ -54,7 +54,7 @@ static void *pak_new(t_symbol *s, int argc, t_atom *argv) {
 
 	t_atomtype *tp = x->x_type;
 	t_pak_pxy **pp = x->x_ins;
-	for (i=0, ap=argv, vp=x->x_vec; i<argc; i++, ap++, vp++, tp++)
+	for (i=0, ap=argv, vp=x->x_vec; i<argc; ap++, i++, vp++, tp++)
 	{	if (ap->a_type == A_FLOAT)
 		{	*tp = A_GIMME;
 			*vp = *ap;   }
@@ -139,8 +139,8 @@ static void pak_bang(t_pak *x) {
 }
 
 static void pak_pxy_bang(t_pak_pxy *p) {
-	int i = p->p_i;
 	t_pak *x = p->p_x;
+	int i = p->p_i;
 	t_atomtype type = x->x_type[i];
 	if (type == A_SYMBOL || type == A_GIMME)
 		SETSYMBOL(x->x_vec+i, gensym("bang"));

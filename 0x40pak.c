@@ -4,23 +4,25 @@
 /* -------------------------- reverse pak ------------------------------ */
 
 static t_class *rpak_class;
-static t_class *rpak_proxy_class;
+static t_class *rpak_proxy;
 
-typedef struct _rpak {
+typedef struct _rpak t_rpak;
+
+typedef struct _rpak_pxy {
+	t_object p_obj;
+	t_int p_i;                  /* inlet index */
+	t_gpointer *p_ptr;          /* reference to a pointer */
+	t_rpak *p_x;
+} t_rpak_pxy;
+
+struct _rpak {
 	t_object x_obj;
 	t_int x_n, x_nptr, x_mute;  /* number of args, number of pointers, mute */
 	t_atom *x_vec, *x_outvec;   /* input values, space for output values */
 	t_atomtype *x_type;         /* value types */
 	t_gpointer *x_ptr;          /* the pointers */
-	struct _rpak_proxy **x_ins; /* proxy inlets */
-} t_rpak;
-
-typedef struct _rpak_proxy {
-	t_object p_obj;
-	t_int p_i;                  /* inlet index */
-	t_gpointer *p_ptr;          /* reference to a pointer */
-	t_rpak *p_owner;
-} t_rpak_proxy;
+	t_rpak_pxy **x_ins;         /* proxy inlets */
+};
 
 static void *rpak_new(t_symbol *s, int argc, t_atom *argv) {
 	t_rpak *x = (t_rpak *)pd_new(rpak_class);
@@ -39,7 +41,7 @@ static void *rpak_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_vec = (t_atom *)getbytes(argc * sizeof(*x->x_vec));
 	x->x_outvec = (t_atom *)getbytes(argc * sizeof(*x->x_outvec));
 	x->x_type = (t_atomtype *)getbytes(argc * sizeof(*x->x_type));
-	x->x_ins = (t_rpak_proxy **)getbytes((argc-1) * sizeof(t_rpak_proxy *));
+	x->x_ins = (t_rpak_pxy **)getbytes((argc-1) * sizeof(t_rpak_pxy *));
 
 	for (i=argc, ap=argv; i--; ap++)
 	{	if (ap->a_type == A_FLOAT) nptr++;
@@ -51,7 +53,7 @@ static void *rpak_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_nptr = nptr;
 
 	t_atomtype *tp = x->x_type;
-	t_rpak_proxy **pp = x->x_ins;
+	t_rpak_pxy **pp = x->x_ins;
 	for (i=0, ap=argv+argc, vp=x->x_vec; ap--, i<argc; i++, vp++, tp++)
 	{	if (ap->a_type == A_FLOAT)
 		{	*tp = A_GIMME;
@@ -78,11 +80,11 @@ static void *rpak_new(t_symbol *s, int argc, t_atom *argv) {
 
 		int hasptr = (*tp==A_POINTER || *tp==A_GIMME);
 		if (i)
-		{	*pp = (t_rpak_proxy *)pd_new(rpak_proxy_class);
-			(*pp)->p_owner = x;
+		{	*pp = (t_rpak_pxy *)pd_new(rpak_proxy);
+			(*pp)->p_x = x;
 			(*pp)->p_i = i;
 			if (hasptr) (*pp)->p_ptr = gp;
-			inlet_new((t_object *)x, (t_pd *)*pp, 0, 0);
+			inlet_new(&x->x_obj, (t_pd *)*pp, 0, 0);
 			pp++;   }
 		if (hasptr)
 		{	gpointer_init(gp);
@@ -96,6 +98,12 @@ static const char *rpak_check(t_atomtype type) {
 	else if (type==A_SYMBOL) return "symbol";
 	else if (type==A_POINTER) return "pointer";
 	else return "null";
+}
+
+static void rpak_error(t_rpak *x, int i, const char *t) {
+	if (i) pd_error(x, "inlet: expected '%s' but got '%s'",
+		rpak_check(x->x_type[i]), t);
+	else pd_error(x, "@pak_%s: wrong type", t);
 }
 
 static void rpak_bang(t_rpak *x) {
@@ -130,8 +138,8 @@ static void rpak_bang(t_rpak *x) {
 	else x->x_outvec = outvec;
 }
 
-static void rpak_proxy_bang(t_rpak_proxy *p) {
-	t_rpak *x = p->p_owner;
+static void rpak_pxy_bang(t_rpak_pxy *p) {
+	t_rpak *x = p->p_x;
 	int i = x->x_n - p->p_i - 1;
 	t_atomtype type = x->x_type[i];
 	if (type == A_SYMBOL || type == A_GIMME)
@@ -140,137 +148,114 @@ static void rpak_proxy_bang(t_rpak_proxy *p) {
 		rpak_check(type), "bang");
 }
 
-static int rpak_pointer_all(t_rpak *x, t_gpointer *ptr, t_gpointer *gp, int i) {
+
+static void rpak_p(t_rpak *x, t_gpointer *ptr, t_gpointer *gp, int i) {
 	t_atomtype type = x->x_type[i];
 	if (type == A_POINTER || type == A_GIMME)
 	{	gpointer_unset(ptr);
 		*ptr = *gp;
 		if (gp->gp_stub) gp->gp_stub->gs_refcount++;
 		SETPOINTER(x->x_vec+i, ptr);
-		return 1;   }
-	else return 0;
+		if (i >= x->x_n-1) rpak_bang(x);   }
+	else if ((x->x_mute>>i) & 1) rpak_error(x, i, "pointer");
 }
-
 static void rpak_pointer(t_rpak *x, t_gpointer *gp) {
-	int i = x->x_n - 1;
+	int i = x->x_n-1;
 	t_gpointer *ptr = (i) ? x->x_ins[i-1]->p_ptr : x->x_ptr;
-	if (rpak_pointer_all(x, ptr, gp, i)) rpak_bang(x);
-	else if ((x->x_mute>>i)&1) pd_error(x, "@pak_pointer: wrong type");
+	rpak_p(x, ptr, gp, i);
+}
+static void rpak_pxy_pointer(t_rpak_pxy *p, t_gpointer *gp) {
+	t_rpak *x = p->p_x;
+	int i = x->x_n-1 - p->p_i;
+	t_gpointer *ptr = (i) ? x->x_ins[i-1]->p_ptr : x->x_ptr;
+	rpak_p(x, ptr, gp, i);
 }
 
-static void rpak_proxy_pointer(t_rpak_proxy *p, t_gpointer *gp) {
-	t_rpak *x = p->p_owner;
-	int i = x->x_n - p->p_i - 1;
-	t_gpointer *ptr = (i) ? x->x_ins[i-1]->p_ptr : x->x_ptr;
-	if (!rpak_pointer_all(x, ptr, gp, i) && ((x->x_mute>>i)&1))
-		pd_error(x, "inlet: expected '%s' but got '%s'",
-			rpak_check(x->x_type[i]), "pointer");
-}
 
-static int rpak_float_all(t_rpak *x, t_float f, int i) {
+static void rpak_f(t_rpak *x, t_float f, int i) {
 	t_atomtype type = x->x_type[i];
 	if (type == A_FLOAT || type == A_GIMME)
 	{	SETFLOAT(x->x_vec+i, f);
-		return 1;   }
-	else return 0;
+		if (i >= x->x_n-1) rpak_bang(x);   }
+	else if ((x->x_mute>>i) & 1) rpak_error(x, i, "float");
 }
-
 static void rpak_float(t_rpak *x, t_float f) {
-	int i = x->x_n - 1;
-	if (rpak_float_all(x, f, i)) rpak_bang(x);
-	else if ((x->x_mute>>i)&1) pd_error(x, "@pak_float: wrong type");
+	rpak_f(x, f, x->x_n-1);
+}
+static void rpak_pxy_float(t_rpak_pxy *p, t_float f) {
+	rpak_f(p->p_x, f, p->p_x->x_n-1 - p->p_i);
 }
 
-static void rpak_proxy_float(t_rpak_proxy *p, t_float f) {
-	t_rpak *x = p->p_owner;
-	int i = x->x_n - p->p_i - 1;
-	if (!rpak_float_all(x, f, i) && ((x->x_mute>>i)&1))
-		pd_error(x, "inlet: expected '%s' but got '%s'",
-			rpak_check(x->x_type[i]), "float");
-}
 
-static int rpak_symbol_all(t_rpak *x, t_symbol *s, int i) {
+static void rpak_s(t_rpak *x, t_symbol *s, int i) {
 	t_atomtype type = x->x_type[i];
 	if (type == A_SYMBOL || type == A_GIMME)
 	{	SETSYMBOL(x->x_vec+i, s);
-		return 1;   }
-	else return 0;
+		if (i >= x->x_n-1) rpak_bang(x);   }
+	else if ((x->x_mute>>i) & 1) rpak_error(x, i, "symbol");
 }
-
 static void rpak_symbol(t_rpak *x, t_symbol *s) {
-	int i = x->x_n - 1;
-	if (rpak_symbol_all(x, s, i)) rpak_bang(x);
-	else if ((x->x_mute>>i)&1) pd_error(x, "@pak_symbol: wrong type");
+	rpak_s(x, s, x->x_n-1);
+}
+static void rpak_pxy_symbol(t_rpak_pxy *p, t_symbol *s) {
+	rpak_s(p->p_x, s, p->p_x->x_n-1 - p->p_i);
 }
 
-static void rpak_proxy_symbol(t_rpak_proxy *p, t_symbol *s) {
-	t_rpak *x = p->p_owner;
-	int i = x->x_n - p->p_i - 1;
-	if (!rpak_symbol_all(x, s, i) && ((x->x_mute>>i)&1))
-		pd_error(x, "inlet: expected '%s' but got '%s'",
-			rpak_check(x->x_type[i]), "symbol");
-}
 
-static int rpak_iterate(t_rpak *x, t_atom *v, t_gpointer *ptr, t_atom a, t_atomtype t) {
+static int rpak_set(t_rpak *x, t_atom *v, t_gpointer *p, t_atom a, t_atomtype t) {
 	if (t==a.a_type || t==A_GIMME)
 	{	if (a.a_type == A_POINTER)
 		{	t_gpointer *gp = a.a_w.w_gpointer;
-			gpointer_unset(ptr);
-			*ptr = *gp;
+			gpointer_unset(p);
+			*p = *gp;
 			if (gp->gp_stub) gp->gp_stub->gs_refcount++;
-			SETPOINTER(v, ptr);   }
+			SETPOINTER(v, p);   }
 		else *v = a;
 		return 1;   }
 	else return 0;
 }
 
-static int rpak_list_all(t_rpak *x, t_symbol *s, int ac, t_atom *av, int i) {
+static int rpak_l(t_rpak *x, t_symbol *s, int ac, t_atom *av, int i) {
 	int result = 1;
 	t_atom *vp = x->x_vec + i;
 	t_atomtype *tp = x->x_type + i;
-	t_rpak_proxy **pp = x->x_ins + (i-1);
+	t_rpak_pxy **pp = x->x_ins + (i-1);
 	for (i++; ac-- && i--; vp--, tp--, pp--, av++)
 	{	if (av->a_type==A_SYMBOL && !strcmp(av->a_w.w_symbol->s_name, "."))
 			continue;
 		t_gpointer *ptr = i ? (*pp)->p_ptr : x->x_ptr;
-		if (!rpak_iterate(x, vp, ptr, *av, *tp) && ((x->x_mute>>i)&1))
-		{	if (i>=x->x_n-1)
+		if (!rpak_set(x, vp, ptr, *av, *tp) && ((x->x_mute>>i) & 1))
+		{	if (i >= x->x_n-1)
 			{	pd_error(x, "@pak_%s: wrong type", rpak_check(av->a_type));
 				result = 0;   }
 			else pd_error(x, "inlet: expected '%s' but got '%s'",
 				rpak_check(*tp), rpak_check(av->a_type));   }   }
 	return result;
 }
-
 static void rpak_list(t_rpak *x, t_symbol *s, int ac, t_atom *av) {
-	if (rpak_list_all(x, 0, ac, av, x->x_n-1)) rpak_bang(x);
+	if (rpak_l(x, 0, ac, av, x->x_n-1)) rpak_bang(x);
+}
+static void rpak_pxy_list(t_rpak_pxy *p, t_symbol *s, int ac, t_atom *av) {
+	rpak_l(p->p_x, s, ac, av, p->p_x->x_n-1 - p->p_i);
 }
 
-static void rpak_proxy_list(t_rpak_proxy *p, t_symbol *s, int ac, t_atom *av) {
-	t_rpak *x = p->p_owner;
-	int i = x->x_n - p->p_i - 1;
-	rpak_list_all(x, s, ac, av, i);
-}
 
-static int rpak_anything_all(t_rpak *x, t_symbol *s, int ac, t_atom *av, int j) {
-	t_atom *av2 = (t_atom *)getbytes((ac + 1) * sizeof(t_atom));
+static int rpak_a(t_rpak *x, t_symbol *s, int ac, t_atom *av, int j) {
+	t_atom *av2 = (t_atom *)getbytes((ac+1) * sizeof(t_atom));
 	int i;
 	for (i = 0; i < ac; i++) av2[i+1] = av[i];
 	SETSYMBOL(av2, s);
-	int result = rpak_list_all(x, 0, ac+1, av2, j);
-	freebytes(av2, (ac + 1) * sizeof(t_atom));
+	int result = rpak_l(x, 0, ac+1, av2, j);
+	freebytes(av2, (ac+1) * sizeof(t_atom));
 	return result;
 }
-
 static void rpak_anything(t_rpak *x, t_symbol *s, int ac, t_atom *av) {
-	if (rpak_anything_all(x, s, ac, av, x->x_n-1)) rpak_bang(x);
+	if (rpak_a(x, s, ac, av, x->x_n-1)) rpak_bang(x);
+}
+static void rpak_pxy_anything(t_rpak_pxy *p, t_symbol *s, int ac, t_atom *av) {
+	rpak_a(p->p_x, s, ac, av, p->p_x->x_n-1 - p->p_i);
 }
 
-static void rpak_proxy_anything(t_rpak_proxy *p, t_symbol *s, int ac, t_atom *av) {
-	t_rpak *x = p->p_owner;
-	int i = x->x_n - p->p_i - 1;
-	rpak_anything_all(p->p_owner, s, ac, av, i);
-}
 
 static void rpak_mute(t_rpak *x, t_floatarg f) {
 	x->x_mute = ~(int)f;
@@ -283,14 +268,14 @@ static void rpak_free(t_rpak *x) {
 	for (gp = x->x_ptr, i = (int)x->x_nptr; i--; gp++)
 		gpointer_unset(gp);
 
-	t_rpak_proxy **pp;
+	t_rpak_pxy **pp;
 	for (pp=x->x_ins, i=pn; i--; pp++)
 		if (*pp) pd_free((t_pd *)*pp);
 
 	freebytes(x->x_vec, n * sizeof(*x->x_vec));
 	freebytes(x->x_outvec, n * sizeof(*x->x_outvec));
 	freebytes(x->x_type, n * sizeof(*x->x_type));
-	freebytes(x->x_ins, pn * sizeof(t_rpak_proxy *));
+	freebytes(x->x_ins, pn * sizeof(t_rpak_pxy *));
 	freebytes(x->x_ptr, x->x_nptr * sizeof(*x->x_ptr));
 }
 
@@ -309,12 +294,12 @@ void setup_0x40pak(void) {
 		gensym("mute"), A_FLOAT, 0);
 	class_sethelpsymbol(rpak_class, gensym("rpak"));
 
-	rpak_proxy_class = class_new(gensym("_@pak_proxy"), 0, 0,
-		sizeof(t_rpak_proxy), CLASS_PD | CLASS_NOINLET, 0);
-	class_addbang(rpak_proxy_class, rpak_proxy_bang);
-	class_addpointer(rpak_proxy_class, rpak_proxy_pointer);
-	class_addfloat(rpak_proxy_class, rpak_proxy_float);
-	class_addsymbol(rpak_proxy_class, rpak_proxy_symbol);
-	class_addlist(rpak_proxy_class, rpak_proxy_list);
-	class_addanything(rpak_proxy_class, rpak_proxy_anything);
+	rpak_proxy = class_new(gensym("_@pak_proxy"), 0, 0,
+		sizeof(t_rpak_pxy), CLASS_PD | CLASS_NOINLET, 0);
+	class_addbang(rpak_proxy, rpak_pxy_bang);
+	class_addpointer(rpak_proxy, rpak_pxy_pointer);
+	class_addfloat(rpak_proxy, rpak_pxy_float);
+	class_addsymbol(rpak_proxy, rpak_pxy_symbol);
+	class_addlist(rpak_proxy, rpak_pxy_list);
+	class_addanything(rpak_proxy, rpak_pxy_anything);
 }

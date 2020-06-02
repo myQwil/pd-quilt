@@ -31,8 +31,8 @@
 #X msg 267 110 a;
 #X msg 347 110 a b c;
 #X msg 377 141 foo . .;
-#X msg 387 166 bar a .;
-#X msg 396 191 baz b c;
+#X msg 387 166 bar d .;
+#X msg 396 191 baz e f;
 #X msg 141 164 dud;
 #X connect 1 0 10 0;
 #X connect 2 0 10 0;

@@ -11,9 +11,9 @@
 #X obj 158 228 \$2;
 #X obj 144 256 sel;
 #X floatatom 180 122 5 0 0 0 - #0-nbx -;
-#X obj 181 140 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
+#X obj 181 143 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
 -243850 -75900 -1;
-#X obj 201 140 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
+#X obj 201 143 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
 -243850 -75900 -1;
 #X obj 60 228 \$1;
 #X obj 65 256 sel;
@@ -51,4 +51,4 @@
 #X connect 18 1 6 0;
 #X connect 19 0 7 1;
 #X connect 19 1 7 0;
-#X coords 0 -1 1 1 42 42 2 180 120;
+#X coords 0 -1 1 1 42 45 2 180 120;
