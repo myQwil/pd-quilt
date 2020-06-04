@@ -214,7 +214,7 @@ typedef union {
 #undef PD_COLOR_SELECT
 #undef PD_COLOR_EDIT
 #define PD_COLOR_FG           0xFCFCFC
-#define PD_COLOR_BG           0x000000
+#define PD_COLOR_BG           0xBBBBBB
 #define PD_COLOR_SELECT       0x00FFFF
 #define PD_COLOR_EDIT         0xFF9999
 
@@ -278,9 +278,13 @@ static void radix_clip(t_radix *x) {
 }
 
 static void radix_calc_fontwidth(t_radix *x) {
-	int rad = x->x_zh * IEMGUI_ZOOM(x) * 0.6667;
+	int font = x->x_gui.x_fontsize;
+	if (x->x_gui.x_fsf.x_font_style == 1) font *= 0.95;
+	else if (x->x_gui.x_fsf.x_font_style == 2) font *= 0.85;
+	int f = font / 10;
+	font -= (font + 2 + f) >> 2;
 	int w = x->x_numwidth ? x->x_numwidth : x->x_bufsize;
-	x->x_gui.x_w = w * glist_fontwidth(x->x_gui.x_glist) + rad;
+	x->x_gui.x_w = (w*font + x->x_zh-(f<<2)) * IEMGUI_ZOOM(x);
 }
 
 static void radix_precision(t_radix *x, t_floatarg f) {
@@ -595,13 +599,13 @@ static void radix_draw_new(t_radix *x, t_glist *glist) {
 		xpos + w, ypos + h,
 		xpos, ypos + h,
 		xpos, ypos,
-		zoom, PD_COLOR_FG, x);
+		zoom, x->x_gui.x_bcol, x);
 	sys_vgui(".x%lx.c create arc %d %d %d %d -start 270 -extent 180 -width %d "
 		" -outline #%06x -tags %lxBASE2\n",
 		canvas,
 		xpos - rad, ypos + zoom + ioh,
 		xpos + rad, ypos + h - zoom - ioh,
-		zoom, x->x_gui.x_fcol, x);
+		zoom, x->x_gui.x_bcol, x);
 	if (!x->x_gui.x_fsf.x_snd_able)
 		sys_vgui(".x%lx.c create rectangle %d %d %d %d "
 			" -fill grey -outline #%06x -tags [list %lxOUT%d outlet]\n",
@@ -695,9 +699,9 @@ static void radix_draw_config(t_radix* x, t_glist* glist) {
 		x->x_gui.x_font, x->x_gui.x_fontsize * IEMGUI_ZOOM(x), sys_fontweight,
 		(x->x_gui.x_fsf.x_selected ? PD_COLOR_SELECT : x->x_gui.x_fcol));
 	sys_vgui(".x%lx.c itemconfigure %lxBASE1 -fill #%06x\n", canvas, x,
-		PD_COLOR_FG);
+		x->x_gui.x_bcol);
 	sys_vgui(".x%lx.c itemconfigure %lxBASE2 -outline #%06x\n", canvas, x,
-		(x->x_gui.x_fsf.x_selected ? PD_COLOR_SELECT : x->x_gui.x_fcol));
+		(x->x_gui.x_fsf.x_selected ? PD_COLOR_SELECT : x->x_gui.x_bcol));
 }
 
 static void radix_draw_io(t_radix* x,t_glist* glist, int old_snd_rcv_flags) {
@@ -749,9 +753,9 @@ static void radix_draw_select(t_radix *x, t_glist *glist) {
 			canvas, x, PD_COLOR_SELECT);   }
 	else
 	{	sys_vgui(".x%lx.c itemconfigure %lxBASE1 -fill #%06x\n",
-			canvas, x, PD_COLOR_FG);
+			canvas, x, x->x_gui.x_bcol);
 		sys_vgui(".x%lx.c itemconfigure %lxBASE2 -outline #%06x\n",
-			canvas, x, x->x_gui.x_fcol);
+			canvas, x, x->x_gui.x_bcol);
 		sys_vgui(".x%lx.c itemconfigure %lxNUMBER -fill #%06x\n",
 			canvas, x, x->x_gui.x_fcol);   }
 }
