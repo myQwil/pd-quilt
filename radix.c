@@ -181,6 +181,15 @@ obstacle to adoption, that text has been removed.
 #include <float.h>
 #include <limits.h>
 
+#ifdef _WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
+
+#define MINDIGITS 0
+#define MINFONT   4
+
 typedef union {
 	float f;
 	struct { unsigned mnt:23,ex:8,sgn:1; } u;
@@ -198,15 +207,6 @@ typedef union {
 #else
 #define LEAD 2
 #endif
-
-#ifdef _WIN32
-#include <io.h>
-#else
-#include <unistd.h>
-#endif
-
-#define MINDIGITS 0
-#define MINFONT   4
 
 // for a dark theme of pd
 #undef PD_COLOR_FG
@@ -254,7 +254,7 @@ static const char dgt[] = {
 static void radix_key(void *z, t_floatarg fkey);
 static void radix_draw_update(t_gobj *client, t_glist *glist);
 
-/* ------------ radix gui-my number box ----------------------- */
+/* --------------- radix gui number box ----------------------- */
 
 t_widgetbehavior radix_widgetbehavior;
 static t_class *radix_class;
@@ -282,9 +282,9 @@ static void radix_calc_fontwidth(t_radix *x) {
 	if (x->x_gui.x_fsf.x_font_style == 1) font *= 0.95;
 	else if (x->x_gui.x_fsf.x_font_style == 2) font *= 0.85;
 	int f = font / 10;
-	font -= (font + 2 + f) >> 2;
+	font -= (font + 2 + f) / 4;
 	int w = x->x_numwidth ? x->x_numwidth : x->x_bufsize;
-	x->x_gui.x_w = (w*font + x->x_zh-(f<<2)) * IEMGUI_ZOOM(x);
+	x->x_gui.x_w = (w*font + x->x_zh-f*4) * IEMGUI_ZOOM(x);
 }
 
 static void radix_precision(t_radix *x, t_floatarg f) {
@@ -307,8 +307,8 @@ static void radix_base(t_radix *x, t_floatarg f) {
 	int bx = x->x_bexp = log(umax) / log(base), tx = 32;
 	for (;bx; base *= base)
 	{	if (bx & 1) pwr *= base;
-		bx >>= 1;   }
-	while (umax > pwr) { tx--; umax >>= 1; }
+		bx /= 2;   }
+	while (umax > pwr) { tx--; umax /= 2; }
 	x->x_pwr = pwr;
 	x->x_texp = tx;
 }
@@ -430,9 +430,9 @@ static void radix_ftoa(t_radix *x) {
 			long double small;
 			if ((*d/i & 1) || (i==pwr && d>a && (d[-1]&1)))
 				round += 2;
-			if (u<i/2) small=0x0.8p0;
+			if      (u< i/2)           small=0x0.8p0;
 			else if (u==i/2 && d+1==z) small=0x1.0p0;
-			else small=0x1.8p0;
+			else                       small=0x1.8p0;
 			if (neg) round*=-1, small*=-1;
 			*d -= u;
 			/* Decide whether to round by probing round+small */
@@ -585,9 +585,9 @@ static void radix_draw_update(t_gobj *client, t_glist *glist) {
 static void radix_draw_new(t_radix *x, t_glist *glist) {
 	int xpos = text_xpix(&x->x_gui.x_obj, glist);
 	int ypos = text_ypix(&x->x_gui.x_obj, glist);
-	int zoom = IEMGUI_ZOOM(x), iow = IOWIDTH * zoom, ioh = OHEIGHT * zoom;
 	int w = x->x_gui.x_w, h = x->x_gui.x_h;
-	int half = h>>1, corner = half>>1, rad = half-ioh, fine = zoom-1;
+	int zoom = IEMGUI_ZOOM(x), iow = IOWIDTH * zoom, ioh = OHEIGHT * zoom;
+	int half = h/2, corner = h/4, rad = half-ioh, fine = zoom-1;
 	t_canvas *canvas = glist_getcanvas(glist);
 
 	sys_vgui(".x%lx.c create line %d %d %d %d %d %d %d %d %d %d %d %d "
@@ -639,9 +639,9 @@ static void radix_draw_new(t_radix *x, t_glist *glist) {
 static void radix_draw_move(t_radix *x, t_glist *glist) {
 	int xpos = text_xpix(&x->x_gui.x_obj, glist);
 	int ypos = text_ypix(&x->x_gui.x_obj, glist);
-	int zoom = IEMGUI_ZOOM(x), iow = IOWIDTH * zoom, ioh = OHEIGHT * zoom;
 	int w = x->x_gui.x_w, h = x->x_gui.x_h;
-	int half = h>>1, corner = half>>1, rad = half-ioh, fine = zoom-1;
+	int zoom = IEMGUI_ZOOM(x), iow = IOWIDTH * zoom, ioh = OHEIGHT * zoom;
+	int half = h/2, corner = h/4, rad = half-ioh, fine = zoom-1;
 	t_canvas *canvas = glist_getcanvas(glist);
 
 	sys_vgui(".x%lx.c coords %lxBASE1 %d %d %d %d %d %d %d %d %d %d %d %d\n",
@@ -761,7 +761,7 @@ static void radix_draw_select(t_radix *x, t_glist *glist) {
 }
 
 static void radix_draw(t_radix *x, t_glist *glist, int mode) {
-	if (mode == IEM_GUI_DRAW_MODE_UPDATE)
+	if      (mode == IEM_GUI_DRAW_MODE_UPDATE)
 		sys_queuegui(x, glist, radix_draw_update);
 	else if (mode == IEM_GUI_DRAW_MODE_MOVE)
 		radix_draw_move(x, glist);
@@ -815,14 +815,11 @@ static int radix_check_minmax(t_radix *x, double min, double max) {
 	int ret = 0;
 	double fine = 1. / (x->x_base * x->x_base);
 	if (x->x_lilo)
-	{	if (min==0.0 && max==0.0)
-			max = 1.0;
+	{	if (min==0.0 && max==0.0) max = 1.0;
 		if (max > 0.0)
-		{	if (min <= 0.0)
-				min = fine * max;   }
+		{	if (min <= 0.0) min = fine * max;   }
 		else
-		{	if (min > 0.0)
-				max = fine * min;   }   }
+		{	if (min >  0.0) max = fine * min;   }   }
 	x->x_min = min;
 	x->x_max = max;
 	if (!x->x_lilo && min==0.0 && max==0.0)
@@ -830,7 +827,8 @@ static int radix_check_minmax(t_radix *x, double min, double max) {
 	if (x->x_val < x->x_min)
 	{	x->x_val = x->x_min;
 		ret = 1;   }
-	else if (x->x_val > x->x_max)
+	else
+	if (x->x_val > x->x_max)
 	{	x->x_val = x->x_max;
 		ret = 1;   }
 	if (x->x_lilo)
@@ -1150,11 +1148,12 @@ static void *radix_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_gui.x_fsf.x_rcv_able = 1;
 	x->x_gui.x_glist = (t_glist *)canvas_getcurrent();
 	if (x->x_gui.x_isa.x_loadinit)
-		x->x_val = v;
+		 x->x_val = v;
 	else x->x_val = 0.0;
 
 	x->x_lilo = lilo;
-	if (log_height < 10) log_height = 10;
+	if (log_height < 10)
+		log_height = 10;
 	x->x_log_height = log_height;
 
 	if (!strcmp(x->x_gui.x_snd->s_name, "empty"))
