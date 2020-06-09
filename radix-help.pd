@@ -53,8 +53,8 @@
 #X msg 191 86 set 1;
 #X obj 80 335 mantissa;
 #X text 96 50 number box with specifiable radix and precision;
-#X text 207 282 ____5____10___15___20___25___30___35;
-#X text 207 266 ----^----^----^----^----^----^----^-;
+#X text 206 282 ____5____10___15___20___25___30___35;
+#X text 206 266 ----^----^----^----^----^----^----^-;
 #X text 376 78 digits[64] =;
 #X text 376 98 0123456789abcdef;
 #X text 376 118 ghijkmnopqrstuvw;

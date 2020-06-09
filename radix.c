@@ -202,11 +202,7 @@ typedef union {
 #define MAX(a,b) ((a)>(b) ? (a):(b))
 #define MIN(a,b) ((a)<(b) ? (a):(b))
 
-#ifdef _WIN32
-#define LEAD 3
-#else
 #define LEAD 2
-#endif
 
 // for a dark theme of pd
 #undef PD_COLOR_FG
@@ -275,16 +271,6 @@ static void radix_clip(t_radix *x) {
 	if (x->x_min || x->x_max)
 	{	if      (x->x_val < x->x_min) x->x_val = x->x_min;
 		else if (x->x_val > x->x_max) x->x_val = x->x_max;   }
-}
-
-static void radix_calc_fontwidth(t_radix *x) {
-	int font = x->x_gui.x_fontsize;
-	if (x->x_gui.x_fsf.x_font_style == 1) font *= 0.95;
-	else if (x->x_gui.x_fsf.x_font_style == 2) font *= 0.85;
-	int f = font / 10;
-	font -= (font + 2 + f) / 4;
-	int w = x->x_numwidth ? x->x_numwidth : x->x_bufsize;
-	x->x_gui.x_w = (w*font + x->x_zh-f*4) * IEMGUI_ZOOM(x);
 }
 
 static void radix_precision(t_radix *x, t_floatarg f) {
@@ -526,16 +512,26 @@ static void radix_ftoa(t_radix *x) {
 	else x->x_resize = 0;
 }
 
+static void radix_width(t_radix *x, t_floatarg zoom) {
+	int font = x->x_gui.x_fontsize * zoom;
+	if (x->x_gui.x_fsf.x_font_style == 1) font *= 0.95;
+	else if (x->x_gui.x_fsf.x_font_style == 2) font *= 0.85;
+	int f = font / 10;
+	font -= (font + 2 + f) / 4;
+	int w = x->x_numwidth ? x->x_numwidth : x->x_bufsize;
+	x->x_gui.x_w = w*font + (x->x_zh/2 + 3) * zoom;
+}
+
 static void radix_zoom(t_radix *x, t_floatarg zoom) {
 	t_iemgui *gui = &x->x_gui;
 	int oldzoom = gui->x_glist->gl_zoom;
 	if (oldzoom < 1) oldzoom = 1;
-	gui->x_w = gui->x_w / oldzoom * zoom;
 	gui->x_h = x->x_zh * zoom - (zoom-1)*2;
+	radix_width(x, zoom);
 }
 
 static void radix_border(t_radix *x) {
-	radix_calc_fontwidth(x);
+	radix_width(x, IEMGUI_ZOOM(x));
 	t_glist *glist = x->x_gui.x_glist;
 	int xpos = text_xpix(&x->x_gui.x_obj, glist);
 	int ypos = text_ypix(&x->x_gui.x_obj, glist);
@@ -895,7 +891,7 @@ static void radix_dialog(t_radix *x, t_symbol *s, int argc, t_atom *argv) {
 	if (log_height < 10)
 		log_height = 10;
 	x->x_log_height = log_height;
-	radix_calc_fontwidth(x);
+	radix_width(x, IEMGUI_ZOOM(x));
 	/*if (radix_check_minmax(x, min, max))
 	 radix_bang(x);*/
 	radix_check_minmax(x, min, max);
@@ -990,7 +986,7 @@ static void radix_size(t_radix *x, t_symbol *s, int ac, t_atom *av) {
 			h = IEM_GUI_MINSIZE;
 		x->x_zh = h;
 		x->x_gui.x_h = h * IEMGUI_ZOOM(x) - (IEMGUI_ZOOM(x)-1)*2;   }
-	radix_calc_fontwidth(x);
+	radix_width(x, IEMGUI_ZOOM(x));
 	iemgui_size((void *)x, &x->x_gui);
 }
 
@@ -1037,7 +1033,7 @@ static void radix_label_font(t_radix *x, t_symbol *s, int ac, t_atom *av) {
 	f = atom_getfloatarg(0, ac, av);
 	if (f<0 || f>2) f = 0;
 	x->x_gui.x_fsf.x_font_style = f;
-	radix_calc_fontwidth(x);
+	radix_width(x, IEMGUI_ZOOM(x));
 	iemgui_label_font((void *)x, &x->x_gui, s, ac, av);
 }
 
@@ -1190,7 +1186,7 @@ static void *radix_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_clock_wait = clock_new(x, (t_method)radix_tick_wait);
 	x->x_gui.x_fsf.x_change = 0;
 	iemgui_newzoom(&x->x_gui);
-	radix_calc_fontwidth(x);
+	radix_width(x, IEMGUI_ZOOM(x));
 	outlet_new(&x->x_gui.x_obj, &s_float);
 	return (x);
 }
