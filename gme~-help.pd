@@ -1,4 +1,4 @@
-#N canvas 608 212 575 718 14;
+#N canvas 452 70 575 718 14;
 #X obj 194 596 *~;
 #X obj 194 666 dac~;
 #N canvas 710 778 450 300 (subpatch) 0;
@@ -8,7 +8,7 @@
 #X obj 47 541 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
 0 1;
 #X floatatom 72 540 0 0 0 0 - - -;
-#X obj 47 418 cupqb;
+#X obj 47 418 cupqb 1;
 #X obj 47 207 openpanel;
 #X obj 224 596 *~;
 #X obj 198 412 bng 15 250 50 0 empty empty play/pause 17 7 0 10 -1
@@ -25,7 +25,7 @@
 #X msg 478 255 6, f 2;
 #X msg 502 255 7, f 2;
 #X obj 47 656 tabwrite~ gme;
-#X text 86 435 tracks;
+#X text 89 445 tracks;
 #X obj 185 502 gme~;
 #X text 295 281 get;
 #X text 295 258 set;
@@ -35,7 +35,7 @@
 #X obj 156 631 *~;
 #X obj 255 596 cos~;
 #X obj 255 631 *~;
-#X msg 47 461 \$1 \, info;
+#X msg 47 498 \$1 \, info;
 #X obj 62 394 bng 15 250 50 0 empty empty restart 17 7 0 10 -1 -262144
 -262144;
 #X msg 417 471 goto \$1;
@@ -45,7 +45,7 @@
 #X obj 417 424 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
 #X obj 366 535 hsl 128 17 0.001 1 1 0 empty empty vol 25 9 0 12 -1
--262144 -262144 0 1;
+-262144 -262144 8800 1;
 #X obj 366 584 hsl 128 17 -0.001 -1 1 0 empty empty cos 25 9 0 12 -1
 -262144 -262144 0 1;
 #X floatatom 376 554 0 0 0 0 - - -;
@@ -71,7 +71,7 @@
 #X floatatom 301 526 0 0 0 0 - - -;
 #X floatatom 265 526 0 0 0 0 - - -;
 #X text 290 524 :;
-#N canvas 205 313 401 617 time 0;
+#N canvas 130 168 401 617 time 0;
 #X obj 69 49 inlet;
 #X obj 138 544 outlet~;
 #X obj 244 442 * 0.001;
@@ -121,14 +121,14 @@
 #X msg 173 461 1, f 2;
 #X obj 138 519 *~;
 #X obj 93 489 line~;
-#X obj 49 435 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 49 435 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
 1;
 #X msg 120 370 0, f 2;
 #X msg 135 401 set \$1;
 #X obj 93 461 pack;
 #X msg 71 269 pause;
 #X obj 42 322 outlet;
-#X obj 71 143 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 71 143 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
 1;
 #X obj 71 213 t b f;
 #X obj 71 238 del;
@@ -140,7 +140,7 @@
 #X msg 131 111 1, f 2;
 #X msg 96 111 0, f 2;
 #X msg 106 136 set \$1;
-#X obj 79 435 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 79 435 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
 1;
 #X obj 71 188 *;
 #X obj 210 142 s \$0ps;
@@ -231,7 +231,7 @@
 #X connect 53 0 54 0;
 #X connect 54 0 21 0;
 #X restore 231 502 pd time;
-#X msg 47 370 set 0;
+#X msg 47 370 set 1;
 #X text 45 60 A Pd interface for the Game Music Emu library \, created
 by Shay Green and maintained by Michael Pyne at https://bitbucket.org/mpyne/game-music-emu
 Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
@@ -257,10 +257,11 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X obj 215 312 loadbang;
 #X obj 311 456 t a;
 #X msg 232 339 100;
+#X obj 47 468 sel;
 #X connect 0 0 1 0;
 #X connect 3 0 75 0;
 #X connect 4 0 75 1;
-#X connect 5 0 31 0;
+#X connect 5 0 85 0;
 #X connect 6 0 65 0;
 #X connect 7 0 1 1;
 #X connect 8 0 62 0;
@@ -336,7 +337,6 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X connect 74 0 28 1;
 #X connect 75 0 20 0;
 #X connect 76 0 80 0;
-#X connect 77 0 83 0;
 #X connect 78 0 76 0;
 #X connect 78 0 11 0;
 #X connect 79 0 81 0;
@@ -346,3 +346,5 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X connect 82 0 84 0;
 #X connect 83 0 22 0;
 #X connect 84 0 78 0;
+#X connect 85 0 9 0;
+#X connect 85 1 31 0;

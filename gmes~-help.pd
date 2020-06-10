@@ -40,7 +40,7 @@
 -262144;
 #X msg 159 218 \$1 \, info;
 #X obj 152 250 gmes~, f 34;
-#X msg 33 76 symbol ~/Music/gme;
+#X msg 33 76 symbol ~/Music/Games;
 #X obj 256 30 cnv 15 64 22 empty empty gmes~ 2 10 0 16 -1 -262144 0
 ;
 #X text 162 55 the multi-channel version of gme~;
