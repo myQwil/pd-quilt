@@ -11,13 +11,12 @@ struct _bop {
 	t_object x_obj;
 	t_float x_f1;
 	t_float x_f2;
-	t_bopmethod x_bang;
 	int x_lb;
 };
 
 static void bop_float(t_bop *x, t_float f) {
 	x->x_f1 = f;
-	x->x_bang(x);
+	pd_bang((t_pd *)x);
 }
 
 static void bop_f2(t_bop *x, t_float f) {
@@ -27,19 +26,17 @@ static void bop_f2(t_bop *x, t_float f) {
 static void bop_skip(t_bop *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac && av->a_type == A_FLOAT)
 		x->x_f2 = av->a_w.w_float;
-	x->x_bang(x);
+	pd_bang((t_pd *)x);
 }
 
 static void bop_loadbang(t_bop *x, t_floatarg action) {
-	if (!action && x->x_lb) x->x_bang(x);
+	if (!action && x->x_lb) pd_bang((t_pd *)x);
 }
 
-static void *bop_new
-(t_class *fltclass, t_bopmethod fn, t_symbol *s, int ac, t_atom *av) {
-	t_bop *x = (t_bop *)pd_new(fltclass);
+static void *bop_new(t_class *cl, t_symbol *s, int ac, t_atom *av) {
+	t_bop *x = (t_bop *)pd_new(cl);
 	outlet_new(&x->x_obj, &s_float);
 	floatinlet_new(&x->x_obj, &x->x_f2);
-	x->x_bang = fn;
 
 	if (ac>1 && av->a_type == A_FLOAT)
 	{	x->x_f1 = av->a_w.w_float;

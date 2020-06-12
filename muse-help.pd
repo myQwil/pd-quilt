@@ -1,4 +1,4 @@
-#N canvas 292 335 725 559 14;
+#N canvas 14 174 725 559 14;
 #X obj 38 444 *~;
 #X obj 38 475 dac~;
 #X text 382 427 frequency;
@@ -17,7 +17,7 @@
 #X obj 269 179 muse;
 #X floatatom 298 207 0 0 0 0 - - -;
 #X obj 38 414 *~;
-#N canvas 823 503 362 336 scaler 0;
+#N canvas 810 321 362 336 scaler 0;
 #X obj 108 218 sel;
 #X obj 248 218 sel;
 #X obj 161 31 inlet;
@@ -45,11 +45,11 @@
 #X connect 12 0 6 0;
 #X connect 12 0 4 0;
 #X connect 12 0 7 0;
-#X coords 0 -1 1 1 46 46 2 120 120;
+#X coords 0 -1 1 1 46 48 2 120 120;
 #X restore 122 242 pd scaler;
 #X text 309 179 default args: 69 7;
 #X obj 253 128 cupqb;
-#N canvas 1017 165 777 729 commands 0;
+#N canvas 714 71 777 729 commands 0;
 #X msg 31 83 n \$1;
 #X text 468 423 non-numbers are skipped;
 #X msg 332 424 list foo bar 10;
@@ -115,18 +115,18 @@
 #X text 77 39 # notes per octave;
 #X obj 424 292 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
 0 1;
-#X msg 424 310 exp \$1;
-#X text 473 310 turn on explicit scale size;
+#X msg 424 310 expl \$1;
+#X text 494 310 turn on explicit scale size;
 #X msg 427 359 x d 4 7;
-#X text 488 359 explicit list (ignores exp);
+#X text 496 359 explicit list (ignores expl);
 #X msg 427 335 i d 4 7;
-#X text 488 335 implicit list (ignores exp);
+#X text 496 335 implicit list (ignores expl);
 #X msg 332 448 l d+ r m f s l t;
 #X msg 108 529 l d+ m- s-;
 #X msg 108 553 l d- m+ s+;
 #X text 468 448 'l' is shorthand for 'list';
 #X msg 427 383 l d 4 7;
-#X text 488 383 normal list (adheres to exp);
+#X text 496 383 normal list (adheres to expl);
 #X text 500 148 set to 14 at 7th interval;
 #X msg 372 154 @ 2 d+;
 #X msg 376 178 @ 2 d-;

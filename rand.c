@@ -11,7 +11,6 @@ struct _inlet {
 };
 
 /* -------------------------- rand -------------------------- */
-
 static t_class *rand_class;
 
 typedef struct _rand {
@@ -24,12 +23,12 @@ typedef struct _rand {
 	int x_p;            /* pointer size */
 	int x_rc;           /* repeat count */
 	int x_rx;           /* repeat max */
-	int x_nop;          /* no-repeat toggle */
 	unsigned x_state;   /* random state */
 	unsigned x_swap;    /* no-repeat state */
+	unsigned x_nop:1;   /* no-repeat toggle */
 } t_rand;
 
-#define MAX 1024
+#define NMAX 1024
 
 static int rand_time(void) {
 	int thym = time(0) % 31536000; // seconds in a year
@@ -57,11 +56,11 @@ static void rand_ptr(t_rand *x, t_symbol *s) {
 }
 
 static void rand_peek(t_rand *x, t_symbol *s) {
-	int i, c=x->x_c, n=x->x_n;
+	int c=x->x_c;
 	t_float *fp = x->x_fp;
 	if (*s->s_name) startpost("%s: ", s->s_name);
 	if (c<3) startpost("%g <-> %g", fp[0], fp[1]);
-	else for (; n--; fp++)
+	else for (int n=x->x_n; n--; fp++)
 	{	startpost("%g", *fp);
 		if (n) startpost(" | ");   }
 	endpost();
@@ -69,16 +68,16 @@ static void rand_peek(t_rand *x, t_symbol *s) {
 
 static int rand_resize(t_rand *x, int n, int l) {
 	n += l;
-	if (n<1) n=1; else if (n>MAX) n=MAX;
+	if (n<1) n=1; else if (n>NMAX) n=NMAX;
 	if (x->x_p<n)
-	{	int d=2, i;
-		while (d<MAX && d<n) d*=2;
+	{	int d=2;
+		while (d<NMAX && d<n) d*=2;
 		x->x_fp = (t_float *)resizebytes(x->x_fp,
 			x->x_p * sizeof(t_float), d * sizeof(t_float));
 		x->x_p = d;
 		t_float *fp = x->x_fp;
 		t_inlet *ip = ((t_object *)x)->ob_inlet;
-		for (i=x->x_in; i--; fp++, ip=ip->i_next)
+		for (int i=x->x_in; i--; fp++, ip=ip->i_next)
 			ip->i_floatslot = fp;   }
 	return (n-l);
 }
@@ -163,14 +162,14 @@ static void rand_float(t_rand *x, t_float f) {
 static void rand_list(t_rand *x, t_symbol *s, int ac, t_atom *av) {
 	x->x_n = ac = rand_resize(x, ac, 0);
 	t_float *fp = x->x_fp;
-	for (; ac--; av++, fp++)
+	for (;ac--; av++, fp++)
 		if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
 }
 
 static void *rand_new(t_symbol *s, int ac, t_atom *av) {
 	t_rand *x = (t_rand *)pd_new(rand_class);
 	outlet_new(&x->x_obj, &s_float);
-	
+
 	int c = x->x_c = !ac ? 2 : ac;
 	// 3 args with a string in the middle creates a small list (ex: 7 or 9)
 	if (ac==3 && av[1].a_type != A_FLOAT)
@@ -179,10 +178,9 @@ static void *rand_new(t_symbol *s, int ac, t_atom *av) {
 
 	// always have a pointer size of at least 2 numbers for min and max
 	x->x_p = c<2 ? 2 : c;
-
 	x->x_fp = (t_float *)getbytes(x->x_p * sizeof(t_float));
 	t_float *fp = x->x_fp;
-	for (; c--; av++, fp++)
+	for (;c--; av++, fp++)
 	{	floatinlet_new(&x->x_obj, fp);
 		*fp = atom_getfloat(av);   }
 	x->x_state = x->x_swap = rand_makeseed();

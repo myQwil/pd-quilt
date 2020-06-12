@@ -1,12 +1,13 @@
 #include "m_pd.h"
 
 /* -------------------------- span -------------------------- */
-
 static t_class *span_class;
 
 typedef struct _span {
 	t_object x_obj;
-	t_float x_min, x_max, x_scale;
+	t_float x_min;
+	t_float x_max;
+	t_float x_scale;
 } t_span;
 
 static void span_float(t_span *x, t_float f) {

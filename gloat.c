@@ -1,15 +1,7 @@
 #include "m_pd.h"
-
-typedef union {
-	float f;
-	struct { unsigned mnt:23,ex:8,sgn:1; } u;
-} ufloat;
-#define mnt u.mnt
-#define ex u.ex
-#define sgn u.sgn
+#include "ufloat.h"
 
 /* -------------------------- gloat -------------------------- */
-
 static t_class *gloat_class;
 
 typedef struct _gloat {
@@ -21,7 +13,7 @@ static void gloat_peek(t_gloat *x, t_symbol *s) {
 	ufloat uf = x->x_uf;
 	post("%s%s0x%x %u %u = %g",
 		s->s_name, *s->s_name?": ":"",
-		uf.mnt, uf.ex, uf.sgn, uf.f);
+		uf.mt, uf.ex, uf.sg, uf.f);
 }
 
 static void gloat_bang(t_gloat *x) {
@@ -29,7 +21,7 @@ static void gloat_bang(t_gloat *x) {
 }
 
 static void gloat_mantissa(t_gloat *x, t_floatarg f) {
-	x->x_uf.mnt = f;
+	x->x_uf.mt = f;
 }
 
 static void gloat_exponent(t_gloat *x, t_floatarg f) {
@@ -37,7 +29,7 @@ static void gloat_exponent(t_gloat *x, t_floatarg f) {
 }
 
 static void gloat_sign(t_gloat *x, t_floatarg f) {
-	x->x_uf.sgn = f;
+	x->x_uf.sg = f;
 }
 
 static void gloat_f(t_gloat *x, t_floatarg f) {
@@ -53,11 +45,11 @@ static void gloat_set(t_gloat *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac>3) ac = 3;
 	switch (ac)
 	{ case 3: if ((av+2)->a_type == A_FLOAT)
-		x->x_uf.sgn = (av+2)->a_w.w_float;
+		x->x_uf.sg = (av+2)->a_w.w_float;
 	  case 2: if ((av+1)->a_type == A_FLOAT)
 		x->x_uf.ex = (av+1)->a_w.w_float;
 	  case 1: if (av->a_type == A_FLOAT)
-		x->x_uf.mnt = av->a_w.w_float; }
+		x->x_uf.mt = av->a_w.w_float; }
 }
 
 static void gloat_list(t_gloat *x, t_symbol *s, int ac, t_atom *av) {

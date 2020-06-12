@@ -1,7 +1,6 @@
 #include "m_pd.h"
 
 /* -------------------------- bitwise negation -------------------------- */
-
 static t_class *bnot_class;
 
 typedef struct _bnot {

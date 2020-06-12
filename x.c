@@ -1,8 +1,8 @@
 #include "m_pd.h"
 
 /* -------------------------- explicit trigger ------------------------------ */
-
 static t_class *xtrigger_class;
+
 #define TR_BANG 0
 #define TR_FLOAT 1
 #define TR_SYMBOL 2

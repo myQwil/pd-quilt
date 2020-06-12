@@ -1,131 +1,14 @@
-#include "m_pd.h"
-#include <stdlib.h> // strtof
-#include <math.h>   // exp, pow, log
-
-struct _inlet {
-	t_pd i_pd;
-	struct _inlet *i_next;
-	t_object *i_owner;
-	t_pd *i_dest;
-	t_symbol *i_symfrom;
-	t_float *i_floatslot;
-};
-
-static t_float ntof(t_float f, double root, double semi) {
-	return (root * exp(semi*f));
-}
+#include "music.h"
 
 /* -------------------------- chrd -------------------------- */
-
 static t_class *chrd_class;
 
 typedef struct _chrd {
-	t_object x_obj;
-	int x_n;            /* current scale size */
-	int x_in;           /* # of inlets */
-	int x_p;            /* pointer size */
-	int x_midi;         /* midi-note toggle */
-	int x_all;          /* all-notes toggle */
-	int x_exp;          /* explicit scale size toggle */
-	double x_rt;        /* root tone */
-	double x_st;        /* semi-tone */
-	t_float x_oct;      /* # of notes in an octave jump */
-	t_float x_tet;      /* # of tones within an octave */
-	t_float x_ref;      /* reference pitch */
-	t_float *x_scl;     /* the scale (root + intervals) */
+	t_music m;
+	unsigned x_all:1;   /* all-outlets toggle */
+	unsigned x_midi:1;  /* midi-note toggle */
 	t_outlet **x_outs;  /* outlets */
 } t_chrd;
-
-#define MAX 1024
-
-static void chrd_ptr(t_chrd *x, t_symbol *s) {
-	post("%s%s%d", s->s_name, *s->s_name?": ":"", x->x_p);
-}
-
-static void chrd_peek(t_chrd *x, t_symbol *s) {
-	int i;
-	t_float *fp = x->x_scl;
-	if (*s->s_name) startpost("%s: ", s->s_name);
-	for (i=x->x_n; i--; fp++) startpost("%g ", *fp);
-	endpost();
-}
-
-static void chrd_operate(t_float *fp, t_atom *av) {
-	const char *cp = av->a_w.w_symbol->s_name;
-	if (cp[1])
-	{	t_float f = cp[2] ? strtof(cp+2, NULL) : 1;
-			 if (cp[1]=='+') *fp += f;
-		else if (cp[1]=='-') *fp -= f;
-		else if (cp[1]=='*') *fp *= f;
-		else if (cp[1]=='/') *fp /= f;   }
-}
-
-static int chrd_resize(t_chrd *x, int n, int l) {
-	n += l;
-	if (n<1) n=1; else if (n>MAX) n=MAX;
-	if (x->x_p<n)
-	{	int d=2, i;
-		while (d<MAX && d<n) d*=2;
-		x->x_scl = (t_float *)resizebytes(x->x_scl,
-			x->x_p * sizeof(t_float), d * sizeof(t_float));
-		x->x_p = d;
-		t_float *fp = x->x_scl;
-		t_inlet *ip = ((t_object *)x)->ob_inlet;
-		for (i=x->x_in; i--; fp++, ip=ip->i_next)
-			ip->i_floatslot = fp;   }
-	return (n-l);
-}
-
-static void chrd_at(t_chrd *x, t_symbol *s, int ac, t_atom *av) {
-	if (ac==2 && av->a_type == A_FLOAT)
-	{	int i = chrd_resize(x, av->a_w.w_float, 1);
-		t_atomtype typ = (av+1)->a_type;
-		if (typ == A_FLOAT) x->x_scl[i] = (av+1)->a_w.w_float;
-		else if (typ == A_SYMBOL) chrd_operate(x->x_scl+i, av+1);   }
-	else pd_error(x, "chrd_at: bad arguments");
-}
-
-static void chrd_size(t_chrd *x, t_floatarg n) {
-	x->x_n = chrd_resize(x, n, 0);
-}
-
-static void chrd_imp(t_chrd *x, int ac, int offset) {
-	x->x_n = chrd_resize(x, ac+offset, 0);
-}
-
-static void chrd_scale(t_chrd *x, int ac, t_atom *av, int offset) {
-	t_float *fp = x->x_scl+offset;
-	for (; ac--; av++, fp++)
-	{	if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
-		else if (av->a_type == A_SYMBOL) chrd_operate(fp, av);   }
-}
-
-static void chrd_scimp(t_chrd *x, int ac, t_atom *av, int offset) {
-	if (!x->x_exp) chrd_imp(x, ac, offset);
-	chrd_scale(x, ac, av, offset);
-}
-
-static void chrd_doremi(t_chrd *x, t_symbol *s, int ac, t_atom *av) {
-	if (ac) chrd_scimp(x, ac, av, 1);
-}
-
-static void chrd_list(t_chrd *x, t_symbol *s, int ac, t_atom *av) {
-	if (ac) chrd_scimp(x, ac, av, 0);
-}
-
-static void chrd_i(t_chrd *x, t_symbol *s, int ac, t_atom *av) {
-	if (ac)
-	{	chrd_imp(x, ac, 0);
-		chrd_scale(x, ac, av, 0);   }
-}
-
-static void chrd_x(t_chrd *x, t_symbol *s, int ac, t_atom *av) {
-	if (ac) chrd_scale(x, ac, av, 0);
-}
-
-static void chrd_explicit(t_chrd *x, t_floatarg f) {
-	x->x_exp = f;
-}
 
 static void chrd_midi(t_chrd *x, t_floatarg f) {
 	x->x_midi = f;
@@ -135,32 +18,15 @@ static void chrd_all(t_chrd *x, t_floatarg f) {
 	x->x_all = f;
 }
 
-static void chrd_octave(t_chrd *x, t_floatarg f) {
-	x->x_oct = f;
-}
-
-static void chrd_ref(t_chrd *x, t_floatarg f) {
-	x->x_rt = (x->x_ref=f) * pow(2,-69/x->x_tet);
-}
-
-static void chrd_tet(t_chrd *x, t_floatarg f) {
-	x->x_rt = x->x_ref * pow(2,-69/f);
-	x->x_st = log(2) / (x->x_tet=f);
-}
-
-static void chrd_octet(t_chrd *x, t_floatarg f) {
-	chrd_octave(x,f);   chrd_tet(x,f);
-}
-
 static double chrd_getnote(t_chrd *x, int d) {
-	t_float root = x->x_scl[0];
+	t_float root = x->m.scale[0];
 	if (d==0) return root;
 	
-	int n=x->x_n-1, i=(d-(d>0))%n,
+	int n=x->m.n-1, i=(d-(d>0))%n,
 		b=i<0, q=(d-!b)/n-b;
 	i += b*n+1;
-	t_float step = x->x_scl[i];
-	return (x->x_oct*q + root+step);
+	t_float step = x->m.scale[i];
+	return (x->m.oct*q + root+step);
 }
 
 static void chrd_float(t_chrd *x, t_float f) {
@@ -170,51 +36,43 @@ static void chrd_float(t_chrd *x, t_float f) {
 	{	int b = f<0?-1:1;
 		double next = chrd_getnote(x, d+b);
 		note += b*(f-d) * (next-note);   }
-	int n=x->x_in-1, i=(d-(d>0))%n;
+	int n=x->m.in-1, i=(d-(d>0))%n;
 	i += (i<0)*n+1;
 	if (d==0) i=0;
 	outlet_float(x->x_outs[i], x->x_midi ?
-		note : ntof(note, x->x_rt, x->x_st));
+		note : ntof(note, x->m.rt, x->m.st));
 }
 
 static void chrd_bang(t_chrd *x) {
-	int n=x->x_n, i=x->x_in;
+	int n=x->m.n, i=x->m.in;
 	i = x->x_all ? i : (n>i?i:n);
-	t_outlet **op;
-	for (op=x->x_outs+i; op--, i--;)
+	for (t_outlet **op=x->x_outs+i; op--, i--;)
 	{	double note = chrd_getnote(x, i);
 		outlet_float(*op, x->x_midi ?
-			note : ntof(note, x->x_rt, x->x_st));   }
+			note : ntof(note, x->m.rt, x->m.st));   }
 }
 
 static void *chrd_new(t_symbol *s, int ac, t_atom *av) {
-	t_chrd *x = (t_chrd *)pd_new(chrd_class);
+	t_chrd *x = (t_chrd *)music_new(chrd_class);
 
-	int n = x->x_n = x->x_in = x->x_p = ac<3 ? 3 : ac;
-	x->x_scl = (t_float *)getbytes(x->x_p * sizeof(t_float));
-	x->x_outs = (t_outlet **)getbytes(x->x_in * sizeof(t_outlet *));
-	t_float *fp = x->x_scl;
+	int n = x->m.n = x->m.in = x->m.p = ac<3 ? 3 : ac;
+	x->m.scale = (t_float *)getbytes(x->m.p * sizeof(t_float));
+	x->x_outs = (t_outlet **)getbytes(x->m.in * sizeof(t_outlet *));
+	t_float *fp = x->m.scale;
 	t_outlet **op = x->x_outs;
 	fp[0]=69, fp[1]=7, fp[2]=12;
 
-	// if no args, 'i' will prevent writing over default values
 	for (int i=0; n--; op++,fp++,i++)
-	{	*op = outlet_new(&x->x_obj, &s_float);
-		floatinlet_new(&x->x_obj, fp);
+	{	*op = outlet_new(&x->m.obj, &s_float);
+		floatinlet_new(&x->m.obj, fp);
 		if (i<ac) *fp = atom_getfloat(av++);   }
-
-	double ref=x->x_ref=440, tet=x->x_tet=12;
-	x->x_rt = ref * pow(2,-69/tet);
-	x->x_st = log(2) / tet;
-	x->x_oct = tet;
-	x->x_exp = 0;
 
 	return (x);
 }
 
 static void chrd_free(t_chrd *x) {
-	freebytes(x->x_scl, x->x_p * sizeof(t_float));
-	freebytes(x->x_outs, x->x_in * sizeof(t_outlet *));
+	music_free((t_music *)x);
+	freebytes(x->x_outs, x->m.in * sizeof(t_outlet *));
 }
 
 void chrd_setup(void) {
@@ -222,39 +80,37 @@ void chrd_setup(void) {
 		(t_newmethod)chrd_new, (t_method)chrd_free,
 		sizeof(t_chrd), 0,
 		A_GIMME, 0);
-	class_addcreator((t_newmethod)chrd_new,
-		gensym("chrd"), A_GIMME, 0);
 	class_addbang(chrd_class, chrd_bang);
 	class_addfloat(chrd_class, chrd_float);
-	class_addlist(chrd_class, chrd_list);
-	class_addmethod(chrd_class, (t_method)chrd_ptr,
+	class_addlist(chrd_class, music_list);
+	class_addmethod(chrd_class, (t_method)music_ptr,
 		gensym("ptr"), A_DEFSYM, 0);
-	class_addmethod(chrd_class, (t_method)chrd_peek,
+	class_addmethod(chrd_class, (t_method)music_peek,
 		gensym("peek"), A_DEFSYM, 0);
-	class_addmethod(chrd_class, (t_method)chrd_at,
+	class_addmethod(chrd_class, (t_method)music_at,
 		gensym("@"), A_GIMME, 0);
-	class_addmethod(chrd_class, (t_method)chrd_doremi,
+	class_addmethod(chrd_class, (t_method)music_doremi,
 		gensym("d"), A_GIMME, 0);
-	class_addmethod(chrd_class, (t_method)chrd_list,
+	class_addmethod(chrd_class, (t_method)music_list,
 		gensym("l"), A_GIMME, 0);
-	class_addmethod(chrd_class, (t_method)chrd_i,
+	class_addmethod(chrd_class, (t_method)music_i,
 		gensym("i"), A_GIMME, 0);
-	class_addmethod(chrd_class, (t_method)chrd_x,
+	class_addmethod(chrd_class, (t_method)music_x,
 		gensym("x"), A_GIMME, 0);
-	class_addmethod(chrd_class, (t_method)chrd_size,
+	class_addmethod(chrd_class, (t_method)music_size,
 		gensym("n"), A_FLOAT, 0);
-	class_addmethod(chrd_class, (t_method)chrd_explicit,
-		gensym("exp"), A_FLOAT, 0);
+	class_addmethod(chrd_class, (t_method)music_expl,
+		gensym("expl"), A_FLOAT, 0);
+	class_addmethod(chrd_class, (t_method)music_octave,
+		gensym("oct"), A_FLOAT, 0);
+	class_addmethod(chrd_class, (t_method)music_ref,
+		gensym("ref"), A_FLOAT, 0);
+	class_addmethod(chrd_class, (t_method)music_tet,
+		gensym("tet"), A_FLOAT, 0);
+	class_addmethod(chrd_class, (t_method)music_octet,
+		gensym("ot"), A_FLOAT, 0);
 	class_addmethod(chrd_class, (t_method)chrd_midi,
 		gensym("midi"), A_FLOAT, 0);
 	class_addmethod(chrd_class, (t_method)chrd_all,
 		gensym("all"), A_FLOAT, 0);
-	class_addmethod(chrd_class, (t_method)chrd_octave,
-		gensym("oct"), A_FLOAT, 0);
-	class_addmethod(chrd_class, (t_method)chrd_ref,
-		gensym("ref"), A_FLOAT, 0);
-	class_addmethod(chrd_class, (t_method)chrd_tet,
-		gensym("tet"), A_FLOAT, 0);
-	class_addmethod(chrd_class, (t_method)chrd_octet,
-		gensym("ot"), A_FLOAT, 0);
 }

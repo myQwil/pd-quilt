@@ -1,7 +1,6 @@
 #include "m_pd.h"
 
 /* -------------------------- logical negation -------------------------- */
-
 static t_class *lnot_class;
 
 typedef struct _lnot {
@@ -10,11 +9,11 @@ typedef struct _lnot {
 } t_lnot;
 
 static void lnot_bang(t_lnot *x) {
-	outlet_float(x->x_obj.ob_outlet, !x->x_f);
+	outlet_float(x->x_obj.ob_outlet, !(int)x->x_f);
 }
 
 static void lnot_float(t_lnot *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, !(x->x_f=f));
+	outlet_float(x->x_obj.ob_outlet, !(int)(x->x_f=f));
 }
 
 static void *lnot_new(t_floatarg f) {

@@ -175,11 +175,12 @@ obstacle to adoption, that text has been removed.
 #include <ctype.h>
 #include "m_pd.h"
 #include "g_canvas.h"
-
 #include "g_all_guis.h"
+
 #include <math.h>
 #include <float.h>
 #include <limits.h>
+#include "ufloat.h"
 
 #ifdef _WIN32
 #include <io.h>
@@ -189,15 +190,6 @@ obstacle to adoption, that text has been removed.
 
 #define MINDIGITS 0
 #define MINFONT   4
-
-typedef union {
-	float f;
-	struct { unsigned mnt:23,ex:8,sgn:1; } u;
-	unsigned u32;
-} ufloat;
-#define mnt u.mnt
-#define ex  u.ex
-#define sgn u.sgn
 
 #define MAX(a,b) ((a)>(b) ? (a):(b))
 #define MIN(a,b) ((a)<(b) ? (a):(b))
@@ -251,9 +243,8 @@ static void radix_key(void *z, t_floatarg fkey);
 static void radix_draw_update(t_gobj *client, t_glist *glist);
 
 /* --------------- radix gui number box ----------------------- */
-
-t_widgetbehavior radix_widgetbehavior;
 static t_class *radix_class;
+t_widgetbehavior radix_widgetbehavior;
 
 /* widget helper functions */
 
@@ -323,17 +314,17 @@ static void radix_ftoa(t_radix *x) {
 	ufloat uf = {.f=x->x_val};
 	int size=0;
 	if (uf.ex == 0xFF)
-	{	int neg = uf.sgn;
+	{	int neg = uf.sg;
 		#ifdef _WIN32
-			if (uf.mnt != 0)
-			{	if (uf.mnt == 0x400000 && neg)
+			if (uf.mt != 0)
+			{	if (uf.mt == 0x400000 && neg)
 					size = 7, strcpy(x->x_buf, "-1.#IND");
 				else size = 7+neg,
 					 strcpy(x->x_buf, (neg ? "-1.#QNAN" : "1.#QNAN"));   }
 			else size = 6+neg,
 				 strcpy(x->x_buf, (neg ? "-1.#INF" : "1.#INF"));
 		#else
-			if (uf.mnt != 0) strcpy(x->x_buf, (neg?"-nan":"nan"));
+			if (uf.mt != 0) strcpy(x->x_buf, (neg?"-nan":"nan"));
 			else strcpy(x->x_buf, (neg?"-inf":"inf"));
 			size = 3+neg;
 		#endif
@@ -494,6 +485,7 @@ static void radix_ftoa(t_radix *x) {
 	num[ni] = '\0';
 	size = ni;
 
+	// reduce if too big for number box width
 	if (x->x_numwidth > 0 && ni > x->x_numwidth)
 	{	if (!dec) dec = num+ni;
 		if (!nxt) nxt = num+ni;
@@ -923,7 +915,7 @@ static void radix_motion(t_radix *x, t_floatarg dx, t_floatarg dy) {
 
 static void radix_set(t_radix *x, t_floatarg f) {
 	ufloat uf = {.f = f}, vf = {.f = x->x_val};
-	if (uf.u32 != vf.u32)
+	if (uf.u != vf.u)
 	{	x->x_val = f;
 		radix_clip(x);
 		sys_queuegui(x, x->x_gui.x_glist, radix_draw_update);   }

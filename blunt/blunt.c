@@ -9,21 +9,17 @@ void revop_setup(void);
 /* --------------------------------------------------------------- */
 
 typedef struct _num t_num;
-typedef void (*t_nummethod)(t_num *x);
 
 struct _num {
 	t_object x_obj;
 	t_float x_f;
-	t_nummethod x_bang;
 	int x_lb;
 };
 
-static void *num_new
-(t_class *numclass, t_nummethod fn, t_symbol *s, int ac, t_atom *av) {
-	t_num *x = (t_num *)pd_new(numclass);
+static void *num_new(t_class *cl, t_symbol *s, int ac, t_atom *av) {
+	t_num *x = (t_num *)pd_new(cl);
 	outlet_new(&x->x_obj, &s_float);
 	floatinlet_new(&x->x_obj, &x->x_f);
-	x->x_bang = fn;
 
 	x->x_f = x->x_lb = 0;
 	if (ac)
@@ -39,11 +35,11 @@ static void *num_new
 
 static void num_float(t_num *x, t_float f) {
 	x->x_f = f;
-	x->x_bang(x);
+	pd_bang((t_pd *)x);
 }
 
 static void num_loadbang(t_num *x, t_floatarg action) {
-	if (x->x_lb && !action) x->x_bang(x);
+	if (x->x_lb && !action) pd_bang((t_pd *)x);
 }
 
 
@@ -61,7 +57,7 @@ static void i_send(t_num *x, t_symbol *s) {
 }
 
 static void *i_new(t_symbol *s, int ac, t_atom *av) {
-	return (num_new(i_class, i_bang, s, ac, av));
+	return (num_new(i_class, s, ac, av));
 }
 
 /* --------------------- float ----------------------------------- */
@@ -87,7 +83,7 @@ static void f_send(t_num *x, t_symbol *s) {
 }
 
 static void *f_new(t_symbol *s, int ac, t_atom *av) {
-	return (num_new(f_class, f_bang, s, ac, av));
+	return (num_new(f_class, s, ac, av));
 }
 
 
@@ -105,7 +101,7 @@ static void b1_plus_bang(t_bop *x) {
 }
 
 static void *b1_plus_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b1_plus_class, b1_plus_bang, s, ac, av));
+	return (bop_new(b1_plus_class, s, ac, av));
 }
 
 /* --------------------- subtraction ----------------------------- */
@@ -116,7 +112,7 @@ static void b1_minus_bang(t_bop *x) {
 }
 
 static void *b1_minus_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b1_minus_class, b1_minus_bang, s, ac, av));
+	return (bop_new(b1_minus_class, s, ac, av));
 }
 
 /* --------------------- multiplication -------------------------- */
@@ -127,7 +123,7 @@ static void b1_times_bang(t_bop *x) {
 }
 
 static void *b1_times_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b1_times_class, b1_times_bang, s, ac, av));
+	return (bop_new(b1_times_class, s, ac, av));
 }
 
 /* --------------------- division -------------------------------- */
@@ -138,7 +134,7 @@ static void b1_div_bang(t_bop *x) {
 }
 
 static void *b1_div_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b1_div_class, b1_div_bang, s, ac, av));
+	return (bop_new(b1_div_class, s, ac, av));
 }
 
 /* --------------------- log ------------------------------------- */
@@ -149,7 +145,7 @@ static void b1_log_bang(t_bop *x) {
 }
 
 static void *b1_log_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b1_log_class, b1_log_bang, s, ac, av));
+	return (bop_new(b1_log_class, s, ac, av));
 }
 
 /* --------------------- pow ------------------------------------- */
@@ -160,7 +156,7 @@ static void b1_pow_bang(t_bop *x) {
 }
 
 static void *b1_pow_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b1_pow_class, b1_pow_bang, s, ac, av));
+	return (bop_new(b1_pow_class, s, ac, av));
 }
 
 /* --------------------- max ------------------------------------- */
@@ -171,7 +167,7 @@ static void b1_max_bang(t_bop *x) {
 }
 
 static void *b1_max_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b1_max_class, b1_max_bang, s, ac, av));
+	return (bop_new(b1_max_class, s, ac, av));
 }
 
 /* --------------------- min ------------------------------------- */
@@ -182,7 +178,7 @@ static void b1_min_bang(t_bop *x) {
 }
 
 static void *b1_min_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b1_min_class, b1_min_bang, s, ac, av));
+	return (bop_new(b1_min_class, s, ac, av));
 }
 
 /* --------------- binop2: ==, !=, >, <, >=, <=. ----------------- */
@@ -195,7 +191,7 @@ static void b2_ee_bang(t_bop *x) {
 }
 
 static void *b2_ee_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b2_ee_class, b2_ee_bang, s, ac, av));
+	return (bop_new(b2_ee_class, s, ac, av));
 }
 
 /* --------------------- != -------------------------------------- */
@@ -206,7 +202,7 @@ static void b2_ne_bang(t_bop *x) {
 }
 
 static void *b2_ne_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b2_ne_class, b2_ne_bang, s, ac, av));
+	return (bop_new(b2_ne_class, s, ac, av));
 }
 
 /* --------------------- > --------------------------------------- */
@@ -217,7 +213,7 @@ static void b2_gt_bang(t_bop *x) {
 }
 
 static void *b2_gt_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b2_gt_class, b2_gt_bang, s, ac, av));
+	return (bop_new(b2_gt_class, s, ac, av));
 }
 
 /* --------------------- < --------------------------------------- */
@@ -228,7 +224,7 @@ static void b2_lt_bang(t_bop *x) {
 }
 
 static void *b2_lt_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b2_lt_class, b2_lt_bang, s, ac, av));
+	return (bop_new(b2_lt_class, s, ac, av));
 }
 
 /* --------------------- >= -------------------------------------- */
@@ -239,7 +235,7 @@ static void b2_ge_bang(t_bop *x) {
 }
 
 static void *b2_ge_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b2_ge_class, b2_ge_bang, s, ac, av));
+	return (bop_new(b2_ge_class, s, ac, av));
 }
 
 /* --------------------- <= -------------------------------------- */
@@ -250,7 +246,7 @@ static void b2_le_bang(t_bop *x) {
 }
 
 static void *b2_le_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b2_le_class, b2_le_bang, s, ac, av));
+	return (bop_new(b2_le_class, s, ac, av));
 }
 
 /* ------- binop3: &, |, &&, ||, <<, >>, ^, %, mod, div ---------- */
@@ -263,7 +259,7 @@ static void b3_ba_bang(t_bop *x) {
 }
 
 static void *b3_ba_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b3_ba_class, b3_ba_bang, s, ac, av));
+	return (bop_new(b3_ba_class, s, ac, av));
 }
 
 /* --------------------- && -------------------------------------- */
@@ -274,7 +270,7 @@ static void b3_la_bang(t_bop *x) {
 }
 
 static void *b3_la_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b3_la_class, b3_la_bang, s, ac, av));
+	return (bop_new(b3_la_class, s, ac, av));
 }
 
 /* --------------------- | --------------------------------------- */
@@ -285,7 +281,7 @@ static void b3_bo_bang(t_bop *x) {
 }
 
 static void *b3_bo_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b3_bo_class, b3_bo_bang, s, ac, av));
+	return (bop_new(b3_bo_class, s, ac, av));
 }
 
 /* --------------------- || -------------------------------------- */
@@ -296,7 +292,7 @@ static void b3_lo_bang(t_bop *x) {
 }
 
 static void *b3_lo_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b3_lo_class, b3_lo_bang, s, ac, av));
+	return (bop_new(b3_lo_class, s, ac, av));
 }
 
 /* --------------------- << -------------------------------------- */
@@ -307,7 +303,7 @@ static void b3_ls_bang(t_bop *x) {
 }
 
 static void *b3_ls_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b3_ls_class, b3_ls_bang, s, ac, av));
+	return (bop_new(b3_ls_class, s, ac, av));
 }
 
 /* --------------------- >> -------------------------------------- */
@@ -318,7 +314,7 @@ static void b3_rs_bang(t_bop *x) {
 }
 
 static void *b3_rs_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b3_rs_class, b3_rs_bang, s, ac, av));
+	return (bop_new(b3_rs_class, s, ac, av));
 }
 
 /* --------------------- ^ --------------------------------------- */
@@ -329,7 +325,7 @@ static void b3_xor_bang(t_bop *x) {
 }
 
 static void *b3_xor_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b3_xor_class, b3_xor_bang, s, ac, av));
+	return (bop_new(b3_xor_class, s, ac, av));
 }
 
 /* --------------------- % --------------------------------------- */
@@ -340,7 +336,7 @@ static void b3_pc_bang(t_bop *x) {
 }
 
 static void *b3_pc_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b3_pc_class, b3_pc_bang, s, ac, av));
+	return (bop_new(b3_pc_class, s, ac, av));
 }
 
 /* --------------------- mod ------------------------------------- */
@@ -351,7 +347,7 @@ static void b3_mod_bang(t_bop *x) {
 }
 
 static void *b3_mod_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b3_mod_class, b3_mod_bang, s, ac, av));
+	return (bop_new(b3_mod_class, s, ac, av));
 }
 
 /* --------------------- div ------------------------------------- */
@@ -362,7 +358,7 @@ static void b3_div_bang(t_bop *x) {
 }
 
 static void *b3_div_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(b3_div_class, b3_div_bang, s, ac, av));
+	return (bop_new(b3_div_class, s, ac, av));
 }
 
 void blunt_setup(void) {
@@ -517,8 +513,8 @@ void blunt_setup(void) {
 
 	i = sizeof(syms) / sizeof*(syms);
 	while (i--)
-	{	int j = 0, max = sizeof(bops[i]) / sizeof*(bops[i]);
-		for (; j < max; j++)
+	{	int max = sizeof(bops[i]) / sizeof*(bops[i]);
+		for (int j=0; j < max; j++)
 		{	if (!bops[i][j]) break;
 			class_addbang(bops[i][j], bangs[i][j]);
 			class_addfloat(bops[i][j], bop_float);

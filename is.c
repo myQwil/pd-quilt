@@ -2,7 +2,6 @@
 #include <string.h>
 
 /* -------------------------- is -------------------------- */
-
 static t_class *is_class;
 static t_class *is_proxy;
 

@@ -1,39 +1,32 @@
 #include "m_pd.h"
-
-typedef union {
-	float f;
-	struct { unsigned mnt:23,exp:8,sgn:1; } u;
-} ufloat;
-#define mnt u.mnt
-#define exp u.exp
-#define sgn u.sgn
+#include "ufloat.h"
 
 /* -------------------------- sploat -------------------------- */
-
 static t_class *sploat_class;
 
 typedef struct _sploat {
 	t_object x_obj;
-	t_float x_f;
-	t_outlet *o_m, *o_e, *o_s;
+	ufloat x_uf;
+	t_outlet *o_mt;
+	t_outlet *o_ex;
+	t_outlet *o_sg;
 } t_sploat;
 
 static void sploat_peek(t_sploat *x, t_symbol *s) {
-	ufloat uf = {.f=x->x_f};
+	ufloat uf = x->x_uf;
 	post("%s%s0x%x %u %u = %g",
 		s->s_name, *s->s_name?": ":"",
-		uf.mnt, uf.exp, uf.sgn, uf.f);
+		uf.mt, uf.ex, uf.sg, uf.f);
 }
 
 static void sploat_bang(t_sploat *x) {
-	ufloat uf = {.f=x->x_f};
-	outlet_float(x->o_s, uf.sgn);
-	outlet_float(x->o_e, uf.exp);
-	outlet_float(x->o_m, uf.mnt);
+	outlet_float(x->o_sg, x->x_uf.sg);
+	outlet_float(x->o_ex, x->x_uf.ex);
+	outlet_float(x->o_mt, x->x_uf.mt);
 }
 
 static void sploat_set(t_sploat *x, t_floatarg f) {
-	x->x_f = f;
+	x->x_uf.f = f;
 }
 
 static void sploat_float(t_sploat *x, t_float f) {
@@ -43,10 +36,10 @@ static void sploat_float(t_sploat *x, t_float f) {
 
 static void *sploat_new(t_floatarg f) {
 	t_sploat *x = (t_sploat *)pd_new(sploat_class);
-	x->o_m = outlet_new(&x->x_obj, &s_float);
-	x->o_e = outlet_new(&x->x_obj, &s_float);
-	x->o_s = outlet_new(&x->x_obj, &s_float);
-	floatinlet_new(&x->x_obj, &x->x_f);
+	x->o_mt = outlet_new(&x->x_obj, &s_float);
+	x->o_ex = outlet_new(&x->x_obj, &s_float);
+	x->o_sg = outlet_new(&x->x_obj, &s_float);
+	inlet_new(&x->x_obj, &x->x_obj.ob_pd, &s_float, gensym("set"));
 	sploat_set(x, f);
 	return (x);
 }

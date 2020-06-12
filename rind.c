@@ -2,12 +2,12 @@
 #include <time.h>
 
 /* -------------------------- rind -------------------------- */
-
 static t_class *rind_class;
 
 typedef struct _rind {
 	t_object x_obj;
-	t_float x_min, x_max;
+	t_float x_min;
+	t_float x_max;
 	unsigned x_state;
 } t_rind;
 

@@ -12,6 +12,13 @@ Shay Green <gblargg@gmail.com>
 #include "game-music-emu/gme/gme.h"
 #include <string.h>
 
+#ifndef NCH
+#define NCH 2
+#endif
+#ifndef MULTI
+#define MULTI 0
+#endif
+
 #if defined MSW                   // when compiling for Windows
 #define EXPORT __declspec(dllexport)
 #elif __GNUC__ >= 4               // else, when compiling with GCC 4.0 or higher
@@ -30,14 +37,14 @@ typedef struct _gme_tilde {
 	Music_Emu *x_emu;   /* emulator object */
 	Music_Emu *x_info;  /* info-only emu fallback */
 	const char *x_path; /* path to the most recently read file */
+	int x_track;        /* current track number */
+	t_float x_tempo;    /* current tempo */
 	unsigned x_read:1;  /* when a new file path is read but not opened yet */
 	unsigned x_open:1;  /* when a request for playback is made */
 	unsigned x_stop:1;  /* flag to start from beginning on next playback */
 	unsigned x_play:1;  /* play/pause flag */
 	unsigned x_mask:8;  /* muting mask */
-	int x_track;        /* current track number */
-	t_float x_tempo;    /* current tempo */
-	t_outlet *l_out;    /* outputs track length and fade */
+	t_outlet *o_len;    /* outputs track length and fade */
 } t_gme_tilde;
 
 static void gme_tilde_m3u(t_gme_tilde *x, Music_Emu *emu) {
@@ -65,7 +72,7 @@ static void gme_tilde_time(t_gme_tilde *x, t_symbol *s, int ac, t_atom *av) {
 	{	t_atom flts[] =
 		{	{A_FLOAT, {(t_float)info->length}},
 			{A_FLOAT, {(t_float)info->fade_length}}   };
-		outlet_list(x->l_out, 0, 2, flts);   }
+		outlet_list(x->o_len, 0, 2, flts);   }
 	gme_free_info(info);
 }
 
@@ -78,9 +85,8 @@ static void gme_tilde_start(t_gme_tilde *x) {
 
 static t_int *gme_tilde_perform(t_int *w) {
 	t_gme_tilde *x = (t_gme_tilde *)(w[1]);
-	int i;
 	t_sample *outs[NCH];
-	for (i=NCH; i--;) outs[i] = (t_sample *)(w[i+2]);
+	for (int i=NCH; i--;) outs[i] = (t_sample *)(w[i+2]);
 	int n = (int)(w[NCH+2]);
 
 	if (x->x_open)
@@ -100,9 +106,9 @@ static t_int *gme_tilde_perform(t_int *w) {
 	{	short buf[NCH];
 		while (n--)
 		{	hnd_err(gme_play(x->x_emu, NCH, buf));
-			for (i=NCH; i--;)
+			for (int i=NCH; i--;)
 				*outs[i]++ = ((t_sample) buf[i]) / (t_sample) 32768;   }   }
-	else while (n--) for (i=NCH; i--;) *outs[i]++ = 0;
+	else while (n--) for (int i=NCH; i--;) *outs[i]++ = 0;
 	return (w+NCH+3);
 }
 
@@ -181,7 +187,7 @@ static void gme_tilde_tempo(t_gme_tilde *x, t_floatarg f) {
 }
 
 static void gme_tilde_mute(t_gme_tilde *x, t_symbol *s, int ac, t_atom *av) {
-	for (; ac--; av++)
+	for (;ac--; av++)
 		if (av->a_type == A_FLOAT)
 			x->x_mask ^= 1 << (int)av->a_w.w_float;
 	if (x->x_emu) gme_mute_voices(x->x_emu, x->x_mask);
@@ -189,7 +195,7 @@ static void gme_tilde_mute(t_gme_tilde *x, t_symbol *s, int ac, t_atom *av) {
 
 static void gme_tilde_solo(t_gme_tilde *x, t_symbol *s, int ac, t_atom *av) {
 	int mask = ~0;
-	for (; ac--; av++)
+	for (;ac--; av++)
 		if (av->a_type == A_FLOAT)
 			mask ^= 1 << (int)av->a_w.w_float;
 	x->x_mask = (x->x_mask == mask) ? 0 : mask;
@@ -212,7 +218,7 @@ static void *gme_new(t_class *gmeclass, t_symbol *s, int ac, t_atom *av) {
 	t_gme_tilde *x = (t_gme_tilde *)pd_new(gmeclass);
 	int i = NCH;
 	while (i--) outlet_new(&x->x_obj, &s_signal);
-	x->l_out = outlet_new(&x->x_obj, &s_list);
+	x->o_len = outlet_new(&x->x_obj, &s_list);
 	if (ac) gme_tilde_solo(x, NULL, ac, av);
 	x->x_tempo = 1;
 	return (x);

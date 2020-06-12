@@ -13,7 +13,7 @@ static void rminus_bang(t_bop *x) {
 }
 
 static void *rminus_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(rminus_class, rminus_bang, s, ac, av));
+	return (bop_new(rminus_class, s, ac, av));
 }
 
 /* --------------------- division -------------------------------- */
@@ -24,7 +24,7 @@ static void rdiv_bang(t_bop *x) {
 }
 
 static void *rdiv_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(rdiv_class, rdiv_bang, s, ac, av));
+	return (bop_new(rdiv_class, s, ac, av));
 }
 
 /* --------------------- log ------------------------------------- */
@@ -35,7 +35,7 @@ static void rlog_bang(t_bop *x) {
 }
 
 static void *rlog_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(rlog_class, rlog_bang, s, ac, av));
+	return (bop_new(rlog_class, s, ac, av));
 }
 
 /* --------------------- pow ------------------------------------- */
@@ -46,7 +46,7 @@ static void rpow_bang(t_bop *x) {
 }
 
 static void *rpow_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(rpow_class, rpow_bang, s, ac, av));
+	return (bop_new(rpow_class, s, ac, av));
 }
 
 /* --------------------- << -------------------------------------- */
@@ -57,7 +57,7 @@ static void rls_bang(t_bop *x) {
 }
 
 static void *rls_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(rls_class, rls_bang, s, ac, av));
+	return (bop_new(rls_class, s, ac, av));
 }
 
 /* --------------------- >> -------------------------------------- */
@@ -68,7 +68,7 @@ static void rrs_bang(t_bop *x) {
 }
 
 static void *rrs_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(rrs_class, rrs_bang, s, ac, av));
+	return (bop_new(rrs_class, s, ac, av));
 }
 
 /* --------------------- % --------------------------------------- */
@@ -79,7 +79,7 @@ static void rpc_bang(t_bop *x) {
 }
 
 static void *rpc_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(rpc_class, rpc_bang, s, ac, av));
+	return (bop_new(rpc_class, s, ac, av));
 }
 
 /* --------------------- mod ------------------------------------- */
@@ -90,7 +90,7 @@ static void rmod_bang(t_bop *x) {
 }
 
 static void *rmod_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(rmod_class, rmod_bang, s, ac, av));
+	return (bop_new(rmod_class, s, ac, av));
 }
 
 /* --------------------- div ------------------------------------- */
@@ -101,7 +101,7 @@ static void rdivm_bang(t_bop *x) {
 }
 
 static void *rdivm_new(t_symbol *s, int ac, t_atom *av) {
-	return (bop_new(rdivm_class, rdivm_bang, s, ac, av));
+	return (bop_new(rdivm_class, s, ac, av));
 }
 
 void revop_setup(void) {

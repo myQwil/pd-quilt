@@ -2,7 +2,6 @@
 #include "math.h"
 
 /* -------------------------- ceil -------------------------- */
-
 static t_class *ceil_class;
 
 typedef struct _ceil {
