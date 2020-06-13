@@ -497,7 +497,12 @@ static void radix_ftoa(t_radix *x) {
 
 static void radix_borderwidth(t_radix *x, t_float zoom) {
 	int n = x->x_numwidth ? x->x_numwidth : x->x_bufsize;
-	x->x_gui.x_w = n*round(x->x_fontwidth * zoom) + (x->x_zh/2 + 3) * zoom;
+	#ifdef __APPLE__
+		x->x_gui.x_w = n * x->x_fontwidth * zoom;
+	#else
+		x->x_gui.x_w = n * round(x->x_fontwidth * zoom);
+	#endif
+	x->x_gui.x_w += (x->x_zh/2 + 3) * zoom;
 }
 
 static void radix_zoom(t_radix *x, t_floatarg zoom) {
@@ -678,14 +683,22 @@ static void radix_draw_config(t_radix* x, t_glist* glist) {
 		(x->x_gui.x_fsf.x_selected ? PD_COLOR_SELECT : x->x_gui.x_bcol));
 }
 
-
 static void radix_calc_fontwidth(t_radix *x) {
 	double fwid = x->x_gui.x_fontsize;
-	if (x->x_gui.x_fsf.x_font_style == 2)
-		fwid *= 0.5;  // helvetica
-	else if (x->x_gui.x_fsf.x_font_style == 1)
-		fwid *= 0.556123; // times
-	else fwid *= 0.6021; // dejavu
+	#ifndef __linux__
+		if (x->x_gui.x_fsf.x_font_style == 2)
+			fwid *= 0.5;          // times
+		else if (x->x_gui.x_fsf.x_font_style == 1)
+			fwid *= 0.556123; // helvetica
+		else fwid *= 0.6021;     // dejavu
+		//else fwid *= 0.61;     // monaco
+	#else
+		if (x->x_gui.x_fsf.x_font_style == 2)
+			fwid *= 0.6018;       // times
+		else if (x->x_gui.x_fsf.x_font_style == 1)
+			fwid *= 0.6692;   // helvetica
+		else fwid *= 0.724623;   // dejavu
+	#endif
 	x->x_fontwidth = fwid;
 }
 

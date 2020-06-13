@@ -50,7 +50,7 @@
 ;
 #X obj 196 251 radix 0 22 0 0 0 0 empty empty empty -1 -10 0 11 -191407
 -262144 -262144 2 24 2 0 256;
-#X msg 191 86 set 1;
+#X msg 220 80 step 1;
 #X obj 80 335 mantissa;
 #X text 96 50 number box with specifiable radix and precision;
 #X text 206 282 ____5____10___15___20___25___30___35;
@@ -60,7 +60,7 @@
 #X text 376 118 ghijkmnopqrstuvw;
 #X text 376 138 xyzACDEFGHJKLMNP;
 #X text 376 158 QRTUVWXYZ?!@#$%&;
-#X msg 251 86 set 0.1;
+#X msg 230 106 step 0.1;
 #X floatatom 433 192 0 0 0 0 - - -;
 #X msg 433 217 p \$1;
 #X text 478 217 precision;
@@ -68,6 +68,11 @@
 #X msg 113 186 fw \$1;
 #X obj 53 131 cupqb;
 #X obj 113 131 cupqb;
+#X obj 53 92 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+-262144;
+#X obj 73 92 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+-262144;
+#X msg 105 86 step 0.72;
 #X connect 0 0 3 1;
 #X connect 1 0 8 0;
 #X connect 2 0 0 0;
@@ -78,13 +83,16 @@
 #X connect 5 1 20 0;
 #X connect 6 0 3 0;
 #X connect 8 0 4 0;
-#X connect 9 0 6 0;
-#X connect 9 0 6 2;
-#X connect 19 0 6 0;
-#X connect 19 0 6 2;
+#X connect 9 0 6 1;
+#X connect 19 0 6 1;
 #X connect 20 0 21 0;
 #X connect 21 0 8 0;
 #X connect 23 0 8 0;
 #X connect 24 0 8 0;
 #X connect 25 0 23 0;
 #X connect 26 0 24 0;
+#X connect 27 0 25 0;
+#X connect 27 0 26 0;
+#X connect 28 0 26 2;
+#X connect 28 0 25 2;
+#X connect 29 0 26 1;
