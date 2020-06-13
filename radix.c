@@ -210,6 +210,7 @@ typedef struct _radix {
 	t_iemgui x_gui;
 	t_clock  *x_clock_reset;
 	t_clock  *x_clock_wait;
+	double   x_fontwidth;
 	double   x_val;
 	double   x_tog;
 	double   x_min;
@@ -315,19 +316,9 @@ static void radix_ftoa(t_radix *x) {
 	int size=0;
 	if (uf.ex == 0xFF)
 	{	int neg = uf.sg;
-		#ifdef _WIN32
-			if (uf.mt != 0)
-			{	if (uf.mt == 0x400000 && neg)
-					size = 7, strcpy(x->x_buf, "-1.#IND");
-				else size = 7+neg,
-					 strcpy(x->x_buf, (neg ? "-1.#QNAN" : "1.#QNAN"));   }
-			else size = 6+neg,
-				 strcpy(x->x_buf, (neg ? "-1.#INF" : "1.#INF"));
-		#else
-			if (uf.mt != 0) strcpy(x->x_buf, (neg?"-nan":"nan"));
-			else strcpy(x->x_buf, (neg?"-inf":"inf"));
-			size = 3+neg;
-		#endif
+		if (uf.mt != 0) strcpy(x->x_buf, (neg?"-nan":"nan"));
+		else strcpy(x->x_buf, (neg?"-inf":"inf"));
+		size = 3+neg;
 		if (x->x_bufsize != size) x->x_resize = 1, x->x_bufsize = size;
 		else x->x_resize = 0;
 		return;   }
@@ -504,14 +495,9 @@ static void radix_ftoa(t_radix *x) {
 	else x->x_resize = 0;
 }
 
-static void radix_width(t_radix *x, t_floatarg zoom) {
-	int font = x->x_gui.x_fontsize * zoom;
-	if (x->x_gui.x_fsf.x_font_style == 1) font *= 0.95;
-	else if (x->x_gui.x_fsf.x_font_style == 2) font *= 0.85;
-	int f = font / 10;
-	font -= (font + 2 + f) / 4;
-	int w = x->x_numwidth ? x->x_numwidth : x->x_bufsize;
-	x->x_gui.x_w = w*font + (x->x_zh/2 + 3) * zoom;
+static void radix_borderwidth(t_radix *x, t_float zoom) {
+	int n = x->x_numwidth ? x->x_numwidth : x->x_bufsize;
+	x->x_gui.x_w = n*round(x->x_fontwidth * zoom) + (x->x_zh/2 + 3) * zoom;
 }
 
 static void radix_zoom(t_radix *x, t_floatarg zoom) {
@@ -519,11 +505,11 @@ static void radix_zoom(t_radix *x, t_floatarg zoom) {
 	int oldzoom = gui->x_glist->gl_zoom;
 	if (oldzoom < 1) oldzoom = 1;
 	gui->x_h = x->x_zh * zoom - (zoom-1)*2;
-	radix_width(x, zoom);
+	radix_borderwidth(x, zoom);
 }
 
-static void radix_border(t_radix *x) {
-	radix_width(x, IEMGUI_ZOOM(x));
+static void radix_resize(t_radix *x) {
+	radix_borderwidth(x, IEMGUI_ZOOM(x));
 	t_glist *glist = x->x_gui.x_glist;
 	int xpos = text_xpix(&x->x_gui.x_obj, glist);
 	int ypos = text_ypix(&x->x_gui.x_obj, glist);
@@ -556,13 +542,13 @@ static void radix_draw_update(t_gobj *client, t_glist *glist) {
 				x->x_buf[sl] = 0;   }
 			else
 			{	radix_ftoa(x);
-				if (!x->x_numwidth && x->x_resize) radix_border(x);
+				if (!x->x_numwidth && x->x_resize) radix_resize(x);
 				sys_vgui(".x%lx.c itemconfigure %lxNUMBER -fill #%06x -text {%s} \n",
 					glist_getcanvas(glist), x, PD_COLOR_EDIT, x->x_buf);
 				x->x_buf[0] = 0;   }   }
 		else
 		{	radix_ftoa(x);
-			if (!x->x_numwidth && x->x_resize) radix_border(x);
+			if (!x->x_numwidth && x->x_resize) radix_resize(x);
 			sys_vgui(".x%lx.c itemconfigure %lxNUMBER -fill #%06x -text {%s} \n",
 				glist_getcanvas(glist), x,
 				(x->x_gui.x_fsf.x_selected ? PD_COLOR_SELECT : x->x_gui.x_fcol),
@@ -690,6 +676,30 @@ static void radix_draw_config(t_radix* x, t_glist* glist) {
 		x->x_gui.x_bcol);
 	sys_vgui(".x%lx.c itemconfigure %lxBASE2 -outline #%06x\n", canvas, x,
 		(x->x_gui.x_fsf.x_selected ? PD_COLOR_SELECT : x->x_gui.x_bcol));
+}
+
+
+static void radix_calc_fontwidth(t_radix *x) {
+	double fwid = x->x_gui.x_fontsize;
+	if (x->x_gui.x_fsf.x_font_style == 2)
+		fwid *= 0.5;  // helvetica
+	else if (x->x_gui.x_fsf.x_font_style == 1)
+		fwid *= 0.556123; // times
+	else fwid *= 0.6021; // dejavu
+	x->x_fontwidth = fwid;
+}
+
+static void radix_fontsize(t_radix *x, t_float f) {
+	if (f <= 0) f = 1;
+	x->x_gui.x_fontsize = f;
+	radix_draw_config(x, x->x_gui.x_glist);
+	radix_calc_fontwidth(x);
+	radix_resize(x);
+}
+
+static void radix_fontwidth(t_radix *x, t_float f) {
+	x->x_fontwidth = f;
+	radix_resize(x);
 }
 
 static void radix_draw_io(t_radix* x,t_glist* glist, int old_snd_rcv_flags) {
@@ -870,6 +880,7 @@ static void radix_dialog(t_radix *x, t_symbol *s, int argc, t_atom *argv) {
 	int lilo       = atom_getfloatarg(4, argc, argv);
 	int log_height = atom_getfloatarg(6, argc, argv);
 	int sr_flags = iemgui_dialog(&x->x_gui, srl, argc, argv);
+	radix_calc_fontwidth(x);
 
 	if (lilo != 0) lilo = 1;
 	x->x_lilo = lilo;
@@ -883,7 +894,7 @@ static void radix_dialog(t_radix *x, t_symbol *s, int argc, t_atom *argv) {
 	if (log_height < 10)
 		log_height = 10;
 	x->x_log_height = log_height;
-	radix_width(x, IEMGUI_ZOOM(x));
+	radix_borderwidth(x, IEMGUI_ZOOM(x));
 	/*if (radix_check_minmax(x, min, max))
 	 radix_bang(x);*/
 	radix_check_minmax(x, min, max);
@@ -978,7 +989,7 @@ static void radix_size(t_radix *x, t_symbol *s, int ac, t_atom *av) {
 			h = IEM_GUI_MINSIZE;
 		x->x_zh = h;
 		x->x_gui.x_h = h * IEMGUI_ZOOM(x) - (IEMGUI_ZOOM(x)-1)*2;   }
-	radix_width(x, IEMGUI_ZOOM(x));
+	radix_borderwidth(x, IEMGUI_ZOOM(x));
 	iemgui_size((void *)x, &x->x_gui);
 }
 
@@ -1025,7 +1036,7 @@ static void radix_label_font(t_radix *x, t_symbol *s, int ac, t_atom *av) {
 	f = atom_getfloatarg(0, ac, av);
 	if (f<0 || f>2) f = 0;
 	x->x_gui.x_fsf.x_font_style = f;
-	radix_width(x, IEMGUI_ZOOM(x));
+	radix_borderwidth(x, IEMGUI_ZOOM(x));
 	iemgui_label_font((void *)x, &x->x_gui, s, ac, av);
 }
 
@@ -1163,6 +1174,7 @@ static void *radix_new(t_symbol *s, int argc, t_atom *argv) {
 	if (fs < MINFONT)
 		fs = MINFONT;
 	x->x_gui.x_fontsize = fs;
+	radix_calc_fontwidth(x);
 	if (w < MINDIGITS)
 		w = MINDIGITS;
 	x->x_numwidth = w;
@@ -1178,7 +1190,7 @@ static void *radix_new(t_symbol *s, int argc, t_atom *argv) {
 	x->x_clock_wait = clock_new(x, (t_method)radix_tick_wait);
 	x->x_gui.x_fsf.x_change = 0;
 	iemgui_newzoom(&x->x_gui);
-	radix_width(x, IEMGUI_ZOOM(x));
+	radix_borderwidth(x, IEMGUI_ZOOM(x));
 	outlet_new(&x->x_gui.x_obj, &s_float);
 	return (x);
 }
@@ -1245,6 +1257,10 @@ void radix_setup(void) {
 		gensym("be"), A_FLOAT, 0);
 	class_addmethod(radix_class, (t_method)radix_precision,
 		gensym("p"), A_FLOAT, 0);
+	class_addmethod(radix_class, (t_method)radix_fontsize,
+		gensym("fs"), A_FLOAT, 0);
+	class_addmethod(radix_class, (t_method)radix_fontwidth,
+		gensym("fw"), A_FLOAT, 0);
 	class_addmethod(radix_class, (t_method)radix_zoom,
 		gensym("zoom"), A_CANT, 0);
 	radix_widgetbehavior.w_visfn        = iemgui_vis;

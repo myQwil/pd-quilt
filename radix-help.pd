@@ -64,6 +64,10 @@
 #X floatatom 433 192 0 0 0 0 - - -;
 #X msg 433 217 p \$1;
 #X text 478 217 precision;
+#X msg 53 186 fs \$1;
+#X msg 113 186 fw \$1;
+#X obj 53 131 cupqb;
+#X obj 113 131 cupqb;
 #X connect 0 0 3 1;
 #X connect 1 0 8 0;
 #X connect 2 0 0 0;
@@ -80,3 +84,7 @@
 #X connect 19 0 6 2;
 #X connect 20 0 21 0;
 #X connect 21 0 8 0;
+#X connect 23 0 8 0;
+#X connect 24 0 8 0;
+#X connect 25 0 23 0;
+#X connect 26 0 24 0;
