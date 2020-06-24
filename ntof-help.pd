@@ -1,13 +1,11 @@
 #N canvas 719 334 506 350 14;
 #X text 26 67 similar to [mtof] and [ftom] with the added ability to
 change the reference pitch and the number of tones in an octave.;
-#X obj 81 147 cupqb;
+#X obj 55 143 cupqb;
 #X obj 92 206 ntof 432 13;
 #X floatatom 201 230 0 0 0 0 - - -;
 #X obj 92 257 phasor~;
 #X obj 92 283 *~;
-#X floatatom 143 282 0 0 0 0 - - -;
-#X obj 143 307 / 1000;
 #X obj 78 315 dac~;
 #X floatatom 166 180 0 0 0 0 - - -;
 #X floatatom 129 157 0 0 0 0 - - -;
@@ -20,15 +18,18 @@ change the reference pitch and the number of tones in an octave.;
 #X obj 179 39 cnv 15 136 22 empty empty ntof_&_fton 2 10 0 16 -1 -262144
 0;
 #X text 394 132 messages;
+#X obj 153 308 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10
+-1 -262144 -262144 5400 1;
+#X msg 123 127 set 440 12;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;
 #X connect 2 0 4 0;
-#X connect 3 0 15 0;
+#X connect 3 0 13 0;
 #X connect 4 0 5 0;
-#X connect 5 0 8 0;
-#X connect 5 0 8 1;
-#X connect 6 0 7 0;
-#X connect 7 0 5 1;
-#X connect 9 0 2 2;
-#X connect 10 0 2 1;
-#X connect 15 0 16 0;
+#X connect 5 0 6 0;
+#X connect 5 0 6 1;
+#X connect 7 0 2 2;
+#X connect 8 0 2 1;
+#X connect 13 0 14 0;
+#X connect 17 0 5 1;
+#X connect 18 0 2 0;

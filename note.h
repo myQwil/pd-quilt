@@ -2,32 +2,56 @@
 #include <math.h>
 
 typedef struct _note {
-	t_object x_obj;
-	t_float x_ref;   /* reference pitch */
-	t_float x_tet;   /* number of tones */
-	double x_rt;     /* root tone */
-	double x_st;     /* semi-tone */
+	t_float ref;   /* reference pitch */
+	t_float tet;   /* number of tones */
+	double rt;     /* root tone */
+	double st;     /* semi-tone */
 } t_note;
 
-static double note_root(t_note *x) {
-	return (x->x_ref * pow(2, -69 / x->x_tet));
+#define note x->x_note
+
+static t_float ntof(t_float f, double root, double semi) {
+	return (root * exp(semi*f));
 }
 
-static double note_semi(t_note *x) {
-	return (log(2) / x->x_tet);
+static t_float fton(t_float f, double root, double semi) {
+	return (semi * log(root*f));
 }
 
-static t_note *note_new(t_class *cl, t_symbol *s, int argc, t_atom *argv) {
-	t_note *x = (t_note *)pd_new(cl);
-	outlet_new(&x->x_obj, &s_float);
-	inlet_new(&x->x_obj, &x->x_obj.ob_pd, &s_float, gensym("ref"));
-	inlet_new(&x->x_obj, &x->x_obj.ob_pd, &s_float, gensym("tet"));
+static double root(t_note *x) {
+	return (x->ref * pow(2, -69 / x->tet));
+}
 
-	t_float ref=440, tet=12;
-	switch (argc)
-	{	case 2: tet = atom_getfloat(argv+1);
-		case 1: ref = atom_getfloat(argv);   }
-	x->x_ref=ref, x->x_tet=tet;
+static double semi(t_note *x) {
+	return (log(2) / x->tet);
+}
 
-	return x;
+static void note_ref(t_note *x, t_float f, int fton) {
+	x->ref = f;
+	x->rt = (fton) ? 1./root(x) : root(x);
+}
+
+static void note_tet(t_note *x, t_float f, int fton) {
+	x->tet = f;
+	if (fton)
+	{	x->rt = 1./root(x);
+		x->st = 1./semi(x);   }
+	else
+	{	x->rt = root(x);
+		x->st = semi(x);   }
+}
+
+static void note_set(t_note *x, int ac, t_atom *av, int fton) {
+	if (ac>2) ac = 2;
+	switch (ac)
+	{	case 2:
+			if ((av+1)->a_type == A_FLOAT)
+			{	x->tet = (av+1)->a_w.w_float;
+				x->st = (fton) ? 1./semi(x) : semi(x);   }
+		case 1:
+			if (av->a_type == A_FLOAT)
+				x->ref = av->a_w.w_float;   }
+
+	if ((ac==2 && (av+1)->a_type == A_FLOAT) || av->a_type == A_FLOAT)
+		x->rt = (fton) ? 1./root(x) : root(x);
 }

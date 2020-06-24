@@ -1,6 +1,4 @@
 #include "blunt.h"
-#include <string.h> // strlen
-#include <stdlib.h> // strtof
 
 /* --------------------------------------------------------------- */
 /*                       hot arithmetics                           */

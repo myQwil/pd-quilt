@@ -10,7 +10,7 @@ Some formats work with gmes~ , the multi-channel version of gme~ .
 To build these externals, simply include libgme.so/dll/dylib in the linking phase of building.
 By default, the library will build and link statically. If you have ubsan enabled, be sure to add `-lubsan` to the linking phase.
 
-## [pak $..] & [unpack $..]
+## [pak $..] & [unpak $..]
 A lazy version of pack/unpack objects with anything inlets/outlets. While these objects allow for strict type checking as with pack/unpack, by default, they aim to allow for any atom type to pass through, and they refrain from printing out error messages even when the the strict type checker receives an incorrect atom type.
 
 ## [ntof $1 $2] & [fton $1 $2]

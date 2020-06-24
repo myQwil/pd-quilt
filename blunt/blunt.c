@@ -1,5 +1,4 @@
 #include "bop.h"
-#include "blunt.h"
 
 void hotop_setup(void);
 void revop_setup(void);

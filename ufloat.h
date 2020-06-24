@@ -1,8 +1,16 @@
+#include "m_pd.h"
+
 typedef union {
-	float f;
-	unsigned u;
-	struct { unsigned mt:23,ex:8,sg:1; } s;
+	t_float f;
+	#if PD_FLOATSIZE == 32
+		uint32_t u;
+		struct { uint32_t m:23, e:8,  s:1; } fu;
+	#elif PD_FLOATSIZE == 64
+		uint64_t u;
+		struct { uint64_t m:52, e:11, s:1; } fu;
+	#endif
 } ufloat;
-#define mt s.mt
-#define ex s.ex
-#define sg s.sg
+
+#define mt fu.m
+#define ex fu.e
+#define sg fu.s

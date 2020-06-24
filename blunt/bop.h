@@ -1,6 +1,4 @@
-#include "m_pd.h"
-#include <string.h> // strlen
-#include <stdlib.h> // strtof
+#include "blunt.h"
 
 /* -------------------------- blunt binops -------------------------- */
 

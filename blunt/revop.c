@@ -1,5 +1,4 @@
 #include "bop.h"
-#include "blunt.h"
 
 /* --------------------------------------------------------------- */
 /*                   reverse arithmetics                           */

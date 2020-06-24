@@ -57,11 +57,10 @@ static t_unpak *unpak_init(t_class *cl, int ac, t_atom *av, int r) {
 static void unpak_list(t_unpak *x, t_symbol *s, int argc, t_atom *argv);
 
 static void unpak_anything(t_unpak *x, t_symbol *s, int ac, t_atom *av) {
-	t_atom *av2 = (t_atom *)getbytes((ac + 1) * sizeof(t_atom));
-	for (int i=0; i<ac; i++) av2[i+1] = av[i];
-	SETSYMBOL(av2, s);
-	unpak_list(x, 0, ac+1, av2);
-	freebytes(av2, (ac+1) * sizeof(t_atom));
+	t_atom atoms[ac+1];
+	atoms[0] = (t_atom){A_SYMBOL, {.w_symbol = s}};
+	memcpy(atoms+1, av, ac * sizeof(t_atom));
+	unpak_list(x, 0, ac+1, atoms);
 }
 
 static void unpak_mute(t_unpak *x, t_floatarg f) {

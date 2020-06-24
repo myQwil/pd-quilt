@@ -1,5 +1,7 @@
 #include "m_pd.h"
 #include <math.h>
+#include <string.h> // strlen
+#include <stdlib.h> // strtof
 
 #if PD_FLOATSIZE == 32
 # define POW powf

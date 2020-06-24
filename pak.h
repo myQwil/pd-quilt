@@ -95,8 +95,8 @@ static t_pak *pak_init(t_class *cl, t_class *pxy, int ac, t_atom *av, int r) {
 }
 
 static const char *pak_check(t_atomtype type) {
-	if (type==A_FLOAT) return s_float.s_name;
-	else if (type==A_SYMBOL) return s_symbol.s_name;
+	if      (type==A_FLOAT)   return s_float.s_name;
+	else if (type==A_SYMBOL)  return s_symbol.s_name;
 	else if (type==A_POINTER) return s_pointer.s_name;
 	else return "null";
 }
@@ -129,7 +129,7 @@ static void pak_bang(t_pak *x) {
 		if (x->x_nptr)
 			post("%s_bang: warning: reentry with pointers unprotected", 
 				class_getname(*(t_pd *)x));
-		outvec = t_getbytes(size);
+		outvec = (t_atom *)t_getbytes(size);
 		reentered = 1;   }
 	else
 	{	outvec = x->x_outvec;
@@ -217,11 +217,10 @@ static void pak_pxy_list(t_pak_pxy *p, t_symbol *s, int ac, t_atom *av) {
 
 
 static int pak_a(t_pak *x, t_symbol *s, int ac, t_atom *av, int j) {
-	t_atom *av2 = (t_atom *)getbytes((ac+1) * sizeof(t_atom));
-	for (int i=0; i < ac; i++) av2[i+1] = av[i];
-	SETSYMBOL(av2, s);
-	int result = pak_l(x, 0, ac+1, av2, j);
-	freebytes(av2, (ac+1) * sizeof(t_atom));
+	t_atom atoms[ac+1];
+	atoms[0] = (t_atom){A_SYMBOL, {.w_symbol = s}};
+	memcpy(atoms+1, av, ac * sizeof(t_atom));
+	int result = pak_l(x, 0, ac+1, atoms, j);
 	return result;
 }
 static void pak_anything(t_pak *x, t_symbol *s, int ac, t_atom *av) {
@@ -248,8 +247,8 @@ static void pak_free(t_pak *x) {
 		if (*pp) pd_free((t_pd *)*pp);
 
 	freebytes(x->x_vec, n * sizeof(*x->x_vec));
-	freebytes(x->x_outvec, n * sizeof(*x->x_outvec));
 	freebytes(x->x_type, n * sizeof(*x->x_type));
 	freebytes(x->x_ins, pn * sizeof(t_pak_pxy *));
+	freebytes(x->x_outvec, n * sizeof(*x->x_outvec));
 	freebytes(x->x_ptr, x->x_nptr * sizeof(*x->x_ptr));
 }

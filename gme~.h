@@ -37,13 +37,13 @@ typedef struct _gme_tilde {
 	Music_Emu *x_emu;   /* emulator object */
 	Music_Emu *x_info;  /* info-only emu fallback */
 	const char *x_path; /* path to the most recently read file */
+	char x_mask;        /* muting mask */
 	int x_track;        /* current track number */
 	t_float x_tempo;    /* current tempo */
 	unsigned x_read:1;  /* when a new file path is read but not opened yet */
 	unsigned x_open:1;  /* when a request for playback is made */
 	unsigned x_stop:1;  /* flag to start from beginning on next playback */
 	unsigned x_play:1;  /* play/pause flag */
-	unsigned x_mask:8;  /* muting mask */
 	t_outlet *o_len;    /* outputs track length and fade */
 } t_gme_tilde;
 
@@ -194,7 +194,7 @@ static void gme_tilde_mute(t_gme_tilde *x, t_symbol *s, int ac, t_atom *av) {
 }
 
 static void gme_tilde_solo(t_gme_tilde *x, t_symbol *s, int ac, t_atom *av) {
-	int mask = ~0;
+	char mask = ~0;
 	for (;ac--; av++)
 		if (av->a_type == A_FLOAT)
 			mask ^= 1 << (int)av->a_w.w_float;
@@ -220,6 +220,7 @@ static void *gme_new(t_class *gmeclass, t_symbol *s, int ac, t_atom *av) {
 	while (i--) outlet_new(&x->x_obj, &s_signal);
 	x->o_len = outlet_new(&x->x_obj, &s_list);
 	if (ac) gme_tilde_solo(x, NULL, ac, av);
+	x->x_track = x->x_mask = x->x_read = x->x_open = x->x_stop = x->x_play = 0;
 	x->x_tempo = 1;
 	return (x);
 }
@@ -227,4 +228,37 @@ static void *gme_new(t_class *gmeclass, t_symbol *s, int ac, t_atom *av) {
 static void gme_tilde_free(t_gme_tilde *x) {
 	gme_delete(x->x_emu); x->x_emu = NULL;
 	gme_delete(x->x_info); x->x_info = NULL;
+}
+
+static t_class *gme_setup(t_symbol *s, t_newmethod newm) {
+	t_class *gmeclass = class_new(s, newm, (t_method)gme_tilde_free,
+		sizeof(t_gme_tilde), 0, A_GIMME, 0);
+	class_addbang(gmeclass, gme_tilde_bang);
+	class_addfloat(gmeclass, gme_tilde_float);
+	class_addmethod(gmeclass, (t_method)gme_tilde_info,
+		gensym("info"), A_DEFSYM, 0);
+	class_addmethod(gmeclass, (t_method)gme_tilde_path,
+		gensym("path"), A_DEFSYM, 0);
+	class_addmethod(gmeclass, (t_method)gme_tilde_read,
+		gensym("read"), A_DEFSYM, 0);
+	class_addmethod(gmeclass, (t_method)gme_tilde_goto,
+		gensym("goto"), A_FLOAT, 0);
+	class_addmethod(gmeclass, (t_method)gme_tilde_tempo,
+		gensym("tempo"), A_FLOAT, 0);
+	class_addmethod(gmeclass, (t_method)gme_tilde_track,
+		gensym("track"), A_FLOAT, 0);
+	class_addmethod(gmeclass, (t_method)gme_tilde_time,
+		gensym("time"), A_GIMME, 0);
+	class_addmethod(gmeclass, (t_method)gme_tilde_mute,
+		gensym("mute"), A_GIMME, 0);
+	class_addmethod(gmeclass, (t_method)gme_tilde_solo,
+		gensym("solo"), A_GIMME, 0);
+	class_addmethod(gmeclass, (t_method)gme_tilde_mask,
+		gensym("mask"), A_GIMME, 0);
+	class_addmethod(gmeclass, (t_method)gme_tilde_stop,
+		gensym("stop"), (t_atomtype)0);
+	class_addmethod(gmeclass, (t_method)gme_tilde_bang,
+		gensym("play"), (t_atomtype)0);
+
+	return gmeclass;
 }

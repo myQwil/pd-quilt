@@ -31,14 +31,14 @@ static void rind_state(t_rind *x, t_symbol *s) {
 }
 
 static void rind_peek(t_rind *x, t_symbol *s) {
-	post("%s%s%g <-> %g", s->s_name, *s->s_name?": ":"", x->x_max, x->x_min);
+	post("%s%s%g <=> %g", s->s_name, *s->s_name?": ":"", x->x_max, x->x_min);
 }
 
 static void rind_bang(t_rind *x) {
 	double min=x->x_min, range=x->x_max-min, nval;
-	unsigned state = x->x_state;
-	x->x_state = state = state * 472940017 + 832416023;
-	nval = (1./4294967296) * range * state + min;
+	unsigned *sp = &x->x_state;
+	*sp = *sp * 472940017 + 832416023;
+	nval = *sp * range / 4294967296 + min;
 	outlet_float(x->x_obj.ob_outlet, nval);
 }
 
@@ -53,7 +53,7 @@ static void *rind_new(t_symbol *s, int ac, t_atom *av) {
 	outlet_new(&x->x_obj, &s_float);
 	
 	floatinlet_new(&x->x_obj, &x->x_max);
-	if (ac!=1) floatinlet_new(&x->x_obj, &x->x_min);
+	if (ac != 1) floatinlet_new(&x->x_obj, &x->x_min);
 	
 	switch (ac)
 	{	case 2: x->x_min = atom_getfloat(av+1);

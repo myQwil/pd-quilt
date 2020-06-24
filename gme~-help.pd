@@ -2,7 +2,7 @@
 #X obj 194 596 *~;
 #X obj 194 666 dac~;
 #N canvas 710 778 450 300 (subpatch) 0;
-#X array gme 256 float 0;
+#X array gme 256 float 0 black #ff0000;
 #X coords 0 1 255 -1 100 70 1;
 #X restore 447 169 graph;
 #X obj 47 541 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
