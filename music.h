@@ -2,6 +2,7 @@
 #include "note.h"
 #include <stdlib.h> // strtof
 #include <string.h> // memcpy
+#include <ctype.h>
 
 typedef struct _music {
 	t_fin x_fin;
@@ -65,59 +66,60 @@ static void music_operate(t_float *fp, t_float f, char c) {
 static void music_calc(t_music *x, t_float **fp, int *n, t_atom *av) {
 	const char *cp = av->a_w.w_symbol->s_name;
 	int i;
-	if (*cp>='0' && *cp<='9')
-	{	i = atoi(cp++);
-		while (*cp>='0' && *cp<='9') cp++;   }
-	else i = *n + 1;
+	if (isdigit(*cp) || (*cp == '-' && isdigit(cp[1])))
+	{	i = atoi(cp);
+		if (i < 0)
+			i = i % *n + *n;
+		while (isdigit(*++cp));   }
+	else i = *n;
 
 	char c = cp[0];
 	if (c=='^' || c=='v' || c=='+' || c=='-' || c=='*' || c=='/')
 	{	if (cp[0] == cp[1])
-		{	for ((*n)++; i--; (*fp)++, (*n)--)
-				music_operate(*fp, (cp[2] ? strtof(cp+2, NULL) : 1), c);
-			return;   }
+		{	for (;;)
+			{	music_operate(*fp, (cp[2] ? strtof(cp+2, NULL) : 1), c);
+				if (--i) *n -= 1, *fp += 1;
+				else break;   }   }
 		else music_operate(*fp, (cp[1] ? strtof(cp+1, NULL) : 1), c);   }
 	else if (c=='<' || c=='>')
 	{	int mvrt = cp[0] == cp[1];
 		cp += mvrt;
 		music_invert(x, *fp, mvrt, i,
 			(cp[1] ? atoi(cp+1) : 1) * (c=='<' ? -1 : 1));
-		*fp += i;
-		*n -= i - 1;
-		return;   }
+		i--, *n -= i, *fp += i;   }
 	else if (cp[1])
 		music_operate(*fp, (cp[2] ? strtof(cp+2, NULL) : 1), cp[1]);
-	(*fp)++;
 }
 
 static int music_scale(t_music *x, int ac, t_atom *av) {
 	t_float *fp = fin.x_fp;
 	int n = x->x_n;
-	for (; n--, ac--; av++)
-	{	if      (av->a_type == A_FLOAT)  *fp++ = av->a_w.w_float;
+	for (; ac > 0; n--, ac--, av++, fp++)
+	{	if      (av->a_type == A_FLOAT)  *fp = av->a_w.w_float;
 		else if (av->a_type == A_SYMBOL) music_calc(x, &fp, &n, av);   }
 	return (n != ac);
 }
 
-static int music_more(int ac, t_atom *av) {
+static int music_more(t_music *x, int ac, t_atom *av) {
 	int more = 0;
 	for (; ac--; av++)
 		if (av->a_type == A_SYMBOL)
 		{	const char *cp = av->a_w.w_symbol->s_name;
-			if (*cp>='0' && *cp<='9')
+			if (isdigit(*cp) || (*cp == '-' && isdigit(cp[1])))
 			{	int add = atoi(cp);
-				if (add) more += add - 1;   }   }
+				if      (add > 0) more += add - 1;
+				else if (add < 0) more += add % x->x_n + x->x_n - 1;   }   }
 	return more;
 }
 
 static void music_x(t_music *x, t_symbol *s, int ac, t_atom *av) {
-	if (ac + music_more(ac, av) > fin.x_p)
+	if (ac + music_more(x, ac, av) > fin.x_p)
 		ac = fin.x_p;
 	music_scale(x, ac, av);
 }
 
 static void music_i(t_music *x, t_symbol *s, int ac, t_atom *av) {
-	int n = fin_resize(&fin, ac + music_more(ac, av), 0);
+	int n = fin_resize(&fin, ac + music_more(x, ac, av), 0);
 	if (music_scale(x, ac, av)) x->x_n = n;
 }
 

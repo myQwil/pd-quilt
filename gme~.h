@@ -9,14 +9,11 @@ Shay Green <gblargg@gmail.com>
 */
 
 #include "m_pd.h"
-#include "game-music-emu/gme/gme.h"
+#include <gme.h>
 #include <string.h>
 
 #ifndef NCH
 #define NCH 2
-#endif
-#ifndef MULTI
-#define MULTI 0
 #endif
 
 #if defined MSW                   // when compiling for Windows
@@ -91,7 +88,7 @@ static t_int *gme_tilde_perform(t_int *w) {
 
 	if (x->x_open)
 	{	gme_delete(x->x_emu); x->x_emu = NULL;
-		hnd_err(gme_open_file(x->x_path, &x->x_emu, sys_getsr(), MULTI));
+		hnd_err(gme_open_file(x->x_path, &x->x_emu, sys_getsr(), NCH>2));
 		if (x->x_emu)
 		{	gme_tilde_m3u(x, x->x_emu);
 			gme_ignore_silence(x->x_emu, 1);
