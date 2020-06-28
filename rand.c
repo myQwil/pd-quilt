@@ -16,15 +16,15 @@ typedef struct _rand {
 	unsigned x_nop:1;   /* no-repeat toggle */
 } t_rand;
 
-static int rand_time(void) {
-	int thym = time(0) % 31536000; // seconds in a year
+static unsigned rand_time(void) {
+	unsigned thym = time(0) * 2;
 	return (thym|1); // odd numbers only
 }
 
-static int rand_makeseed(void) {
+static unsigned rand_makeseed(void) {
 	static unsigned rand_next = 1489853723;
 	rand_next = rand_next * rand_time() + 938284287;
-	return (rand_next & 0x7fffffff);
+	return rand_next;
 }
 
 static void rand_seed(t_rand *x, t_symbol *s, int ac, t_atom *av) {

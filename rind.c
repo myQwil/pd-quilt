@@ -11,19 +11,19 @@ typedef struct _rind {
 	unsigned x_state;
 } t_rind;
 
-static int rind_time(void) {
-	int thym = time(0) % 31536000; // seconds in a year
+static unsigned rind_time(void) {
+	unsigned thym = time(0) * 2;
 	return (thym|1); // odd numbers only
 }
 
-static int rind_makeseed(void) {
+static unsigned rind_makeseed(void) {
 	static unsigned rind_next = 1378742615;
 	rind_next = rind_next * rind_time() + 938284287;
-	return (rind_next & 0x7fffffff);
+	return rind_next;
 }
 
-static void rind_seed(t_rind *x, t_symbol *s, int argc, t_atom *argv) {
-	x->x_state = (argc ? atom_getfloat(argv) : rind_time());
+static void rind_seed(t_rind *x, t_symbol *s, int ac, t_atom *av) {
+	x->x_state = (ac ? atom_getfloat(av) : rind_time());
 }
 
 static void rind_state(t_rind *x, t_symbol *s) {
