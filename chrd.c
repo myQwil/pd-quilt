@@ -39,7 +39,7 @@ static void chrd_float(t_chrd *y, t_float f) {
 	i += (i<0)*n + 1;
 	if (!d) i = 0;
 	outlet_float(y->x_outs[i], y->x_midi ?
-		nte : ntof(nte, note.rt, note.st));
+		nte : ntof(&note, nte));
 }
 
 static void chrd_bang(t_chrd *y) {
@@ -49,7 +49,7 @@ static void chrd_bang(t_chrd *y) {
 	for (t_outlet **op = y->x_outs+i; op--, i--;)
 	{	double nte = chrd_note(x, i);
 		outlet_float(*op, y->x_midi ?
-			nte : ntof(nte, note.rt, note.st));   }
+			nte : ntof(&note, nte));   }
 }
 
 static void *chrd_new(t_symbol *s, int ac, t_atom *av) {

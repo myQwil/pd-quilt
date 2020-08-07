@@ -5,7 +5,7 @@
 static t_class *fton_class;
 
 static void fton_float(t_ntof *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, fton(f, note.rt, note.st));
+	outlet_float(x->x_obj.ob_outlet, fton(&note, f));
 }
 
 static void *fton_new(t_symbol *s, int argc, t_atom *argv) {

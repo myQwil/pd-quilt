@@ -1,15 +1,15 @@
 #N canvas 731 397 522 335 14;
-#X floatatom 223 288 0 0 0 0 - - -;
-#X msg 304 211 25;
-#X msg 233 170 123;
-#X msg 176 211 50;
-#X msg 207 170 1, f 2;
-#X msg 267 170 1, f 2;
-#X obj 306 174 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#X floatatom 223 293 0 0 0 0 - - -;
+#X msg 304 206 25;
+#X msg 233 165 123;
+#X msg 176 206 50;
+#X msg 207 165 1, f 2;
+#X msg 267 165 1, f 2;
+#X obj 306 169 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#X obj 337 213 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#X obj 340 215 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#X obj 156 213 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#X obj 156 215 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
 #X obj 234 37 cnv 15 64 22 empty empty cupqb 2 10 0 16 -1 -262144 0
 ;
@@ -17,7 +17,7 @@
 add to the current value respectively \, while the middle inlet will
 output the current value and allow for it to be set to a different
 value.;
-#X msg 324 170 set 24;
+#X msg 324 165 set 24;
 #X obj 223 240 cupqb 42 2;
 #X connect 1 0 12 2;
 #X connect 2 0 12 1;

@@ -1,13 +1,13 @@
-#N canvas 534 363 450 514 14;
+#N canvas 181 341 450 514 14;
 #X obj 75 232 timer;
-#X obj 239 198 unpack;
+#X obj 239 202 unpack;
 #X obj 89 305 -;
 #X obj 75 257 t b f;
 #X obj 53 305 f;
 #X obj 157 297 f;
 #X obj 117 153 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
 0 1;
-#X obj 107 171 sel;
+#X obj 78 186 sel;
 #X obj 107 65 inlet;
 #X obj 312 375 inlet;
 #X obj 107 93 route pause float list;
@@ -23,10 +23,13 @@
 #X msg 119 232 stop;
 #X obj 173 375 span;
 #X obj 258 410 line~;
-#X obj 258 442 outlet~;
+#X obj 54 440 outlet~;
 #X obj 235 36 cnv 15 64 22 empty empty linp~ 2 10 0 16 -1 -262144 0
 ;
 #X text 170 61 line~ with pause feature;
+#X obj 41 152 t f f;
+#X obj 325 202 outlet;
+#X obj 173 444 outlet;
 #X connect 0 0 3 0;
 #X connect 1 0 5 0;
 #X connect 1 0 21 1;
@@ -40,7 +43,7 @@
 #X connect 3 1 2 1;
 #X connect 4 0 2 0;
 #X connect 5 0 22 0;
-#X connect 6 0 7 0;
+#X connect 6 0 26 0;
 #X connect 7 0 0 1;
 #X connect 7 0 20 0;
 #X connect 7 1 13 0;
@@ -63,6 +66,7 @@
 #X connect 14 1 12 1;
 #X connect 15 0 6 0;
 #X connect 16 0 6 0;
+#X connect 16 0 27 0;
 #X connect 17 0 16 0;
 #X connect 17 0 15 1;
 #X connect 18 0 16 0;
@@ -70,4 +74,7 @@
 #X connect 19 0 18 0;
 #X connect 20 0 19 0;
 #X connect 21 0 22 0;
+#X connect 21 0 28 0;
 #X connect 22 0 23 0;
+#X connect 26 0 27 0;
+#X connect 26 1 7 0;

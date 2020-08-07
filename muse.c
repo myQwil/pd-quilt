@@ -25,7 +25,7 @@ static void muse_float(t_muse *y, t_float f) {
 		double nxt = muse_note(x, d+dir);
 		nte += dir * (f-d) * (nxt-nte);   }
 	outlet_float(y->o_midi, nte);
-	outlet_float(y->o_freq, ntof(nte, note.rt, note.st));
+	outlet_float(y->o_freq, ntof(&note, nte));
 }
 
 static void *muse_new(t_symbol *s, int ac, t_atom *av) {

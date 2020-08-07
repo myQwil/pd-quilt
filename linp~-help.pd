@@ -13,16 +13,19 @@
 #X text 131 124 /resume;
 #X text 105 69 line~ with pause functionality;
 #X obj 200 241 linp~;
-#X obj 200 291 *~;
-#X obj 189 331 dac~;
+#X obj 200 321 *~;
+#X obj 189 361 dac~;
 #X obj 315 228 vsl 15 128 0.001 1 1 0 empty empty empty 0 -9 0 10 -1
--262144 -262144 0 1;
-#X obj 200 266 phasor~ 220;
+-262144 -262144 5700 1;
+#X obj 200 296 phasor~ 220;
 #X msg 217 159 27 \, 440 6000;
 #X msg 223 184 440 \, 27 6000;
 #X obj 88 253 delp;
 #X msg 207 134 336 \, 42 1500;
 #X msg 200 109 42 \, 336 1500;
+#X obj 258 239 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
+0 1;
+#X floatatom 218 269 0 0 0 0 - - -;
 #X connect 0 0 10 0;
 #X connect 0 0 17 0;
 #X connect 3 0 6 0;
@@ -31,6 +34,8 @@
 #X connect 4 0 10 0;
 #X connect 6 0 17 0;
 #X connect 10 0 14 0;
+#X connect 10 1 21 0;
+#X connect 10 2 20 0;
 #X connect 11 0 12 0;
 #X connect 11 0 12 1;
 #X connect 13 0 11 1;
