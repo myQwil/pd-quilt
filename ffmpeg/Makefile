@@ -9,6 +9,6 @@
   suppress-wunused = yes
   warn.flags = -Wall -Winline -Wstrict-aliasing -Wshadow
 
-  ldlibs = -lavcodec -lavformat -lswresample
+  ldlibs = -lavutil -lavcodec -lavformat -lswresample
 
   include ../pd-lib-builder/Makefile.pdlibbuilder

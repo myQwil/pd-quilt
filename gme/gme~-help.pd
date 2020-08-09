@@ -275,7 +275,7 @@
 #X restore 273 442 pd route;
 #X symbolatom 297 299 0 0 0 0 - - -;
 #X obj 141 269 r \$0pass;
-#N canvas 1009 98 568 356 muting_commands 0;
+#N canvas 945 97 568 356 muting_commands 0;
 #X text 132 156 get;
 #X text 132 131 set;
 #X msg 64 131 mask \$1;
@@ -310,7 +310,7 @@
 #X msg 277 285 solo \$[:];
 #X msg 456 263 1 3 -1 -3;
 #X text 316 71 zero resets all channels;
-#X msg 107 184 print $bmask;
+#X msg 107 184 bmask;
 #X connect 2 0 10 0;
 #X connect 3 0 4 0;
 #X connect 4 0 2 0;
