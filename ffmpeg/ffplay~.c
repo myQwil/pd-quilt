@@ -39,6 +39,7 @@ typedef struct _ffplay {
 	int      idx;     /* index of the audio stream */
 	unsigned open:1;  /* true when a file has been successfully opened */
 	unsigned play:1;  /* play/pause toggle */
+	unsigned sped:1;  /* speed change request flag */
 	t_outlet *o_meta; /* outputs track metadata */
 } t_ffplay;
 
@@ -58,8 +59,8 @@ static void ffplay_position(t_ffplay *x) {
 }
 
 static int speed_limit(t_float speed) {
-	if (speed < 0.001)
-		speed = 0.001;
+	if (speed < 0.1)
+		speed = 0.1;
 	speed = sys_getsr() / speed;
 	ufloat uf = {speed};
 	int d = speed;
@@ -72,14 +73,7 @@ static int speed_limit(t_float speed) {
 
 static void ffplay_speed(t_ffplay *x, t_floatarg f) {
 	x->speed = f;
-	if (!x->open) return;
-
-	int64_t layout_in = av_get_default_channel_layout(x->ctx->channels);
-	swr_alloc_set_opts(x->swr,
-		x->layout, AV_SAMPLE_FMT_FLTP, speed_limit(x->speed),
-		layout_in, x->ctx->sample_fmt, x->ctx->sample_rate,
-		0, NULL);
-	swr_init(x->swr);
+	x->sped = 1;
 }
 
 static void ffplay_seek(t_ffplay *x, t_floatarg f) {
@@ -105,6 +99,14 @@ static void ffplay_decode(t_ffplay *x, t_sample **outs) {
 		{	if (avcodec_send_packet(x->ctx, x->pkt) < 0
 			 || avcodec_receive_frame(x->ctx, x->frm) < 0)
 				return;
+			if (x->sped)
+			{	int64_t layout_in = av_get_default_channel_layout(x->ctx->channels);
+				swr_alloc_set_opts(x->swr,
+					x->layout, AV_SAMPLE_FMT_FLTP, speed_limit(x->speed),
+					layout_in, x->ctx->sample_fmt, x->ctx->sample_rate,
+					0, NULL);
+				swr_init(x->swr);
+				x->sped = 0;   }
 			x->siz = swr_convert(x->swr, (uint8_t**)&x->buf, BUFSIZE,
 				(const uint8_t **)x->frm->extended_data, x->frm->nb_samples);
 			av_packet_unref(x->pkt);
@@ -375,7 +377,7 @@ static void *ffplay_new(t_symbol *s, int ac, t_atom *av) {
 		x->buf[i] = (t_sample*)getbytes(BUFSIZE * sizeof(t_sample));   }
 
 	x->o_meta = outlet_new(&x->x_obj, 0);
-	x->open = x->play = 0;
+	x->open = x->play = x->sped = 0;
 	x->speed = 1;
 
 	x->plist.siz = 0;

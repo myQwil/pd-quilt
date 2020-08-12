@@ -22,7 +22,7 @@
 #X obj 87 304 bng 15 250 50 0 empty empty restart 17 7 0 11 -1 -262144
 -262144;
 #X obj 383 440 hsl 128 17 0.001 1 1 0 empty empty vol 25 9 0 12 -1
--262144 -262144 0 1;
+-262144 -262144 10000 1;
 #X obj 383 520 hsl 128 17 -0.001 -1 1 0 empty empty cos 25 9 0 12 -1
 -262144 -262144 0 1;
 #X floatatom 393 469 0 0 0 0 - - -;
@@ -117,7 +117,7 @@
 #X restore 230 81 pd is-playing;
 #X obj 301 221 outlet;
 #X obj 166 143 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-0 1;
+1 1;
 #X msg 166 190 pos;
 #X floatatom 235 134 0 0 0 0 - - -;
 #X obj 166 163 metro 250;
@@ -195,7 +195,7 @@
 #X obj 28 127 outlet;
 #X msg 28 98 seek \$1;
 #X obj 52 16 hsl 576 20 0 1 0 0 empty \$0trackbar empty -2 -8 0 10
--1 -262144 -262144 0 1;
+-1 -262144 -262144 19349 1;
 #X obj 64 43 r \$0time;
 #X obj 28 16 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
@@ -204,6 +204,9 @@
 #X floatatom 179 70 0 0 0 0 - - -;
 #X obj 179 97 / 100;
 #X msg 179 124 speed \$1;
+#X msg 296 59 15 5000;
+#X msg 367 59 400 5000;
+#X obj 296 96 line 0 2;
 #X connect 1 0 0 0;
 #X connect 2 0 5 0;
 #X connect 3 0 5 1;
@@ -213,6 +216,9 @@
 #X connect 7 0 8 0;
 #X connect 8 0 9 0;
 #X connect 9 0 0 0;
+#X connect 10 0 12 0;
+#X connect 11 0 12 0;
+#X connect 12 0 7 0;
 #X restore 427 294 pd trackbar;
 #N canvas 308 517 483 493 metadata 0;
 #X obj 57 446 outlet;
