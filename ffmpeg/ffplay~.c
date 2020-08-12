@@ -1,12 +1,13 @@
-#include "m_pd.h"
+#include "../ufloat.h"
 #include <stdio.h>
+#include <float.h>
 #include <string.h>
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libswresample/swresample.h>
 
-#define NCH 2
-#define BUFSIZE 0x1200
+#define BUFSIZE 0x1000
+#define MAXCH 32
 
 typedef const char *err_t;
 
@@ -27,10 +28,14 @@ typedef struct _ffplay {
 	AVPacket        *pkt;
 	AVFrame         *frm;
 	SwrContext      *swr;
-	t_sample        *buf[NCH];
+	t_sample        *buf[MAXCH];
+	t_sample        *outs[MAXCH];
 	t_playlist      plist;
+	t_float  speed;   /* playback speed factor */
+	int64_t  layout;  /* channel layout bit-mask */
+	int      nch;     /* number of channels */
+	int      siz;     /* number of output samples */
 	int      pos;     /* current buffer position */
-	int      siz;     /* size of frame after resampling */
 	int      idx;     /* index of the audio stream */
 	unsigned open:1;  /* true when a file has been successfully opened */
 	unsigned play:1;  /* play/pause toggle */
@@ -52,12 +57,37 @@ static void ffplay_position(t_ffplay *x) {
 	outlet_anything(x->o_meta, gensym("pos:"), 1, &pos);
 }
 
+static int speed_limit(t_float speed) {
+	if (speed < 0.001)
+		speed = 0.001;
+	speed = sys_getsr() / speed;
+	ufloat uf = {speed};
+	int d = speed;
+	if (speed <= 0.f)
+		d = 1;
+	else if (uf.ex == 0xff)
+		d = INT_MAX;
+	return d;
+}
+
+static void ffplay_speed(t_ffplay *x, t_floatarg f) {
+	x->speed = f;
+	if (!x->open) return;
+
+	int64_t layout_in = av_get_default_channel_layout(x->ctx->channels);
+	swr_alloc_set_opts(x->swr,
+		x->layout, AV_SAMPLE_FMT_FLTP, speed_limit(x->speed),
+		layout_in, x->ctx->sample_fmt, x->ctx->sample_rate,
+		0, NULL);
+	swr_init(x->swr);
+}
+
 static void ffplay_seek(t_ffplay *x, t_floatarg f) {
 	if (!x->open) return;
 	int64_t ts = 1000L * f;
 	avformat_seek_file(x->ic, -1, 0, ts, x->ic->duration, 0);
 	swr_init(x->swr);
-	x->siz = 0;
+	x->siz = x->pos = 0;
 
 	// avcodec_flush_buffers(x->ctx); // doesn't always flush properly
 	avcodec_free_context(&x->ctx);
@@ -68,7 +98,7 @@ static void ffplay_seek(t_ffplay *x, t_floatarg f) {
 	avcodec_open2(x->ctx, codec, NULL);
 }
 
-static void ffplay_decode(t_ffplay *x, t_sample *outs[NCH]) {
+static void ffplay_decode(t_ffplay *x, t_sample **outs) {
 	if (x->siz > 0) goto have_buf;
 	while (av_read_frame(x->ic, x->pkt) >= 0)
 	{	if (x->pkt->stream_index == x->idx)
@@ -78,7 +108,6 @@ static void ffplay_decode(t_ffplay *x, t_sample *outs[NCH]) {
 			x->siz = swr_convert(x->swr, (uint8_t**)&x->buf, BUFSIZE,
 				(const uint8_t **)x->frm->extended_data, x->frm->nb_samples);
 			av_packet_unref(x->pkt);
-			x->pos = 0;
 			goto have_buf;   }
 		av_packet_unref(x->pkt);   }
 
@@ -89,29 +118,31 @@ static void ffplay_decode(t_ffplay *x, t_sample *outs[NCH]) {
 	return;
 
 	have_buf:
-	for (int i=NCH; i--;)
+	for (int i = x->nch; i--;)
 		*outs[i]++ = x->buf[i][x->pos];
 	if (++x->pos >= x->siz)
-		x->siz = 0;
+	{	x->siz = swr_convert(x->swr, (uint8_t**)&x->buf, BUFSIZE, 0, 0);
+		x->pos = 0;   }
 }
 
 static t_int *ffplay_perform(t_int *w) {
 	t_ffplay *x = (t_ffplay *)(w[1]);
-	t_sample *outs[NCH];
-	for (int i=NCH; i--;) outs[i] = (t_sample *)(w[i+2]);
-	int n = (int)(w[NCH+2]);
+	t_sample *outs[x->nch];
+	for (int i = x->nch; i--;) outs[i] = x->outs[i];
+	int n = (int)w[2];
 
 	while (n--)
 		if (x->open && x->play)
 			ffplay_decode(x, outs);
-		else for (int i=NCH; i--;)
+		else for (int i = x->nch; i--;)
 			*outs[i]++ = 0;
-	return (w+NCH+3);
+	return (w+3);
 }
 
 static void ffplay_dsp(t_ffplay *x, t_signal **sp) {
-	dsp_add(ffplay_perform, NCH+2, x,
-		sp[0]->s_vec, sp[1]->s_vec, sp[0]->s_n);
+	for (int i = x->nch; i--;)
+		x->outs[i] = sp[i]->s_vec;
+	dsp_add(ffplay_perform, 2, x, sp[0]->s_n);
 }
 
 static err_t ffplay_load(t_ffplay *x, const char *fname) {
@@ -147,16 +178,15 @@ static err_t ffplay_load(t_ffplay *x, const char *fname) {
 		return "Could not open codec";
 
 	swr_free(&x->swr);
-	int out_sample_rate = sys_getsr();
-	uint64_t layout_in = av_get_default_channel_layout(x->ctx->channels);
+	int64_t layout_in = av_get_default_channel_layout(x->ctx->channels);
 	x->swr = swr_alloc_set_opts(x->swr,
-		AV_CH_LAYOUT_STEREO, AV_SAMPLE_FMT_FLTP, out_sample_rate,
+		x->layout, AV_SAMPLE_FMT_FLTP, speed_limit(x->speed),
 		layout_in, x->ctx->sample_fmt, x->ctx->sample_rate,
 		0, NULL);
 	if (swr_init(x->swr) < 0)
 		return "Resampler initialization failed";
 
-	x->siz = 0;
+	x->siz = x->pos = 0;
 	return 0;
 }
 
@@ -277,9 +307,9 @@ static void ffplay_send(t_ffplay *x, t_symbol *s) {
 		outlet_anything(x->o_meta, gensym(key), 1, &val);   }
 }
 
-static void ffplay_total(t_ffplay *x) {
-	t_atom total = { A_FLOAT, {(t_float)x->plist.siz} };
-	outlet_anything(x->o_meta, gensym("total:"), 1, &total);
+static void ffplay_tracks(t_ffplay *x) {
+	t_atom tracks = { A_FLOAT, {(t_float)x->plist.siz} };
+	outlet_anything(x->o_meta, gensym("tracks:"), 1, &tracks);
 }
 
 static void ffplay_anything(t_ffplay *x, t_symbol *s, int ac, t_atom *av) {
@@ -322,21 +352,35 @@ static void ffplay_stop(t_ffplay *x) {
 	ffplay_float(x, 0);
 }
 
-static void *ffplay_new(t_floatarg f) {
+static void *ffplay_new(t_symbol *s, int ac, t_atom *av) {
 	t_ffplay *x = (t_ffplay *)pd_new(ffplay_class);
 	x->pkt = av_packet_alloc();
 	x->frm = av_frame_alloc();
-	for (int i=NCH; i--;)
-		x->buf[i] = (t_sample*)getbytes(BUFSIZE * sizeof(t_sample));
-	x->open = x->play = x->pos = x->siz = 0;
+	t_atom defarg[2];
+
+	if (!ac)
+	{	av = defarg;
+		ac = 2;
+		SETFLOAT(&defarg[0], 1);
+		SETFLOAT(&defarg[1], 2);   }
+	else if (ac > MAXCH)
+		ac = MAXCH;
+	x->nch = ac;
+
+	x->layout = 0;
+	for (int i=ac; i--;)
+	{	outlet_new(&x->x_obj, &s_signal);
+		int ch = atom_getfloatarg(i, ac, av);
+		if (ch > 0) x->layout |= 1 << (ch-1);
+		x->buf[i] = (t_sample*)getbytes(BUFSIZE * sizeof(t_sample));   }
+
+	x->o_meta = outlet_new(&x->x_obj, 0);
+	x->open = x->play = 0;
+	x->speed = 1;
 
 	x->plist.siz = 0;
 	x->plist.max = 1;
 	x->plist.trk = (t_symbol**)getbytes(sizeof(t_symbol*));
-
-	outlet_new(&x->x_obj, &s_signal);
-	outlet_new(&x->x_obj, &s_signal);
-	x->o_meta = outlet_new(&x->x_obj, 0);
 	return (x);
 }
 
@@ -346,7 +390,8 @@ static void ffplay_free(t_ffplay *x) {
 	av_packet_free(&x->pkt);
 	av_frame_free(&x->frm);
 	swr_free(&x->swr);
-	for (int i=NCH; i--;)
+
+	for (int i = x->nch; i--;)
 		freebytes(x->buf[i], BUFSIZE * sizeof(t_sample));
 }
 
@@ -354,7 +399,7 @@ void ffplay_tilde_setup(void) {
 	ffplay_class = class_new(gensym("ffplay~"),
 		(t_newmethod)ffplay_new, (t_method)ffplay_free,
 		sizeof(t_ffplay), 0,
-		A_DEFFLOAT, 0);
+		A_GIMME, 0);
 	class_addbang(ffplay_class, ffplay_bang);
 	class_addfloat(ffplay_class, ffplay_float);
 	class_addanything(ffplay_class, ffplay_anything);
@@ -362,6 +407,8 @@ void ffplay_tilde_setup(void) {
 		gensym("dsp"), A_CANT, 0);
 	class_addmethod(ffplay_class, (t_method)ffplay_seek,
 		gensym("seek"), A_FLOAT, 0);
+	class_addmethod(ffplay_class, (t_method)ffplay_speed,
+		gensym("speed"), A_FLOAT, 0);
 	class_addmethod(ffplay_class, (t_method)ffplay_info,
 		gensym("info"), A_GIMME, 0);
 	class_addmethod(ffplay_class, (t_method)ffplay_info,
@@ -378,6 +425,6 @@ void ffplay_tilde_setup(void) {
 		gensym("time"), A_NULL);
 	class_addmethod(ffplay_class, (t_method)ffplay_position,
 		gensym("pos"), A_NULL);
-	class_addmethod(ffplay_class, (t_method)ffplay_total,
-		gensym("total"), A_NULL);
+	class_addmethod(ffplay_class, (t_method)ffplay_tracks,
+		gensym("tracks"), A_NULL);
 }
