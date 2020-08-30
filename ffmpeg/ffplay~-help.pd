@@ -6,7 +6,7 @@
 #X coords 0 1 128 -1 128 160 1 0 0;
 #X restore 391 126 graph;
 #X obj 34 460 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-0 1;
+1 1;
 #X floatatom 95 456 0 0 0 0 - - -;
 #X obj 70 328 cupqb 1;
 #X obj 130 197 openpanel;
@@ -22,7 +22,7 @@
 #X obj 87 304 bng 15 250 50 0 empty empty restart 17 7 0 11 -1 -262144
 -262144;
 #X obj 383 440 hsl 128 17 0.001 1 1 0 empty empty vol 25 9 0 12 -1
--262144 -262144 10000 1;
+-262144 -262144 9100 1;
 #X obj 383 520 hsl 128 17 -0.001 -1 1 0 empty empty cos 25 9 0 12 -1
 -262144 -262144 0 1;
 #X floatatom 393 469 0 0 0 0 - - -;
@@ -195,18 +195,62 @@
 #X obj 28 127 outlet;
 #X msg 28 98 seek \$1;
 #X obj 52 16 hsl 576 20 0 1 0 0 empty \$0trackbar empty -2 -8 0 10
--1 -262144 -262144 19349 1;
+-1 -262144 -262144 20269 1;
 #X obj 64 43 r \$0time;
 #X obj 28 16 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
 #X obj 28 43 *;
 #X obj 38 70 s \$0seek;
-#X floatatom 179 70 0 0 0 0 - - -;
-#X obj 179 97 / 100;
-#X msg 179 124 speed \$1;
-#X msg 296 59 15 5000;
-#X msg 367 59 400 5000;
-#X obj 296 96 line 0 2;
+#X floatatom 280 51 0 0 0 0 - - -;
+#X obj 280 78 / 100;
+#X msg 280 105 speed \$1;
+#X msg 385 47 15 5000;
+#X msg 456 47 400 5000;
+#X obj 385 84 line 0 2;
+#N canvas 1097 420 450 364 kseek 0;
+#X obj 84 27 keyname;
+#X obj 84 108 spigot;
+#X obj 92 81 symbol;
+#X obj 84 54 t b f;
+#X obj 84 163 route Left Right;
+#X msg 84 135 \$1;
+#X obj 217 255 +;
+#X obj 268 227 r \$0pos;
+#X obj 159 224 * -1;
+#X obj 159 197 f;
+#X obj 217 197 f;
+#X obj 217 312 outlet;
+#X obj 228 163 inlet;
+#X msg 317 290 set \$1;
+#X obj 317 317 s \$0trackbar;
+#X obj 317 260 /;
+#X obj 338 229 r \$0time;
+#X obj 260 202 r \$0seek;
+#X connect 0 0 3 0;
+#X connect 0 1 2 1;
+#X connect 1 0 5 0;
+#X connect 2 0 1 0;
+#X connect 3 0 2 0;
+#X connect 3 1 1 1;
+#X connect 4 0 9 0;
+#X connect 4 1 10 0;
+#X connect 5 0 4 0;
+#X connect 6 0 11 0;
+#X connect 6 0 15 0;
+#X connect 7 0 6 1;
+#X connect 8 0 6 0;
+#X connect 9 0 8 0;
+#X connect 10 0 6 0;
+#X connect 12 0 10 1;
+#X connect 12 0 9 1;
+#X connect 13 0 14 0;
+#X connect 15 0 13 0;
+#X connect 16 0 15 1;
+#X connect 17 0 6 1;
+#X restore 185 100 pd kseek;
+#X floatatom 185 70 0 0 0 0 - - -;
+#X obj 142 43 loadbang;
+#X msg 142 70 3000;
 #X connect 1 0 0 0;
 #X connect 2 0 5 0;
 #X connect 3 0 5 1;
@@ -219,6 +263,11 @@
 #X connect 10 0 12 0;
 #X connect 11 0 12 0;
 #X connect 12 0 7 0;
+#X connect 13 0 1 0;
+#X connect 13 0 6 0;
+#X connect 14 0 13 0;
+#X connect 15 0 16 0;
+#X connect 16 0 14 0;
 #X restore 427 294 pd trackbar;
 #N canvas 308 517 483 493 metadata 0;
 #X obj 57 446 outlet;

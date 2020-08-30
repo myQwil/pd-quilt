@@ -5,7 +5,7 @@
 #X obj 245 48 cnv 15 28 22 empty empty zp 2 10 0 16 -1 -262144 0;
 #X obj 72 133 pack 0 \$1;
 #X text 154 74 ramp between value changes;
-#X obj 184 161 inlet;
+#X obj 214 104 inlet;
 #X obj 72 161 line 0 \$2;
 #X connect 0 0 4 0;
 #X connect 2 0 4 1;

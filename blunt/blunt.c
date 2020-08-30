@@ -327,6 +327,17 @@ static void *b3_xor_new(t_symbol *s, int ac, t_atom *av) {
 	return (bop_new(b3_xor_class, s, ac, av));
 }
 
+/* --------------------- f% --------------------------------------- */
+static t_class *b3_fpc_class;
+
+static void b3_fpc_bang(t_bop *x) {
+	outlet_float(x->x_obj.ob_outlet, blunt_fpc(x->x_f1, x->x_f2));
+}
+
+static void *b3_fpc_new(t_symbol *s, int ac, t_atom *av) {
+	return (bop_new(b3_fpc_class, s, ac, av));
+}
+
 /* --------------------- % --------------------------------------- */
 static t_class *b3_pc_class;
 
@@ -478,6 +489,9 @@ void blunt_setup(void) {
 	b3_xor_class = class_new(gensym("^"), (t_newmethod)b3_xor_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
 
+	b3_fpc_class = class_new(gensym("f%"), (t_newmethod)b3_fpc_new, 0,
+		sizeof(t_bop), 0, A_GIMME, 0);
+
 	b3_pc_class = class_new(gensym("%"), (t_newmethod)b3_pc_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
 	class_addcreator((t_newmethod)b3_pc_new, gensym("`%"), A_GIMME, 0);
@@ -490,22 +504,22 @@ void blunt_setup(void) {
 		sizeof(t_bop), 0, A_GIMME, 0);
 	class_addcreator((t_newmethod)b3_div_new, gensym("`div"), A_GIMME, 0);
 
-	t_class *bops[][23] =
+	t_class *bops[][24] =
 	{	{	b1_plus_class, b1_minus_class, b1_times_class, b1_div_class,
 			b1_log_class, b1_pow_class, b1_max_class, b1_min_class,
 			b2_ee_class, b2_ne_class, b2_gt_class, b2_lt_class,
 			b2_ge_class, b2_le_class, b3_ba_class, b3_la_class,
 			b3_bo_class, b3_lo_class, b3_ls_class, b3_rs_class,
-			b3_pc_class, b3_mod_class, b3_div_class   },
+			b3_fpc_class, b3_pc_class, b3_mod_class, b3_div_class   },
 		{	b3_xor_class   }   };
 
-	t_bopmethod bangs[][23] =
+	t_bopmethod bangs[][24] =
 	{	{	b1_plus_bang, b1_minus_bang, b1_times_bang, b1_div_bang,
 			b1_log_bang, b1_pow_bang, b1_max_bang, b1_min_bang,
 			b2_ee_bang, b2_ne_bang, b2_gt_bang, b2_lt_bang,
 			b2_ge_bang, b2_le_bang, b3_ba_bang, b3_la_bang,
 			b3_bo_bang, b3_lo_bang, b3_ls_bang, b3_rs_bang,
-			b3_pc_bang, b3_mod_bang, b3_div_bang   },
+			b3_fpc_bang, b3_pc_bang, b3_mod_bang, b3_div_bang   },
 		{	b3_xor_bang   }   };
 
 	t_symbol *syms[] = { num_sym, gensym("0x5e") };

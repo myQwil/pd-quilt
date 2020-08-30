@@ -51,6 +51,7 @@ static t_float blunt_lo(t_float f1, t_float f2) { return ((int)f1) || (int)f2; }
 static t_float blunt_ls(t_float f1, t_float f2) { return ((int)f1) << (int)f2; }
 static t_float blunt_rs(t_float f1, t_float f2) { return ((int)f1) >> (int)f2; }
 static t_float blunt_xor(t_float f1, t_float f2) { return ((int)f1) ^ (int)f2; }
+static t_float blunt_fpc(t_float f1, t_float f2) { return fmod(f1, f2); }
 
 static t_float blunt_pc(t_float f1, t_float f2) {
 	int n2=f2;
