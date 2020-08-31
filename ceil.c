@@ -6,21 +6,21 @@ static t_class *ceil_class;
 
 typedef struct _ceil {
 	t_object x_obj;
-	t_float x_f;
+	t_float f;
 } t_ceil;
 
 static void ceil_bang(t_ceil *x) {
-	outlet_float(x->x_obj.ob_outlet, ceil(x->x_f));
+	outlet_float(x->x_obj.ob_outlet, ceil(x->f));
 }
 
 static void ceil_float(t_ceil *x, t_float f) {
-	outlet_float(x->x_obj.ob_outlet, ceil(x->x_f=f));
+	outlet_float(x->x_obj.ob_outlet, ceil(x->f=f));
 }
 
 static void *ceil_new(t_floatarg f) {
 	t_ceil *x = (t_ceil *)pd_new(ceil_class);
 	outlet_new(&x->x_obj, &s_float);
-	x->x_f = f;
+	x->f = f;
 	return (x);
 }
 

@@ -11,34 +11,34 @@ typedef struct _num t_num;
 
 struct _num {
 	t_object x_obj;
-	t_float x_f;
-	int x_lb;
+	t_float f;
+	int loadbang;
 };
 
 static void *num_new(t_class *cl, t_symbol *s, int ac, t_atom *av) {
 	t_num *x = (t_num *)pd_new(cl);
 	outlet_new(&x->x_obj, &s_float);
-	floatinlet_new(&x->x_obj, &x->x_f);
+	floatinlet_new(&x->x_obj, &x->f);
 
-	x->x_f = x->x_lb = 0;
+	x->f = x->loadbang = 0;
 	if (ac)
 	{	if (av->a_type == A_FLOAT)
-			x->x_f = av->a_w.w_float;
+			x->f = av->a_w.w_float;
 		else if (av->a_type == A_SYMBOL)
 		{	const char *c = av->a_w.w_symbol->s_name;
 			if (c[strlen(c)-1] == '!')
-			{	x->x_f = strtof(c, NULL);
-				x->x_lb = 1;   }   }   }
+			{	x->f = strtof(c, NULL);
+				x->loadbang = 1;   }   }   }
 	return (x);
 }
 
 static void num_float(t_num *x, t_float f) {
-	x->x_f = f;
+	x->f = f;
 	pd_bang((t_pd *)x);
 }
 
 static void num_loadbang(t_num *x, t_floatarg action) {
-	if (x->x_lb && !action) pd_bang((t_pd *)x);
+	if (x->loadbang && !action) pd_bang((t_pd *)x);
 }
 
 
@@ -46,12 +46,12 @@ static void num_loadbang(t_num *x, t_floatarg action) {
 static t_class *i_class;
 
 static void i_bang(t_num *x) {
-	outlet_float(x->x_obj.ob_outlet, (t_float)(int64_t)x->x_f);
+	outlet_float(x->x_obj.ob_outlet, (t_float)(int64_t)x->f);
 }
 
 static void i_send(t_num *x, t_symbol *s) {
 	if (s->s_thing)
-		pd_float(s->s_thing, (t_float)(int64_t)x->x_f);
+		pd_float(s->s_thing, (t_float)(int64_t)x->f);
 	else pd_error(x, "%s: no such object", s->s_name);
 }
 
@@ -63,7 +63,7 @@ static void *i_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *f_class;
 
 static void f_bang(t_num *x) {
-	outlet_float(x->x_obj.ob_outlet, x->x_f);
+	outlet_float(x->x_obj.ob_outlet, x->f);
 }
 
 static void f_symbol(t_num *x, t_symbol *s) {
@@ -72,12 +72,12 @@ static void f_symbol(t_num *x, t_symbol *s) {
 	f = strtof(s->s_name, &str_end);
 	if (f == 0 && s->s_name == str_end)
 		pd_error(x, "Couldn't convert %s to float.", s->s_name);
-	else outlet_float(x->x_obj.ob_outlet, x->x_f = f);
+	else outlet_float(x->x_obj.ob_outlet, x->f = f);
 }
 
 static void f_send(t_num *x, t_symbol *s) {
 	if (s->s_thing)
-		pd_float(s->s_thing, x->x_f);
+		pd_float(s->s_thing, x->f);
 	else pd_error(x, "%s: no such object", s->s_name);
 }
 
@@ -96,7 +96,7 @@ static void *f_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b1_plus_class;
 
 static void b1_plus_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_plus(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_plus(x->f1, x->f2));
 }
 
 static void *b1_plus_new(t_symbol *s, int ac, t_atom *av) {
@@ -107,7 +107,7 @@ static void *b1_plus_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b1_minus_class;
 
 static void b1_minus_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_minus(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_minus(x->f1, x->f2));
 }
 
 static void *b1_minus_new(t_symbol *s, int ac, t_atom *av) {
@@ -118,7 +118,7 @@ static void *b1_minus_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b1_times_class;
 
 static void b1_times_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_times(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_times(x->f1, x->f2));
 }
 
 static void *b1_times_new(t_symbol *s, int ac, t_atom *av) {
@@ -129,7 +129,7 @@ static void *b1_times_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b1_div_class;
 
 static void b1_div_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_div(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_div(x->f1, x->f2));
 }
 
 static void *b1_div_new(t_symbol *s, int ac, t_atom *av) {
@@ -140,7 +140,7 @@ static void *b1_div_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b1_log_class;
 
 static void b1_log_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_log(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_log(x->f1, x->f2));
 }
 
 static void *b1_log_new(t_symbol *s, int ac, t_atom *av) {
@@ -151,7 +151,7 @@ static void *b1_log_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b1_pow_class;
 
 static void b1_pow_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_pow(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_pow(x->f1, x->f2));
 }
 
 static void *b1_pow_new(t_symbol *s, int ac, t_atom *av) {
@@ -162,7 +162,7 @@ static void *b1_pow_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b1_max_class;
 
 static void b1_max_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_max(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_max(x->f1, x->f2));
 }
 
 static void *b1_max_new(t_symbol *s, int ac, t_atom *av) {
@@ -173,7 +173,7 @@ static void *b1_max_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b1_min_class;
 
 static void b1_min_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_min(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_min(x->f1, x->f2));
 }
 
 static void *b1_min_new(t_symbol *s, int ac, t_atom *av) {
@@ -186,7 +186,7 @@ static void *b1_min_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b2_ee_class;
 
 static void b2_ee_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_ee(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_ee(x->f1, x->f2));
 }
 
 static void *b2_ee_new(t_symbol *s, int ac, t_atom *av) {
@@ -197,7 +197,7 @@ static void *b2_ee_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b2_ne_class;
 
 static void b2_ne_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_ne(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_ne(x->f1, x->f2));
 }
 
 static void *b2_ne_new(t_symbol *s, int ac, t_atom *av) {
@@ -208,7 +208,7 @@ static void *b2_ne_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b2_gt_class;
 
 static void b2_gt_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_gt(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_gt(x->f1, x->f2));
 }
 
 static void *b2_gt_new(t_symbol *s, int ac, t_atom *av) {
@@ -219,7 +219,7 @@ static void *b2_gt_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b2_lt_class;
 
 static void b2_lt_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_lt(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_lt(x->f1, x->f2));
 }
 
 static void *b2_lt_new(t_symbol *s, int ac, t_atom *av) {
@@ -230,7 +230,7 @@ static void *b2_lt_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b2_ge_class;
 
 static void b2_ge_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_ge(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_ge(x->f1, x->f2));
 }
 
 static void *b2_ge_new(t_symbol *s, int ac, t_atom *av) {
@@ -241,7 +241,7 @@ static void *b2_ge_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b2_le_class;
 
 static void b2_le_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_le(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_le(x->f1, x->f2));
 }
 
 static void *b2_le_new(t_symbol *s, int ac, t_atom *av) {
@@ -254,7 +254,7 @@ static void *b2_le_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b3_ba_class;
 
 static void b3_ba_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_ba(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_ba(x->f1, x->f2));
 }
 
 static void *b3_ba_new(t_symbol *s, int ac, t_atom *av) {
@@ -265,7 +265,7 @@ static void *b3_ba_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b3_la_class;
 
 static void b3_la_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_la(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_la(x->f1, x->f2));
 }
 
 static void *b3_la_new(t_symbol *s, int ac, t_atom *av) {
@@ -276,7 +276,7 @@ static void *b3_la_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b3_bo_class;
 
 static void b3_bo_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_bo(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_bo(x->f1, x->f2));
 }
 
 static void *b3_bo_new(t_symbol *s, int ac, t_atom *av) {
@@ -287,7 +287,7 @@ static void *b3_bo_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b3_lo_class;
 
 static void b3_lo_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_lo(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_lo(x->f1, x->f2));
 }
 
 static void *b3_lo_new(t_symbol *s, int ac, t_atom *av) {
@@ -298,7 +298,7 @@ static void *b3_lo_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b3_ls_class;
 
 static void b3_ls_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_ls(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_ls(x->f1, x->f2));
 }
 
 static void *b3_ls_new(t_symbol *s, int ac, t_atom *av) {
@@ -309,7 +309,7 @@ static void *b3_ls_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b3_rs_class;
 
 static void b3_rs_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_rs(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_rs(x->f1, x->f2));
 }
 
 static void *b3_rs_new(t_symbol *s, int ac, t_atom *av) {
@@ -320,7 +320,7 @@ static void *b3_rs_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b3_xor_class;
 
 static void b3_xor_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_xor(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_xor(x->f1, x->f2));
 }
 
 static void *b3_xor_new(t_symbol *s, int ac, t_atom *av) {
@@ -331,7 +331,7 @@ static void *b3_xor_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b3_fpc_class;
 
 static void b3_fpc_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_fpc(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_fpc(x->f1, x->f2));
 }
 
 static void *b3_fpc_new(t_symbol *s, int ac, t_atom *av) {
@@ -342,7 +342,7 @@ static void *b3_fpc_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b3_pc_class;
 
 static void b3_pc_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_pc(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_pc(x->f1, x->f2));
 }
 
 static void *b3_pc_new(t_symbol *s, int ac, t_atom *av) {
@@ -353,7 +353,7 @@ static void *b3_pc_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b3_mod_class;
 
 static void b3_mod_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_mod(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_mod(x->f1, x->f2));
 }
 
 static void *b3_mod_new(t_symbol *s, int ac, t_atom *av) {
@@ -364,7 +364,7 @@ static void *b3_mod_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *b3_div_class;
 
 static void b3_div_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_divm(x->x_f1, x->x_f2));
+	outlet_float(x->x_obj.ob_outlet, blunt_divm(x->f1, x->f2));
 }
 
 static void *b3_div_new(t_symbol *s, int ac, t_atom *av) {

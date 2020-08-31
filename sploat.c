@@ -5,27 +5,27 @@ static t_class *sploat_class;
 
 typedef struct _sploat {
 	t_object x_obj;
-	ufloat x_uf;
+	ufloat uf;
 	t_outlet *o_mt;
 	t_outlet *o_ex;
 	t_outlet *o_sg;
 } t_sploat;
 
 static void sploat_peek(t_sploat *x, t_symbol *s) {
-	ufloat uf = x->x_uf;
+	ufloat uf = x->uf;
 	post("%s%s0x%x %u %u = %g",
 		s->s_name, *s->s_name?": ":"",
 		uf.mt, uf.ex, uf.sg, uf.f);
 }
 
 static void sploat_bang(t_sploat *x) {
-	outlet_float(x->o_sg, x->x_uf.sg);
-	outlet_float(x->o_ex, x->x_uf.ex);
-	outlet_float(x->o_mt, x->x_uf.mt);
+	outlet_float(x->o_sg, x->uf.sg);
+	outlet_float(x->o_ex, x->uf.ex);
+	outlet_float(x->o_mt, x->uf.mt);
 }
 
 static void sploat_set(t_sploat *x, t_floatarg f) {
-	x->x_uf.f = f;
+	x->uf.f = f;
 }
 
 static void sploat_float(t_sploat *x, t_float f) {

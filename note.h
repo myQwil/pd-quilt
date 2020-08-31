@@ -8,8 +8,6 @@ typedef struct _note {
 	double st;     /* semi-tone */
 } t_note;
 
-#define note x->x_note
-
 static t_float ntof(t_note *x, t_float f) {
 	return (x->bt * exp(x->st*f));
 }

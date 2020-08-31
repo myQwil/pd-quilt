@@ -8,7 +8,7 @@
 static t_class *rminus_class;
 
 static void rminus_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_minus(x->x_f2, x->x_f1));
+	outlet_float(x->x_obj.ob_outlet, blunt_minus(x->f2, x->f1));
 }
 
 static void *rminus_new(t_symbol *s, int ac, t_atom *av) {
@@ -19,7 +19,7 @@ static void *rminus_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *rdiv_class;
 
 static void rdiv_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_div(x->x_f2, x->x_f1));
+	outlet_float(x->x_obj.ob_outlet, blunt_div(x->f2, x->f1));
 }
 
 static void *rdiv_new(t_symbol *s, int ac, t_atom *av) {
@@ -30,7 +30,7 @@ static void *rdiv_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *rlog_class;
 
 static void rlog_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_log(x->x_f2, x->x_f1));
+	outlet_float(x->x_obj.ob_outlet, blunt_log(x->f2, x->f1));
 }
 
 static void *rlog_new(t_symbol *s, int ac, t_atom *av) {
@@ -41,7 +41,7 @@ static void *rlog_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *rpow_class;
 
 static void rpow_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_pow(x->x_f2, x->x_f1));
+	outlet_float(x->x_obj.ob_outlet, blunt_pow(x->f2, x->f1));
 }
 
 static void *rpow_new(t_symbol *s, int ac, t_atom *av) {
@@ -52,7 +52,7 @@ static void *rpow_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *rls_class;
 
 static void rls_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_ls(x->x_f2, x->x_f1));
+	outlet_float(x->x_obj.ob_outlet, blunt_ls(x->f2, x->f1));
 }
 
 static void *rls_new(t_symbol *s, int ac, t_atom *av) {
@@ -63,18 +63,29 @@ static void *rls_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *rrs_class;
 
 static void rrs_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_rs(x->x_f2, x->x_f1));
+	outlet_float(x->x_obj.ob_outlet, blunt_rs(x->f2, x->f1));
 }
 
 static void *rrs_new(t_symbol *s, int ac, t_atom *av) {
 	return (bop_new(rrs_class, s, ac, av));
 }
 
+/* --------------------- f% --------------------------------------- */
+static t_class *rfpc_class;
+
+static void rfpc_bang(t_bop *x) {
+	outlet_float(x->x_obj.ob_outlet, blunt_fpc(x->f2, x->f1));
+}
+
+static void *rfpc_new(t_symbol *s, int ac, t_atom *av) {
+	return (bop_new(rfpc_class, s, ac, av));
+}
+
 /* --------------------- % --------------------------------------- */
 static t_class *rpc_class;
 
 static void rpc_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_pc(x->x_f2, x->x_f1));
+	outlet_float(x->x_obj.ob_outlet, blunt_pc(x->f2, x->f1));
 }
 
 static void *rpc_new(t_symbol *s, int ac, t_atom *av) {
@@ -85,7 +96,7 @@ static void *rpc_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *rmod_class;
 
 static void rmod_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_mod(x->x_f2, x->x_f1));
+	outlet_float(x->x_obj.ob_outlet, blunt_mod(x->f2, x->f1));
 }
 
 static void *rmod_new(t_symbol *s, int ac, t_atom *av) {
@@ -96,7 +107,7 @@ static void *rmod_new(t_symbol *s, int ac, t_atom *av) {
 static t_class *rdivm_class;
 
 static void rdivm_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet, blunt_divm(x->x_f2, x->x_f1));
+	outlet_float(x->x_obj.ob_outlet, blunt_divm(x->f2, x->f1));
 }
 
 static void *rdivm_new(t_symbol *s, int ac, t_atom *av) {
@@ -122,6 +133,9 @@ void revop_setup(void) {
 	rrs_class = class_new(gensym("@>>"), (t_newmethod)rrs_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
 
+	rfpc_class = class_new(gensym("@f%"), (t_newmethod)rfpc_new, 0,
+		sizeof(t_bop), 0, A_GIMME, 0);
+
 	rpc_class = class_new(gensym("@%"), (t_newmethod)rpc_new, 0,
 		sizeof(t_bop), 0, A_GIMME, 0);
 
@@ -132,11 +146,11 @@ void revop_setup(void) {
 		sizeof(t_bop), 0, A_GIMME, 0);
 
 	t_class *revs[] =
-	{	rminus_class, rdiv_class, rlog_class, rpow_class,
+	{	rminus_class, rdiv_class, rlog_class, rpow_class, rfpc_class,
 		rls_class, rrs_class, rpc_class, rmod_class, rdivm_class   };
 
 	t_bopmethod rbangs[] =
-	{	rminus_bang, rdiv_bang, rlog_bang, rpow_bang,
+	{	rminus_bang, rdiv_bang, rlog_bang, rpow_bang, rfpc_bang,
 		rls_bang, rrs_bang, rpc_bang, rmod_bang, rdivm_bang   };
 
 	int i = sizeof(revs) / sizeof*(revs);

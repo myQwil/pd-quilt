@@ -5,34 +5,34 @@ static t_class *gloat_class;
 
 typedef struct _gloat {
 	t_object x_obj;
-	ufloat x_uf;
+	ufloat uf;
 } t_gloat;
 
 static void gloat_peek(t_gloat *x, t_symbol *s) {
-	ufloat uf = x->x_uf;
+	ufloat uf = x->uf;
 	post("%s%s0x%x %u %u = %g",
 		s->s_name, *s->s_name?": ":"",
 		uf.mt, uf.ex, uf.sg, uf.f);
 }
 
 static void gloat_bang(t_gloat *x) {
-	outlet_float(x->x_obj.ob_outlet, x->x_uf.f);
+	outlet_float(x->x_obj.ob_outlet, x->uf.f);
 }
 
 static void gloat_mantissa(t_gloat *x, t_floatarg f) {
-	x->x_uf.mt = f;
+	x->uf.mt = f;
 }
 
 static void gloat_exponent(t_gloat *x, t_floatarg f) {
-	x->x_uf.ex = f;
+	x->uf.ex = f;
 }
 
 static void gloat_sign(t_gloat *x, t_floatarg f) {
-	x->x_uf.sg = f;
+	x->uf.sg = f;
 }
 
 static void gloat_f(t_gloat *x, t_floatarg f) {
-	x->x_uf.f = f;
+	x->uf.f = f;
 }
 
 static void gloat_float(t_gloat *x, t_float f) {
@@ -44,11 +44,11 @@ static void gloat_set(t_gloat *x, t_symbol *s, int ac, t_atom *av) {
 	if (ac>3) ac = 3;
 	switch (ac)
 	{ case 3: if ((av+2)->a_type == A_FLOAT)
-		x->x_uf.sg = (av+2)->a_w.w_float;
+		x->uf.sg = (av+2)->a_w.w_float;
 	  case 2: if ((av+1)->a_type == A_FLOAT)
-		x->x_uf.ex = (av+1)->a_w.w_float;
+		x->uf.ex = (av+1)->a_w.w_float;
 	  case 1: if (av->a_type == A_FLOAT)
-		x->x_uf.mt = av->a_w.w_float; }
+		x->uf.mt = av->a_w.w_float; }
 }
 
 static void gloat_list(t_gloat *x, t_symbol *s, int ac, t_atom *av) {

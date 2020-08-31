@@ -6,20 +6,20 @@
 
 typedef struct _ntof {
 	t_object x_obj;
-	t_note x_note;
+	t_note note;
 } t_ntof;
 
 
 static void ntof_ref(t_ntof *x, t_floatarg f) {
-	note_ref(&note, f, FTON);
+	note_ref(&x->note, f, FTON);
 }
 
 static void ntof_tet(t_ntof *x, t_floatarg f) {
-	note_tet(&note, f, FTON);
+	note_tet(&x->note, f, FTON);
 }
 
 static void ntof_set(t_ntof *x, t_symbol *s, int ac, t_atom *av) {
-	note_set(&note, ac, av, FTON);
+	note_set(&x->note, ac, av, FTON);
 }
 
 static t_ntof *ntof_init(t_class *cl, int argc, t_atom *argv) {
@@ -32,8 +32,8 @@ static t_ntof *ntof_init(t_class *cl, int argc, t_atom *argv) {
 	switch (argc)
 	{	case 2: tet = atom_getfloat(argv+1);
 		case 1: ref = atom_getfloat(argv);   }
-	note.ref = ref;
-	note_tet(&note, tet, FTON);
+	x->note.ref = ref;
+	note_tet(&x->note, tet, FTON);
 
 	return x;
 }

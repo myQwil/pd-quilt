@@ -6,13 +6,13 @@ static t_class *rind_class;
 
 typedef struct _rind {
 	t_object x_obj;
-	t_float x_min;
-	t_float x_max;
-	unsigned x_state;
+	t_float min;
+	t_float max;
+	unsigned state;
 } t_rind;
 
 static unsigned rind_time(void) {
-	unsigned thym = time(0) * 2;
+	unsigned thym = (time(0) * 2) % 0x100000000;
 	return (thym|1); // odd numbers only
 }
 
@@ -23,42 +23,42 @@ static unsigned rind_makeseed(void) {
 }
 
 static void rind_seed(t_rind *x, t_symbol *s, int ac, t_atom *av) {
-	x->x_state = (ac ? atom_getfloat(av) : rind_time());
+	x->state = ac ? (unsigned)atom_getfloat(av) : rind_time();
 }
 
 static void rind_state(t_rind *x, t_symbol *s) {
-	post("%s%s%u", s->s_name, *s->s_name?": ":"", x->x_state);
+	post("%s%s%u", s->s_name, *s->s_name?": ":"", x->state);
 }
 
 static void rind_peek(t_rind *x, t_symbol *s) {
-	post("%s%s%g <=> %g", s->s_name, *s->s_name?": ":"", x->x_max, x->x_min);
+	post("%s%s%g <=> %g", s->s_name, *s->s_name?": ":"", x->max, x->min);
 }
 
 static void rind_bang(t_rind *x) {
-	double min=x->x_min, range=x->x_max-min, nval;
-	unsigned *sp = &x->x_state;
+	double min=x->min, range=x->max-min, nval;
+	unsigned *sp = &x->state;
 	*sp = *sp * 472940017 + 832416023;
-	nval = *sp * range / 4294967296 + min;
+	nval = *sp * range / 0x100000000 + min;
 	outlet_float(x->x_obj.ob_outlet, nval);
 }
 
 static void rind_list(t_rind *x, t_symbol *s, int ac, t_atom *av) {
 	switch (ac)
-	{	case 2: if (av[1].a_type == A_FLOAT) x->x_min = av[1].a_w.w_float;
-		case 1: if (av[0].a_type == A_FLOAT) x->x_max = av[0].a_w.w_float;   }
+	{	case 2: if (av[1].a_type == A_FLOAT) x->min = av[1].a_w.w_float;
+		case 1: if (av[0].a_type == A_FLOAT) x->max = av[0].a_w.w_float;   }
 }
 
 static void *rind_new(t_symbol *s, int ac, t_atom *av) {
 	t_rind *x = (t_rind *)pd_new(rind_class);
 	outlet_new(&x->x_obj, &s_float);
 	
-	floatinlet_new(&x->x_obj, &x->x_max);
-	if (ac != 1) floatinlet_new(&x->x_obj, &x->x_min);
+	floatinlet_new(&x->x_obj, &x->max);
+	if (ac != 1) floatinlet_new(&x->x_obj, &x->min);
 	
 	switch (ac)
-	{	case 2: x->x_min = atom_getfloat(av+1);
-		case 1: x->x_max = atom_getfloat(av);   }
-	x->x_state = rind_makeseed();
+	{	case 2: x->min = atom_getfloat(av+1);
+		case 1: x->max = atom_getfloat(av);   }
+	x->state = rind_makeseed();
 	
 	return (x);
 }

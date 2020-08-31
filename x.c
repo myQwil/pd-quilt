@@ -11,14 +11,14 @@ static t_class *xtrigger_class;
 #define TR_ANYTHING 5
 
 typedef struct xtriggerout {
-	int u_type;		 /* outlet type from above */
-	t_outlet *u_outlet;
+	int type;		 /* outlet type from above */
+	t_outlet *outlet;
 } t_xtriggerout;
 
 typedef struct _xtrigger {
 	t_object x_obj;
-	t_int x_n;
-	t_xtriggerout *x_vec;
+	t_int siz;
+	t_xtriggerout *vec;
 } t_xtrigger;
 
 static void *xtrigger_new(t_symbol *s, int argc, t_atom *argv) {
@@ -31,65 +31,66 @@ static void *xtrigger_new(t_symbol *s, int argc, t_atom *argv) {
 		argc = 2;
 		SETFLOAT(&defarg[0], 0);
 		SETFLOAT(&defarg[1], 0);   }
-	x->x_n = argc;
-	x->x_vec = (t_xtriggerout *)getbytes(argc * sizeof(*x->x_vec));
-	for (i = 0, ap = argv, u = x->x_vec; i < argc; u++, ap++, i++)
+	x->siz = argc;
+	x->vec = (t_xtriggerout *)getbytes(argc * sizeof(*x->vec));
+	for (i = 0, ap = argv, u = x->vec; i < argc; u++, ap++, i++)
 	{	t_atomtype thistype = ap->a_type;
 		char c;
 		if (thistype == TR_SYMBOL) c = ap->a_w.w_symbol->s_name[0];
 		else if (thistype == TR_FLOAT) c = 'a';
 		else c = 0;
 		if (c == 'p')
-			u->u_type = TR_POINTER,
-				u->u_outlet = outlet_new(&x->x_obj, &s_pointer);
+			u->type = TR_POINTER,
+				u->outlet = outlet_new(&x->x_obj, &s_pointer);
 		else if (c == 'f')
-			u->u_type = TR_FLOAT, u->u_outlet = outlet_new(&x->x_obj, &s_float);
+			u->type = TR_FLOAT, u->outlet = outlet_new(&x->x_obj, &s_float);
 		else if (c == 'b')
-			u->u_type = TR_BANG, u->u_outlet = outlet_new(&x->x_obj, &s_bang);
+			u->type = TR_BANG, u->outlet = outlet_new(&x->x_obj, &s_bang);
 		else if (c == 'l')
-			u->u_type = TR_LIST, u->u_outlet = outlet_new(&x->x_obj, &s_list);
+			u->type = TR_LIST, u->outlet = outlet_new(&x->x_obj, &s_list);
 		else if (c == 's')
-			u->u_type = TR_SYMBOL,
-				u->u_outlet = outlet_new(&x->x_obj, &s_symbol);
+			u->type = TR_SYMBOL,
+				u->outlet = outlet_new(&x->x_obj, &s_symbol);
 		else if (c == 'a')
-			u->u_type = TR_ANYTHING,
-				u->u_outlet = outlet_new(&x->x_obj, 0);
+			u->type = TR_ANYTHING,
+				u->outlet = outlet_new(&x->x_obj, 0);
 		else
 		{	pd_error(x, "xtrigger: %s: bad type", ap->a_w.w_symbol->s_name);
-			u->u_type = TR_ANYTHING;
-			u->u_outlet = outlet_new(&x->x_obj, 0);   }   }
+			u->type = TR_ANYTHING;
+			u->outlet = outlet_new(&x->x_obj, 0);   }   }
 	return (x);
 }
 
 static void xtrigger_list(t_xtrigger *x, t_symbol *s, int argc, t_atom *argv) {
 	t_xtriggerout *u;
 	int i;
-	for (i = (int)x->x_n, u = x->x_vec + i; u--, i--;)
-	{	int type = u->u_type;
+	for (i = (int)x->siz, u = x->vec + i; u--, i--;)
+	{	int type = u->type;
 		if (type==TR_ANYTHING && argc==1) type = argv->a_type;
 
 		if (type == TR_FLOAT)
-			outlet_float(u->u_outlet, (argc ? atom_getfloat(argv) : 0));
+			outlet_float(u->outlet, (argc ? atom_getfloat(argv) : 0));
 		else if (type == TR_BANG)
-			outlet_bang(u->u_outlet);
+			outlet_bang(u->outlet);
 		else if (type == TR_SYMBOL)
-			outlet_symbol(u->u_outlet,
+			outlet_symbol(u->outlet,
 				(argc ? atom_getsymbol(argv) : &s_symbol));
 		else if (type == TR_POINTER)
 		{	if (!argc || argv->a_type != TR_POINTER)
 				pd_error(x, "unpack: bad pointer");
-			else outlet_pointer(u->u_outlet, argv->a_w.w_gpointer);   }
-		else outlet_list(u->u_outlet, &s_list, argc, argv);   }
+			else outlet_pointer(u->outlet, argv->a_w.w_gpointer);   }
+		else outlet_list(u->outlet, &s_list, argc, argv);   }
 }
 
-static void xtrigger_anything(t_xtrigger *x, t_symbol *s, int argc, t_atom *argv) {
+static void xtrigger_anything
+(t_xtrigger *x, t_symbol *s, int argc, t_atom *argv) {
 	t_xtriggerout *u;
 	int i;
-	for (i = (int)x->x_n, u = x->x_vec + i; u--, i--;)
-	{	if (u->u_type == TR_BANG)
-			outlet_bang(u->u_outlet);
-		else if (u->u_type == TR_ANYTHING)
-			outlet_anything(u->u_outlet, s, argc, argv);
+	for (i = (int)x->siz, u = x->vec + i; u--, i--;)
+	{	if (u->type == TR_BANG)
+			outlet_bang(u->outlet);
+		else if (u->type == TR_ANYTHING)
+			outlet_anything(u->outlet, s, argc, argv);
 		else pd_error(x, "xtrigger: can only convert 's' to 'b' or 'a'");   }
 }
 
@@ -116,7 +117,7 @@ static void xtrigger_symbol(t_xtrigger *x, t_symbol *s) {
 }
 
 static void xtrigger_free(t_xtrigger *x) {
-	freebytes(x->x_vec, x->x_n * sizeof(*x->x_vec));
+	freebytes(x->vec, x->siz * sizeof(*x->vec));
 }
 
 void x_setup(void) {

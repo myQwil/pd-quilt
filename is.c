@@ -14,21 +14,21 @@ typedef struct _is_pxy {
 
 struct _is {
 	t_object x_obj;
-	t_symbol *x_type;
 	t_is_pxy *x_p;
+	t_symbol *type;
 };
 
 static void is_peek(t_is *x, t_symbol *s) {
 	if (*s->s_name) startpost("%s: ", s->s_name);
-	post("%s", x->x_type->s_name);
+	post("%s", x->type->s_name);
 }
 
 static void is_bang(t_is *x) {
-	outlet_float(x->x_obj.ob_outlet, !strcmp(x->x_type->s_name, "bang"));
+	outlet_float(x->x_obj.ob_outlet, !strcmp(x->type->s_name, "bang"));
 }
 
 static void is_anything(t_is *x, t_symbol *s, int ac, t_atom *av) {
-	int result = (x->x_type == s);
+	int result = (x->type == s);
 	outlet_float(x->x_obj.ob_outlet, result);
 }
 
@@ -43,14 +43,14 @@ static t_symbol *is_check(t_symbol *s) {
 }
 
 static void is_pxy_anything(t_is_pxy *p, t_symbol *s, int ac, t_atom *av) {
-	p->p_x->x_type = is_check(s);
+	p->p_x->type = is_check(s);
 }
 
 static void is_type(t_is *x, t_symbol *s, int ac, t_atom *av) {
 	if (!ac) return;
-	if (av->a_type == A_SYMBOL) x->x_type = is_check(av->a_w.w_symbol);
-	else if (av->a_type == A_FLOAT) x->x_type = gensym("float");
-	else if (av->a_type == A_POINTER) x->x_type = gensym("pointer");
+	if (av->a_type == A_SYMBOL) x->type = is_check(av->a_w.w_symbol);
+	else if (av->a_type == A_FLOAT) x->type = gensym("float");
+	else if (av->a_type == A_POINTER) x->type = gensym("pointer");
 }
 
 static void *is_new(t_symbol *s) {
@@ -59,7 +59,7 @@ static void *is_new(t_symbol *s) {
 
 	x->x_p = p;
 	p->p_x = x;
-	x->x_type = (*s->s_name) ? is_check(s) : gensym("float");
+	x->type = (*s->s_name) ? is_check(s) : gensym("float");
 
 	inlet_new((t_object *)x, (t_pd *)p, 0, 0);
 	outlet_new(&x->x_obj, &s_float);

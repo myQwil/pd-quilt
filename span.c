@@ -5,30 +5,33 @@ static t_class *span_class;
 
 typedef struct _span {
 	t_object x_obj;
-	t_float x_min;
-	t_float x_max;
-	t_float x_scale;
+	t_float min;
+	t_float max;
+	t_float scale;
 } t_span;
 
 static void span_float(t_span *x, t_float f) {
 	outlet_float(x->x_obj.ob_outlet,
-		f * (x->x_max - x->x_min) / x->x_scale + x->x_min);
+		f * (x->max - x->min) / x->scale + x->min);
 }
 
 static void *span_new(t_symbol *s, int argc, t_atom *argv) {
 	t_span *x = (t_span *)pd_new(span_class);
 	outlet_new(&x->x_obj, &s_float);
-	floatinlet_new(&x->x_obj, &x->x_min);
-	floatinlet_new(&x->x_obj, &x->x_max);
-	floatinlet_new(&x->x_obj, &x->x_scale);
+	floatinlet_new(&x->x_obj, &x->min);
+	floatinlet_new(&x->x_obj, &x->max);
+	floatinlet_new(&x->x_obj, &x->scale);
 	t_float min=0, max=1, scale=100;
 	switch (argc)
-	{ case 3: scale=atom_getfloat(argv+2); // no break
+	{ case 3:
+		scale = atom_getfloat(argv+2); // no break
 	  case 2:
-		max=atom_getfloat(argv+1);
-		min=atom_getfloat(argv); break;
-	  case 1: max=atom_getfloat(argv);   }
-	x->x_min=min, x->x_max=max, x->x_scale=scale;
+		max = atom_getfloat(argv+1);
+		min = atom_getfloat(argv);
+		break;
+	  case 1:
+		max = atom_getfloat(argv);   }
+	x->min = min, x->max = max, x->scale = scale;
 	return (x);
 }
 
