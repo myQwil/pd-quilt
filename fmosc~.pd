@@ -1,0 +1,22 @@
+#N canvas 252 551 450 344 14;
+#X obj 194 124 inlet~;
+#X obj 194 152 osc~;
+#X obj 194 190 *~;
+#X obj 297 124 inlet~;
+#X obj 173 220 +~;
+#X obj 91 124 inlet~;
+#X obj 173 249 osc~;
+#X obj 173 283 outlet~;
+#X obj 204 24 cnv 15 76 22 empty empty fmosc~ 2 10 0 16 -1 -262144
+0;
+#X text 185 85 modulator frequency;
+#X text 81 85 carrier frequency;
+#X text 290 87 modulating index;
+#X text 161 49 frequency modulator;
+#X connect 0 0 1 0;
+#X connect 1 0 2 0;
+#X connect 2 0 4 1;
+#X connect 3 0 2 1;
+#X connect 4 0 6 0;
+#X connect 5 0 4 0;
+#X connect 6 0 7 0;

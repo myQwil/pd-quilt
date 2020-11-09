@@ -18,35 +18,37 @@ struct _is {
 	t_symbol *type;
 };
 
-static void is_peek(t_is *x, t_symbol *s) {
-	if (*s->s_name) startpost("%s: ", s->s_name);
-	post("%s", x->type->s_name);
+static void is_peek(t_is *x ,t_symbol *s) {
+	if (*s->s_name) startpost("%s: " ,s->s_name);
+	post("%s" ,x->type->s_name);
 }
 
 static void is_bang(t_is *x) {
-	outlet_float(x->x_obj.ob_outlet, !strcmp(x->type->s_name, "bang"));
+	outlet_float(x->x_obj.ob_outlet ,!strcmp(x->type->s_name ,"bang"));
 }
 
-static void is_anything(t_is *x, t_symbol *s, int ac, t_atom *av) {
+static void is_anything(t_is *x ,t_symbol *s ,int ac ,t_atom *av) {
 	int result = (x->type == s);
-	outlet_float(x->x_obj.ob_outlet, result);
+	outlet_float(x->x_obj.ob_outlet ,result);
 }
 
 static t_symbol *is_check(t_symbol *s) {
 	const char *name = s->s_name;
-	if      (!strcmp(name, "b")) return &s_bang;
-	else if (!strcmp(name, "f")) return &s_float;
-	else if (!strcmp(name, "s")) return &s_symbol;
-	else if (!strcmp(name, "l")) return &s_list;
-	else if (!strcmp(name, "p")) return &s_pointer;
-	else return s;
+	if (strlen(name) > 1) return s;
+	switch (*name)
+	{	case 'b': return &s_bang;
+		case 'f': return &s_float;
+		case 's': return &s_symbol;
+		case 'p': return &s_pointer;
+		case 'l': return &s_list;
+		default : return s;   }
 }
 
-static void is_pxy_anything(t_is_pxy *p, t_symbol *s, int ac, t_atom *av) {
+static void is_pxy_anything(t_is_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
 	p->p_x->type = is_check(s);
 }
 
-static void is_type(t_is *x, t_symbol *s, int ac, t_atom *av) {
+static void is_type(t_is *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (!ac) return;
 	if (av->a_type == A_SYMBOL) x->type = is_check(av->a_w.w_symbol);
 	else if (av->a_type == A_FLOAT) x->type = gensym("float");
@@ -61,8 +63,8 @@ static void *is_new(t_symbol *s) {
 	p->p_x = x;
 	x->type = (*s->s_name) ? is_check(s) : gensym("float");
 
-	inlet_new((t_object *)x, (t_pd *)p, 0, 0);
-	outlet_new(&x->x_obj, &s_float);
+	inlet_new((t_object *)x ,(t_pd *)p ,0 ,0);
+	outlet_new(&x->x_obj ,&s_float);
 	return (x);
 }
 
@@ -71,18 +73,19 @@ static void is_free(t_is *x) {
 }
 
 void is_setup(void) {
-	is_class = class_new(gensym("is"),
-		(t_newmethod)is_new, (t_method)is_free,
-		sizeof(t_is), 0,
-		A_DEFSYM, 0);
-	class_addbang(is_class, is_bang);
-	class_addanything(is_class, is_anything);
-	class_addmethod(is_class, (t_method)is_type,
-		gensym("type"), A_GIMME, 0);
-	class_addmethod(is_class, (t_method)is_peek,
-		gensym("peek"), A_DEFSYM, 0);
+	is_class = class_new(gensym("is")
+		,(t_newmethod)is_new ,(t_method)is_free
+		,sizeof(t_is) ,0
+		,A_DEFSYM ,0);
+	class_addbang    (is_class ,is_bang);
+	class_addanything(is_class ,is_anything);
 
-	is_proxy = class_new(gensym("_is_pxy"), 0, 0,
-		sizeof(t_is_pxy), CLASS_PD | CLASS_NOINLET, 0);
-	class_addanything(is_proxy, is_pxy_anything);
+	class_addmethod(is_class ,(t_method)is_type
+		,gensym("type") ,A_GIMME  ,0);
+	class_addmethod(is_class ,(t_method)is_peek
+		,gensym("peek") ,A_DEFSYM ,0);
+
+	is_proxy = class_new(gensym("_is_pxy") ,0 ,0
+		,sizeof(t_is_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
+	class_addanything(is_proxy ,is_pxy_anything);
 }

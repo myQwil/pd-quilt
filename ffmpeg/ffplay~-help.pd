@@ -6,14 +6,14 @@
 #X coords 0 1 128 -1 128 160 1 0 0;
 #X restore 391 126 graph;
 #X obj 34 460 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-1 1;
+0 1;
 #X floatatom 95 456 0 0 0 0 - - -;
 #X obj 70 328 cupqb 1;
 #X obj 130 197 openpanel;
 #X obj 255 519 *~;
-#X obj 260 211 bng 15 250 50 0 empty empty play/pause 19 7 0 11 -1
+#X obj 252 206 bng 15 250 50 0 empty empty play/pause 19 7 0 11 -1
 -262144 -262144;
-#X msg 275 235 stop;
+#X msg 267 230 stop;
 #X text 112 355 tracks;
 #X obj 174 519 cos~;
 #X obj 174 586 *~;
@@ -22,7 +22,7 @@
 #X obj 87 304 bng 15 250 50 0 empty empty restart 17 7 0 11 -1 -262144
 -262144;
 #X obj 383 440 hsl 128 17 0.001 1 1 0 empty empty vol 25 9 0 12 -1
--262144 -262144 9100 1;
+-262144 -262144 0 1;
 #X obj 383 520 hsl 128 17 -0.001 -1 1 0 empty empty cos 25 9 0 12 -1
 -262144 -262144 0 1;
 #X floatatom 393 469 0 0 0 0 - - -;
@@ -117,7 +117,7 @@
 #X restore 230 81 pd is-playing;
 #X obj 301 221 outlet;
 #X obj 166 143 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-1 1;
+0 1;
 #X msg 166 190 pos;
 #X floatatom 235 134 0 0 0 0 - - -;
 #X obj 166 163 metro 250;
@@ -132,7 +132,7 @@
 #X connect 9 0 2 0;
 #X connect 10 0 11 1;
 #X connect 11 0 9 0;
-#X restore 260 269 pd time;
+#X restore 252 264 pd time;
 #X obj 130 150 bng 15 250 50 0 empty empty previous_directory 19 7
 0 11 -1 -262144 -262144;
 #X obj 334 469 zp~ 15;
@@ -185,7 +185,7 @@
 #X connect 12 0 7 0;
 #X connect 13 0 10 0;
 #X restore 359 392 pd route;
-#X symbolatom 327 269 0 0 0 0 - - -;
+#X symbolatom 305 293 0 0 0 0 - - -;
 #X obj 56 275 r \$0start;
 #X msg 140 172 symbol ~/Music;
 #X msg 130 223 open \$1;
@@ -195,7 +195,7 @@
 #X obj 28 127 outlet;
 #X msg 28 98 seek \$1;
 #X obj 52 16 hsl 576 20 0 1 0 0 empty \$0trackbar empty -2 -8 0 10
--1 -262144 -262144 20269 1;
+-1 -262144 -262144 0 1;
 #X obj 64 43 r \$0time;
 #X obj 28 16 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
@@ -268,7 +268,7 @@
 #X connect 14 0 13 0;
 #X connect 15 0 16 0;
 #X connect 16 0 14 0;
-#X restore 427 294 pd trackbar;
+#X restore 427 304 pd trackbar;
 #N canvas 308 517 483 493 metadata 0;
 #X obj 57 446 outlet;
 #X msg 57 46 info;
@@ -304,15 +304,15 @@
 #X connect 19 0 0 0;
 #X connect 20 0 0 0;
 #X connect 21 0 0 0;
-#X restore 427 322 pd metadata;
+#X restore 427 332 pd metadata;
 #X obj 159 249 r \$0open;
 #N canvas 165 277 721 300 http 0;
 #X obj 188 219 outlet;
 #X msg 21 42 open https://upload.wikimedia.org/wikipedia/en/1/10/Michael_Jackson_Thriller.ogg
 , f 81;
 #X connect 1 0 0 0;
-#X restore 427 350 pd http;
-#X symbolatom 327 299 0 0 0 0 - - -;
+#X restore 427 360 pd http;
+#X symbolatom 278 320 0 0 0 0 - - -;
 #X obj 120 328 r \$0eof;
 #X obj 225 615 dac~;
 #X obj 34 556 tabwrite~ \$0ffplay;

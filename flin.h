@@ -18,23 +18,23 @@ typedef struct _flin {
 
 #define NMAX 1024
 
-static int flin_resize(t_flin *x, int n, int isindex) {
+static int flin_resize(t_flin *x ,int n ,int isindex) {
 	n += isindex;
 	if      (n < 1)    n = 1;
 	else if (n > NMAX) n = NMAX;
 	if (x->ptrsiz < n)
 	{	int d = 2;
 		while (d < n) d *= 2;
-		x->fp = (t_float *)resizebytes(x->fp,
-			x->ptrsiz * sizeof(t_float), d * sizeof(t_float));
+		x->fp = (t_float *)resizebytes(x->fp
+			,x->ptrsiz * sizeof(t_float) ,d * sizeof(t_float));
 		x->ptrsiz = d;
 		t_float *fp = x->fp;
 		t_inlet *ip = ((t_object *)x)->ob_inlet;
-		for (int i=x->ninlets; i--; fp++, ip=ip->i_next)
+		for (int i=x->ninlets; i--; fp++ ,ip=ip->i_next)
 			ip->i_floatslot = fp;   }
 	return (n - isindex);
 }
 
 static void flin_free(t_flin *x) {
-	freebytes(x->fp, x->ptrsiz * sizeof(t_float));
+	freebytes(x->fp ,x->ptrsiz * sizeof(t_float));
 }
