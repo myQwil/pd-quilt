@@ -112,11 +112,15 @@ static int music_more(t_music *x ,int ac ,t_atom *av) {
 	return more;
 }
 
-static void music_x(t_music *x ,t_symbol *s ,int ac ,t_atom *av ,int i) {
+static void music_z(t_music *x ,t_symbol *s ,int ac ,t_atom *av ,int i) {
 	if (i < 0)
 		return pd_error(x ,"music_at: index cannot be negative");
 	flin_resize(&x->flin ,ac + i + music_more(x ,ac ,av) ,0);
 	music_scale(x ,ac ,av ,i);
+}
+
+static void music_x(t_music *x ,t_symbol *s ,int ac ,t_atom *av) {
+	music_z(x ,s ,ac ,av ,0);
 }
 
 static void music_i(t_music *x ,t_symbol *s ,int ac ,t_atom *av) {
@@ -126,14 +130,14 @@ static void music_i(t_music *x ,t_symbol *s ,int ac ,t_atom *av) {
 
 static void music_list(t_music *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (x->expl)
-		 music_x(x ,s ,ac ,av ,0);
+		 music_z(x ,s ,ac ,av ,0);
 	else music_i(x ,s ,ac ,av);
 }
 
 static void music_anything(t_music *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (*s->s_name == '@')
 	{	int i = strtof(s->s_name+1 ,NULL);
-		if (ac) music_x(x ,s ,ac ,av ,i);
+		if (ac) music_z(x ,s ,ac ,av ,i);
 		else pd_error(x ,"music_at: bad arguments");   }
 	else
 	{	t_atom atoms[ac+1];
@@ -145,7 +149,7 @@ static void music_anything(t_music *x ,t_symbol *s ,int ac ,t_atom *av) {
 static void music_at(t_music *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (ac>1 && av->a_type == A_FLOAT)
 	{	int i = av->a_w.w_float;
-		music_x(x ,s ,ac-1 ,av+1 ,i);   }
+		music_z(x ,s ,ac-1 ,av+1 ,i);   }
 	else pd_error(x ,"music_at: bad arguments");
 }
 

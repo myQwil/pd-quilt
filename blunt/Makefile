@@ -2,7 +2,7 @@
 
   lib.name = blunt
 
-  class.sources = revop.c hotop.c
+  class.sources = hotop.c revop.c
 
   make-lib-executable = yes
   lib.setup.sources = blunt.c

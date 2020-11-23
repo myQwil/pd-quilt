@@ -4,56 +4,25 @@ void rand_setup(void);
 void rind_setup(void);
 void ntof_setup(void);
 void fton_setup(void);
-void span_setup(void);
 void sploat_setup(void);
 void gloat_setup(void);
-void logb_setup(void);
-void ceil_setup(void);
+void span_setup(void);
 void same_setup(void);
+void ceil_setup(void);
 void radix_setup(void);
+void setup_0x21(void);
+void setup_0x21_tilde(void);
+void is_setup(void);
+void pak_setup(void);
+void unpak_setup(void);
+void setup_0x40pak(void);
+void setup_0x40unpak(void);
+void stopwatch_setup(void);
 
-void setup_0x21(void); // [!]
-void setup_0x21_tilde(void); // [!~]
-void setup_0x3c0x3e(void); // [<>] !=
-void setup_0x3e0x3c(void); // [><] !=
-
-// hot binops
-void setup_0x230x2b(void); // [#+]
-void setup_0x230x2d(void); // [#-]
-void setup_0x230x2a(void); // [#*]
-void setup_0x230x2f(void); // [#/]
-void setup_0x230x3c(void); // [#<]
-void setup_0x230x3e(void); // [#>]
-void setup_0x230x26(void); // [#&]
-void setup_0x230x7c(void); // [#|]
-void setup_0x230x25(void); // [#%]
-void setup_0x230x5e(void); // [#^]
-void setup_0x230x3d0x3d(void); // [#==]
-void setup_0x230x210x3d(void); // [#!=]
-void setup_0x230x3c0x3d(void); // [#<=]
-void setup_0x230x3e0x3d(void); // [#>=]
-void setup_0x230x260x26(void); // [#&&]
-void setup_0x230x7c0x7c(void); // [#||]
-void setup_0x230x3c0x3c(void); // [#<<]
-void setup_0x230x3e0x3e(void); // [#>>]
-void setup_0x230x3c0x3e(void); // [#<>]
-void setup_0x230x3e0x3c(void); // [#><]
-void setup_0x23min(void);
-void setup_0x23max(void);
-void setup_0x23pow(void);
-void setup_0x23div(void);
-void setup_0x23mod(void);
-void setup_0x23logb(void);
-
-// reverse binops
-void setup_0x400x2d(void); // [@-]
-void setup_0x400x2f(void); // [@/]
-void setup_0x400x25(void); // [@%]
-void setup_0x400x3c0x3c(void); // [@<<]
-void setup_0x400x3e0x3e(void); // [@>>]
-void setup_0x40div(void);
-void setup_0x40mod(void);
-void setup_0x40pow(void);
+void blunt_setup(void);
+void ffplay_tilde_setup(void);
+void gme_tilde_setup(void);
+void gmes_tilde_setup(void);
 
 void myQwil_setup(void) {
 	muse_setup();
@@ -62,54 +31,23 @@ void myQwil_setup(void) {
 	rind_setup();
 	ntof_setup();
 	fton_setup();
-	span_setup();
 	sploat_setup();
 	gloat_setup();
-	logb_setup();
-	ceil_setup();
+	span_setup();
 	same_setup();
+	ceil_setup();
 	radix_setup();
+	setup_0x21();
+	setup_0x21_tilde();
+	is_setup();
+	pak_setup();
+	unpak_setup();
+	setup_0x40pak();
+	setup_0x40unpak();
+	stopwatch_setup();
 
-	setup_0x21(); // [!]
-	setup_0x21_tilde(); // [!~]
-	setup_0x3c0x3e(); // [<>] !=
-	setup_0x3e0x3c(); // [><] !=
-
-	// hot binops
-	setup_0x230x2b(); // [#+]
-	setup_0x230x2d(); // [#-]
-	setup_0x230x2a(); // [#*]
-	setup_0x230x2f(); // [#/]
-	setup_0x230x3c(); // [#<]
-	setup_0x230x3e(); // [#>]
-	setup_0x230x26(); // [#&]
-	setup_0x230x7c(); // [#|]
-	setup_0x230x25(); // [#%]
-	setup_0x230x5e(); // [#^]
-	setup_0x230x3d0x3d(); // [#==]
-	setup_0x230x210x3d(); // [#!=]
-	setup_0x230x3c0x3d(); // [#<=]
-	setup_0x230x3e0x3d(); // [#>=]
-	setup_0x230x260x26(); // [#&&]
-	setup_0x230x7c0x7c(); // [#||]
-	setup_0x230x3c0x3c(); // [#<<]
-	setup_0x230x3e0x3e(); // [#>>]
-	setup_0x230x3c0x3e(); // [#<>]
-	setup_0x230x3e0x3c(); // [#><]
-	setup_0x23min();
-	setup_0x23max();
-	setup_0x23pow();
-	setup_0x23div();
-	setup_0x23mod();
-	setup_0x23logb();
-
-	// reverse binops
-	setup_0x400x2d(); // [@-]
-	setup_0x400x2f(); // [@/]
-	setup_0x400x25(); // [@%]
-	setup_0x400x3c0x3c(); // [@<<]
-	setup_0x400x3e0x3e(); // [@>>]
-	setup_0x40div();
-	setup_0x40mod();
-	setup_0x40pow();
+	blunt_setup();
+	ffplay_tilde_setup();
+	gme_tilde_setup();
+	gmes_tilde_setup();
 }

@@ -233,16 +233,16 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 	err_t err_msg = 0;
 	char str[MAXPDSTRING];
 
-	const char *p = strrchr(s->s_name ,'/');
-	if (p)
-	{	len = p - s->s_name;
+	const char *path = strrchr(s->s_name ,'/');
+	if (path)
+	{	len = path - s->s_name;
 		strncpy(str ,s->s_name ,len);
-		p++;   }
+		path++;   }
 	else
 	{	len = 1;
 		str[0] = '.';
-		p = s->s_name;   }
-	str[len] = 0;
+		path = s->s_name;   }
+	str[len] = '\0';
 	x->plist.dir = gensym(str);
 
 	char *ext = strrchr(s->s_name ,'.');
@@ -250,7 +250,7 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 		err_msg = ffplay_m3u(x ,s);
 	else
 	{	x->plist.siz = 1;
-		x->plist.trk[0] = gensym(p);   }
+		x->plist.trk[0] = gensym(path);   }
 
 	if (!err_msg) err_msg = ffplay_start(x ,1);
 	if (err_msg) post("Error: %s." ,err_msg);

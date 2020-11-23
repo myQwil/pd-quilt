@@ -205,7 +205,6 @@
 #X obj 280 78 / 100;
 #X msg 280 105 speed \$1;
 #X msg 385 47 15 5000;
-#X msg 456 47 400 5000;
 #X obj 385 84 line 0 2;
 #N canvas 1097 420 450 364 kseek 0;
 #X obj 84 27 keyname;
@@ -251,6 +250,7 @@
 #X floatatom 185 70 0 0 0 0 - - -;
 #X obj 142 43 loadbang;
 #X msg 142 70 3000;
+#X msg 456 47 200 5000;
 #X connect 1 0 0 0;
 #X connect 2 0 5 0;
 #X connect 3 0 5 1;
@@ -260,14 +260,14 @@
 #X connect 7 0 8 0;
 #X connect 8 0 9 0;
 #X connect 9 0 0 0;
-#X connect 10 0 12 0;
-#X connect 11 0 12 0;
-#X connect 12 0 7 0;
-#X connect 13 0 1 0;
-#X connect 13 0 6 0;
-#X connect 14 0 13 0;
-#X connect 15 0 16 0;
-#X connect 16 0 14 0;
+#X connect 10 0 11 0;
+#X connect 11 0 7 0;
+#X connect 12 0 1 0;
+#X connect 12 0 6 0;
+#X connect 13 0 12 0;
+#X connect 14 0 15 0;
+#X connect 15 0 13 0;
+#X connect 16 0 11 0;
 #X restore 427 304 pd trackbar;
 #N canvas 308 517 483 493 metadata 0;
 #X obj 57 446 outlet;

@@ -51,11 +51,11 @@ typedef struct _gmepd {
 	t_outlet *o_meta; /* outputs track metadata */
 } t_gmepd;
 
-#define file_path x->path->s_name
+#define xpath x->path->s_name
 
 static void gmepd_m3u(t_gmepd *x ,Music_Emu *emu) {
 	char m3u_path [256 + 5];
-	strncpy(m3u_path ,file_path ,256);
+	strncpy(m3u_path ,xpath ,256);
 	m3u_path [256] = 0;
 	char *p = strrchr(m3u_path ,'.');
 	if (!p) p = m3u_path + strlen(m3u_path);
@@ -75,7 +75,7 @@ static void gmepd_time(t_gmepd *x ,t_floatarg f) {
 	Music_Emu *emu = gmepd_emu(x);
 	if (emu && !hnd_err(gme_track_info(emu ,&info ,track-1)))
 	{	t_atom flts[] =
-		{	{ A_FLOAT ,{(t_float)(info->length > 0 ?
+		{	 { A_FLOAT ,{(t_float)(info->length > 0 ?
 				info->length : info->play_length)} }
 			,{ A_FLOAT ,{(t_float)info->fade_length} }   };
 		gme_free_info(info);
@@ -85,7 +85,6 @@ static void gmepd_time(t_gmepd *x ,t_floatarg f) {
 static void gmepd_start(t_gmepd *x) {
 	if (!hnd_err(gme_start_track(x->emu ,x->track-1)))
 	{	gme_set_fade(x->emu ,-1 ,0);
-		gmepd_time(x ,0);
 		x->stop = 0 ,x->play = 1;   }
 }
 
@@ -104,19 +103,19 @@ static t_int *gmepd_perform(t_int *w) {
 
 	if (x->open)
 	{	gme_delete(x->emu); x->emu = NULL;
-		if (!hnd_err(gme_open_file(file_path ,&x->emu ,sys_getsr() ,NCH>2)))
+		if (!hnd_err(gme_open_file(xpath ,&x->emu ,sys_getsr() ,NCH>2)))
 		{	gmepd_m3u(x ,x->emu);
-			gme_ignore_silence(x->emu ,1);
-			gme_mute_voices   (x->emu ,x->mask);
-			gme_set_tempo     (x->emu ,x->tempo);
-			gme_set_speed     (x->emu ,x->speed);
+			gme_ignore_silence (x->emu ,1        );
+			gme_mute_voices    (x->emu ,x->mask  );
+			gme_set_tempo      (x->emu ,x->tempo );
+			gme_set_speed      (x->emu ,x->speed );
 			if (x->track < 1 || x->track > gme_track_count(x->emu))
 				x->track = 1;
 			gmepd_start(x);   }
 		x->open = x->read = 0;   }
 
 	if (x->emu && x->play)
-		while (n--) gmepd_decode(x ,outs);
+		 while (n--) gmepd_decode(x ,outs);
 	else while (n--) for (int i=NCH; i--;) *outs[i]++ = 0;
 	return (w+NCH+3);
 }
@@ -129,8 +128,8 @@ static void gmepd_open(t_gmepd *x ,t_symbol *s) {
 		gme_delete(x->info); x->info = info;
 		gmepd_m3u(x ,x->info);   }
 	else x->read = 0;
-	t_atom result = { A_FLOAT ,{(t_float)x->read} };
-	outlet_anything(x->o_meta ,gensym("open:") ,1 ,&result);
+	t_atom open = { A_FLOAT ,{(t_float)x->read} };
+	outlet_anything(x->o_meta ,gensym("open:") ,1 ,&open);
 }
 
 static void gmepd_bang(t_gmepd *x) {
@@ -166,35 +165,34 @@ static void gmepd_track(t_gmepd *x ,t_symbol *s ,int ac ,t_atom *av) {
 			x->track = f;   }
 }
 
-static void gmepd_total(t_gmepd *x) {
+static void gmepd_tracks(t_gmepd *x) {
 	Music_Emu *emu = gmepd_emu(x);
 	t_float f = emu ? gme_track_count(emu) : 0;
 	t_atom flt = { A_FLOAT ,{f} };
-	outlet_anything(x->o_meta ,gensym("total:") ,1 ,&flt);
+	outlet_anything(x->o_meta ,gensym("tracks:") ,1 ,&flt);
 }
 
 static const char *gmepd_meta
 (t_gmepd *x ,gme_info_t *info ,const char *sym ,int *len ,char buf[33]) {
 	const char *dict[][2] =
-	{	 {"path"      ,file_path}
-		,{"system"    ,info->system}
-		,{"game"      ,info->game}
-		,{"song"      ,info->song}
-		,{"author"    ,info->author}
-		,{"copyright" ,info->copyright}
-		,{"comment"   ,info->comment}
-		,{"dumper"    ,info->dumper}
-		,{"length"    ,(const char*)info->length}
-		,{"fade"      ,(const char*)info->fade_length}
-		,{"track"     ,(const char*)x->track}
-		,{"total"     ,(const char*)gme_track_count(gmepd_emu(x))}
-		,{"mask"      ,(const char*)x->mask}
-		,{"bmask"     ,0}   };
+	{	 {"path"      ,xpath                                      }
+		,{"system"    ,info->system                               }
+		,{"game"      ,info->game                                 }
+		,{"song"      ,info->song                                 }
+		,{"author"    ,info->author                               }
+		,{"copyright" ,info->copyright                            }
+		,{"comment"   ,info->comment                              }
+		,{"dumper"    ,info->dumper                               }
+		,{"length"    ,(const char*)info->length                  }
+		,{"fade"      ,(const char*)info->fade_length             }
+		,{"track"     ,(const char*)x->track                      }
+		,{"tracks"    ,(const char*)gme_track_count(gmepd_emu(x)) }
+		,{"mask"      ,(const char*)x->mask                       }
+		,{"bmask"     ,0                                          }   };
 	int n = sizeof(dict) / sizeof(*dict);
 	for (int i = 0; i < n; i++)
-	{	int keylen = strlen(dict[i][0]);
-		if (!strncmp(sym ,dict[i][0] ,keylen))
-		{	if (len) *len = keylen;
+	{	if (!strcmp(sym ,dict[i][0]))
+		{	if (len) *len = strlen(dict[i][0]);
 			if (i >= 8)
 			{	if (i == 13)
 				{	int m = x->mask;
@@ -213,7 +211,7 @@ static void gmepd_format(t_gmepd *x ,int ac ,t_atom *av) {
 	gme_info_t *info;
 	Music_Emu *emu = gmepd_emu(x);
 	if (!emu || hnd_err(gme_track_info(emu ,&info ,x->track-1)))
-	{	pd_error(x ,"gme~: %s" ,file_path);
+	{	pd_error(x ,"gme~: %s" ,xpath);
 		return;   }
 
 	char buf[33];
@@ -239,7 +237,7 @@ static void gmepd_send(t_gmepd *x ,t_symbol *s) {
 	gme_info_t *info;
 	Music_Emu *emu = gmepd_emu(x);
 	if (!emu || hnd_err(gme_track_info(emu ,&info ,x->track-1)))
-	{	pd_error(x ,"gme~: %s" ,file_path);
+	{	pd_error(x ,"gme~: %s" ,xpath);
 		return;   }
 
 	char buf[33];
@@ -259,7 +257,7 @@ static void gmepd_anything(t_gmepd *x ,t_symbol *s ,int ac ,t_atom *av) {
 	gme_info_t *info;
 	Music_Emu *emu = gmepd_emu(x);
 	if (!emu || hnd_err(gme_track_info(emu ,&info ,x->track-1)))
-	{	pd_error(x ,"gme~: %s" ,file_path);
+	{	pd_error(x ,"gme~: %s" ,xpath);
 		return;   }
 
 	char buf[33];
@@ -286,7 +284,7 @@ static void gmepd_info(t_gmepd *x ,t_symbol *s ,int ac ,t_atom *av) {
 
 	Music_Emu *emu = gmepd_emu(x);
 	if (emu) gmepd_info_default(emu ,x->track);
-	else pd_error(x ,"gme~: %s" ,file_path);
+	else pd_error(x ,"gme~: %s" ,xpath);
 }
 
 static void gmepd_seek(t_gmepd *x ,t_floatarg f) {
@@ -387,8 +385,8 @@ static t_class *gmepd_setup(t_symbol *s ,t_newmethod newm) {
 		,gensym("print") ,A_GIMME    ,0);
 	class_addmethod(gmeclass ,(t_method)gmepd_track
 		,gensym("track") ,A_GIMME    ,0);
-	class_addmethod(gmeclass ,(t_method)gmepd_total
-		,gensym("total") ,A_NULL);
+	class_addmethod(gmeclass ,(t_method)gmepd_tracks
+		,gensym("tracks") ,A_NULL);
 	class_addmethod(gmeclass ,(t_method)gmepd_stop
 		,gensym("stop")  ,A_NULL);
 	class_addmethod(gmeclass ,(t_method)gmepd_bang

@@ -6,7 +6,7 @@
 #X obj 72 133 pack 0 \$1;
 #X text 154 74 ramp between value changes;
 #X obj 214 104 inlet;
-#X obj 72 161 line 0 \$2;
+#X obj 72 161 line \$2 \$3;
 #X connect 0 0 4 0;
 #X connect 2 0 4 1;
 #X connect 4 0 7 0;
