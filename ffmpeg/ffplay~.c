@@ -33,10 +33,10 @@ typedef struct _ffplay {
 	t_playlist      plist;
 	t_float  speed;   /* playback speed factor */
 	int64_t  layout;  /* channel layout bit-mask */
-	int      nch;     /* number of channels */
-	int      siz;     /* number of output samples */
-	int      pos;     /* current buffer position */
 	int      idx;     /* index of the audio stream */
+	unsigned nch;     /* number of channels */
+	unsigned siz;     /* number of output samples */
+	unsigned pos;     /* current buffer position */
 	unsigned open:1;  /* true when a file has been successfully opened */
 	unsigned play:1;  /* play/pause toggle */
 	unsigned sped:1;  /* speed change request flag */
@@ -92,52 +92,56 @@ static void ffplay_seek(t_ffplay *x ,t_floatarg f) {
 	avcodec_open2(x->ctx ,codec ,NULL);
 }
 
-static void ffplay_decode(t_ffplay *x ,t_sample **outs) {
-	if (x->siz > 0) goto have_buf;
-	while (av_read_frame(x->ic ,x->pkt) >= 0)
-	{	if (x->pkt->stream_index == x->idx)
-		{	if (avcodec_send_packet(x->ctx ,x->pkt) < 0
-			 || avcodec_receive_frame(x->ctx ,x->frm) < 0)
-				return;
-			if (x->sped)
-			{	int64_t layout_in = av_get_default_channel_layout(x->ctx->channels);
-				swr_alloc_set_opts(x->swr
-					,x->layout ,AV_SAMPLE_FMT_FLTP ,speed_limit(x->speed)
-					,layout_in ,x->ctx->sample_fmt ,x->ctx->sample_rate
-					,0 ,NULL);
-				swr_init(x->swr);
-				x->sped = 0;   }
-			x->siz = swr_convert(x->swr ,(uint8_t**)&x->buf ,BUFSIZE
-				,(const uint8_t **)x->frm->extended_data ,x->frm->nb_samples);
-			av_packet_unref(x->pkt);
-			goto have_buf;   }
-		av_packet_unref(x->pkt);   }
-
-	// reached the end
-	x->play = 0;
-	ffplay_seek(x ,0);
-	outlet_anything(x->o_meta ,gensym("EOF") ,0 ,0);
-	return;
-
-	have_buf:
-	for (int i = x->nch; i--;)
-		*outs[i]++ = x->buf[i][x->pos];
-	if (++x->pos >= x->siz)
-	{	x->siz = swr_convert(x->swr ,(uint8_t**)&x->buf ,BUFSIZE ,0 ,0);
-		x->pos = 0;   }
-}
-
 static t_int *ffplay_perform(t_int *w) {
 	t_ffplay *x = (t_ffplay *)(w[1]);
-	t_sample *outs[x->nch];
-	for (int i = x->nch; i--;) outs[i] = x->outs[i];
+	unsigned nch = x->nch;
+	t_sample *outs[nch];
+	for (int i = nch; i--;) outs[i] = x->outs[i];
 	int n = (int)w[2];
 
-	while (n--)
-		if (x->open && x->play)
-			ffplay_decode(x ,outs);
-		else for (int i = x->nch; i--;)
-			*outs[i]++ = 0;
+	if (x->open && x->play)
+	{	unsigned pos = x->pos;
+		while (n--)
+		{	if (x->siz)
+			{	sound:
+				for (int i = nch; i--;)
+					*outs[i]++ = x->buf[i][pos];
+				if (++pos >= x->siz)
+				{	x->siz = swr_convert(x->swr ,(uint8_t**)&x->buf ,BUFSIZE ,0 ,0);
+					pos = 0;   }
+				continue;   }
+			while (av_read_frame(x->ic ,x->pkt) >= 0)
+			{	if (x->pkt->stream_index == x->idx)
+				{	if (avcodec_send_packet(x->ctx ,x->pkt) < 0
+					|| avcodec_receive_frame(x->ctx ,x->frm) < 0)
+						continue;
+					if (x->sped)
+					{	int64_t layout_in =
+							av_get_default_channel_layout(x->ctx->channels);
+						swr_alloc_set_opts(x->swr
+							,x->layout ,AV_SAMPLE_FMT_FLTP ,speed_limit(x->speed)
+							,layout_in ,x->ctx->sample_fmt ,x->ctx->sample_rate
+							,0 ,NULL);
+						swr_init(x->swr);
+						x->sped = 0;   }
+					x->siz = swr_convert(x->swr ,(uint8_t**)&x->buf ,BUFSIZE
+						,(const uint8_t **)x->frm->extended_data ,x->frm->nb_samples);
+					av_packet_unref(x->pkt);
+					goto sound;   }
+				av_packet_unref(x->pkt);   }
+
+			// reached the end
+			if (x->play)
+				x->play = 0 ,n++; // don't iterate in case there's another track
+			else
+			{	ffplay_seek(x ,0);
+				goto silence;   }
+			outlet_anything(x->o_meta ,gensym("EOF") ,0 ,0);   }
+		x->pos = pos;   }
+	else while (n--)
+	{	silence:
+		for (int i = nch; i--;)
+			*outs[i]++ = 0;   }
 	return (w+3);
 }
 

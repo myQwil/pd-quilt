@@ -1,24 +1,20 @@
 # Makefile for myQwil
 
-  lib.name = myQwil
+lib.name = myQwil
 
-  class.sources = \
-	muse.c chrd.c rand.c rind.c ntof.c fton.c sploat.c gloat.c \
-	span.c same.c ceil.c radix.c 0x21.c 0x21~.c x.c is.c \
-	pak.c unpak.c 0x40pak.c 0x40unpak.c stopwatch.c
+class.sources := $(patsubst %, %.c, \
+muse chrd rand rind ntof fton sploat gloat span same ceil radix \
+0x21 0x21~ x is pak unpak 0x40pak 0x40unpak stopwatch)
 
-  datafiles = \
-	0x21-help.pd 0x21~-help.pd 2^.pd ad.pd ad~.pd adac~.pd same-help.pd \
-	bt.pd ct.pd cupq.pd cupq-help.pd cupqb.pd cupqb-help.pd fmod~.pd fmad~.pd \
-	muse-help.pd chrd-help.pd ceil-help.pd logb-help.pd phi.pd tie.pd mix~.pd \
-	mantissa.pd mantissab.pd mantissal.pd mancalc.pd mantr.pd \
-	ntof-help.pd zp.pd zp~.pd radix-help.pd rand-help.pd rind-help.pd \
-	sploat-help.pd is-help.pd pak-help.pd rpak-help.pd \
-	x-help.pd adsr.pd adsr-help.pd fkick~.pd span-help.pd \
-	dep.pd dep-help.pd linp.pd linp-help.pd linp~.pd linp~-help.pd \
-	README.md LICENSE.md
+datafiles := $(patsubst %, %-help.pd, \
+muse chrd rand rind ntof sploat span same ceil radix 0x21 0x21~ x is pak rpak \
+stopwatch adsrz cupq cupqb delp linp linp~)
 
-  suppress-wunused = yes
-  warn.flags = -Wall -Wshadow -Winline -Wstrict-aliasing
+datafiles += $(patsubst %, %.pd, \
+2^ ad ad~ add~ all~ bt ct cupq cupqb delp linp linp~ dollar-slice fkick~ \
+hms lead0 mancalc mantissa mantissal mantr phi fmosc~ zp zp~)
 
-  include pd-lib-builder/Makefile.pdlibbuilder
+suppress-wunused = yes
+warn.flags = -Wall -Wshadow -Winline -Wstrict-aliasing
+
+include pd-lib-builder/Makefile.pdlibbuilder

@@ -1,14 +1,14 @@
 # Makefile for ffmpeg
 
-  lib.name = ffmpeg
+lib.name = ffmpeg
 
-  class.sources = ffplay~.c
+class.sources = ffplay~.c
 
-  datafiles = ffplay~-help.pd
+datafiles = ffplay~-help.pd
 
-  suppress-wunused = yes
-  warn.flags = -Wall -Winline -Wstrict-aliasing -Wshadow
+suppress-wunused = yes
+warn.flags = -Wall -Winline -Wstrict-aliasing -Wshadow
 
-  ldlibs = -lavutil -lavcodec -lavformat -lswresample
+ldlibs = -lavutil -lavcodec -lavformat -lswresample
 
-  include ../pd-lib-builder/Makefile.pdlibbuilder
+include ../pd-lib-builder/Makefile.pdlibbuilder

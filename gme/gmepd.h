@@ -88,13 +88,6 @@ static void gmepd_start(t_gmepd *x) {
 		x->stop = 0 ,x->play = 1;   }
 }
 
-static void gmepd_decode(t_gmepd *x ,t_sample *outs[NCH]) {
-	short buf[NCH];
-	hnd_err(gme_play(x->emu ,NCH ,buf));
-	for (int i=NCH; i--;)
-		*outs[i]++ = buf[i] / (t_sample)32768;
-}
-
 static t_int *gmepd_perform(t_int *w) {
 	t_gmepd *x = (t_gmepd *)(w[1]);
 	t_sample *outs[NCH];
@@ -115,7 +108,11 @@ static t_int *gmepd_perform(t_int *w) {
 		x->open = x->read = 0;   }
 
 	if (x->emu && x->play)
-		 while (n--) gmepd_decode(x ,outs);
+		 while (n--)
+		 {	short buf[NCH];
+			hnd_err(gme_play(x->emu ,NCH ,buf));
+			for (int i=NCH; i--;)
+				*outs[i]++ = buf[i] / (t_sample)32768;   }
 	else while (n--) for (int i=NCH; i--;) *outs[i]++ = 0;
 	return (w+NCH+3);
 }
