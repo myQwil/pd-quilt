@@ -23,7 +23,7 @@
 #X obj 69 324 bng 15 250 50 0 empty empty restart 17 7 0 10 -1 -262144
 -262144;
 #X obj 371 445 hsl 128 17 0.001 1 1 0 empty empty vol 25 9 0 12 -1
--262144 -262144 0 1;
+-262144 -262144 9200 1;
 #X obj 371 514 hsl 128 17 -0.001 -1 1 0 empty empty cos 25 9 0 12 -1
 -262144 -262144 0 1;
 #X floatatom 381 474 0 0 0 0 - - -;
@@ -257,7 +257,7 @@
 #X obj 39 167 print tracks;
 #X obj 103 236 s \$0start;
 #X obj 52 65 route tracks: time: open: path: track:;
-#X msg 190 209 path \, info \, tracks \, time \, bang;
+#X msg 190 209 path \, tracks \, info \, time \, bang;
 #X connect 0 0 13 0;
 #X connect 6 1 14 0;
 #X connect 6 1 7 0;
