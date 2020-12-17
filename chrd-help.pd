@@ -101,7 +101,7 @@
 #N canvas 210 405 513 369 instruments 0;
 #N canvas 725 405 450 323 inst 0;
 #X obj 201 237 *~;
-#X obj 228 186 ad~ 1;
+#X obj 228 186 ad 1;
 #X obj 120 68 inlet;
 #X obj 201 269 outlet~;
 #X obj 329 145 r dcay;
@@ -136,7 +136,7 @@
 #X restore 50 71 pd inst;
 #N canvas 801 405 450 323 inst 0;
 #X obj 201 237 *~;
-#X obj 228 186 ad~ 1;
+#X obj 228 186 ad 1;
 #X obj 120 68 inlet;
 #X obj 201 269 outlet~;
 #X obj 329 145 r dcay;
@@ -167,7 +167,7 @@
 #X restore 120 71 pd inst;
 #N canvas 801 405 450 323 inst 0;
 #X obj 201 237 *~;
-#X obj 228 186 ad~ 1;
+#X obj 228 186 ad 1;
 #X obj 120 68 inlet;
 #X obj 201 269 outlet~;
 #X obj 329 145 r dcay;
@@ -198,7 +198,7 @@
 #X restore 190 71 pd inst;
 #N canvas 801 405 450 323 inst 0;
 #X obj 201 237 *~;
-#X obj 228 186 ad~ 1;
+#X obj 228 186 ad 1;
 #X obj 120 68 inlet;
 #X obj 201 269 outlet~;
 #X obj 329 145 r dcay;
@@ -229,7 +229,7 @@
 #X restore 260 71 pd inst;
 #N canvas 801 405 450 323 inst 0;
 #X obj 201 237 *~;
-#X obj 228 186 ad~ 1;
+#X obj 228 186 ad 1;
 #X obj 120 68 inlet;
 #X obj 201 269 outlet~;
 #X obj 329 145 r dcay;
@@ -260,7 +260,7 @@
 #X restore 330 71 pd inst;
 #N canvas 801 405 450 323 inst 0;
 #X obj 201 237 *~;
-#X obj 228 186 ad~ 1;
+#X obj 228 186 ad 1;
 #X obj 120 68 inlet;
 #X obj 201 269 outlet~;
 #X obj 329 145 r dcay;
@@ -368,7 +368,7 @@
 #X msg 480 295 @ 5 \$1;
 #X obj 406 400 loadbang;
 #X obj 357 433 vsl 15 128 0.001 1 1 0 empty empty empty 0 -9 0 10 -1
--262144 -262144 9900 1;
+-262144 -262144 0 1;
 #X obj 291 253 cupqb 16;
 #X obj 338 253 cupqb 19;
 #X obj 385 253 cupqb 23;
@@ -382,7 +382,7 @@
 #X msg 56 362 peek;
 #X text 116 72 A derivative of [muse] that uses multiple outlets to
 allow for chords and harmonization;
-#X obj 302 44 cnv 15 52 22 empty empty chrd 2 10 0 16 -1 -262144 0
+#X obj 302 44 cnv 15 60 24 empty empty chrd 4 12 0 18 -1 -262144 0
 ;
 #X msg 237 322 0;
 #X obj 480 253 cupqb 24;

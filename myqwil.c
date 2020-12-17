@@ -20,9 +20,9 @@ void setup_0x40unpak(void);
 void stopwatch_setup(void);
 
 void blunt_setup(void);
-void ffplay_tilde_setup(void);
-void gme_tilde_setup(void);
-void gmes_tilde_setup(void);
+// void ffplay_tilde_setup(void);
+// void gme_tilde_setup(void);
+// void gmes_tilde_setup(void);
 
 void myQwil_setup(void) {
 	muse_setup();
@@ -47,7 +47,7 @@ void myQwil_setup(void) {
 	stopwatch_setup();
 
 	blunt_setup();
-	ffplay_tilde_setup();
-	gme_tilde_setup();
-	gmes_tilde_setup();
+	// ffplay_tilde_setup();
+	// gme_tilde_setup();
+	// gmes_tilde_setup();
 }

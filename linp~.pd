@@ -24,7 +24,7 @@
 #X obj 173 375 span;
 #X obj 258 410 line~;
 #X obj 54 440 outlet~;
-#X obj 235 36 cnv 15 64 22 empty empty linp~ 2 10 0 16 -1 -262144 0
+#X obj 235 36 cnv 15 72 24 empty empty linp~ 4 12 0 18 -1 -262144 0
 ;
 #X text 170 61 line~ with pause feature;
 #X obj 41 152 t f f;

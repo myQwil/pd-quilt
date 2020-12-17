@@ -43,7 +43,7 @@ additional features.;
 #X obj 33 497 random 2;
 #X msg 79 460 seed 1234;
 #X floatatom 67 522 0 0 0 0 - - -;
-#X obj 264 29 cnv 15 52 22 empty empty rand 2 10 0 16 -1 -262144 0
+#X obj 264 29 cnv 15 60 24 empty empty rand 4 12 0 18 -1 -262144 0
 ;
 #X msg 216 267 c 3 \, n 3 \, @ 2 7;
 #X msg 111 352 n 4 \, @ 3 7;

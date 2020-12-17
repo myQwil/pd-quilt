@@ -1,14 +1,14 @@
-#N canvas 719 355 450 300 14;
-#X text 95 93 round up to the nearest integer;
-#X floatatom 127 144 0 0 0 0 - - -;
-#X obj 127 170 ceil;
-#X floatatom 127 195 0 0 0 0 - - -;
-#X msg 258 144 bang;
-#X obj 258 170 ceil 2.1;
-#X floatatom 258 195 0 0 0 0 - - -;
-#X obj 191 63 cnv 15 52 22 empty empty ceil 2 10 0 16 -1 -262144 0
+#N canvas 550 300 451 301 14;
+#X floatatom 120 140 0 0 0 0 - - -;
+#X obj 120 170 ceil;
+#X floatatom 120 200 0 0 0 0 - - -;
+#X msg 250 140 bang;
+#X obj 250 170 ceil 2.1;
+#X floatatom 250 200 0 0 0 0 - - -;
+#X text 100 90 round up to the nearest integer;
+#X obj 190 60 cnv 15 60 24 empty empty ceil 4 12 0 18 -1 -262144 0
 ;
+#X connect 0 0 1 0;
 #X connect 1 0 2 0;
-#X connect 2 0 3 0;
+#X connect 3 0 4 0;
 #X connect 4 0 5 0;
-#X connect 5 0 6 0;

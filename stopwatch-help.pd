@@ -11,7 +11,7 @@
 #X msg 240 143 tempo 3 msec;
 #X msg 260 195 tempo 0.5 msec;
 #X msg 250 169 tempo 1 msec;
-#X obj 295 43 cnv 15 112 22 empty empty stopwatch 2 10 0 16 -1 -262144
+#X obj 295 43 cnv 15 124 24 empty empty stopwatch 4 12 0 18 -1 -262144
 0;
 #X obj 232 258 hms;
 #X symbolatom 232 285 0 0 0 0 - - -;

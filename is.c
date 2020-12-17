@@ -77,8 +77,8 @@ void is_setup(void) {
 		,(t_newmethod)is_new ,(t_method)is_free
 		,sizeof(t_is) ,0
 		,A_DEFSYM ,0);
-	class_addbang    (is_class ,is_bang);
-	class_addanything(is_class ,is_anything);
+	class_addbang     (is_class ,is_bang);
+	class_addanything (is_class ,is_anything);
 
 	class_addmethod(is_class ,(t_method)is_type
 		,gensym("type") ,A_GIMME  ,0);

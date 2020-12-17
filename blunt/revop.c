@@ -8,7 +8,7 @@
 static t_class *rminus_class;
 
 static void rminus_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_minus(x->f2 ,x->f1));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_minus(x->f2 ,x->f1));
 }
 
 static void *rminus_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -19,7 +19,7 @@ static void *rminus_new(t_symbol *s ,int ac ,t_atom *av) {
 static t_class *rdiv_class;
 
 static void rdiv_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_div(x->f2 ,x->f1));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_div(x->f2 ,x->f1));
 }
 
 static void *rdiv_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -30,7 +30,7 @@ static void *rdiv_new(t_symbol *s ,int ac ,t_atom *av) {
 static t_class *rlog_class;
 
 static void rlog_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_log(x->f2 ,x->f1));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_log(x->f2 ,x->f1));
 }
 
 static void *rlog_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -41,7 +41,7 @@ static void *rlog_new(t_symbol *s ,int ac ,t_atom *av) {
 static t_class *rpow_class;
 
 static void rpow_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_pow(x->f2 ,x->f1));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_pow(x->f2 ,x->f1));
 }
 
 static void *rpow_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -52,7 +52,7 @@ static void *rpow_new(t_symbol *s ,int ac ,t_atom *av) {
 static t_class *rls_class;
 
 static void rls_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_ls(x->f2 ,x->f1));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_ls(x->f2 ,x->f1));
 }
 
 static void *rls_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -63,7 +63,7 @@ static void *rls_new(t_symbol *s ,int ac ,t_atom *av) {
 static t_class *rrs_class;
 
 static void rrs_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_rs(x->f2 ,x->f1));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_rs(x->f2 ,x->f1));
 }
 
 static void *rrs_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -74,7 +74,7 @@ static void *rrs_new(t_symbol *s ,int ac ,t_atom *av) {
 static t_class *rfpc_class;
 
 static void rfpc_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_fpc(x->f2 ,x->f1));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_fpc(x->f2 ,x->f1));
 }
 
 static void *rfpc_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -85,7 +85,7 @@ static void *rfpc_new(t_symbol *s ,int ac ,t_atom *av) {
 static t_class *rpc_class;
 
 static void rpc_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_pc(x->f2 ,x->f1));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_pc(x->f2 ,x->f1));
 }
 
 static void *rpc_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -96,7 +96,7 @@ static void *rpc_new(t_symbol *s ,int ac ,t_atom *av) {
 static t_class *rmod_class;
 
 static void rmod_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_mod(x->f2 ,x->f1));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_mod(x->f2 ,x->f1));
 }
 
 static void *rmod_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -107,7 +107,7 @@ static void *rmod_new(t_symbol *s ,int ac ,t_atom *av) {
 static t_class *rdivm_class;
 
 static void rdivm_bang(t_bop *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_divm(x->f2 ,x->f1));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_divm(x->f2 ,x->f1));
 }
 
 static void *rdivm_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -156,13 +156,13 @@ void revop_setup(void) {
 	int i = sizeof(revs) / sizeof*(revs);
 	t_symbol *rev_sym = gensym("revbinops");
 	while (i--)
-	{	class_addbang(revs[i] ,rbangs[i]);
-		class_addfloat(revs[i] ,bop_float);
+	{	class_addbang  (revs[i] ,rbangs[i]);
+		class_addfloat (revs[i] ,bop_float);
 		class_addmethod(revs[i] ,(t_method)bop_f2
 			,gensym("f2") ,A_FLOAT ,0);
 		class_addmethod(revs[i] ,(t_method)bop_skip
 			,gensym(".") ,A_GIMME ,0);
-		class_addmethod(revs[i] ,(t_method)bop_loadbang
+		class_addmethod(revs[i] ,(t_method)blunt_loadbang
 			,gensym("loadbang") ,A_DEFFLOAT ,0);
 		class_sethelpsymbol(revs[i] ,rev_sym);   }
 }

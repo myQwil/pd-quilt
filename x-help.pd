@@ -31,7 +31,7 @@
 #X restore 397 142 pd foo;
 #X msg 95 182 traverse pd-foo \, bang;
 #X msg 300 182 traverse pd-foo \, bang;
-#X obj 267 25 cnv 15 16 22 empty empty x 2 10 0 16 -1 -262144 0;
+#X obj 267 25 cnv 15 21 24 empty empty x 4 12 0 18 -1 -262144 0;
 #X text 204 49 explicit trigger;
 #X text 33 70 A variation of [trigger] that sends 1-atom lists as the
 atom itself when either a number \, the letter 'a' \, or no creation

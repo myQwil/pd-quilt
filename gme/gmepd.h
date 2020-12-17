@@ -108,12 +108,15 @@ static t_int *gmepd_perform(t_int *w) {
 		x->open = x->read = 0;   }
 
 	if (x->emu && x->play)
-		 while (n--)
-		 {	short buf[NCH];
-			hnd_err(gme_play(x->emu ,NCH ,buf));
+	{	int16_t buf[NCH];
+		while (n--)
+		{	hnd_err(gme_play(x->emu ,NCH ,buf));
 			for (int i=NCH; i--;)
-				*outs[i]++ = buf[i] / (t_sample)32768;   }
-	else while (n--) for (int i=NCH; i--;) *outs[i]++ = 0;
+				*outs[i]++ = buf[i] / (t_sample)32768;   }   }
+	else
+		while (n--)
+			for (int i=NCH; i--;)
+				*outs[i]++ = 0;
 	return (w+NCH+3);
 }
 
@@ -354,9 +357,9 @@ static void gmepd_free(t_gmepd *x) {
 static t_class *gmepd_setup(t_symbol *s ,t_newmethod newm) {
 	t_class *gmeclass = class_new(s ,newm ,(t_method)gmepd_free
 		,sizeof(t_gmepd) ,0 ,A_GIMME ,0);
-	class_addbang    (gmeclass ,gmepd_bang);
-	class_addfloat   (gmeclass ,gmepd_float);
-	class_addanything(gmeclass ,gmepd_anything);
+	class_addbang     (gmeclass ,gmepd_bang);
+	class_addfloat    (gmeclass ,gmepd_float);
+	class_addanything (gmeclass ,gmepd_anything);
 
 	class_addmethod(gmeclass ,(t_method)gmepd_open
 		,gensym("open")  ,A_SYMBOL   ,0);

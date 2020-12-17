@@ -29,6 +29,6 @@ void ceil_setup(void) {
 		,(t_newmethod)ceil_new ,0
 		,sizeof(t_ceil) ,0
 		,A_DEFFLOAT ,0);
-	class_addbang(ceil_class ,ceil_bang);
-	class_addfloat(ceil_class ,ceil_float);
+	class_addbang  (ceil_class ,ceil_bang);
+	class_addfloat (ceil_class ,ceil_float);
 }

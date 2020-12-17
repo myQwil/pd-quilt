@@ -13,11 +13,10 @@ typedef struct _hot_pxy {
 } t_hot_pxy;
 
 struct _hot {
-	t_object x_obj;
+	t_blunt bl;
 	t_hot_pxy *x_p;
 	t_float f1;
 	t_float f2;
-	int loadbang;
 };
 
 static void hot_float(t_hot *x ,t_float f) {
@@ -32,10 +31,6 @@ static void hot_f2(t_hot *x ,t_floatarg f) {
 static void hot_skip(t_hot *x ,t_floatarg f) {
 	x->f2 = f;
 	pd_bang((t_pd *)x);
-}
-
-static void hot_loadbang(t_hot *x ,t_floatarg action) {
-	if (x->loadbang && !action) pd_bang((t_pd *)x);
 }
 
 static void hot_pxy_bang(t_hot_pxy *p) {
@@ -65,15 +60,15 @@ static void *hot_new(t_class *cl ,t_class *z ,t_symbol *s ,int ac ,t_atom *av) {
 	t_hot_pxy *p = (t_hot_pxy *)pd_new(z);
 	x->x_p = p;
 	p->p_x = x;
-	outlet_new(&x->x_obj ,&s_float);
-	inlet_new(&x->x_obj ,(t_pd *)p ,0 ,0);
+	outlet_new(&x->bl.obj ,&s_float);
+	inlet_new(&x->bl.obj ,(t_pd *)p ,0 ,0);
 
 	if (ac>1 && av->a_type == A_FLOAT)
 	{	x->f1 = av->a_w.w_float;
 		av++;   }
 	else x->f1 = 0;
 
-	x->f2 = x->loadbang = 0;
+	x->f2 = x->bl.loadbang = 0;
 	if (ac)
 	{	if (av->a_type == A_FLOAT)
 			x->f2 = av->a_w.w_float;
@@ -81,7 +76,7 @@ static void *hot_new(t_class *cl ,t_class *z ,t_symbol *s ,int ac ,t_atom *av) {
 		{	const char *c = av->a_w.w_symbol->s_name;
 			if (c[strlen(c)-1] == '!')
 			{	x->f2 = strtof(c ,NULL);
-				x->loadbang = 1;   }   }   }
+				x->bl.loadbang = 1;   }   }   }
 	return (x);
 }
 
@@ -97,7 +92,7 @@ static t_class *hplus_class;
 static t_class *hplus_proxy;
 
 static void hplus_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_plus(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_plus(x->f1 ,x->f2));
 }
 
 static void *hplus_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -109,7 +104,7 @@ static t_class *hminus_class;
 static t_class *hminus_proxy;
 
 static void hminus_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_minus(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_minus(x->f1 ,x->f2));
 }
 
 static void *hminus_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -121,7 +116,7 @@ static t_class *htimes_class;
 static t_class *htimes_proxy;
 
 static void htimes_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_times(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_times(x->f1 ,x->f2));
 }
 
 static void *htimes_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -133,7 +128,7 @@ static t_class *hdiv_class;
 static t_class *hdiv_proxy;
 
 static void hdiv_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_div(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_div(x->f1 ,x->f2));
 }
 
 static void *hdiv_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -145,7 +140,7 @@ static t_class *hlog_class;
 static t_class *hlog_proxy;
 
 static void hlog_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_log(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_log(x->f1 ,x->f2));
 }
 
 static void *hlog_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -157,7 +152,7 @@ static t_class *hpow_class;
 static t_class *hpow_proxy;
 
 static void hpow_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_pow(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_pow(x->f1 ,x->f2));
 }
 
 static void *hpow_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -169,7 +164,7 @@ static t_class *hmax_class;
 static t_class *hmax_proxy;
 
 static void hmax_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_max(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_max(x->f1 ,x->f2));
 }
 
 static void *hmax_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -181,7 +176,7 @@ static t_class *hmin_class;
 static t_class *hmin_proxy;
 
 static void hmin_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_min(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_min(x->f1 ,x->f2));
 }
 
 static void *hmin_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -195,7 +190,7 @@ static t_class *hee_class;
 static t_class *hee_proxy;
 
 static void hee_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_ee(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_ee(x->f1 ,x->f2));
 }
 
 static void *hee_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -207,7 +202,7 @@ static t_class *hne_class;
 static t_class *hne_proxy;
 
 static void hne_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_ne(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_ne(x->f1 ,x->f2));
 }
 
 static void *hne_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -219,7 +214,7 @@ static t_class *hgt_class;
 static t_class *hgt_proxy;
 
 static void hgt_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_gt(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_gt(x->f1 ,x->f2));
 }
 
 static void *hgt_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -231,7 +226,7 @@ static t_class *hlt_class;
 static t_class *hlt_proxy;
 
 static void hlt_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_lt(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_lt(x->f1 ,x->f2));
 }
 
 static void *hlt_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -243,7 +238,7 @@ static t_class *hge_class;
 static t_class *hge_proxy;
 
 static void hge_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_ge(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_ge(x->f1 ,x->f2));
 }
 
 static void *hge_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -255,7 +250,7 @@ static t_class *hle_class;
 static t_class *hle_proxy;
 
 static void hle_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_le(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_le(x->f1 ,x->f2));
 }
 
 static void *hle_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -269,7 +264,7 @@ static t_class *hba_class;
 static t_class *hba_proxy;
 
 static void hba_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_ba(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_ba(x->f1 ,x->f2));
 }
 
 static void *hba_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -281,7 +276,7 @@ static t_class *hla_class;
 static t_class *hla_proxy;
 
 static void hla_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_la(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_la(x->f1 ,x->f2));
 }
 
 static void *hla_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -293,7 +288,7 @@ static t_class *hbo_class;
 static t_class *hbo_proxy;
 
 static void hbo_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_bo(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_bo(x->f1 ,x->f2));
 }
 
 static void *hbo_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -305,7 +300,7 @@ static t_class *hlo_class;
 static t_class *hlo_proxy;
 
 static void hlo_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_lo(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_lo(x->f1 ,x->f2));
 }
 
 static void *hlo_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -317,7 +312,7 @@ static t_class *hls_class;
 static t_class *hls_proxy;
 
 static void hls_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_ls(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_ls(x->f1 ,x->f2));
 }
 
 static void *hls_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -329,7 +324,7 @@ static t_class *hrs_class;
 static t_class *hrs_proxy;
 
 static void hrs_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_rs(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_rs(x->f1 ,x->f2));
 }
 
 static void *hrs_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -341,7 +336,7 @@ static t_class *hxor_class;
 static t_class *hxor_proxy;
 
 static void hxor_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_xor(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_xor(x->f1 ,x->f2));
 }
 
 static void *hxor_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -353,7 +348,7 @@ static t_class *hfpc_class;
 static t_class *hfpc_proxy;
 
 static void hfpc_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_fpc(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_fpc(x->f1 ,x->f2));
 }
 
 static void *hfpc_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -365,7 +360,7 @@ static t_class *hpc_class;
 static t_class *hpc_proxy;
 
 static void hpc_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_pc(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_pc(x->f1 ,x->f2));
 }
 
 static void *hpc_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -377,7 +372,7 @@ static t_class *hmod_class;
 static t_class *hmod_proxy;
 
 static void hmod_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_mod(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_mod(x->f1 ,x->f2));
 }
 
 static void *hmod_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -389,7 +384,7 @@ static t_class *hdivm_class;
 static t_class *hdivm_proxy;
 
 static void hdivm_bang(t_hot *x) {
-	outlet_float(x->x_obj.ob_outlet ,blunt_divm(x->f1 ,x->f2));
+	outlet_float(x->bl.obj.ob_outlet ,blunt_divm(x->f1 ,x->f2));
 }
 
 static void *hdivm_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -586,17 +581,17 @@ void hotop_setup(void) {
 	{	int max = sizeof(hots[i]) / sizeof*(hots[i]);
 		for (int j=0; j < max; j++)
 		{	if (hots[i][j] == 0) continue;
-			class_addbang(hots[i][j] ,hbangs[i][j]);
-			class_addfloat(hots[i][j] ,hot_float);
+			class_addbang  (hots[i][j] ,hbangs[i][j]);
+			class_addfloat (hots[i][j] ,hot_float);
 			class_addmethod(hots[i][j] ,(t_method)hot_f2
 				,gensym("f2") ,A_FLOAT ,0);
 			class_addmethod(hots[i][j] ,(t_method)hot_skip
 				,gensym(".") ,A_FLOAT ,0);
-			class_addmethod(hots[i][j] ,(t_method)hot_loadbang
+			class_addmethod(hots[i][j] ,(t_method)blunt_loadbang
 				,gensym("loadbang") ,A_DEFFLOAT ,0);
 
-			class_addbang(pxys[i][j] ,hot_pxy_bang);
-			class_addfloat(pxys[i][j] ,hot_pxy_float);
+			class_addbang  (pxys[i][j] ,hot_pxy_bang);
+			class_addfloat (pxys[i][j] ,hot_pxy_float);
 			class_addmethod(pxys[i][j] ,(t_method)hot_pxy_f1
 				,gensym("f1") ,A_FLOAT ,0);
 			class_addmethod(pxys[i][j] ,(t_method)hot_pxy_skip

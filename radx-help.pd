@@ -46,7 +46,7 @@
 #X connect 15 1 6 0;
 #X restore 325 211 pd commands;
 #X obj 203 137 cupqb 23 0.01;
-#X obj 246 25 cnv 15 64 22 empty empty radix 2 10 0 16 -1 -262144 0
+#X obj 246 25 cnv 15 64 24 empty empty radix 4 12 0 18 -1 -262144 0
 ;
 #X msg 220 80 step 1;
 #X obj 80 365 mantissa;

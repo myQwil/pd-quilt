@@ -125,10 +125,10 @@ void x_setup(void) {
 		,(t_newmethod)xtrigger_new ,(t_method)xtrigger_free
 		,sizeof(t_xtrigger) ,0
 		,A_GIMME ,0);
-	class_addlist    (xtrigger_class ,xtrigger_list);
-	class_addbang    (xtrigger_class ,xtrigger_bang);
-	class_addpointer (xtrigger_class ,xtrigger_pointer);
-	class_addfloat   (xtrigger_class ,xtrigger_float);
-	class_addsymbol  (xtrigger_class ,xtrigger_symbol);
-	class_addanything(xtrigger_class ,xtrigger_anything);
+	class_addlist     (xtrigger_class ,xtrigger_list);
+	class_addbang     (xtrigger_class ,xtrigger_bang);
+	class_addpointer  (xtrigger_class ,xtrigger_pointer);
+	class_addfloat    (xtrigger_class ,xtrigger_float);
+	class_addsymbol   (xtrigger_class ,xtrigger_symbol);
+	class_addanything (xtrigger_class ,xtrigger_anything);
 }

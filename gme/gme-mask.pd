@@ -34,7 +34,7 @@
 #X obj 55 415 outlet;
 #X obj 55 255 b, f 1;
 #X obj 55 367 expr $f1 + $f2 + $f3 + $f4 + $f5 + $f6 + $f7 + $f8;
-#X obj 314 54 cnv 15 100 22 empty empty gme-mask 2 10 0 16 -1 -262144
+#X obj 314 54 cnv 15 100 24 empty empty gme-mask 4 12 0 18 -1 -262144
 0;
 #X text 241 79 simple channel-muter for gme~;
 #X connect 0 0 9 0;

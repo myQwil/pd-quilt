@@ -169,9 +169,9 @@ void rand_setup(void) {
 		,(t_newmethod)rand_new ,(t_method)rand_free
 		,sizeof(t_rand) ,0
 		,A_GIMME ,0);
-	class_addbang (rand_class ,rand_bang);
-	class_addfloat(rand_class ,rand_float);
-	class_addlist (rand_class ,rand_list);
+	class_addbang  (rand_class ,rand_bang);
+	class_addfloat (rand_class ,rand_float);
+	class_addlist  (rand_class ,rand_list);
 
 	class_addmethod(rand_class ,(t_method)rand_seed
 		,gensym("seed")  ,A_GIMME  ,0);

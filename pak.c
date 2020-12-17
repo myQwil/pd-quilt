@@ -46,21 +46,21 @@ void pak_setup(void) {
 		,(t_newmethod)pak_new ,(t_method)pak_free
 		,sizeof(t_pak) ,0
 		,A_GIMME ,0);
-	class_addbang(pak_class ,pak_bang);
-	class_addpointer(pak_class ,pak_pointer);
-	class_addfloat(pak_class ,pak_float);
-	class_addsymbol(pak_class ,pak_symbol);
-	class_addlist(pak_class ,pak_list);
-	class_addanything(pak_class ,pak_anything);
+	class_addbang     (pak_class ,pak_bang);
+	class_addpointer  (pak_class ,pak_pointer);
+	class_addfloat    (pak_class ,pak_float);
+	class_addsymbol   (pak_class ,pak_symbol);
+	class_addlist     (pak_class ,pak_list);
+	class_addanything (pak_class ,pak_anything);
 	class_addmethod(pak_class ,(t_method)pak_mute
 		,gensym("mute") ,A_FLOAT ,0);
 
 	pak_proxy = class_new(gensym("_pak_pxy") ,0 ,0
 		,sizeof(t_pak_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-	class_addbang(pak_proxy ,pak_pxy_bang);
-	class_addpointer(pak_proxy ,pak_pxy_pointer);
-	class_addfloat(pak_proxy ,pak_pxy_float);
-	class_addsymbol(pak_proxy ,pak_pxy_symbol);
-	class_addlist(pak_proxy ,pak_pxy_list);
-	class_addanything(pak_proxy ,pak_pxy_anything);
+	class_addbang     (pak_proxy ,pak_pxy_bang);
+	class_addpointer  (pak_proxy ,pak_pxy_pointer);
+	class_addfloat    (pak_proxy ,pak_pxy_float);
+	class_addsymbol   (pak_proxy ,pak_pxy_symbol);
+	class_addlist     (pak_proxy ,pak_pxy_list);
+	class_addanything (pak_proxy ,pak_pxy_anything);
 }

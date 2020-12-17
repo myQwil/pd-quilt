@@ -1,10 +1,10 @@
-#N canvas 719 355 450 300 14;
-#X obj 141 115 inlet~;
-#X obj 141 157 throw~ L;
-#X obj 254 115 inlet~;
-#X obj 254 157 throw~ R;
-#X obj 190 53 cnv 15 52 22 empty empty add~ 2 10 0 16 -1 -262144 0
+#N canvas 720 350 351 251 14;
+#X obj 100 100 inlet~;
+#X obj 200 100 inlet~;
+#X obj 100 150 throw~ L;
+#X obj 200 150 throw~ R;
+#X text 130 60 stereo throw;
+#X obj 150 30 cnv 15 60 24 empty empty add~ 4 12 0 18 -1 -262144 0
 ;
-#X text 163 77 stereo throw;
-#X connect 0 0 1 0;
-#X connect 2 0 3 0;
+#X connect 0 0 2 0;
+#X connect 1 0 3 0;

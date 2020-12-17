@@ -406,9 +406,9 @@ void ffplay_tilde_setup(void) {
 		,(t_newmethod)ffplay_new ,(t_method)ffplay_free
 		,sizeof(t_ffplay) ,0
 		,A_GIMME ,0);
-	class_addbang    (ffplay_class ,ffplay_bang);
-	class_addfloat   (ffplay_class ,ffplay_float);
-	class_addanything(ffplay_class ,ffplay_anything);
+	class_addbang     (ffplay_class ,ffplay_bang);
+	class_addfloat    (ffplay_class ,ffplay_float);
+	class_addanything (ffplay_class ,ffplay_anything);
 
 	class_addmethod(ffplay_class ,(t_method)ffplay_dsp
 		,gensym("dsp")    ,A_CANT   ,0);

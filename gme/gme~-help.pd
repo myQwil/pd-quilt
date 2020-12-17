@@ -23,12 +23,12 @@
 #X obj 69 324 bng 15 250 50 0 empty empty restart 17 7 0 10 -1 -262144
 -262144;
 #X obj 371 445 hsl 128 17 0.001 1 1 0 empty empty vol 25 9 0 12 -1
--262144 -262144 9200 1;
+-262144 -262144 0 1;
 #X obj 371 514 hsl 128 17 -0.001 -1 1 0 empty empty cos 25 9 0 12 -1
 -262144 -262144 0 1;
 #X floatatom 381 474 0 0 0 0 - - -;
 #X floatatom 381 543 0 0 0 0 - - -;
-#X obj 250 33 cnv 15 52 22 empty empty gme~ 2 10 0 16 -1 -262144 0
+#X obj 250 33 cnv 15 52 24 empty empty gme~ 4 12 0 18 -1 -262144 0
 ;
 #X obj 67 505 *~ 0.5;
 #X obj 237 459 *~;
@@ -241,7 +241,7 @@
 #X connect 8 0 2 0;
 #X restore 52 401 pd bounds;
 #X obj 258 412 +~;
-#X obj 97 348 r \$0b;
+#X obj 107 348 r \$0b;
 #N canvas 803 533 457 301 route 0;
 #X obj 53 39 inlet;
 #X obj 110 137 s \$0l;
@@ -343,7 +343,6 @@
 #N canvas 1009 251 450 309 misc_commands 0;
 #X msg 212 192 tempo \$1;
 #X floatatom 212 140 0 0 400 0 - - -;
-#X msg 304 192 goto \$1;
 #X floatatom 325 115 0 0 0 0 - - -;
 #X obj 325 139 * 100;
 #X obj 304 166 f;
@@ -379,24 +378,25 @@
 #X connect 9 0 6 0;
 #X restore 103 102 pd pitch;
 #X obj 103 49 cupqb;
-#X connect 0 0 12 0;
-#X connect 1 0 7 0;
-#X connect 2 0 12 0;
-#X connect 3 0 4 0;
-#X connect 4 0 5 1;
-#X connect 5 0 2 0;
-#X connect 6 0 5 0;
-#X connect 7 0 0 0;
-#X connect 8 0 13 0;
-#X connect 9 0 8 0;
-#X connect 9 0 1 0;
-#X connect 10 0 11 0;
-#X connect 11 0 9 0;
-#X connect 13 0 14 0;
-#X connect 14 0 12 0;
+#X msg 304 192 seek \$1;
+#X connect 0 0 11 0;
+#X connect 1 0 6 0;
+#X connect 2 0 3 0;
+#X connect 3 0 4 1;
+#X connect 4 0 16 0;
+#X connect 5 0 4 0;
+#X connect 6 0 0 0;
+#X connect 7 0 12 0;
+#X connect 8 0 7 0;
+#X connect 8 0 1 0;
+#X connect 9 0 10 0;
+#X connect 10 0 8 0;
+#X connect 12 0 13 0;
+#X connect 13 0 11 0;
+#X connect 14 0 13 0;
+#X connect 14 1 0 0;
 #X connect 15 0 14 0;
-#X connect 15 1 0 0;
-#X connect 16 0 15 0;
+#X connect 16 0 11 0;
 #X restore 371 345 pd misc_commands;
 #N canvas 1009 388 483 493 info_msgs 0;
 #X obj 57 446 outlet;

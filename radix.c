@@ -689,9 +689,9 @@ static void radix_free(t_radix *x) {
 void radix_setup(void) {
 	radix_class = class_new(gensym("radix") ,(t_newmethod)radix_new
 		,(t_method)radix_free ,sizeof(t_radixtcl) ,0 ,A_GIMME ,0);
-	class_addbang (radix_class ,radix_bang);
-	class_addfloat(radix_class ,radix_float);
-	class_addlist (radix_class ,radix_list);
+	class_addbang  (radix_class ,radix_bang);
+	class_addfloat (radix_class ,radix_float);
+	class_addlist  (radix_class ,radix_list);
 
 	class_addmethod(radix_class ,(t_method)radix_click
 		,gensym("click")      ,A_FLOAT ,A_FLOAT ,A_FLOAT ,A_FLOAT ,A_FLOAT ,0);

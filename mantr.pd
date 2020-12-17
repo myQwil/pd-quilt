@@ -96,7 +96,7 @@ $f9 + $f10 + $f11 + $f12 + $f13 + $f14 + $f15 + $f16 + $f17 + $f18
 + $f19 + $f20 + $f21 + $f22 + $f23;
 #X obj 55 465 outlet;
 #X obj 30 278 b, f 1;
-#X obj 332 35 cnv 15 64 22 empty empty mantr 2 10 0 16 -1 -262144 0
+#X obj 332 35 cnv 15 72 24 empty empty mantr 4 12 0 18 -1 -262144 0
 ;
 #X text 226 63 sends and receives mantissa values;
 #X connect 0 0 24 0;

@@ -63,9 +63,9 @@ you wish without having to wait for attacks or releases to finish;
 #X obj 31 541 *~;
 #X obj 31 565 dac~;
 #X obj 72 543 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10 -1
--262144 -262144 8200 1;
+-262144 -262144 0 1;
 #X text 180 57 envelope generator abstraction;
-#X obj 275 34 cnv 15 52 22 empty empty adsr 2 10 0 16 -1 -262144 0
+#X obj 275 34 cnv 15 60 24 empty empty adsr 4 12 0 18 -1 -262144 0
 ;
 #X msg 124 116 . 500 33 r \, 1;
 #X msg 133 138 . 10 s 20 \, 1;

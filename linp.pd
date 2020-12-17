@@ -25,7 +25,7 @@
 #X obj 297 312 del;
 #X msg 119 232 stop;
 #X obj 151 387 span;
-#X obj 235 31 cnv 15 52 22 empty empty linp 2 10 0 16 -1 -262144 0
+#X obj 235 31 cnv 15 60 24 empty empty linp 4 12 0 18 -1 -262144 0
 ;
 #X text 170 56 line with pause feature;
 #X obj 163 456 outlet;

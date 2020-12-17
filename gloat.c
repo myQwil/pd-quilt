@@ -35,6 +35,10 @@ static void gloat_f(t_gloat *x ,t_floatarg f) {
 	x->uf.f = f;
 }
 
+static void gloat_u(t_gloat *x ,t_floatarg f) {
+	x->uf.u = f;
+}
+
 static void gloat_float(t_gloat *x ,t_float f) {
 	gloat_mantissa(x ,f);
 	gloat_bang(x);
@@ -70,9 +74,9 @@ void gloat_setup(void) {
 		,(t_newmethod)gloat_new ,0
 		,sizeof(t_gloat) ,0
 		,A_GIMME ,0);
-	class_addbang(gloat_class ,gloat_bang);
-	class_addfloat(gloat_class ,gloat_float);
-	class_addlist(gloat_class ,gloat_list);
+	class_addbang  (gloat_class ,gloat_bang);
+	class_addfloat (gloat_class ,gloat_float);
+	class_addlist  (gloat_class ,gloat_list);
 	class_addmethod(gloat_class ,(t_method)gloat_mantissa
 		,gensym("m") ,A_FLOAT ,0);
 	class_addmethod(gloat_class ,(t_method)gloat_exponent
@@ -81,6 +85,8 @@ void gloat_setup(void) {
 		,gensym("s") ,A_FLOAT ,0);
 	class_addmethod(gloat_class ,(t_method)gloat_f
 		,gensym("f") ,A_FLOAT ,0);
+	class_addmethod(gloat_class ,(t_method)gloat_u
+		,gensym("u") ,A_FLOAT ,0);
 	class_addmethod(gloat_class ,(t_method)gloat_set
 		,gensym("set") ,A_GIMME ,0);
 	class_addmethod(gloat_class ,(t_method)gloat_peek

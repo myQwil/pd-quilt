@@ -1,7 +1,7 @@
 #N canvas 734 369 450 404 14;
 #X msg 89 124 pause;
 #X floatatom 102 288 0 0 0 0 - - -;
-#X obj 197 43 cnv 15 64 22 empty empty linp~ 2 10 0 16 -1 -262144 0
+#X obj 197 43 cnv 15 72 24 empty empty linp~ 4 12 0 18 -1 -262144 0
 ;
 #X obj 144 158 unpack;
 #X obj 200 210 t a;
@@ -16,7 +16,7 @@
 #X obj 200 321 *~;
 #X obj 189 361 dac~;
 #X obj 315 228 vsl 15 128 0.001 1 1 0 empty empty empty 0 -9 0 10 -1
--262144 -262144 5700 1;
+-262144 -262144 0 1;
 #X obj 200 296 phasor~ 220;
 #X msg 217 159 27 \, 440 6000;
 #X msg 223 184 440 \, 27 6000;

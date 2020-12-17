@@ -96,7 +96,7 @@
 + 1/$f15 + 1/$f16 + 1/$f17 + 1/$f18 + 1/$f19 + 1/$f20 + 1/$f21 + 1/$f22
 + 1/$f23;
 #X obj 92 432 outlet;
-#X obj 276 40 cnv 15 88 22 empty empty mancalc 2 10 0 16 -1 -262144
+#X obj 276 40 cnv 15 98 24 empty empty mancalc 4 12 0 18 -1 -262144
 0;
 #X text 242 66 mantissa calculator;
 #X connect 0 0 23 0;

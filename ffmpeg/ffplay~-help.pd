@@ -27,7 +27,7 @@
 -262144 -262144 0 1;
 #X floatatom 393 469 0 0 0 0 - - -;
 #X floatatom 393 549 0 0 0 0 - - -;
-#X obj 227 20 cnv 15 88 22 empty empty ffplay~ 2 10 0 16 -1 -262144
+#X obj 227 20 cnv 15 88 24 empty empty ffplay~ 4 12 0 18 -1 -262144
 0;
 #N canvas 177 433 485 351 time 0;
 #X obj 81 39 inlet;

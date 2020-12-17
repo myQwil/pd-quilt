@@ -10,7 +10,7 @@
 0 1;
 #X floatatom 97 177 0 0 0 0 - - -;
 #X obj 48 391 *~;
-#X obj 69 327 ad~ 5;
+#X obj 69 327 ad 5;
 #X obj 47 177 metro;
 #X floatatom 315 154 0 0 0 0 - - -;
 #X obj 619 258 cupqb;
@@ -138,7 +138,7 @@
 #X floatatom 77 282 0 0 0 0 - - -;
 #X text 211 161 peak;
 #X obj 215 288 zp 1000;
-#X obj 370 41 cnv 15 52 22 empty empty muse 2 10 0 16 -1 -262144 0
+#X obj 370 41 cnv 15 60 24 empty empty muse 4 12 0 18 -1 -262144 0
 ;
 #X obj 195 179 cupqb 14;
 #X obj 297 258 cupqb 33;
