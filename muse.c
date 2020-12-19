@@ -28,13 +28,22 @@ static void muse_float(t_muse *y ,t_float f) {
 	outlet_float(y->o_freq ,ntof(&x->note ,nte));
 }
 
+static void muse_send(t_muse *y ,t_float f) {
+	t_music *x = &y->z;
+	int i=f ,ac=x->siz-i ,n=ac;
+	t_float *fp = x->flin.fp + i;
+	t_atom flts[ac];
+	while (n--) flts[n] = (t_atom){ A_FLOAT ,{fp[n]}};
+	outlet_list(y->o_midi ,0 ,ac ,flts);
+}
+
 static void *muse_new(t_symbol *s ,int ac ,t_atom *av) {
 	int n = (ac<2 ? 2 : ac);
 	t_muse *y = (t_muse *)music_new(muse_class ,n);
 	t_music *x = &y->z;
 
 	y->o_freq = outlet_new(&x->flin.x_obj ,&s_float);
-	y->o_midi = outlet_new(&x->flin.x_obj ,&s_float);
+	y->o_midi = outlet_new(&x->flin.x_obj ,0);
 
 	t_float *fp = x->flin.fp;
 	fp[0]=69 ,fp[1]=7;
@@ -50,4 +59,6 @@ void muse_setup(void) {
 	muse_class = music_setup(gensym("muse")
 		,(t_newmethod)muse_new ,(t_method)flin_free ,sizeof(t_muse));
 	class_addfloat(muse_class ,muse_float);
+	class_addmethod(muse_class ,(t_method)muse_send
+		,gensym("send")  ,A_DEFFLOAT ,0);
 }
