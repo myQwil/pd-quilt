@@ -1,5 +1,6 @@
 #include "flin.h"
 #include <time.h>
+#include <stdlib.h> // strtof
 
 /* -------------------------- rand -------------------------- */
 static t_class *rand_class;
@@ -50,14 +51,6 @@ static void rand_peek(t_rand *x ,t_symbol *s) {
 	{	startpost("%g" ,*fp);
 		if (n) startpost(" | ");   }
 	endpost();
-}
-
-static void rand_at(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
-	if (ac==2 && av->a_type == A_FLOAT)
-	{	int i = flin_resize(&x->flin ,av->a_w.w_float ,1);
-		if ((av+1)->a_type == A_FLOAT)
-			x->flin.fp[i] = (av+1)->a_w.w_float;   }
-	else pd_error(x ,"rand_at: bad arguments");
 }
 
 static void rand_size(t_rand *x ,t_floatarg n) {
@@ -131,11 +124,34 @@ static void rand_float(t_rand *x ,t_float f) {
 		outlet_float(x->flin.x_obj.ob_outlet ,fp[i]);   }
 }
 
-static void rand_list(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
-	x->siz = ac = flin_resize(&x->flin ,ac ,0);
-	t_float *fp = x->flin.fp;
+static void rand_dolist(t_rand *x ,int ac ,t_atom *av ,int i) {
+	if (i < 0)
+		i = i % x->siz + x->siz;
+	int n = ac + i;
+	if (n > NMAX) return;
+	flin_resize(&x->flin ,n ,0);
+	t_float *fp = x->flin.fp + i;
 	for (;ac--; av++ ,fp++)
 		if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
+}
+
+static void rand_list(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
+	x->siz = ac;
+	rand_dolist(x ,ac ,av ,0);
+}
+
+static void rand_anything(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
+	if (*s->s_name == '@')
+	{	int i = strtof(s->s_name+1 ,NULL);
+		if (ac) rand_dolist(x ,ac ,av ,i);
+		else pd_error(x ,"rand_at: bad arguments");   }
+}
+
+static void rand_at(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
+	if (ac>1 && av->a_type == A_FLOAT)
+	{	int i = av->a_w.w_float;
+		rand_dolist(x ,ac-1 ,av+1 ,i);   }
+	else pd_error(x ,"rand_at: bad arguments");
 }
 
 static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -169,9 +185,10 @@ void rand_setup(void) {
 		,(t_newmethod)rand_new ,(t_method)rand_free
 		,sizeof(t_rand) ,0
 		,A_GIMME ,0);
-	class_addbang  (rand_class ,rand_bang);
-	class_addfloat (rand_class ,rand_float);
-	class_addlist  (rand_class ,rand_list);
+	class_addbang    (rand_class ,rand_bang);
+	class_addfloat   (rand_class ,rand_float);
+	class_addlist    (rand_class ,rand_list);
+	class_addanything(rand_class ,rand_anything);
 
 	class_addmethod(rand_class ,(t_method)rand_seed
 		,gensym("seed")  ,A_GIMME  ,0);

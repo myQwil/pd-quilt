@@ -4,32 +4,32 @@
 static t_class *runpak_class;
 
 static void *runpak_new(t_symbol *s ,int argc ,t_atom *argv) {
-	return (unpak_init(runpak_class ,argc ,argv ,1));
+	return (new_unpak(runpak_class ,argc ,argv ,1));
 }
 
 static void unpak_list(t_unpak *x ,t_symbol *s ,int argc ,t_atom *argv) {
 	t_atom *ap;
 	t_unpakout *u;
 	int i;
-	if (argc > x->x_n) argc = (int)x->x_n;
-	for (i = argc ,u = x->x_vec + i ,ap = argv; u-- ,i--; ap++)
+	if (argc > x->n) argc = (int)x->n;
+	for (i = argc ,u = x->vec + i ,ap = argv; u-- ,i--; ap++)
 	{	if (ap->a_type==A_SYMBOL && !strcmp(ap->a_w.w_symbol->s_name ,"."))
 			continue;
 
-		t_atomtype type = u->u_type;
+		t_atomtype type = u->type;
 		if (type == A_GIMME) type = ap->a_type;
 		else if (type != ap->a_type)
-		{	if ((x->x_mute>>i)&1) pd_error(x ,"@unpak: type mismatch");
+		{	if ((x->mute>>i)&1) pd_error(x ,"@unpak: type mismatch");
 			continue;   }
 
 		if (type == A_FLOAT)
-			outlet_float(u->u_outlet ,ap->a_w.w_float);
+			outlet_float(u->outlet ,ap->a_w.w_float);
 		else if (type == A_SYMBOL)
 		{	if (!strcmp(ap->a_w.w_symbol->s_name ,"bang"))
-				outlet_bang(u->u_outlet);
-			else outlet_symbol(u->u_outlet ,ap->a_w.w_symbol);   }
+				outlet_bang(u->outlet);
+			else outlet_symbol(u->outlet ,ap->a_w.w_symbol);   }
 		else if (type == A_POINTER)
-			outlet_pointer(u->u_outlet ,ap->a_w.w_gpointer);   }
+			outlet_pointer(u->outlet ,ap->a_w.w_gpointer);   }
 }
 
 void setup_0x40unpak(void) {

@@ -55,7 +55,7 @@ static void hot_pxy_skip(t_hot_pxy *p ,t_floatarg f) {
 	pd_bang((t_pd *)x);
 }
 
-static void *hot_new(t_class *cl ,t_class *z ,t_symbol *s ,int ac ,t_atom *av) {
+static t_hot *hot_new(t_class *cl ,t_class *z ,t_symbol *s ,int ac ,t_atom *av) {
 	t_hot *x = (t_hot *)pd_new(cl);
 	t_hot_pxy *p = (t_hot_pxy *)pd_new(z);
 	x->x_p = p;
@@ -395,151 +395,151 @@ void hotop_setup(void) {
 	/* ------------------ binop1 ----------------------- */
 
 	hplus_class = class_new(gensym("#+")
-		,(t_newmethod)hplus_new ,(t_method)hot_free
+		,(t_newmethod)hplus_new  ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hplus_proxy = class_new(gensym("_#+_pxy") ,0 ,0
+	hplus_proxy = class_new(gensym("_#+_pxy")   ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hminus_class = class_new(gensym("#-")
 		,(t_newmethod)hminus_new ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hminus_proxy = class_new(gensym("_#-_pxy") ,0 ,0
+	hminus_proxy = class_new(gensym("_#-_pxy")  ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	htimes_class = class_new(gensym("#*")
 		,(t_newmethod)htimes_new ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	htimes_proxy = class_new(gensym("_#*_pxy") ,0 ,0
+	htimes_proxy = class_new(gensym("_#*_pxy")  ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hdiv_class = class_new(gensym("#/")
-		,(t_newmethod)hdiv_new ,(t_method)hot_free
+		,(t_newmethod)hdiv_new  ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hdiv_proxy = class_new(gensym("_#/_pxy") ,0 ,0
+	hdiv_proxy = class_new(gensym("_#/_pxy")    ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hlog_class = class_new(gensym("#log")
-		,(t_newmethod)hlog_new ,(t_method)hot_free
+		,(t_newmethod)hlog_new  ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hlog_proxy = class_new(gensym("_#log_pxy") ,0 ,0
+	hlog_proxy = class_new(gensym("_#log_pxy")  ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hpow_class = class_new(gensym("#pow")
-		,(t_newmethod)hpow_new ,(t_method)hot_free
+		,(t_newmethod)hpow_new  ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hpow_proxy = class_new(gensym("_#pow_pxy") ,0 ,0
+	hpow_proxy = class_new(gensym("_#pow_pxy")  ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hmax_class = class_new(gensym("#max")
-		,(t_newmethod)hmax_new ,(t_method)hot_free
+		,(t_newmethod)hmax_new  ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hmax_proxy = class_new(gensym("_#max_pxy") ,0 ,0
+	hmax_proxy = class_new(gensym("_#max_pxy")  ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hmin_class = class_new(gensym("#min")
-		,(t_newmethod)hmin_new ,(t_method)hot_free
+		,(t_newmethod)hmin_new  ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hmin_proxy = class_new(gensym("_#min_pxy") ,0 ,0
+	hmin_proxy = class_new(gensym("_#min_pxy")  ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	/* ------------------ binop2 ----------------------- */
 
 	hee_class = class_new(gensym("#==")
-		,(t_newmethod)hee_new ,(t_method)hot_free
+		,(t_newmethod)hee_new   ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hee_proxy = class_new(gensym("_#==_pxy") ,0 ,0
+	hee_proxy = class_new(gensym("_#==_pxy")    ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hne_class = class_new(gensym("#!=")
-		,(t_newmethod)hne_new ,(t_method)hot_free
+		,(t_newmethod)hne_new   ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hne_proxy = class_new(gensym("_#!=_pxy") ,0 ,0
+	hne_proxy = class_new(gensym("_#!=_pxy")    ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hgt_class = class_new(gensym("#>")
-		,(t_newmethod)hgt_new ,(t_method)hot_free
+		,(t_newmethod)hgt_new   ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hgt_proxy = class_new(gensym("_#>_pxy") ,0 ,0
+	hgt_proxy = class_new(gensym("_#>_pxy")     ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hlt_class = class_new(gensym("#<")
-		,(t_newmethod)hlt_new ,(t_method)hot_free
+		,(t_newmethod)hlt_new   ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hlt_proxy = class_new(gensym("_#<_pxy") ,0 ,0
+	hlt_proxy = class_new(gensym("_#<_pxy")     ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hge_class = class_new(gensym("#>=")
-		,(t_newmethod)hge_new ,(t_method)hot_free
+		,(t_newmethod)hge_new   ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hge_proxy = class_new(gensym("_#>=_pxy") ,0 ,0
+	hge_proxy = class_new(gensym("_#>=_pxy")    ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hle_class = class_new(gensym("#<=")
-		,(t_newmethod)hle_new ,(t_method)hot_free
+		,(t_newmethod)hle_new   ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hle_proxy = class_new(gensym("_#<=_pxy") ,0 ,0
+	hle_proxy = class_new(gensym("_#<=_pxy")    ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	/* ------------------ binop3 ----------------------- */
 
 	hba_class = class_new(gensym("#&")
-		,(t_newmethod)hba_new ,(t_method)hot_free
+		,(t_newmethod)hba_new   ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hba_proxy = class_new(gensym("_#&_pxy") ,0 ,0
+	hba_proxy = class_new(gensym("_#&_pxy")     ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hla_class = class_new(gensym("#&&")
-		,(t_newmethod)hla_new ,(t_method)hot_free
+		,(t_newmethod)hla_new   ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hla_proxy = class_new(gensym("_#&&_pxy") ,0 ,0
+	hla_proxy = class_new(gensym("_#&&_pxy")    ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hbo_class = class_new(gensym("#|")
-		,(t_newmethod)hbo_new ,(t_method)hot_free
+		,(t_newmethod)hbo_new   ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hbo_proxy = class_new(gensym("_#|_pxy") ,0 ,0
+	hbo_proxy = class_new(gensym("_#|_pxy")     ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hlo_class = class_new(gensym("#||")
-		,(t_newmethod)hlo_new ,(t_method)hot_free
+		,(t_newmethod)hlo_new   ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hlo_proxy = class_new(gensym("_#||_pxy") ,0 ,0
+	hlo_proxy = class_new(gensym("_#||_pxy")    ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hls_class = class_new(gensym("#<<")
-		,(t_newmethod)hls_new ,(t_method)hot_free
+		,(t_newmethod)hls_new   ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hls_proxy = class_new(gensym("_#<<_pxy") ,0 ,0
+	hls_proxy = class_new(gensym("_#<<_pxy")    ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hrs_class = class_new(gensym("#>>")
-		,(t_newmethod)hrs_new ,(t_method)hot_free
+		,(t_newmethod)hrs_new   ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hrs_proxy = class_new(gensym("_#>>_pxy") ,0 ,0
+	hrs_proxy = class_new(gensym("_#>>_pxy")    ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hxor_class = class_new(gensym("#^")
-		,(t_newmethod)hxor_new ,(t_method)hot_free
+		,(t_newmethod)hxor_new  ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hxor_proxy = class_new(gensym("_#^_pxy") ,0 ,0
+	hxor_proxy = class_new(gensym("_#^_pxy")    ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hfpc_class = class_new(gensym("#f%")
-		,(t_newmethod)hfpc_new ,(t_method)hot_free
+		,(t_newmethod)hfpc_new  ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hfpc_proxy = class_new(gensym("_#f%_pxy") ,0 ,0
+	hfpc_proxy = class_new(gensym("_#f%_pxy")   ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hpc_class = class_new(gensym("#%")
-		,(t_newmethod)hpc_new ,(t_method)hot_free
+		,(t_newmethod)hpc_new   ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hpc_proxy = class_new(gensym("_#%_pxy") ,0 ,0
+	hpc_proxy = class_new(gensym("_#%_pxy")     ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hmod_class = class_new(gensym("#mod")
-		,(t_newmethod)hmod_new ,(t_method)hot_free
+		,(t_newmethod)hmod_new  ,(t_method)hot_free
 		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hmod_proxy = class_new(gensym("_#mod_pxy") ,0 ,0
+	hmod_proxy = class_new(gensym("_#mod_pxy")  ,0 ,0
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	hdivm_class = class_new(gensym("#div")
@@ -586,7 +586,7 @@ void hotop_setup(void) {
 			class_addmethod(hots[i][j] ,(t_method)hot_f2
 				,gensym("f2") ,A_FLOAT ,0);
 			class_addmethod(hots[i][j] ,(t_method)hot_skip
-				,gensym(".") ,A_FLOAT ,0);
+				,gensym(".")  ,A_FLOAT ,0);
 			class_addmethod(hots[i][j] ,(t_method)blunt_loadbang
 				,gensym("loadbang") ,A_DEFFLOAT ,0);
 
@@ -595,7 +595,7 @@ void hotop_setup(void) {
 			class_addmethod(pxys[i][j] ,(t_method)hot_pxy_f1
 				,gensym("f1") ,A_FLOAT ,0);
 			class_addmethod(pxys[i][j] ,(t_method)hot_pxy_skip
-				,gensym(".") ,A_FLOAT ,0);
+				,gensym(".")  ,A_FLOAT ,0);
 
 			class_sethelpsymbol(hots[i][j] ,syms[i]);   }   }
 }

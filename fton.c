@@ -9,11 +9,11 @@ static void fton_float(t_ntof *x, t_float f) {
 }
 
 static void *fton_new(t_symbol *s, int argc, t_atom *argv) {
-	return (ntof_init(fton_class, argc, argv));
+	return (new_ntof(fton_class, argc, argv));
 }
 
-void fton_setup(void) {	
-	fton_class = ntofs_setup(gensym("fton"), (t_newmethod)fton_new);
+void fton_setup(void) {
+	fton_class = setup_ntof(gensym("fton"), (t_newmethod)fton_new);
 	class_addfloat(fton_class, fton_float);
 	class_sethelpsymbol(fton_class, gensym("ntof"));
 }

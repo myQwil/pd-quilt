@@ -22,7 +22,7 @@ static void ntof_set(t_ntof *x ,t_symbol *s ,int ac ,t_atom *av) {
 	note_set(&x->note ,ac ,av ,FTON);
 }
 
-static t_ntof *ntof_init(t_class *cl ,int argc ,t_atom *argv) {
+static t_ntof *new_ntof(t_class *cl ,int argc ,t_atom *argv) {
 	t_ntof *x = (t_ntof *)pd_new(cl);
 	outlet_new(&x->x_obj ,&s_float);
 	inlet_new(&x->x_obj ,&x->x_obj.ob_pd ,&s_float ,gensym("ref"));
@@ -38,7 +38,7 @@ static t_ntof *ntof_init(t_class *cl ,int argc ,t_atom *argv) {
 	return x;
 }
 
-static t_class *ntofs_setup(t_symbol *s ,t_newmethod newm) {
+static t_class *setup_ntof(t_symbol *s ,t_newmethod newm) {
 	t_class *nclass = class_new(s ,newm ,0 ,sizeof(t_ntof) ,0 ,A_GIMME ,0);
 	class_addmethod(nclass ,(t_method)ntof_ref
 		,gensym("ref") ,A_FLOAT ,0);

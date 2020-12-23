@@ -29,7 +29,7 @@ static void bop_skip(t_bop *x ,t_symbol *s ,int ac ,t_atom *av) {
 	pd_bang((t_pd *)x);
 }
 
-static void *bop_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
+static t_bop *bop_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
 	t_bop *x = (t_bop *)pd_new(cl);
 	outlet_new     (&x->bl.obj ,&s_float);
 	floatinlet_new (&x->bl.obj ,&x->f2);
