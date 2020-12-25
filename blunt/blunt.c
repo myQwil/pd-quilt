@@ -454,7 +454,7 @@ void sym_setup(void) {
 
 void blunt_setup(void) {
 
-	post("Blunt! 0.1.0");
+	post("Blunt! version 1.2");
 
 	/* ---------------- connectives --------------------- */
 
