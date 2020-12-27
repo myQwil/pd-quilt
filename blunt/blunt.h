@@ -59,7 +59,7 @@ static t_float blunt_pc(t_float f1 ,t_float f2) {
 }
 
 static t_float blunt_mod(t_float f1 ,t_float f2) {
-	int n2 = abs(f2) ,result;
+	int n2 = abs((int)f2) ,result;
 	if (!n2) n2 = 1;
 	result = (int)f1 % n2;
 	if (result < 0) result += n2;
@@ -67,7 +67,7 @@ static t_float blunt_mod(t_float f1 ,t_float f2) {
 }
 
 static t_float blunt_divm(t_float f1 ,t_float f2) {
-	int n1 = f1 ,n2 = abs(f2) ,result;
+	int n1 = f1 ,n2 = abs((int)f2) ,result;
 	if (!n2) n2 = 1;
 	if (n1 < 0) n1 -= (n2-1);
 	result = n1 / n2;
