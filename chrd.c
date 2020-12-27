@@ -18,7 +18,7 @@ static void chrd_all(t_chrd *y ,t_floatarg f) {
 	y->all = f;
 }
 
-static double chrd_note(t_music *x ,int d) {
+static t_float chrd_note(t_music *x ,int d) {
 	if (!d) return x->flin.fp[0];
 	int n = x->siz - (x->siz > 1);
 	int i = (d - (d>0)) % n ,neg = i<0;
@@ -27,14 +27,16 @@ static double chrd_note(t_music *x ,int d) {
 	return (x->oct * ((d - !neg)/n - neg) + x->flin.fp[0] + step);
 }
 
-static void chrd_float(t_chrd *y ,t_float f) {
-	t_music *x = &y->z;
+static void music_f(t_music *x ,t_float f ,char c ,t_float g) {
+	t_chrd *y = (t_chrd*)x;
 	int d = f;
-	double nte = chrd_note(x ,d);
+	t_float nte = chrd_note(x ,d);
 	if (f != d)
 	{	int dir = f<0 ? -1 : 1;
-		double nxt = chrd_note(x ,d+dir);
+		t_float nxt = chrd_note(x ,d+dir);
 		nte += dir * (f-d) * (nxt-nte);   }
+	if (c)
+		music_operate(&nte ,c ,g);
 	int n = x->flin.ninlets-1 ,i = (d - (d>0)) % n;
 	i += (i<0)*n + 1;
 	if (!d) i = 0;
@@ -79,7 +81,6 @@ void chrd_setup(void) {
 	chrd_class = music_setup(gensym("chrd")
 		,(t_newmethod)chrd_new ,(t_method)chrd_free ,sizeof(t_chrd));
 	class_addbang  (chrd_class ,chrd_bang);
-	class_addfloat (chrd_class ,chrd_float);
 	class_addmethod(chrd_class ,(t_method)chrd_midi
 		,gensym("midi") ,A_FLOAT ,0);
 	class_addmethod(chrd_class ,(t_method)chrd_all

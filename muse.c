@@ -9,32 +9,36 @@ typedef struct _muse {
 	t_outlet *o_midi;    /* midi outlet */
 } t_muse;
 
-static double muse_note(t_music *x ,int d) {
+static t_float muse_note(t_music *x ,int d) {
 	int n = x->siz ,i = d%n ,neg = i<0;
 	i += n * neg;
 	t_float step = i ? x->flin.fp[i] : 0;
 	return (x->oct * (d/n - neg) + x->flin.fp[0] + step);
 }
 
-static void muse_float(t_muse *y ,t_float f) {
-	t_music *x = &y->z;
+static void music_f(t_music *x ,t_float f ,char c ,t_float g) {
+	t_muse *y = (t_muse*)x;
 	int d = f;
-	double nte = muse_note(x ,d);
+	t_float nte = muse_note(x ,d);
 	if (f != d)
 	{	int dir = f<0 ? -1 : 1;
-		double nxt = muse_note(x ,d+dir);
+		t_float nxt = muse_note(x ,d+dir);
 		nte += dir * (f-d) * (nxt-nte);   }
+	if (c)
+		music_operate(&nte ,c ,g);
 	outlet_float(y->o_midi ,nte);
 	outlet_float(y->o_freq ,ntof(&x->note ,nte));
 }
 
 static void muse_send(t_muse *y ,t_float f) {
 	t_music *x = &y->z;
-	int i=f ,ac=x->siz-i ,n=ac;
+	int n = x->siz ,i = (int)f % n;
+	if (i < 0) i += n;
+	int ac = n = n - i;
 	t_float *fp = x->flin.fp + i;
-	t_atom flts[ac];
+	t_atom flts[n];
 	while (n--) flts[n] = (t_atom){ A_FLOAT ,{fp[n]}};
-	outlet_list(y->o_midi ,0 ,ac ,flts);
+	outlet_anything(y->o_midi ,gensym("scale:") ,ac ,flts);
 }
 
 static void *muse_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -58,7 +62,6 @@ static void *muse_new(t_symbol *s ,int ac ,t_atom *av) {
 void muse_setup(void) {
 	muse_class = music_setup(gensym("muse")
 		,(t_newmethod)muse_new ,(t_method)flin_free ,sizeof(t_muse));
-	class_addfloat(muse_class ,muse_float);
 	class_addmethod(muse_class ,(t_method)muse_send
 		,gensym("send")  ,A_DEFFLOAT ,0);
 }
