@@ -2,26 +2,21 @@
 #include "note.h"
 #include <stdlib.h> // strtof
 #include <string.h> // memcpy
-#include <ctype.h>  // isdigit
-
-static int isinteger(const char *cp) {
-	return isdigit(*cp) || ( *cp == '-' && isdigit(cp[1]) );
-}
 
 static int isoperator(char c) {
-	return c=='+' || c=='-' || c=='~' || c=='*' || c=='/';
+	return (c=='^' || c=='v' || c=='+' || c=='-' || c=='*' || c=='/');
 }
 
 typedef struct _music {
 	t_flin flin;
 	t_note note;
-	t_float oct;       /* # of semitone steps per octave */
-	int siz;           /* current scale size */
-	unsigned expl:1;   /* explicit scale size toggle */
+	t_float oct;     /* # of semitone steps per octave */
+	int siz;         /* current scale size */
+	unsigned expl:1; /* explicit scale size toggle */
 } t_music;
 
 static void music_ptr(t_music *x ,t_symbol *s) {
-	post("%s%s%d" ,s->s_name ,*s->s_name?": ":"" ,x->flin.ptrsiz);
+	post("%s%s%d" ,s->s_name ,*s->s_name?": ":"" ,x->flin.siz);
 }
 
 static void music_peek(t_music *x ,t_symbol *s) {
@@ -55,7 +50,7 @@ static void music_invert(t_music *x ,t_float *fp ,int mvrt ,int n ,int d) {
 	for (i = 0; i < g; i++)
 	{	int temp = fp[i];
 		int j = i;
-		while (1)
+		for (;;)
 		{	int k = j + d;
 			if (k >= n) k -= n;
 			if (k == i) break;
@@ -65,83 +60,70 @@ static void music_invert(t_music *x ,t_float *fp ,int mvrt ,int n ,int d) {
 }
 
 static void music_operate(t_float *fp ,char c ,t_float f) {
-	if      (c=='+') *fp += f;
-	else if (c=='-' || c=='~') *fp -= f;
-	else if (c=='*') *fp *= f;
-	else if (c=='/') *fp /= f;
-}
+	switch (c)
+	{	case '+':
+		case '^': *fp += f; break;
 
-static int music_calc(t_music *x ,t_float *fp ,int n ,const char *cp) {
-	long i;
-	if (isinteger(cp))
-	{	char *p;
-		i = strtol(cp ,&p ,10);
-		cp = p;
-		if (i < 0)
-			i = i % n + n;   }
-	else i = n;
+		case '-':
+		case 'v': *fp -= f; break;
 
-	char c = cp[0];
-	if (isoperator(c))
-	{	if (cp[0] == cp[1])
-		{	t_float f = cp[2] ? strtof(cp+2,0) : 1;
-			for (int j=i; j--; n-- ,fp++)
-				music_operate(fp ,c ,f);
-			return i;   }
-		else music_operate(fp ,c ,(cp[1] ? strtof(cp+1,0) : 1));   }
-	else if (c=='<' || c=='>')
-	{	int mvrt = cp[0] == cp[1];
-		int dir  = c - '='; // 1 or -1
-		cp += 1 + mvrt;
-		music_invert(x ,fp ,mvrt ,i ,dir * (*cp ? atoi(cp) : 1));
-		return i;   }
-	else if (cp[1])
-		music_operate(fp ,cp[1] ,(cp[2] ? strtof(cp+2,0) : 1));
-	return 1;
+		case '*': *fp *= f; break;
+
+		case '/': *fp /= f; break;   }
 }
 
 static int music_scale(t_music *x ,int i ,int ac ,t_atom *av) {
+	if (i+ac > x->flin.siz && flin_resize(&x->flin ,i+ac ,0) < 0)
+		return x->siz;
+
+	int n = i;
 	t_float *fp = x->flin.fp + i;
-	int n = x->siz;
-	for (; ac > 0; ac-- ,av++ ,n-=i ,fp+=i)
-	{	if      (av->a_type == A_FLOAT)
-		{	*fp = av->a_w.w_float;
-			i = 1;   }
-		else if (av->a_type == A_SYMBOL)
-			i = music_calc(x ,fp ,n ,av->a_w.w_symbol->s_name);   }
-	return (n != ac);
-}
-
-static int music_more(t_music *x ,int ac ,t_atom *av) {
-	int more = 0;
 	for (; ac--; av++)
-		if (av->a_type == A_SYMBOL)
+	{	if (av->a_type == A_FLOAT)
+		{	*fp = av->a_w.w_float;
+			n++ ,fp++;   }
+		else if (av->a_type == A_SYMBOL)
 		{	const char *cp = av->a_w.w_symbol->s_name;
-			if (isinteger(cp))
-			{	int add = atoi(cp);
-				if      (add > 0) more += add - 1;
-				else if (add < 0) more += add % x->siz + x->siz - 1;   }   }
-	return more;
-}
+			char *p;
+			int m = x->siz - n;
+			if (m <= 0) m = 1;
+			i = strtol(cp ,&p ,10);
+			if (cp != p)
+			{	cp = p;
+				if (i < 0) i = i % m + m;
+				int all = i + ac + n;
+				if (all > x->flin.siz)
+				{	if (flin_resize(&x->flin ,all ,0) >= 0)
+						fp = x->flin.fp + n;
+					else break;   }   }
+			else i = m;
 
-static int music_check(t_music *x ,int i ,int ac ,t_atom *av) {
-	if (i < 0)
-		i = i % x->siz + x->siz;
-	int n = ac + i + music_more(x ,ac ,av);
-	if (n > NMAX) return 0;
-	flin_resize(&x->flin ,n ,0);
+			char c = cp[0];
+			if (isoperator(c))
+			{	if (cp[0] == cp[1])
+				{	t_float f = cp[2] ? strtof(cp+2,0) : 1;
+					for (; i--; n++ ,fp++)
+						music_operate(fp ,c ,f);
+					continue;   }
+				else music_operate(fp ,c ,(cp[1] ? strtof(cp+1,0) : 1));   }
+			else if (c=='<' || c=='>')
+			{	int mvrt = cp[0] == cp[1];
+				cp += 1 + mvrt;
+				music_invert(x ,fp ,mvrt ,i ,(c-'=') * (*cp ? atoi(cp) : 1));
+				n+=i ,fp+=i;
+				continue;   }
+			else if (isoperator(cp[1]))
+				music_operate(fp ,cp[1] ,(cp[2] ? strtof(cp+2,0) : 1));
+			n++ ,fp++;   }   }
 	return n;
 }
 
 static void music_i(t_music *x ,int i ,int ac ,t_atom *av) {
-	int n  = music_check(x ,i ,ac ,av);
-	if (n && music_scale(x ,i ,ac ,av))
-		x->siz = n;
+	x->siz = music_scale(x ,i ,ac ,av);
 }
 
 static void music_x(t_music *x ,int i ,int ac ,t_atom *av) {
-	if (music_check(x ,i ,ac ,av))
-		music_scale(x ,i ,ac ,av);
+	music_scale(x ,i ,ac ,av);
 }
 
 static void music_z(t_music *x ,int i ,int ac ,t_atom *av) {
@@ -172,9 +154,9 @@ static void music_anything(t_music *x ,t_symbol *s ,int ac ,t_atom *av) {
 		else
 		{	t_atom atom = {A_SYMBOL ,{.w_symbol = s}};
 			music_z(x ,0 ,1 ,&atom);   }   }
-	else if (*cp == '!') music_i(x ,strtof(cp+1,0) ,ac ,av); // implicit
-	else if (*cp == '@') music_x(x ,strtof(cp+1,0) ,ac ,av); // explicit
-	else if (*cp == '#') music_z(x ,strtof(cp+1,0) ,ac ,av); // default
+	else if (*cp == '!') music_i(x ,strtol(cp+1,0,10) ,ac ,av); // implicit
+	else if (*cp == '@') music_x(x ,strtol(cp+1,0,10) ,ac ,av); // explicit
+	else if (*cp == '#') music_z(x ,strtol(cp+1,0,10) ,ac ,av); // default
 	else
 	{	t_atom atoms[ac+1];
 		atoms[0] = (t_atom){A_SYMBOL ,{.w_symbol = s}};
@@ -187,7 +169,9 @@ static void music_symbol(t_music *x ,t_symbol *s) {
 }
 
 static void music_size(t_music *x ,t_floatarg n) {
-	x->siz = flin_resize(&x->flin ,n ,0);
+	if (n > x->flin.siz && flin_resize(&x->flin ,n ,0) < 0)
+		return;
+	x->siz = n;
 }
 
 static void music_expl(t_music *x ,t_floatarg f) {
@@ -199,11 +183,11 @@ static void music_octave(t_music *x ,t_floatarg f) {
 }
 
 static void music_ref(t_music *x ,t_floatarg f) {
-	note_ref(&x->note ,f ,0);
+	note_ref(&x->note ,f);
 }
 
 static void music_tet(t_music *x ,t_floatarg f) {
-	note_tet(&x->note ,f ,0);
+	note_tet(&x->note ,f);
 }
 
 static void music_octet(t_music *x ,t_floatarg f) {
@@ -212,17 +196,17 @@ static void music_octet(t_music *x ,t_floatarg f) {
 }
 
 static void music_set(t_music *x ,t_symbol *s ,int ac ,t_atom *av) {
-	note_set(&x->note ,ac ,av ,0);
+	note_set(&x->note ,ac ,av);
 }
 
 static t_music *music_new(t_class *mclass ,int ac) {
 	t_music *x = (t_music *)pd_new(mclass);
 
-	int n = x->siz = x->flin.ninlets = x->flin.ptrsiz = ac;
-	x->flin.fp = (t_float *)getbytes(x->flin.ptrsiz * sizeof(t_float));
+	x->siz = x->flin.ninlets = ac;
+	flin_alloc(&x->flin ,ac);
 
 	t_atom atms[] = { {A_FLOAT ,{440}} ,{A_FLOAT ,{12}} };
-	note_set(&x->note ,2 ,atms ,0);
+	note_set(&x->note ,2 ,atms);
 	x->oct = x->note.tet;
 	x->expl = 0;
 

@@ -1,4 +1,6 @@
-#define FTON 1
+#define BASE(x) 1. / ((x)->ref * pow(2, -69 / (x)->tet))
+#define SEMI(x) 1. / (log(2) / (x)->tet)
+
 #include "ntof.h"
 
 /* -------------------------- fton -------------------------- */

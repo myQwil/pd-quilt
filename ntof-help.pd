@@ -1,35 +1,37 @@
-#N canvas 719 334 506 350 14;
-#X text 26 67 similar to [mtof] and [ftom] with the added ability to
-change the reference pitch and the number of tones in an octave.;
-#X obj 55 143 cupqb;
-#X obj 92 206 ntof 432 13;
-#X floatatom 201 230 0 0 0 0 - - -;
-#X obj 92 257 phasor~;
-#X obj 92 283 *~;
-#X obj 78 315 dac~;
-#X floatatom 166 180 0 0 0 0 - - -;
-#X floatatom 129 157 0 0 0 0 - - -;
-#X msg 404 154 ref \$1;
-#X text 161 156 reference pitch. default: 440;
-#X msg 404 181 tet \$1;
-#X text 203 180 # of tones. default: 12;
-#X obj 201 257 fton 432 13;
-#X floatatom 201 282 5 0 0 0 - - -;
-#X obj 179 39 cnv 15 152 24 empty empty ntof\ &\ fton 4 12 0 18 -1 -262144
-0;
-#X text 394 132 messages;
-#X obj 153 308 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10
+#N canvas 720 330 501 371 14;
+#X obj 80 210 ntof 432 13;
+#X floatatom 150 240 0 0 0 0 - - -;
+#X obj 150 270 fton 432 13;
+#X floatatom 150 300 0 0 0 0 - - -;
+#X obj 80 270 phasor~;
+#X obj 80 300 *~;
+#X obj 70 330 dac~;
+#X obj 120 330 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10
 -1 -262144 -262144 0 1;
-#X msg 123 127 set 440 12;
+#X msg 100 120 440 12;
+#X floatatom 120 150 0 0 0 0 - - -;
+#X floatatom 160 180 0 0 0 0 - - -;
+#X obj 60 110 b !;
+#X obj 40 140 cupqb 69;
+#X msg 410 150 ref \$1;
+#X msg 410 180 tet \$1;
+#X text 160 150 reference pitch. default: 440;
+#X text 200 180 # of tones. default: 12;
+#X text 410 130 messages;
+#X text 30 50 similar to [mtof] and [ftom] with the added ability to
+change the reference pitch and the number of tones in an octave.;
+#X obj 170 20 cnv 15 152 24 empty empty ntof\ &\ fton 4 12 0 18
+-1 -262144 0;
+#X connect 0 0 1 0;
+#X connect 0 0 4 0;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;
-#X connect 2 0 4 0;
-#X connect 3 0 13 0;
 #X connect 4 0 5 0;
 #X connect 5 0 6 0;
 #X connect 5 0 6 1;
-#X connect 7 0 2 2;
-#X connect 8 0 2 1;
-#X connect 13 0 14 0;
-#X connect 17 0 5 1;
-#X connect 18 0 2 0;
+#X connect 7 0 5 1;
+#X connect 8 0 0 0;
+#X connect 9 0 0 1;
+#X connect 10 0 0 2;
+#X connect 11 0 12 1;
+#X connect 12 0 0 0;

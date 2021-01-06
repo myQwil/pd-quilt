@@ -7,13 +7,13 @@ static void slope_k(t_slope *x) {
 	if (x->log)
 	{    slope_minmax(x);
 	     x->k = log(x->max / x->min) / x->run;   }
-	else x->k = (x->max - x->min)    / x->run;
+	else x->k =    (x->max - x->min) / x->run;
 }
 
 static void sly_float(t_slope *x ,t_float f) {
 	t_float res = (x->log)
-		? x->min * exp(x->k * f)
-		: x->min +     x->k * f;
+		? exp(x->k * f) * x->min
+		:     x->k * f  + x->min;
 	outlet_float(x->x_obj.ob_outlet ,res);
 }
 

@@ -11,30 +11,34 @@ struct _inlet {
 
 typedef struct _flin {
 	t_object x_obj;
-	t_float *fp; /* number list */
+	t_float *fp; /* float array */
 	int ninlets; /* number of inlets */
-	int ptrsiz;  /* pointer size */
+	int siz;     /* pointer size */
 } t_flin;
 
 #define NMAX 1024
 
+static void flin_alloc(t_flin *x ,int n) {
+	x->siz = n;
+	x->fp = (t_float*)getbytes(x->siz * sizeof(t_float));
+}
+
 static int flin_resize(t_flin *x ,int n ,int isindex) {
 	n += isindex;
-	if      (n < 1)    n = 1;
-	else if (n > NMAX) n = NMAX;
-	if (x->ptrsiz < n)
-	{	int d = 2;
-		while (d < n) d *= 2;
-		x->fp = (t_float *)resizebytes(x->fp
-			,x->ptrsiz * sizeof(t_float) ,d * sizeof(t_float));
-		x->ptrsiz = d;
-		t_float *fp = x->fp;
-		t_inlet *ip = ((t_object *)x)->ob_inlet;
-		for (int i=x->ninlets; i--; fp++ ,ip=ip->i_next)
-			ip->i_floatslot = fp;   }
+	if (n < 1 || n > NMAX)
+		return -1;
+	int d = 2;
+	while (d < n) d <<= 1;
+	x->fp = (t_float *)resizebytes(x->fp
+		,x->siz * sizeof(t_float) ,d * sizeof(t_float));
+	x->siz = d;
+	t_float *fp = x->fp;
+	t_inlet *ip = ((t_object *)x)->ob_inlet;
+	for (int i=x->ninlets; i--; fp++ ,ip=ip->i_next)
+		ip->i_floatslot = fp;
 	return (n - isindex);
 }
 
 static void flin_free(t_flin *x) {
-	freebytes(x->fp ,x->ptrsiz * sizeof(t_float));
+	freebytes(x->fp ,x->siz * sizeof(t_float));
 }

@@ -42,7 +42,7 @@ static void muse_send(t_muse *y ,t_float f) {
 }
 
 static void *muse_new(t_symbol *s ,int ac ,t_atom *av) {
-	int n = (ac<2 ? 2 : ac);
+	int n = ac < 2 ? 2 : ac;
 	t_muse *y = (t_muse *)music_new(muse_class ,n);
 	t_music *x = &y->z;
 
@@ -54,7 +54,8 @@ static void *muse_new(t_symbol *s ,int ac ,t_atom *av) {
 
 	for (int i=0; n--; fp++,i++)
 	{	floatinlet_new(&x->flin.x_obj ,fp);
-		if (i<ac) *fp = atom_getfloat(av++);   }
+		if (i < ac)
+			*fp = atom_getfloat(av++);   }
 
 	return (y);
 }

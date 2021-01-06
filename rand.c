@@ -1,6 +1,7 @@
 #include "flin.h"
 #include <time.h>
 #include <stdlib.h> // strtof
+#include <string.h> // memcpy
 
 /* -------------------------- rand -------------------------- */
 static t_class *rand_class;
@@ -39,7 +40,7 @@ static void rand_state(t_rand *x ,t_symbol *s) {
 }
 
 static void rand_ptr(t_rand *x ,t_symbol *s) {
-	post("%s%s%d" ,s->s_name ,*s->s_name?": ":"" ,x->flin.ptrsiz);
+	post("%s%s%d" ,s->s_name ,*s->s_name?": ":"" ,x->flin.siz);
 }
 
 static void rand_peek(t_rand *x ,t_symbol *s) {
@@ -54,7 +55,9 @@ static void rand_peek(t_rand *x ,t_symbol *s) {
 }
 
 static void rand_size(t_rand *x ,t_floatarg n) {
-	x->siz = flin_resize(&x->flin ,n ,0);
+	if (n > x->flin.siz && flin_resize(&x->flin ,n ,0) < 0)
+		return;
+	x->siz = n;
 }
 
 static void rand_count(t_rand *x ,t_floatarg f) {
@@ -124,12 +127,10 @@ static void rand_float(t_rand *x ,t_float f) {
 		outlet_float(x->flin.x_obj.ob_outlet ,fp[i]);   }
 }
 
-static void rand_dolist(t_rand *x ,int ac ,t_atom *av ,int i) {
-	if (i < 0)
-		i = i % x->siz + x->siz;
-	int n = ac + i;
-	if (n > NMAX) return;
-	flin_resize(&x->flin ,n ,0);
+static void rand_z(t_rand *x ,int i ,int ac ,t_atom *av) {
+	if (i+ac > x->flin.siz && flin_resize(&x->flin ,i+ac ,0) < 0)
+		return;
+	if (i < 0) i = i % x->siz + x->siz;
 	t_float *fp = x->flin.fp + i;
 	for (;ac--; av++ ,fp++)
 		if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
@@ -137,21 +138,18 @@ static void rand_dolist(t_rand *x ,int ac ,t_atom *av ,int i) {
 
 static void rand_list(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
 	x->siz = ac;
-	rand_dolist(x ,ac ,av ,0);
+	rand_z(x ,0 ,ac ,av);
 }
 
 static void rand_anything(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
+	if (!ac) return;
 	if (*s->s_name == '@')
-	{	int i = strtof(s->s_name+1 ,NULL);
-		if (ac) rand_dolist(x ,ac ,av ,i);
-		else pd_error(x ,"rand_at: bad arguments");   }
-}
-
-static void rand_at(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
-	if (ac>1 && av->a_type == A_FLOAT)
-	{	int i = av->a_w.w_float;
-		rand_dolist(x ,ac-1 ,av+1 ,i);   }
-	else pd_error(x ,"rand_at: bad arguments");
+		rand_z(x ,strtol(s->s_name+1,0,10) ,ac ,av);
+	else
+	{	t_atom atoms[ac+1];
+		atoms[0] = (t_atom){A_SYMBOL ,{.w_symbol = s}};
+		memcpy(atoms+1 ,av ,ac * sizeof(t_atom));
+		rand_z(x ,0 ,ac+1 ,atoms);   }
 }
 
 static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -166,8 +164,7 @@ static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
 	x->siz = x->flin.ninlets = c;
 
 	// always have a pointer size of at least 2 numbers for min and max
-	x->flin.ptrsiz = c<2 ? 2 : c;
-	x->flin.fp = (t_float *)getbytes(x->flin.ptrsiz * sizeof(t_float));
+	flin_alloc(&x->flin ,c<2 ? 2 : c);
 	t_float *fp = x->flin.fp;
 	for (;c--; av++ ,fp++)
 	{	floatinlet_new(&x->flin.x_obj ,fp);
@@ -177,7 +174,7 @@ static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void rand_free(t_rand *x) {
-	freebytes(x->flin.fp ,x->flin.ptrsiz * sizeof(t_float));
+	freebytes(x->flin.fp ,x->flin.siz * sizeof(t_float));
 }
 
 void rand_setup(void) {
@@ -198,8 +195,6 @@ void rand_setup(void) {
 		,gensym("ptr")   ,A_DEFSYM ,0);
 	class_addmethod(rand_class ,(t_method)rand_peek
 		,gensym("peek")  ,A_DEFSYM ,0);
-	class_addmethod(rand_class ,(t_method)rand_at
-		,gensym("@")     ,A_GIMME  ,0);
 	class_addmethod(rand_class ,(t_method)rand_size
 		,gensym("n")     ,A_FLOAT  ,0);
 	class_addmethod(rand_class ,(t_method)rand_count
