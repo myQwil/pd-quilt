@@ -9,10 +9,10 @@ static t_class *rand_class;
 typedef struct _rand {
 	t_flin flin;
 	t_float prev;     /* previous random number */
-	int siz;          /* list size */
-	int argc;         /* arg count */
 	int repc;         /* repeat count */
 	int repmax;       /* repeat max */
+	uint16_t siz;     /* list size */
+	uint16_t argc;    /* arg count */
 	unsigned state;   /* random state */
 	unsigned swap;    /* no-repeat state */
 	unsigned norep:1; /* no-repeat toggle */
@@ -55,7 +55,7 @@ static void rand_peek(t_rand *x ,t_symbol *s) {
 }
 
 static void rand_size(t_rand *x ,t_floatarg n) {
-	if (n > x->flin.siz && flin_resize(&x->flin ,n ,0) < 0)
+	if (flin_resize(&x->flin ,n) < 0)
 		return;
 	x->siz = n;
 }
@@ -128,7 +128,7 @@ static void rand_float(t_rand *x ,t_float f) {
 }
 
 static void rand_z(t_rand *x ,int i ,int ac ,t_atom *av) {
-	if (i+ac > x->flin.siz && flin_resize(&x->flin ,i+ac ,0) < 0)
+	if (flin_resize(&x->flin ,i+ac) < 0)
 		return;
 	if (i < 0) i = i % x->siz + x->siz;
 	t_float *fp = x->flin.fp + i;
@@ -161,7 +161,7 @@ static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
 	if (ac==3 && av[1].a_type != A_FLOAT)
 	{	av[1] = av[2];
 		c = 2;   }
-	x->siz = x->flin.ninlets = c;
+	x->siz = x->flin.ins = c;
 
 	// always have a pointer size of at least 2 numbers for min and max
 	flin_alloc(&x->flin ,c<2 ? 2 : c);

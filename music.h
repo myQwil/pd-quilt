@@ -11,7 +11,7 @@ typedef struct _music {
 	t_flin flin;
 	t_note note;
 	t_float oct;     /* # of semitone steps per octave */
-	int siz;         /* current scale size */
+	uint16_t siz;    /* current scale size */
 	unsigned expl:1; /* explicit scale size toggle */
 } t_music;
 
@@ -73,7 +73,7 @@ static void music_operate(t_float *fp ,char c ,t_float f) {
 }
 
 static int music_scale(t_music *x ,int i ,int ac ,t_atom *av) {
-	if (i+ac > x->flin.siz && flin_resize(&x->flin ,i+ac ,0) < 0)
+	if (flin_resize(&x->flin ,i+ac) < 0)
 		return x->siz;
 
 	int n = i;
@@ -91,11 +91,9 @@ static int music_scale(t_music *x ,int i ,int ac ,t_atom *av) {
 			if (cp != p)
 			{	cp = p;
 				if (i < 0) i = i % m + m;
-				int all = i + ac + n;
-				if (all > x->flin.siz)
-				{	if (flin_resize(&x->flin ,all ,0) >= 0)
-						fp = x->flin.fp + n;
-					else break;   }   }
+				int res = flin_resize(&x->flin ,i+ac+n);
+				if      (res > 0) fp = x->flin.fp + n;
+				else if (res < 0) break;   }
 			else i = m;
 
 			char c = cp[0];
@@ -169,7 +167,7 @@ static void music_symbol(t_music *x ,t_symbol *s) {
 }
 
 static void music_size(t_music *x ,t_floatarg n) {
-	if (n > x->flin.siz && flin_resize(&x->flin ,n ,0) < 0)
+	if (flin_resize(&x->flin ,n) < 0)
 		return;
 	x->siz = n;
 }
@@ -202,7 +200,7 @@ static void music_set(t_music *x ,t_symbol *s ,int ac ,t_atom *av) {
 static t_music *music_new(t_class *mclass ,int ac) {
 	t_music *x = (t_music *)pd_new(mclass);
 
-	x->siz = x->flin.ninlets = ac;
+	x->siz = x->flin.ins = ac;
 	flin_alloc(&x->flin ,ac);
 
 	t_atom atms[] = { {A_FLOAT ,{440}} ,{A_FLOAT ,{12}} };
