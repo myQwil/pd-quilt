@@ -28,8 +28,7 @@ static int flin_resize(t_flin *x ,int n) {
 	if (n > x->siz)
 	{	if (n > NMAX)
 			return -1;
-		int d = 2;
-		while (d < n) d <<= 1;
+		int d = 2 << ilog2(n-1);
 		x->fp = (t_float *)resizebytes(x->fp
 			,x->siz * sizeof(t_float) ,d * sizeof(t_float));
 		if (!x->fp)

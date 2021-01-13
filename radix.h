@@ -147,8 +147,8 @@ static void radix_dobase(t_radix *x, t_float f) {
 	int bx = x->x_bexp = log(umax) / log(base), tx = 32;
 	for (;bx; base *= base)
 	{	if (bx & 1) pwr *= base;
-		bx /= 2;   }
-	while (umax > pwr) { tx--; umax /= 2; }
+		bx >>= 1;   }
+	while (umax > pwr) { tx--; umax >>= 1; }
 	x->x_pwr = pwr;
 	x->x_texp = tx;
 }

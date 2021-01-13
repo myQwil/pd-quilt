@@ -109,7 +109,7 @@ static void stopwatch_tempo(t_stopwatch *x ,t_symbol *s ,int ac ,t_atom *av) {
 static void *stopwatch_new(t_symbol *s ,int argc ,t_atom *argv) {
 	t_stopwatch *x = (t_stopwatch *)pd_new(stopwatch_class);
 	inlet_new(&x->x_obj ,&x->x_obj.ob_pd ,&s_bang ,gensym("bang2"));
-	outlet_new(&x->x_obj ,gensym("float"));
+	outlet_new(&x->x_obj ,&s_float);
 	x->o_lap = outlet_new(&x->x_obj ,0);
 
 	x->unit = 1;

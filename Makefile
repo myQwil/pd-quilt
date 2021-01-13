@@ -4,7 +4,7 @@ lib.name = myQwil
 
 class.sources := $(patsubst %, %.c, \
 muse chrd rand rind ntof fton sploat gloat slx sly same ceil radix \
-0x21 0x21~ x is pak unpak 0x40pak 0x40unpak stopwatch)
+0x21 0x21~ x is pak unpak 0x40pak 0x40unpak stopwatch tabosc2~)
 
 datafiles := $(patsubst %, %-help.pd, \
 muse chrd rand rind ntof sploat slope same ceil radix 0x21 0x21~ x is pak rpak \

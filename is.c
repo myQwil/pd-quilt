@@ -50,9 +50,9 @@ static void is_pxy_anything(t_is_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
 
 static void is_type(t_is *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (!ac) return;
-	if (av->a_type == A_SYMBOL) x->type = is_check(av->a_w.w_symbol);
-	else if (av->a_type == A_FLOAT) x->type = gensym("float");
-	else if (av->a_type == A_POINTER) x->type = gensym("pointer");
+	if      (av->a_type == A_SYMBOL)  x->type = is_check(av->a_w.w_symbol);
+	else if (av->a_type == A_FLOAT)   x->type = &s_float;
+	else if (av->a_type == A_POINTER) x->type = &s_pointer;
 }
 
 static void *is_new(t_symbol *s) {
@@ -61,7 +61,7 @@ static void *is_new(t_symbol *s) {
 
 	x->x_p = p;
 	p->p_x = x;
-	x->type = (*s->s_name) ? is_check(s) : gensym("float");
+	x->type = (*s->s_name) ? is_check(s) : &s_float;
 
 	inlet_new((t_object *)x ,(t_pd *)p ,0 ,0);
 	outlet_new(&x->x_obj ,&s_float);
