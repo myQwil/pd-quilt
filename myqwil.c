@@ -19,6 +19,8 @@ void unpak_setup(void);
 void setup_0x40pak(void);
 void setup_0x40unpak(void);
 void stopwatch_setup(void);
+void tabread2_tilde_setup(void);
+void tabosc2_tilde_setup(void);
 
 void blunt_setup(void);
 // void ffplay_tilde_setup(void);
@@ -47,6 +49,8 @@ void myQwil_setup(void) {
 	setup_0x40pak();
 	setup_0x40unpak();
 	stopwatch_setup();
+	tabread2_tilde_setup();
+	tabosc2_tilde_setup();
 
 	blunt_setup();
 	// ffplay_tilde_setup();
