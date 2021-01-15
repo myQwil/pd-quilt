@@ -57,12 +57,6 @@ typedef struct _tabosc2 {
 	double phase;
 } t_tabosc2;
 
-static void tabosc2_edge(t_tabosc2 *x ,t_float f) {
-	if (x->edge == f) return;
-	if (f < 1) x->k = 1. / (1. - f);
-	x->edge = f;
-}
-
 static t_int *tabosc2_perform(t_int *w) {
 	t_tabosc2 *x = (t_tabosc2 *)(w[1]);
 	t_sample *in1 = (t_sample *)(w[2]);
@@ -81,17 +75,24 @@ static t_int *tabosc2_perform(t_int *w) {
 	tf.d = UNITBIT32;
 	normhipart = tf.i[HIOFFSET];
 
-	for (t_sample frac ,a ,b; n--;)
+	for (t_sample frac ,edge ,a ,b; n--;)
 	{	tf.d = dphase;
 		dphase += *in1++ * conv;
-		tabosc2_edge(x ,*in2++);
 		addr = tab + (tf.i[HIOFFSET] & mask);
 		tf.i[HIOFFSET] = normhipart;
 		frac = tf.d - UNITBIT32;
-		a = addr[0].w_float;
-		b = addr[1].w_float;
-		*out++ = a + (frac <= x->edge ? 0 :
-			(b - a) * (frac - x->edge) * x->k);   }
+		edge = *in2++;
+		if (frac <= edge)
+			*out++ = addr[1].w_float;
+		else
+		{	if (x->edge != edge)
+			{	if (edge < 1)
+					x->k = 1. / (1. - edge);
+				x->edge = edge;   }
+			a = addr[1].w_float;
+			b = addr[2].w_float;
+			frac = (frac - edge) * x->k;
+			*out++ = a * (1. - frac) + b * frac;   }   }
 
 	tf.d = UNITBIT32 * fnpoints;
 	normhipart = tf.i[HIOFFSET];
@@ -117,13 +118,15 @@ static void tabosc2_set(t_tabosc2 *x ,t_symbol *s) {
 	else if (!garray_getfloatwords(a ,&pointsinarray ,&x->vec))
 	{	pd_error(x ,"%s: bad template for tabosc2~" ,x->arrayname->s_name);
 		x->vec = 0;   }
-	else if (pointsinarray < 2)
-	{	pd_error(x ,"%s: number of points (%d) cannot be less than two"
+	else if (pointsinarray < 3)
+	{	pd_error(x ,"%s: number of points (%d) cannot be less than three"
 			,x->arrayname->s_name ,pointsinarray);
 		x->vec = 0;
 		garray_usedindsp(a);   }
 	else
-	{	x->fnpoints = 1 << ilog2(pointsinarray - 1);
+	{	if (pointsinarray == 4) // 2^0 + 3
+			pointsinarray--;
+		x->fnpoints = 1 << ilog2(pointsinarray - 2);
 		x->finvnpoints = 1. / x->fnpoints;
 		garray_usedindsp(a);   }
 }
@@ -146,12 +149,11 @@ static void *tabosc2_new(t_symbol *s ,t_float edge) {
 	x->vec = 0;
 	x->fnpoints = 512.;
 	x->finvnpoints = 1. / x->fnpoints;
-	x->k = 1;
-	tabosc2_edge(x ,edge);
-	signalinlet_new(&x->x_obj, x->edge);
+	signalinlet_new(&x->x_obj, edge);
 	inlet_new(&x->x_obj ,&x->x_obj.ob_pd ,&s_float ,gensym("ft1"));
 	outlet_new(&x->x_obj ,&s_signal);
 	x->f = 0;
+	x->k = 1;
 	return (x);
 }
 
