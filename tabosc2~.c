@@ -108,7 +108,7 @@ static t_int *tabosc2_perform(t_int *w) {
 
 static void tabosc2_set(t_tabosc2 *x ,t_symbol *s) {
 	t_garray *a;
-	int pointsinarray;
+	int npoints ,pointsinarray;
 
 	x->arrayname = s;
 	if (!(a = (t_garray *)pd_findbyclass(x->arrayname ,garray_class)))
@@ -118,16 +118,14 @@ static void tabosc2_set(t_tabosc2 *x ,t_symbol *s) {
 	else if (!garray_getfloatwords(a ,&pointsinarray ,&x->vec))
 	{	pd_error(x ,"%s: bad template for tabosc2~" ,x->arrayname->s_name);
 		x->vec = 0;   }
-	else if (pointsinarray < 3)
-	{	pd_error(x ,"%s: number of points (%d) cannot be less than three"
+	else if ((npoints = pointsinarray - 3) != (1 << ilog2(pointsinarray - 3)))
+	{	pd_error(x ,"%s: number of points (%d) not a power of 2 plus three"
 			,x->arrayname->s_name ,pointsinarray);
 		x->vec = 0;
 		garray_usedindsp(a);   }
 	else
-	{	if (pointsinarray == 4) // 2^0 + 3
-			pointsinarray--;
-		x->fnpoints = 1 << ilog2(pointsinarray - 2);
-		x->finvnpoints = 1. / x->fnpoints;
+	{	x->fnpoints = npoints;
+		x->finvnpoints = 1. / npoints;
 		garray_usedindsp(a);   }
 }
 

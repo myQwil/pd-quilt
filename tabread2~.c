@@ -25,7 +25,7 @@ static t_int *tabread2_perform(t_int *w) {
 	t_word *buf = x->vec ,*wp;
 	double onset = x->onset;
 
-	maxindex = x->npoints - 2;
+	maxindex = x->npoints - 3;
 	if(maxindex<0) goto zero;
 
 	if (!buf) goto zero;
