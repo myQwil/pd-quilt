@@ -16,7 +16,7 @@
 #X msg 130 200 0.5;
 #X msg 170 260 0;
 #X obj 230 320 metro 60;
-#X floatatom 310 320 0 -10000 100 0 - - -;
+#X floatatom 310 320 0 0 0 0 - - -;
 #X obj 230 390 tabwrite~ \$0view;
 #X floatatom 180 290 0 0 0 0 - - -;
 #X floatatom 180 320 0 -10000 100 0 - - -;

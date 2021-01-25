@@ -3,7 +3,7 @@
 #X obj 90 60 t f f;
 #X obj 170 50 < 10;
 #X obj 170 80 sel;
-#X msg 210 110 symbol 0;
+#X msg 210 110 symbol \0;
 #X msg 210 150 symbol;
 #X obj 90 180 pack f s;
 #X msg 90 210 symbol \$2\$1;

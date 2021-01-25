@@ -37,7 +37,7 @@
 #X obj 140 90 i;
 #X obj 110 120 ==;
 #X obj 190 110 sel;
-#X msg 230 140 symbol 0;
+#X msg 230 140 symbol .\0;
 #X msg 230 180 symbol;
 #X obj 90 150 lead0;
 #X obj 90 180 pack s s;
