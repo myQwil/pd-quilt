@@ -11,6 +11,8 @@ void sly_setup(void);
 void same_setup(void);
 void ceil_setup(void);
 void radix_setup(void);
+void chrono_setup(void);
+void delp_setup(void);
 void setup_0x21(void);
 void setup_0x21_tilde(void);
 void is_setup(void);
@@ -18,7 +20,6 @@ void pak_setup(void);
 void unpak_setup(void);
 void setup_0x40pak(void);
 void setup_0x40unpak(void);
-void stopwatch_setup(void);
 void tabread2_tilde_setup(void);
 void tabosc2_tilde_setup(void);
 
@@ -41,6 +42,8 @@ void myQwil_setup(void) {
 	same_setup();
 	ceil_setup();
 	radix_setup();
+	chrono_setup();
+	delp_setup();
 	setup_0x21();
 	setup_0x21_tilde();
 	is_setup();
@@ -48,7 +51,6 @@ void myQwil_setup(void) {
 	unpak_setup();
 	setup_0x40pak();
 	setup_0x40unpak();
-	stopwatch_setup();
 	tabread2_tilde_setup();
 	tabosc2_tilde_setup();
 

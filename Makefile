@@ -3,15 +3,15 @@
 lib.name = myQwil
 
 class.sources := $(patsubst %, %.c, \
-muse chrd rand rind ntof fton sploat gloat slx sly same ceil radix \
-0x21 0x21~ x is pak unpak 0x40pak 0x40unpak stopwatch tabread2~ tabosc2~)
+muse chrd rand rind ntof fton sploat gloat slx sly same ceil radix delp \
+0x21 0x21~ x is pak unpak 0x40pak 0x40unpak chrono tabread2~ tabosc2~)
 
 datafiles := $(patsubst %, %-help.pd, \
 muse chrd rand rind ntof sploat slope same ceil radix 0x21 0x21~ x is pak rpak \
-stopwatch adsr cupq cupqb delp linp linp~)
+chrono adsr cupq cupqb delp linp linp~)
 
 datafiles += $(patsubst %, %.pd, \
-2^ ad adsr add~ all~ bt ct cupq cupqb delp linp linp~ dollar-slice fkick~ \
+2^ ad adsr add~ all~ bt ct cupq cupqb linp linp~ dollar-slice fkick~ \
 hms lead0 mancalc mantissa mantissal mantr phi fmosc~ zp zp~)
 
 suppress-wunused = yes
