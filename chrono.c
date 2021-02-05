@@ -29,7 +29,7 @@ static void chrono_push(t_chrono *x ,t_floatarg f) {
 
 static void chrono_float(t_chrono *x ,t_floatarg f) {
 	chrono_bang(x);
-	chrono_push(x ,f);
+	x->setmore -= f;
 }
 
 static void chrono_bang2(t_chrono *x) {

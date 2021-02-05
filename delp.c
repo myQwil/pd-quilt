@@ -39,6 +39,15 @@ static void delp_ft1(t_delp *x ,t_floatarg f) {
 	x->deltime = f;
 }
 
+static void delp_push(t_delp *x ,t_floatarg f) {
+	x->remtime -= f;
+	if (!x->stop && !x->pause)
+	{	clock_unset(x->clock);
+		x->remtime -= timesince(x->settime ,x->unit ,x->samps);
+		x->settime = clock_getlogicaltime();
+		clock_delay(x->clock ,x->remtime);   }
+}
+
 static void delp_bang(t_delp *x) {
 	clock_delay(x->clock ,x->deltime);
 	x->settime = clock_getlogicaltime();
@@ -113,6 +122,8 @@ void delp_setup(void) {
 		,gensym("pause") ,0);
 	class_addmethod(delp_class ,(t_method)delp_ft1
 		,gensym("ft1")   ,A_FLOAT ,0);
+	class_addmethod(delp_class ,(t_method)delp_push
+		,gensym("push")  ,A_FLOAT ,0);
 	class_addmethod(delp_class ,(t_method)delp_tempo
 		,gensym("tempo") ,A_GIMME ,0);
 }
