@@ -1,4 +1,4 @@
-#include "bop.h"
+#include "blunt.h"
 
 void hotop_setup(void);
 void revop_setup(void);
@@ -11,6 +11,11 @@ typedef struct _num {
 	t_blunt bl;
 	t_float f;
 } t_num;
+
+static void num_float(t_num *x ,t_float f) {
+	x->f = f;
+	pd_bang((t_pd *)x);
+}
 
 static void *num_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
 	t_num *x = (t_num *)pd_new(cl);
@@ -27,11 +32,6 @@ static void *num_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
 			{	x->f = strtof(c ,NULL);
 				x->bl.loadbang = 1;   }   }   }
 	return (x);
-}
-
-static void num_float(t_num *x ,t_float f) {
-	x->f = f;
-	pd_bang((t_pd *)x);
 }
 
 
@@ -372,6 +372,10 @@ typedef struct _bng {
 	t_blunt bl;
 } t_bng;
 
+static void b_bang(t_bng *x) {
+	outlet_bang(x->bl.obj.ob_outlet);
+}
+
 static void *b_new(t_symbol *s ,int ac ,t_atom *av) {
 	t_bng *x = (t_bng *)pd_new(bng_class);
 	outlet_new(&x->bl.obj ,&s_bang);
@@ -380,10 +384,6 @@ static void *b_new(t_symbol *s ,int ac ,t_atom *av) {
 		 x->bl.loadbang = (c[strlen(c)-1] == '!') ? 1 : 0;   }
 	else x->bl.loadbang = 0;
 	return (x);
-}
-
-static void b_bang(t_bng *x) {
-	outlet_bang(x->bl.obj.ob_outlet);
 }
 
 static void bng_setup(void) {
@@ -409,16 +409,6 @@ typedef struct _sym {
 	t_symbol *sym;
 } t_sym;
 
-static void *sym_new(t_symbol *s ,int ac ,t_atom *av) {
-	t_sym *x = (t_sym *)pd_new(sym_class);
-	outlet_new      (&x->bl.obj ,&s_symbol);
-	symbolinlet_new (&x->bl.obj ,&x->sym);
-	x->sym = (ac && av->a_type == A_SYMBOL) ? av->a_w.w_symbol : &s_;
-	const char *c = s->s_name;
-	x->bl.loadbang = (c[strlen(c)-1] == '!') ? 1 : 0;
-	return (x);
-}
-
 static void sym_bang(t_sym *x) {
 	outlet_symbol(x->bl.obj.ob_outlet ,x->sym);
 }
@@ -439,6 +429,16 @@ static void sym_list(t_sym *x ,t_symbol *s ,int ac ,t_atom *av) {
 	else sym_anything(x ,s ,ac ,av);
 }
 
+static void *sym_new(t_symbol *s ,int ac ,t_atom *av) {
+	t_sym *x = (t_sym *)pd_new(sym_class);
+	outlet_new      (&x->bl.obj ,&s_symbol);
+	symbolinlet_new (&x->bl.obj ,&x->sym);
+	x->sym = (ac && av->a_type == A_SYMBOL) ? av->a_w.w_symbol : &s_;
+	const char *c = s->s_name;
+	x->bl.loadbang = (c[strlen(c)-1] == '!') ? 1 : 0;
+	return (x);
+}
+
 void sym_setup(void) {
 	sym_class = class_new(gensym("sym") ,(t_newmethod)sym_new ,0
 		,sizeof(t_sym) ,0 ,A_GIMME ,0);
@@ -454,7 +454,7 @@ void sym_setup(void) {
 
 void blunt_setup(void) {
 
-	post("Blunt! version 1.2");
+	post("Blunt! version 1.3");
 
 	/* ---------------- connectives --------------------- */
 
@@ -613,11 +613,13 @@ void blunt_setup(void) {
 			class_addbang  (bops[i][j] ,bangs[i][j]);
 			class_addfloat (bops[i][j] ,bop_float);
 			class_addmethod(bops[i][j] ,(t_method)bop_f1
-				,gensym("f1") ,A_FLOAT ,0);
+				,gensym("f1")  ,A_FLOAT ,0);
 			class_addmethod(bops[i][j] ,(t_method)bop_f2
-				,gensym("f2") ,A_FLOAT ,0);
+				,gensym("f2")  ,A_FLOAT ,0);
 			class_addmethod(bops[i][j] ,(t_method)bop_skip
-				,gensym(".")  ,A_GIMME ,0);
+				,gensym(".")   ,A_GIMME ,0);
+			class_addmethod(bops[i][j] ,(t_method)bop_set
+				,gensym("set") ,A_GIMME ,0);
 			class_addmethod(bops[i][j] ,(t_method)blunt_loadbang
 				,gensym("loadbang") ,A_DEFFLOAT ,0);
 			class_sethelpsymbol(bops[i][j] ,syms[i]);   }   }

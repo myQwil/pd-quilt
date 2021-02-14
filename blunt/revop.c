@@ -1,4 +1,4 @@
-#include "bop.h"
+#include "blunt.h"
 
 /* --------------------------------------------------------------- */
 /*                   reverse arithmetics                           */
@@ -158,10 +158,14 @@ void revop_setup(void) {
 	while (i--)
 	{	class_addbang  (revs[i] ,rbangs[i]);
 		class_addfloat (revs[i] ,bop_float);
+		class_addmethod(revs[i] ,(t_method)bop_f1
+			,gensym("f1")  ,A_FLOAT ,0);
 		class_addmethod(revs[i] ,(t_method)bop_f2
-			,gensym("f2") ,A_FLOAT ,0);
+			,gensym("f2")  ,A_FLOAT ,0);
 		class_addmethod(revs[i] ,(t_method)bop_skip
-			,gensym(".") ,A_GIMME ,0);
+			,gensym(".")   ,A_GIMME ,0);
+		class_addmethod(revs[i] ,(t_method)bop_set
+			,gensym("set") ,A_GIMME ,0);
 		class_addmethod(revs[i] ,(t_method)blunt_loadbang
 			,gensym("loadbang") ,A_DEFFLOAT ,0);
 		class_sethelpsymbol(revs[i] ,rev_sym);   }
