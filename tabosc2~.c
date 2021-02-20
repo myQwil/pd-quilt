@@ -45,7 +45,7 @@ union tabfudge {
 static t_class *tabosc2_class;
 
 typedef struct _tabosc2 {
-	t_object x_obj;
+	t_object obj;
 	t_symbol *arrayname;
 	t_word *vec;
 	t_float f;
@@ -147,9 +147,9 @@ static void *tabosc2_new(t_symbol *s ,t_float edge) {
 	x->vec = 0;
 	x->fnpoints = 512.;
 	x->finvnpoints = 1. / x->fnpoints;
-	signalinlet_new(&x->x_obj, edge);
-	inlet_new(&x->x_obj ,&x->x_obj.ob_pd ,&s_float ,gensym("ft1"));
-	outlet_new(&x->x_obj ,&s_signal);
+	signalinlet_new(&x->obj, edge);
+	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("ft1"));
+	outlet_new(&x->obj ,&s_signal);
 	x->f = 0;
 	x->k = 1;
 	return (x);

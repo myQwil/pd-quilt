@@ -5,7 +5,7 @@
 static t_class *rind_class;
 
 typedef struct _rind {
-	t_object x_obj;
+	t_object obj;
 	t_float min;
 	t_float max;
 	unsigned state;
@@ -39,7 +39,7 @@ static void rind_bang(t_rind *x) {
 	unsigned *sp = &x->state;
 	*sp = *sp * 472940017 + 832416023;
 	nval = *sp * range / 0x100000000 + min;
-	outlet_float(x->x_obj.ob_outlet ,nval);
+	outlet_float(x->obj.ob_outlet ,nval);
 }
 
 static void rind_list(t_rind *x ,t_symbol *s ,int ac ,t_atom *av) {
@@ -50,10 +50,10 @@ static void rind_list(t_rind *x ,t_symbol *s ,int ac ,t_atom *av) {
 
 static void *rind_new(t_symbol *s ,int ac ,t_atom *av) {
 	t_rind *x = (t_rind *)pd_new(rind_class);
-	outlet_new(&x->x_obj ,&s_float);
+	outlet_new(&x->obj ,&s_float);
 
-	floatinlet_new(&x->x_obj ,&x->max);
-	if (ac != 1) floatinlet_new(&x->x_obj ,&x->min);
+	floatinlet_new(&x->obj ,&x->max);
+	if (ac != 1) floatinlet_new(&x->obj ,&x->min);
 
 	switch (ac)
 	{	case 2: x->min = atom_getfloat(av+1);

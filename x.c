@@ -16,7 +16,7 @@ typedef struct xtriggerout {
 } t_xtriggerout;
 
 typedef struct _xtrigger {
-	t_object x_obj;
+	t_object obj;
 	t_int siz;
 	t_xtriggerout *vec;
 } t_xtrigger;
@@ -41,23 +41,23 @@ static void *xtrigger_new(t_symbol *s ,int argc ,t_atom *argv) {
 		else c = 0;
 		if (c == 'p')
 			u->type = TR_POINTER
-				,u->outlet = outlet_new(&x->x_obj ,&s_pointer);
+				,u->outlet = outlet_new(&x->obj ,&s_pointer);
 		else if (c == 'f')
-			u->type = TR_FLOAT ,u->outlet = outlet_new(&x->x_obj ,&s_float);
+			u->type = TR_FLOAT ,u->outlet = outlet_new(&x->obj ,&s_float);
 		else if (c == 'b')
-			u->type = TR_BANG ,u->outlet = outlet_new(&x->x_obj ,&s_bang);
+			u->type = TR_BANG ,u->outlet = outlet_new(&x->obj ,&s_bang);
 		else if (c == 'l')
-			u->type = TR_LIST ,u->outlet = outlet_new(&x->x_obj ,&s_list);
+			u->type = TR_LIST ,u->outlet = outlet_new(&x->obj ,&s_list);
 		else if (c == 's')
 			u->type = TR_SYMBOL
-				,u->outlet = outlet_new(&x->x_obj ,&s_symbol);
+				,u->outlet = outlet_new(&x->obj ,&s_symbol);
 		else if (c == 'a')
 			u->type = TR_ANYTHING
-				,u->outlet = outlet_new(&x->x_obj ,0);
+				,u->outlet = outlet_new(&x->obj ,0);
 		else
 		{	pd_error(x ,"xtrigger: %s: bad type" ,ap->a_w.w_symbol->s_name);
 			u->type = TR_ANYTHING;
-			u->outlet = outlet_new(&x->x_obj ,0);   }   }
+			u->outlet = outlet_new(&x->obj ,0);   }   }
 	return (x);
 }
 

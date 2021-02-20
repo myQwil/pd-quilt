@@ -5,7 +5,7 @@
 static t_class *tabread2_class;
 
 typedef struct _tabread2 {
-	t_object x_obj;
+	t_object obj;
 	t_symbol *arrayname;
 	t_word *vec;
 	t_float f;
@@ -85,9 +85,9 @@ static void *tabread2_new(t_symbol *s ,t_float edge) {
 	x->arrayname = s;
 	x->vec = 0;
 	
-	signalinlet_new(&x->x_obj ,edge);
-	floatinlet_new(&x->x_obj ,&x->onset);
-	outlet_new(&x->x_obj ,gensym("signal"));
+	signalinlet_new(&x->obj ,edge);
+	floatinlet_new(&x->obj ,&x->onset);
+	outlet_new(&x->obj ,gensym("signal"));
 	x->f = 0;
 	x->onset = 0;
 	return (x);

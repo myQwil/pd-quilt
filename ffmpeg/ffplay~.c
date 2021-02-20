@@ -22,7 +22,7 @@ typedef struct _playlist {
 } t_playlist;
 
 typedef struct _ffplay {
-	t_object x_obj;
+	t_object obj;
 	AVFormatContext *ic;
 	AVCodecContext  *ctx;
 	AVPacket        *pkt;
@@ -375,12 +375,12 @@ static void *ffplay_new(t_symbol *s ,int ac ,t_atom *av) {
 
 	x->layout = 0;
 	for (int i=ac; i--;)
-	{	outlet_new(&x->x_obj ,&s_signal);
+	{	outlet_new(&x->obj ,&s_signal);
 		int ch = atom_getfloatarg(i ,ac ,av);
 		if (ch > 0) x->layout |= 1 << (ch-1);
 		x->buf[i] = (t_sample*)getbytes(BUFSIZE * sizeof(t_sample));   }
 
-	x->o_meta = outlet_new(&x->x_obj ,0);
+	x->o_meta = outlet_new(&x->obj ,0);
 	x->open = x->play = x->sped = 0;
 	x->speed = 1;
 

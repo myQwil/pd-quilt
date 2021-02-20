@@ -4,7 +4,7 @@
 static t_class *gloat_class;
 
 typedef struct _gloat {
-	t_object x_obj;
+	t_object obj;
 	ufloat uf;
 } t_gloat;
 
@@ -16,7 +16,7 @@ static void gloat_peek(t_gloat *x ,t_symbol *s) {
 }
 
 static void gloat_bang(t_gloat *x) {
-	outlet_float(x->x_obj.ob_outlet ,x->uf.f);
+	outlet_float(x->obj.ob_outlet ,x->uf.f);
 }
 
 static void gloat_mantissa(t_gloat *x ,t_floatarg f) {
@@ -62,9 +62,9 @@ static void gloat_list(t_gloat *x ,t_symbol *s ,int ac ,t_atom *av) {
 
 static void *gloat_new(t_symbol *s ,int argc ,t_atom *argv) {
 	t_gloat *x = (t_gloat *)pd_new(gloat_class);
-	outlet_new(&x->x_obj ,&s_float);
-	inlet_new(&x->x_obj ,&x->x_obj.ob_pd ,&s_float ,gensym("e"));
-	inlet_new(&x->x_obj ,&x->x_obj.ob_pd ,&s_float ,gensym("s"));
+	outlet_new(&x->obj ,&s_float);
+	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("e"));
+	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("s"));
 	gloat_set(x ,s ,argc ,argv);
 	return (x);
 }

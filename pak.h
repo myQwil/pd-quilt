@@ -11,7 +11,7 @@ typedef struct _pak_pxy {
 } t_pak_pxy;
 
 struct _pak {
-	t_object x_obj;
+	t_object obj;
 	t_pak_pxy **ins;   /* proxy inlets */
 	t_atomtype *type;  /* value types */
 	t_gpointer *ptr;   /* gobj pointers */
@@ -85,12 +85,12 @@ static t_pak *new_pak(t_class *cl ,t_class *pxy ,int ac ,t_atom *av ,int r) {
 			(*pp)->p_x = x;
 			(*pp)->idx = i;
 			if (hasptr) (*pp)->ptr = gp;
-			inlet_new(&x->x_obj ,(t_pd *)*pp ,0 ,0);
+			inlet_new(&x->obj ,(t_pd *)*pp ,0 ,0);
 			pp++;   }
 		if (hasptr)
 		{	gpointer_init(gp);
 			gp++;   }   }
-	outlet_new(&x->x_obj ,&s_list);
+	outlet_new(&x->obj ,&s_list);
 	return x;
 }
 
@@ -135,7 +135,7 @@ static void pak_bang(t_pak *x) {
 	{	outvec = x->outvec;
 		x->outvec = 0;   }
 	memcpy(outvec ,x->vec ,size);
-	outlet_list(x->x_obj.ob_outlet ,&s_list ,x->n ,outvec);
+	outlet_list(x->obj.ob_outlet ,&s_list ,x->n ,outvec);
 	if (reentered) t_freebytes(outvec ,size);
 	else x->outvec = outvec;
 }

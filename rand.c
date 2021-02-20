@@ -105,12 +105,12 @@ static void rand_bang(t_rand *x) {
 		double d = rand_next(x ,rng ,0) + min;
 		i = d - (d<0); // floor negative values
 		if (x->norep) i = rand_swap(x ,i ,rng ,min);
-		outlet_float(x->flin.x_obj.ob_outlet ,i);   }
+		outlet_float(x->flin.obj.ob_outlet ,i);   }
 	else     // list method
 	{	c = x->siz;
 		i = rand_next(x ,c ,0);
 		if (x->norep) i = rand_swap(x ,i ,c ,0);
-		outlet_float(x->flin.x_obj.ob_outlet ,fp[i]);   }
+		outlet_float(x->flin.obj.ob_outlet ,fp[i]);   }
 }
 
 static void rand_float(t_rand *x ,t_float f) {
@@ -119,12 +119,12 @@ static void rand_float(t_rand *x ,t_float f) {
 	if (c<3) // range method
 	{	double min=fp[1] ,rng=fp[0]-min;
 		f = rand_swap(x ,f ,rng ,min);
-		outlet_float(x->flin.x_obj.ob_outlet ,f);   }
+		outlet_float(x->flin.obj.ob_outlet ,f);   }
 	else     // list method
 	{	int i = f;
 		c = x->siz;
 		i = rand_swap(x ,i ,c ,0);
-		outlet_float(x->flin.x_obj.ob_outlet ,fp[i]);   }
+		outlet_float(x->flin.obj.ob_outlet ,fp[i]);   }
 }
 
 static void rand_z(t_rand *x ,int i ,int ac ,t_atom *av) {
@@ -154,7 +154,7 @@ static void rand_anything(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
 
 static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
 	t_rand *x = (t_rand *)pd_new(rand_class);
-	outlet_new(&x->flin.x_obj ,&s_float);
+	outlet_new(&x->flin.obj ,&s_float);
 
 	int c = x->argc = !ac ? 2 : ac;
 	// 3 args with a string in the middle creates a small list (ex: 7 or 9)
@@ -167,7 +167,7 @@ static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
 	flin_alloc(&x->flin ,c<2 ? 2 : c);
 	t_float *fp = x->flin.fp;
 	for (;c--; av++ ,fp++)
-	{	floatinlet_new(&x->flin.x_obj ,fp);
+	{	floatinlet_new(&x->flin.obj ,fp);
 		*fp = atom_getfloat(av);   }
 	x->state = x->swap = rand_makeseed();
 	return (x);

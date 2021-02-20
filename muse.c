@@ -46,14 +46,14 @@ static void *muse_new(t_symbol *s ,int ac ,t_atom *av) {
 	t_muse *y = (t_muse *)music_new(muse_class ,n);
 	t_music *x = &y->z;
 
-	y->o_freq = outlet_new(&x->flin.x_obj ,&s_float);
-	y->o_midi = outlet_new(&x->flin.x_obj ,0);
+	y->o_freq = outlet_new(&x->flin.obj ,&s_float);
+	y->o_midi = outlet_new(&x->flin.obj ,0);
 
 	t_float *fp = x->flin.fp;
 	fp[0]=69 ,fp[1]=7;
 
 	for (int i=0; n--; fp++,i++)
-	{	floatinlet_new(&x->flin.x_obj ,fp);
+	{	floatinlet_new(&x->flin.obj ,fp);
 		if (i < ac)
 			*fp = atom_getfloat(av++);   }
 

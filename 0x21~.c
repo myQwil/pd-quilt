@@ -4,21 +4,21 @@
 static t_class *bnot_class;
 
 typedef struct _bnot {
-	t_object x_obj;
+	t_object obj;
 	t_float f;
 } t_bnot;
 
 static void bnot_bang(t_bnot *x) {
-	outlet_float(x->x_obj.ob_outlet ,~(int)x->f);
+	outlet_float(x->obj.ob_outlet ,~(int)x->f);
 }
 
 static void bnot_float(t_bnot *x ,t_float f) {
-	outlet_float(x->x_obj.ob_outlet ,~(int)(x->f=f));
+	outlet_float(x->obj.ob_outlet ,~(int)(x->f=f));
 }
 
 static void *bnot_new(t_floatarg f) {
 	t_bnot *x = (t_bnot *)pd_new(bnot_class);
-	outlet_new(&x->x_obj ,&s_float);
+	outlet_new(&x->obj ,&s_float);
 	x->f = f;
 	return (x);
 }

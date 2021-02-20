@@ -36,7 +36,7 @@ static gme_err_t hnd_err( const char *str ) {
 }
 
 typedef struct _gmepd {
-	t_object x_obj;
+	t_object obj;
 	Music_Emu *emu;   /* emulator object */
 	Music_Emu *info;  /* info-only emu fallback */
 	t_symbol *path;   /* path to the most recently read file */
@@ -339,8 +339,8 @@ static void gmepd_mask(t_gmepd *x ,t_symbol *s ,int ac ,t_atom *av) {
 static void *gmepd_new(t_class *gmeclass ,t_symbol *s ,int ac ,t_atom *av) {
 	t_gmepd *x = (t_gmepd *)pd_new(gmeclass);
 	int i = NCH;
-	while (i--) outlet_new(&x->x_obj ,&s_signal);
-	x->o_meta = outlet_new(&x->x_obj ,0);
+	while (i--) outlet_new(&x->obj ,&s_signal);
+	x->o_meta = outlet_new(&x->obj ,0);
 	if (ac) gmepd_solo(x ,NULL ,ac ,av);
 	x->read = x->open = x->stop = x->play = 0;
 	x->track = x->mask = 0;

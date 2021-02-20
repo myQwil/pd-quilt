@@ -4,7 +4,7 @@
 static t_class *sploat_class;
 
 typedef struct _sploat {
-	t_object x_obj;
+	t_object obj;
 	ufloat uf;
 	t_outlet *o_mt;
 	t_outlet *o_ex;
@@ -35,10 +35,10 @@ static void sploat_float(t_sploat *x ,t_float f) {
 
 static void *sploat_new(t_floatarg f) {
 	t_sploat *x = (t_sploat *)pd_new(sploat_class);
-	x->o_mt = outlet_new(&x->x_obj ,&s_float);
-	x->o_ex = outlet_new(&x->x_obj ,&s_float);
-	x->o_sg = outlet_new(&x->x_obj ,&s_float);
-	inlet_new(&x->x_obj ,&x->x_obj.ob_pd ,&s_float ,gensym("set"));
+	x->o_mt = outlet_new(&x->obj ,&s_float);
+	x->o_ex = outlet_new(&x->obj ,&s_float);
+	x->o_sg = outlet_new(&x->obj ,&s_float);
+	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("set"));
 	sploat_set(x ,f);
 	return (x);
 }

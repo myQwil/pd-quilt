@@ -13,7 +13,7 @@ typedef struct _is_pxy {
 } t_is_pxy;
 
 struct _is {
-	t_object x_obj;
+	t_object obj;
 	t_is_pxy *x_p;
 	t_symbol *type;
 };
@@ -24,12 +24,12 @@ static void is_peek(t_is *x ,t_symbol *s) {
 }
 
 static void is_bang(t_is *x) {
-	outlet_float(x->x_obj.ob_outlet ,!strcmp(x->type->s_name ,"bang"));
+	outlet_float(x->obj.ob_outlet ,!strcmp(x->type->s_name ,"bang"));
 }
 
 static void is_anything(t_is *x ,t_symbol *s ,int ac ,t_atom *av) {
 	int result = (x->type == s);
-	outlet_float(x->x_obj.ob_outlet ,result);
+	outlet_float(x->obj.ob_outlet ,result);
 }
 
 static t_symbol *is_check(t_symbol *s) {
@@ -64,7 +64,7 @@ static void *is_new(t_symbol *s) {
 	x->type = (*s->s_name) ? is_check(s) : &s_float;
 
 	inlet_new((t_object *)x ,(t_pd *)p ,0 ,0);
-	outlet_new(&x->x_obj ,&s_float);
+	outlet_new(&x->obj ,&s_float);
 	return (x);
 }
 

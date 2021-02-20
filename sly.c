@@ -14,7 +14,7 @@ static void sly_float(t_slope *x ,t_float f) {
 	t_float res = (x->log)
 		? exp(x->k * f) * x->min
 		:     x->k * f  + x->min;
-	outlet_float(x->x_obj.ob_outlet ,res);
+	outlet_float(x->obj.ob_outlet ,res);
 }
 
 static void *sly_new(t_symbol *s, int argc, t_atom *argv) {

@@ -14,7 +14,7 @@ static void slx_float(t_slope *x ,t_float f) {
 	t_float res = (x->log)
 		? log(f / x->min) * x->k
 		:    (f - x->min) * x->k;
-	outlet_float(x->x_obj.ob_outlet ,res);
+	outlet_float(x->obj.ob_outlet ,res);
 }
 
 static void *slx_new(t_symbol *s, int argc, t_atom *argv) {

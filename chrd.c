@@ -64,8 +64,8 @@ static void *chrd_new(t_symbol *s ,int ac ,t_atom *av) {
 	fp[0]=69 ,fp[1]=7 ,fp[2]=12;
 
 	for (int i=0; n--; op++,fp++,i++)
-	{	*op = outlet_new(&x->flin.x_obj ,&s_float);
-		floatinlet_new(&x->flin.x_obj ,fp);
+	{	*op = outlet_new(&x->flin.obj ,&s_float);
+		floatinlet_new(&x->flin.obj ,fp);
 		if (i<ac) *fp = atom_getfloat(av++);   }
 
 	return (y);

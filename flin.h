@@ -10,7 +10,7 @@ struct _inlet {
 };
 
 typedef struct _flin {
-	t_object x_obj;
+	t_object obj;
 	t_float *fp;  /* float array */
 	uint16_t ins; /* number of inlets */
 	uint16_t siz; /* pointer size */

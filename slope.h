@@ -3,7 +3,7 @@
 #include <string.h>
 
 typedef struct _slope {
-	t_object x_obj;
+	t_object obj;
 	double min;
 	double max;
 	double run;
@@ -49,10 +49,10 @@ static void slope_log(t_slope *x ,t_float f) {
 
 static t_slope *slope_new(t_class *cl ,int ac ,t_atom *av) {
 	t_slope *x = (t_slope *)pd_new(cl);
-	outlet_new(&x->x_obj ,&s_float);
-	inlet_new (&x->x_obj ,&x->x_obj.ob_pd ,&s_float ,gensym("min"));
-	inlet_new (&x->x_obj ,&x->x_obj.ob_pd ,&s_float ,gensym("max"));
-	inlet_new (&x->x_obj ,&x->x_obj.ob_pd ,&s_float ,gensym("run"));
+	outlet_new(&x->obj ,&s_float);
+	inlet_new (&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("min"));
+	inlet_new (&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("max"));
+	inlet_new (&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("run"));
 	t_float min=0 ,max=1 ,run=100;
 
 	if (ac && av->a_type == A_SYMBOL)

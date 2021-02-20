@@ -1,7 +1,7 @@
 #include "note.h"
 
 typedef struct _ntof {
-	t_object x_obj;
+	t_object obj;
 	t_note note;
 } t_ntof;
 
@@ -20,9 +20,9 @@ static void ntof_list(t_ntof *x ,t_symbol *s ,int ac ,t_atom *av) {
 
 static t_ntof *new_ntof(t_class *cl ,int argc ,t_atom *argv) {
 	t_ntof *x = (t_ntof *)pd_new(cl);
-	outlet_new(&x->x_obj ,&s_float);
-	inlet_new(&x->x_obj ,&x->x_obj.ob_pd ,&s_float ,gensym("ref"));
-	inlet_new(&x->x_obj ,&x->x_obj.ob_pd ,&s_float ,gensym("tet"));
+	outlet_new(&x->obj ,&s_float);
+	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("ref"));
+	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("tet"));
 
 	t_float ref=440 ,tet=12;
 	switch (argc)
