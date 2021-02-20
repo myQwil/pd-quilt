@@ -1,0 +1,25 @@
+#N canvas 730 400 451 301 14;
+#X msg 130 110 1 2 hi 4;
+#X msg 210 110 1 2 3 hi;
+#X msg 290 110 3;
+#X obj 210 140 t a;
+#X obj 150 180 has hi;
+#X obj 210 180 has 3;
+#X obj 260 180 has 4;
+#X obj 150 210 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
+0 1;
+#X obj 210 210 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
+0 1;
+#X obj 260 210 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
+0 1;
+#X text 50 60 checks if a list contains its creation arg;
+#X obj 200 30 cnv 15 48 24 empty empty has 4 12 0 18 -1 -262144 0;
+#X connect 0 0 3 0;
+#X connect 1 0 3 0;
+#X connect 2 0 3 0;
+#X connect 3 0 4 0;
+#X connect 3 0 5 0;
+#X connect 3 0 6 0;
+#X connect 4 0 7 0;
+#X connect 5 0 8 0;
+#X connect 6 0 9 0;
