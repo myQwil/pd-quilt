@@ -56,23 +56,8 @@ static t_hot *hot_new(t_class *cz ,t_class *cp ,t_symbol *s ,int ac ,t_atom *av)
 	t_bop *x = &z->x;
 	z->p = p;
 	p->x = x;
-	outlet_new(&x->bl.obj ,&s_float);
-	inlet_new (&x->bl.obj ,(t_pd *)p ,0 ,0);
-
-	if (ac>1 && av->a_type == A_FLOAT)
-	{	x->f1 = av->a_w.w_float;
-		av++;   }
-	else x->f1 = 0;
-
-	x->f2 = x->bl.loadbang = 0;
-	if (ac)
-	{	if (av->a_type == A_FLOAT)
-			x->f2 = av->a_w.w_float;
-		else if (av->a_type == A_SYMBOL)
-		{	const char *c = av->a_w.w_symbol->s_name;
-			if (c[strlen(c)-1] == '!')
-			{	x->f2 = strtof(c ,NULL);
-				x->bl.loadbang = 1;   }   }   }
+	bop_init(x ,ac ,av);
+	inlet_new(&x->bl.obj ,(t_pd *)p ,0 ,0);
 	return (z);
 }
 

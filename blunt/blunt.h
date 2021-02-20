@@ -121,11 +121,7 @@ static void bop_set(t_bop *x ,t_symbol *s ,int ac ,t_atom *av) {
 		x->f2 = av->a_w.w_float;
 }
 
-static t_bop *bop_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
-	t_bop *x = (t_bop *)pd_new(cl);
-	outlet_new     (&x->bl.obj ,&s_float);
-	floatinlet_new (&x->bl.obj ,&x->f2);
-
+static void bop_init(t_bop *x ,int ac ,t_atom *av) {
 	if (ac>1 && av->a_type == A_FLOAT)
 	{	x->f1 = av->a_w.w_float;
 		av++;   }
@@ -140,5 +136,13 @@ static t_bop *bop_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
 			if (c[strlen(c)-1] == '!')
 			{	x->f2 = strtof(c ,NULL);
 				x->bl.loadbang = 1;   }   }   }
+
+	outlet_new(&x->bl.obj ,&s_float);
+}
+
+static t_bop *bop_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
+	t_bop *x = (t_bop *)pd_new(cl);
+	bop_init(x ,ac ,av);
+	floatinlet_new(&x->bl.obj ,&x->f2);
 	return (x);
 }
