@@ -17,11 +17,13 @@ static void *has_new(t_symbol *s ,int ac ,t_atom *av) {
 
 static void has_list(t_has *x ,t_symbol *s ,int ac ,t_atom *av) {
 	int found = 0;
+	t_atomtype type = x->a.a_type;
 	for (; ac--; av++)
-		if (av->a_type == x->a.a_type
-		 && av->a_w.w_index == x->a.a_w.w_index)
-		{	found = 1;
-			break;   }
+		if (av->a_type == type)
+			if ((type == A_FLOAT && av->a_w.w_float  == x->a.a_w.w_float)
+			                     || av->a_w.w_symbol == x->a.a_w.w_symbol)
+			{	found = 1;
+				break;   }
 	outlet_float(x->obj.ob_outlet ,found);
 }
 
