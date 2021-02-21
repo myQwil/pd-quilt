@@ -1,25 +1,43 @@
 #N canvas 730 400 451 301 14;
-#X msg 130 110 1 2 hi 4;
-#X msg 210 110 1 2 3 hi;
-#X msg 290 110 3;
-#X obj 210 140 t a;
-#X obj 150 180 has hi;
-#X obj 210 180 has 3;
-#X obj 260 180 has 4;
-#X obj 150 210 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
+#X msg 30 130 1 2 hi 4;
+#X msg 110 130 1 2 3 hi;
+#X msg 190 130 3;
+#X obj 50 240 has hi;
+#X obj 110 240 has 3;
+#X obj 160 240 has 4;
+#X obj 50 270 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
 0 1;
-#X obj 210 210 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
+#X obj 110 270 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
 0 1;
-#X obj 260 210 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
+#X obj 160 270 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
 0 1;
-#X text 50 60 checks if a list contains its creation arg;
-#X obj 200 30 cnv 15 48 24 empty empty has 4 12 0 18 -1 -262144 0;
-#X connect 0 0 3 0;
-#X connect 1 0 3 0;
-#X connect 2 0 3 0;
-#X connect 3 0 4 0;
-#X connect 3 0 5 0;
+#X obj 200 20 cnv 15 48 24 empty empty has 4 12 0 18 -1 -262144 0;
+#X obj 240 130 pointer;
+#X msg 220 240 2;
+#X obj 240 160 t p p;
+#X msg 310 130 symbol bang;
+#X obj 310 250 namecanvas foo;
+#X msg 240 100 traverse foo \, bang;
+#X obj 110 200 t a;
+#X obj 310 160 t s s;
+#X obj 160 210 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+-262144;
+#X text 30 50 checks if a list contains a specific atom value;
+#X connect 0 0 16 0;
+#X connect 1 0 16 0;
+#X connect 2 0 16 0;
 #X connect 3 0 6 0;
 #X connect 4 0 7 0;
 #X connect 5 0 8 0;
-#X connect 6 0 9 0;
+#X connect 10 0 12 0;
+#X connect 11 0 5 1;
+#X connect 12 0 16 0;
+#X connect 12 1 5 1;
+#X connect 13 0 17 0;
+#X connect 15 0 10 0;
+#X connect 16 0 3 0;
+#X connect 16 0 4 0;
+#X connect 16 0 5 0;
+#X connect 17 0 16 0;
+#X connect 17 1 5 1;
+#X connect 18 0 5 0;

@@ -16,7 +16,7 @@ static void pak_pointer(t_pak *x ,t_gpointer *gp) {
 }
 
 static void pak_pxy_pointer(t_pak_pxy *p ,t_gpointer *gp) {
-	pak_p(p->p_x ,p->ptr ,gp ,p->idx);
+	pak_p(p->x ,p->ptr ,gp ,p->idx);
 }
 
 static int pak_l(t_pak *x ,t_symbol *s ,int ac ,t_atom *av ,int i) {

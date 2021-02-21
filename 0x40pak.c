@@ -1,5 +1,5 @@
 #define PAK_FIRST(x) ((x)->n - 1)
-#define PAK_INDEX(p) ((p)->p_x->n - (p)->idx - 1)
+#define PAK_INDEX(p) ((p)->x->n - (p)->idx - 1)
 
 #include "pak.h"
 
@@ -18,7 +18,7 @@ static void rpak_pointer(t_pak *x ,t_gpointer *gp) {
 }
 
 static void rpak_pxy_pointer(t_pak_pxy *p ,t_gpointer *gp) {
-	t_pak *x = p->p_x;
+	t_pak *x = p->x;
 	int i = PAK_INDEX(p);
 	t_gpointer *ptr = (i) ? x->ins[i-1]->ptr : x->ptr;
 	pak_p(x ,ptr ,gp ,i);

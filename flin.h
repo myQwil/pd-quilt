@@ -35,7 +35,7 @@ static int flin_resize(t_flin *x ,int n) {
 			return -2;
 		x->siz = d;
 		t_float *fp = x->fp;
-		t_inlet *ip = ((t_object *)x)->ob_inlet;
+		t_inlet *ip = x->obj.ob_inlet;
 		for (int i=x->ins; i--; fp++ ,ip=ip->i_next)
 			ip->i_floatslot = fp;
 		return n;   }

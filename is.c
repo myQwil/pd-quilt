@@ -8,13 +8,13 @@ static t_class *is_proxy;
 typedef struct _is t_is;
 
 typedef struct _is_pxy {
-	t_object p_obj;
-	t_is *p_x;
+	t_object obj;
+	t_is *x;
 } t_is_pxy;
 
 struct _is {
 	t_object obj;
-	t_is_pxy *x_p;
+	t_is_pxy *p;
 	t_symbol *type;
 };
 
@@ -45,10 +45,10 @@ static t_symbol *is_check(t_symbol *s) {
 }
 
 static void is_pxy_anything(t_is_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
-	p->p_x->type = is_check(s);
+	p->x->type = is_check(s);
 }
 
-static void is_type(t_is *x ,t_symbol *s ,int ac ,t_atom *av) {
+static void is_set(t_is *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (!ac) return;
 	if      (av->a_type == A_SYMBOL)  x->type = is_check(av->a_w.w_symbol);
 	else if (av->a_type == A_FLOAT)   x->type = &s_float;
@@ -59,8 +59,8 @@ static void *is_new(t_symbol *s) {
 	t_is *x = (t_is *)pd_new(is_class);
 	t_is_pxy *p = (t_is_pxy *)pd_new(is_proxy);
 
-	x->x_p = p;
-	p->p_x = x;
+	x->p = p;
+	p->x = x;
 	x->type = (*s->s_name) ? is_check(s) : &s_float;
 
 	inlet_new((t_object *)x ,(t_pd *)p ,0 ,0);
@@ -69,7 +69,7 @@ static void *is_new(t_symbol *s) {
 }
 
 static void is_free(t_is *x) {
-	if (x->x_p) pd_free((t_pd *)x->x_p);
+	pd_free((t_pd *)x->p);
 }
 
 void is_setup(void) {
@@ -80,8 +80,8 @@ void is_setup(void) {
 	class_addbang     (is_class ,is_bang);
 	class_addanything (is_class ,is_anything);
 
-	class_addmethod(is_class ,(t_method)is_type
-		,gensym("type") ,A_GIMME  ,0);
+	class_addmethod(is_class ,(t_method)is_set
+		,gensym("set") ,A_GIMME  ,0);
 	class_addmethod(is_class ,(t_method)is_peek
 		,gensym("peek") ,A_DEFSYM ,0);
 

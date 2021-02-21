@@ -4,8 +4,8 @@
 typedef struct _pak t_pak;
 
 typedef struct _pak_pxy {
-	t_object p_obj;
-	t_pak *p_x;
+	t_object obj;
+	t_pak *x;
 	t_gpointer *ptr;   /* inlet's associated pointer */
 	int idx;           /* inlet index */
 } t_pak_pxy;
@@ -82,7 +82,7 @@ static t_pak *new_pak(t_class *cl ,t_class *pxy ,int ac ,t_atom *av ,int r) {
 		int hasptr = (*tp==A_POINTER || *tp==A_GIMME);
 		if (i)
 		{	*pp = (t_pak_pxy *)pd_new(pxy);
-			(*pp)->p_x = x;
+			(*pp)->x = x;
 			(*pp)->idx = i;
 			if (hasptr) (*pp)->ptr = gp;
 			inlet_new(&x->obj ,(t_pd *)*pp ,0 ,0);
@@ -141,7 +141,7 @@ static void pak_bang(t_pak *x) {
 }
 
 static void pak_pxy_bang(t_pak_pxy *p) {
-	t_pak *x = p->p_x;
+	t_pak *x = p->x;
 	int i = PAK_INDEX(p);
 	t_atomtype type = x->type[i];
 	if (type == A_SYMBOL || type == A_GIMME)
@@ -172,7 +172,7 @@ static void pak_float(t_pak *x ,t_float f) {
 	pak_f(x ,f ,PAK_FIRST(x));
 }
 static void pak_pxy_float(t_pak_pxy *p ,t_float f) {
-	pak_f(p->p_x ,f ,PAK_INDEX(p));
+	pak_f(p->x ,f ,PAK_INDEX(p));
 }
 
 
@@ -187,7 +187,7 @@ static void pak_symbol(t_pak *x ,t_symbol *s) {
 	pak_s(x ,s ,PAK_FIRST(x));
 }
 static void pak_pxy_symbol(t_pak_pxy *p ,t_symbol *s) {
-	pak_s(p->p_x ,s ,PAK_INDEX(p));
+	pak_s(p->x ,s ,PAK_INDEX(p));
 }
 
 
@@ -209,7 +209,7 @@ static void pak_list(t_pak *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (pak_l(x ,0 ,ac ,av ,PAK_FIRST(x))) pak_bang(x);
 }
 static void pak_pxy_list(t_pak_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
-	pak_l(p->p_x ,s ,ac ,av ,PAK_INDEX(p));
+	pak_l(p->x ,s ,ac ,av ,PAK_INDEX(p));
 }
 
 
@@ -224,7 +224,7 @@ static void pak_anything(t_pak *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (pak_a(x ,s ,ac ,av ,PAK_FIRST(x))) pak_bang(x);
 }
 static void pak_pxy_anything(t_pak_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
-	pak_a(p->p_x ,s ,ac ,av ,PAK_INDEX(p));
+	pak_a(p->x ,s ,ac ,av ,PAK_INDEX(p));
 }
 
 
