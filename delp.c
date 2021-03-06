@@ -34,31 +34,13 @@ static void delp_stop(t_delp *x) {
 	outlet_float(x->o_on ,0);
 }
 
-static void delp_ft1(t_delp *x ,t_floatarg f) {
-	if (f < 0) f = 0;
-	x->deltime = f;
-}
-
 static void delp_push(t_delp *x ,t_floatarg f) {
-	x->remtime -= f;
+	x->remtime += f;
 	if (!x->stop && !x->pause)
 	{	clock_unset(x->clock);
 		x->remtime -= timesince(x->settime ,x->unit ,x->samps);
 		x->settime = clock_getlogicaltime();
 		clock_delay(x->clock ,x->remtime);   }
-}
-
-static void delp_bang(t_delp *x) {
-	clock_delay(x->clock ,x->deltime);
-	x->settime = clock_getlogicaltime();
-	x->remtime = x->deltime;
-	x->pause = x->stop = 0;
-	outlet_float(x->o_on ,1);
-}
-
-static void delp_float(t_delp *x ,t_float f) {
-	delp_ft1(x ,f);
-	delp_bang(x);
 }
 
 static void delp_pause(t_delp *x) {
@@ -88,8 +70,22 @@ static void delp_tempo(t_delp *x ,t_symbol *s ,int ac ,t_atom *av) {
 	clock_setunit(x->clock ,x->unit ,x->samps);
 }
 
-static void delp_free(t_delp *x) {
-	clock_free(x->clock);
+static void delp_ft1(t_delp *x ,t_floatarg f) {
+	if (f < 0) f = 0;
+	x->deltime = f;
+}
+
+static void delp_bang(t_delp *x) {
+	clock_delay(x->clock ,x->deltime);
+	x->settime = clock_getlogicaltime();
+	x->remtime = x->deltime;
+	x->pause = x->stop = 0;
+	outlet_float(x->o_on ,1);
+}
+
+static void delp_float(t_delp *x ,t_float f) {
+	delp_ft1(x ,f);
+	delp_bang(x);
 }
 
 static void *delp_new(t_symbol *s ,int argc ,t_atom *argv) {
@@ -107,6 +103,10 @@ static void *delp_new(t_symbol *s ,int argc ,t_atom *argv) {
 	x->unitname = gensym("msec");
 	delp_tempo(x ,0 ,argc ,argv);
 	return (x);
+}
+
+static void delp_free(t_delp *x) {
+	clock_free(x->clock);
 }
 
 void delp_setup(void) {

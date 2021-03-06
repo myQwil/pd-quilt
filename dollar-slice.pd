@@ -1,4 +1,4 @@
-#N canvas 575 185 481 581 14;
+#N canvas 570 180 481 581 14;
 #X msg 60 40 list a b c 4 e f g;
 #X msg 60 70 foo \$[:] bar;
 #X msg 70 100 list a b c 4 e f g;

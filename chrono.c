@@ -24,12 +24,12 @@ static void chrono_bang(t_chrono *x) {
 }
 
 static void chrono_push(t_chrono *x ,t_floatarg f) {
-	x->setmore += f;
+	x->setmore -= f;
 }
 
 static void chrono_float(t_chrono *x ,t_floatarg f) {
 	chrono_bang(x);
-	x->setmore -= f;
+	chrono_push(x ,f);
 }
 
 static void chrono_bang2(t_chrono *x) {

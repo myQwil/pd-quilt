@@ -1,4 +1,4 @@
-#N canvas 575 180 351 421 14;
+#N canvas 570 180 351 421 14;
 #X obj 110 20 inlet;
 #X obj 150 140 inlet;
 #X obj 200 80 loadbang;
@@ -8,7 +8,7 @@
 #X obj 100 140 \$1;
 #X obj 100 180 sel;
 #X obj 110 50 t f f;
-#N canvas 925 360 351 241 neg 0;
+#N canvas 920 360 351 241 neg 0;
 #X obj 130 30 inlet;
 #X obj 130 60 < 0;
 #X obj 130 90 sel;

@@ -1,4 +1,4 @@
-#N canvas 400 275 501 401 14;
+#N canvas 100 210 501 401 14;
 #X obj 250 20 inlet;
 #X obj 200 190 inlet;
 #X obj 340 190 inlet;
@@ -15,9 +15,9 @@
 #X obj 30 210 sel;
 #X obj 60 240 s \$0itr;
 #X floatatom 200 123 5 0 0 0 - #0tonbx #0frnbx;
-#X obj 201 144 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
+#X obj 200 144 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
 -243850 -75900 -1;
-#X obj 221 144 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
+#X obj 220 144 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
 -243850 -75900 -1;
 #X obj 200 220 route set;
 #X obj 170 260 1;

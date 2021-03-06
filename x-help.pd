@@ -1,41 +1,40 @@
-#N canvas 693 321 557 425 14;
-#X obj 89 253 t a;
-#X msg 59 130 list 12;
-#X msg 77 159 list hi;
-#X obj 95 206 pointer;
-#X obj 66 323 is list;
-#X obj 131 323 is float;
-#X obj 204 323 is symbol;
-#X obj 283 323 is pointer;
-#X msg 264 130 list 12;
-#X msg 282 159 list hi;
-#X obj 300 206 pointer;
-#X obj 281 233 x a;
-#X msg 123 229 1 2 3;
-#X msg 370 217 1 2 3;
-#X obj 66 352 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
+#N canvas 690 320 551 421 14;
+#X obj 80 270 t a;
+#X msg 50 130 list 12;
+#X msg 70 160 list hi;
+#X obj 90 220 pointer;
+#X obj 60 340 is list;
+#X obj 130 340 is float;
+#X obj 200 340 is symbol;
+#X obj 280 340 is pointer;
+#X msg 260 130 list 12;
+#X msg 280 160 list hi;
+#X obj 300 220 pointer;
+#X obj 280 250 x a;
+#X msg 160 220 1 2 3;
+#X msg 370 220 1 2 3;
+#X obj 60 370 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
+1 1;
+#X obj 130 370 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
 0 1;
-#X obj 131 352 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
+#X obj 200 370 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
 0 1;
-#X obj 204 352 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
+#X obj 280 370 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
 0 1;
-#X obj 283 352 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-0 1;
-#X obj 404 285 is p;
-#X obj 388 311 spigot;
-#X obj 388 343 pointer;
-#X obj 388 367 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#X obj 400 280 is p;
+#X obj 380 310 spigot;
+#X obj 380 340 pointer;
+#X obj 380 370 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#X obj 363 281 x;
-#N canvas 0 0 450 300 foo 0;
-#X restore 397 142 pd foo;
-#X msg 95 182 traverse pd-foo \, bang;
-#X msg 300 182 traverse pd-foo \, bang;
-#X obj 267 25 cnv 15 21 24 empty empty x 4 12 0 18 -1 -262144 0;
-#X text 204 49 explicit trigger;
-#X text 33 70 A variation of [trigger] that sends 1-atom lists as the
+#X obj 360 280 x;
+#X obj 260 20 cnv 15 21 24 empty empty x 4 12 0 18 -1 -262144 0;
+#X text 200 50 explicit trigger;
+#X text 30 70 A variation of [trigger] that sends 1-atom lists as the
 atom itself when either a number \, the letter 'a' \, or no creation
 args are used.;
+#X obj 400 30 namecanvas foo;
+#X msg 90 190 traverse foo \, bang;
+#X msg 300 190 traverse foo \, bang;
 #X connect 0 0 4 0;
 #X connect 0 0 5 0;
 #X connect 0 0 6 0;
@@ -63,5 +62,5 @@ args are used.;
 #X connect 20 0 21 0;
 #X connect 22 0 19 0;
 #X connect 22 1 18 0;
-#X connect 24 0 3 0;
-#X connect 25 0 10 0;
+#X connect 27 0 3 0;
+#X connect 28 0 10 0;

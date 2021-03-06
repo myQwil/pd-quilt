@@ -1,7 +1,7 @@
-#N canvas 152 309 594 587 14;
-#X obj 170 446 *~;
-#X obj 210 528 dac~;
-#N canvas 0 0 450 300 (subpatch) 0;
+#N canvas 150 300 591 581 14;
+#X obj 170 460 *~;
+#X obj 210 540 dac~;
+#N canvas 0 0 451 301 (subpatch) 0;
 #X array nsf 100 float 1;
 #A 0 0.112152 0.112152 0.112305 0.107178 0.0921936 0.0842285 0.084259
 0.0846863 0.0810547 0.0668335 0.0575562 0.0576477 0.0569458 0.0578918
@@ -19,50 +19,50 @@
 -0.0740356 -0.0842285 -0.110413 -0.112579 -0.107697 -0.0950317 -0.0840454
 -0.0834351 -0.0838318;
 #X coords 0 1 99 -1 200 140 1;
-#X restore 344 97 graph;
-#X obj 50 260 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
+#X restore 340 90 graph;
+#X obj 50 270 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
 0 1;
-#X floatatom 72 249 0 0 0 0 - - -;
-#X obj 159 171 cupqb;
-#X obj 33 101 openpanel;
-#X obj 48 209 bng 15 250 50 0 empty empty play/pause 17 7 0 8 -1 -262144
+#X floatatom 70 250 0 0 0 0 - - -;
+#X obj 150 170 cupqb;
+#X obj 30 90 openpanel;
+#X obj 40 200 bng 15 250 50 0 empty empty play/pause 17 7 0 10 -1 -262144
 -262144;
-#X msg 262 216 stop;
-#X msg 251 190 tempo \$1;
-#X floatatom 251 140 5 0 400 0 - - -;
-#X obj 195 446 *~;
-#X obj 220 446 *~;
-#X obj 245 446 *~;
-#X obj 270 446 *~;
-#X obj 251 164 / 100;
-#X obj 50 365 tabwrite~ nsf;
-#X obj 159 151 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#X msg 260 230 stop;
+#X msg 250 200 tempo \$1;
+#X floatatom 250 140 5 0 400 0 - - -;
+#X obj 190 460 *~;
+#X obj 220 460 *~;
+#X obj 240 460 *~;
+#X obj 270 460 *~;
+#X obj 250 170 / 100;
+#X obj 50 370 tabwrite~ nsf;
+#X obj 150 150 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#X msg 159 218 \$1 \, info;
-#X obj 152 250 gmes~, f 34;
-#X msg 33 76 symbol ~/Music/Games;
-#X obj 256 30 cnv 15 64 24 empty empty gmes~ 4 12 0 18 -1 -262144 0
+#X msg 150 220 \$1 \, info;
+#X obj 150 260 gmes~, f 34;
+#X msg 30 60 symbol ~/Music/Games;
+#X obj 350 20 cnv 15 64 24 empty empty gmes~ 4 12 0 18 -1 -262144 0
 ;
-#X text 162 55 the multi-channel version of gme~;
-#X obj 220 488 *~;
-#X obj 251 89 loadbang;
-#X msg 251 114 100;
-#X obj 319 302 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -1 -262144
+#X text 250 50 the multi-channel version of gme~;
+#X obj 220 500 *~;
+#X obj 250 80 loadbang;
+#X msg 250 110 100;
+#X obj 310 320 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -1 -262144
 -262144 0 1;
-#X msg 33 126 read \$1 \, path \, info \, bang;
-#X obj 339 302 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -1 -262144
+#X msg 30 120 read \$1 \, path \, info \, bang;
+#X obj 330 320 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -1 -262144
 -262144 0 1;
-#X obj 359 302 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -1 -262144
+#X obj 350 320 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -1 -262144
 -262144 0 1;
-#X obj 379 302 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -1 -262144
+#X obj 370 320 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -1 -262144
 -262144 0 1;
-#X obj 399 302 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -1 -262144
+#X obj 390 320 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -1 -262144
 -262144 0 1;
-#X obj 287 475 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10
+#X obj 280 490 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10
 -1 -262144 -262144 0 1;
-#X floatatom 287 495 0 0 0 0 - - -;
-#X obj 50 280 metro 28;
-#X obj 307 279 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -1 -262144
+#X floatatom 280 510 0 0 0 0 - - -;
+#X obj 50 290 metro 28;
+#X obj 300 290 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -1 -262144
 -262144 0 1;
 #X connect 0 0 23 0;
 #X connect 3 0 34 0;

@@ -23,7 +23,7 @@
 #X floatatom 160 290 0 0 0 0 - - -;
 #X floatatom 250 290 0 0 0 0 - - -;
 #X floatatom 340 290 0 0 0 0 - - -;
-#X text 154 60 == \, != \, > \, < \, >= \, <=;
+#X text 150 60 == \, != \, > \, < \, >= \, <=;
 #X text 130 80 arithmetic with hot inlets;
 #X obj 160 30 cnv 15 164 24 empty empty hot\ binops\ 2 4 12 0 18 -1 -262144
 0;

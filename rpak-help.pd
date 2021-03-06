@@ -1,61 +1,60 @@
-#N canvas 654 363 505 360 14;
-#X obj 230 289 print;
-#X obj 118 165 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#N canvas 650 360 501 361 14;
+#X obj 120 310 print;
+#X obj 110 160 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#X msg 179 164 123;
-#X msg 228 231 hi;
-#X obj 38 163 pointer;
-#X msg 217 164 8 7;
-#X symbolatom 382 246 0 0 0 0 - - -;
-#N canvas 494 294 450 300 foo 0;
-#X restore 38 100 pd foo;
-#X msg 38 134 traverse pd-foo \, bang;
-#X obj 169 30 cnv 15 178 24 empty empty @pak\ &\ @unpak 4 12 0 18 -1
--262144 0;
-#X obj 121 256 @pak f f a;
-#X text 160 291 a f f;
-#X msg 38 190 . . \$1;
-#X obj 382 316 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#X msg 180 160 123;
+#X msg 220 230 hi;
+#X obj 30 160 pointer;
+#X msg 220 160 8 7;
+#X symbolatom 400 260 0 0 0 0 - - -;
+#X obj 160 30 cnv 15 178 24 empty empty @pak\ &\ @unpak 4 12 0
+18 -1 -262144 0;
+#X obj 120 260 @pak f f a;
+#X text 170 310 a f f;
+#X msg 30 190 . . \$1;
+#X obj 400 300 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#X obj 335 316 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#X obj 340 300 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#X obj 289 316 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
+#X obj 280 300 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#X text 106 74 args are written in receiving order;
-#X text 126 54 outputs the values in reverse;
-#X msg 203 205 6 six;
-#X obj 289 219 @unpak a a a;
-#X msg 307 110 a b;
-#X symbolatom 289 246 0 0 0 0 - - -;
-#X symbolatom 335 246 0 0 0 0 - - -;
-#X msg 267 110 a;
-#X msg 347 110 a b c;
-#X msg 377 141 foo . .;
-#X msg 387 166 bar d .;
-#X msg 396 191 baz e f;
-#X msg 141 164 dud;
-#X connect 1 0 10 0;
-#X connect 2 0 10 0;
-#X connect 3 0 10 2;
-#X connect 4 0 12 0;
-#X connect 5 0 10 0;
-#X connect 6 0 13 0;
+#X text 100 70 args are written in receiving order;
+#X text 120 50 outputs the values in reverse;
+#X msg 210 200 6 six;
+#X obj 280 230 @unpak a a a;
+#X msg 300 110 a b;
+#X symbolatom 280 260 0 0 0 0 - - -;
+#X symbolatom 340 260 0 0 0 0 - - -;
+#X msg 260 110 a;
+#X msg 340 110 a b c;
+#X msg 370 140 foo . .;
+#X msg 380 170 bar d .;
+#X msg 390 200 baz e f;
+#X msg 140 160 dud;
+#X obj 30 100 namecanvas foo;
+#X msg 30 130 traverse foo \, bang;
+#X connect 1 0 8 0;
+#X connect 2 0 8 0;
+#X connect 3 0 8 2;
+#X connect 4 0 10 0;
+#X connect 5 0 8 0;
+#X connect 6 0 11 0;
 #X connect 6 0 0 0;
-#X connect 8 0 4 0;
-#X connect 10 0 0 0;
-#X connect 12 0 10 0;
-#X connect 18 0 10 1;
-#X connect 19 0 21 0;
-#X connect 19 1 22 0;
-#X connect 19 2 6 0;
-#X connect 20 0 19 0;
-#X connect 21 0 15 0;
-#X connect 21 0 0 0;
-#X connect 22 0 14 0;
-#X connect 22 0 0 0;
-#X connect 23 0 19 0;
-#X connect 24 0 19 0;
-#X connect 25 0 19 0;
-#X connect 26 0 19 0;
-#X connect 27 0 19 0;
-#X connect 28 0 10 0;
+#X connect 8 0 0 0;
+#X connect 10 0 8 0;
+#X connect 16 0 8 1;
+#X connect 17 0 19 0;
+#X connect 17 1 20 0;
+#X connect 17 2 6 0;
+#X connect 18 0 17 0;
+#X connect 19 0 13 0;
+#X connect 19 0 0 0;
+#X connect 20 0 12 0;
+#X connect 20 0 0 0;
+#X connect 21 0 17 0;
+#X connect 22 0 17 0;
+#X connect 23 0 17 0;
+#X connect 24 0 17 0;
+#X connect 25 0 17 0;
+#X connect 26 0 8 0;
+#X connect 28 0 4 0;
