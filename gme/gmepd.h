@@ -35,7 +35,7 @@ static gme_err_t hnd_err( const char *str ) {
 	return str;
 }
 
-typedef struct _gmepd {
+typedef struct {
 	t_object obj;
 	Music_Emu *emu;   /* emulator object */
 	Music_Emu *info;  /* info-only emu fallback */

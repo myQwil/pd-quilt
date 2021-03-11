@@ -4,7 +4,7 @@
 
 static t_class *tabread2_class;
 
-typedef struct _tabread2 {
+typedef struct {
 	t_object obj;
 	t_symbol *arrayname;
 	t_word *vec;

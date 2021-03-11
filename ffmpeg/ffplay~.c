@@ -14,14 +14,14 @@ typedef const char *err_t;
 /* -------------------------- FFmpeg player -------------------------- */
 static t_class *ffplay_class;
 
-typedef struct _playlist {
+typedef struct {
 	t_symbol **trk; /* m3u list of tracks */
 	t_symbol *dir;  /* starting directory */
 	int      siz;   /* size of the list */
 	int      max;   /* list's current maximum capacity */
 } t_playlist;
 
-typedef struct _ffplay {
+typedef struct {
 	t_object obj;
 	AVFormatContext *ic;
 	AVCodecContext  *ctx;

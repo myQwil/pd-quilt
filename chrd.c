@@ -3,7 +3,7 @@
 /* -------------------------- chrd -------------------------- */
 static t_class *chrd_class;
 
-typedef struct _chrd {
+typedef struct {
 	t_music z;
 	unsigned all:1;  /* all-outlets toggle */
 	unsigned midi:1; /* midi-note toggle */

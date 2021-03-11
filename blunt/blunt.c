@@ -7,7 +7,7 @@ void revop_setup(void);
 /*                           connectives                           */
 /* --------------------------------------------------------------- */
 
-typedef struct _num {
+typedef struct {
 	t_blunt bl;
 	t_float f;
 } t_num;
@@ -358,7 +358,7 @@ static void *b3_fpc_new(t_symbol *s ,int ac ,t_atom *av) {
 /* -------------------------- bang ------------------------------ */
 static t_class *bng_class;
 
-typedef struct _bng {
+typedef struct {
 	t_blunt bl;
 } t_bng;
 
@@ -394,7 +394,7 @@ static void bng_setup(void) {
 /* -------------------------- symbol ------------------------------ */
 static t_class *sym_class;
 
-typedef struct _sym {
+typedef struct {
 	t_blunt bl;
 	t_symbol *sym;
 } t_sym;

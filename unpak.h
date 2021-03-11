@@ -1,12 +1,12 @@
 #include "m_pd.h"
 #include <string.h>
 
-typedef struct unpakout {
+typedef struct {
 	t_atomtype type;
 	t_outlet *outlet;
 } t_unpakout;
 
-typedef struct _unpak {
+typedef struct {
 	t_object obj;
 	t_unpakout *vec;
 	t_int mute;

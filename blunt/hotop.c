@@ -4,12 +4,12 @@
 /*                       hot arithmetics                           */
 /* --------------------------------------------------------------- */
 
-typedef struct _hot_pxy {
+typedef struct {
 	t_object obj;
 	t_bop *x;
 } t_hot_pxy;
 
-typedef struct _hot {
+typedef struct {
 	t_bop x;
 	t_hot_pxy *p;
 } t_hot;

@@ -9,7 +9,7 @@ struct _inlet {
 	t_float *i_floatslot;
 };
 
-typedef struct _flin {
+typedef struct {
 	t_object obj;
 	t_float *fp;  /* float array */
 	uint16_t ins; /* number of inlets */

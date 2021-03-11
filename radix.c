@@ -6,7 +6,7 @@
 
 #include "radix.h"
 
-typedef struct _radixtcl {
+typedef struct {
 	t_radix z;
 	double  x_fontwidth;
 	int     x_zh;         // un-zoomed height

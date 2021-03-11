@@ -3,7 +3,7 @@
 /* -------------------------- linp~ ------------------------------ */
 static t_class *linp_tilde_class;
 
-typedef struct _linp {
+typedef struct {
 	t_object obj;
 	t_sample target; /* target value of ramp */
 	t_sample value;  /* current value of ramp at block-borders */

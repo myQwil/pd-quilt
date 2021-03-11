@@ -3,7 +3,7 @@
 /* -------------------------- sploat -------------------------- */
 static t_class *sploat_class;
 
-typedef struct _sploat {
+typedef struct {
 	t_object obj;
 	ufloat uf;
 	t_outlet *o_mt;

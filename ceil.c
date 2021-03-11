@@ -4,7 +4,7 @@
 /* -------------------------- ceil -------------------------- */
 static t_class *ceil_class;
 
-typedef struct _ceil {
+typedef struct {
 	t_object obj;
 	t_float f;
 } t_ceil;

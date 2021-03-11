@@ -6,7 +6,7 @@
 /* -------------------------- rand -------------------------- */
 static t_class *rand_class;
 
-typedef struct _rand {
+typedef struct {
 	t_flin flin;
 	t_float prev;     /* previous random number */
 	int repc;         /* repeat count */

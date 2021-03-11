@@ -7,7 +7,7 @@ static int isoperator(char c) {
 	return (c=='^' || c=='v' || c=='+' || c=='-' || c=='*' || c=='/');
 }
 
-typedef struct _music {
+typedef struct {
 	t_flin flin;
 	t_note note;
 	t_float oct;     /* # of semitone steps per octave */
@@ -134,7 +134,7 @@ static void music_list(t_music *x ,t_symbol *s ,int ac ,t_atom *av) {
 	music_z(x ,0 ,ac ,av);
 }
 
-static void music_f(t_music *x ,t_float f ,char c, t_float g);
+static void music_f(t_music *x ,t_float f ,char c ,t_float g);
 
 static void music_float(t_music *x ,t_float f) {
 	music_f(x ,f ,0 ,0);

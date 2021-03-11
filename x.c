@@ -10,12 +10,12 @@ static t_class *xtrigger_class;
 #define TR_LIST 4
 #define TR_ANYTHING 5
 
-typedef struct xtriggerout {
+typedef struct {
 	int type;		 /* outlet type from above */
 	t_outlet *outlet;
 } t_xtriggerout;
 
-typedef struct _xtrigger {
+typedef struct {
 	t_object obj;
 	t_int siz;
 	t_xtriggerout *vec;

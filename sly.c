@@ -17,12 +17,12 @@ static void sly_float(t_slope *x ,t_float f) {
 	outlet_float(x->obj.ob_outlet ,res);
 }
 
-static void *sly_new(t_symbol *s, int argc, t_atom *argv) {
-	return (slope_new(sly_class, argc, argv));
+static void *sly_new(t_symbol *s ,int argc ,t_atom *argv) {
+	return (slope_new(sly_class ,argc ,argv));
 }
 
 void sly_setup(void) {
 	sly_class = slope_setup(gensym("sly") ,(t_newmethod)sly_new);
 	class_addfloat(sly_class ,sly_float);
-	class_sethelpsymbol(sly_class, gensym("slope"));
+	class_sethelpsymbol(sly_class ,gensym("slope"));
 }

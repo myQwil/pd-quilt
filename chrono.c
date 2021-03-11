@@ -7,7 +7,7 @@ EXTERN void parsetimeunits(void *x ,t_float amount ,t_symbol *unitname
 /* -------------------------- chrono ------------------------------ */
 static t_class *chrono_class;
 
-typedef struct _chrono {
+typedef struct {
 	t_object obj;
 	t_symbol *unitname;
 	t_float  unit;

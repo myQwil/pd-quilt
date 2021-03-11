@@ -3,7 +3,7 @@
 /* -------------------------- gloat -------------------------- */
 static t_class *gloat_class;
 
-typedef struct _gloat {
+typedef struct {
 	t_object obj;
 	ufloat uf;
 } t_gloat;

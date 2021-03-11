@@ -3,7 +3,7 @@
 
 typedef struct _pak t_pak;
 
-typedef struct _pak_pxy {
+typedef struct {
 	t_object obj;
 	t_pak *x;
 	t_gpointer *ptr;   /* inlet's associated pointer */
@@ -127,8 +127,8 @@ static void pak_bang(t_pak *x) {
 	if (!x->outvec)
 	{	/* LATER figure out how to deal with reentrancy and pointers... */
 		if (x->nptr)
-			post("%s_bang: warning: reentry with pointers unprotected" ,
-				class_getname(*(t_pd *)x));
+			post("%s_bang: warning: reentry with pointers unprotected"
+				,class_getname(*(t_pd *)x));
 		outvec = (t_atom *)t_getbytes(size);
 		reentered = 1;   }
 	else

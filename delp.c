@@ -7,7 +7,7 @@ EXTERN void parsetimeunits(void *x ,t_float amount ,t_symbol *unitname
 /* -------------------------- delp ------------------------------ */
 static t_class *delp_class;
 
-typedef struct _delp {
+typedef struct {
 	t_object obj;
 	t_clock  *clock;
 	t_symbol *unitname;

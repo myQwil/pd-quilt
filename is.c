@@ -7,7 +7,7 @@ static t_class *is_proxy;
 
 typedef struct _is t_is;
 
-typedef struct _is_pxy {
+typedef struct {
 	t_object obj;
 	t_is *x;
 } t_is_pxy;

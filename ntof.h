@@ -1,6 +1,6 @@
 #include "note.h"
 
-typedef struct _ntof {
+typedef struct {
 	t_object obj;
 	t_note note;
 } t_ntof;

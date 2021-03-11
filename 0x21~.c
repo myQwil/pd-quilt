@@ -3,7 +3,7 @@
 /* -------------------------- bitwise negation -------------------------- */
 static t_class *bnot_class;
 
-typedef struct _bnot {
+typedef struct {
 	t_object obj;
 	t_float f;
 } t_bnot;

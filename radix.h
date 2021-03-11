@@ -68,7 +68,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // #define PD_COLOR_SELECT       0x0000FF
 // #define PD_COLOR_EDIT         0xFF0000
 
-typedef struct _radix {
+typedef struct {
 	t_iemgui x_gui;
 	t_clock  *x_clock_reset;
 	t_clock  *x_clock_wait;
@@ -104,19 +104,19 @@ static const char dgt[] = {
 
 /*------------------ global functions -------------------------*/
 
-static void radix_key(void *z, t_floatarg fkey);
-static void radix_draw_update(t_gobj *client, t_glist *glist);
+static void radix_key(void *z ,t_floatarg fkey);
+static void radix_draw_update(t_gobj *client ,t_glist *glist);
 
 /*------------------ radix functions --------------------------*/
 
 static void radix_tick_wait(t_radix *x) {
-	sys_queuegui(x, x->x_gui.x_glist, radix_draw_update);
+	sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);
 }
 
 static void radix_tick_reset(t_radix *x) {
 	if (x->x_gui.x_change && x->x_gui.x_glist)
 	{	x->x_gui.x_change = 0;
-		sys_queuegui(x, x->x_gui.x_glist, radix_draw_update);   }
+		sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);   }
 }
 
 static void radix_clip(t_radix *x) {
@@ -125,7 +125,7 @@ static void radix_clip(t_radix *x) {
 		else if (x->x_val > x->x_max) x->x_val = x->x_max;   }
 }
 
-static void radix_precision(t_radix *x, t_floatarg f) {
+static void radix_precision(t_radix *x ,t_floatarg f) {
 	int m = FLT_MANT_DIG / log2(x->x_base) + 1;
 	if      (f < 1) f = 1;
 	else if (f > m) f = m;
@@ -139,12 +139,12 @@ static int radix_bounds(t_float base) {
 	return base;
 }
 
-static void radix_dobase(t_radix *x, t_float f) {
+static void radix_dobase(t_radix *x ,t_float f) {
 	unsigned base = radix_bounds(f);
-	if (base > x->x_base) radix_precision(x, x->x_prec);
+	if (base > x->x_base) radix_precision(x ,x->x_prec);
 	x->x_base = base;
-	unsigned umax = -1, pwr = 1;
-	int bx = x->x_bexp = log(umax) / log(base), tx = 32;
+	unsigned umax = -1 ,pwr = 1;
+	int bx = x->x_bexp = log(umax) / log(base) ,tx = 32;
 	for (;bx; base *= base)
 	{	if (bx & 1) pwr *= base;
 		bx >>= 1;   }
@@ -153,27 +153,27 @@ static void radix_dobase(t_radix *x, t_float f) {
 	x->x_texp = tx;
 }
 
-static void radix_base(t_radix *x, t_floatarg f) {
-	radix_dobase(x, f);
-	sys_queuegui(x, x->x_gui.x_glist, radix_draw_update);
+static void radix_base(t_radix *x ,t_floatarg f) {
+	radix_dobase(x ,f);
+	sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);
 }
 
-static void radix_ebase(t_radix *x, t_floatarg base) {
+static void radix_ebase(t_radix *x ,t_floatarg base) {
 	x->x_e = radix_bounds(base);
-	sys_queuegui(x, x->x_gui.x_glist, radix_draw_update);
+	sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);
 }
 
-static void radix_be(t_radix *x, t_floatarg base) {
-	radix_dobase(x, base);
+static void radix_be(t_radix *x ,t_floatarg base) {
+	radix_dobase(x ,base);
 	x->x_e = x->x_base;
-	sys_queuegui(x, x->x_gui.x_glist, radix_draw_update);
+	sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);
 }
 
-static void out(char num[], int *i, const char *s, int l) {
+static void out(char num[] ,int *i ,const char *s ,int l) {
 	for (; l--; s++) num[(*i)++] = *s;
 }
 
-static char *fmt_u(uintmax_t u, char *s, int radx) {
+static char *fmt_u(uintmax_t u ,char *s ,int radx) {
 	unsigned long v;
 	for (   ; u>ULONG_MAX; u/=radx) *--s = dgt[u%radx];
 	for (v=u;           v; v/=radx) *--s = dgt[v%radx];
@@ -185,35 +185,35 @@ static void radix_ftoa(t_radix *x) {
 	int len=0;
 	if (uf.ex == 0xFF)
 	{	int neg = uf.sg;
-		if (uf.mt != 0) strcpy(x->x_buf, (neg?"-nan":"nan"));
-		else strcpy(x->x_buf, (neg?"-inf":"inf"));
+		if (uf.mt != 0) strcpy(x->x_buf ,(neg?"-nan":"nan"));
+		else strcpy(x->x_buf ,(neg?"-inf":"inf"));
 		len = 3+neg;
-		if (x->x_buflen != len) x->x_resize = 1, x->x_buflen = len;
+		if (x->x_buflen != len) x->x_resize = 1 ,x->x_buflen = len;
 		else x->x_resize = 0;
 		return;   }
 
 	long double y = x->x_val;
 	int radx = x->x_base;
 	unsigned pwr = x->x_pwr;
-	int bx=x->x_bexp, tx=x->x_texp;
-	int xb=bx-1, xt=tx-1;
-	int neg=0, t='g';
+	int bx=x->x_bexp ,tx=x->x_texp;
+	int xb=bx-1 ,xt=tx-1;
+	int neg=0 ,t='g';
 
 	/* based on: musl-libc /src/stdio/vfprintf.c */
 	unsigned size = (LDBL_MANT_DIG+xt)/tx + 1    // mantissa expansion
 		+ (LDBL_MAX_EXP+LDBL_MANT_DIG+xt+xb)/bx; // exponent expansion
 	uint32_t big[size];
-	uint32_t *a, *d, *r, *z;
-	int e2=0, e, i, j, l;
+	uint32_t *a ,*d ,*r ,*z;
+	int e2=0 ,e ,i ,j ,l;
 	char buf[bx+LDBL_MANT_DIG/4];
-	char ebuf0[3*sizeof(int)], *ebuf=&ebuf0[3*sizeof(int)], *estr;
+	char ebuf0[3*sizeof(int)] ,*ebuf=&ebuf0[3*sizeof(int)] ,*estr;
 
-	if (signbit(y)) y=-y, neg=1;
+	if (signbit(y)) y=-y ,neg=1;
 	int p = (x->x_numwidth && x->x_prec >= x->x_numwidth)
 		  ? x->x_numwidth-neg : x->x_prec;
 
-	y = frexpl(y, &e2) * 2;
-	if (y) y *= (1<<xt), e2-=tx;
+	y = frexpl(y ,&e2) * 2;
+	if (y) y *= (1<<xt) ,e2-=tx;
 
 	if (e2<0) a=r=z=big;
 	else a=r=z=big+sizeof(big)/sizeof(*big) - LDBL_MANT_DIG - 1;
@@ -235,8 +235,8 @@ static void radix_ftoa(t_radix *x) {
 		e2-=sh;   }
 
 	while (e2<0)
-	{	uint32_t carry=0, *b;
-		int sh=MIN(bx,-e2), need=1+(p+LDBL_MANT_DIG/3U+xb)/bx;
+	{	uint32_t carry=0 ,*b;
+		int sh=MIN(bx,-e2) ,need=1+(p+LDBL_MANT_DIG/3U+xb)/bx;
 		for (d=a; d<z; d++)
 		{	uint32_t rm = *d & ((1<<sh)-1);
 			*d = (*d>>sh) + carry;
@@ -248,7 +248,7 @@ static void radix_ftoa(t_radix *x) {
 		if (z-b > need) z = b+need;
 		e2+=sh;   }
 
-	if (a<z) for (i=radx, e=bx*(r-a); *a>=i; i*=radx, e++);
+	if (a<z) for (i=radx ,e=bx*(r-a); *a>=i; i*=radx ,e++);
 	else e=0;
 
 	/* Perform rounding: j is precision after the radix (possibly neg) */
@@ -259,7 +259,7 @@ static void radix_ftoa(t_radix *x) {
 		d = r + 1 + ((j+bx*LDBL_MAX_EXP)/bx - LDBL_MAX_EXP);
 		j += bx*LDBL_MAX_EXP;
 		j %= bx;
-		for (i=radx, j++; j<bx; i*=radx, j++);
+		for (i=radx ,j++; j<bx; i*=radx ,j++);
 		u = *d % i;
 		/* Are there any significant digits past j? */
 		if (u || d+1!=z)
@@ -270,7 +270,7 @@ static void radix_ftoa(t_radix *x) {
 			if      (u< i/2)           small=0x0.8p0;
 			else if (u==i/2 && d+1==z) small=0x1.0p0;
 			else                       small=0x1.8p0;
-			if (neg) round*=-1, small*=-1;
+			if (neg) round*=-1 ,small*=-1;
 			*d -= u;
 			/* Decide whether to round by probing round+small */
 			if (round+small != round)
@@ -279,7 +279,7 @@ static void radix_ftoa(t_radix *x) {
 				{	*d--=0;
 					if (d<a) *--a=0;
 					(*d)++;   }
-				for (i=radx, e=bx*(r-a); *a>=i; i*=radx, e++);   }   }
+				for (i=radx ,e=bx*(r-a); *a>=i; i*=radx ,e++);   }   }
 		if (z>d+1) z=d+1;   }
 
 	for (; z>a && !z[-1]; z--);
@@ -291,7 +291,7 @@ static void radix_ftoa(t_radix *x) {
 	{	t-=2; p--;   }
 
 	/* Count trailing zeros in last place */
-	if (z>a && z[-1]) for (i=radx, j=0; z[-1]%i==0; i*=radx, j++);
+	if (z>a && z[-1]) for (i=radx ,j=0; z[-1]%i==0; i*=radx ,j++);
 	else j=bx;
 	if ((t|32)=='f')
 		p = MIN(p,MAX(0,bx*(z-r-1)-j));
@@ -303,45 +303,45 @@ static void radix_ftoa(t_radix *x) {
 	{	if (e>0) l+=e;   }
 	else
 	{	int erad = x->x_e;
-		estr=fmt_u(e<0 ? -e : e, ebuf, erad);
+		estr=fmt_u(e<0 ? -e : e ,ebuf ,erad);
 		while(ebuf-estr<LEAD) *--estr='0';
 		*--estr = (e<0 ? '-' : '+');
 		*--estr = '^';
 		l += ebuf-estr;   }
 
-	char *num = x->x_buf, *dec=0, *nxt=0;
+	char *num = x->x_buf ,*dec=0 ,*nxt=0;
 	int ni=0;
-	out(num, &ni, "-", neg);
+	out(num ,&ni ,"-" ,neg);
 
 	if ((t|32)=='f')
 	{	if (a>r) a=r;
 		for (d=a; d<=r; d++)
-		{	char *s = fmt_u(*d, buf+bx, radx);
+		{	char *s = fmt_u(*d ,buf+bx ,radx);
 			if (d!=a) while (s>buf) *--s='0';
 			else if (s==buf+bx) *--s='0';
-			out(num, &ni, s, buf+bx-s);   }
+			out(num ,&ni ,s ,buf+bx-s);   }
 		if (p)
 		{	dec = num+ni;
-			out(num, &ni, ".", 1);   }
-		for (; d<z && p>0; d++, p-=bx)
-		{	char *s = fmt_u(*d, buf+bx, radx);
+			out(num ,&ni ,"." ,1);   }
+		for (; d<z && p>0; d++ ,p-=bx)
+		{	char *s = fmt_u(*d ,buf+bx ,radx);
 			while (s>buf) *--s='0';
-			out(num, &ni, s, MIN(bx,p));   }   }
+			out(num ,&ni ,s ,MIN(bx,p));   }   }
 	else
 	{	if (z<=a) z=a+1;
 		for (d=a; d<z && p>=0; d++)
-		{	char *s = fmt_u(*d, buf+bx, radx);
+		{	char *s = fmt_u(*d ,buf+bx ,radx);
 			if (s==buf+bx) *--s='0';
 			if (d!=a) while (s>buf) *--s='0';
 			else
-			{	out(num, &ni, s++, 1);
+			{	out(num ,&ni ,s++ ,1);
 				if (p>0)
 				{	dec = num+ni;
-					out(num, &ni, ".", 1);   }   }
-			out(num, &ni, s, MIN(buf+bx-s, p));
+					out(num ,&ni ,"." ,1);   }   }
+			out(num ,&ni ,s ,MIN(buf+bx-s ,p));
 			p -= buf+bx-s;   }
 		nxt = num+ni;
-		out(num, &ni, estr, ebuf-estr);   }
+		out(num ,&ni ,estr ,ebuf-estr);   }
 	num[ni] = '\0';
 	len = ni;
 
@@ -353,18 +353,18 @@ static void radix_ftoa(t_radix *x) {
 		if (nxt-dec >= reduce)
 		{	char *s1 = nxt-reduce;
 			ebuf = num+ni;
-			for (;nxt < ebuf; s1++, nxt++) *s1 = *nxt;
+			for (;nxt < ebuf; s1++ ,nxt++) *s1 = *nxt;
 			*s1 = '\0';
 			len = s1-num;   }
 		else
 		{	num[0] = (neg?'-':'+');
 			num[1] = '\0';   }   }
 	if (len < 3) len = 3;
-	if (x->x_buflen != len) x->x_resize = 1, x->x_buflen = len;
+	if (x->x_buflen != len) x->x_resize = 1 ,x->x_buflen = len;
 	else x->x_resize = 0;
 }
 
-static int radix_check_minmax(t_radix *x, double min, double max) {
+static int radix_check_minmax(t_radix *x ,double min ,double max) {
 	int ret = 0;
 	double fine = 1. / (x->x_base * x->x_base);
 	if (x->x_lilo)
@@ -390,15 +390,15 @@ static int radix_check_minmax(t_radix *x, double min, double max) {
 	return(ret);
 }
 
-static void radix_set(t_radix *x, t_floatarg f) {
-	ufloat uf = {.f = f}, vf = {.f = x->x_val};
+static void radix_set(t_radix *x ,t_floatarg f) {
+	ufloat uf = {.f = f} ,vf = {.f = x->x_val};
 	if (uf.u != vf.u)
 	{	x->x_val = f;
 		radix_clip(x);
-		sys_queuegui(x, x->x_gui.x_glist, radix_draw_update);   }
+		sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);   }
 }
 
-static void radix_log_height(t_radix *x, t_floatarg lh) {
+static void radix_log_height(t_radix *x ,t_floatarg lh) {
 	if (lh < 10.) lh = 10.;
 	x->x_log_height = lh;
 	if (x->x_lilo)
@@ -408,8 +408,8 @@ static void radix_log_height(t_radix *x, t_floatarg lh) {
 
 static void radix_log(t_radix *x) {
 	x->x_lilo = 1;
-	if (radix_check_minmax(x, x->x_min, x->x_max))
-	{	sys_queuegui(x, x->x_gui.x_glist, radix_draw_update);
+	if (radix_check_minmax(x ,x->x_min ,x->x_max))
+	{	sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);
 		/*radix_bang(x);*/   }
 }
 
@@ -417,9 +417,9 @@ static void radix_lin(t_radix *x) {
 	x->x_lilo = 0;
 }
 
-static void radix_list(t_radix *x, t_symbol *s, int ac, t_atom *av) {
+static void radix_list(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (!ac) pd_bang((t_pd *)x);
-	else if (IS_A_FLOAT(av, 0))
-	{	radix_set(x, atom_getfloatarg(0, ac, av));
+	else if (IS_A_FLOAT(av ,0))
+	{	radix_set(x ,atom_getfloatarg(0 ,ac ,av));
 		pd_bang((t_pd *)x);   }
 }

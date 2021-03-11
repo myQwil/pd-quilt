@@ -71,7 +71,7 @@ static inline t_float blunt_divm(t_float f1 ,t_float f2) {
 	return (t_float)result;
 }
 
-typedef struct _blunt {
+typedef struct {
 	t_object obj;
 	int loadbang;
 } t_blunt;
@@ -95,7 +95,7 @@ static void blunt_init(t_blunt *x ,t_float *f ,int ac ,t_atom *av) {
 
 /* -------------------------- blunt binops -------------------------- */
 
-typedef struct _bop {
+typedef struct {
 	t_blunt bl;
 	t_float f1;
 	t_float f2;
