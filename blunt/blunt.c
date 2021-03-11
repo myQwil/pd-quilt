@@ -19,18 +19,8 @@ static void num_float(t_num *x ,t_float f) {
 
 static void *num_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
 	t_num *x = (t_num *)pd_new(cl);
-	outlet_new     (&x->bl.obj ,&s_float);
-	floatinlet_new (&x->bl.obj ,&x->f);
-
-	x->f = x->bl.loadbang = 0;
-	if (ac)
-	{	if (av->a_type == A_FLOAT)
-			x->f = av->a_w.w_float;
-		else if (av->a_type == A_SYMBOL)
-		{	const char *c = av->a_w.w_symbol->s_name;
-			if (c[strlen(c)-1] == '!')
-			{	x->f = strtof(c ,NULL);
-				x->bl.loadbang = 1;   }   }   }
+	blunt_init(&x->bl ,&x->f ,ac ,av);
+	floatinlet_new(&x->bl.obj ,&x->f);
 	return (x);
 }
 
@@ -483,125 +473,125 @@ void blunt_setup(void) {
 
 	/* ------------------ binop1 ----------------------- */
 
-	b1_plus_class = class_new(gensym("+")  ,(t_newmethod)b1_plus_new ,0
+	b1_plus_class  = class_new(gensym("+")   ,(t_newmethod)b1_plus_new  ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b1_plus_new  ,gensym("`+") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b1_plus_new  ,gensym("`+")   ,A_GIMME ,0);
 
-	b1_minus_class = class_new(gensym("-") ,(t_newmethod)b1_minus_new ,0
+	b1_minus_class = class_new(gensym("-")   ,(t_newmethod)b1_minus_new ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b1_minus_new ,gensym("`-") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b1_minus_new ,gensym("`-")   ,A_GIMME ,0);
 
-	b1_times_class = class_new(gensym("*") ,(t_newmethod)b1_times_new ,0
+	b1_times_class = class_new(gensym("*")   ,(t_newmethod)b1_times_new ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b1_times_new ,gensym("`*") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b1_times_new ,gensym("`*")   ,A_GIMME ,0);
 
-	b1_div_class = class_new(gensym("/")   ,(t_newmethod)b1_div_new ,0
+	b1_div_class   = class_new(gensym("/")   ,(t_newmethod)b1_div_new   ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b1_div_new ,gensym("`/") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b1_div_new   ,gensym("`/")   ,A_GIMME ,0);
 
-	b1_log_class = class_new(gensym("log") ,(t_newmethod)b1_log_new ,0
+	b1_log_class   = class_new(gensym("log") ,(t_newmethod)b1_log_new   ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b1_log_new ,gensym("`log") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b1_log_new   ,gensym("`log") ,A_GIMME ,0);
 
-	b1_pow_class = class_new(gensym("pow") ,(t_newmethod)b1_pow_new ,0
+	b1_pow_class   = class_new(gensym("pow") ,(t_newmethod)b1_pow_new   ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b1_pow_new ,gensym("`pow") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b1_pow_new   ,gensym("`pow") ,A_GIMME ,0);
 
-	b1_max_class = class_new(gensym("max") ,(t_newmethod)b1_max_new ,0
+	b1_max_class   = class_new(gensym("max") ,(t_newmethod)b1_max_new   ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b1_max_new ,gensym("`max") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b1_max_new   ,gensym("`max") ,A_GIMME ,0);
 
-	b1_min_class = class_new(gensym("min") ,(t_newmethod)b1_min_new ,0
+	b1_min_class   = class_new(gensym("min") ,(t_newmethod)b1_min_new   ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b1_min_new ,gensym("`min") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b1_min_new   ,gensym("`min") ,A_GIMME ,0);
 
 	/* ------------------ binop2 ----------------------- */
 
-	b2_ee_class = class_new(gensym("==")   ,(t_newmethod)b2_ee_new ,0
+	b2_ee_class    = class_new(gensym("==")  ,(t_newmethod)b2_ee_new    ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b2_ee_new  ,gensym("`==") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b2_ee_new    ,gensym("`==")  ,A_GIMME ,0);
 
-	b2_ne_class = class_new(gensym("!=")   ,(t_newmethod)b2_ne_new ,0
+	b2_ne_class    = class_new(gensym("!=")  ,(t_newmethod)b2_ne_new    ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b2_ne_new  ,gensym("`!=") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b2_ne_new    ,gensym("`!=")  ,A_GIMME ,0);
 
-	b2_gt_class = class_new(gensym(">")    ,(t_newmethod)b2_gt_new ,0
+	b2_gt_class    = class_new(gensym(">")   ,(t_newmethod)b2_gt_new    ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b2_gt_new  ,gensym("`>") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b2_gt_new    ,gensym("`>")   ,A_GIMME ,0);
 
-	b2_lt_class = class_new(gensym("<")    ,(t_newmethod)b2_lt_new ,0
+	b2_lt_class    = class_new(gensym("<")   ,(t_newmethod)b2_lt_new    ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b2_lt_new  ,gensym("`<") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b2_lt_new    ,gensym("`<")   ,A_GIMME ,0);
 
-	b2_ge_class = class_new(gensym(">=")   ,(t_newmethod)b2_ge_new ,0
+	b2_ge_class    = class_new(gensym(">=")  ,(t_newmethod)b2_ge_new    ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b2_ge_new  ,gensym("`>=") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b2_ge_new    ,gensym("`>=")  ,A_GIMME ,0);
 
-	b2_le_class = class_new(gensym("<=")   ,(t_newmethod)b2_le_new ,0
+	b2_le_class    = class_new(gensym("<=")  ,(t_newmethod)b2_le_new    ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b2_le_new  ,gensym("`<=") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b2_le_new    ,gensym("`<=")  ,A_GIMME ,0);
 
 	/* ------------------ binop3 ----------------------- */
 
-	b3_ba_class = class_new(gensym("&")    ,(t_newmethod)b3_ba_new ,0
+	b3_ba_class    = class_new(gensym("&")   ,(t_newmethod)b3_ba_new    ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b3_ba_new  ,gensym("`&") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b3_ba_new    ,gensym("`&")   ,A_GIMME ,0);
 
-	b3_la_class = class_new(gensym("&&")   ,(t_newmethod)b3_la_new ,0
+	b3_la_class    = class_new(gensym("&&")  ,(t_newmethod)b3_la_new    ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b3_la_new  ,gensym("`&&") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b3_la_new    ,gensym("`&&")  ,A_GIMME ,0);
 
-	b3_bo_class = class_new(gensym("|")    ,(t_newmethod)b3_bo_new ,0
+	b3_bo_class    = class_new(gensym("|")   ,(t_newmethod)b3_bo_new    ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b3_bo_new  ,gensym("`|") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b3_bo_new    ,gensym("`|")   ,A_GIMME ,0);
 
-	b3_lo_class = class_new(gensym("||")   ,(t_newmethod)b3_lo_new ,0
+	b3_lo_class    = class_new(gensym("||")  ,(t_newmethod)b3_lo_new    ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b3_lo_new  ,gensym("`||") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b3_lo_new    ,gensym("`||")  ,A_GIMME ,0);
 
-	b3_ls_class = class_new(gensym("<<")   ,(t_newmethod)b3_ls_new ,0
+	b3_ls_class    = class_new(gensym("<<")  ,(t_newmethod)b3_ls_new    ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b3_ls_new  ,gensym("`<<") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b3_ls_new    ,gensym("`<<")  ,A_GIMME ,0);
 
-	b3_rs_class = class_new(gensym(">>")   ,(t_newmethod)b3_rs_new ,0
+	b3_rs_class    = class_new(gensym(">>")  ,(t_newmethod)b3_rs_new    ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b3_rs_new  ,gensym("`>>") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b3_rs_new    ,gensym("`>>")  ,A_GIMME ,0);
 
-	b3_pc_class = class_new(gensym("%")    ,(t_newmethod)b3_pc_new ,0
+	b3_pc_class    = class_new(gensym("%")   ,(t_newmethod)b3_pc_new    ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b3_pc_new  ,gensym("`%") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b3_pc_new    ,gensym("`%")   ,A_GIMME ,0);
 
-	b3_mod_class = class_new(gensym("mod") ,(t_newmethod)b3_mod_new ,0
+	b3_mod_class   = class_new(gensym("mod") ,(t_newmethod)b3_mod_new   ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b3_mod_new ,gensym("`mod") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b3_mod_new   ,gensym("`mod") ,A_GIMME ,0);
 
-	b3_div_class = class_new(gensym("div") ,(t_newmethod)b3_div_new ,0
+	b3_div_class   = class_new(gensym("div") ,(t_newmethod)b3_div_new   ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)b3_div_new ,gensym("`div") ,A_GIMME ,0);
+	class_addcreator((t_newmethod)b3_div_new   ,gensym("`div") ,A_GIMME ,0);
 
-	b3_xor_class = class_new(gensym("^")   ,(t_newmethod)b3_xor_new ,0
+	b3_xor_class   = class_new(gensym("^")   ,(t_newmethod)b3_xor_new   ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
 
-	b3_fpc_class = class_new(gensym("f%")  ,(t_newmethod)b3_fpc_new ,0
+	b3_fpc_class   = class_new(gensym("f%")  ,(t_newmethod)b3_fpc_new   ,0
 		,sizeof(t_bop) ,0 ,A_GIMME ,0);
 
 	t_class *bops[][24] =
-	{	{	b1_plus_class ,b1_minus_class ,b1_times_class ,b1_div_class
-			,b1_log_class ,b1_pow_class ,b1_max_class ,b1_min_class
-			,b2_ee_class ,b2_ne_class ,b2_gt_class ,b2_lt_class
-			,b2_ge_class ,b2_le_class ,b3_ba_class ,b3_la_class
-			,b3_bo_class ,b3_lo_class ,b3_ls_class ,b3_rs_class
-			,b3_fpc_class ,b3_pc_class ,b3_mod_class ,b3_div_class   }
-		,{	b3_xor_class   }   };
+	{	{	 b1_plus_class ,b1_minus_class ,b1_times_class ,b1_div_class
+			,b1_log_class  ,b1_pow_class   ,b1_max_class   ,b1_min_class
+			,b2_ee_class   ,b2_ne_class    ,b2_gt_class    ,b2_lt_class
+			,b2_ge_class   ,b2_le_class    ,b3_ba_class    ,b3_la_class
+			,b3_bo_class   ,b3_lo_class    ,b3_ls_class    ,b3_rs_class
+			,b3_fpc_class  ,b3_pc_class    ,b3_mod_class   ,b3_div_class   }
+		,{	 b3_xor_class   }   };
 
 	t_bopmethod bangs[][24] =
-	{	{	b1_plus_bang ,b1_minus_bang ,b1_times_bang ,b1_div_bang
-			,b1_log_bang ,b1_pow_bang ,b1_max_bang ,b1_min_bang
-			,b2_ee_bang ,b2_ne_bang ,b2_gt_bang ,b2_lt_bang
-			,b2_ge_bang ,b2_le_bang ,b3_ba_bang ,b3_la_bang
-			,b3_bo_bang ,b3_lo_bang ,b3_ls_bang ,b3_rs_bang
-			,b3_fpc_bang ,b3_pc_bang ,b3_mod_bang ,b3_div_bang   }
-		,{	b3_xor_bang   }   };
+	{	{	 b1_plus_bang ,b1_minus_bang ,b1_times_bang ,b1_div_bang
+			,b1_log_bang  ,b1_pow_bang   ,b1_max_bang   ,b1_min_bang
+			,b2_ee_bang   ,b2_ne_bang    ,b2_gt_bang    ,b2_lt_bang
+			,b2_ge_bang   ,b2_le_bang    ,b3_ba_bang    ,b3_la_bang
+			,b3_bo_bang   ,b3_lo_bang    ,b3_ls_bang    ,b3_rs_bang
+			,b3_fpc_bang  ,b3_pc_bang    ,b3_mod_bang   ,b3_div_bang   }
+		,{	 b3_xor_bang   }   };
 
 	t_symbol *syms[] = { num_sym ,gensym("0x5e") };
 

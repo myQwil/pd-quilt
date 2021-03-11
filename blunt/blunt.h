@@ -18,18 +18,15 @@ static inline t_float blunt_times (t_float f1 ,t_float f2) { return f1 * f2; }
 static inline t_float blunt_div   (t_float f1 ,t_float f2) { return (f2!=0 ? f1/f2 : 0); }
 
 static inline t_float blunt_log(t_float f1 ,t_float f2) {
-	t_float r;
-	if (f1 <= 0) r = -1000;
-	else if (f2 <= 0) r = LOG(f1);
-	else r = LOG(f1) / LOG(f2);
-	return r;
+	return f1 <= 0 ? -1000
+		: (f2 <= 0 ? LOG(f1)
+		: LOG(f1) / LOG(f2));
 }
 
 static inline t_float blunt_pow(t_float f1 ,t_float f2) {
-	t_float r = (f1 == 0 && f2 < 0) ||
-		(f1 < 0 && (f2 - (int)f2) != 0) ?
-			0 : POW(f1 ,f2);
-	return r;
+	return (f1 == 0 &&  f2 < 0)
+	    || (f1 <  0 && (f2 - (int)f2) != 0)
+	     ? 0 : POW(f1 ,f2);
 }
 
 static inline t_float blunt_max(t_float f1 ,t_float f2) { return (f1 > f2 ? f1 : f2); }
@@ -83,6 +80,19 @@ static void blunt_loadbang(t_blunt *x ,t_floatarg action) {
 	if (x->loadbang && !action) pd_bang((t_pd *)x);
 }
 
+static void blunt_init(t_blunt *x ,t_float *f ,int ac ,t_atom *av) {
+	*f = x->loadbang = 0;
+	if (ac)
+	{	if (av->a_type == A_FLOAT)
+			*f = av->a_w.w_float;
+		else if (av->a_type == A_SYMBOL)
+		{	const char *c = av->a_w.w_symbol->s_name;
+			if (c[strlen(c)-1] == '!')
+			{	*f = strtof(c ,NULL);
+				x->loadbang = 1;   }   }   }
+	outlet_new(&x->obj ,&s_float);
+}
+
 /* -------------------------- blunt binops -------------------------- */
 
 typedef struct _bop {
@@ -126,18 +136,7 @@ static void bop_init(t_bop *x ,int ac ,t_atom *av) {
 	{	x->f1 = av->a_w.w_float;
 		av++;   }
 	else x->f1 = 0;
-
-	x->f2 = x->bl.loadbang = 0;
-	if (ac)
-	{	if (av->a_type == A_FLOAT)
-			x->f2 = av->a_w.w_float;
-		else if (av->a_type == A_SYMBOL)
-		{	const char *c = av->a_w.w_symbol->s_name;
-			if (c[strlen(c)-1] == '!')
-			{	x->f2 = strtof(c ,NULL);
-				x->bl.loadbang = 1;   }   }   }
-
-	outlet_new(&x->bl.obj ,&s_float);
+	blunt_init(&x->bl ,&x->f2 ,ac ,av);
 }
 
 static t_bop *bop_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
