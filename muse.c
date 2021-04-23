@@ -38,7 +38,7 @@ static void muse_send(t_muse *y ,t_float f) {
 	t_float *fp = x->flin.fp + i;
 	t_atom flts[n];
 	while (n--) flts[n] = (t_atom){ A_FLOAT ,{fp[n]}};
-	outlet_anything(y->o_midi ,gensym("scale:") ,ac ,flts);
+	outlet_anything(y->o_midi ,gensym("scale") ,ac ,flts);
 }
 
 static void *muse_new(t_symbol *s ,int ac ,t_atom *av) {

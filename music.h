@@ -3,7 +3,7 @@
 #include <stdlib.h> // strtof
 #include <string.h> // memcpy
 
-static int isoperator(char c) {
+static inline int isoperator(char c) {
 	return (c=='^' || c=='v' || c=='+' || c=='-' || c=='*' || c=='/');
 }
 
@@ -26,7 +26,7 @@ static void music_peek(t_music *x ,t_symbol *s) {
 	endpost();
 }
 
-static int gcd(int a ,int b) {
+static inline int gcd(int a ,int b) {
 	int r;
 	while (b)
 	{	r = a % b;

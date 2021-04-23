@@ -47,7 +47,7 @@ static void ffplay_time(t_ffplay *x) {
 	if (!x->open) return;
 	t_float f = x->ic->duration / 1000.; // AV_TIME_BASE is in microseconds
 	t_atom time = { A_FLOAT ,{f} };
-	outlet_anything(x->o_meta ,gensym("time:") ,1 ,&time);
+	outlet_anything(x->o_meta ,gensym("time") ,1 ,&time);
 }
 
 static void ffplay_position(t_ffplay *x) {
@@ -55,7 +55,7 @@ static void ffplay_position(t_ffplay *x) {
 	AVRational ratio = x->ic->streams[x->idx]->time_base;
 	t_float f = 1000. * x->frm->pts * ratio.num / ratio.den;
 	t_atom pos = { A_FLOAT ,{f} };
-	outlet_anything(x->o_meta ,gensym("pos:") ,1 ,&pos);
+	outlet_anything(x->o_meta ,gensym("pos") ,1 ,&pos);
 }
 
 static int speed_limit(t_float speed) {
@@ -259,11 +259,27 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 	if (!err_msg) err_msg = ffplay_start(x ,1);
 	if (err_msg) post("Error: %s." ,err_msg);
 	t_atom open = { A_FLOAT ,{(t_float)x->open} };
-	outlet_anything(x->o_meta ,gensym("open:") ,1 ,&open);
+	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
 }
 
-static void ffplay_info_custom(AVDictionary *meta ,int ac ,t_atom *av) {
-	for (; ac--; av++) if (av->a_type == A_SYMBOL)
+static t_atom ffplay_meta(t_ffplay *x ,t_symbol *s) {
+	if (!strcmp(s->s_name ,"path") || !strcmp(s->s_name ,"url"))
+		return (t_atom){ A_SYMBOL ,{.w_symbol = gensym(x->ic->url)} };
+	if (!strcmp(s->s_name ,"filename"))
+	{	const char *name = strrchr(x->ic->url ,'/');
+		return (t_atom){ A_SYMBOL ,{.w_symbol = gensym(name ? name+1 : x->ic->url)} };   }
+	if (!strcmp(s->s_name ,"tracks"))
+		return (t_atom){ A_FLOAT ,{(t_float)x->plist.siz} };
+
+	AVDictionaryEntry *entry = av_dict_get(x->ic->metadata ,s->s_name ,0 ,0);
+	if (entry)
+	     return (t_atom){ A_SYMBOL ,{.w_symbol = gensym(entry->value)} };
+	else return (t_atom){A_NULL ,{0}};
+}
+
+static void ffplay_info_custom(t_ffplay *x ,int ac ,t_atom *av) {
+	for (; ac--; av++)
+	if (av->a_type == A_SYMBOL)
 	{	const char *sym = av->a_w.w_symbol->s_name ,*pct ,*end;
 		while ( (pct = strchr(sym ,'%')) && (end = strchr(pct+1 ,'%')) )
 		{	int len = pct - sym;
@@ -278,9 +294,11 @@ static void ffplay_info_custom(AVDictionary *meta ,int ac ,t_atom *av) {
 			char buf[len + 1];
 			strncpy(buf ,pct ,len);
 			buf[len] = 0;
-			AVDictionaryEntry *entry = av_dict_get(meta ,buf ,0 ,0);
-			if (entry)
-				startpost("%s" ,entry->value);
+			t_atom atom = ffplay_meta(x ,gensym(buf));
+			switch (atom.a_type)
+			{	case A_FLOAT:  startpost("%g" ,atom.a_w.w_float); break;
+				case A_SYMBOL: startpost("%s" ,atom.a_w.w_symbol->s_name); break;
+				default: startpost("");   }
 			sym += len + 2;   }
 		startpost("%s%s" ,sym ,ac ? " ":"");   }
 	endpost();
@@ -288,56 +306,47 @@ static void ffplay_info_custom(AVDictionary *meta ,int ac ,t_atom *av) {
 
 static void ffplay_info(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (!x->open) return;
+	if (ac) return ffplay_info_custom(x ,ac ,av);
+
 	AVDictionary *meta = x->ic->metadata;
-	if (ac) return ffplay_info_custom(meta ,ac ,av);
-	else
-	{	AVDictionaryEntry *artist = av_dict_get(meta ,"artist" ,0 ,0);
-		AVDictionaryEntry *title  = av_dict_get(meta ,"title" ,0 ,0);
-		if (artist || title)
-			post("%s%s%s"
-				,artist ? artist->value : ""
-				,artist ? " - " : ""
-				,title  ? title->value  : "");   }
+	AVDictionaryEntry *artist = av_dict_get(meta ,"artist" ,0 ,0);
+	AVDictionaryEntry *title  = av_dict_get(meta ,"title" ,0 ,0);
+	if (artist || title)
+		post("%s%s%s"
+			,artist ? artist->value : ""
+			,artist ? " - " : ""
+			,title  ? title->value  : "");
 }
 
 static void ffplay_send(t_ffplay *x ,t_symbol *s) {
 	if (!x->open) return;
-	AVDictionary *meta = x->ic->metadata;
-	AVDictionaryEntry *entry = av_dict_get(meta ,s->s_name ,0 ,0);
-	if (entry)
-	{	int len = strlen(s->s_name);
-		char key[len + 2];
-		strcpy(key ,s->s_name);
-		strcpy(key+len ,":\0");
-		t_atom val = { A_SYMBOL ,{.w_symbol = gensym(entry->value)} };
-		outlet_anything(x->o_meta ,gensym(key) ,1 ,&val);   }
-}
-
-static void ffplay_tracks(t_ffplay *x) {
-	t_atom tracks = { A_FLOAT ,{(t_float)x->plist.siz} };
-	outlet_anything(x->o_meta ,gensym("tracks:") ,1 ,&tracks);
+	t_atom atom = ffplay_meta(x ,s);
+	if (atom.a_type)
+	{	t_atom val[2] =
+		{	{ A_SYMBOL ,{.w_symbol = s} } ,atom   };
+		outlet_anything(x->o_meta ,&s_list ,2 ,val);   }
+	else pd_error(x ,"ffplay_send: '%s' not found" ,s->s_name);
 }
 
 static void ffplay_anything(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (!x->open) return;
-	if (!strcmp(s->s_name ,"path") || !strcmp(s->s_name ,"url"))
-	{	post("%s" ,x->ic->url);
-		return;   }
-	if (!strcmp(s->s_name ,"filename"))
-	{	const char *name = strrchr(x->ic->url ,'/');
-		if (name) name++;
-		else name = x->ic->url;
-		post("%s" ,name);
-		return;   }
-	AVDictionaryEntry *entry = av_dict_get(x->ic->metadata ,s->s_name ,0 ,0);
-	if (entry) post("%s" ,entry->value);
+	t_atom atom = ffplay_meta(x ,s);
+	switch (atom.a_type)
+	{	case A_FLOAT:  post("%s: %g" ,s->s_name ,atom.a_w.w_float); break;
+		case A_SYMBOL: post("%s: %s" ,s->s_name ,atom.a_w.w_symbol->s_name); break;
+		default: pd_error(x ,"ffplay~: no method for '%s'" ,s->s_name);   }
+}
+
+static void ffplay_tracks(t_ffplay *x) {
+	t_atom tracks = { A_FLOAT ,{(t_float)x->plist.siz} };
+	outlet_anything(x->o_meta ,gensym("tracks") ,1 ,&tracks);
 }
 
 static void ffplay_bang(t_ffplay *x) {
 	if (!x->open) return;
 	x->play = !x->play;
 	t_atom play = { A_FLOAT ,{(t_float)x->play} };
-	outlet_anything(x->o_meta ,gensym("play:") ,1 ,&play);
+	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
 }
 
 static void ffplay_float(t_ffplay *x ,t_float f) {
@@ -351,7 +360,7 @@ static void ffplay_float(t_ffplay *x ,t_float f) {
 	{	x->play = d = 0;
 		ffplay_seek(x ,0);   }
 	t_atom play = { A_FLOAT ,{(t_float)x->play} };
-	outlet_anything(x->o_meta ,gensym("play:") ,1 ,&play);
+	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
 }
 
 static void ffplay_stop(t_ffplay *x) {

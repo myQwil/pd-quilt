@@ -6,7 +6,7 @@
 #X coords 0 1 1152 -1 128 160 1;
 #X restore 390 120 graph;
 #X obj 30 460 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-1 1;
+0 1;
 #X floatatom 90 460 0 0 0 0 - - -;
 #X obj 70 330 cupqb 1;
 #X obj 130 200 openpanel;
@@ -22,7 +22,7 @@
 #X obj 90 300 bng 15 250 50 0 empty empty restart 17 7 0 11 -1 -262144
 -262144;
 #X obj 380 440 hsl 128 17 0.001 1 1 0 empty empty vol 25 9 0 12 -1
--262144 -262144 9600 1;
+-262144 -262144 0 1;
 #X obj 380 520 hsl 128 17 -0.001 -1 1 0 empty empty cos 25 9 0 12 -1
 -262144 -262144 0 1;
 #X floatatom 390 470 0 0 0 0 - - -;
@@ -117,7 +117,7 @@
 #X restore 230 80 pd is-playing;
 #X obj 300 220 outlet;
 #X obj 160 140 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-1 1;
+0 1;
 #X msg 160 190 pos;
 #X floatatom 230 130 0 0 0 0 - - -;
 #X obj 160 160 metro 250;
@@ -168,9 +168,9 @@
 #X obj 250 90 s \$0pos;
 #X obj 210 120 s \$0eof;
 #X obj 50 180 print -n;
-#X obj 50 60 route tracks: time: open: EOF pos: play:;
-#X msg 180 190 path \, info \, tracks;
-#X msg 50 150 tracks: \$1;
+#X obj 50 60 route tracks time open EOF pos play;
+#X msg 180 190 path \, tracks \, info;
+#X msg 50 150 \$1 tracks;
 #X connect 0 0 11 0;
 #X connect 2 1 12 0;
 #X connect 2 1 4 0;
@@ -195,7 +195,7 @@
 #X obj 30 140 outlet;
 #X msg 30 110 seek \$1;
 #X obj 60 20 hsl 576 20 0 1 0 0 empty \$0trackbar empty -2 -8 0 10
--1 -262144 -262144 57495 1;
+-1 -262144 -262144 0 1;
 #X obj 70 50 r \$0time;
 #X obj 30 20 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
@@ -274,14 +274,14 @@
 #X msg 50 30 info;
 #X text 90 30 general track info;
 #X text 100 60 file path;
-#X text 140 150 total tracks in playlist;
+#X text 150 150 total tracks in playlist;
 #X msg 60 60 path;
 #X text 310 330 custom info;
 #X msg 70 90 track;
 #X text 120 90 get track number;
 #X text 150 120 set but do not start;
 #X msg 80 120 track \$1;
-#X msg 90 150 total;
+#X msg 90 150 tracks;
 #X text 280 270 send through outlet;
 #X text 280 180 print metadata;
 #X text 150 440 print is an alias for info;

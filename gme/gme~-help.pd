@@ -256,7 +256,7 @@
 #X obj 340 100 print -n;
 #X obj 30 160 print tracks;
 #X obj 100 230 s \$0start;
-#X obj 50 60 route tracks: time: open: path: track:;
+#X obj 50 60 route tracks time open path track;
 #X msg 190 200 path \, tracks \, info \, time \, bang;
 #X connect 0 0 13 0;
 #X connect 6 1 14 0;
@@ -421,10 +421,10 @@
 #X msg 210 280 send song;
 #X text 300 280 send through outlet;
 #X text 270 210 print metadata;
-#X msg 150 380 info ©$copyright\\\, for the "$system";
-#X msg 150 410 print track $track of $tracks;
+#X msg 150 380 info ©%copyright%\\\, for the "%system%";
+#X msg 150 410 print track %track% of %tracks%;
 #X text 150 440 print is an alias for info;
-#X msg 150 350 info $author - $song ($comment);
+#X msg 150 350 info %author% - %song% (%comment%);
 #X connect 1 0 0 0;
 #X connect 5 0 0 0;
 #X connect 7 0 0 0;
