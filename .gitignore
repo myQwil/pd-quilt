@@ -5,6 +5,9 @@
 # builds
 *.pd_linux
 *.pd_darwin
-*.m_amd64
-*.m_i386
 *.dll
+*.l_*
+*.d_*
+*.m_*
+*.o_*
+*.so

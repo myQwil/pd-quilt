@@ -12,7 +12,7 @@ typedef struct {
 	t_float  targetval;
 	double   targettime;
 	double   prevtime;
-	double   coeftime;
+	double   invtime;
 	double   in1val;
 	unsigned gotinlet :1;
 	unsigned pause    :1;
@@ -32,7 +32,7 @@ static void linp_set(t_linp *x ,t_floatarg f) {
 static void linp_freeze(t_linp *x) {
 	if (clock_getsystime() >= x->targettime)
 	     x->setval  = x->targetval;
-	else x->setval += x->coeftime * (clock_getsystime() - x->prevtime)
+	else x->setval += x->invtime * (clock_getsystime() - x->prevtime)
 	                              * (x->targetval - x->setval);
 	clock_unset(x->clock);
 }
@@ -56,7 +56,7 @@ static void linp_pause(t_linp *x) {
 	{	double msectogo = x->targettime;
 		double timenow = clock_getsystime();
 		x->targettime = clock_getsystimeafter(msectogo);
-		x->coeftime = 1. / (x->targettime - timenow);
+		x->invtime = 1. / (x->targettime - timenow);
 		x->prevtime = timenow;
 		if (x->grain <= 0)
 			x->grain = DEFAULTGRAIN;
@@ -71,7 +71,7 @@ static void linp_tick(t_linp *x) {
 		outlet_float(x->obj.ob_outlet ,x->targetval);   }
 	else
 	{	outlet_float(x->obj.ob_outlet
-			,x->setval + x->coeftime * (timenow - x->prevtime)
+			,x->setval + x->invtime * (timenow - x->prevtime)
 			                         * (x->targetval - x->setval));
 		if (x->grain <= 0)
 			x->grain = DEFAULTGRAIN;
@@ -83,14 +83,14 @@ static void linp_float(t_linp *x ,t_float f) {
 	if (x->gotinlet && x->in1val > 0)
 	{	if (timenow > x->targettime)
 		     x->setval = x->targetval;
-		else x->setval = x->setval + x->coeftime * (timenow - x->prevtime)
+		else x->setval = x->setval + x->invtime * (timenow - x->prevtime)
 		                                         * (x->targetval - x->setval);
 		x->prevtime = timenow;
 		x->targettime = clock_getsystimeafter(x->in1val);
 		x->targetval = f;
 		linp_tick(x);
 		x->gotinlet = x->pause = 0;
-		x->coeftime = 1. / (x->targettime - timenow);
+		x->invtime = 1. / (x->targettime - timenow);
 		if (x->grain <= 0)
 			x->grain = DEFAULTGRAIN;
 		outlet_float(x->o_on ,1);
@@ -106,7 +106,7 @@ static void *linp_new(t_floatarg f ,t_floatarg grain) {
 	t_linp *x = (t_linp *)pd_new(linp_class);
 	x->targetval = x->setval = f;
 	x->gotinlet  = x->pause  = 0;
-	x->coeftime  = 1;
+	x->invtime   = 1;
 	x->grain = grain;
 	x->clock = clock_new(x ,(t_method)linp_tick);
 	x->targettime = x->prevtime = clock_getsystime();

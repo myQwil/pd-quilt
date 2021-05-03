@@ -155,8 +155,8 @@ static void rand_anything(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
 static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
 	t_rand *x = (t_rand *)pd_new(rand_class);
 	outlet_new(&x->flin.obj ,&s_float);
-
 	int c = x->argc = !ac ? 2 : ac;
+
 	// 3 args with a string in the middle creates a small list (ex: 7 or 9)
 	if (ac==3 && av[1].a_type != A_FLOAT)
 	{	av[1] = av[2];

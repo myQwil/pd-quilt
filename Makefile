@@ -3,11 +3,11 @@
 lib.name = myQwil
 
 class.sources := $(patsubst %, %.c, \
-muse chrd rand rind ntof fton sploat gloat slx sly same ceil delp linp linp~ \
+muse chrd rand rind ntof fton flenc fldec slx sly same ceil delp linp linp~ \
 radix 0x21 0x21~ x is has pak unpak 0x40pak 0x40unpak chrono tabread2~ tabosc2~)
 
 datafiles := $(patsubst %, %-help.pd, \
-muse chrd rand rind ntof sploat slope same ceil delp linp linp~ \
+muse chrd rand rind ntof flenc slope same ceil delp linp linp~ \
 radix 0x21 0x21~ x is has pak rpak chrono tabread2~ tabosc2~ ad adsr cupq cupqb)
 
 datafiles += $(patsubst %, %.pd, \
