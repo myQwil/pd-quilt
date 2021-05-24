@@ -9,36 +9,46 @@ typedef struct {
 	t_outlet *o_midi;    /* midi outlet */
 } t_muse;
 
-static t_float muse_note(t_music *x ,int d) {
-	int n = x->siz ,i = d%n ,neg = i<0;
-	i += n * neg;
-	t_float step = i ? x->flin.fp[i] : 0;
-	return (x->oct * (d/n - neg) + x->flin.fp[0] + step);
-}
-
 static void music_f(t_music *x ,t_float f ,char c ,t_float g) {
+	t_float note = x->flin.fp[0] + music_interval(x ,x->flin.fp ,f);
+	if (c) music_operate(&note ,c ,g);
+
 	t_muse *y = (t_muse*)x;
-	int d = f;
-	t_float nte = muse_note(x ,d);
-	if (f != d)
-	{	int dir = f<0 ? -1 : 1;
-		t_float nxt = muse_note(x ,d+dir);
-		nte += dir * (f-d) * (nxt-nte);   }
-	if (c)
-		music_operate(&nte ,c ,g);
-	outlet_float(y->o_midi ,nte);
-	outlet_float(y->o_freq ,ntof(&x->note ,nte));
+	outlet_float(y->o_midi ,note);
+	outlet_float(y->o_freq ,ntof(&x->note ,note));
 }
 
-static void muse_send(t_muse *y ,t_float f) {
+static void muse_slice(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
 	t_music *x = &y->z;
-	int n = x->siz ,i = (int)f % n;
-	if (i < 0) i += n;
-	int ac = n = n - i;
-	t_float *fp = x->flin.fp + i;
-	t_atom flts[n];
-	while (n--) flts[n] = (t_atom){ A_FLOAT ,{fp[n]}};
-	outlet_anything(y->o_midi ,gensym("scale") ,ac ,flts);
+	int n = x->siz;
+	int strt=0 ,stop=n ,step=0;
+	if (ac > 2 && av[2].a_type == A_FLOAT)
+	{	step = atom_getint(av+2);
+		if (step < 0)
+			strt = n ,stop = 0;   }
+	if (ac > 1 && av[1].a_type == A_FLOAT)
+	{	stop = atom_getint(av+1) % n;
+		if (stop < 0)
+			stop += n;   }
+	if (ac > 0 && av[0].a_type == A_FLOAT)
+	{	strt = atom_getint(av+0) % n;
+		if (strt < 0)
+			strt += n;   }
+	if (!step)
+		step = (strt > stop) ? -1 : 1;
+
+	t_float *fp = x->flin.fp;
+	int rev = (step < 0);
+	step = abs(step);
+	t_atom flts[(abs(strt - stop) - 1) / step + 1];
+	if (rev)
+	{	strt-- ,stop--;
+		for (n = 0; strt > stop; strt -= step)
+			flts[n++] = (t_atom){ A_FLOAT ,{fp[strt]} };   }
+	else
+	{	for (n = 0; strt < stop; strt += step)
+			flts[n++] = (t_atom){ A_FLOAT ,{fp[strt]} };   }
+	outlet_anything(y->o_midi ,gensym("slice") ,n ,flts);
 }
 
 static void *muse_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -63,6 +73,6 @@ static void *muse_new(t_symbol *s ,int ac ,t_atom *av) {
 void muse_setup(void) {
 	muse_class = music_setup(gensym("muse")
 		,(t_newmethod)muse_new ,(t_method)flin_free ,sizeof(t_muse));
-	class_addmethod(muse_class ,(t_method)muse_send
-		,gensym("send")  ,A_DEFFLOAT ,0);
+	class_addmethod(muse_class ,(t_method)muse_slice
+		,gensym("slice") ,A_GIMME ,0);
 }
