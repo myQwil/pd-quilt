@@ -16,20 +16,20 @@ typedef struct {
 	double st;     /* semi-tone */
 } t_note;
 
-static t_float ntof(t_note *x ,t_float f) {
+static inline t_float ntof(t_note *x ,t_float f) {
 	return (x->bt * exp(x->st*f));
 }
 
-static t_float fton(t_note *x ,t_float f) {
+static inline t_float fton(t_note *x ,t_float f) {
 	return (x->st * log(x->bt*f));
 }
 
-static void note_ref(t_note *x ,t_float f) {
+static inline void note_ref(t_note *x ,t_float f) {
 	x->ref = f;
 	x->bt = BASE(x);
 }
 
-static void note_tet(t_note *x ,t_float f) {
+static inline void note_tet(t_note *x ,t_float f) {
 	x->tet = f;
 	x->st = SEMI(x);
 	x->bt = BASE(x);

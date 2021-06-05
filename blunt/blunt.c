@@ -595,7 +595,7 @@ void blunt_setup(void) {
 
 	t_symbol *syms[] = { num_sym ,gensym("0x5e") };
 
-	i = sizeof(syms) / sizeof*(syms);
+	i = sizeof syms / sizeof *syms;
 	while (i--)
 	{	int max = sizeof(bops[i]) / sizeof*(bops[i]);
 		for (int j=0; j < max; j++)

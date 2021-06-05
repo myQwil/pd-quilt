@@ -72,7 +72,7 @@ static void xtrigger_list(t_xtrigger *x ,t_symbol *s ,int argc ,t_atom *argv) {
 	for (i = (int)x->siz ,u = x->vec + i; u-- ,i--;)
 	{	xtype type = u->type;
 		if (type == TR_ANYTHING && argc == 1)
-			type = argv->a_type;
+			type = (xtype)argv->a_type;
 
 		switch (type)
 		{ case TR_BANG:

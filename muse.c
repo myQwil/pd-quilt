@@ -42,7 +42,7 @@ static void muse_slice(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
 	step = abs(step);
 	t_atom flts[(abs(strt - stop) - 1) / step + 1];
 	if (rev)
-	{	strt-- ,stop--;
+	{	strt--,stop--;
 		for (n = 0; strt > stop; strt -= step)
 			flts[n++] = (t_atom){ A_FLOAT ,{fp[strt]} };   }
 	else
@@ -51,28 +51,57 @@ static void muse_slice(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
 	outlet_anything(y->o_midi ,gensym("slice") ,n ,flts);
 }
 
+static void muse_send(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
+	t_music *x = &y->z;
+	t_flin flin = {0,0,0};
+	flin_alloc(&flin ,x->siz);
+	memcpy(flin.fp ,x->flin.fp ,x->siz * sizeof(t_float));
+
+	int n;
+	if (ac)
+	{	if (av->a_type == A_SYMBOL)
+		{	s = av->a_w.w_symbol;
+			ac--,av++;
+			n = music_any(x ,&flin ,s ,ac ,av);   }
+		else n = music_z(x ,&flin ,0 ,ac ,av);
+		if (!n) n = x->siz;   }
+	else n = x->siz;
+
+	t_atom atoms[n];
+	for (int i = 0; i < n; i++)
+		atoms[i] = (t_atom){A_FLOAT ,{flin.fp[i]}};
+	flin_free(&flin);
+	outlet_anything(y->o_midi ,gensym("scale") ,n ,atoms);
+}
+
 static void *muse_new(t_symbol *s ,int ac ,t_atom *av) {
 	int n = ac < 2 ? 2 : ac;
 	t_muse *y = (t_muse *)music_new(muse_class ,n);
 	t_music *x = &y->z;
 
-	y->o_freq = outlet_new(&x->flin.obj ,&s_float);
-	y->o_midi = outlet_new(&x->flin.obj ,0);
+	y->o_freq = outlet_new(&x->obj ,&s_float);
+	y->o_midi = outlet_new(&x->obj ,0);
 
 	t_float *fp = x->flin.fp;
 	fp[0]=69 ,fp[1]=7;
 
-	for (int i=0; n--; fp++,i++)
-	{	floatinlet_new(&x->flin.obj ,fp);
+	for (int i = 0; n--; fp++,i++)
+	{	floatinlet_new(&x->obj ,fp);
 		if (i < ac)
 			*fp = atom_getfloat(av++);   }
 
 	return (y);
 }
 
+static void muse_free(t_music *x) {
+	flin_free(&x->flin);
+}
+
 void muse_setup(void) {
 	muse_class = music_setup(gensym("muse")
-		,(t_newmethod)muse_new ,(t_method)flin_free ,sizeof(t_muse));
+		,(t_newmethod)muse_new ,(t_method)muse_free ,sizeof(t_muse));
 	class_addmethod(muse_class ,(t_method)muse_slice
 		,gensym("slice") ,A_GIMME ,0);
+	class_addmethod(muse_class ,(t_method)muse_send
+		,gensym("send")  ,A_GIMME ,0);
 }

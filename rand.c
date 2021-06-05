@@ -7,6 +7,7 @@
 static t_class *rand_class;
 
 typedef struct {
+	t_object obj;
 	t_flin flin;
 	t_float prev;     /* previous random number */
 	int repc;         /* repeat count */
@@ -54,10 +55,12 @@ static void rand_peek(t_rand *x ,t_symbol *s) {
 	endpost();
 }
 
-static void rand_size(t_rand *x ,t_floatarg n) {
-	if (flin_resize(&x->flin ,n) < 0)
-		return;
-	x->siz = n;
+static void rand_size(t_rand *x ,t_floatarg f) {
+	int res = flin_resize(&x->flin ,&x->obj ,f);
+	switch(res)
+	{	case -2: x->siz = 1;
+		case -1: break;
+		default: x->siz = f;   }
 }
 
 static void rand_count(t_rand *x ,t_floatarg f) {
@@ -105,12 +108,12 @@ static void rand_bang(t_rand *x) {
 		double d = rand_next(x ,rng ,0) + min;
 		i = d - (d<0); // floor negative values
 		if (x->norep) i = rand_swap(x ,i ,rng ,min);
-		outlet_float(x->flin.obj.ob_outlet ,i);   }
+		outlet_float(x->obj.ob_outlet ,i);   }
 	else     // list method
 	{	c = x->siz;
 		i = rand_next(x ,c ,0);
 		if (x->norep) i = rand_swap(x ,i ,c ,0);
-		outlet_float(x->flin.obj.ob_outlet ,fp[i]);   }
+		outlet_float(x->obj.ob_outlet ,fp[i]);   }
 }
 
 static void rand_float(t_rand *x ,t_float f) {
@@ -119,32 +122,36 @@ static void rand_float(t_rand *x ,t_float f) {
 	if (c<3) // range method
 	{	double min=fp[1] ,rng=fp[0]-min;
 		f = rand_swap(x ,f ,rng ,min);
-		outlet_float(x->flin.obj.ob_outlet ,f);   }
+		outlet_float(x->obj.ob_outlet ,f);   }
 	else     // list method
 	{	int i = f;
 		c = x->siz;
 		i = rand_swap(x ,i ,c ,0);
-		outlet_float(x->flin.obj.ob_outlet ,fp[i]);   }
+		outlet_float(x->obj.ob_outlet ,fp[i]);   }
 }
 
-static void rand_z(t_rand *x ,int i ,int ac ,t_atom *av) {
-	if (flin_resize(&x->flin ,i+ac) < 0)
-		return;
-	if (i < 0) i = i % x->siz + x->siz;
+static int rand_z(t_rand *x ,int i ,int ac ,t_atom *av) {
+	if (i < 0)
+	{	i %= x->siz;
+		if (i < 0) i += x->siz;   }
+	int n = flin_resize(&x->flin ,&x->obj ,i+ac);
+	if (n < 0) // resize error
+	{	n = (n == -2) ? 1 : x->siz;
+		return n;   }
 	t_float *fp = x->flin.fp + i;
 	for (;ac--; av++ ,fp++)
 		if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
+	return n;
 }
 
 static void rand_list(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
-	x->siz = ac;
-	rand_z(x ,0 ,ac ,av);
+	x->siz = rand_z(x ,0 ,ac ,av);
 }
 
 static void rand_anything(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (!ac) return;
-	if (*s->s_name == '@')
-		rand_z(x ,strtol(s->s_name+1,0,10) ,ac ,av);
+	if (*s->s_name == '#')
+		rand_z(x ,atoi(s->s_name+1) ,ac ,av);
 	else
 	{	t_atom atoms[ac+1];
 		atoms[0] = (t_atom){A_SYMBOL ,{.w_symbol = s}};
@@ -154,7 +161,7 @@ static void rand_anything(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
 
 static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
 	t_rand *x = (t_rand *)pd_new(rand_class);
-	outlet_new(&x->flin.obj ,&s_float);
+	outlet_new(&x->obj ,&s_float);
 	int c = x->argc = !ac ? 2 : ac;
 
 	// 3 args with a string in the middle creates a small list (ex: 7 or 9)
@@ -167,7 +174,7 @@ static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
 	flin_alloc(&x->flin ,c<2 ? 2 : c);
 	t_float *fp = x->flin.fp;
 	for (;c--; av++ ,fp++)
-	{	floatinlet_new(&x->flin.obj ,fp);
+	{	floatinlet_new(&x->obj ,fp);
 		*fp = atom_getfloat(av);   }
 	x->state = x->swap = rand_makeseed();
 	return (x);
