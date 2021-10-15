@@ -1,4 +1,4 @@
-#N canvas 500 350 361 341 14;
+#N canvas 500 350 360 340 14;
 #X obj 100 110 inlet~ mod-freq;
 #X obj 150 150 inlet~ mod-index;
 #X obj 160 190 inlet~ carrier-freq;

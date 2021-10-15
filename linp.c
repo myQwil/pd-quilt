@@ -19,12 +19,12 @@ typedef struct {
 	t_outlet *o_on;
 } t_linp;
 
-static void linp_ft1(t_linp *x ,t_floatarg g) {
+static void linp_ft1(t_linp *x ,t_float g) {
 	x->in1val = g;
 	x->gotinlet = 1;
 }
 
-static void linp_set(t_linp *x ,t_floatarg f) {
+static void linp_set(t_linp *x ,t_float f) {
 	clock_unset(x->clock);
 	x->targetval = x->setval = f;
 }
@@ -102,7 +102,7 @@ static void linp_float(t_linp *x ,t_float f) {
 	x->gotinlet = 0;
 }
 
-static void *linp_new(t_floatarg f ,t_floatarg grain) {
+static void *linp_new(t_float f ,t_float grain) {
 	t_linp *x = (t_linp *)pd_new(linp_class);
 	x->targetval = x->setval = f;
 	x->gotinlet  = x->pause  = 0;

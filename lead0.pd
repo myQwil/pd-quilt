@@ -1,4 +1,4 @@
-#N canvas 470 300 351 291 14;
+#N canvas 470 300 350 290 14;
 #X obj 90 30 inlet;
 #X obj 90 60 t f f;
 #X obj 170 50 < 10;

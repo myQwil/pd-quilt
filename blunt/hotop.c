@@ -25,11 +25,11 @@ static void hot_pxy_float(t_hot_pxy *p ,t_float f) {
 	pd_bang((t_pd *)x);
 }
 
-static void hot_pxy_f1(t_hot_pxy *p ,t_floatarg f) {
+static void hot_pxy_f1(t_hot_pxy *p ,t_float f) {
 	bop_f1(p->x ,f);
 }
 
-static void hot_pxy_f2(t_hot_pxy *p ,t_floatarg f) {
+static void hot_pxy_f2(t_hot_pxy *p ,t_float f) {
 	bop_f2(p->x ,f);
 }
 

@@ -63,7 +63,7 @@ static void unpak_anything(t_unpak *x ,t_symbol *s ,int ac ,t_atom *av) {
 	unpak_list(x ,0 ,ac+1 ,atoms);
 }
 
-static void unpak_mute(t_unpak *x ,t_floatarg f) {
+static void unpak_mute(t_unpak *x ,t_float f) {
 	x->mute = ~(int)f;
 }
 

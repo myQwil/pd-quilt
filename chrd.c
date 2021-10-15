@@ -10,11 +10,11 @@ typedef struct {
 	t_outlet **outs; /* outlets */
 } t_chrd;
 
-static void chrd_midi(t_chrd *y ,t_floatarg f) {
+static void chrd_midi(t_chrd *y ,t_float f) {
 	y->midi = f;
 }
 
-static void chrd_all(t_chrd *y ,t_floatarg f) {
+static void chrd_all(t_chrd *y ,t_float f) {
 	y->all = f;
 }
 

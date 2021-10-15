@@ -1,4 +1,4 @@
-#N canvas 780 320 351 271 14;
+#N canvas 780 320 350 270 14;
 #X obj 120 90 inlet;
 #X obj 180 90 inlet;
 #X obj 180 120 route float on;

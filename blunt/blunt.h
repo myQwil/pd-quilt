@@ -77,7 +77,7 @@ typedef struct {
 	int loadbang;
 } t_blunt;
 
-static void blunt_loadbang(t_blunt *x ,t_floatarg action) {
+static void blunt_loadbang(t_blunt *x ,t_float action) {
 	if (x->loadbang && !action) pd_bang((t_pd *)x);
 }
 

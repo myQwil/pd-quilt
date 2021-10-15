@@ -1,11 +1,11 @@
-#N canvas 620 230 751 531 14;
+#N canvas 620 230 750 530 14;
 #X msg 250 110 one 2 3;
 #X msg 330 110 4 five 6;
 #X msg 330 140 7 8 nine;
 #X obj 220 200 unpak any 2 3;
 #X obj 220 280 pak hi b float;
 #X msg 170 110 . . 234;
-#N canvas 570 570 451 321 foo 0;
+#N canvas 570 570 450 320 foo 0;
 #X restore 40 150 pd foo;
 #X msg 40 180 traverse pd-foo \, bang;
 #X obj 40 210 pointer;
@@ -24,7 +24,7 @@
 #X obj 220 370 unpak a 2 f;
 #X msg 140 320 1 2 three;
 #X msg 80 370 mute 0;
-#N canvas 570 390 351 271 out 0;
+#N canvas 570 390 350 270 out 0;
 #X obj 70 50 inlet;
 #X obj 70 80 x;
 #X obj 100 110 is p;
@@ -52,7 +52,7 @@
 #X obj 180 430 pointer;
 #X obj 220 460 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#N canvas 570 390 351 271 out 0;
+#N canvas 570 390 350 270 out 0;
 #X obj 70 50 inlet;
 #X obj 70 80 x;
 #X obj 100 110 is p;
@@ -80,7 +80,7 @@
 #X obj 300 430 pointer;
 #X obj 340 460 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#N canvas 570 390 351 271 out 0;
+#N canvas 570 390 350 270 out 0;
 #X obj 70 50 inlet;
 #X obj 70 80 x;
 #X obj 100 110 is p;

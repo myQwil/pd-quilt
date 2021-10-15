@@ -1,4 +1,4 @@
-#N canvas 710 360 351 301 14;
+#N canvas 710 360 350 300 14;
 #X obj 110 90 inlet;
 #X obj 170 90 loadbang;
 #X msg 140 130 5;

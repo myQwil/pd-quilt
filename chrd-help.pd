@@ -1,4 +1,4 @@
-#N canvas 200 140 601 611 14;
+#N canvas 200 140 600 610 14;
 #X obj 130 320 cupqb;
 #X obj 330 550 dac~;
 #X obj 90 260 * 100;
@@ -6,7 +6,7 @@
 #X obj 90 290 s dcay;
 #X floatatom 30 230 0 0 0 0 - - -;
 #X obj 30 290 s atak;
-#N canvas 1170 250 511 401 chords 0;
+#N canvas 1170 250 510 400 chords 0;
 #X msg 180 40 @ 40;
 #X msg 190 70 @ 38;
 #X msg 210 130 @ 33;
@@ -98,8 +98,8 @@
 0 1;
 #X msg 60 380 expl \$1;
 #X msg 50 160 1 10 10 5;
-#N canvas 210 400 551 401 instruments 0;
-#N canvas 720 400 451 321 inst 0;
+#N canvas 210 400 550 400 instruments 0;
+#N canvas 720 400 450 320 inst 0;
 #X obj 120 240 *~;
 #X obj 220 200 ad 1;
 #X obj 120 60 inlet;
@@ -134,7 +134,7 @@
 #X connect 14 0 0 0;
 #X connect 15 0 1 2;
 #X restore 50 80 pd inst;
-#N canvas 800 400 451 321 inst 0;
+#N canvas 800 400 450 320 inst 0;
 #X obj 110 230 *~;
 #X obj 220 180 ad 1;
 #X obj 110 60 inlet;
@@ -165,7 +165,7 @@
 #X connect 12 0 6 0;
 #X connect 13 0 0 0;
 #X restore 120 80 pd inst;
-#N canvas 800 400 451 321 inst 0;
+#N canvas 800 400 450 320 inst 0;
 #X obj 120 220 *~;
 #X obj 220 180 ad 1;
 #X obj 120 60 inlet;
@@ -196,7 +196,7 @@
 #X connect 12 0 6 0;
 #X connect 13 0 0 0;
 #X restore 190 80 pd inst;
-#N canvas 800 400 451 321 inst 0;
+#N canvas 800 400 450 320 inst 0;
 #X obj 120 220 *~;
 #X obj 220 180 ad 1;
 #X obj 120 60 inlet;
@@ -227,7 +227,7 @@
 #X connect 12 0 6 0;
 #X connect 13 0 0 0;
 #X restore 260 80 pd inst;
-#N canvas 800 400 451 321 inst 0;
+#N canvas 800 400 450 320 inst 0;
 #X obj 120 220 *~;
 #X obj 220 180 ad 1;
 #X obj 120 60 inlet;
@@ -258,7 +258,7 @@
 #X connect 12 0 6 0;
 #X connect 13 0 0 0;
 #X restore 330 80 pd inst;
-#N canvas 800 400 451 321 inst 0;
+#N canvas 800 400 450 320 inst 0;
 #X obj 120 220 *~;
 #X obj 220 180 ad 1;
 #X obj 120 60 inlet;

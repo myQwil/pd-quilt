@@ -9,7 +9,7 @@ typedef struct {
 	t_outlet *o_same;
 } t_same;
 
-static void *same_new(t_floatarg f) {
+static void *same_new(t_float f) {
 	t_same *x = (t_same *)pd_new(same_class);
 	x->f = f;
 	outlet_new(&x->obj ,&s_float);

@@ -1,4 +1,4 @@
-#N canvas 480 270 541 521 14;
+#N canvas 480 270 540 520 14;
 #X obj 110 140 cupqb;
 #X obj 170 140 cupqb;
 #X obj 230 140 cupqb;

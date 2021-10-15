@@ -34,13 +34,18 @@ static void delp_stop(t_delp *x) {
 	outlet_float(x->o_on ,0);
 }
 
-static void delp_push(t_delp *x ,t_floatarg f) {
+static void delp_push(t_delp *x ,t_float f) {
 	x->remtime += f;
 	if (!x->stop && !x->pause)
 	{	clock_unset(x->clock);
 		x->remtime -= timesince(x->settime ,x->unit ,x->samps);
 		x->settime = clock_getlogicaltime();
 		clock_delay(x->clock ,x->remtime);   }
+}
+
+static void delp_time(t_delp *x) {
+	outlet_float(x->o_rem ,x->remtime - (x->pause ? 0 :
+		timesince(x->settime ,x->unit ,x->samps) ));
 }
 
 static void delp_pause(t_delp *x) {
@@ -70,7 +75,7 @@ static void delp_tempo(t_delp *x ,t_symbol *s ,int ac ,t_atom *av) {
 	clock_setunit(x->clock ,x->unit ,x->samps);
 }
 
-static void delp_ft1(t_delp *x ,t_floatarg f) {
+static void delp_ft1(t_delp *x ,t_float f) {
 	if (f < 0) f = 0;
 	x->deltime = f;
 }
@@ -96,6 +101,7 @@ static void *delp_new(t_symbol *s ,int argc ,t_atom *argv) {
 	x->o_on  = outlet_new(&x->obj ,&s_float);
 
 	x->clock = clock_new(x ,(t_method)delp_tick);
+	x->settime = clock_getlogicaltime();
 	if (argc && argv->a_type == A_FLOAT)
 	{	delp_ft1(x ,argv->a_w.w_float);
 		argc-- ,argv++;   }
@@ -118,6 +124,8 @@ void delp_setup(void) {
 	class_addfloat (delp_class ,delp_float);
 	class_addmethod(delp_class ,(t_method)delp_stop
 		,gensym("stop")  ,0);
+	class_addmethod(delp_class ,(t_method)delp_time
+		,gensym("time")  ,0);
 	class_addmethod(delp_class ,(t_method)delp_pause
 		,gensym("pause") ,0);
 	class_addmethod(delp_class ,(t_method)delp_ft1

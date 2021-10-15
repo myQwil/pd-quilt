@@ -228,7 +228,7 @@ static void pak_pxy_anything(t_pak_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 
-static void pak_mute(t_pak *x ,t_floatarg f) {
+static void pak_mute(t_pak *x ,t_float f) {
 	x->mute = ~(int)f;
 }
 

@@ -104,7 +104,7 @@ static const char dgt[] = {
 
 /*------------------ global functions -------------------------*/
 
-static void radix_key(void *z ,t_floatarg fkey);
+static void radix_key(void *z ,t_float fkey);
 static void radix_draw_update(t_gobj *client ,t_glist *glist);
 
 /*------------------ radix functions --------------------------*/
@@ -125,7 +125,7 @@ static void radix_clip(t_radix *x) {
 		else if (x->x_val > x->x_max) x->x_val = x->x_max;   }
 }
 
-static void radix_precision(t_radix *x ,t_floatarg f) {
+static void radix_precision(t_radix *x ,t_float f) {
 	int m = FLT_MANT_DIG / log2(x->x_base) + 1;
 	if      (f < 1) f = 1;
 	else if (f > m) f = m;
@@ -153,17 +153,17 @@ static void radix_dobase(t_radix *x ,t_float f) {
 	x->x_texp = tx;
 }
 
-static void radix_base(t_radix *x ,t_floatarg f) {
+static void radix_base(t_radix *x ,t_float f) {
 	radix_dobase(x ,f);
 	sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);
 }
 
-static void radix_ebase(t_radix *x ,t_floatarg base) {
+static void radix_ebase(t_radix *x ,t_float base) {
 	x->x_e = radix_bounds(base);
 	sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);
 }
 
-static void radix_be(t_radix *x ,t_floatarg base) {
+static void radix_be(t_radix *x ,t_float base) {
 	radix_dobase(x ,base);
 	x->x_e = x->x_base;
 	sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);
@@ -390,7 +390,7 @@ static int radix_check_minmax(t_radix *x ,double min ,double max) {
 	return(ret);
 }
 
-static void radix_set(t_radix *x ,t_floatarg f) {
+static void radix_set(t_radix *x ,t_float f) {
 	ufloat uf = {.f = f} ,vf = {.f = x->x_val};
 	if (uf.u != vf.u)
 	{	x->x_val = f;
@@ -398,7 +398,7 @@ static void radix_set(t_radix *x ,t_floatarg f) {
 		sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);   }
 }
 
-static void radix_log_height(t_radix *x ,t_floatarg lh) {
+static void radix_log_height(t_radix *x ,t_float lh) {
 	if (lh < 10.) lh = 10.;
 	x->x_log_height = lh;
 	if (x->x_lilo)

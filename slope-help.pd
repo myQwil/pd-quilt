@@ -1,4 +1,4 @@
-#N canvas 630 300 541 461 14;
+#N canvas 630 300 540 460 14;
 #X floatatom 20 170 0 0 0 2 current - -;
 #X floatatom 90 170 0 0 0 2 min - -;
 #X floatatom 130 170 0 0 0 2 max - -;

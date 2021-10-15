@@ -24,7 +24,7 @@ static void fldec_bang(t_fldec *x) {
 	outlet_float(x->o_mt ,x->uf.mt);
 }
 
-static void fldec_set(t_fldec *x ,t_floatarg f) {
+static void fldec_set(t_fldec *x ,t_float f) {
 	x->uf.f = f;
 }
 
@@ -33,7 +33,7 @@ static void fldec_float(t_fldec *x ,t_float f) {
 	fldec_bang(x);
 }
 
-static void *fldec_new(t_floatarg f) {
+static void *fldec_new(t_float f) {
 	t_fldec *x = (t_fldec *)pd_new(fldec_class);
 	x->o_mt = outlet_new(&x->obj ,&s_float);
 	x->o_ex = outlet_new(&x->obj ,&s_float);

@@ -1,7 +1,7 @@
-#N canvas 660 130 561 661 14;
+#N canvas 660 130 560 660 14;
 #X obj 220 520 *~;
 #X obj 220 550 dac~;
-#N canvas 710 780 451 301 (subpatch) 0;
+#N canvas 710 780 450 300 (subpatch) 0;
 #X array \$0ffplay 1152 float 2;
 #X coords 0 1 1152 -1 128 160 1;
 #X restore 390 120 graph;
@@ -29,11 +29,11 @@
 #X floatatom 390 550 0 0 0 0 - - -;
 #X obj 220 20 cnv 15 88 24 empty empty ffplay~ 4 12 0 18 -1 -262144
 0;
-#N canvas 180 430 481 371 time 0;
+#N canvas 180 430 480 370 time 0;
 #X obj 80 40 inlet;
 #X obj 380 220 outlet;
 #X obj 80 230 outlet;
-#N canvas 140 230 481 341 display 0;
+#N canvas 140 230 480 340 display 0;
 #X obj 130 40 r \$0time;
 #X obj 110 160 @-;
 #X msg 190 190 set \$1;
@@ -65,10 +65,10 @@
 #X restore 300 170 pd display;
 #X obj 140 80 route stop;
 #X msg 140 110 0;
-#N canvas 260 520 451 301 is-playing 0;
+#N canvas 260 520 450 300 is-playing 0;
 #X obj 100 70 r \$0play;
 #X obj 140 100 #&&;
-#N canvas 1140 350 451 301 check-dsp 0;
+#N canvas 1140 350 450 300 check-dsp 0;
 #X obj 150 50 loadbang;
 #X obj 150 80 t;
 #X obj 150 120 del 5;
@@ -137,7 +137,7 @@
 0 11 -1 -262144 -262144;
 #X obj 330 470 zp~ 15;
 #X obj 330 550 zp~ 15;
-#N canvas 1150 350 451 301 bounds 0;
+#N canvas 1150 350 450 300 bounds 0;
 #X obj 150 50 inlet;
 #X obj 260 110 + 1;
 #X obj 30 220 outlet;
@@ -156,7 +156,7 @@
 #X connect 6 0 1 0;
 #X connect 7 0 2 0;
 #X restore 70 390 pd bounds;
-#N canvas 120 600 491 301 route 0;
+#N canvas 120 600 490 300 route 0;
 #X obj 50 30 inlet;
 #X obj 40 90 s \$0n;
 #X obj 160 90 sel;
@@ -191,7 +191,7 @@
 #X msg 130 230 open \$1;
 #X obj 30 490 metro 48;
 #X obj 100 520 /~ 2;
-#N canvas 360 600 661 191 trackbar 1;
+#N canvas 360 600 660 190 trackbar 1;
 #X obj 30 140 outlet;
 #X msg 30 110 seek \$1;
 #X obj 60 20 hsl 576 20 0 1 0 0 empty \$0trackbar empty -2 -8 0 10
@@ -206,7 +206,7 @@
 #X msg 290 140 speed \$1;
 #X msg 390 50 15 5000;
 #X obj 390 90 line 0 2;
-#N canvas 1090 420 451 361 kseek 0;
+#N canvas 1090 420 450 360 kseek 0;
 #X obj 80 20 keyname;
 #X obj 80 100 spigot;
 #X obj 90 80 symbol;
@@ -269,7 +269,7 @@
 #X connect 15 0 13 0;
 #X connect 16 0 11 0;
 #X restore 420 300 pd trackbar;
-#N canvas 300 510 481 491 metadata 0;
+#N canvas 300 510 480 490 metadata 0;
 #X obj 50 440 outlet;
 #X msg 50 30 info;
 #X text 90 30 general track info;
@@ -306,7 +306,7 @@
 #X connect 21 0 0 0;
 #X restore 420 330 pd metadata;
 #X obj 160 260 r \$0open;
-#N canvas 160 270 721 301 http 0;
+#N canvas 160 270 720 300 http 0;
 #X obj 180 210 outlet;
 #X msg 20 40 open https://upload.wikimedia.org/wikipedia/en/1/10/Michael_Jackson_Thriller.ogg
 , f 81;

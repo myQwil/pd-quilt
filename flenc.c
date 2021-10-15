@@ -19,23 +19,23 @@ static void flenc_bang(t_flenc *x) {
 	outlet_float(x->obj.ob_outlet ,x->uf.f);
 }
 
-static void flenc_mantissa(t_flenc *x ,t_floatarg f) {
+static void flenc_mantissa(t_flenc *x ,t_float f) {
 	x->uf.mt = f;
 }
 
-static void flenc_exponent(t_flenc *x ,t_floatarg f) {
+static void flenc_exponent(t_flenc *x ,t_float f) {
 	x->uf.ex = f;
 }
 
-static void flenc_sign(t_flenc *x ,t_floatarg f) {
+static void flenc_sign(t_flenc *x ,t_float f) {
 	x->uf.sg = f;
 }
 
-static void flenc_f(t_flenc *x ,t_floatarg f) {
+static void flenc_f(t_flenc *x ,t_float f) {
 	x->uf.f = f;
 }
 
-static void flenc_u(t_flenc *x ,t_floatarg f) {
+static void flenc_u(t_flenc *x ,t_float f) {
 	x->uf.u = f;
 }
 

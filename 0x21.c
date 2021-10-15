@@ -16,7 +16,7 @@ static void lnot_float(t_lnot *x ,t_float f) {
 	outlet_float(x->obj.ob_outlet ,!(int)(x->f=f));
 }
 
-static void *lnot_new(t_floatarg f) {
+static void *lnot_new(t_float f) {
 	t_lnot *x = (t_lnot *)pd_new(lnot_class);
 	outlet_new(&x->obj ,&s_float);
 	x->f = f;

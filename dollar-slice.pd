@@ -1,4 +1,4 @@
-#N canvas 570 180 481 581 14;
+#N canvas 570 180 480 580 14;
 #X msg 60 40 list a b c 4 e f g;
 #X msg 60 70 foo \$[:] bar;
 #X msg 70 100 list a b c 4 e f g;
@@ -27,7 +27,7 @@
 #X text 260 340 foo a c e bar;
 #X text 270 400 foo g f e 4 c b a bar;
 #X text 280 460 foo e c a bar;
-#N canvas 1060 270 431 441 extra-features 0;
+#N canvas 1060 270 430 440 extra-features 0;
 #X msg 40 40 list a b c 4 e f g;
 #X msg 40 70 foo \$[:::] bar;
 #X msg 50 100 list a b c 4 e f g;

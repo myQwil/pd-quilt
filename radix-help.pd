@@ -1,12 +1,12 @@
-#N canvas 310 300 611 411 14;
+#N canvas 310 300 610 410 14;
 #X floatatom 250 160 0 0 0 0 - - -;
 #X floatatom 200 220 0 0 0 0 - - -;
 #X floatatom 320 140 0 2 64 0 base - -;
 #X obj 200 190 @pow 2;
 #X obj 80 300 sploat;
-#N canvas 940 300 471 441 commands 0;
+#N canvas 940 300 470 440 commands 0;
 #X floatatom 120 160 0 0 0 0 - - -;
-#N canvas 1250 300 451 321 pcalc 0;
+#N canvas 1250 300 450 320 pcalc 0;
 #X obj 70 60 inlet;
 #X obj 70 120 @/ 24;
 #X obj 70 180 outlet;

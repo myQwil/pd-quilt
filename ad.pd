@@ -1,4 +1,4 @@
-#N canvas 570 250 541 401 14;
+#N canvas 570 250 540 400 14;
 #X obj 30 30 inlet peak;
 #X obj 310 60 inlet attack;
 #X obj 420 60 inlet decay;

@@ -1,7 +1,7 @@
-#N canvas 660 120 551 661 14;
+#N canvas 660 120 550 660 14;
 #X obj 200 510 *~;
 #X obj 200 600 dac~;
-#N canvas 710 770 451 301 (subpatch) 0;
+#N canvas 710 770 450 300 (subpatch) 0;
 #X array \$0gme 128 float 2;
 #X coords 0 1 128 -1 128 120 1 0 0;
 #X restore 370 170 graph;
@@ -23,7 +23,7 @@
 #X obj 60 320 bng 15 250 50 0 empty empty restart 17 7 0 10 -1 -262144
 -262144;
 #X obj 370 440 hsl 128 17 0.001 1 1 0 empty empty vol 25 9 0 12 -1
--262144 -262144 0 1;
+-262144 -262144 9200 1;
 #X obj 370 510 hsl 128 17 -0.001 -1 1 0 empty empty cos 25 9 0 12 -1
 -262144 -262144 0 1;
 #X floatatom 380 470 0 0 0 0 - - -;
@@ -33,7 +33,7 @@
 #X obj 50 500 *~ 0.5;
 #X obj 230 450 *~;
 #X obj 200 450 *~;
-#N canvas 80 190 481 561 time 0;
+#N canvas 80 190 480 560 time 0;
 #X obj 80 30 inlet;
 #X obj 200 490 outlet~;
 #X obj 310 340 outlet;
@@ -50,7 +50,7 @@
 #X obj 220 370 linp~;
 #X floatatom 330 60 0 0 0 0 - - -;
 #X floatatom 330 90 0 0 0 0 - - -;
-#N canvas 760 360 451 301 defaults 0;
+#N canvas 760 360 450 300 defaults 0;
 #X obj 120 60 inlet;
 #X obj 240 60 inlet;
 #X obj 120 90 sel -1;
@@ -74,7 +74,7 @@
 #X obj 200 460 *~;
 #X obj 200 430 line~;
 #X obj 80 370 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-0 1;
+1 1;
 #X msg 140 300 0, f 2;
 #X msg 140 340 set \$1;
 #X obj 80 400 pack;
@@ -91,7 +91,7 @@
 #X msg 290 430 15;
 #X obj 230 310 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
 -262144;
-#N canvas 300 400 451 301 display 0;
+#N canvas 300 400 450 300 display 0;
 #X obj 140 30 inlet;
 #X obj 200 30 inlet;
 #X obj 250 30 inlet;
@@ -123,9 +123,9 @@
 #X connect 13 1 6 0;
 #X connect 14 0 7 0;
 #X restore 310 310 pd display;
-#N canvas 580 190 451 301 pause 0;
+#N canvas 580 190 450 300 pause 0;
 #X obj 150 110 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-0 1;
+1 1;
 #X obj 150 190 t b f;
 #X obj 150 220 del;
 #X obj 150 130 == 0;
@@ -221,7 +221,7 @@
 #X msg 120 180 symbol ~/Music/Games;
 #X obj 320 470 zp~ 15;
 #X obj 320 540 zp~ 15;
-#N canvas 860 330 451 301 bounds 0;
+#N canvas 860 330 450 300 bounds 0;
 #X obj 150 70 inlet;
 #X obj 250 100 + 1;
 #X obj 200 210 outlet;
@@ -242,7 +242,7 @@
 #X restore 50 400 pd bounds;
 #X obj 250 410 +~;
 #X obj 100 340 r \$0b;
-#N canvas 800 530 451 301 route 0;
+#N canvas 800 530 450 300 route 0;
 #X obj 50 30 inlet;
 #X obj 110 130 s \$0l;
 #X floatatom 70 100 0 0 0 0 - - -;
@@ -275,7 +275,7 @@
 #X restore 270 440 pd route;
 #X symbolatom 290 290 0 0 0 0 - - -;
 #X obj 140 270 r \$0pass;
-#N canvas 940 90 561 351 muting_commands 0;
+#N canvas 940 90 560 350 muting_commands 0;
 #X text 130 160 get;
 #X text 130 130 set;
 #X msg 60 130 mask \$1;
@@ -340,7 +340,7 @@
 #X connect 32 0 31 0;
 #X connect 34 0 10 0;
 #X restore 350 310 pd muting_commands;
-#N canvas 1000 250 451 301 misc_commands 0;
+#N canvas 1000 250 450 300 misc_commands 0;
 #X msg 210 190 tempo \$1;
 #X floatatom 210 130 0 0 400 0 - - -;
 #X floatatom 320 100 0 0 0 0 - - -;
@@ -356,26 +356,24 @@
 #X obj 210 240 outlet;
 #X obj 110 170 * 0.01;
 #X msg 80 200 speed \$1;
-#N canvas 1000 610 451 301 pitch 0;
+#N canvas 1000 610 450 300 pitch 0;
 #X obj 180 70 inlet;
 #X obj 100 240 outlet;
 #X obj 180 240 outlet;
 #X floatatom 100 210 0 0 0 0 - - -;
 #X floatatom 180 210 0 0 0 0 - - -;
 #X obj 180 180 @pow 2;
-#X obj 180 150 / 12;
 #X obj 100 180 @pow 2;
 #X obj 100 150 / 12;
-#X obj 180 120 * -1;
-#X connect 0 0 9 0;
+#X obj 180 150 / -12;
+#X connect 0 0 7 0;
 #X connect 0 0 8 0;
 #X connect 3 0 1 0;
 #X connect 4 0 2 0;
 #X connect 5 0 4 0;
-#X connect 6 0 5 0;
-#X connect 7 0 3 0;
-#X connect 8 0 7 0;
-#X connect 9 0 6 0;
+#X connect 6 0 3 0;
+#X connect 7 0 6 0;
+#X connect 8 0 5 0;
 #X restore 100 100 pd pitch;
 #X obj 100 40 cupqb;
 #X msg 300 190 seek \$1;
@@ -398,7 +396,7 @@
 #X connect 15 0 14 0;
 #X connect 16 0 11 0;
 #X restore 370 340 pd misc_commands;
-#N canvas 1000 380 481 491 info_msgs 0;
+#N canvas 1000 380 480 490 info_msgs 0;
 #X obj 50 440 outlet;
 #X msg 50 30 info;
 #X text 90 30 general track info;

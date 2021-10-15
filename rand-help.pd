@@ -1,104 +1,113 @@
-#N canvas 510 140 581 601 14;
-#X text 60 60 Similar to [random] but with time worked into the seed
-to produce different results upon each restart of pd. It also has several
-additional features.;
-#X text 290 250 1 arg behaves just like [random];
-#X obj 230 250 rand 4;
-#X floatatom 230 280 0 0 0 0 - - -;
-#X floatatom 140 340 0 0 0 0 - - -;
-#X text 220 330 number between -1 and 2 (-1 \, 0 \, 1 \, 2);
-#X text 190 450 either 2 \, 8 \, or 10;
-#X obj 50 370 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
-#X floatatom 90 460 0 0 0 0 - - -;
-#X obj 40 490 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
-#X floatatom 110 560 0 0 0 0 - - -;
-#X text 200 530 3 args with a non-number in the middle;
-#X text 190 430 3 or more args creates a list;
-#X obj 160 250 random 4;
-#X msg 140 210 seed 123;
-#X floatatom 160 280 0 0 0 0 - - -;
-#X obj 90 430 rand 2 8 10;
-#X msg 60 120 peek;
-#X msg 70 150 ptr;
-#X text 110 150 print pointer size;
-#X msg 80 180 state;
-#X msg 160 400 c 2;
-#X msg 20 310 c 2;
-#X text 20 260 act like a list;
-#X text 200 400 act like a range;
-#X msg 120 400 c 3;
-#X msg 150 490 c 2;
-#X msg 190 490 c 3;
-#X obj 40 530 random 2;
-#X msg 70 490 seed 1234;
-#X floatatom 40 560 0 0 0 0 - - -;
-#X obj 240 30 cnv 15 60 24 empty empty rand 4 12 0 18 -1 -262144 0
-;
-#X text 110 120 print range/list;
-#X text 130 180 print seed's current state;
-#X text 200 370 list-size = 4 \, at-index[3] = 7;
-#X obj 140 310 rand 3 -1;
-#X text 200 550 creates a small list (either 7 or 9);
-#X obj 110 530 rand 7 | 9;
-#X text 220 310 2 or 0 args act as boundaries (stop \, start);
-#X obj 30 220 s \$0r;
-#X msg 20 280 c 3 \, n 3 \, @2 7;
-#X obj 90 340 r \$0r;
-#X msg 120 370 n 4 \, @3 7;
-#N canvas 580 380 471 331 no-repeats 0;
-#X obj 120 60 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
-#X floatatom 120 220 0 0 0 0 - - -;
+#N canvas 650 220 520 520 14;
+#X text 170 150 1 arg behaves just like [random];
+#X obj 150 190 rand 4;
+#X floatatom 150 220 0 0 0 0 - - -;
+#X obj 70 190 random 4;
+#X msg 70 150 seed 123;
+#X floatatom 70 220 0 0 0 0 - - -;
+#X obj 210 30 cnv 15 60 24 empty empty rand 4 12 0 18 #000000 #fcfcfc
+0;
+#N canvas 580 380 470 330 no-repeats 0;
+#X obj 100 160 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
+#X floatatom 100 260 0 0 0 0 - - -;
 #X msg 150 60 nop 1;
 #X text 200 60 turn on no-repeat mode;
-#X msg 170 90 max 2;
-#X text 220 90 set max repeats (default 1);
-#X text 170 120 nop works automatically with floats;
-#X obj 150 30 `b !;
-#X obj 120 190 rand 3;
-#X msg 170 140 0, f 2;
-#X msg 200 140 1, f 2;
-#X msg 230 140 2, f 2;
-#X connect 0 0 8 0;
-#X connect 2 0 8 0;
-#X connect 4 0 8 0;
-#X connect 7 0 2 0;
-#X connect 8 0 1 0;
+#X obj 210 110 loadbang;
+#X text 240 140 set max repeats to 2;
+#X floatatom 190 260 0 0 0 0 - - -;
+#X msg 210 170 seed 123;
+#X obj 50 90 metro 100;
+#X obj 50 60 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc #fcfcfc
+0 1;
+#X obj 40 260 print;
+#X msg 190 140 nop 2;
+#X floatatom 290 260 0 0 0 0 - - -;
+#X obj 290 230 random 2;
+#X obj 100 230 rand -1 1;
+#X obj 190 230 rand 20 | 1;
+#X connect 0 0 13 0;
+#X connect 0 0 14 0;
+#X connect 0 0 15 0;
+#X connect 2 0 14 0;
+#X connect 2 0 15 0;
+#X connect 4 0 11 0;
+#X connect 4 0 7 0;
+#X connect 7 0 13 0;
+#X connect 7 0 14 0;
+#X connect 7 0 15 0;
+#X connect 8 0 0 0;
 #X connect 9 0 8 0;
-#X connect 10 0 8 0;
-#X connect 11 0 8 0;
-#X restore 390 160 pd no-repeats;
-#X obj 30 170 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
-#X obj 230 210 r \$0r;
-#X connect 2 0 3 0;
-#X connect 7 0 16 0;
-#X connect 9 0 28 0;
-#X connect 9 0 37 0;
-#X connect 13 0 15 0;
-#X connect 14 0 2 0;
-#X connect 14 0 13 0;
-#X connect 14 0 35 0;
-#X connect 16 0 8 0;
-#X connect 17 0 39 0;
-#X connect 18 0 39 0;
-#X connect 20 0 39 0;
-#X connect 21 0 16 0;
-#X connect 22 0 35 0;
-#X connect 25 0 16 0;
-#X connect 26 0 37 0;
-#X connect 27 0 37 0;
-#X connect 28 0 30 0;
-#X connect 29 0 28 0;
-#X connect 29 0 37 0;
-#X connect 35 0 4 0;
-#X connect 37 0 10 0;
-#X connect 40 0 35 0;
-#X connect 41 0 35 0;
-#X connect 41 0 16 0;
-#X connect 42 0 16 0;
-#X connect 44 0 39 0;
-#X connect 44 0 13 0;
-#X connect 45 0 2 0;
+#X connect 11 0 14 0;
+#X connect 11 0 15 0;
+#X connect 13 0 12 0;
+#X connect 14 0 1 0;
+#X connect 14 0 10 0;
+#X connect 15 0 6 0;
+#X restore 360 470 pd no-repeats;
+#X obj 150 150 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
+#X floatatom 70 330 0 0 0 0 - - -;
+#X obj 70 300 rand 4 8;
+#X obj 70 270 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc;
+#X floatatom 70 440 0 0 0 0 - - -;
+#X obj 70 380 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc;
+#X text 90 380 3 or more args create a list;
+#X text 60 60 Similar to [random] but with the current time worked
+into the seed to produce different results with each restart of pd.
+, f 45;
+#X text 150 300 number between 4 and 7;
+#X text 90 270 2 args create start/stop boundaries;
+#N canvas 580 380 480 400 lists 0;
+#X floatatom 40 110 0 0 0 0 - - -;
+#X obj 40 50 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc;
+#X floatatom 40 240 0 0 0 0 - - -;
+#X obj 40 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc;
+#X msg 70 170 lst \$1;
+#X obj 70 150 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc 0 1;
+#X obj 40 210 rand 1 5;
+#X obj 40 80 rand 22 or 333;
+#X text 130 170 force list or range behavior;
+#X floatatom 40 350 0 0 0 0 - - -;
+#X obj 40 290 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc;
+#X msg 80 250 n 2;
+#X msg 60 290 1.2 2.3 3.4;
+#X obj 40 320 rand 1 2 3;
+#X text 120 250 resize list;
+#X text 230 320 reassign starting at index;
+#X text 170 280 sending lists reassigns and resizes implicitly, f
+26;
+#X msg 140 320 #2 3.6 555;
+#X msg 140 350 @2 3.6 555;
+#X text 60 50 make a small list with the creation args f-s-f;
+#X text 230 350 reassign at index and resize;
+#X connect 1 0 7 0;
+#X connect 3 0 6 0;
+#X connect 4 0 6 0;
+#X connect 5 0 4 0;
+#X connect 6 0 2 0;
+#X connect 7 0 0 0;
+#X connect 10 0 13 0;
+#X connect 11 0 13 0;
+#X connect 12 0 13 0;
+#X connect 13 0 9 0;
+#X connect 17 0 13 0;
+#X connect 18 0 13 0;
+#X restore 360 440 pd lists;
+#X obj 70 410 rand 1 22 333;
+#X connect 1 0 2 0;
+#X connect 3 0 5 0;
+#X connect 4 0 1 0;
+#X connect 4 0 3 0;
+#X connect 8 0 1 0;
+#X connect 8 0 3 0;
+#X connect 10 0 9 0;
+#X connect 11 0 10 0;
+#X connect 13 0 19 0;
+#X connect 19 0 12 0;

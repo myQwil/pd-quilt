@@ -16,7 +16,7 @@ static void bnot_float(t_bnot *x ,t_float f) {
 	outlet_float(x->obj.ob_outlet ,~(int)(x->f=f));
 }
 
-static void *bnot_new(t_floatarg f) {
+static void *bnot_new(t_float f) {
 	t_bnot *x = (t_bnot *)pd_new(bnot_class);
 	outlet_new(&x->obj ,&s_float);
 	x->f = f;

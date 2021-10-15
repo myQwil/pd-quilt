@@ -1,4 +1,4 @@
-#N canvas 730 420 451 331 14;
+#N canvas 730 420 450 330 14;
 #X obj 200 220 linp;
 #X msg 70 120 pause;
 #X floatatom 200 250 0 0 0 0 - - -;

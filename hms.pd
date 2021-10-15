@@ -1,4 +1,4 @@
-#N canvas 570 180 351 421 14;
+#N canvas 570 180 350 420 14;
 #X obj 110 20 inlet;
 #X obj 150 140 inlet;
 #X obj 200 80 loadbang;
@@ -8,7 +8,7 @@
 #X obj 100 140 \$1;
 #X obj 100 180 sel;
 #X obj 110 50 t f f;
-#N canvas 920 360 351 241 neg 0;
+#N canvas 920 360 350 240 neg 0;
 #X obj 130 30 inlet;
 #X obj 130 60 < 0;
 #X obj 130 90 sel;
@@ -31,7 +31,7 @@
 #X obj 160 270 div 60;
 #X obj 40 180 f% 60;
 #X obj 40 240 round 0.01;
-#N canvas 220 310 351 301 format 0;
+#N canvas 220 310 350 300 format 0;
 #X obj 90 30 inlet;
 #X obj 90 60 t f f f;
 #X obj 140 90 i;

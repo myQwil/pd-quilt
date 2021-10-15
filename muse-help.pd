@@ -1,11 +1,11 @@
-#N canvas 620 270 721 561 14;
+#N canvas 620 270 720 560 14;
 #X obj 50 470 *~;
 #X obj 50 500 dac~;
 #X floatatom 390 490 0 0 0 3 frequency - -;
 #X floatatom 530 490 0 0 0 3 midi-note - -;
 #X text 350 150 root inlet;
-#X obj 40 150 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-1 1;
+#X obj 40 150 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc 0 1;
 #X floatatom 70 150 0 0 0 0 - - -;
 #X obj 50 410 *~;
 #X obj 70 350 ad 5;
@@ -15,7 +15,7 @@
 #X obj 270 180 muse;
 #X floatatom 300 210 0 0 0 0 - - -;
 #X obj 50 440 *~;
-#N canvas 560 500 361 331 scaler 0;
+#N canvas 560 500 360 330 scaler 0;
 #X obj 100 210 sel;
 #X obj 240 210 sel;
 #X obj 160 30 inlet;
@@ -52,15 +52,15 @@
 #X restore 130 250 pd scaler;
 #X text 310 180 default args: 69 7;
 #X obj 260 130 cupqb;
-#N canvas 880 200 691 531 commands 0;
+#N canvas 880 200 690 530 commands 0;
 #X msg 30 90 n \$1;
 #X obj 400 140 pack;
 #X obj 450 80 cupqb;
 #X obj 400 80 cupqb;
 #X obj 30 40 cupqb;
 #X text 30 20 change scale size;
-#X msg 240 40 tet \$1;
-#X text 290 40 # tones per octave;
+#X msg 260 40 tet \$1;
+#X text 320 40 # tones per octave;
 #X obj 150 80 cupqb;
 #X obj 210 100 cupqb;
 #X text 210 80 reference pitch;
@@ -77,8 +77,8 @@
 #X obj 90 60 cupqb;
 #X msg 90 110 oct \$1;
 #X text 90 40 # notes per octave;
-#X obj 300 300 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-0 1;
+#X obj 300 300 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc 0 1;
 #X text 150 60 oct and tet.;
 #X obj 30 470 s cmd;
 #X obj 80 240 s cmd;
@@ -101,21 +101,21 @@
 #X text 360 460 indicates the offset value;
 #X text 320 280 default list behavior;
 #X text 320 300 strict means scale size doesn't change;
-#N canvas 410 340 451 301 slices 0;
-#X obj 57 231 outlet;
-#X msg 157 201 slice \$1 \$2;
-#X msg 57 201 slice \$1;
-#X msg 57 71 1;
-#X msg 77 131 -1;
-#X msg 67 101 2;
-#X msg 87 161 -2;
-#X msg 157 71 3 0;
-#X msg 167 101 0 3;
-#X msg 177 131 1 -1;
-#X msg 187 161 -1 1;
-#X msg 267 201 slice \$1 \$2 \$3;
-#X msg 267 131 list . . 2;
-#X msg 277 161 list . . -2;
+#N canvas 410 340 450 300 slices 0;
+#X obj 50 230 outlet;
+#X msg 150 200 slice \$1 \$2;
+#X msg 50 200 slice \$1;
+#X msg 50 70 1;
+#X msg 70 130 -1;
+#X msg 60 100 2;
+#X msg 80 160 -2;
+#X msg 150 70 3 0;
+#X msg 160 100 0 3;
+#X msg 170 130 1 -1;
+#X msg 180 160 -1 1;
+#X msg 260 200 slice \$1 \$2 \$3;
+#X msg 260 130 list . . 2;
+#X msg 270 160 list . . -2;
 #X connect 1 0 0 0;
 #X connect 2 0 0 0;
 #X connect 3 0 2 0;
@@ -134,7 +134,7 @@
 #X msg 70 440 slice \$1;
 #X msg 330 410 @1 4 7;
 #X msg 310 350 !1 4 7;
-#N canvas 410 340 451 301 send 0;
+#N canvas 410 340 450 300 send 0;
 #X obj 150 200 outlet;
 #X msg 150 170 send >\$1;
 #X floatatom 150 140 0 0 0 0 - - -;
@@ -144,7 +144,6 @@
 #X connect 1 0 0 0;
 #X connect 2 0 1 0;
 #X restore 180 440 pd send;
-#X msg 50 150 -1;
 #X connect 0 0 27 0;
 #X connect 1 0 42 0;
 #X connect 2 0 1 0;
@@ -174,7 +173,6 @@
 #X connect 50 0 30 0;
 #X connect 51 0 30 0;
 #X connect 52 0 26 0;
-#X connect 53 0 4 1;
 #X restore 520 150 pd commands;
 #X obj 230 250 cupqb;
 #X floatatom 230 340 0 0 0 0 - - -;
@@ -188,8 +186,8 @@
 #X floatatom 70 280 0 0 0 0 - - -;
 #X text 200 160 peak;
 #X obj 230 310 zp 1000;
-#X obj 370 40 cnv 15 60 24 empty empty muse 4 12 0 18 -1 -262144 0
-;
+#X obj 370 40 cnv 15 60 24 empty empty muse 4 12 0 18 #000000 #fcfcfc
+0;
 #X obj 200 180 cupqb 14;
 #X obj 300 260 cupqb 33;
 #X obj 350 260 cupqb 2;
@@ -201,7 +199,7 @@
 #X text 200 70 A number list that acts as a scale or arpeggio. The
 first argument is the root note \, followed by the intervals that come
 after. More creation arguments results in more inlets.;
-#N canvas 580 410 451 321 accent 0;
+#N canvas 580 410 450 320 accent 0;
 #X obj 70 50 inlet;
 #X obj 70 240 outlet~;
 #X obj 70 160 1;
@@ -243,14 +241,14 @@ after. More creation arguments results in more inlets.;
 #X connect 16 0 6 0;
 #X restore 90 440 pd accent;
 #X obj 130 310 t b f;
-#X obj 90 470 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10 -1
--262144 -262144 5600 1;
+#X obj 90 470 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10 #000000
+#fcfcfc #fcfcfc 0 1;
 #X obj 320 500 r cmd;
 #X floatatom 90 500 0 0 0 0 - - -;
 #X obj 10 250 * 0.25;
 #X obj 70 250 * 0.85;
 #X obj 390 460 muse 40 2 4 5 7 9 11;
-#N canvas 910 310 701 591 notation 0;
+#N canvas 910 310 700 590 notation 0;
 #X text 280 20 change the root+intervals respectively;
 #X text 490 150 major scale;
 #X text 490 210 change notes relative;
@@ -348,8 +346,9 @@ after. More creation arguments results in more inlets.;
 #X msg 300 420 \$1+\$2;
 #X obj 560 460 route float;
 #X obj 600 490 print -n;
-#X floatatom 81 221 0 0 0 0 - - -;
-#X floatatom 11 201 0 0 0 0 - - -;
+#X floatatom 80 220 0 0 0 0 - - -;
+#X floatatom 10 200 0 0 0 0 - - -;
+#X text 350 420 note + semitone;
 #X connect 0 0 1 0;
 #X connect 0 0 1 1;
 #X connect 5 0 9 0;

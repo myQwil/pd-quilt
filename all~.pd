@@ -1,4 +1,4 @@
-#N canvas 720 350 351 251 14;
+#N canvas 720 350 350 250 14;
 #X obj 100 100 catch~ L;
 #X obj 200 100 catch~ R;
 #X obj 100 150 outlet~;

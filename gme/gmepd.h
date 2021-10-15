@@ -69,7 +69,7 @@ static Music_Emu *gmepd_emu(t_gmepd *x) {
 	else return NULL;
 }
 
-static void gmepd_time(t_gmepd *x ,t_floatarg f) {
+static void gmepd_time(t_gmepd *x ,t_float f) {
 	int track = f ? f : x->track;
 	gme_info_t *info;
 	Music_Emu *emu = gmepd_emu(x);
@@ -291,18 +291,18 @@ static void gmepd_anything(t_gmepd *x ,t_symbol *s ,int ac ,t_atom *av) {
 	gme_free_info(info);
 }
 
-static void gmepd_seek(t_gmepd *x ,t_floatarg f) {
+static void gmepd_seek(t_gmepd *x ,t_float f) {
 	if (x->emu)
 	{	gme_seek(x->emu ,f);
 		gme_set_fade(x->emu ,-1 ,0);   }
 }
 
-static void gmepd_tempo(t_gmepd *x ,t_floatarg f) {
+static void gmepd_tempo(t_gmepd *x ,t_float f) {
 	x->tempo = f;
 	if (x->emu) gme_set_tempo(x->emu ,x->tempo);
 }
 
-static void gmepd_speed(t_gmepd *x ,t_floatarg f) {
+static void gmepd_speed(t_gmepd *x ,t_float f) {
 	x->speed = f;
 	if (x->emu) gme_set_speed(x->emu ,x->speed);
 }

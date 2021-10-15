@@ -6,11 +6,11 @@ typedef struct {
 } t_ntof;
 
 
-static void ntof_ref(t_ntof *x ,t_floatarg f) {
+static void ntof_ref(t_ntof *x ,t_float f) {
 	note_ref(&x->note ,f);
 }
 
-static void ntof_tet(t_ntof *x ,t_floatarg f) {
+static void ntof_tet(t_ntof *x ,t_float f) {
 	note_tet(&x->note ,f);
 }
 

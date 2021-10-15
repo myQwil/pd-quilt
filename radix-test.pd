@@ -1,4 +1,4 @@
-#N canvas 200 260 781 521 14;
+#N canvas 200 260 780 520 14;
 #X floatatom 230 40 0 2 64 0 - - -;
 #X msg 290 140 p \$1;
 #X floatatom 290 110 0 0 0 0 - - -;
@@ -11,7 +11,7 @@
 #X floatatom 110 170 0 0 0 0 gatom - -;
 #X msg 230 140 be \$1;
 #X obj 100 450 sploat;
-#N canvas 750 270 451 301 pcalc 0;
+#N canvas 750 270 450 300 pcalc 0;
 #X obj 190 70 inlet;
 #X obj 190 130 @/ 24;
 #X obj 190 100 log 2;

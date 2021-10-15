@@ -15,19 +15,21 @@ typedef struct {
 	double   settime ,laptime;
 	double   setmore ,lapmore; /* paused time and tempo changes */
 	unsigned pause:1;
-	t_outlet *o_lap;
+	t_outlet *o_lap;  /* outputs lap & total time */
+	t_outlet *o_on;   /* outputs play/pause state */
 } t_chrono;
 
 static void chrono_bang(t_chrono *x) {
 	x->settime = x->laptime = clock_getlogicaltime();
 	x->setmore = x->lapmore = x->pause = 0;
+	outlet_float(x->o_on ,1);
 }
 
-static void chrono_push(t_chrono *x ,t_floatarg f) {
+static void chrono_push(t_chrono *x ,t_float f) {
 	x->setmore -= f;
 }
 
-static void chrono_float(t_chrono *x ,t_floatarg f) {
+static void chrono_float(t_chrono *x ,t_float f) {
 	chrono_bang(x);
 	chrono_push(x ,f);
 }
@@ -53,6 +55,7 @@ static void chrono_lap(t_chrono *x) {
 }
 
 static void chrono_pause(t_chrono *x) {
+	outlet_float(x->o_on ,x->pause);
 	x->pause = !x->pause;
 	if (x->pause)
 	{	x->setmore += timesince(x->settime ,x->unit ,x->samps);
@@ -80,6 +83,7 @@ static void *chrono_new(t_symbol *s ,int argc ,t_atom *argv) {
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_bang ,gensym("bang2"));
 	outlet_new(&x->obj ,&s_float);
 	x->o_lap = outlet_new(&x->obj ,0);
+	x->o_on  = outlet_new(&x->obj ,&s_float);
 
 	x->unit = 1 ,x->samps = 0;
 	x->unitname = gensym("msec");

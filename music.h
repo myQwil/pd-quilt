@@ -114,8 +114,8 @@ static int music_scale(t_music *x ,t_flin *flin ,int n ,int ac ,t_atom *av) {
 						music_operate(fp ,c ,f);
 					continue;   }
 				else music_operate(fp ,c ,music_getfloat(x ,temp ,cp+1));   }
-			else if (c=='<' || c=='>')
-			{	int mvrt = cp[0] == cp[1]; // << or >> - move the root
+			else if (c=='<' || c=='>') // scale inversion
+			{	int mvrt = cp[0] == cp[1]; // << or >> moves the root
 				cp += 1 + mvrt;
 				t_float f = (c-'=') * (*cp ? strtof(cp ,0) : 1); // direction and amount
 				t_float *tp = temp + n;
@@ -227,7 +227,7 @@ static void music_symbol(t_music *x ,t_symbol *s) {
 	music_anything(x ,s ,0 ,0);
 }
 
-static void music_size(t_music *x ,t_floatarg f) {
+static void music_size(t_music *x ,t_float f) {
 	int i = f;
 	if      (i < 0) i = i % x->siz + x->siz;
 	else if (i < 1) i = 1;
@@ -238,23 +238,23 @@ static void music_size(t_music *x ,t_floatarg f) {
 		default: x->siz = i;   }
 }
 
-static void music_strict(t_music *x ,t_floatarg f) {
+static void music_strict(t_music *x ,t_float f) {
 	x->strict = f;
 }
 
-static void music_octave(t_music *x ,t_floatarg f) {
+static void music_octave(t_music *x ,t_float f) {
 	x->oct = f;
 }
 
-static void music_ref(t_music *x ,t_floatarg f) {
+static void music_ref(t_music *x ,t_float f) {
 	note_ref(&x->note ,f);
 }
 
-static void music_tet(t_music *x ,t_floatarg f) {
+static void music_tet(t_music *x ,t_float f) {
 	note_tet(&x->note ,f);
 }
 
-static void music_octet(t_music *x ,t_floatarg f) {
+static void music_octet(t_music *x ,t_float f) {
 	music_octave(x ,f);
 	music_tet(x ,f);
 }

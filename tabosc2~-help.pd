@@ -1,4 +1,4 @@
-#N canvas 600 300 671 471 14;
+#N canvas 600 300 670 470 14;
 #X msg 20 290 100;
 #X floatatom 20 320 0 0 0 0 - - -;
 #X obj 20 350 tabosc2~ \$0wave 0.9;
@@ -31,7 +31,7 @@
 #X array \$0view 480 float 2 red red;
 #X coords 0 1 480 -1 240 120 1;
 #X restore 400 330 graph;
-#N canvas 1070 270 451 301 view-size 0;
+#N canvas 1070 270 450 300 view-size 0;
 #X obj 170 60 loadbang;
 #X obj 170 90 samplerate~;
 #X obj 170 120 / 100;

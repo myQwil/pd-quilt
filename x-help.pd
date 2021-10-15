@@ -1,4 +1,4 @@
-#N canvas 690 320 551 421 14;
+#N canvas 690 320 550 420 14;
 #X obj 80 270 t a;
 #X msg 50 130 list 12;
 #X msg 70 160 list hi;

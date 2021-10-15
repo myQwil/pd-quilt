@@ -71,12 +71,12 @@ static int speed_limit(t_float speed) {
 	return d;
 }
 
-static void ffplay_speed(t_ffplay *x ,t_floatarg f) {
+static void ffplay_speed(t_ffplay *x ,t_float f) {
 	x->speed = f;
 	x->sped = 1;
 }
 
-static void ffplay_seek(t_ffplay *x ,t_floatarg f) {
+static void ffplay_seek(t_ffplay *x ,t_float f) {
 	if (!x->open) return;
 	int64_t ts = 1000L * f;
 	avformat_seek_file(x->ic ,-1 ,0 ,ts ,x->ic->duration ,0);

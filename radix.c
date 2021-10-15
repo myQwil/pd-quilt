@@ -28,7 +28,7 @@ static void radix_borderwidth(t_radix *x ,t_float zoom) {
 	x->x_gui.x_w += (y->x_zh/2 + 3) * zoom;
 }
 
-static void radix_zoom(t_radix *x ,t_floatarg zoom) {
+static void radix_zoom(t_radix *x ,t_float zoom) {
 	t_iemgui *gui = &x->x_gui;
 	int oldzoom = gui->x_glist->gl_zoom;
 	if (oldzoom < 1) oldzoom = 1;
@@ -97,7 +97,7 @@ static void radix_calc_fontwidth(t_radix *x) {
 	((t_radixtcl *)x)->x_fontwidth = fwid;
 }
 
-static void radix_fontsize(t_radix *x ,t_floatarg f) {
+static void radix_fontsize(t_radix *x ,t_float f) {
 	if (f <= 0) f = 1;
 	x->x_gui.x_fontsize = f;
 	radix_draw_config(x ,x->x_gui.x_glist);
@@ -105,7 +105,7 @@ static void radix_fontsize(t_radix *x ,t_floatarg f) {
 	radix_resize(x);
 }
 
-static void radix_fontwidth(t_radix *x ,t_floatarg f) {
+static void radix_fontwidth(t_radix *x ,t_float f) {
 	((t_radixtcl *)x)->x_fontwidth = f;
 	radix_resize(x);
 }
@@ -421,7 +421,7 @@ static void radix_dialog(t_radix *x ,t_symbol *s ,int argc ,t_atom *argv) {
 	canvas_fixlinesfor (x->x_gui.x_glist ,(t_text*)x);
 }
 
-static void radix_motion(t_radix *x ,t_floatarg dx ,t_floatarg dy) {
+static void radix_motion(t_radix *x ,t_float dx ,t_float dy) {
 	double k2 = 1. ,pwr = x->x_base * x->x_base ,fin = 1/pwr;
 	ufloat uf = {.f = x->x_val};
 	if (uf.ex > 150) k2 *= pow(2 ,uf.ex-150);
@@ -446,8 +446,8 @@ static void radix_float(t_radix *x ,t_float f) {
 		radix_bang(x);
 }
 
-static void radix_click(t_radix *x ,t_floatarg xpos ,t_floatarg ypos
-,t_floatarg shift ,t_floatarg ctrl ,t_floatarg alt) {
+static void radix_click(t_radix *x ,t_float xpos ,t_float ypos
+,t_float shift ,t_float ctrl ,t_float alt) {
 	if (alt)
 	{	if (x->x_val != 0)
 		{	x->x_tog = x->x_val;
@@ -540,17 +540,17 @@ static void radix_label_font(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
 	iemgui_label_font((void *)x ,&x->x_gui ,s ,ac ,av);
 }
 
-static void radix_init(t_radix *x ,t_floatarg f) {
+static void radix_init(t_radix *x ,t_float f) {
 	x->x_gui.x_isa.x_loadinit = (f == 0.) ? 0 : 1;
 }
 
-static void radix_loadbang(t_radix *x ,t_floatarg action) {
+static void radix_loadbang(t_radix *x ,t_float action) {
 	if (action == LB_LOAD && x->x_gui.x_isa.x_loadinit)
 	{	sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);
 		radix_bang(x);   }
 }
 
-static void radix_key(void *z ,t_floatarg fkey) {
+static void radix_key(void *z ,t_float fkey) {
 	t_radix *x = z;
 	char c = fkey;
 	char buf[3];
