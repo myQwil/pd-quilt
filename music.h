@@ -207,14 +207,15 @@ static int music_any(t_music *x ,t_flin *flin ,t_symbol *s ,int ac ,t_atom *av) 
 		else
 		{	t_atom atom = {A_SYMBOL ,{.w_symbol = s}};
 			n = music_z(x ,flin ,0 ,1 ,&atom);   }   }
-	else if (*cp == '!') n = music_i(x ,flin ,atoi(cp+1) ,ac ,av); // lazy
-	else if (*cp == '@') n = music_z(x ,flin ,atoi(cp+1) ,ac ,av); // default
-	else if (*cp == '#') n = music_x(x ,flin ,atoi(cp+1) ,ac ,av); // strict
-	else
-	{	t_atom atoms[ac+1];
-		atoms[0] = (t_atom){A_SYMBOL ,{.w_symbol = s}};
-		memcpy(atoms+1 ,av ,ac * sizeof(t_atom));
-		n = music_z(x ,flin ,0 ,ac+1 ,atoms);   }
+	else switch (*cp)
+	{	case '!': n = music_i(x ,flin ,atoi(cp+1) ,ac ,av); break; // lazy
+		case '@': n = music_z(x ,flin ,atoi(cp+1) ,ac ,av); break; // default
+		case '#': n = music_x(x ,flin ,atoi(cp+1) ,ac ,av); break; // strict
+		default:
+		{	t_atom atoms[ac+1];
+			atoms[0] = (t_atom){A_SYMBOL ,{.w_symbol = s}};
+			memcpy(atoms+1 ,av ,ac * sizeof(t_atom));
+			n = music_z(x ,flin ,0 ,ac+1 ,atoms);   }   }
 	return n;
 }
 
@@ -232,7 +233,7 @@ static void music_size(t_music *x ,t_float f) {
 	if      (i < 0) i = i % x->siz + x->siz;
 	else if (i < 1) i = 1;
 	int res = flin_resize(&x->flin ,&x->obj ,i);
-	switch(res)
+	switch (res)
 	{	case -2: x->siz = 1;
 		case -1: break;
 		default: x->siz = i;   }
