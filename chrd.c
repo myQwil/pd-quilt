@@ -78,7 +78,7 @@ static void chrd_free(t_chrd *y) {
 }
 
 void chrd_setup(void) {
-	chrd_class = music_setup(gensym("chrd")
+	chrd_class = class_music(gensym("chrd")
 		,(t_newmethod)chrd_new ,(t_method)chrd_free ,sizeof(t_chrd));
 	class_addbang  (chrd_class ,chrd_bang);
 	class_addmethod(chrd_class ,(t_method)chrd_midi

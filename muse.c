@@ -98,7 +98,7 @@ static void muse_free(t_music *x) {
 }
 
 void muse_setup(void) {
-	muse_class = music_setup(gensym("muse")
+	muse_class = class_music(gensym("muse")
 		,(t_newmethod)muse_new ,(t_method)muse_free ,sizeof(t_muse));
 	class_addmethod(muse_class ,(t_method)muse_slice
 		,gensym("slice") ,A_GIMME ,0);

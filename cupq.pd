@@ -14,8 +14,8 @@
 #X obj 200 280 \$1;
 #X obj 200 310 outlet;
 #X text 60 60 forward/backward incrementer;
-#X obj 150 30 cnv 15 60 24 empty empty cupq 4 12 0 18 -1 -262144 0
-;
+#X obj 150 30 cnv 15 60 24 empty empty cupq 4 12 0 18 #000000 #fcfcfc
+0;
 #X connect 0 0 3 0;
 #X connect 1 0 4 0;
 #X connect 2 0 5 0;

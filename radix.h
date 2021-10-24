@@ -57,16 +57,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #undef PD_COLOR_EDIT
 
 // dark theme
-#define PD_COLOR_FG           0xFCFCFC
-#define PD_COLOR_BG           0xBBBBBB
-#define PD_COLOR_SELECT       0x00FFFF
-#define PD_COLOR_EDIT         0xFF9999
+#define PD_COLOR_FG           0xfcfcfc
+#define PD_COLOR_BG           0xbbbbbb
+#define PD_COLOR_SELECT       0x00ffff
+#define PD_COLOR_EDIT         0xff9999
 
 // regular theme
 // #define PD_COLOR_FG           0x000000
 // #define PD_COLOR_BG           0x444444
-// #define PD_COLOR_SELECT       0x0000FF
-// #define PD_COLOR_EDIT         0xFF0000
+// #define PD_COLOR_SELECT       0x0000ff
+// #define PD_COLOR_EDIT         0xff0000
 
 typedef struct {
 	t_iemgui x_gui;

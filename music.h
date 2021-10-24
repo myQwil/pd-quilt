@@ -278,7 +278,7 @@ static t_music *music_new(t_class *mclass ,int ac) {
 	return x;
 }
 
-static t_class *music_setup
+static t_class *class_music
 (t_symbol *s ,t_newmethod newm ,t_method free ,size_t size) {
 	t_class *mclass = class_new(s ,newm ,free ,size ,0 ,A_GIMME ,0);
 	class_addfloat   (mclass ,music_float);

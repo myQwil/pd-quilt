@@ -8,7 +8,7 @@
 #X msg 240 90 bash \$1;
 #X obj 50 130 >~;
 #X obj 50 190 outlet~;
-#X obj 120 20 cnv 15 86 24 empty empty pulse~ 4 12 0 18 -1 -262144
+#X obj 120 20 cnv 15 86 24 empty empty pulse~ 4 12 0 18 #000000 #fcfcfc
 0;
 #X obj 50 160 -~ 0.5;
 #X connect 0 0 2 0;

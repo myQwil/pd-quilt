@@ -3,56 +3,56 @@
 $f9 + $f10 + $f11 + $f12 + $f13 + $f14 + $f15 + $f16 + $f17 + $f18
 + $f19 + $f20 + $f21 + $f22 + $f23, f 154;
 #X obj 20 380 outlet;
-#X obj 40 30 cnv 15 72 24 empty empty mantr 4 12 0 18 -1 -262144 0
-;
+#X obj 40 30 cnv 15 72 24 empty empty mantr 4 12 0 18 #000000 #fcfcfc
+0;
 #X text 40 60 sends and receives mantissa values;
 #X obj 1120 50 inlet;
-#X obj 790 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 770 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 750 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 730 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 710 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 690 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 670 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 650 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 630 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 610 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 590 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 570 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 550 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 530 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 510 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 490 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 470 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 450 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 430 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 410 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 390 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 370 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 350 200 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
+#X obj 790 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 770 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 750 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 730 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 710 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 690 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 670 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 650 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 630 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 610 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 590 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 570 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 550 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 530 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 510 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 490 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 470 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 450 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 430 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 410 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 390 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 370 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 350 200 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
 #X obj 1120 140 & 1;
 #X obj 670 140 & 1;
 #X obj 670 110 >> 9;

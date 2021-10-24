@@ -3,23 +3,23 @@
 typedef struct {
 	t_object obj;
 	t_note note;
-} t_ntof;
+} t_tone;
 
 
-static void ntof_ref(t_ntof *x ,t_float f) {
+static void tone_ref(t_tone *x ,t_float f) {
 	note_ref(&x->note ,f);
 }
 
-static void ntof_tet(t_ntof *x ,t_float f) {
+static void tone_tet(t_tone *x ,t_float f) {
 	note_tet(&x->note ,f);
 }
 
-static void ntof_list(t_ntof *x ,t_symbol *s ,int ac ,t_atom *av) {
+static void tone_list(t_tone *x ,t_symbol *s ,int ac ,t_atom *av) {
 	note_set(&x->note ,ac ,av);
 }
 
-static t_ntof *new_ntof(t_class *cl ,int argc ,t_atom *argv) {
-	t_ntof *x = (t_ntof *)pd_new(cl);
+static t_tone *tone_new(t_class *cl ,int argc ,t_atom *argv) {
+	t_tone *x = (t_tone *)pd_new(cl);
 	outlet_new(&x->obj ,&s_float);
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("ref"));
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("tet"));
@@ -34,14 +34,14 @@ static t_ntof *new_ntof(t_class *cl ,int argc ,t_atom *argv) {
 	return x;
 }
 
-static t_class *setup_ntof(t_symbol *s ,t_newmethod newm) {
-	t_class *nclass = class_new(s ,newm ,0 ,sizeof(t_ntof) ,0 ,A_GIMME ,0);
-	class_addlist(nclass ,ntof_list);
-	class_addmethod(nclass ,(t_method)ntof_ref
+static t_class *class_tone(t_symbol *s ,t_newmethod newm) {
+	t_class *nclass = class_new(s ,newm ,0 ,sizeof(t_tone) ,0 ,A_GIMME ,0);
+	class_addlist(nclass ,tone_list);
+	class_addmethod(nclass ,(t_method)tone_ref
 		,gensym("ref") ,A_FLOAT ,0);
-	class_addmethod(nclass ,(t_method)ntof_tet
+	class_addmethod(nclass ,(t_method)tone_tet
 		,gensym("tet") ,A_FLOAT ,0);
-	class_addmethod(nclass ,(t_method)ntof_list
+	class_addmethod(nclass ,(t_method)tone_list
 		,gensym("set") ,A_GIMME ,0);
 
 	return nclass;

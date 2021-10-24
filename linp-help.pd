@@ -8,21 +8,21 @@
 #X msg 210 120 2000 \, 0 2000;
 #X floatatom 90 260 0 0 0 0 - - -;
 #X msg 200 90 2000 \, 3000 5000;
-#X obj 190 30 cnv 15 60 24 empty empty linp 4 12 0 18 -1 -262144 0
-;
+#X obj 190 30 cnv 15 60 24 empty empty linp 4 12 0 18 #000000 #fcfcfc
+0;
 #X obj 110 200 unpack;
 #X obj 200 190 t a;
 #X text 100 50 line with pause functionality;
-#X obj 70 260 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
+#X obj 70 260 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc;
 #X obj 80 200 b, f 2;
-#X obj 120 240 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-0 1;
+#X obj 120 240 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc 0 1;
 #X msg 240 190 200;
 #X text 120 120 /resume;
 #X obj 70 230 delp;
-#X obj 250 230 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-0 1;
+#X obj 250 230 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc 0 1;
 #X text 320 190 time grain;
 #X connect 0 0 2 0;
 #X connect 0 1 19 0;

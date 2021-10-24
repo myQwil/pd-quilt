@@ -1,10 +1,10 @@
 #N canvas 700 250 560 490 14;
 #X text 180 50 checks an atom's type.;
 #X floatatom 220 320 0 0 0 0 - - -;
-#X obj 220 200 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
-#X obj 300 200 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
+#X obj 220 200 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
+#X obj 300 200 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
 #X text 330 240 set with either the name;
 #X text 330 260 or an example of the type;
 #X msg 140 220 peek;
@@ -36,7 +36,8 @@
 #X msg 280 140 foo;
 #X msg 190 110 symbol a;
 #X msg 270 110 symbol b;
-#X obj 250 20 cnv 15 34 24 empty empty is 4 12 0 18 -1 -262144 0;
+#X obj 250 20 cnv 15 34 24 empty empty is 4 12 0 18 #000000 #fcfcfc
+0;
 #X connect 2 0 29 0;
 #X connect 3 0 29 1;
 #X connect 6 0 29 0;

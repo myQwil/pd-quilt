@@ -8,42 +8,47 @@
 #X obj 210 30 cnv 15 60 24 empty empty rand 4 12 0 18 #000000 #fcfcfc
 0;
 #N canvas 580 380 470 330 no-repeats 0;
-#X obj 100 160 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 100 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
 #fcfcfc #fcfcfc;
-#X floatatom 100 260 0 0 0 0 - - -;
-#X msg 150 60 nop 1;
-#X text 200 60 turn on no-repeat mode;
-#X obj 210 110 loadbang;
-#X text 240 140 set max repeats to 2;
-#X floatatom 190 260 0 0 0 0 - - -;
-#X msg 210 170 seed 123;
-#X obj 50 90 metro 100;
-#X obj 50 60 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc #fcfcfc
+#X floatatom 100 280 0 0 0 0 - - -;
+#X obj 210 130 loadbang;
+#X floatatom 190 280 0 0 0 0 - - -;
+#X msg 210 190 seed 123;
+#X obj 60 100 metro 100;
+#X obj 60 70 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc #fcfcfc
 0 1;
-#X obj 40 260 print;
-#X msg 190 140 nop 2;
-#X floatatom 290 260 0 0 0 0 - - -;
-#X obj 290 230 random 2;
-#X obj 100 230 rand -1 1;
-#X obj 190 230 rand 20 | 1;
-#X connect 0 0 13 0;
-#X connect 0 0 14 0;
-#X connect 0 0 15 0;
-#X connect 2 0 14 0;
-#X connect 2 0 15 0;
+#X obj 40 280 print;
+#X msg 190 160 nop 2;
+#X floatatom 290 280 0 0 0 0 - - -;
+#X obj 290 250 random 2;
+#X obj 100 250 rand -1 1;
+#X obj 190 250 rand 20 | 1;
+#X obj 150 40 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc 0 1;
+#X msg 150 100 nop \$1;
+#X text 170 40 no-repeat mode;
+#X floatatom 160 70 0 0 0 0 - - -;
+#X text 200 70 max repeats allowed;
+#X connect 0 0 10 0;
+#X connect 0 0 11 0;
+#X connect 0 0 12 0;
+#X connect 2 0 8 0;
+#X connect 2 0 4 0;
+#X connect 4 0 10 0;
 #X connect 4 0 11 0;
-#X connect 4 0 7 0;
-#X connect 7 0 13 0;
-#X connect 7 0 14 0;
-#X connect 7 0 15 0;
-#X connect 8 0 0 0;
-#X connect 9 0 8 0;
-#X connect 11 0 14 0;
-#X connect 11 0 15 0;
-#X connect 13 0 12 0;
-#X connect 14 0 1 0;
-#X connect 14 0 10 0;
-#X connect 15 0 6 0;
+#X connect 4 0 12 0;
+#X connect 5 0 0 0;
+#X connect 6 0 5 0;
+#X connect 8 0 11 0;
+#X connect 8 0 12 0;
+#X connect 10 0 9 0;
+#X connect 11 0 1 0;
+#X connect 11 0 7 0;
+#X connect 12 0 3 0;
+#X connect 13 0 14 0;
+#X connect 14 0 11 0;
+#X connect 14 0 12 0;
+#X connect 16 0 14 0;
 #X restore 360 470 pd no-repeats;
 #X obj 150 150 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
 #fcfcfc #fcfcfc;

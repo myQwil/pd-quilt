@@ -5,15 +5,15 @@
 #X msg 160 170 50;
 #X msg 190 140 1, f 2;
 #X msg 260 140 1, f 2;
-#X obj 300 140 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
-#X obj 300 180 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
-#X obj 140 170 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
+#X obj 300 140 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
+#X obj 300 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
+#X obj 140 170 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
 #X obj 190 210 cupq 42 2;
-#X obj 240 20 cnv 15 60 24 empty empty cupq 4 12 0 18 -1 -262144 0
-;
+#X obj 240 20 cnv 15 60 24 empty empty cupq 4 12 0 18 #000000 #fcfcfc
+0;
 #X text 20 50 the left-most and right-most inlets will subtract and
 add to the current value respectively \, while the middle inlet will
 output the current value and allow for it to be set to a different

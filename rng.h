@@ -1,6 +1,8 @@
 #include "m_pd.h"
 #include <time.h>
 
+#define UINT_LIMIT 0x100000000
+
 static unsigned seed;
 
 typedef struct {
@@ -9,7 +11,7 @@ typedef struct {
 } t_rng;
 
 static unsigned rng_time(void) {
-	unsigned thym = (time(0) * 2) % 0x100000000;
+	unsigned thym = (time(0) * 2) % UINT_LIMIT;
 	return (thym|1); // odd numbers only
 }
 
@@ -28,5 +30,5 @@ static void rng_state(t_rng *x ,t_symbol *s) {
 
 static inline double rng_next(t_rng *x) {
 	x->state = x->state * 472940017 + 832416023;
-	return (double)x->state / 0x100000000;
+	return (double)x->state / UINT_LIMIT;
 }

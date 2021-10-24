@@ -7,7 +7,7 @@
 #X obj 90 240 osc~;
 #X obj 90 270 outlet~;
 #X text 50 90 additional frequency modulation;
-#X obj 130 60 cnv 15 86 24 empty empty fmore~ 4 12 0 18 -1 -262144
+#X obj 130 60 cnv 15 86 24 empty empty fmore~ 4 12 0 18 #000000 #fcfcfc
 0;
 #X connect 0 0 3 0;
 #X connect 1 0 3 1;

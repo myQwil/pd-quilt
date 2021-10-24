@@ -16,7 +16,7 @@
 #X obj 90 370 outlet~;
 #X text 150 80 efficient kick drum;
 #X text 150 100 original patch by ajf;
-#X obj 200 50 cnv 15 84 24 empty empty fkick~ 4 12 0 18 -1 -262144
+#X obj 200 50 cnv 15 84 24 empty empty fkick~ 4 12 0 18 #000000 #fcfcfc
 0;
 #X connect 0 0 3 0;
 #X connect 1 0 4 1;

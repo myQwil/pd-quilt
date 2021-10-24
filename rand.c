@@ -2,7 +2,11 @@
 #include "flin.h"
 #include <stdlib.h> // atoi
 #include <string.h> // memcpy
-#include <math.h>   // fmod
+#include <math.h>   // trunc, floor
+
+static inline double mod(double x ,double y) {
+	return x - y * trunc(x / y);
+}
 
 /* -------------------------- rand -------------------------- */
 static t_class *rand_class;
@@ -14,12 +18,8 @@ typedef struct {
 	uint16_t siz;     /* list size */
 	unsigned nop;     /* no-repeat toggle & max */
 	unsigned reps;    /* repeat count */
-	unsigned prev;    /* previous random number's index */
+	unsigned prev;    /* previous index */
 } t_rand;
-
-static void rand_ptr(t_rand *x ,t_symbol *s) {
-	post("%s%s%d" ,s->s_name ,*s->s_name?": ":"" ,x->flin.siz);
-}
 
 static void rand_peek(t_rand *x ,t_symbol *s) {
 	int list = x->lst;
@@ -30,6 +30,10 @@ static void rand_peek(t_rand *x ,t_symbol *s) {
 		if (n) startpost(" | ");   }
 	else startpost("%g <=> %g" ,fp[0] ,fp[1]);
 	endpost();
+}
+
+static void rand_ptr(t_rand *x ,t_symbol *s) {
+	post("%s%s%d" ,s->s_name ,*s->s_name?": ":"" ,x->flin.siz);
 }
 
 static void rand_nop(t_rand *x ,t_float f) {
@@ -48,26 +52,28 @@ static void rand_size(t_rand *x ,t_float f) {
 }
 
 static void rand_bang(t_rand *x) {
-	t_float *fp = x->flin.fp;
-	int list = x->lst;
 	double min ,range;
-	if (list) min = 0     ,range = x->siz;      // list method
-	else      min = fp[1] ,range = fp[0] - min; // range method
-	int rev = (range < 0 ? -1 : 1);
-	range *= rev;
+	int neg ,list = x->lst;
+	t_float *fp = x->flin.fp;
+	if (list) // list method
+		range = x->siz;
+	else      // range method
+	{	min = fp[1];
+		range = fp[0] - min;
+		neg = (range < 0 ? -1 : 1); // make range an absolute value
+		range *= neg;   }
 
 	double d ,next = rng_next(&x->z);
 	unsigned nop=x->nop ,reps=x->reps ,prev=x->prev;
 	if (nop && reps >= nop)
-	     d = fmod(next * (range-1) + (prev+1) ,range ? range : 1);
+	     d = mod(next * (range-1) + (prev+1) ,range ? range : 1);
 	else d = next * range;
+
 	int i = d;
 	x->reps = (i == prev ? reps+1 : 1);
 	x->prev = i;
 
-	d = d * rev + min;
-	i = d - (d < 0);
-	outlet_float(x->z.obj.ob_outlet ,list ? fp[i] : i);
+	outlet_float(x->z.obj.ob_outlet ,list ? fp[i] : floor(d * neg + min));
 }
 
 static int rand_z(t_rand *x ,int i ,int ac ,t_atom *av) {
@@ -142,10 +148,10 @@ void rand_setup(void) {
 		,gensym("seed")  ,A_GIMME  ,0);
 	class_addmethod(rand_class ,(t_method)rng_state
 		,gensym("state") ,A_DEFSYM ,0);
-	class_addmethod(rand_class ,(t_method)rand_ptr
-		,gensym("ptr")   ,A_DEFSYM ,0);
 	class_addmethod(rand_class ,(t_method)rand_peek
 		,gensym("peek")  ,A_DEFSYM ,0);
+	class_addmethod(rand_class ,(t_method)rand_ptr
+		,gensym("ptr")   ,A_DEFSYM ,0);
 	class_addmethod(rand_class ,(t_method)rand_nop
 		,gensym("nop")   ,A_FLOAT  ,0);
 	class_addmethod(rand_class ,(t_method)rand_lst

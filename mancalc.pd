@@ -1,50 +1,50 @@
 #N canvas 500 340 1295 451 14;
-#X obj 810 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 790 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 770 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 750 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 730 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 710 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 690 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 670 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 650 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 630 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 610 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 590 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 570 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 550 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 530 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 510 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 490 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 470 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 450 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 430 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 410 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 390 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
-#X obj 370 100 tgl 18 0 empty empty empty 17 7 0 10 -66577 -262144
--262144 0 1;
+#X obj 810 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 790 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 770 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 750 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 730 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 710 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 690 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 670 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 650 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 630 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 610 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 590 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 570 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 550 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 530 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 510 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 490 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 470 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 450 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 430 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 410 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 390 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
+#X obj 370 100 tgl 18 0 empty empty empty 17 7 0 10 #404040 #fcfcfc
+#fcfcfc 0 1;
 #X obj 1080 140 t b f;
 #X obj 530 140 t b f;
 #X obj 1030 140 t b f;
@@ -68,7 +68,7 @@
 #X obj 580 140 t b f;
 #X obj 30 140 t b f;
 #X obj 30 370 outlet;
-#X obj 550 30 cnv 15 98 24 empty empty mancalc 4 12 0 18 -1 -262144
+#X obj 550 30 cnv 15 98 24 empty empty mancalc 4 12 0 18 #000000 #fcfcfc
 0;
 #X text 520 50 mantissa calculator;
 #X obj 30 260 b;

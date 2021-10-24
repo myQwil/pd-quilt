@@ -8,7 +8,8 @@
 #X obj 140 180 line~;
 #X obj 140 210 outlet~;
 #X text 30 60 ramp between value changes (signal);
-#X obj 150 30 cnv 15 48 24 empty empty zp~ 4 12 0 18 -1 -262144 0;
+#X obj 150 30 cnv 15 48 24 empty empty zp~ 4 12 0 18 #000000 #fcfcfc
+0;
 #X connect 0 0 3 0;
 #X connect 1 0 2 0;
 #X connect 2 0 6 0;
