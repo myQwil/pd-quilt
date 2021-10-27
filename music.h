@@ -75,8 +75,8 @@ static inline int revindex(int i ,int n) {
 static int music_scale(t_music *x ,t_flin *flin ,int n ,int ac ,t_atom *av) {
 	int siz = x->siz;
 	if (n < 0) n = revindex(n ,siz);
-	switch(flin_resize(flin ,&x->obj ,n+ac))
-	{	case -2: return (x->siz = 1);
+	switch (flin_resize(flin ,&x->obj ,n+ac))
+	{	case -2: return (x->siz = 0);
 		case -1: return siz;   }
 
 	t_float temp[siz]; // reference to unaltered values
@@ -98,8 +98,8 @@ static int music_scale(t_music *x ,t_flin *flin ,int n ,int ac ,t_atom *av) {
 				if (cp != p)
 				{	cp = p;
 					if (z < 0) z = revindex(z ,m);
-					switch(flin_resize(flin ,&x->obj ,z+n+ac))
-					{	case -2: return (x->siz = 1);
+					switch (flin_resize(flin ,&x->obj ,z+n+ac))
+					{	case -2: return (x->siz = 0);
 						case -1: return n;   }   }
 				else z = m;   }
 
@@ -234,7 +234,7 @@ static void music_size(t_music *x ,t_float f) {
 	else if (i < 1) i = 1;
 	int res = flin_resize(&x->flin ,&x->obj ,i);
 	switch (res)
-	{	case -2: x->siz = 1;
+	{	case -2: x->siz = 0;
 		case -1: break;
 		default: x->siz = i;   }
 }

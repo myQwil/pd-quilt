@@ -46,7 +46,7 @@ static void rand_lst(t_rand *x ,t_float f) {
 
 static void rand_size(t_rand *x ,t_float f) {
 	switch (flin_resize(&x->flin ,&x->z.obj ,f))
-	{	case -2: x->siz = 1;
+	{	case -2: x->siz = 0;
 		case -1: break;
 		default: x->siz = f;   }
 }
@@ -82,7 +82,7 @@ static int rand_z(t_rand *x ,int i ,int ac ,t_atom *av) {
 		if (i < 0) i += x->siz;   }
 	int n = i + ac;
 	switch (flin_resize(&x->flin ,&x->z.obj ,n))
-	{	case -2: n = 1; break;
+	{	case -2: n = 0; break;
 		case -1: n = x->siz;   }
 	t_float *fp = x->flin.fp + i;
 	for (;ac--; av++ ,fp++)

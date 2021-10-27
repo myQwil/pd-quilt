@@ -16,8 +16,8 @@ typedef struct {
 } t_flin;
 
 static void flin_alloc(t_flin *x ,int n) {
+	x->fp = (t_float*)getbytes(n * sizeof(t_float));
 	x->siz = n;
-	x->fp = (t_float*)getbytes(x->siz * sizeof(t_float));
 }
 
 static void flin_free(t_flin *x) {
@@ -33,8 +33,7 @@ static int flin_resize(t_flin *x ,t_object *obj ,int n) {
 		x->fp = (t_float *)resizebytes(x->fp
 			,x->siz * sizeof(t_float) ,d * sizeof(t_float));
 		if (!x->fp)
-		{	flin_alloc(x ,1);
-			return -2;   }
+			return -2;
 		x->siz = d;
 		if (x->ins)
 		{	t_float *fp = x->fp;

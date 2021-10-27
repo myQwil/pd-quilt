@@ -4,7 +4,7 @@
 #X msg 140 130 5;
 #X obj 140 160 sqrt;
 #X obj 140 190 + 1;
-#X obj 140 220 / 2;
+#X obj 140 220 * 0.5;
 #X obj 140 250 outlet;
 #X text 110 60 the golden ratio;
 #X obj 150 30 cnv 15 48 24 empty empty phi 4 12 0 18 #000000 #fcfcfc
