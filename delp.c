@@ -40,7 +40,7 @@ static void delp_push(t_delp *x ,t_float f) {
 	{	clock_unset(x->clock);
 		x->remtime -= timesince(x->settime ,x->unit ,x->samps);
 		x->settime = clock_getlogicaltime();
-		clock_delay(x->clock ,x->remtime);   }
+		clock_delay(x->clock ,x->remtime);  }
 }
 
 static void delp_time(t_delp *x) {
@@ -55,22 +55,22 @@ static void delp_pause(t_delp *x) {
 	if (x->pause)
 	{	clock_unset(x->clock);
 		x->remtime -= timesince(x->settime ,x->unit ,x->samps);
-		outlet_float(x->o_rem ,x->remtime);   }
+		outlet_float(x->o_rem ,x->remtime);  }
 	else
 	{	x->settime = clock_getlogicaltime();
-		clock_delay(x->clock ,x->remtime);   }
+		clock_delay(x->clock ,x->remtime);  }
 }
 
 static void delp_tempo(t_delp *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (!x->stop && !x->pause)
 	{	x->remtime -= timesince(x->settime ,x->unit ,x->samps);
-		x->settime = clock_getlogicaltime();   }
+		x->settime = clock_getlogicaltime();  }
 	if (ac > 2) ac = 2;
 	while (ac--)
 	{	switch (av[ac].a_type)
 		{	case A_FLOAT  :x->unit     = av[ac].a_w.w_float  ;break;
 			case A_SYMBOL :x->unitname = av[ac].a_w.w_symbol ;break;
-			default: break;   }   }
+			default: break;  }  }
 	parsetimeunits(x ,x->unit ,x->unitname ,&x->unit ,&x->samps);
 	clock_setunit(x->clock ,x->unit ,x->samps);
 }
@@ -104,7 +104,7 @@ static void *delp_new(t_symbol *s ,int argc ,t_atom *argv) {
 	x->settime = clock_getlogicaltime();
 	if (argc && argv->a_type == A_FLOAT)
 	{	delp_ft1(x ,argv->a_w.w_float);
-		argc-- ,argv++;   }
+		argc-- ,argv++;  }
 	x->unit = x->stop = 1 ,x->samps = 0;
 	x->unitname = gensym("msec");
 	delp_tempo(x ,0 ,argc ,argv);

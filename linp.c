@@ -51,7 +51,7 @@ static void linp_pause(t_linp *x) {
 	x->pause = !x->pause;
 	if (x->pause)
 	{	linp_freeze(x);
-		x->targettime = -clock_gettimesince(x->targettime);   }
+		x->targettime = -clock_gettimesince(x->targettime);  }
 	else
 	{	double msectogo = x->targettime;
 		double timenow = clock_getsystime();
@@ -60,7 +60,7 @@ static void linp_pause(t_linp *x) {
 		x->prevtime = timenow;
 		if (x->grain <= 0)
 			x->grain = DEFAULTGRAIN;
-		clock_delay(x->clock ,(x->grain > msectogo ? msectogo : x->grain));   }
+		clock_delay(x->clock ,(x->grain > msectogo ? msectogo : x->grain));  }
 }
 
 static void linp_tick(t_linp *x) {
@@ -68,14 +68,14 @@ static void linp_tick(t_linp *x) {
 	double msectogo = -clock_gettimesince(x->targettime);
 	if (msectogo < 1E-9)
 	{	outlet_float(x->o_on ,0);
-		outlet_float(x->obj.ob_outlet ,x->targetval);   }
+		outlet_float(x->obj.ob_outlet ,x->targetval);  }
 	else
 	{	outlet_float(x->obj.ob_outlet
 			,x->setval + x->invtime * (timenow - x->prevtime)
 			                         * (x->targetval - x->setval));
 		if (x->grain <= 0)
 			x->grain = DEFAULTGRAIN;
-		clock_delay(x->clock ,(x->grain > msectogo ? msectogo : x->grain));   }
+		clock_delay(x->clock ,(x->grain > msectogo ? msectogo : x->grain));  }
 }
 
 static void linp_float(t_linp *x ,t_float f) {
@@ -94,11 +94,11 @@ static void linp_float(t_linp *x ,t_float f) {
 		if (x->grain <= 0)
 			x->grain = DEFAULTGRAIN;
 		outlet_float(x->o_on ,1);
-		clock_delay(x->clock ,(x->grain > x->in1val ? x->in1val : x->grain));   }
+		clock_delay(x->clock ,(x->grain > x->in1val ? x->in1val : x->grain));  }
 	else
 	{	clock_unset(x->clock);
 		x->targetval = x->setval = f;
-		outlet_float(x->obj.ob_outlet ,f);   }
+		outlet_float(x->obj.ob_outlet ,f);  }
 	x->gotinlet = 0;
 }
 

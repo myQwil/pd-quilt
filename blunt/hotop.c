@@ -45,7 +45,7 @@ static void hot_pxy_set(t_hot_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
 	if (ac)
 	{	if (av->a_type == A_FLOAT)
 			x->f2 = av->a_w.w_float;
-		ac-- ,av++;   }
+		ac-- ,av++;  }
 	if (ac && av->a_type == A_FLOAT)
 		x->f1 = av->a_w.w_float;
 }
@@ -530,32 +530,32 @@ void hotop_setup(void) {
 		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
 	t_class *hots[][10] =
-	{	 {	hplus_class ,hminus_class ,htimes_class ,hdiv_class
-			,hlog_class ,hpow_class ,hmax_class ,hmin_class   }
-		,{	hee_class ,hne_class ,hgt_class ,hlt_class ,hge_class ,hle_class   }
-		,{	hba_class ,hla_class ,hbo_class ,hlo_class ,hls_class ,hrs_class
-			,hfpc_class ,hpc_class ,hmod_class ,hdivm_class   }
-		,{	hxor_class   }   };
+	{	 {	 hplus_class ,hminus_class ,htimes_class ,hdiv_class
+			,hlog_class  ,hpow_class   ,hmax_class   ,hmin_class  }
+		,{	 hee_class   ,hne_class    ,hgt_class    ,hlt_class ,hge_class ,hle_class  }
+		,{	 hba_class   ,hla_class    ,hbo_class    ,hlo_class ,hls_class ,hrs_class
+			,hfpc_class  ,hpc_class    ,hmod_class   ,hdivm_class  }
+		,{	 hxor_class  }  };
 
 	t_bopmethod hbangs[][10] =
-	{	 {	hplus_bang ,hminus_bang ,htimes_bang ,hdiv_bang
-			,hlog_bang ,hpow_bang ,hmax_bang ,hmin_bang   }
-		,{	hee_bang ,hne_bang ,hgt_bang ,hlt_bang ,hge_bang ,hle_bang   }
-		,{	hba_bang ,hla_bang ,hbo_bang ,hlo_bang ,hls_bang ,hrs_bang
-			,hfpc_bang ,hpc_bang ,hmod_bang ,hdivm_bang   }
-		,{	hxor_bang   }   };
+	{	 {	 hplus_bang ,hminus_bang ,htimes_bang ,hdiv_bang
+			,hlog_bang  ,hpow_bang   ,hmax_bang   ,hmin_bang  }
+		,{	 hee_bang   ,hne_bang    ,hgt_bang    ,hlt_bang ,hge_bang ,hle_bang  }
+		,{	 hba_bang   ,hla_bang    ,hbo_bang    ,hlo_bang ,hls_bang ,hrs_bang
+			,hfpc_bang  ,hpc_bang    ,hmod_bang   ,hdivm_bang  }
+		,{	 hxor_bang  }  };
 
 	t_class *pxys[][10] =
-	{	 {	hplus_proxy ,hminus_proxy ,htimes_proxy ,hdiv_proxy
-			,hlog_proxy ,hpow_proxy ,hmax_proxy ,hmin_proxy   }
-		,{	hee_proxy ,hne_proxy ,hgt_proxy ,hlt_proxy ,hge_proxy ,hle_proxy   }
-		,{	hba_proxy ,hla_proxy ,hbo_proxy ,hlo_proxy ,hls_proxy ,hrs_proxy
-			,hfpc_proxy ,hpc_proxy ,hmod_proxy ,hdivm_proxy   }
-		,{	hxor_proxy   }   };
+	{	 {	 hplus_proxy ,hminus_proxy ,htimes_proxy ,hdiv_proxy
+			,hlog_proxy  ,hpow_proxy   ,hmax_proxy   ,hmin_proxy  }
+		,{	 hee_proxy   ,hne_proxy    ,hgt_proxy    ,hlt_proxy ,hge_proxy ,hle_proxy  }
+		,{	 hba_proxy   ,hla_proxy    ,hbo_proxy    ,hlo_proxy ,hls_proxy ,hrs_proxy
+			,hfpc_proxy  ,hpc_proxy    ,hmod_proxy   ,hdivm_proxy  }
+		,{	 hxor_proxy  }  };
 
 	t_symbol *syms[] =
 	{	 gensym("hotbinops1") ,gensym("hotbinops2") ,gensym("hotbinops3")
-		,gensym("0x5e")   };
+		,gensym("0x5e")  };
 
 	int i = sizeof(syms) / sizeof*(syms);
 	while (i--)
@@ -586,5 +586,5 @@ void hotop_setup(void) {
 			class_addmethod(pxys[i][j] ,(t_method)hot_pxy_set
 				,gensym("set") ,A_GIMME ,0);
 
-			class_sethelpsymbol(hots[i][j] ,syms[i]);   }   }
+			class_sethelpsymbol(hots[i][j] ,syms[i]);  }  }
 }

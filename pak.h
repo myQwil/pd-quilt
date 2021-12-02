@@ -32,7 +32,7 @@ static t_pak *new_pak(t_class *cl ,t_class *pxy ,int ac ,t_atom *av ,int r) {
 	{	av = defarg;
 		ac = 2;
 		SETFLOAT(&defarg[0] ,0);
-		SETFLOAT(&defarg[1] ,0);   }
+		SETFLOAT(&defarg[1] ,0);  }
 
 	x->n = ac;
 	x->vec = (t_atom *)getbytes(ac * sizeof(t_atom));
@@ -46,7 +46,7 @@ static t_pak *new_pak(t_class *cl ,t_class *pxy ,int ac ,t_atom *av ,int r) {
 		{	const char *name = ap->a_w.w_symbol->s_name;
 			if (strcmp(name ,"f") && strcmp(name ,s_float.s_name)
 			 && strcmp(name ,"s") && strcmp(name ,s_symbol.s_name))
-				nptr++;   }   }
+				nptr++;  }  }
 	gp = x->ptr = (t_gpointer *)t_getbytes(nptr * sizeof(t_gpointer));
 	x->nptr = nptr;
 
@@ -58,26 +58,26 @@ static t_pak *new_pak(t_class *cl ,t_class *pxy ,int ac ,t_atom *av ,int r) {
 	for (i=0; i < ac; i++ ,vp++ ,tp++ ,ap+=r)
 	{	if (ap->a_type == A_FLOAT)
 		{	*tp = A_GIMME;
-			*vp = *ap;   }
+			*vp = *ap;  }
 		else if (ap->a_type == A_SYMBOL)
 		{	const char *nm = ap->a_w.w_symbol->s_name;
 			if (!strcmp(nm ,"b"))
 			{	*tp = A_GIMME;
-				SETSYMBOL(vp ,&s_bang);   }
+				SETSYMBOL(vp ,&s_bang);  }
 			else if (!strcmp(nm ,"f") || !strcmp(nm ,s_float.s_name))
 			{	*tp = vp->a_type = A_FLOAT;
-				vp->a_w.w_float = 0;   }
+				vp->a_w.w_float = 0;  }
 			else if (!strcmp(nm ,"s") || !strcmp(nm ,s_symbol.s_name))
 			{	*tp = vp->a_type = A_SYMBOL;
-				vp->a_w.w_symbol = &s_symbol;   }
+				vp->a_w.w_symbol = &s_symbol;  }
 			else if (!strcmp(nm ,"p") || !strcmp(nm ,s_pointer.s_name))
 			{	*tp = vp->a_type = A_POINTER;
-				vp->a_w.w_gpointer = gp;   }
+				vp->a_w.w_gpointer = gp;  }
 			else
 			{	*tp = A_GIMME;
 				if (strcmp(nm ,"a") && strcmp(nm ,"any"))
 					SETSYMBOL(vp ,ap->a_w.w_symbol);
-				else SETFLOAT(vp ,0);   }   }
+				else SETFLOAT(vp ,0);  }  }
 
 		int hasptr = (*tp==A_POINTER || *tp==A_GIMME);
 		if (i)
@@ -86,10 +86,10 @@ static t_pak *new_pak(t_class *cl ,t_class *pxy ,int ac ,t_atom *av ,int r) {
 			(*pp)->idx = i;
 			if (hasptr) (*pp)->ptr = gp;
 			inlet_new(&x->obj ,(t_pd *)*pp ,0 ,0);
-			pp++;   }
+			pp++;  }
 		if (hasptr)
 		{	gpointer_init(gp);
-			gp++;   }   }
+			gp++;  }  }
 	outlet_new(&x->obj ,&s_list);
 	return x;
 }
@@ -117,8 +117,8 @@ static void pak_bang(t_pak *x) {
 		{	if (!gpointer_check(gp ,1))
 			{	pd_error(x ,"%s: stale pointer %d"
 					,class_getname(*(t_pd *)x) ,i);
-				return;   }
-			else gp++;   }
+				return;  }
+			else gp++;  }
 
 	/* reentrancy protection.  The first time through use the pre-allocated
 	outvec; if we're reentered we have to allocate new memory. */
@@ -130,10 +130,10 @@ static void pak_bang(t_pak *x) {
 			post("%s_bang: warning: reentry with pointers unprotected"
 				,class_getname(*(t_pd *)x));
 		outvec = (t_atom *)t_getbytes(size);
-		reentered = 1;   }
+		reentered = 1;  }
 	else
 	{	outvec = x->outvec;
-		x->outvec = 0;   }
+		x->outvec = 0;  }
 	memcpy(outvec ,x->vec ,size);
 	outlet_list(x->obj.ob_outlet ,&s_list ,x->n ,outvec);
 	if (reentered) t_freebytes(outvec ,size);
@@ -156,7 +156,7 @@ static void pak_p(t_pak *x ,t_gpointer *ptr ,t_gpointer *gp ,int i) {
 		*ptr = *gp;
 		if (gp->gp_stub) gp->gp_stub->gs_refcount++;
 		SETPOINTER(x->vec+i ,ptr);
-		if (i == PAK_FIRST(x)) pak_bang(x);   }
+		if (i == PAK_FIRST(x)) pak_bang(x);  }
 	else if ((x->mute>>i) & 1) pak_error(x ,i ,s_pointer.s_name);
 }
 
@@ -165,7 +165,7 @@ static void pak_f(t_pak *x ,t_float f ,int i) {
 	t_atomtype type = x->type[i];
 	if (type == A_FLOAT || type == A_GIMME)
 	{	SETFLOAT(x->vec+i ,f);
-		if (i == PAK_FIRST(x)) pak_bang(x);   }
+		if (i == PAK_FIRST(x)) pak_bang(x);  }
 	else if ((x->mute>>i) & 1) pak_error(x ,i ,s_float.s_name);
 }
 static void pak_float(t_pak *x ,t_float f) {
@@ -180,7 +180,7 @@ static void pak_s(t_pak *x ,t_symbol *s ,int i) {
 	t_atomtype type = x->type[i];
 	if (type == A_SYMBOL || type == A_GIMME)
 	{	SETSYMBOL(x->vec+i ,s);
-		if (i == PAK_FIRST(x)) pak_bang(x);   }
+		if (i == PAK_FIRST(x)) pak_bang(x);  }
 	else if ((x->mute>>i) & 1) pak_error(x ,i ,s_symbol.s_name);
 }
 static void pak_symbol(t_pak *x ,t_symbol *s) {
@@ -198,9 +198,9 @@ static int pak_set(t_pak *x ,t_atom *v ,t_gpointer *p ,t_atom a ,t_atomtype t) {
 			gpointer_unset(p);
 			*p = *gp;
 			if (gp->gp_stub) gp->gp_stub->gs_refcount++;
-			SETPOINTER(v ,p);   }
+			SETPOINTER(v ,p);  }
 		else *v = a;
-		return 1;   }
+		return 1;  }
 	else return 0;
 }
 

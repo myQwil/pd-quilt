@@ -90,7 +90,7 @@ static void blunt_init(t_blunt *x ,t_float *f ,int ac ,t_atom *av) {
 		{	const char *c = av->a_w.w_symbol->s_name;
 			if (c[strlen(c)-1] == '!')
 			{	*f = strtof(c ,NULL);
-				x->loadbang = 1;   }   }   }
+				x->loadbang = 1;  }  }  }
 	outlet_new(&x->obj ,&s_float);
 }
 
@@ -126,7 +126,7 @@ static void bop_set(t_bop *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (ac)
 	{	if (av->a_type == A_FLOAT)
 			x->f1 = av->a_w.w_float;
-		ac-- ,av++;   }
+		ac-- ,av++;  }
 	if (ac && av->a_type == A_FLOAT)
 		x->f2 = av->a_w.w_float;
 }
@@ -134,7 +134,7 @@ static void bop_set(t_bop *x ,t_symbol *s ,int ac ,t_atom *av) {
 static void bop_init(t_bop *x ,int ac ,t_atom *av) {
 	if (ac>1 && av->a_type == A_FLOAT)
 	{	x->f1 = av->a_w.w_float;
-		av++;   }
+		av++;  }
 	else x->f1 = 0;
 	blunt_init(&x->bl ,&x->f2 ,ac ,av);
 }

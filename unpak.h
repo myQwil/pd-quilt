@@ -23,7 +23,7 @@ static t_unpak *new_unpak(t_class *cl ,int ac ,t_atom *av ,int r) {
 	{	av = defarg;
 		ac = 2;
 		SETFLOAT(&defarg[0] ,0);
-		SETFLOAT(&defarg[1] ,0);   }
+		SETFLOAT(&defarg[1] ,0);  }
 
 	x->n = ac;
 	x->vec = (t_unpakout *)getbytes(ac * sizeof(t_unpakout));
@@ -36,21 +36,21 @@ static t_unpak *new_unpak(t_class *cl ,int ac ,t_atom *av ,int r) {
 		{	char c = *ap->a_w.w_symbol->s_name;
 			if (c == 'f')
 			{	u->type = A_FLOAT;
-				u->outlet = outlet_new(&x->obj ,&s_float);   }
+				u->outlet = outlet_new(&x->obj ,&s_float);  }
 			else if (c == 's')
 			{	u->type = A_SYMBOL;
-				u->outlet = outlet_new(&x->obj ,&s_symbol);   }
+				u->outlet = outlet_new(&x->obj ,&s_symbol);  }
 			else if (c == 'p')
 			{	u->type = A_POINTER;
-				u->outlet = outlet_new(&x->obj ,&s_pointer);   }
+				u->outlet = outlet_new(&x->obj ,&s_pointer);  }
 			else
 			{	if (c != 'a') pd_error(x ,"unpak: %s: bad type"
 					,ap->a_w.w_symbol->s_name);
 				u->type = A_GIMME;
-				u->outlet = outlet_new(&x->obj ,0);   }   }
+				u->outlet = outlet_new(&x->obj ,0);  }  }
 		else
 		{	u->type =  A_GIMME;
-			u->outlet = outlet_new(&x->obj ,0);   }   }
+			u->outlet = outlet_new(&x->obj ,0);  }  }
 	return x;
 }
 

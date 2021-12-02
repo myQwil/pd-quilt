@@ -27,7 +27,7 @@ static void rand_peek(t_rand *x ,t_symbol *s) {
 	if (*s->s_name) startpost("%s: " ,s->s_name);
 	if (list) for (int n=x->siz; n--; fp++)
 	{	startpost("%g" ,*fp);
-		if (n) startpost(" | ");   }
+		if (n) startpost(" | ");  }
 	else startpost("%g <=> %g" ,fp[0] ,fp[1]);
 	endpost();
 }
@@ -48,7 +48,7 @@ static void rand_size(t_rand *x ,t_float f) {
 	switch (flin_resize(&x->flin ,&x->z.obj ,f))
 	{	case -2: x->siz = 0;
 		case -1: break;
-		default: x->siz = f;   }
+		default: x->siz = f;  }
 }
 
 static void rand_bang(t_rand *x) {
@@ -61,7 +61,7 @@ static void rand_bang(t_rand *x) {
 	{	min = fp[1];
 		range = fp[0] - min;
 		neg = (range < 0 ? -1 : 1); // make range an absolute value
-		range *= neg;   }
+		range *= neg;  }
 
 	double d ,next = rng_next(&x->z);
 	unsigned nop=x->nop ,reps=x->reps ,prev=x->prev;
@@ -79,11 +79,11 @@ static void rand_bang(t_rand *x) {
 static int rand_z(t_rand *x ,int i ,int ac ,t_atom *av) {
 	if (i < 0)
 	{	i %= x->siz;
-		if (i < 0) i += x->siz;   }
+		if (i < 0) i += x->siz;  }
 	int n = i + ac;
 	switch (flin_resize(&x->flin ,&x->z.obj ,n))
 	{	case -2: n = 0; break;
-		case -1: n = x->siz;   }
+		case -1: n = x->siz;  }
 	t_float *fp = x->flin.fp + i;
 	for (;ac--; av++ ,fp++)
 		if (av->a_type == A_FLOAT) *fp = av->a_w.w_float;
@@ -97,13 +97,13 @@ static void rand_list(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
 static void rand_anything(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (!ac) return;
 	switch (*s->s_name)
-	{	case '#': rand_z(x ,atoi(s->s_name+1) ,ac ,av); break;
+	{	case '#': rand_z(x ,atoi(s->s_name+1) ,ac ,av);          break;
 		case '@': x->siz = rand_z(x ,atoi(s->s_name+1) ,ac ,av); break;
 		default:
 		{	t_atom atoms[ac+1];
 			atoms[0] = (t_atom){A_SYMBOL ,{.w_symbol = s}};
 			memcpy(atoms+1 ,av ,ac * sizeof(t_atom));
-			x->siz = rand_z(x ,0 ,ac+1 ,atoms);   }   }
+			x->siz = rand_z(x ,0 ,ac+1 ,atoms);  }  }
 }
 
 static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -116,7 +116,7 @@ static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
 	// 3 args with a string in the middle creates a small list (ex: 7 or 9)
 	if (ac==3 && av[1].a_type != A_FLOAT)
 	{	av[1] = av[2];
-		c = 2;   }
+		c = 2;  }
 	y->siz = y->flin.ins = c;
 
 	// always have a pointer size of at least 2 numbers for min and max
@@ -124,7 +124,7 @@ static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
 	t_float *fp = y->flin.fp;
 	for (;c--; av++ ,fp++)
 	{	floatinlet_new(&x->obj ,fp);
-		*fp = atom_getfloat(av);   }
+		*fp = atom_getfloat(av);  }
 	y->nop = y->reps = y->prev = 0;
 	rng_makeseed(x);
 	return (y);

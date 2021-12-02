@@ -147,11 +147,11 @@ void revop_setup(void) {
 
 	t_class *revs[] =
 	{	 rminus_class ,rdiv_class ,rlog_class ,rpow_class ,rfpc_class
-		,rls_class    ,rrs_class  ,rpc_class  ,rmod_class ,rdivm_class   };
+		,rls_class    ,rrs_class  ,rpc_class  ,rmod_class ,rdivm_class  };
 
 	t_bopmethod rbangs[] =
 	{	 rminus_bang ,rdiv_bang ,rlog_bang ,rpow_bang ,rfpc_bang
-		,rls_bang    ,rrs_bang  ,rpc_bang  ,rmod_bang ,rdivm_bang   };
+		,rls_bang    ,rrs_bang  ,rpc_bang  ,rmod_bang ,rdivm_bang  };
 
 	int i = sizeof(revs) / sizeof*(revs);
 	t_symbol *rev_sym = gensym("revbinops");
@@ -168,5 +168,5 @@ void revop_setup(void) {
 			,gensym("set") ,A_GIMME ,0);
 		class_addmethod(revs[i] ,(t_method)blunt_loadbang
 			,gensym("loadbang") ,A_DEFFLOAT ,0);
-		class_sethelpsymbol(revs[i] ,rev_sym);   }
+		class_sethelpsymbol(revs[i] ,rev_sym);  }
 }

@@ -34,7 +34,7 @@ static void music_f(t_music *x ,t_float f ,char c ,t_float g) {
 	if (f != d)
 	{	int dir = f<0 ? -1 : 1;
 		t_float nxt = chrd_note(x ,d+dir);
-		nte += dir * (f-d) * (nxt-nte);   }
+		nte += dir * (f-d) * (nxt-nte);  }
 	if (c)
 		music_operate(&nte ,c ,g);
 	int n = x->flin.ins-1 ,i = (d - (d>0)) % n;
@@ -50,7 +50,7 @@ static void chrd_bang(t_chrd *y) {
 	for (t_outlet **op = y->outs+i; op-- ,i--;)
 	{	double nte = chrd_note(x ,i);
 		outlet_float(*op ,y->midi ?
-			nte : ntof(&x->note ,nte));   }
+			nte : ntof(&x->note ,nte));  }
 }
 
 static void *chrd_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -66,7 +66,7 @@ static void *chrd_new(t_symbol *s ,int ac ,t_atom *av) {
 	for (int i=0; n--; op++,fp++,i++)
 	{	*op = outlet_new(&x->obj ,&s_float);
 		floatinlet_new(&x->obj ,fp);
-		if (i<ac) *fp = atom_getfloat(av++);   }
+		if (i<ac) *fp = atom_getfloat(av++);  }
 
 	return (y);
 }

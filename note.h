@@ -42,9 +42,9 @@ static void note_set(t_note *x ,int ac ,t_atom *av) {
 	{	case 2:
 			if (av[1].a_type == A_FLOAT)
 			{	x->tet = av[1].a_w.w_float;
-				x->st = SEMI(x);   }
+				x->st = SEMI(x);  }
 		case 1:
 			if (av->a_type == A_FLOAT)
-				x->ref = av->a_w.w_float;   }
+				x->ref = av->a_w.w_float;  }
 	x->bt = BASE(x);
 }

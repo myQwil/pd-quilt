@@ -88,11 +88,11 @@ static t_int *tabosc2_perform(t_int *w) {
 		{	if (x->edge != edge)
 			{	if (edge < 1)
 					x->k = 1. / (1. - edge);
-				x->edge = edge;   }
+				x->edge = edge;  }
 			a = addr[1].w_float;
 			b = addr[2].w_float;
 			frac = (frac - edge) * x->k;
-			*out++ = a * (1. - frac) + b * frac;   }   }
+			*out++ = a * (1. - frac) + b * frac;  }  }
 
 	tf.d = UNITBIT32 * fnpoints;
 	normhipart = tf.i[HIOFFSET];
@@ -114,19 +114,19 @@ static void tabosc2_set(t_tabosc2 *x ,t_symbol *s) {
 	if (!(a = (t_garray *)pd_findbyclass(x->arrayname ,garray_class)))
 	{	if (*s->s_name)
 			pd_error(x ,"tabosc2~: %s: no such array" ,x->arrayname->s_name);
-		x->vec = 0;   }
+		x->vec = 0;  }
 	else if (!garray_getfloatwords(a ,&pointsinarray ,&x->vec))
 	{	pd_error(x ,"%s: bad template for tabosc2~" ,x->arrayname->s_name);
-		x->vec = 0;   }
+		x->vec = 0;  }
 	else if ((npoints = pointsinarray - 3) != (1 << ilog2(pointsinarray - 3)))
 	{	pd_error(x ,"%s: number of points (%d) not a power of 2 plus three"
 			,x->arrayname->s_name ,pointsinarray);
 		x->vec = 0;
-		garray_usedindsp(a);   }
+		garray_usedindsp(a);  }
 	else
 	{	x->fnpoints = npoints;
 		x->finvnpoints = 1. / npoints;
-		garray_usedindsp(a);   }
+		garray_usedindsp(a);  }
 }
 
 static void tabosc2_dsp(t_tabosc2 *x ,t_signal **sp) {

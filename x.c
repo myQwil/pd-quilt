@@ -32,7 +32,7 @@ static void *xtrigger_new(t_symbol *s ,int argc ,t_atom *argv) {
 	{	argv = defarg;
 		argc = 2;
 		SETFLOAT(&defarg[0] ,0);
-		SETFLOAT(&defarg[1] ,0);   }
+		SETFLOAT(&defarg[1] ,0);  }
 	x->siz = argc;
 	x->vec = (t_xtriggerout *)getbytes(argc * sizeof(*x->vec));
 	for (i = 0 ,ap = argv ,u = x->vec; i < argc; u++ ,ap++ ,i++)
@@ -62,7 +62,7 @@ static void *xtrigger_new(t_symbol *s ,int argc ,t_atom *argv) {
 			pd_error(x ,"xtrigger: %s: bad type" ,ap->a_w.w_symbol->s_name);
 		  case 'a':
 			u->type = TR_ANYTHING;
-			u->outlet = outlet_new(&x->obj ,0);   }   }
+			u->outlet = outlet_new(&x->obj ,0);  }  }
 	return (x);
 }
 
@@ -90,7 +90,7 @@ static void xtrigger_list(t_xtrigger *x ,t_symbol *s ,int argc ,t_atom *argv) {
 			else outlet_pointer(u->outlet ,argv->a_w.w_gpointer);
 			break;
 		  default:
-			outlet_list(u->outlet ,&s_list ,argc ,argv);   }   }
+			outlet_list(u->outlet ,&s_list ,argc ,argv);  }  }
 }
 
 static void xtrigger_anything
@@ -102,7 +102,7 @@ static void xtrigger_anything
 			outlet_bang(u->outlet);
 		else if (u->type == TR_ANYTHING)
 			outlet_anything(u->outlet ,s ,argc ,argv);
-		else pd_error(x ,"xtrigger: can only convert 's' to 'b' or 'a'");   }
+		else pd_error(x ,"xtrigger: can only convert 's' to 'b' or 'a'");  }
 }
 
 static void xtrigger_bang(t_xtrigger *x) {

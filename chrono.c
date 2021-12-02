@@ -46,10 +46,10 @@ static void chrono_lap(t_chrono *x) {
 	else
 	{	settime = x->settime;
 		laptime = x->laptime;
-		x->laptime = clock_getlogicaltime();   }
+		x->laptime = clock_getlogicaltime();  }
 	t_atom lap[] =
 	{	 { A_FLOAT ,{timesince(laptime ,x->unit ,x->samps) + x->lapmore} }
-		,{ A_FLOAT ,{timesince(settime ,x->unit ,x->samps) + x->setmore} }   };
+		,{ A_FLOAT ,{timesince(settime ,x->unit ,x->samps) + x->setmore} }  };
 	x->lapmore = 0;
 	outlet_list(x->o_lap ,0 ,2 ,lap);
 }
@@ -59,7 +59,7 @@ static void chrono_pause(t_chrono *x) {
 	x->pause = !x->pause;
 	if (x->pause)
 	{	x->setmore += timesince(x->settime ,x->unit ,x->samps);
-		x->lapmore += timesince(x->laptime ,x->unit ,x->samps);   }
+		x->lapmore += timesince(x->laptime ,x->unit ,x->samps);  }
 	else
 		x->settime = x->laptime = clock_getlogicaltime();
 }
@@ -68,13 +68,13 @@ static void chrono_tempo(t_chrono *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (!x->pause)
 	{	x->setmore += timesince(x->settime ,x->unit ,x->samps);
 		x->lapmore += timesince(x->laptime ,x->unit ,x->samps);
-		x->settime = x->laptime = clock_getlogicaltime();   }
+		x->settime = x->laptime = clock_getlogicaltime();  }
 	if (ac > 2) ac = 2;
 	while (ac--)
 	{	switch (av[ac].a_type)
 		{	case A_FLOAT  :x->unit     = av[ac].a_w.w_float  ;break;
 			case A_SYMBOL :x->unitname = av[ac].a_w.w_symbol ;break;
-			default: break;   }   }
+			default: break;  }  }
 	parsetimeunits(x ,x->unit ,x->unitname ,&x->unit ,&x->samps);
 }
 

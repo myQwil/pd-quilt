@@ -30,7 +30,7 @@ static inline t_float music_interval(t_music *x ,t_float *fp ,t_float f) {
 	if (f != d) // between two intervals
 	{	int dir = f < 0 ? -1 : 1;
 		t_float next = music_step(x ,fp ,d+dir);
-		step += dir * (f-d) * (next-step);   }
+		step += dir * (f-d) * (next-step);  }
 	return step;
 }
 
@@ -51,7 +51,7 @@ static inline void music_operate(t_float *fp ,char c ,t_float f) {
 
 		case '*': *fp *= f; break;
 
-		case '/': *fp /= f; break;   }
+		case '/': *fp /= f; break;  }
 }
 
 static void music_ptr(t_music *x ,t_symbol *s) {
@@ -77,7 +77,7 @@ static int music_scale(t_music *x ,t_flin *flin ,int n ,int ac ,t_atom *av) {
 	if (n < 0) n = revindex(n ,siz);
 	switch (flin_resize(flin ,&x->obj ,n+ac))
 	{	case -2: return (x->siz = 0);
-		case -1: return siz;   }
+		case -1: return siz;  }
 
 	t_float temp[siz]; // reference to unaltered values
 	memcpy(temp ,flin->fp ,siz * sizeof(t_float));
@@ -87,7 +87,7 @@ static int music_scale(t_music *x ,t_flin *flin ,int n ,int ac ,t_atom *av) {
 	{	fp = flin->fp + n;
 		if (av->a_type == A_FLOAT)
 		{	*fp = av->a_w.w_float;
-			n++;   }
+			n++;  }
 		else if (av->a_type == A_SYMBOL)
 		{	const char *cp = av->a_w.w_symbol->s_name;
 			int z; // inner arg count
@@ -100,8 +100,8 @@ static int music_scale(t_music *x ,t_flin *flin ,int n ,int ac ,t_atom *av) {
 					if (z < 0) z = revindex(z ,m);
 					switch (flin_resize(flin ,&x->obj ,z+n+ac))
 					{	case -2: return (x->siz = 0);
-						case -1: return n;   }   }
-				else z = m;   }
+						case -1: return n;  }  }
+				else z = m;  }
 
 			char c = cp[0];
 			if (c=='&')
@@ -112,8 +112,8 @@ static int music_scale(t_music *x ,t_flin *flin ,int n ,int ac ,t_atom *av) {
 					t_float f = music_getfloat(x ,temp ,cp+2);
 					for (; z--; n++,fp++)
 						music_operate(fp ,c ,f);
-					continue;   }
-				else music_operate(fp ,c ,music_getfloat(x ,temp ,cp+1));   }
+					continue;  }
+				else music_operate(fp ,c ,music_getfloat(x ,temp ,cp+1));  }
 			else if (c=='<' || c=='>') // scale inversion
 			{	int mvrt = cp[0] == cp[1]; // << or >> moves the root
 				cp += 1 + mvrt;
@@ -137,10 +137,10 @@ static int music_scale(t_music *x ,t_flin *flin ,int n ,int ac ,t_atom *av) {
 					{	f += 1;
 						j = i;
 						i = (d - 1) % z;
-						if (i < 0) i += z;   }
+						if (i < 0) i += z;  }
 					else
 					{	j = (d + 1) % z;
-						if (j < 0) j += z;   }
+						if (j < 0) j += z;  }
 					t_float a = (i ? fp[i] : 0);
 					t_float b = (j ? fp[j] : oct);
 					t_float oa = oct - a ,ob = oct - b;
@@ -151,7 +151,7 @@ static int music_scale(t_music *x ,t_flin *flin ,int n ,int ac ,t_atom *av) {
 					if (--q) fp[q] = g*(tp[z-1] - a) + f*(ob);
 					for (i = q; --i >  0;)
 						fp[i] = g*(tp[i+d] - a) + f*(tp[i+d+1] - b);
-					if (mvrt) fp[0] = root + g*a + f*b + oct * octs;   }
+					if (mvrt) fp[0] = root + g*a + f*b + oct * octs;  }
 				else
 				{	t_float a = (i ? fp[i] : 0);
 					t_float oa = oct - a;
@@ -160,13 +160,13 @@ static int music_scale(t_music *x ,t_flin *flin ,int n ,int ac ,t_atom *av) {
 						fp[i+q] = tp[i] + oa;
 					for (i = q; --i >  0;)
 						fp[i] = tp[i+d] - a;
-					if (mvrt) fp[0] = root + a + oct * octs;   }
+					if (mvrt) fp[0] = root + a + oct * octs;  }
 				tp[0] = root;
 				n += z;
-				continue;   }
+				continue;  }
 			else if (isoperator(cp[1])) // current value ± semitones
 				music_operate(fp ,cp[1] ,music_getfloat(x ,temp ,cp+2));
-			n++;   }   }
+			n++;  }  }
 	return n;
 }
 
@@ -206,7 +206,7 @@ static int music_any(t_music *x ,t_flin *flin ,t_symbol *s ,int ac ,t_atom *av) 
 			music_f(x ,f ,*p ,strtof(p+1 ,0));
 		else
 		{	t_atom atom = {A_SYMBOL ,{.w_symbol = s}};
-			n = music_z(x ,flin ,0 ,1 ,&atom);   }   }
+			n = music_z(x ,flin ,0 ,1 ,&atom);  }  }
 	else switch (*cp)
 	{	case '!': n = music_i(x ,flin ,atoi(cp+1) ,ac ,av); break; // lazy
 		case '@': n = music_z(x ,flin ,atoi(cp+1) ,ac ,av); break; // default
@@ -215,7 +215,7 @@ static int music_any(t_music *x ,t_flin *flin ,t_symbol *s ,int ac ,t_atom *av) 
 		{	t_atom atoms[ac+1];
 			atoms[0] = (t_atom){A_SYMBOL ,{.w_symbol = s}};
 			memcpy(atoms+1 ,av ,ac * sizeof(t_atom));
-			n = music_z(x ,flin ,0 ,ac+1 ,atoms);   }   }
+			n = music_z(x ,flin ,0 ,ac+1 ,atoms);  }  }
 	return n;
 }
 
@@ -236,7 +236,7 @@ static void music_size(t_music *x ,t_float f) {
 	switch (res)
 	{	case -2: x->siz = 0;
 		case -1: break;
-		default: x->siz = i;   }
+		default: x->siz = i;  }
 }
 
 static void music_strict(t_music *x ,t_float f) {

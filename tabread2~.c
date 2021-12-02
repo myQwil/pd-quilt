@@ -46,11 +46,11 @@ static t_int *tabread2_perform(t_int *w) {
 		{	if (x->edge != edge)
 			{	if (edge < 1)
 					x->k = 1. / (1. - edge);
-				x->edge = edge;   }
+				x->edge = edge;  }
 			a = wp[0].w_float;
 			b = wp[1].w_float;
 			frac = (frac - edge) * x->k;
-			*out++ = a * (1. - frac) + b * frac;   }   }
+			*out++ = a * (1. - frac) + b * frac;  }  }
 	return (w+6);
  zero:
 	while (n--) *out++ = 0;
@@ -65,10 +65,10 @@ static void tabread2_set(t_tabread2 *x ,t_symbol *s) {
 	if (!(a = (t_garray *)pd_findbyclass(x->arrayname ,garray_class)))
 	{	if (*s->s_name)
 			pd_error(x ,"tabread2~: %s: no such array" ,x->arrayname->s_name);
-		x->vec = 0;   }
+		x->vec = 0;  }
 	else if (!garray_getfloatwords(a ,&x->npoints ,&x->vec))
 	{	pd_error(x ,"%s: bad template for tabread2~" ,x->arrayname->s_name);
-		x->vec = 0;   }
+		x->vec = 0;  }
 	else garray_usedindsp(a);
 }
 

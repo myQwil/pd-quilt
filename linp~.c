@@ -33,20 +33,20 @@ static t_int *linp_tilde_perform(t_int *w) {
 		x->ticksleft = nticks;
 		x->biginc = (x->target - x->value)/(t_float)nticks;
 		x->inc = x->coefn * x->biginc;
-		x->retarget = 0;   }
+		x->retarget = 0;  }
 	if (x->ticksleft && !x->pause)
 	{	g = x->value;
 		while (n--)
 			*out++ = g ,g += x->inc;
 		x->value += x->biginc;
-		x->ticksleft--;   }
+		x->ticksleft--;  }
 	else
 	{	if (!x->pause)
 		{	x->value = x->target;
-			outlet_float(x->o_on ,0);   }
+			outlet_float(x->o_on ,0);  }
 		g = x->value;
 		while (n--)
-			*out++ = g;   }
+			*out++ = g;  }
 	return (w+4);
 }
 
@@ -65,21 +65,21 @@ static t_int *linp_tilde_perf8(t_int *w) {
 		x->ticksleft = nticks;
 		x->biginc = (x->target - x->value)/(t_sample)nticks;
 		x->inc = x->coefn * x->biginc;
-		x->retarget = 0;   }
+		x->retarget = 0;  }
 	if (x->ticksleft && !x->pause)
 	{	g = x->value;
 		while (n--)
 			*out++ = g ,g += x->inc;
 		x->value += x->biginc;
-		x->ticksleft--;   }
+		x->ticksleft--;  }
 	else
 	{	if (!x->pause)
 		{	x->value = x->target;
-			outlet_float(x->o_on ,0);   }
+			outlet_float(x->o_on ,0);  }
 		g = x->value;
 		for (; n; n -= 8 ,out += 8)
 		{	out[0] = out[1] = out[2] = out[3] =
-			out[4] = out[5] = out[6] = out[7] = g;   }   }
+			out[4] = out[5] = out[6] = out[7] = g;  }  }
 	return (w+4);
 }
 
@@ -98,13 +98,13 @@ static void linp_tilde_pause(t_linp *x) {
 static void linp_tilde_float(t_linp *x ,t_float f) {
 	if (x->inletvalue <= 0)
 	{	x->target = x->value = f;
-		x->ticksleft = x->retarget = 0;   }
+		x->ticksleft = x->retarget = 0;  }
 	else
 	{	x->target = f;
 		x->retarget = 1;
 		x->inletwas = x->inletvalue;
 		x->inletvalue = x->pause = 0;
-		outlet_float(x->o_on ,1);   }
+		outlet_float(x->o_on ,1);  }
 }
 
 static void linp_tilde_dsp(t_linp *x ,t_signal **sp) {

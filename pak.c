@@ -33,7 +33,7 @@ static int pak_l(t_pak *x ,t_symbol *s ,int ac ,t_atom *av ,int i) {
 				,pak_check(*tp) ,pak_check(av->a_type));
 			else
 			{	pd_error(x ,"pak_%s: wrong type" ,pak_check(av->a_type));
-				result = 0;   }   }   }
+				result = 0;  }  }  }
 	return result;
 }
 

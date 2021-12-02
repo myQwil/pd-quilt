@@ -41,7 +41,7 @@ static t_symbol *is_check(t_symbol *s) {
 		case 's': return &s_symbol;
 		case 'p': return &s_pointer;
 		case 'l': return &s_list;
-		default : return s;   }
+		default : return s;  }
 }
 
 static void is_pxy_anything(t_is_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {

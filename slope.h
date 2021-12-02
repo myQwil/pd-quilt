@@ -17,10 +17,10 @@ static void slope_minmax(t_slope *x) {
 		max = 1.0;
 	if (max > 0.0)
 	{	if (min <= 0.0)
-			min = 0.01 * max;   }
+			min = 0.01 * max;  }
 	else
 	{	if (min >  0.0)
-			max = 0.01 * min;   }
+			max = 0.01 * min;  }
 	x->min = min;
 	x->max = max;
 }
@@ -57,7 +57,7 @@ static t_slope *slope_new(t_class *cl ,int ac ,t_atom *av) {
 
 	if (ac && av->a_type == A_SYMBOL)
 	{	x->log = !strcmp(av->a_w.w_symbol->s_name ,"log");
-		ac-=1 ,av+=1;   }
+		ac-=1 ,av+=1;  }
 	else x->log = 0;
 
 	switch (ac)
@@ -68,7 +68,7 @@ static t_slope *slope_new(t_class *cl ,int ac ,t_atom *av) {
 		min = atom_getfloat(av);
 		break;
 	  case 1:
-		max = atom_getfloat(av);   }
+		max = atom_getfloat(av);  }
 	x->min=min ,x->max=max ,x->run=run;
 	slope_k(x);
 	return x;

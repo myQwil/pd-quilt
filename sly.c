@@ -6,7 +6,7 @@ static t_class *sly_class;
 static void slope_k(t_slope *x) {
 	if (x->log)
 	{    slope_minmax(x);
-	     x->k = log(x->max / x->min) / x->run;   }
+	     x->k = log(x->max / x->min) / x->run;  }
 	else x->k =    (x->max - x->min) / x->run;
 }
 

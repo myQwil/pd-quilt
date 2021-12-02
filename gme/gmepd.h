@@ -77,15 +77,15 @@ static void gmepd_time(t_gmepd *x ,t_float f) {
 	{	t_atom flts[] =
 		{	 { A_FLOAT ,{(t_float)(info->length > 0 ?
 				info->length : info->play_length)} }
-			,{ A_FLOAT ,{(t_float)info->fade_length} }   };
+			,{ A_FLOAT ,{(t_float)info->fade_length} }  };
 		gme_free_info(info);
-		outlet_anything(x->o_meta ,gensym("time") ,2 ,flts);   }
+		outlet_anything(x->o_meta ,gensym("time") ,2 ,flts);  }
 }
 
 static void gmepd_start(t_gmepd *x) {
 	if (!hnd_err(gme_start_track(x->emu ,x->track-1)))
 	{	gme_set_fade(x->emu ,-1 ,0);
-		x->stop = 0 ,x->play = 1;   }
+		x->stop = 0 ,x->play = 1;  }
 }
 
 static t_int *gmepd_perform(t_int *w) {
@@ -104,15 +104,15 @@ static t_int *gmepd_perform(t_int *w) {
 			gme_set_speed      (x->emu ,x->speed );
 			if (x->track < 1 || x->track > gme_track_count(x->emu))
 				x->track = 1;
-			gmepd_start(x);   }
-		x->open = x->read = 0;   }
+			gmepd_start(x);  }
+		x->open = x->read = 0;  }
 
 	if (x->emu && x->play)
 	{	int16_t buf[NCH];
 		while (n--)
 		{	hnd_err(gme_play(x->emu ,NCH ,buf));
 			for (int i=NCH; i--;)
-				*outs[i]++ = buf[i] / (t_sample)32768;   }   }
+				*outs[i]++ = buf[i] / (t_sample)32768;  }  }
 	else
 		while (n--)
 			for (int i=NCH; i--;)
@@ -126,7 +126,7 @@ static void gmepd_open(t_gmepd *x ,t_symbol *s) {
 	{	x->path = s;
 		x->track = x->read = 1;
 		gme_delete(x->info); x->info = info;
-		gmepd_m3u(x ,x->info);   }
+		gmepd_m3u(x ,x->info);  }
 	else x->read = 0;
 	t_atom open = { A_FLOAT ,{(t_float)x->read} };
 	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
@@ -141,13 +141,13 @@ static void gmepd_bang(t_gmepd *x) {
 static void gmepd_float(t_gmepd *x ,t_float f) {
 	if (f <= 0)
 	{	x->play = 0 ,x->stop = 1;
-		return;   }
+		return;  }
 	else if (x->read) x->open = 1;
 
 	Music_Emu *emu = gmepd_emu(x);
 	if (emu && f > 0 && f <= gme_track_count(emu))
 	{	x->track = f;
-		if (x->emu) gmepd_start(x);   }
+		if (x->emu) gmepd_start(x);  }
 }
 
 static void gmepd_stop(t_gmepd *x) {
@@ -157,12 +157,12 @@ static void gmepd_stop(t_gmepd *x) {
 static void gmepd_track(t_gmepd *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (!ac)
 	{	t_atom flt = { A_FLOAT ,{(t_float)x->track} };
-		outlet_anything(x->o_meta ,gensym("track") ,1 ,&flt);   }
+		outlet_anything(x->o_meta ,gensym("track") ,1 ,&flt);  }
 	else if (av->a_type == A_FLOAT)
 	{	t_float f = av->a_w.w_float;
 		Music_Emu *emu = gmepd_emu(x);
 		if (emu && f > 0 && f <= gme_track_count(emu))
-			x->track = f;   }
+			x->track = f;  }
 }
 
 static void gmepd_tracks(t_gmepd *x) {
@@ -211,7 +211,7 @@ static t_atom gmepd_meta(t_gmepd *x ,gme_info_t *info ,t_symbol *sym) {
 		int m = x->mask;
 		sprintf(buf ,"%d%d%d%d%d%d%d%d" ,m&1 ,(m>>1)&1 ,(m>>2)&1
 			,(m>>3)&1 ,(m>>4)&1 ,(m>>5)&1 ,(m>>6)&1 ,(m>>7)&1);
-		return (t_atom){ A_SYMBOL  ,{.w_symbol = gensym(buf)} };   }
+		return (t_atom){ A_SYMBOL  ,{.w_symbol = gensym(buf)} };  }
 	else return (t_atom){A_NULL ,{0}};
 }
 
@@ -226,7 +226,7 @@ static void gmepd_info_custom(t_gmepd *x ,gme_info_t *info ,int ac ,t_atom *av) 
 				strncpy(before ,sym ,len);
 				before[len] = 0;
 				startpost("%s" ,before);
-				sym += len;   }
+				sym += len;  }
 			pct++;
 			len = end - pct;
 			char buf[len + 1];
@@ -236,9 +236,9 @@ static void gmepd_info_custom(t_gmepd *x ,gme_info_t *info ,int ac ,t_atom *av) 
 			switch (atom.a_type)
 			{	case A_FLOAT:  startpost("%g" ,atom.a_w.w_float); break;
 				case A_SYMBOL: startpost("%s" ,atom.a_w.w_symbol->s_name); break;
-				default: startpost("");   }
-			sym += len + 2;   }
-		startpost("%s%s" ,sym ,ac ? " ":"");   }
+				default: startpost("");  }
+			sym += len + 2;  }
+		startpost("%s%s" ,sym ,ac ? " ":"");  }
 	endpost();
 }
 
@@ -247,7 +247,7 @@ static void gmepd_info(t_gmepd *x ,t_symbol *s ,int ac ,t_atom *av) {
 	Music_Emu *emu = gmepd_emu(x);
 	if (!emu || hnd_err(gme_track_info(emu ,&info ,x->track-1)))
 	{	pd_error(x ,"gme~: %s" ,xpath);
-		return;   }
+		return;  }
 
 	if (ac) return gmepd_info_custom(x ,info ,ac ,av);
 
@@ -265,13 +265,13 @@ static void gmepd_send(t_gmepd *x ,t_symbol *s) {
 	Music_Emu *emu = gmepd_emu(x);
 	if (!emu || hnd_err(gme_track_info(emu ,&info ,x->track-1)))
 	{	pd_error(x ,"gme~: %s" ,xpath);
-		return;   }
+		return;  }
 
 	t_atom atom = gmepd_meta(x ,info ,s);
 	if (atom.a_type)
 	{	t_atom val[2] =
-		{	{ A_SYMBOL ,{.w_symbol = s} } ,atom   };
-		outlet_anything(x->o_meta ,&s_list ,2 ,val);   }
+		{	{ A_SYMBOL ,{.w_symbol = s} } ,atom  };
+		outlet_anything(x->o_meta ,&s_list ,2 ,val);  }
 	else pd_error(x ,"gmepd_send: '%s' not found" ,s->s_name);
 	gme_free_info(info);
 }
@@ -281,20 +281,20 @@ static void gmepd_anything(t_gmepd *x ,t_symbol *s ,int ac ,t_atom *av) {
 	Music_Emu *emu = gmepd_emu(x);
 	if (!emu || hnd_err(gme_track_info(emu ,&info ,x->track-1)))
 	{	pd_error(x ,"gme~: %s" ,xpath);
-		return;   }
+		return;  }
 
 	t_atom atom = gmepd_meta(x ,info ,s);
 	switch (atom.a_type)
 	{	case A_FLOAT:  post("%s: %g" ,s->s_name ,atom.a_w.w_float); break;
 		case A_SYMBOL: post("%s: %s" ,s->s_name ,atom.a_w.w_symbol->s_name); break;
-		default: pd_error(x ,"gme~: no method for '%s'" ,s->s_name);   }
+		default: pd_error(x ,"gme~: no method for '%s'" ,s->s_name);  }
 	gme_free_info(info);
 }
 
 static void gmepd_seek(t_gmepd *x ,t_float f) {
 	if (x->emu)
 	{	gme_seek(x->emu ,f);
-		gme_set_fade(x->emu ,-1 ,0);   }
+		gme_set_fade(x->emu ,-1 ,0);  }
 }
 
 static void gmepd_tempo(t_gmepd *x ,t_float f) {
@@ -312,11 +312,11 @@ static byte domask(byte mask ,int ac ,t_atom *av) {
 	{	int d = av->a_w.w_float;
 		if (!d)
 		{	mask = 0;
-			continue;   }
+			continue;  }
 		if (d > 0) d--;
 		d %= mask_size;
 		if (d < 0) d += mask_size;
-		mask ^= 1 << d;   }
+		mask ^= 1 << d;  }
 	return mask;
 }
 
@@ -334,10 +334,10 @@ static void gmepd_solo(t_gmepd *x ,t_symbol *s ,int ac ,t_atom *av) {
 static void gmepd_mask(t_gmepd *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (ac && av->a_type == A_FLOAT)
 	{	x->mask = av->a_w.w_float;
-		if (x->emu) gme_mute_voices(x->emu ,x->mask);   }
+		if (x->emu) gme_mute_voices(x->emu ,x->mask);  }
 	else
 	{	t_atom flt = { A_FLOAT ,{(t_float)x->mask} };
-		outlet_anything(x->o_meta ,gensym("mask") ,1 ,&flt);   }
+		outlet_anything(x->o_meta ,gensym("mask") ,1 ,&flt);  }
 }
 
 static void *gmepd_new(t_class *gmeclass ,t_symbol *s ,int ac ,t_atom *av) {

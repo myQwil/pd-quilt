@@ -213,9 +213,9 @@
 #X connect 38 0 4 0;
 #X restore 220 290 pd time;
 #X text 40 60 A Pd interface for the Game Music Emu library \, created
-+by Shay Green and maintained by Michael Pyne at https://bitbucket.org/mpyne/game-music-emu
-+Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
-+\\\, SAP \, SPC \, RSN \, VGM/VGZ;
+by Shay Green and maintained by Michael Pyne at https://bitbucket.org/mpyne/game-music-emu
+Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
+\, AP \, SPC \, RSN \, VGM/VGZ;
 #X obj 110 160 bng 15 250 50 0 empty empty previous_directory 19 7
 0 11 -1 -262144 -262144;
 #X msg 120 180 symbol ~/Music/Games;

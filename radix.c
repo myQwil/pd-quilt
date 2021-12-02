@@ -123,13 +123,13 @@ static void radix_draw_update(t_gobj *client ,t_glist *glist) {
 				cp += sl - x->x_numwidth + 1;
 			sys_vgui(".x%lx.c itemconfigure %lxNUMBER -fill #%06x -text {%s} \n"
 				,glist_getcanvas(glist) ,x ,PD_COLOR_EDIT ,cp);
-			x->x_buf[sl] = 0;   }
+			x->x_buf[sl] = 0;  }
 		else
 		{	radix_ftoa(x);
 			if (!x->x_numwidth && x->x_resize) radix_resize(x);
 			sys_vgui(".x%lx.c itemconfigure %lxNUMBER -fill #%06x -text {%s} \n"
 				,glist_getcanvas(glist) ,x ,PD_COLOR_EDIT ,x->x_buf);
-			x->x_buf[0] = 0;   }   }
+			x->x_buf[0] = 0;  }  }
 	else
 	{	radix_ftoa(x);
 		if (!x->x_numwidth && x->x_resize) radix_resize(x);
@@ -137,7 +137,7 @@ static void radix_draw_update(t_gobj *client ,t_glist *glist) {
 			,glist_getcanvas(glist) ,x
 			,(x->x_gui.x_fsf.x_selected ? PD_COLOR_SELECT : x->x_gui.x_fcol)
 			,x->x_buf);
-		x->x_buf[0] = 0;   }
+		x->x_buf[0] = 0;  }
 }
 
 static void radix_draw_new(t_radix *x ,t_glist *glist) {
@@ -259,7 +259,7 @@ static void radix_draw_io(t_radix* x,t_glist* glist ,int old_snd_rcv_flags) {
 			,PD_COLOR_FG ,x ,0);
 		/* keep these above outlet */
 		sys_vgui(".x%lx.c raise %lxLABEL %lxOUT%d\n" ,canvas ,x ,x ,0);
-		sys_vgui(".x%lx.c raise %lxNUMBER %lxLABEL\n" ,canvas ,x ,x);   }
+		sys_vgui(".x%lx.c raise %lxNUMBER %lxLABEL\n" ,canvas ,x ,x);  }
 	if (!(old_snd_rcv_flags & IEM_GUI_OLD_SND_FLAG) && x->x_gui.x_fsf.x_snd_able)
 		sys_vgui(".x%lx.c delete %lxOUT%d\n" ,canvas ,x ,0);
 	if ((old_snd_rcv_flags & IEM_GUI_OLD_RCV_FLAG) && !x->x_gui.x_fsf.x_rcv_able)
@@ -271,7 +271,7 @@ static void radix_draw_io(t_radix* x,t_glist* glist ,int old_snd_rcv_flags) {
 			,PD_COLOR_FG ,x ,0);
 		/* keep these above inlet */
 		sys_vgui(".x%lx.c raise %lxLABEL %lxIN%d\n" ,canvas ,x ,x ,0);
-		sys_vgui(".x%lx.c raise %lxNUMBER %lxLABEL\n" ,canvas ,x ,x);   }
+		sys_vgui(".x%lx.c raise %lxNUMBER %lxLABEL\n" ,canvas ,x ,x);  }
 	if (!(old_snd_rcv_flags & IEM_GUI_OLD_RCV_FLAG) && x->x_gui.x_fsf.x_rcv_able)
 		sys_vgui(".x%lx.c delete %lxIN%d\n" ,canvas ,x ,0);
 }
@@ -284,20 +284,20 @@ static void radix_draw_select(t_radix *x ,t_glist *glist) {
 		{	x->x_gui.x_change = 0;
 			clock_unset(x->x_clock_reset);
 			x->x_buf[0] = 0;
-			sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);   }
+			sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);  }
 		sys_vgui(".x%lx.c itemconfigure %lxBASE1 -fill #%06x\n"
 			,canvas ,x ,PD_COLOR_SELECT);
 		sys_vgui(".x%lx.c itemconfigure %lxBASE2 -outline #%06x\n"
 			,canvas ,x ,PD_COLOR_SELECT);
 		sys_vgui(".x%lx.c itemconfigure %lxNUMBER -fill #%06x\n"
-			,canvas ,x ,PD_COLOR_SELECT);   }
+			,canvas ,x ,PD_COLOR_SELECT);  }
 	else
 	{	sys_vgui(".x%lx.c itemconfigure %lxBASE1 -fill #%06x\n"
 			,canvas ,x ,x->x_gui.x_bcol);
 		sys_vgui(".x%lx.c itemconfigure %lxBASE2 -outline #%06x\n"
 			,canvas ,x ,x->x_gui.x_bcol);
 		sys_vgui(".x%lx.c itemconfigure %lxNUMBER -fill #%06x\n"
-			,canvas ,x ,x->x_gui.x_fcol);   }
+			,canvas ,x ,x->x_gui.x_fcol);  }
 }
 
 static void radix_draw(t_radix *x ,t_glist *glist ,int mode) {
@@ -337,7 +337,7 @@ static void radix_save(t_gobj *z ,t_binbuf *b) {
 	if (x->x_gui.x_change)
 	{	x->x_gui.x_change = 0;
 		clock_unset(x->x_clock_reset);
-		sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);   }
+		sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);  }
 	binbuf_addv(b ,"ssiisiiffiisssiiiisssiiifi" ,gensym("#X") ,gensym("obj")
 		,x->x_gui.x_obj.te_xpix ,x->x_gui.x_obj.te_ypix
 		,gensym("radix") ,x->x_numwidth ,((t_radixtcl *)x)->x_zh
@@ -360,7 +360,7 @@ static void radix_properties(t_gobj *z ,t_glist *owner) {
 	if (x->x_gui.x_change)
 	{	x->x_gui.x_change = 0;
 		clock_unset(x->x_clock_reset);
-		sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);   }
+		sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);  }
 	sprintf(buf ,"pdtk_iemgui_dialog %%s |radix| "
 		"-------dimensions(digits)(pix):------- %d %d width: %d %d height: "
 		"-----------output-range:----------- %g min: %g max: %d "
@@ -433,7 +433,7 @@ static void radix_motion(t_radix *x ,t_float dx ,t_float dy) {
 	{	x->x_val -= k2*dy;
 		double trunc = fin * floor(pwr * x->x_val + 0.5);
 		if (trunc < x->x_val + fin*fin && trunc > x->x_val - fin*fin)
-			x->x_val = trunc;   }
+			x->x_val = trunc;  }
 	radix_clip(x);
 	sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);
 	radix_bang(x);
@@ -452,10 +452,10 @@ static void radix_click(t_radix *x ,t_float xpos ,t_float ypos
 	{	if (x->x_val != 0)
 		{	x->x_tog = x->x_val;
 			radix_float(x ,0);
-			return;   }
-		else radix_float(x ,x->x_tog);   }
+			return;  }
+		else radix_float(x ,x->x_tog);  }
 	glist_grab(x->x_gui.x_glist ,&x->x_gui.x_obj.te_g
-		,(t_glistmotionfn)radix_motion ,radix_key ,xpos ,ypos);
+		,(t_glistmotionfn)radix_motion ,(t_glistkeyfn)radix_key ,xpos ,ypos);
 }
 
 static int radix_newclick(t_gobj *z ,struct _glist *glist
@@ -468,12 +468,12 @@ static int radix_newclick(t_gobj *z ,struct _glist *glist
 		{	clock_delay(x->x_clock_wait ,50);
 			x->x_gui.x_change = 1;
 			clock_delay(x->x_clock_reset ,3000);
-			x->x_buf[0] = 0;   }
+			x->x_buf[0] = 0;  }
 		else
 		{	x->x_gui.x_change = 0;
 			clock_unset(x->x_clock_reset);
 			x->x_buf[0] = 0;
-			sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);   }   }
+			sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);  }  }
 	return (1);
 }
 
@@ -488,7 +488,7 @@ static void radix_size(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
 		if (h < IEM_GUI_MINSIZE)
 			h = IEM_GUI_MINSIZE;
 		((t_radixtcl *)x)->x_zh = h;
-		x->x_gui.x_h = h * IEMGUI_ZOOM(x) - (IEMGUI_ZOOM(x)-1)*2;   }
+		x->x_gui.x_h = h * IEMGUI_ZOOM(x) - (IEMGUI_ZOOM(x)-1)*2;  }
 	radix_borderwidth(x ,IEMGUI_ZOOM(x));
 	iemgui_size((void *)x ,&x->x_gui);
 }
@@ -505,7 +505,7 @@ static void radix_range(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (radix_check_minmax( x
 	,atom_getfloatarg(0 ,ac ,av) ,atom_getfloatarg(1 ,ac ,av)))
 	{	sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);
-		/*radix_bang(x);*/   }
+		/*radix_bang(x);*/  }
 }
 
 static void radix_color(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
@@ -547,10 +547,10 @@ static void radix_init(t_radix *x ,t_float f) {
 static void radix_loadbang(t_radix *x ,t_float action) {
 	if (action == LB_LOAD && x->x_gui.x_isa.x_loadinit)
 	{	sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);
-		radix_bang(x);   }
+		radix_bang(x);  }
 }
 
-static void radix_key(void *z ,t_float fkey) {
+static void radix_key(void *z ,t_symbol *keysym ,t_float fkey) {
 	t_radix *x = z;
 	char c = fkey;
 	char buf[3];
@@ -560,18 +560,18 @@ static void radix_key(void *z ,t_float fkey) {
 	{	x->x_gui.x_change = 0;
 		clock_unset(x->x_clock_reset);
 		sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);
-		return;   }
+		return;  }
 	if ((c>='0' && c<='9') || c=='.' || c=='-' || c=='e' || c=='+' || c=='E')
 	{	if (strlen(x->x_buf) < (IEMGUI_MAX_NUM_LEN-2))
 		{	buf[0] = c;
 			strcat(x->x_buf ,buf);
-			sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);   }   }
+			sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);  }  }
 	else if ((c == '\b') || (c == 127))
 	{	int sl = strlen(x->x_buf) - 1;
 		if (sl < 0)
 			sl = 0;
 		x->x_buf[sl] = 0;
-		sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);   }
+		sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);  }
 	else if ((c == '\n') || (c == 13))
 	{	x->x_val = atof(x->x_buf);
 		x->x_buf[0] = 0;
@@ -579,7 +579,7 @@ static void radix_key(void *z ,t_float fkey) {
 		clock_unset(x->x_clock_reset);
 		radix_clip(x);
 		radix_bang(x);
-		sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);   }
+		sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);  }
 	clock_delay(x->x_clock_reset ,3000);
 }
 
@@ -613,14 +613,14 @@ static void *radix_new(t_symbol *s ,int argc ,t_atom *argv) {
 		iem_inttosymargs(&x->x_gui.x_isa ,atom_getfloatarg(5 ,argc ,argv));
 		iem_inttofstyle(&x->x_gui.x_fsf ,atom_getfloatarg(11 ,argc ,argv));
 		iemgui_all_loadcolors(&x->x_gui ,argv+13 ,argv+14 ,argv+15);
-		iemgui_new_getnames(&x->x_gui ,6 ,argv);   }
+		iemgui_new_getnames(&x->x_gui ,6 ,argv);  }
 	else iemgui_new_getnames(&x->x_gui ,6 ,0);
 	if (argc==21) log_height = atom_getfloatarg(20 ,argc ,argv);
 
 	if (argc>=1 && argc<=3)
 	{	base = atom_getfloatarg(0 ,argc ,argv);
 		prec = atom_getfloatarg(1 ,argc ,argv);
-		e    = atom_getfloatarg(2 ,argc ,argv);   }
+		e    = atom_getfloatarg(2 ,argc ,argv);  }
 	radix_dobase(x ,base ? base : 16);
 	radix_precision(x ,prec ? prec : (FLT_MANT_DIG / log2(x->x_base)));
 	x->x_e = e ? radix_bounds(e) : x->x_base;
@@ -647,7 +647,7 @@ static void *radix_new(t_symbol *s ,int argc ,t_atom *argv) {
 	{	case 2: strcpy(x->x_gui.x_font ,"times"); break;
 		case 1: strcpy(x->x_gui.x_font ,"helvetica"); break;
 		default: x->x_gui.x_fsf.x_font_style = 0;
-			strcpy(x->x_gui.x_font ,sys_font);   }
+			strcpy(x->x_gui.x_font ,sys_font);  }
 
 	if (x->x_gui.x_fsf.x_rcv_able)
 		pd_bind(&x->x_gui.x_obj.ob_pd ,x->x_gui.x_rcv);

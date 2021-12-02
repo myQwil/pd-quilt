@@ -6,7 +6,7 @@ static t_class *slx_class;
 static void slope_k(t_slope *x) {
 	if (x->log)
 	{    slope_minmax(x);
-	     x->k = x->run / log(x->max / x->min);   }
+	     x->k = x->run / log(x->max / x->min);  }
 	else x->k = x->run /    (x->max - x->min);
 }
 

@@ -20,16 +20,16 @@ static void unpak_list(t_unpak *x ,t_symbol *s ,int argc ,t_atom *argv) {
 		if (type == A_GIMME) type = ap->a_type;
 		else if (type != ap->a_type)
 		{	if ((x->mute>>i)&1) pd_error(x ,"@unpak: type mismatch");
-			continue;   }
+			continue;  }
 
 		if (type == A_FLOAT)
 			outlet_float(u->outlet ,ap->a_w.w_float);
 		else if (type == A_SYMBOL)
 		{	if (!strcmp(ap->a_w.w_symbol->s_name ,"bang"))
 				outlet_bang(u->outlet);
-			else outlet_symbol(u->outlet ,ap->a_w.w_symbol);   }
+			else outlet_symbol(u->outlet ,ap->a_w.w_symbol);  }
 		else if (type == A_POINTER)
-			outlet_pointer(u->outlet ,ap->a_w.w_gpointer);   }
+			outlet_pointer(u->outlet ,ap->a_w.w_gpointer);  }
 }
 
 void setup_0x40unpak(void) {

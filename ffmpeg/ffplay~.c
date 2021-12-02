@@ -108,8 +108,8 @@ static t_int *ffplay_perform(t_int *w) {
 					*outs[i]++ = x->buf[i][pos];
 				if (++pos >= x->siz)
 				{	x->siz = swr_convert(x->swr ,(uint8_t**)&x->buf ,BUFSIZE ,0 ,0);
-					pos = 0;   }
-				continue;   }
+					pos = 0;  }
+				continue;  }
 			while (av_read_frame(x->ic ,x->pkt) >= 0)
 			{	if (x->pkt->stream_index == x->idx)
 				{	if (avcodec_send_packet(x->ctx ,x->pkt) < 0
@@ -123,25 +123,25 @@ static t_int *ffplay_perform(t_int *w) {
 							,layout_in ,x->ctx->sample_fmt ,x->ctx->sample_rate
 							,0 ,NULL);
 						swr_init(x->swr);
-						x->sped = 0;   }
+						x->sped = 0;  }
 					x->siz = swr_convert(x->swr ,(uint8_t**)&x->buf ,BUFSIZE
 						,(const uint8_t **)x->frm->extended_data ,x->frm->nb_samples);
 					av_packet_unref(x->pkt);
-					goto sound;   }
-				av_packet_unref(x->pkt);   }
+					goto sound;  }
+				av_packet_unref(x->pkt);  }
 
 			// reached the end
 			if (x->play)
 				x->play = 0 ,n++; // don't iterate in case there's another track
 			else
 			{	ffplay_seek(x ,0);
-				goto silence;   }
-			outlet_anything(x->o_meta ,gensym("EOF") ,0 ,0);   }
-		x->pos = pos;   }
+				goto silence;  }
+			outlet_anything(x->o_meta ,gensym("EOF") ,0 ,0);  }
+		x->pos = pos;  }
 	else while (n--)
 	{	silence:
 		for (int i = nch; i--;)
-			*outs[i]++ = 0;   }
+			*outs[i]++ = 0;  }
 	return (w+3);
 }
 
@@ -164,7 +164,7 @@ static err_t ffplay_load(t_ffplay *x ,const char *fname) {
 	for (unsigned j=0; j < x->ic->nb_streams; j++)
 		if (x->ic->streams[j]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
 		{	i = j;
-			break;   }
+			break;  }
 	if (i < 0)
 		return "No audio stream found";
 	x->idx = i;
@@ -209,13 +209,13 @@ static err_t ffplay_m3u(t_ffplay *x ,t_symbol *s) {
 	if (size > pl->max)
 	{	pl->trk = (t_symbol**)resizebytes(pl->trk
 			,pl->max * sizeof(t_symbol*) ,size * sizeof(t_symbol*));
-		pl->max = size;   }
+		pl->max = size;  }
 	pl->siz = size;
 	rewind(fp);
 
 	for (int i=0; fgets(str ,MAXPDSTRING ,fp) != NULL; i++)
 	{	str[strcspn(str ,"\r\n")] = 0;
-		pl->trk[i] = gensym(str);   }
+		pl->trk[i] = gensym(str);  }
 
 	fclose(fp);
 	return 0;
@@ -241,11 +241,11 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 	if (path)
 	{	len = path - s->s_name;
 		strncpy(str ,s->s_name ,len);
-		path++;   }
+		path++;  }
 	else
 	{	len = 1;
 		str[0] = '.';
-		path = s->s_name;   }
+		path = s->s_name;  }
 	str[len] = '\0';
 	x->plist.dir = gensym(str);
 
@@ -254,7 +254,7 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 		err_msg = ffplay_m3u(x ,s);
 	else
 	{	x->plist.siz = 1;
-		x->plist.trk[0] = gensym(path);   }
+		x->plist.trk[0] = gensym(path);  }
 
 	if (!err_msg) err_msg = ffplay_start(x ,1);
 	if (err_msg) post("Error: %s." ,err_msg);
@@ -267,7 +267,7 @@ static t_atom ffplay_meta(t_ffplay *x ,t_symbol *s) {
 		return (t_atom){ A_SYMBOL ,{.w_symbol = gensym(x->ic->url)} };
 	if (!strcmp(s->s_name ,"filename"))
 	{	const char *name = strrchr(x->ic->url ,'/');
-		return (t_atom){ A_SYMBOL ,{.w_symbol = gensym(name ? name+1 : x->ic->url)} };   }
+		return (t_atom){ A_SYMBOL ,{.w_symbol = gensym(name ? name+1 : x->ic->url)} };  }
 	if (!strcmp(s->s_name ,"tracks"))
 		return (t_atom){ A_FLOAT ,{(t_float)x->plist.siz} };
 
@@ -288,7 +288,7 @@ static void ffplay_info_custom(t_ffplay *x ,int ac ,t_atom *av) {
 				strncpy(before ,sym ,len);
 				before[len] = 0;
 				startpost("%s" ,before);
-				sym += len;   }
+				sym += len;  }
 			pct++;
 			len = end - pct;
 			char buf[len + 1];
@@ -298,9 +298,9 @@ static void ffplay_info_custom(t_ffplay *x ,int ac ,t_atom *av) {
 			switch (atom.a_type)
 			{	case A_FLOAT:  startpost("%g" ,atom.a_w.w_float); break;
 				case A_SYMBOL: startpost("%s" ,atom.a_w.w_symbol->s_name); break;
-				default: startpost("");   }
-			sym += len + 2;   }
-		startpost("%s%s" ,sym ,ac ? " ":"");   }
+				default: startpost("");  }
+			sym += len + 2;  }
+		startpost("%s%s" ,sym ,ac ? " ":"");  }
 	endpost();
 }
 
@@ -323,8 +323,8 @@ static void ffplay_send(t_ffplay *x ,t_symbol *s) {
 	t_atom atom = ffplay_meta(x ,s);
 	if (atom.a_type)
 	{	t_atom val[2] =
-		{	{ A_SYMBOL ,{.w_symbol = s} } ,atom   };
-		outlet_anything(x->o_meta ,&s_list ,2 ,val);   }
+		{	{ A_SYMBOL ,{.w_symbol = s} } ,atom  };
+		outlet_anything(x->o_meta ,&s_list ,2 ,val);  }
 	else pd_error(x ,"ffplay_send: '%s' not found" ,s->s_name);
 }
 
@@ -334,7 +334,7 @@ static void ffplay_anything(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
 	switch (atom.a_type)
 	{	case A_FLOAT:  post("%s: %g" ,s->s_name ,atom.a_w.w_float); break;
 		case A_SYMBOL: post("%s: %s" ,s->s_name ,atom.a_w.w_symbol->s_name); break;
-		default: pd_error(x ,"ffplay~: no method for '%s'" ,s->s_name);   }
+		default: pd_error(x ,"ffplay~: no method for '%s'" ,s->s_name);  }
 }
 
 static void ffplay_tracks(t_ffplay *x) {
@@ -355,10 +355,10 @@ static void ffplay_float(t_ffplay *x ,t_float f) {
 	if (d > 0 && d <= x->plist.siz)
 	{	err_t err_msg = ffplay_start(x ,d);
 		if (err_msg) post("Error: %s." ,err_msg);
-		x->play = !err_msg;   }
+		x->play = !err_msg;  }
 	else
 	{	x->play = d = 0;
-		ffplay_seek(x ,0);   }
+		ffplay_seek(x ,0);  }
 	t_atom play = { A_FLOAT ,{(t_float)x->play} };
 	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
 }
@@ -377,7 +377,7 @@ static void *ffplay_new(t_symbol *s ,int ac ,t_atom *av) {
 	{	av = defarg;
 		ac = 2;
 		SETFLOAT(&defarg[0] ,1);
-		SETFLOAT(&defarg[1] ,2);   }
+		SETFLOAT(&defarg[1] ,2);  }
 	else if (ac > MAXCH)
 		ac = MAXCH;
 	x->nch = ac;
@@ -387,7 +387,7 @@ static void *ffplay_new(t_symbol *s ,int ac ,t_atom *av) {
 	{	outlet_new(&x->obj ,&s_signal);
 		int ch = atom_getfloatarg(i ,ac ,av);
 		if (ch > 0) x->layout |= 1 << (ch-1);
-		x->buf[i] = (t_sample*)getbytes(BUFSIZE * sizeof(t_sample));   }
+		x->buf[i] = (t_sample*)getbytes(BUFSIZE * sizeof(t_sample));  }
 
 	x->o_meta = outlet_new(&x->obj ,0);
 	x->open = x->play = x->sped = 0;

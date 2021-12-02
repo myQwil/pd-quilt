@@ -371,7 +371,7 @@ static void *b_new(t_symbol *s ,int ac ,t_atom *av) {
 	outlet_new(&x->bl.obj ,&s_bang);
 	if (ac && av->a_type == A_SYMBOL)
 	{	const char *c = av->a_w.w_symbol->s_name;
-		 x->bl.loadbang = (c[strlen(c)-1] == '!') ? 1 : 0;   }
+		 x->bl.loadbang = (c[strlen(c)-1] == '!') ? 1 : 0;  }
 	else x->bl.loadbang = 0;
 	return (x);
 }
@@ -469,7 +469,7 @@ void blunt_setup(void) {
 	{	class_addfloat (nums[i] ,num_float);
 		class_addmethod(nums[i] ,(t_method)blunt_loadbang
 			,gensym("loadbang") ,A_DEFFLOAT ,0);
-		class_sethelpsymbol(nums[i] ,num_sym);   }
+		class_sethelpsymbol(nums[i] ,num_sym);  }
 
 	/* ------------------ binop1 ----------------------- */
 
@@ -581,8 +581,8 @@ void blunt_setup(void) {
 			,b2_ee_class   ,b2_ne_class    ,b2_gt_class    ,b2_lt_class
 			,b2_ge_class   ,b2_le_class    ,b3_ba_class    ,b3_la_class
 			,b3_bo_class   ,b3_lo_class    ,b3_ls_class    ,b3_rs_class
-			,b3_fpc_class  ,b3_pc_class    ,b3_mod_class   ,b3_div_class   }
-		,{	 b3_xor_class   }   };
+			,b3_fpc_class  ,b3_pc_class    ,b3_mod_class   ,b3_div_class  }
+		,{	 b3_xor_class  }  };
 
 	t_bopmethod bangs[][24] =
 	{	{	 b1_plus_bang ,b1_minus_bang ,b1_times_bang ,b1_div_bang
@@ -590,8 +590,8 @@ void blunt_setup(void) {
 			,b2_ee_bang   ,b2_ne_bang    ,b2_gt_bang    ,b2_lt_bang
 			,b2_ge_bang   ,b2_le_bang    ,b3_ba_bang    ,b3_la_bang
 			,b3_bo_bang   ,b3_lo_bang    ,b3_ls_bang    ,b3_rs_bang
-			,b3_fpc_bang  ,b3_pc_bang    ,b3_mod_bang   ,b3_div_bang   }
-		,{	 b3_xor_bang   }   };
+			,b3_fpc_bang  ,b3_pc_bang    ,b3_mod_bang   ,b3_div_bang  }
+		,{	 b3_xor_bang  }  };
 
 	t_symbol *syms[] = { num_sym ,gensym("0x5e") };
 
@@ -612,7 +612,7 @@ void blunt_setup(void) {
 				,gensym("set") ,A_GIMME ,0);
 			class_addmethod(bops[i][j] ,(t_method)blunt_loadbang
 				,gensym("loadbang") ,A_DEFFLOAT ,0);
-			class_sethelpsymbol(bops[i][j] ,syms[i]);   }   }
+			class_sethelpsymbol(bops[i][j] ,syms[i]);  }  }
 
 	/* hot & reverse binops */
 	hotop_setup();

@@ -36,9 +36,9 @@ static int pak_l(t_pak *x ,t_symbol *s ,int ac ,t_atom *av ,int i) {
 		if (!pak_set(x ,vp ,ptr ,*av ,*tp) && ((x->mute>>i) & 1))
 		{	if (i >= x->n-1)
 			{	pd_error(x ,"@pak_%s: wrong type" ,pak_check(av->a_type));
-				result = 0;   }
+				result = 0;  }
 			else pd_error(x ,"inlet: expected '%s' but got '%s'"
-				,pak_check(*tp) ,pak_check(av->a_type));   }   }
+				,pak_check(*tp) ,pak_check(av->a_type));  }  }
 	return result;
 }
 

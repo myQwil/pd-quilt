@@ -21,7 +21,7 @@ static void has_list(t_has *x ,t_symbol *s ,int ac ,t_atom *av) {
 			if ((type == A_FLOAT && av->a_w.w_float  == x->a.a_w.w_float)
 			                     || av->a_w.w_symbol == x->a.a_w.w_symbol)
 			{	found = 1;
-				break;   }
+				break;  }
 	outlet_float(x->obj.ob_outlet ,found);
 }
 

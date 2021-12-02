@@ -25,15 +25,15 @@ static void muse_slice(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
 	if (ac > 2 && av[2].a_type == A_FLOAT)
 	{	step = atom_getint(av+2);
 		if (step < 0)
-			strt = n ,stop = 0;   }
+			strt = n ,stop = 0;  }
 	if (ac > 1 && av[1].a_type == A_FLOAT)
 	{	stop = atom_getint(av+1) % n;
 		if (stop < 0)
-			stop += n;   }
+			stop += n;  }
 	if (ac > 0 && av[0].a_type == A_FLOAT)
 	{	strt = atom_getint(av+0) % n;
 		if (strt < 0)
-			strt += n;   }
+			strt += n;  }
 	if (!step)
 		step = (strt > stop) ? -1 : 1;
 
@@ -44,10 +44,10 @@ static void muse_slice(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
 	if (rev)
 	{	strt--,stop--;
 		for (n = 0; strt > stop; strt -= step)
-			flts[n++] = (t_atom){ A_FLOAT ,{fp[strt]} };   }
+			flts[n++] = (t_atom){ A_FLOAT ,{fp[strt]} };  }
 	else
 	{	for (n = 0; strt < stop; strt += step)
-			flts[n++] = (t_atom){ A_FLOAT ,{fp[strt]} };   }
+			flts[n++] = (t_atom){ A_FLOAT ,{fp[strt]} };  }
 	outlet_anything(y->o_midi ,gensym("slice") ,n ,flts);
 }
 
@@ -62,9 +62,9 @@ static void muse_send(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
 	{	if (av->a_type == A_SYMBOL)
 		{	s = av->a_w.w_symbol;
 			ac--,av++;
-			n = music_any(x ,&flin ,s ,ac ,av);   }
+			n = music_any(x ,&flin ,s ,ac ,av);  }
 		else n = music_z(x ,&flin ,0 ,ac ,av);
-		if (!n) n = x->siz;   }
+		if (!n) n = x->siz;  }
 	else n = x->siz;
 
 	t_atom atoms[n];
@@ -88,7 +88,7 @@ static void *muse_new(t_symbol *s ,int ac ,t_atom *av) {
 	for (int i = 0; n--; fp++,i++)
 	{	floatinlet_new(&x->obj ,fp);
 		if (i < ac)
-			*fp = atom_getfloat(av++);   }
+			*fp = atom_getfloat(av++);  }
 
 	return (y);
 }

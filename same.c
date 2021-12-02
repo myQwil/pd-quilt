@@ -24,7 +24,7 @@ static void same_bang(t_same *x) {
 static void same_float(t_same *x ,t_float f) {
 	if (x->f != f)
 	{	x->f = f;
-		outlet_float(x->obj.ob_outlet ,f);   }
+		outlet_float(x->obj.ob_outlet ,f);  }
 	else outlet_float(x->o_same ,f);
 }
 
