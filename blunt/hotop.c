@@ -373,218 +373,77 @@ static void *hdivm_new(t_symbol *s ,int ac ,t_atom *av) {
 }
 
 void hotop_setup(void) {
-	/* ------------------ binop1 ----------------------- */
-
-	hplus_class  = class_new(gensym("#+")
-		,(t_newmethod)hplus_new  ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hplus_proxy  = class_new(gensym("_#+_pxy")   ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hminus_class = class_new(gensym("#-")
-		,(t_newmethod)hminus_new ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hminus_proxy = class_new(gensym("_#-_pxy")   ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	htimes_class = class_new(gensym("#*")
-		,(t_newmethod)htimes_new ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	htimes_proxy = class_new(gensym("_#*_pxy")   ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hdiv_class   = class_new(gensym("#/")
-		,(t_newmethod)hdiv_new   ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hdiv_proxy   = class_new(gensym("_#/_pxy")   ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hlog_class   = class_new(gensym("#log")
-		,(t_newmethod)hlog_new   ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hlog_proxy   = class_new(gensym("_#log_pxy") ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hpow_class   = class_new(gensym("#pow")
-		,(t_newmethod)hpow_new   ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hpow_proxy   = class_new(gensym("_#pow_pxy") ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hmax_class   = class_new(gensym("#max")
-		,(t_newmethod)hmax_new   ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hmax_proxy   = class_new(gensym("_#max_pxy") ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hmin_class   = class_new(gensym("#min")
-		,(t_newmethod)hmin_new   ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hmin_proxy   = class_new(gensym("_#min_pxy") ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	/* ------------------ binop2 ----------------------- */
-
-	hee_class    = class_new(gensym("#==")
-		,(t_newmethod)hee_new    ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hee_proxy    = class_new(gensym("_#==_pxy")  ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hne_class    = class_new(gensym("#!=")
-		,(t_newmethod)hne_new    ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hne_proxy    = class_new(gensym("_#!=_pxy")  ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hgt_class    = class_new(gensym("#>")
-		,(t_newmethod)hgt_new    ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hgt_proxy    = class_new(gensym("_#>_pxy")   ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hlt_class    = class_new(gensym("#<")
-		,(t_newmethod)hlt_new    ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hlt_proxy    = class_new(gensym("_#<_pxy")   ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hge_class    = class_new(gensym("#>=")
-		,(t_newmethod)hge_new    ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hge_proxy    = class_new(gensym("_#>=_pxy")  ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hle_class    = class_new(gensym("#<=")
-		,(t_newmethod)hle_new    ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hle_proxy    = class_new(gensym("_#<=_pxy")  ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	/* ------------------ binop3 ----------------------- */
-
-	hba_class    = class_new(gensym("#&")
-		,(t_newmethod)hba_new    ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hba_proxy    = class_new(gensym("_#&_pxy")   ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hla_class    = class_new(gensym("#&&")
-		,(t_newmethod)hla_new    ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hla_proxy    = class_new(gensym("_#&&_pxy")  ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hbo_class    = class_new(gensym("#|")
-		,(t_newmethod)hbo_new    ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hbo_proxy    = class_new(gensym("_#|_pxy")   ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hlo_class    = class_new(gensym("#||")
-		,(t_newmethod)hlo_new    ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hlo_proxy    = class_new(gensym("_#||_pxy")  ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hls_class    = class_new(gensym("#<<")
-		,(t_newmethod)hls_new    ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hls_proxy    = class_new(gensym("_#<<_pxy")  ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hrs_class    = class_new(gensym("#>>")
-		,(t_newmethod)hrs_new    ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hrs_proxy    = class_new(gensym("_#>>_pxy")  ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hxor_class   = class_new(gensym("#^")
-		,(t_newmethod)hxor_new   ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hxor_proxy   = class_new(gensym("_#^_pxy")   ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hfpc_class   = class_new(gensym("#f%")
-		,(t_newmethod)hfpc_new   ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hfpc_proxy   = class_new(gensym("_#f%_pxy")  ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hpc_class    = class_new(gensym("#%")
-		,(t_newmethod)hpc_new    ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hpc_proxy    = class_new(gensym("_#%_pxy")   ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hmod_class   = class_new(gensym("#mod")
-		,(t_newmethod)hmod_new   ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hmod_proxy   = class_new(gensym("_#mod_pxy") ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	hdivm_class  = class_new(gensym("#div")
-		,(t_newmethod)hdivm_new  ,(t_method)hot_free
-		,sizeof(t_hot) ,0 ,A_GIMME ,0);
-	hdivm_proxy  = class_new(gensym("_#div_pxy") ,0 ,0
-		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
-
-	t_class *hots[][10] =
-	{	 {	 hplus_class ,hminus_class ,htimes_class ,hdiv_class
-			,hlog_class  ,hpow_class   ,hmax_class   ,hmin_class  }
-		,{	 hee_class   ,hne_class    ,hgt_class    ,hlt_class ,hge_class ,hle_class  }
-		,{	 hba_class   ,hla_class    ,hbo_class    ,hlo_class ,hls_class ,hrs_class
-			,hfpc_class  ,hpc_class    ,hmod_class   ,hdivm_class  }
-		,{	 hxor_class  }  };
-
-	t_bopmethod hbangs[][10] =
-	{	 {	 hplus_bang ,hminus_bang ,htimes_bang ,hdiv_bang
-			,hlog_bang  ,hpow_bang   ,hmax_bang   ,hmin_bang  }
-		,{	 hee_bang   ,hne_bang    ,hgt_bang    ,hlt_bang ,hge_bang ,hle_bang  }
-		,{	 hba_bang   ,hla_bang    ,hbo_bang    ,hlo_bang ,hls_bang ,hrs_bang
-			,hfpc_bang  ,hpc_bang    ,hmod_bang   ,hdivm_bang  }
-		,{	 hxor_bang  }  };
-
-	t_class *pxys[][10] =
-	{	 {	 hplus_proxy ,hminus_proxy ,htimes_proxy ,hdiv_proxy
-			,hlog_proxy  ,hpow_proxy   ,hmax_proxy   ,hmin_proxy  }
-		,{	 hee_proxy   ,hne_proxy    ,hgt_proxy    ,hlt_proxy ,hge_proxy ,hle_proxy  }
-		,{	 hba_proxy   ,hla_proxy    ,hbo_proxy    ,hlo_proxy ,hls_proxy ,hrs_proxy
-			,hfpc_proxy  ,hpc_proxy    ,hmod_proxy   ,hdivm_proxy  }
-		,{	 hxor_proxy  }  };
+	const struct _obj
+	{	t_class **class;
+		t_class **proxy;
+		const char *name;
+		t_newmethod new;
+		t_bopmethod bang;  }
+	objs[] =
+	{	 { &hplus_class  ,&hplus_proxy  ,"#+"   ,(t_newmethod)hplus_new  ,hplus_bang  }
+		,{ &hminus_class ,&hminus_proxy ,"#-"   ,(t_newmethod)hminus_new ,hminus_bang }
+		,{ &htimes_class ,&htimes_proxy ,"#*"   ,(t_newmethod)htimes_new ,htimes_bang }
+		,{ &hdiv_class   ,&hdiv_proxy   ,"#/"   ,(t_newmethod)hdiv_new   ,hdiv_bang   }
+		,{ &hlog_class   ,&hlog_proxy   ,"#log" ,(t_newmethod)hlog_new   ,hlog_bang   }
+		,{ &hpow_class   ,&hpow_proxy   ,"#pow" ,(t_newmethod)hpow_new   ,hpow_bang   }
+		,{ &hmax_class   ,&hmax_proxy   ,"#max" ,(t_newmethod)hmax_new   ,hmax_bang   }
+		,{ &hmin_class   ,&hmin_proxy   ,"#min" ,(t_newmethod)hmin_new   ,hmin_bang   }
+		,{ NULL }
+		,{ &hee_class    ,&hee_proxy    ,"#=="  ,(t_newmethod)hee_new    ,hee_bang    }
+		,{ &hne_class    ,&hne_proxy    ,"#!="  ,(t_newmethod)hne_new    ,hne_bang    }
+		,{ &hgt_class    ,&hgt_proxy    ,"#>"   ,(t_newmethod)hgt_new    ,hgt_bang    }
+		,{ &hlt_class    ,&hlt_proxy    ,"#<"   ,(t_newmethod)hlt_new    ,hlt_bang    }
+		,{ &hge_class    ,&hge_proxy    ,"#>="  ,(t_newmethod)hge_new    ,hge_bang    }
+		,{ &hle_class    ,&hle_proxy    ,"#<="  ,(t_newmethod)hle_new    ,hle_bang    }
+		,{ NULL }
+		,{ &hba_class    ,&hba_proxy    ,"#&"   ,(t_newmethod)hba_new    ,hba_bang    }
+		,{ &hla_class    ,&hla_proxy    ,"#&&"  ,(t_newmethod)hla_new    ,hla_bang    }
+		,{ &hbo_class    ,&hbo_proxy    ,"#|"   ,(t_newmethod)hbo_new    ,hbo_bang    }
+		,{ &hlo_class    ,&hlo_proxy    ,"#||"  ,(t_newmethod)hlo_new    ,hlo_bang    }
+		,{ &hls_class    ,&hls_proxy    ,"#<<"  ,(t_newmethod)hls_new    ,hls_bang    }
+		,{ &hrs_class    ,&hrs_proxy    ,"#>>"  ,(t_newmethod)hrs_new    ,hrs_bang    }
+		,{ &hfpc_class   ,&hfpc_proxy   ,"#f%"  ,(t_newmethod)hfpc_new   ,hfpc_bang   }
+		,{ &hpc_class    ,&hpc_proxy    ,"#%"   ,(t_newmethod)hpc_new    ,hpc_bang    }
+		,{ &hmod_class   ,&hmod_proxy   ,"#mod" ,(t_newmethod)hmod_new   ,hmod_bang   }
+		,{ &hdivm_class  ,&hdivm_proxy  ,"#div" ,(t_newmethod)hdivm_new  ,hdivm_bang  }
+		,{ NULL }
+		,{ &hxor_class   ,&hxor_proxy   ,"#^"   ,(t_newmethod)hxor_new   ,hxor_bang   }
+		,{ NULL }  };
 
 	t_symbol *syms[] =
 	{	 gensym("hotbinops1") ,gensym("hotbinops2") ,gensym("hotbinops3")
-		,gensym("0x5e")  };
+		,gensym("0x5e") ,NULL  };
 
-	int i = sizeof(syms) / sizeof*(syms);
-	while (i--)
-	{	int max = sizeof(hots[i]) / sizeof*(hots[i]);
-		for (int j=0; j < max; j++)
-		{	if (hots[i][j] == 0) continue;
-			class_addbang  (hots[i][j] ,hbangs[i][j]);
-			class_addfloat (hots[i][j] ,bop_float);
-			class_addmethod(hots[i][j] ,(t_method)bop_f1
-				,gensym("f1")  ,A_FLOAT ,0);
-			class_addmethod(hots[i][j] ,(t_method)bop_f2
-				,gensym("f2")  ,A_FLOAT ,0);
-			class_addmethod(hots[i][j] ,(t_method)bop_skip
-				,gensym(".")   ,A_GIMME ,0);
-			class_addmethod(hots[i][j] ,(t_method)bop_set
-				,gensym("set") ,A_GIMME ,0);
-			class_addmethod(hots[i][j] ,(t_method)blunt_loadbang
+	int i=0 ,j=0;
+	char alt[10] = "_";
+	for (; syms[i]; i++ ,j++)
+	{	for (; objs[j].class; j++)
+		{	struct _obj obj = objs[j];
+			const char *name = obj.name;
+
+			*obj.class = class_new(gensym(name) ,obj.new ,(t_method)hot_free
+				,sizeof(t_hot) ,0 ,A_GIMME ,0);
+			strcpy(stpcpy(alt+1 ,name) ,"_pxy");
+			*obj.proxy = class_new(gensym(alt) ,0 ,0
+				,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
+
+			t_class *class = *obj.class;
+			t_class *proxy = *obj.proxy;
+			class_addbang  (class ,obj.bang);
+			class_addfloat (class ,bop_float);
+			class_addmethod(class ,(t_method)bop_f1   ,gensym("f1")  ,A_FLOAT ,0);
+			class_addmethod(class ,(t_method)bop_f2   ,gensym("f2")  ,A_FLOAT ,0);
+			class_addmethod(class ,(t_method)bop_skip ,gensym(".")   ,A_GIMME ,0);
+			class_addmethod(class ,(t_method)bop_set  ,gensym("set") ,A_GIMME ,0);
+			class_addmethod(class ,(t_method)blunt_loadbang
 				,gensym("loadbang") ,A_DEFFLOAT ,0);
 
-			class_addbang  (pxys[i][j] ,hot_pxy_bang);
-			class_addfloat (pxys[i][j] ,hot_pxy_float);
-			class_addmethod(pxys[i][j] ,(t_method)hot_pxy_f1
-				,gensym("f1")  ,A_FLOAT ,0);
-			class_addmethod(pxys[i][j] ,(t_method)hot_pxy_f2
-				,gensym("f2")  ,A_FLOAT ,0);
-			class_addmethod(pxys[i][j] ,(t_method)hot_pxy_skip
-				,gensym(".")   ,A_GIMME ,0);
-			class_addmethod(pxys[i][j] ,(t_method)hot_pxy_set
-				,gensym("set") ,A_GIMME ,0);
+			class_addbang  (proxy ,hot_pxy_bang);
+			class_addfloat (proxy ,hot_pxy_float);
+			class_addmethod(proxy ,(t_method)hot_pxy_f1   ,gensym("f1")  ,A_FLOAT ,0);
+			class_addmethod(proxy ,(t_method)hot_pxy_f2   ,gensym("f2")  ,A_FLOAT ,0);
+			class_addmethod(proxy ,(t_method)hot_pxy_skip ,gensym(".")   ,A_GIMME ,0);
+			class_addmethod(proxy ,(t_method)hot_pxy_set  ,gensym("set") ,A_GIMME ,0);
 
-			class_sethelpsymbol(hots[i][j] ,syms[i]);  }  }
+			class_sethelpsymbol(class ,syms[i]);  }  }
 }

@@ -115,58 +115,39 @@ static void *rdivm_new(t_symbol *s ,int ac ,t_atom *av) {
 }
 
 void revop_setup(void) {
-	rminus_class = class_new(gensym("@-")   ,(t_newmethod)rminus_new ,0
-		,sizeof(t_bop) ,0 ,A_GIMME ,0);
+	const struct _obj
+	{	t_class **class;
+		const char *name;
+		t_newmethod new;
+		t_bopmethod bang;  }
+	objs[] =
+	{	 { &rminus_class ,"@-"   ,(t_newmethod)rminus_new ,rminus_bang }
+		,{ &rdiv_class   ,"@/"   ,(t_newmethod)rdiv_new   ,rdiv_bang   }
+		,{ &rlog_class   ,"@log" ,(t_newmethod)rlog_new   ,rlog_bang   }
+		,{ &rpow_class   ,"@pow" ,(t_newmethod)rpow_new   ,rpow_bang   }
+		,{ &rls_class    ,"@<<"  ,(t_newmethod)rls_new    ,rls_bang    }
+		,{ &rrs_class    ,"@>>"  ,(t_newmethod)rrs_new    ,rrs_bang    }
+		,{ &rfpc_class   ,"@f%"  ,(t_newmethod)rfpc_new   ,rfpc_bang   }
+		,{ &rpc_class    ,"@%"   ,(t_newmethod)rpc_new    ,rpc_bang    }
+		,{ &rmod_class   ,"@mod" ,(t_newmethod)rmod_new   ,rmod_bang   }
+		,{ &rdivm_class  ,"@div" ,(t_newmethod)rdiv_new   ,rdiv_bang   }
+		,{ NULL }  };
 
-	rdiv_class   = class_new(gensym("@/")   ,(t_newmethod)rdiv_new   ,0
-		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-
-	rlog_class   = class_new(gensym("@log") ,(t_newmethod)rlog_new   ,0
-		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-
-	rpow_class   = class_new(gensym("@pow") ,(t_newmethod)rpow_new   ,0
-		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-
-	rls_class    = class_new(gensym("@<<")  ,(t_newmethod)rls_new    ,0
-		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-
-	rrs_class    = class_new(gensym("@>>")  ,(t_newmethod)rrs_new    ,0
-		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-
-	rfpc_class   = class_new(gensym("@f%")  ,(t_newmethod)rfpc_new   ,0
-		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-
-	rpc_class    = class_new(gensym("@%")   ,(t_newmethod)rpc_new    ,0
-		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-
-	rmod_class   = class_new(gensym("@mod") ,(t_newmethod)rmod_new   ,0
-		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-
-	rdivm_class  = class_new(gensym("@div") ,(t_newmethod)rdivm_new  ,0
-		,sizeof(t_bop) ,0 ,A_GIMME ,0);
-
-	t_class *revs[] =
-	{	 rminus_class ,rdiv_class ,rlog_class ,rpow_class ,rfpc_class
-		,rls_class    ,rrs_class  ,rpc_class  ,rmod_class ,rdivm_class  };
-
-	t_bopmethod rbangs[] =
-	{	 rminus_bang ,rdiv_bang ,rlog_bang ,rpow_bang ,rfpc_bang
-		,rls_bang    ,rrs_bang  ,rpc_bang  ,rmod_bang ,rdivm_bang  };
-
-	int i = sizeof(revs) / sizeof*(revs);
 	t_symbol *rev_sym = gensym("revbinops");
-	while (i--)
-	{	class_addbang  (revs[i] ,rbangs[i]);
-		class_addfloat (revs[i] ,bop_float);
-		class_addmethod(revs[i] ,(t_method)bop_f1
-			,gensym("f1")  ,A_FLOAT ,0);
-		class_addmethod(revs[i] ,(t_method)bop_f2
-			,gensym("f2")  ,A_FLOAT ,0);
-		class_addmethod(revs[i] ,(t_method)bop_skip
-			,gensym(".")   ,A_GIMME ,0);
-		class_addmethod(revs[i] ,(t_method)bop_set
-			,gensym("set") ,A_GIMME ,0);
-		class_addmethod(revs[i] ,(t_method)blunt_loadbang
+	for (int i=0; objs[i].class; i++)
+	{	struct _obj obj = objs[i];
+
+		*obj.class = class_new(gensym(obj.name) ,obj.new  ,0
+			,sizeof(t_bop) ,0 ,A_GIMME ,0);
+
+		t_class *class = *obj.class;
+		class_addbang  (class ,obj.bang);
+		class_addfloat (class ,bop_float);
+		class_addmethod(class ,(t_method)bop_f1   ,gensym("f1")  ,A_FLOAT ,0);
+		class_addmethod(class ,(t_method)bop_f2	,gensym("f2")  ,A_FLOAT ,0);
+		class_addmethod(class ,(t_method)bop_skip ,gensym(".")   ,A_GIMME ,0);
+		class_addmethod(class ,(t_method)bop_set  ,gensym("set") ,A_GIMME ,0);
+		class_addmethod(class ,(t_method)blunt_loadbang
 			,gensym("loadbang") ,A_DEFFLOAT ,0);
-		class_sethelpsymbol(revs[i] ,rev_sym);  }
+		class_sethelpsymbol(class ,rev_sym);  }
 }
