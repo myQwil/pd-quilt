@@ -44,10 +44,10 @@ static void muse_slice(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
 	if (rev)
 	{	strt--,stop--;
 		for (n = 0; strt > stop; strt -= step)
-			flts[n++] = (t_atom){ A_FLOAT ,{fp[strt]} };  }
+			flts[n++] = (t_atom){.a_type=A_FLOAT ,.a_w={.w_float = fp[strt]}};  }
 	else
 	{	for (n = 0; strt < stop; strt += step)
-			flts[n++] = (t_atom){ A_FLOAT ,{fp[strt]} };  }
+			flts[n++] = (t_atom){.a_type=A_FLOAT ,.a_w={.w_float = fp[strt]}};  }
 	outlet_anything(y->o_midi ,gensym("slice") ,n ,flts);
 }
 
@@ -69,7 +69,7 @@ static void muse_send(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
 
 	t_atom atoms[n];
 	for (int i = 0; i < n; i++)
-		atoms[i] = (t_atom){A_FLOAT ,{flin.fp[i]}};
+		atoms[i] = (t_atom){.a_type=A_FLOAT ,.a_w={.w_float = flin.fp[i]}};
 	flin_free(&flin);
 	outlet_anything(y->o_midi ,gensym("scale") ,n ,atoms);
 }

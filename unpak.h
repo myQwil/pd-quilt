@@ -58,7 +58,7 @@ static void unpak_list(t_unpak *x ,t_symbol *s ,int argc ,t_atom *argv);
 
 static void unpak_anything(t_unpak *x ,t_symbol *s ,int ac ,t_atom *av) {
 	t_atom atoms[ac+1];
-	atoms[0] = (t_atom){A_SYMBOL ,{.w_symbol = s}};
+	atoms[0] = (t_atom){.a_type=A_SYMBOL ,.a_w={.w_symbol = s}};
 	memcpy(atoms+1 ,av ,ac * sizeof(t_atom));
 	unpak_list(x ,0 ,ac+1 ,atoms);
 }

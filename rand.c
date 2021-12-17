@@ -101,7 +101,7 @@ static void rand_anything(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
 		case '@': x->siz = rand_z(x ,atoi(s->s_name+1) ,ac ,av); break;
 		default:
 		{	t_atom atoms[ac+1];
-			atoms[0] = (t_atom){A_SYMBOL ,{.w_symbol = s}};
+			atoms[0] = (t_atom){.a_type=A_SYMBOL ,.a_w={.w_symbol = s}};
 			memcpy(atoms+1 ,av ,ac * sizeof(t_atom));
 			x->siz = rand_z(x ,0 ,ac+1 ,atoms);  }  }
 }

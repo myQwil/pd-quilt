@@ -205,7 +205,7 @@ static int music_any(t_music *x ,t_flin *flin ,t_symbol *s ,int ac ,t_atom *av) 
 		if (cp!=p && p[0]!=p[1] && isoperator(*p)) // interval ± semitones
 			music_f(x ,f ,*p ,strtof(p+1 ,0));
 		else
-		{	t_atom atom = {A_SYMBOL ,{.w_symbol = s}};
+		{	t_atom atom = {.a_type=A_SYMBOL ,.a_w={.w_symbol = s}};
 			n = music_z(x ,flin ,0 ,1 ,&atom);  }  }
 	else switch (*cp)
 	{	case '!': n = music_i(x ,flin ,atoi(cp+1) ,ac ,av); break; // lazy
@@ -213,7 +213,7 @@ static int music_any(t_music *x ,t_flin *flin ,t_symbol *s ,int ac ,t_atom *av) 
 		case '#': n = music_x(x ,flin ,atoi(cp+1) ,ac ,av); break; // strict
 		default:
 		{	t_atom atoms[ac+1];
-			atoms[0] = (t_atom){A_SYMBOL ,{.w_symbol = s}};
+			atoms[0] = (t_atom){.a_type=A_SYMBOL ,.a_w={.w_symbol = s}};
 			memcpy(atoms+1 ,av ,ac * sizeof(t_atom));
 			n = music_z(x ,flin ,0 ,ac+1 ,atoms);  }  }
 	return n;
@@ -270,7 +270,9 @@ static t_music *music_new(t_class *mclass ,int ac) {
 	x->siz = x->flin.ins = ac;
 	flin_alloc(&x->flin ,ac);
 
-	t_atom atms[] = { {A_FLOAT ,{440}} ,{A_FLOAT ,{12}} };
+	t_atom atms[] =
+	{	 {.a_type=A_FLOAT ,.a_w={.w_float = 440}}
+		,{.a_type=A_FLOAT ,.a_w={.w_float = 12 }}  };
 	note_set(&x->note ,2 ,atms);
 	x->oct = x->note.tet;
 	x->strict = 0;

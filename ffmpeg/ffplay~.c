@@ -11,7 +11,7 @@
 
 typedef const char *err_t;
 
-/* -------------------------- FFmpeg player -------------------------- */
+/* ------------------------- FFmpeg player ------------------------- */
 static t_class *ffplay_class;
 
 typedef struct {
@@ -46,7 +46,7 @@ typedef struct {
 static void ffplay_time(t_ffplay *x) {
 	if (!x->open) return;
 	t_float f = x->ic->duration / 1000.; // AV_TIME_BASE is in microseconds
-	t_atom time = { A_FLOAT ,{f} };
+	t_atom time = {.a_type=A_FLOAT ,.a_w={.w_float = f}};
 	outlet_anything(x->o_meta ,gensym("time") ,1 ,&time);
 }
 
@@ -54,7 +54,7 @@ static void ffplay_position(t_ffplay *x) {
 	if (!x->open) return;
 	AVRational ratio = x->ic->streams[x->idx]->time_base;
 	t_float f = 1000. * x->frm->pts * ratio.num / ratio.den;
-	t_atom pos = { A_FLOAT ,{f} };
+	t_atom pos = {.a_type=A_FLOAT ,.a_w={.w_float = f}};
 	outlet_anything(x->o_meta ,gensym("pos") ,1 ,&pos);
 }
 
@@ -258,23 +258,24 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 
 	if (!err_msg) err_msg = ffplay_start(x ,1);
 	if (err_msg) post("Error: %s." ,err_msg);
-	t_atom open = { A_FLOAT ,{(t_float)x->open} };
+	t_atom open = {.a_type=A_FLOAT ,.a_w={.w_float = x->open}};
 	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
 }
 
 static t_atom ffplay_meta(t_ffplay *x ,t_symbol *s) {
 	if (!strcmp(s->s_name ,"path") || !strcmp(s->s_name ,"url"))
-		return (t_atom){ A_SYMBOL ,{.w_symbol = gensym(x->ic->url)} };
+		return (t_atom){.a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(x->ic->url)}};
 	if (!strcmp(s->s_name ,"filename"))
 	{	const char *name = strrchr(x->ic->url ,'/');
-		return (t_atom){ A_SYMBOL ,{.w_symbol = gensym(name ? name+1 : x->ic->url)} };  }
+		name = name ? name+1 : x->ic->url;
+		return (t_atom){.a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(name)}};  }
 	if (!strcmp(s->s_name ,"tracks"))
-		return (t_atom){ A_FLOAT ,{(t_float)x->plist.siz} };
+		return (t_atom){.a_type=A_FLOAT  ,.a_w={.w_float = x->plist.siz}};
 
 	AVDictionaryEntry *entry = av_dict_get(x->ic->metadata ,s->s_name ,0 ,0);
 	if (entry)
-	     return (t_atom){ A_SYMBOL ,{.w_symbol = gensym(entry->value)} };
-	else return (t_atom){A_NULL ,{0}};
+		return (t_atom){.a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(entry->value)}};
+	else return (t_atom){.a_type=A_NULL ,.a_w={.w_float = 0}};
 }
 
 static void ffplay_info_custom(t_ffplay *x ,int ac ,t_atom *av) {
@@ -320,11 +321,11 @@ static void ffplay_info(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
 
 static void ffplay_send(t_ffplay *x ,t_symbol *s) {
 	if (!x->open) return;
-	t_atom atom = ffplay_meta(x ,s);
-	if (atom.a_type)
-	{	t_atom val[2] =
-		{	{ A_SYMBOL ,{.w_symbol = s} } ,atom  };
-		outlet_anything(x->o_meta ,&s_list ,2 ,val);  }
+	t_atom meta = ffplay_meta(x ,s);
+	if (meta.a_type)
+	{	t_atom args[] =
+		{	{.a_type=A_SYMBOL ,.a_w={.w_symbol = s}} ,meta  };
+		outlet_anything(x->o_meta ,&s_list ,2 ,args);  }
 	else pd_error(x ,"ffplay_send: '%s' not found" ,s->s_name);
 }
 
@@ -338,14 +339,14 @@ static void ffplay_anything(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void ffplay_tracks(t_ffplay *x) {
-	t_atom tracks = { A_FLOAT ,{(t_float)x->plist.siz} };
+	t_atom tracks = {.a_type=A_FLOAT ,.a_w={.w_float = x->plist.siz}};
 	outlet_anything(x->o_meta ,gensym("tracks") ,1 ,&tracks);
 }
 
 static void ffplay_bang(t_ffplay *x) {
 	if (!x->open) return;
 	x->play = !x->play;
-	t_atom play = { A_FLOAT ,{(t_float)x->play} };
+	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
 	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
 }
 
@@ -359,7 +360,7 @@ static void ffplay_float(t_ffplay *x ,t_float f) {
 	else
 	{	x->play = d = 0;
 		ffplay_seek(x ,0);  }
-	t_atom play = { A_FLOAT ,{(t_float)x->play} };
+	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
 	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
 }
 

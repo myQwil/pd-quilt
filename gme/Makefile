@@ -2,7 +2,7 @@
 
 lib.name = gmepd
 
-class.sources = gme~.cpp gmes~.cpp
+class.sources = gme~.c gmes~.c
 
 datafiles = gme-mask.pd gme~-help.pd gmes~-help.pd
 

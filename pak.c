@@ -1,6 +1,3 @@
-#define PAK_FIRST(x) 0
-#define PAK_INDEX(p) ((p)->idx)
-
 #include "pak.h"
 
 /* -------------------------- pak ------------------------------ */

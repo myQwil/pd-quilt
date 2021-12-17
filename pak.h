@@ -1,6 +1,14 @@
 #include "m_pd.h"
 #include <string.h>
 
+#ifndef PAK_FIRST
+#define PAK_FIRST(x) 0
+#endif
+
+#ifndef PAK_INDEX
+#define PAK_INDEX(p) ((p)->idx)
+#endif
+
 typedef struct _pak t_pak;
 
 typedef struct {
@@ -215,7 +223,7 @@ static void pak_pxy_list(t_pak_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
 
 static int pak_a(t_pak *x ,t_symbol *s ,int ac ,t_atom *av ,int j) {
 	t_atom atoms[ac+1];
-	atoms[0] = (t_atom){A_SYMBOL ,{.w_symbol = s}};
+	atoms[0] = (t_atom){.a_type=A_SYMBOL ,.a_w={.w_symbol = s}};
 	memcpy(atoms+1 ,av ,ac * sizeof(t_atom));
 	int result = pak_l(x ,0 ,ac+1 ,atoms ,j);
 	return result;

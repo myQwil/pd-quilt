@@ -48,8 +48,8 @@ static void chrono_lap(t_chrono *x) {
 		laptime = x->laptime;
 		x->laptime = clock_getlogicaltime();  }
 	t_atom lap[] =
-	{	 { A_FLOAT ,{timesince(laptime ,x->unit ,x->samps) + x->lapmore} }
-		,{ A_FLOAT ,{timesince(settime ,x->unit ,x->samps) + x->setmore} }  };
+	{	 { .a_type=A_FLOAT ,.a_w={timesince(laptime ,x->unit ,x->samps) + x->lapmore} }
+		,{ .a_type=A_FLOAT ,.a_w={timesince(settime ,x->unit ,x->samps) + x->setmore} }  };
 	x->lapmore = 0;
 	outlet_list(x->o_lap ,0 ,2 ,lap);
 }
