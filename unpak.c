@@ -39,7 +39,6 @@ void unpak_setup(void) {
 		,A_GIMME ,0);
 	class_addlist     (unpak_class ,unpak_list);
 	class_addanything (unpak_class ,unpak_anything);
-	class_addmethod   (unpak_class ,(t_method)unpak_mute
-		,gensym("mute") ,A_FLOAT ,0);
+	class_addmethod   (unpak_class ,(t_method)unpak_mute ,gensym("mute") ,A_FLOAT ,0);
 	class_sethelpsymbol(unpak_class ,gensym("pak"));
 }

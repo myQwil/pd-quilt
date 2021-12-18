@@ -420,28 +420,16 @@ void ffplay_tilde_setup(void) {
 	class_addfloat    (ffplay_class ,ffplay_float);
 	class_addanything (ffplay_class ,ffplay_anything);
 
-	class_addmethod(ffplay_class ,(t_method)ffplay_dsp
-		,gensym("dsp")    ,A_CANT   ,0);
-	class_addmethod(ffplay_class ,(t_method)ffplay_seek
-		,gensym("seek")   ,A_FLOAT  ,0);
-	class_addmethod(ffplay_class ,(t_method)ffplay_speed
-		,gensym("speed")  ,A_FLOAT  ,0);
-	class_addmethod(ffplay_class ,(t_method)ffplay_info
-		,gensym("info")   ,A_GIMME  ,0);
-	class_addmethod(ffplay_class ,(t_method)ffplay_info
-		,gensym("print")  ,A_GIMME  ,0);
-	class_addmethod(ffplay_class ,(t_method)ffplay_send
-		,gensym("send")   ,A_SYMBOL ,0);
-	class_addmethod(ffplay_class ,(t_method)ffplay_open
-		,gensym("open")   ,A_SYMBOL ,0);
-	class_addmethod(ffplay_class ,(t_method)ffplay_bang
-		,gensym("play")   ,A_NULL);
-	class_addmethod(ffplay_class ,(t_method)ffplay_stop
-		,gensym("stop")   ,A_NULL);
-	class_addmethod(ffplay_class ,(t_method)ffplay_time
-		,gensym("time")   ,A_NULL);
-	class_addmethod(ffplay_class ,(t_method)ffplay_position
-		,gensym("pos")    ,A_NULL);
-	class_addmethod(ffplay_class ,(t_method)ffplay_tracks
-		,gensym("tracks") ,A_NULL);
+	class_addmethod(ffplay_class ,(t_method)ffplay_dsp    ,gensym("dsp")    ,A_CANT   ,0);
+	class_addmethod(ffplay_class ,(t_method)ffplay_seek   ,gensym("seek")   ,A_FLOAT  ,0);
+	class_addmethod(ffplay_class ,(t_method)ffplay_speed  ,gensym("speed")  ,A_FLOAT  ,0);
+	class_addmethod(ffplay_class ,(t_method)ffplay_info   ,gensym("info")   ,A_GIMME  ,0);
+	class_addmethod(ffplay_class ,(t_method)ffplay_info   ,gensym("print")  ,A_GIMME  ,0);
+	class_addmethod(ffplay_class ,(t_method)ffplay_send   ,gensym("send")   ,A_SYMBOL ,0);
+	class_addmethod(ffplay_class ,(t_method)ffplay_open   ,gensym("open")   ,A_SYMBOL ,0);
+	class_addmethod(ffplay_class ,(t_method)ffplay_bang   ,gensym("play")   ,0);
+	class_addmethod(ffplay_class ,(t_method)ffplay_stop   ,gensym("stop")   ,0);
+	class_addmethod(ffplay_class ,(t_method)ffplay_time   ,gensym("time")   ,0);
+	class_addmethod(ffplay_class ,(t_method)ffplay_tracks ,gensym("tracks") ,0);
+	class_addmethod(ffplay_class ,(t_method)ffplay_position ,gensym("pos")  ,0);
 }

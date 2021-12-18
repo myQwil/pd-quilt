@@ -161,10 +161,7 @@ void tabosc2_tilde_setup(void) {
 		,sizeof(t_tabosc2) ,0
 		,A_DEFSYM ,A_DEFFLOAT ,0);
 	CLASS_MAINSIGNALIN(tabosc2_class ,t_tabosc2 ,f);
-	class_addmethod(tabosc2_class ,(t_method)tabosc2_dsp
-		,gensym("dsp") ,A_CANT ,0);
-	class_addmethod(tabosc2_class ,(t_method)tabosc2_set
-		,gensym("set") ,A_SYMBOL ,0);
-	class_addmethod(tabosc2_class ,(t_method)tabosc2_ft1
-		,gensym("ft1") ,A_FLOAT ,0);
+	class_addmethod(tabosc2_class ,(t_method)tabosc2_dsp ,gensym("dsp") ,A_CANT   ,0);
+	class_addmethod(tabosc2_class ,(t_method)tabosc2_set ,gensym("set") ,A_SYMBOL ,0);
+	class_addmethod(tabosc2_class ,(t_method)tabosc2_ft1 ,gensym("ft1") ,A_FLOAT  ,0);
 }

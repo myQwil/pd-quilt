@@ -21,8 +21,8 @@
 #X obj 270 30 cupqb;
 #X msg 270 230 d r 3 f s 8 10;
 #X msg 270 200 65 2 4 5 7 9 11;
-#X msg 50 300 n 5;
-#X msg 50 330 n 6;
+#X msg 50 300 size 5;
+#X msg 50 330 size 6;
 #X msg 30 220 @ d+3;
 #X msg 30 250 @ d-3;
 #X msg 270 300 d r m- f s l- t-;
@@ -67,7 +67,7 @@
 #X obj 360 320 t b f;
 #X obj 310 320 t b f;
 #X obj 260 320 t b f;
-#X msg 270 230 n 5;
+#X msg 270 230 size 5;
 #X obj 310 200 t a b;
 #X obj 330 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
 #fcfcfc #fcfcfc;
@@ -88,7 +88,7 @@
 #X msg 510 380 5;
 #X obj 510 350 t b a;
 #X obj 210 440 cupqb;
-#X msg 210 490 n \$1;
+#X msg 210 490 size \$1;
 #X text 60 510 use all outlets;
 #X text 90 530 on bang;
 #X obj 70 450 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc

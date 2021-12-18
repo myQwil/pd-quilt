@@ -99,14 +99,9 @@ void chrono_setup(void) {
 		,A_GIMME ,0);
 	class_addbang  (chrono_class ,chrono_bang);
 	class_addfloat (chrono_class ,chrono_float);
-	class_addmethod(chrono_class ,(t_method)chrono_bang2
-		,gensym("bang2") ,0);
-	class_addmethod(chrono_class ,(t_method)chrono_pause
-		,gensym("pause") ,0);
-	class_addmethod(chrono_class ,(t_method)chrono_lap
-		,gensym("lap")   ,0);
-	class_addmethod(chrono_class ,(t_method)chrono_push
-		,gensym("push")  ,A_FLOAT ,0);
-	class_addmethod(chrono_class ,(t_method)chrono_tempo
-		,gensym("tempo") ,A_GIMME ,0);
+	class_addmethod(chrono_class ,(t_method)chrono_bang2 ,gensym("bang2") ,0);
+	class_addmethod(chrono_class ,(t_method)chrono_pause ,gensym("pause") ,0);
+	class_addmethod(chrono_class ,(t_method)chrono_lap   ,gensym("lap")   ,0);
+	class_addmethod(chrono_class ,(t_method)chrono_push  ,gensym("push")  ,A_FLOAT ,0);
+	class_addmethod(chrono_class ,(t_method)chrono_tempo ,gensym("tempo") ,A_GIMME ,0);
 }

@@ -102,8 +102,6 @@ void tabread2_tilde_setup(void) {
 		,sizeof(t_tabread2) ,0
 		,A_DEFSYM ,A_DEFFLOAT ,0);
 	CLASS_MAINSIGNALIN(tabread2_class ,t_tabread2 ,f);
-	class_addmethod(tabread2_class ,(t_method)tabread2_dsp
-		,gensym("dsp") ,A_CANT ,0);
-	class_addmethod(tabread2_class ,(t_method)tabread2_set
-		,gensym("set") ,A_SYMBOL ,0);
+	class_addmethod(tabread2_class ,(t_method)tabread2_dsp ,gensym("dsp") ,A_CANT   ,0);
+	class_addmethod(tabread2_class ,(t_method)tabread2_set ,gensym("set") ,A_SYMBOL ,0);
 }

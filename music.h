@@ -288,26 +288,15 @@ static t_class *class_music
 	class_addlist    (mclass ,music_list);
 	class_addanything(mclass ,music_anything);
 
-	class_addmethod(mclass ,(t_method)music_ptr
-		,gensym("ptr")    ,A_DEFSYM ,0);
-	class_addmethod(mclass ,(t_method)music_peek
-		,gensym("peek")   ,A_DEFSYM ,0);
-	class_addmethod(mclass ,(t_method)music_set
-		,gensym("set")    ,A_GIMME  ,0);
-	class_addmethod(mclass ,(t_method)music_size
-		,gensym("n")      ,A_FLOAT  ,0);
-	class_addmethod(mclass ,(t_method)music_size
-		,gensym("size")   ,A_FLOAT  ,0);
-	class_addmethod(mclass ,(t_method)music_strict
-		,gensym("strict") ,A_FLOAT  ,0);
-	class_addmethod(mclass ,(t_method)music_octave
-		,gensym("oct")    ,A_FLOAT  ,0);
-	class_addmethod(mclass ,(t_method)music_ref
-		,gensym("ref")    ,A_FLOAT  ,0);
-	class_addmethod(mclass ,(t_method)music_tet
-		,gensym("tet")    ,A_FLOAT  ,0);
-	class_addmethod(mclass ,(t_method)music_octet
-		,gensym("ot")     ,A_FLOAT  ,0);
+	class_addmethod(mclass ,(t_method)music_ptr    ,gensym("ptr")    ,A_DEFSYM ,0);
+	class_addmethod(mclass ,(t_method)music_peek   ,gensym("peek")   ,A_DEFSYM ,0);
+	class_addmethod(mclass ,(t_method)music_set    ,gensym("set")    ,A_GIMME  ,0);
+	class_addmethod(mclass ,(t_method)music_size   ,gensym("size")   ,A_FLOAT  ,0);
+	class_addmethod(mclass ,(t_method)music_strict ,gensym("strict") ,A_FLOAT  ,0);
+	class_addmethod(mclass ,(t_method)music_octave ,gensym("oct")    ,A_FLOAT  ,0);
+	class_addmethod(mclass ,(t_method)music_ref    ,gensym("ref")    ,A_FLOAT  ,0);
+	class_addmethod(mclass ,(t_method)music_tet    ,gensym("tet")    ,A_FLOAT  ,0);
+	class_addmethod(mclass ,(t_method)music_octet  ,gensym("ot")     ,A_FLOAT  ,0);
 
 	return mclass;
 }

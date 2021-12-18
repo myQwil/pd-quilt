@@ -37,12 +37,9 @@ static t_tone *tone_new(t_class *cl ,int argc ,t_atom *argv) {
 static t_class *class_tone(t_symbol *s ,t_newmethod newm) {
 	t_class *nclass = class_new(s ,newm ,0 ,sizeof(t_tone) ,0 ,A_GIMME ,0);
 	class_addlist(nclass ,tone_list);
-	class_addmethod(nclass ,(t_method)tone_ref
-		,gensym("ref") ,A_FLOAT ,0);
-	class_addmethod(nclass ,(t_method)tone_tet
-		,gensym("tet") ,A_FLOAT ,0);
-	class_addmethod(nclass ,(t_method)tone_list
-		,gensym("set") ,A_GIMME ,0);
+	class_addmethod(nclass ,(t_method)tone_ref  ,gensym("ref") ,A_FLOAT ,0);
+	class_addmethod(nclass ,(t_method)tone_tet  ,gensym("tet") ,A_FLOAT ,0);
+	class_addmethod(nclass ,(t_method)tone_list ,gensym("set") ,A_GIMME ,0);
 
 	return nclass;
 }

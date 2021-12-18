@@ -144,18 +144,11 @@ void rand_setup(void) {
 	class_addlist    (rand_class ,rand_list);
 	class_addanything(rand_class ,rand_anything);
 
-	class_addmethod(rand_class ,(t_method)rng_seed
-		,gensym("seed")  ,A_GIMME  ,0);
-	class_addmethod(rand_class ,(t_method)rng_state
-		,gensym("state") ,A_DEFSYM ,0);
-	class_addmethod(rand_class ,(t_method)rand_peek
-		,gensym("peek")  ,A_DEFSYM ,0);
-	class_addmethod(rand_class ,(t_method)rand_ptr
-		,gensym("ptr")   ,A_DEFSYM ,0);
-	class_addmethod(rand_class ,(t_method)rand_nop
-		,gensym("nop")   ,A_FLOAT  ,0);
-	class_addmethod(rand_class ,(t_method)rand_lst
-		,gensym("lst")   ,A_FLOAT  ,0);
-	class_addmethod(rand_class ,(t_method)rand_size
-		,gensym("n")     ,A_FLOAT  ,0);
+	class_addmethod(rand_class ,(t_method)rng_seed  ,gensym("seed")  ,A_GIMME  ,0);
+	class_addmethod(rand_class ,(t_method)rng_state ,gensym("state") ,A_DEFSYM ,0);
+	class_addmethod(rand_class ,(t_method)rand_peek ,gensym("peek")  ,A_DEFSYM ,0);
+	class_addmethod(rand_class ,(t_method)rand_ptr  ,gensym("ptr")   ,A_DEFSYM ,0);
+	class_addmethod(rand_class ,(t_method)rand_nop  ,gensym("nop")   ,A_FLOAT  ,0);
+	class_addmethod(rand_class ,(t_method)rand_lst  ,gensym("lst")   ,A_FLOAT  ,0);
+	class_addmethod(rand_class ,(t_method)rand_size ,gensym("size")  ,A_FLOAT  ,0);
 }

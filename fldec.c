@@ -50,9 +50,7 @@ void fldec_setup(void) {
 		,A_DEFFLOAT ,0);
 	class_addbang  (fldec_class ,fldec_bang);
 	class_addfloat (fldec_class ,fldec_float);
-	class_addmethod(fldec_class ,(t_method)fldec_set
-		,gensym("set")  ,A_FLOAT  ,0);
-	class_addmethod(fldec_class ,(t_method)fldec_peek
-		,gensym("peek") ,A_DEFSYM ,0);
+	class_addmethod(fldec_class ,(t_method)fldec_set  ,gensym("set")  ,A_FLOAT  ,0);
+	class_addmethod(fldec_class ,(t_method)fldec_peek ,gensym("peek") ,A_DEFSYM ,0);
 	class_sethelpsymbol(fldec_class ,gensym("flenc"));
 }

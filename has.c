@@ -44,6 +44,5 @@ void has_setup(void) {
 		,A_GIMME ,0);
 	class_addbang(has_class ,has_bang);
 	class_addlist(has_class ,has_list);
-	class_addmethod(has_class ,(t_method)has_set
-		,gensym("set") ,A_GIMME ,0);
+	class_addmethod(has_class ,(t_method)has_set ,gensym("set") ,A_GIMME ,0);
 }

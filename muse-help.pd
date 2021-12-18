@@ -53,7 +53,7 @@
 #X text 310 180 default args: 69 7;
 #X obj 260 130 cupqb;
 #N canvas 880 200 690 530 commands 0;
-#X msg 30 90 n \$1;
+#X msg 30 90 size \$1;
 #X obj 400 140 pack;
 #X obj 450 80 cupqb;
 #X obj 400 80 cupqb;

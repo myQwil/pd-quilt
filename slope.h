@@ -76,14 +76,10 @@ static t_slope *slope_new(t_class *cl ,int ac ,t_atom *av) {
 
 static t_class *slope_setup(t_symbol *s ,t_newmethod newm) {
 	t_class *xclass = class_new(s ,newm ,0 ,sizeof(t_slope) ,0 ,A_GIMME ,0);
-	class_addmethod(xclass ,(t_method)slope_min
-		,gensym("min") ,A_FLOAT ,0);
-	class_addmethod(xclass ,(t_method)slope_max
-		,gensym("max") ,A_FLOAT ,0);
-	class_addmethod(xclass ,(t_method)slope_run
-		,gensym("run") ,A_FLOAT ,0);
-	class_addmethod(xclass ,(t_method)slope_log
-		,gensym("log") ,A_FLOAT ,0);
+	class_addmethod(xclass ,(t_method)slope_min ,gensym("min") ,A_FLOAT ,0);
+	class_addmethod(xclass ,(t_method)slope_max ,gensym("max") ,A_FLOAT ,0);
+	class_addmethod(xclass ,(t_method)slope_run ,gensym("run") ,A_FLOAT ,0);
+	class_addmethod(xclass ,(t_method)slope_log ,gensym("log") ,A_FLOAT ,0);
 
 	return xclass;
 }
