@@ -11,6 +11,8 @@ typedef struct {
 } t_rng;
 
 static unsigned rng_time(void) {
+	// multiplying by 2 gives us a new value every second
+	// rather than every other second
 	unsigned thym = (time(0) * 2) % UINT_LIMIT;
 	return (thym|1); // odd numbers only
 }
