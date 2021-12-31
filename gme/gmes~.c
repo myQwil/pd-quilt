@@ -4,7 +4,7 @@
 /* -------------------------- gmes~ ------------------------------ */
 static t_class *gmes_tilde_class;
 
-static void gmes_tilde_dsp(t_gmepd *x ,t_signal **sp) {
+static void gmes_tilde_dsp(t_gme *x ,t_signal **sp) {
 	dsp_add(gmepd_perform ,NCH+2 ,x
 		,sp[0]->s_vec  ,sp[1]->s_vec  ,sp[2]->s_vec  ,sp[3]->s_vec
 		,sp[4]->s_vec  ,sp[5]->s_vec  ,sp[6]->s_vec  ,sp[7]->s_vec
