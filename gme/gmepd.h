@@ -366,9 +366,9 @@ static t_class *gmepd_setup(t_symbol *s ,t_newmethod newm) {
 	class_addmethod(gmeclass ,(t_method)gmepd_send   ,gensym("send")   ,A_SYMBOL   ,0);
 	class_addmethod(gmeclass ,(t_method)gmepd_open   ,gensym("open")   ,A_SYMBOL   ,0);
 	class_addmethod(gmeclass ,(t_method)gmepd_track  ,gensym("track")  ,A_GIMME    ,0);
-	class_addmethod(gmeclass ,(t_method)gmepd_tracks ,gensym("tracks") ,0);
-	class_addmethod(gmeclass ,(t_method)gmepd_bang   ,gensym("play")   ,0);
-	class_addmethod(gmeclass ,(t_method)gmepd_stop   ,gensym("stop")   ,0);
+	class_addmethod(gmeclass ,(t_method)gmepd_tracks ,gensym("tracks") ,A_NULL);
+	class_addmethod(gmeclass ,(t_method)gmepd_bang   ,gensym("play")   ,A_NULL);
+	class_addmethod(gmeclass ,(t_method)gmepd_stop   ,gensym("stop")   ,A_NULL);
 
 	return gmeclass;
 }

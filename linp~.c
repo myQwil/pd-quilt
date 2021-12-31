@@ -132,6 +132,6 @@ void linp_tilde_setup(void) {
 		,0);
 	class_addfloat(linp_tilde_class ,(t_method)linp_tilde_float);
 	class_addmethod(linp_tilde_class ,(t_method)linp_tilde_dsp  ,gensym("dsp") ,A_CANT ,0);
-	class_addmethod(linp_tilde_class ,(t_method)linp_tilde_stop  ,gensym("stop")  ,0);
-	class_addmethod(linp_tilde_class ,(t_method)linp_tilde_pause ,gensym("pause") ,0);
+	class_addmethod(linp_tilde_class ,(t_method)linp_tilde_stop  ,gensym("stop")  ,A_NULL);
+	class_addmethod(linp_tilde_class ,(t_method)linp_tilde_pause ,gensym("pause") ,A_NULL);
 }

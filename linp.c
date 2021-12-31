@@ -129,6 +129,6 @@ void linp_setup(void) {
 	class_addfloat(linp_class ,(t_method)linp_float);
 	class_addmethod(linp_class ,(t_method)linp_ft1   ,gensym("ft1")   ,A_FLOAT ,0);
 	class_addmethod(linp_class ,(t_method)linp_set   ,gensym("set")   ,A_FLOAT ,0);
-	class_addmethod(linp_class ,(t_method)linp_stop  ,gensym("stop")  ,0);
-	class_addmethod(linp_class ,(t_method)linp_pause ,gensym("pause") ,0);
+	class_addmethod(linp_class ,(t_method)linp_stop  ,gensym("stop")  ,A_NULL);
+	class_addmethod(linp_class ,(t_method)linp_pause ,gensym("pause") ,A_NULL);
 }
