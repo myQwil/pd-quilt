@@ -123,7 +123,7 @@
 #X obj 350 200 * 1.033;
 #X obj 50 240 cupqb;
 #X obj 110 240 cupqb;
-#X text 98 242 :;
+#X text 100 240 :;
 #X msg 350 50 \; pd dsp \$1;
 #X msg 310 140 bang;
 #X msg 350 170 1;

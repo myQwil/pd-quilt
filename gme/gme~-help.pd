@@ -5,14 +5,14 @@
 #X array \$0gme 128 float 2;
 #X coords 0 1 128 -1 128 120 1 0 0;
 #X restore 370 170 graph;
-#X obj 30 440 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-0 1;
-#X floatatom 90 430 0 0 0 0 - - -;
+#X obj 30 440 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc 0 1;
+#X floatatom 90 430 0 0 0 0 - - - 0;
 #X obj 50 340 cupqb 1;
 #X obj 110 210 openpanel;
 #X obj 230 510 *~;
-#X obj 220 240 bng 15 250 50 0 empty empty play/pause 19 7 0 11 -1
--262144 -262144;
+#X obj 220 240 bng 15 250 50 0 empty empty play/pause 19 7 0 11 #000000
+#fcfcfc #fcfcfc;
 #X msg 230 260 stop;
 #X text 100 370 tracks;
 #X obj 200 410 gme~;
@@ -20,16 +20,16 @@
 #X obj 160 570 *~;
 #X obj 270 510 cos~;
 #X obj 270 570 *~;
-#X obj 60 320 bng 15 250 50 0 empty empty restart 17 7 0 10 -1 -262144
--262144;
-#X obj 370 440 hsl 128 17 0.001 1 1 0 empty empty vol 25 9 0 12 -1
--262144 -262144 9200 1;
-#X obj 370 510 hsl 128 17 -0.001 -1 1 0 empty empty cos 25 9 0 12 -1
--262144 -262144 0 1;
-#X floatatom 380 470 0 0 0 0 - - -;
-#X floatatom 380 540 0 0 0 0 - - -;
-#X obj 250 30 cnv 15 60 24 empty empty gme~ 4 12 0 18 -1 -262144 0
-;
+#X obj 60 320 bng 15 250 50 0 empty empty restart 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
+#X obj 370 440 hsl 128 17 0.001 1 1 0 empty empty vol 25 9 0 12 #000000
+#fcfcfc #fcfcfc 0 1;
+#X obj 370 510 hsl 128 17 -0.001 -1 1 0 empty empty cos 25 9 0 12 #000000
+#fcfcfc #fcfcfc 0 1;
+#X floatatom 380 470 0 0 0 0 - - - 0;
+#X floatatom 380 540 0 0 0 0 - - - 0;
+#X obj 250 30 cnv 15 60 24 empty empty gme~ 4 12 0 18 #000000 #fcfcfc
+0;
 #X obj 50 500 *~ 0.5;
 #X obj 230 450 *~;
 #X obj 200 450 *~;
@@ -48,8 +48,8 @@
 #X obj 90 270 delp;
 #X obj 230 280 delp;
 #X obj 220 370 linp~;
-#X floatatom 330 60 0 0 0 0 - - -;
-#X floatatom 330 90 0 0 0 0 - - -;
+#X floatatom 330 60 0 0 0 0 - - - 0;
+#X floatatom 330 90 0 0 0 0 - - - 0;
 #N canvas 760 360 450 300 defaults 0;
 #X obj 120 60 inlet;
 #X obj 240 60 inlet;
@@ -73,8 +73,8 @@
 #X msg 200 280 1, f 2;
 #X obj 200 460 *~;
 #X obj 200 430 line~;
-#X obj 80 370 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-1 1;
+#X obj 80 370 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc 0 1;
 #X msg 140 300 0, f 2;
 #X msg 140 340 set \$1;
 #X obj 80 400 pack;
@@ -82,15 +82,15 @@
 #X obj 30 190 outlet;
 #X text 280 380 pause/stop delay;
 #X obj 290 400 loadbang;
-#X floatatom 290 460 0 0 0 0 - - -;
+#X floatatom 290 460 0 0 0 0 - - - 0;
 #X obj 180 100 del;
-#X obj 90 340 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-0 1;
+#X obj 90 340 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc 0 1;
 #X obj 290 490 s \$0ps;
 #X obj 110 370 r \$0ps;
 #X msg 290 430 15;
-#X obj 230 310 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
+#X obj 230 310 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
 #N canvas 300 400 450 300 display 0;
 #X obj 140 30 inlet;
 #X obj 200 30 inlet;
@@ -124,8 +124,8 @@
 #X connect 14 0 7 0;
 #X restore 310 310 pd display;
 #N canvas 580 190 450 300 pause 0;
-#X obj 150 110 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-1 1;
+#X obj 150 110 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc 0 1;
 #X obj 150 190 t b f;
 #X obj 150 220 del;
 #X obj 150 130 == 0;
@@ -217,7 +217,7 @@ by Shay Green and maintained by Michael Pyne at https://bitbucket.org/mpyne/game
 Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 \, AP \, SPC \, RSN \, VGM/VGZ;
 #X obj 110 160 bng 15 250 50 0 empty empty previous_directory 19 7
-0 11 -1 -262144 -262144;
+0 11 #000000 #fcfcfc #fcfcfc;
 #X msg 120 180 symbol ~/Music/Games;
 #X obj 320 470 zp~ 15;
 #X obj 320 540 zp~ 15;
@@ -245,8 +245,8 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #N canvas 800 530 450 300 route 0;
 #X obj 50 30 inlet;
 #X obj 110 130 s \$0l;
-#X floatatom 70 100 0 0 0 0 - - -;
-#X floatatom 300 100 0 0 0 0 - - -;
+#X floatatom 70 100 0 0 0 0 - - - 0;
+#X floatatom 300 100 0 0 0 0 - - - 0;
 #X obj 50 130 s \$0n;
 #X obj 190 230 s \$0pass;
 #X obj 160 130 sel;
@@ -273,7 +273,7 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X connect 13 5 10 0;
 #X connect 14 0 5 0;
 #X restore 270 440 pd route;
-#X symbolatom 290 290 0 0 0 0 - - -;
+#X symbolatom 290 290 0 0 0 0 - - - 0;
 #X obj 140 270 r \$0pass;
 #N canvas 940 90 560 350 muting_commands 0;
 #X text 130 160 get;
@@ -285,7 +285,7 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X msg 260 230 1, f 2;
 #X msg 80 160 mask;
 #X text 130 70 mask helper;
-#X floatatom 20 60 0 0 0 0 - - -;
+#X floatatom 20 60 0 0 0 0 - - - 0;
 #X obj 110 270 outlet;
 #X msg 290 230 2, f 2;
 #X msg 320 230 3, f 2;
@@ -340,61 +340,53 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X connect 32 0 31 0;
 #X connect 34 0 10 0;
 #X restore 350 310 pd muting_commands;
-#N canvas 1000 250 450 300 misc_commands 0;
-#X msg 210 190 tempo \$1;
-#X floatatom 210 130 0 0 400 0 - - -;
-#X floatatom 320 100 0 0 0 0 - - -;
-#X obj 320 130 * 100;
-#X obj 300 160 f;
-#X obj 300 140 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
-#X obj 210 160 * 0.01;
-#X floatatom 110 140 0 0 0 0 - - -;
-#X floatatom 210 100 0 5 2000 0 - - -;
-#X obj 210 40 loadbang;
-#X msg 210 70 100;
-#X obj 210 240 outlet;
-#X obj 110 170 * 0.01;
-#X msg 80 200 speed \$1;
+#N canvas 1210 480 450 300 misc_commands 0;
+#X msg 210 200 tempo \$1;
+#X floatatom 210 140 0 0 400 0 - - - 0;
+#X floatatom 320 110 0 0 0 0 - - - 0;
+#X obj 320 140 * 100;
+#X obj 300 170 f;
+#X obj 300 150 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
+#X floatatom 120 140 0 0 0 0 - - - 0;
+#X floatatom 210 90 0 5 2000 0 - - - 0;
+#X obj 210 30 loadbang;
+#X obj 210 250 outlet;
+#X msg 120 200 speed \$1;
 #N canvas 1000 610 450 300 pitch 0;
 #X obj 180 70 inlet;
 #X obj 100 240 outlet;
 #X obj 180 240 outlet;
-#X floatatom 100 210 0 0 0 0 - - -;
-#X floatatom 180 210 0 0 0 0 - - -;
 #X obj 180 180 @pow 2;
 #X obj 100 180 @pow 2;
 #X obj 100 150 / 12;
 #X obj 180 150 / -12;
-#X connect 0 0 7 0;
-#X connect 0 0 8 0;
-#X connect 3 0 1 0;
-#X connect 4 0 2 0;
+#X connect 0 0 5 0;
+#X connect 0 0 6 0;
+#X connect 3 0 2 0;
+#X connect 4 0 1 0;
 #X connect 5 0 4 0;
 #X connect 6 0 3 0;
-#X connect 7 0 6 0;
-#X connect 8 0 5 0;
-#X restore 100 100 pd pitch;
-#X obj 100 40 cupqb;
-#X msg 300 190 seek \$1;
-#X connect 0 0 11 0;
-#X connect 1 0 6 0;
+#X restore 120 90 pd pitch;
+#X obj 120 30 cupqb;
+#X msg 300 200 seek \$1;
+#X msg 210 60 1;
+#X connect 0 0 9 0;
+#X connect 1 0 0 0;
 #X connect 2 0 3 0;
 #X connect 3 0 4 1;
-#X connect 4 0 16 0;
+#X connect 4 0 13 0;
 #X connect 5 0 4 0;
-#X connect 6 0 0 0;
-#X connect 7 0 12 0;
-#X connect 8 0 7 0;
-#X connect 8 0 1 0;
-#X connect 9 0 10 0;
-#X connect 10 0 8 0;
-#X connect 12 0 13 0;
-#X connect 13 0 11 0;
-#X connect 14 0 13 0;
-#X connect 14 1 0 0;
-#X connect 15 0 14 0;
-#X connect 16 0 11 0;
+#X connect 6 0 10 0;
+#X connect 7 0 1 0;
+#X connect 7 0 6 0;
+#X connect 8 0 14 0;
+#X connect 10 0 9 0;
+#X connect 11 0 6 0;
+#X connect 11 1 1 0;
+#X connect 12 0 11 0;
+#X connect 13 0 9 0;
+#X connect 14 0 7 0;
 #X restore 370 340 pd misc_commands;
 #N canvas 1000 380 480 490 info_msgs 0;
 #X obj 50 440 outlet;

@@ -11,12 +11,20 @@ Shay Green <gblargg@gmail.com>
 #include "m_pd.h"
 #include <gme.h>
 #include <string.h>
+#include <samplerate.h>
 
 #ifndef NCH
 #define NCH 2
 #endif
 
-const int mask_size = 8;
+#define FRAMES 16
+
+enum { buf_size  = NCH * FRAMES };
+enum { mask_size = 8 };
+
+static const double frames = FRAMES;
+static const double inv_frames = 1. / FRAMES;
+static const float short_limit = 0x8000;
 
 static gme_err_t hnd_err( const char *str ) {
 	if (str) post("Error: %s" ,str);
@@ -29,10 +37,13 @@ typedef struct {
 	Music_Emu *emu;   /* emulator object */
 	Music_Emu *info;  /* info-only emu fallback */
 	t_symbol *path;   /* path to the most recently read file */
+	SRC_STATE *state; /* resampler state */
+	SRC_DATA data;    /* resampler data */
+	float in[buf_size];  /* audio input buffer */
+	float out[buf_size]; /* audio output buffer */
+	double tempo;     /* current tempo */
 	int track;        /* current track number */
 	byte mask;        /* muting mask */
-	double tempo;     /* current tempo */
-	double speed;     /* current speed */
 	unsigned read:1;  /* when a file has been read but not yet played */
 	unsigned open:1;  /* when a request for playback is made */
 	unsigned stop:1;  /* flag to start from beginning on next playback */
@@ -86,27 +97,47 @@ static t_int *gmepd_perform(t_int *w) {
 
 	if (x->open)
 	{	gme_delete(x->emu); x->emu = NULL;
-		if (!hnd_err(gme_open_file(xpath ,&x->emu ,sys_getsr() ,NCH>2)))
-		{	gmepd_m3u(x ,x->emu);
-			gme_ignore_silence (x->emu ,1        );
-			gme_mute_voices    (x->emu ,x->mask  );
-			gme_set_tempo      (x->emu ,x->tempo );
-			gme_set_speed      (x->emu ,x->speed );
-			if (x->track < 1 || x->track > gme_track_count(x->emu))
+		if (!hnd_err(gme_open_file(xpath ,&x->emu ,sys_getsr() ,NCH > 2)))
+		{	Music_Emu *emu = x->emu;
+			gmepd_m3u(x ,emu);
+			gme_ignore_silence ( emu ,1        );
+			gme_mute_voices    ( emu ,x->mask  );
+			gme_set_tempo      ( emu ,x->tempo );
+			if (x->track < 1 || x->track > gme_track_count(emu))
 				x->track = 1;
 			gmepd_start(x);  }
 		x->open = x->read = 0;  }
 
 	if (x->emu && x->play)
-	{	int16_t buf[NCH];
+	{	SRC_DATA *data = &x->data;
+		float *out = data->data_out;
 		while (n--)
-		{	hnd_err(gme_play(x->emu ,NCH ,buf));
-			for (int i=NCH; i--;)
-				*outs[i]++ = buf[i] / (t_sample)32768;  }  }
-	else
-		while (n--)
-			for (int i=NCH; i--;)
-				*outs[i]++ = 0;
+		{	if (data->output_frames_gen)
+			{	sound:
+				for (int i = NCH; i--;)
+					*outs[i]++ = out[i];
+				out += NCH;
+				data->output_frames_gen--;
+				continue;  }
+
+			if (!data->input_frames)
+			{	short buf[buf_size];
+				float *in = x->in;
+				hnd_err(gme_play(x->emu ,buf_size ,buf));
+				for (int i = buf_size; i--;)
+					in[i] = buf[i] / short_limit;
+				data->input_frames = FRAMES;
+				data->data_in = x->in;  }
+
+			data->data_out = out = x->out;
+			src_process(x->state, data);
+			data->data_in += data->input_frames_used * NCH;
+			data->input_frames -= data->input_frames_used;
+			goto sound;  }
+		data->data_out = out;  }
+	else while (n--)
+		for (int i = NCH; i--;)
+			*outs[i]++ = 0;
 	return (w+NCH+3);
 }
 
@@ -278,8 +309,8 @@ static void gmepd_tempo(t_gme *x ,t_float f) {
 }
 
 static void gmepd_speed(t_gme *x ,t_float f) {
-	x->speed = f;
-	if (x->emu) gme_set_speed(x->emu ,x->speed);
+	f = (f > frames ? frames : (f < inv_frames ? inv_frames : f));
+	x->data.src_ratio = 1./f;
 }
 
 static byte domask(byte mask ,int ac ,t_atom *av) {
@@ -321,16 +352,27 @@ static void *gmepd_new(t_class *gmeclass ,t_symbol *s ,int ac ,t_atom *av) {
 	while (i--) outlet_new(&x->obj ,&s_signal);
 	x->o_meta = outlet_new(&x->obj ,0);
 	if (ac) gmepd_solo(x ,NULL ,ac ,av);
-	x->read = x->open = x->stop = x->play = 0;
-	x->track = x->mask = 0;
 	x->path = gensym("no track loaded");
-	x->tempo = x->speed = 1.;
+
+	int err;
+	if ((x->state = src_new(SRC_LINEAR ,NCH ,&err)) == NULL)
+		printf ("\n\nError : src_new() failed : %s.\n\n" ,src_strerror(err)) ;
+	SRC_DATA *data = &x->data;
+	data->data_out = x->out;
+	data->output_frames = FRAMES;
+	data->output_frames_gen = 0;
+	data->src_ratio = 1.;
+
+	x->tempo = 1.;
+	x->track = x->mask = 0;
+	x->read = x->open = x->stop = x->play = 0;
 	return (x);
 }
 
 static void gmepd_free(t_gme *x) {
 	gme_delete(x->emu);
 	gme_delete(x->info);
+	src_delete(x->state);
 }
 
 static t_class *gmepd_setup(t_symbol *s ,t_newmethod newm) {

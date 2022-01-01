@@ -58,9 +58,9 @@ static void ffplay_position(t_ffplay *x) {
 	outlet_anything(x->o_meta ,gensym("pos") ,1 ,&pos);
 }
 
-static int speed_limit(t_float speed) {
-	if (speed < 0.1)
-		speed = 0.1;
+static int speed_to_srate(t_float speed) {
+	if (speed < 0.01)
+		speed = 0.01;
 	speed = sys_getsr() / speed;
 	ufloat uf = {speed};
 	int d = speed;
@@ -101,34 +101,35 @@ static t_int *ffplay_perform(t_int *w) {
 	int n = (int)w[2];
 
 	if (x->open && x->play)
-	{	unsigned pos = x->pos;
+	{	t_sample **buf = x->buf;
+		unsigned pos = x->pos;
 		while (n--)
-		{	if (x->siz)
-			{	sound:
-				for (int i = nch; i--;)
-					*outs[i]++ = x->buf[i][pos];
+		{	cont:
+			if (x->siz)
+			{	for (int i = nch; i--;)
+					*outs[i]++ = buf[i][pos];
 				if (++pos >= x->siz)
-				{	x->siz = swr_convert(x->swr ,(uint8_t**)&x->buf ,BUFSIZE ,0 ,0);
+				{	x->siz = swr_convert(x->swr ,(uint8_t**)buf ,BUFSIZE ,0 ,0);
 					pos = 0;  }
 				continue;  }
 			while (av_read_frame(x->ic ,x->pkt) >= 0)
 			{	if (x->pkt->stream_index == x->idx)
 				{	if (avcodec_send_packet(x->ctx ,x->pkt) < 0
-					|| avcodec_receive_frame(x->ctx ,x->frm) < 0)
+					 || avcodec_receive_frame(x->ctx ,x->frm) < 0)
 						continue;
 					if (x->sped)
 					{	int64_t layout_in =
 							av_get_default_channel_layout(x->ctx->channels);
 						swr_alloc_set_opts(x->swr
-							,x->layout ,AV_SAMPLE_FMT_FLTP ,speed_limit(x->speed)
+							,x->layout ,AV_SAMPLE_FMT_FLTP ,speed_to_srate(x->speed)
 							,layout_in ,x->ctx->sample_fmt ,x->ctx->sample_rate
 							,0 ,NULL);
 						swr_init(x->swr);
 						x->sped = 0;  }
-					x->siz = swr_convert(x->swr ,(uint8_t**)&x->buf ,BUFSIZE
-						,(const uint8_t **)x->frm->extended_data ,x->frm->nb_samples);
+					x->siz = swr_convert(x->swr ,(uint8_t**)buf ,BUFSIZE
+						,(const uint8_t**)x->frm->extended_data ,x->frm->nb_samples);
 					av_packet_unref(x->pkt);
-					goto sound;  }
+					goto cont;  }
 				av_packet_unref(x->pkt);  }
 
 			// reached the end
@@ -187,7 +188,7 @@ static err_t ffplay_load(t_ffplay *x ,const char *fname) {
 	swr_free(&x->swr);
 	int64_t layout_in = av_get_default_channel_layout(x->ctx->channels);
 	x->swr = swr_alloc_set_opts(x->swr
-		,x->layout ,AV_SAMPLE_FMT_FLTP ,speed_limit(x->speed)
+		,x->layout ,AV_SAMPLE_FMT_FLTP ,speed_to_srate(x->speed)
 		,layout_in ,x->ctx->sample_fmt ,x->ctx->sample_rate
 		,0 ,NULL);
 	if (swr_init(x->swr) < 0)
@@ -359,7 +360,7 @@ static void ffplay_float(t_ffplay *x ,t_float f) {
 		if (err_msg) post("Error: %s." ,err_msg);
 		x->play = !err_msg;  }
 	else
-	{	x->play = d = 0;
+	{	x->play = 0;
 		ffplay_seek(x ,0);  }
 	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
 	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);

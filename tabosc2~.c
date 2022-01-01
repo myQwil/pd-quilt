@@ -92,7 +92,7 @@ static t_int *tabosc2_perform(t_int *w) {
 			a = addr[1].w_float;
 			b = addr[2].w_float;
 			frac = (frac - edge) * x->k;
-			*out++ = a * (1. - frac) + b * frac;  }  }
+			*out++ = frac * b + (1.-frac) * a;  }  }
 
 	tf.d = UNITBIT32 * fnpoints;
 	normhipart = tf.i[HIOFFSET];

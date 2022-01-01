@@ -50,7 +50,7 @@ static t_int *tabread2_perform(t_int *w) {
 			a = wp[0].w_float;
 			b = wp[1].w_float;
 			frac = (frac - edge) * x->k;
-			*out++ = a * (1. - frac) + b * frac;  }  }
+			*out++ = frac * b + (1.-frac) * a;  }  }
 	return (w+6);
  zero:
 	while (n--) *out++ = 0;

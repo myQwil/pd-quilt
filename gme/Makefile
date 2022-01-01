@@ -10,18 +10,11 @@ suppress-wunused = yes
 warn.flags = -Wall -Winline -Wstrict-aliasing -Wno-int-to-pointer-cast
 
 cflags = -I"game-music-emu/gme"
-ldlibs = game-music-emu/build/gme/libgme.a
 
+ldlibs = -lsamplerate game-music-emu/build/gme/libgme.a
 define forWindows
-  ldlibs += -Wl,-Bstatic -lz -lunrar
+  ldlibs += -Wl,-Bstatic
 endef
-
-define forLinux
-  ldlibs += -lz -lunrar
-endef
-
-define forDarwin
-  ldlibs += -lz -lunrar
-endef
+ldlibs += -lz -lunrar
 
 include ../pd-lib-builder/Makefile.pdlibbuilder
