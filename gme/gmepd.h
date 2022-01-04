@@ -78,9 +78,10 @@ static void gmepd_start(t_gme *x) {
 }
 
 static t_int *gmepd_perform(t_int *w) {
-	t_gme *x = (t_gme *)(w[1]);
+	t_gme *x = (t_gme*)(w[1]);
 	t_sample *outs[NCH];
-	for (int i=NCH; i--;) outs[i] = (t_sample *)(w[i+2]);
+	for (int i=NCH; i--;)
+		outs[i] = (t_sample*)(w[i+2]);
 	int n = (int)(w[NCH+2]);
 
 	if (x->open)
@@ -315,7 +316,7 @@ static void gmepd_mask(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void *gmepd_new(t_class *gmeclass ,t_symbol *s ,int ac ,t_atom *av) {
-	t_gme *x = (t_gme *)pd_new(gmeclass);
+	t_gme *x = (t_gme*)pd_new(gmeclass);
 	int i = NCH;
 	while (i--) outlet_new(&x->obj ,&s_signal);
 	x->o_meta = outlet_new(&x->obj ,0);

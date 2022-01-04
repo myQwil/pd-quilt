@@ -56,20 +56,20 @@ static void is_set(t_is *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void *is_new(t_symbol *s) {
-	t_is *x = (t_is *)pd_new(is_class);
-	t_is_pxy *p = (t_is_pxy *)pd_new(is_proxy);
+	t_is *x = (t_is*)pd_new(is_class);
+	t_is_pxy *p = (t_is_pxy*)pd_new(is_proxy);
 
 	x->p = p;
 	p->x = x;
 	x->type = (*s->s_name) ? is_check(s) : &s_float;
 
-	inlet_new((t_object *)x ,(t_pd *)p ,0 ,0);
+	inlet_new((t_object*)x ,(t_pd*)p ,0 ,0);
 	outlet_new(&x->obj ,&s_float);
 	return (x);
 }
 
 static void is_free(t_is *x) {
-	pd_free((t_pd *)x->p);
+	pd_free((t_pd*)x->p);
 }
 
 void is_setup(void) {

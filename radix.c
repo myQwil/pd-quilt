@@ -18,7 +18,7 @@ t_widgetbehavior radix_widgetbehavior;
 
 
 static void radix_borderwidth(t_radix *x ,t_float zoom) {
-	t_radixtcl *y = (t_radixtcl *)x;
+	t_radixtcl *y = (t_radixtcl*)x;
 	int n = x->x_numwidth ? x->x_numwidth : x->x_buflen;
   #ifdef __APPLE__
 	x->x_gui.x_w = n * y->x_fontwidth * zoom;
@@ -32,7 +32,7 @@ static void radix_zoom(t_radix *x ,t_float zoom) {
 	t_iemgui *gui = &x->x_gui;
 	int oldzoom = gui->x_glist->gl_zoom;
 	if (oldzoom < 1) oldzoom = 1;
-	gui->x_h = ((t_radixtcl *)x)->x_zh * zoom - (zoom-1)*2;
+	gui->x_h = ((t_radixtcl*)x)->x_zh * zoom - (zoom-1)*2;
 	radix_borderwidth(x ,zoom);
 }
 
@@ -94,7 +94,7 @@ static void radix_calc_fontwidth(t_radix *x) {
 			fwid *= 0.6692;   // helvetica
 		else fwid *= 0.724623;   // dejavu
 	#endif
-	((t_radixtcl *)x)->x_fontwidth = fwid;
+	((t_radixtcl*)x)->x_fontwidth = fwid;
 }
 
 static void radix_fontsize(t_radix *x ,t_float f) {
@@ -106,12 +106,12 @@ static void radix_fontsize(t_radix *x ,t_float f) {
 }
 
 static void radix_fontwidth(t_radix *x ,t_float f) {
-	((t_radixtcl *)x)->x_fontwidth = f;
+	((t_radixtcl*)x)->x_fontwidth = f;
 	radix_resize(x);
 }
 
 static void radix_draw_update(t_gobj *client ,t_glist *glist) {
-	t_radix *x = (t_radix *)client;
+	t_radix *x = (t_radix*)client;
 	if (!glist_isvisible(glist)) return;
 	if (x->x_gui.x_change)
 	{	if (x->x_buf[0])
@@ -329,7 +329,7 @@ static void radix_getrect
 }
 
 static void radix_save(t_gobj *z ,t_binbuf *b) {
-	t_radix *x = (t_radix *)z;
+	t_radix *x = (t_radix*)z;
 	t_symbol *bflcol[3];
 	t_symbol *srl[3];
 
@@ -340,7 +340,7 @@ static void radix_save(t_gobj *z ,t_binbuf *b) {
 		sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);  }
 	binbuf_addv(b ,"ssiisiiffiisssiiiisssiiifi" ,gensym("#X") ,gensym("obj")
 		,x->x_gui.x_obj.te_xpix ,x->x_gui.x_obj.te_ypix
-		,gensym("radix") ,x->x_numwidth ,((t_radixtcl *)x)->x_zh
+		,gensym("radix") ,x->x_numwidth ,((t_radixtcl*)x)->x_zh
 		,x->x_min ,x->x_max ,x->x_lilo
 		,iem_symargstoint(&x->x_gui.x_isa) ,srl[0] ,srl[1] ,srl[2]
 		,x->x_gui.x_ldx ,x->x_gui.x_ldy
@@ -352,7 +352,7 @@ static void radix_save(t_gobj *z ,t_binbuf *b) {
 }
 
 static void radix_properties(t_gobj *z ,t_glist *owner) {
-	t_radix *x = (t_radix *)z;
+	t_radix *x = (t_radix*)z;
 	char buf[800];
 	t_symbol *srl[3];
 
@@ -369,7 +369,7 @@ static void radix_properties(t_gobj *z ,t_glist *owner) {
 		"%s %d %d "
 		"%d %d "
 		"#%06x #%06x #%06x\n"
-		,x->x_numwidth ,MINDIGITS ,((t_radixtcl *)x)->x_zh ,IEM_GUI_MINSIZE
+		,x->x_numwidth ,MINDIGITS ,((t_radixtcl*)x)->x_zh ,IEM_GUI_MINSIZE
 		,x->x_min ,x->x_max ,0 /*no_schedule*/
 		,x->x_lilo ,x->x_gui.x_isa.x_loadinit ,-1
 		,x->x_log_height /*no multi ,but iem-characteristic*/
@@ -405,7 +405,7 @@ static void radix_dialog(t_radix *x ,t_symbol *s ,int argc ,t_atom *argv) {
 	x->x_numwidth = w;
 	if (h < IEM_GUI_MINSIZE)
 		h = IEM_GUI_MINSIZE;
-	((t_radixtcl *)x)->x_zh = h;
+	((t_radixtcl*)x)->x_zh = h;
 	x->x_gui.x_h = h * IEMGUI_ZOOM(x) - (IEMGUI_ZOOM(x)-1)*2;
 	if (log_height < 10)
 		log_height = 10;
@@ -460,7 +460,7 @@ static void radix_click(t_radix *x ,t_float xpos ,t_float ypos
 
 static int radix_newclick(t_gobj *z ,struct _glist *glist
 ,int xpix ,int ypix ,int shift ,int alt ,int dbl ,int doit) {
-	t_radix* x = (t_radix *)z;
+	t_radix* x = (t_radix*)z;
 	if (doit)
 	{	radix_click(x ,xpix ,ypix ,shift ,0 ,alt);
 		x->x_gui.x_fsf.x_finemoved = (shift != 0);
@@ -487,18 +487,18 @@ static void radix_size(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
 	{	h = atom_getintarg(1 ,ac ,av);
 		if (h < IEM_GUI_MINSIZE)
 			h = IEM_GUI_MINSIZE;
-		((t_radixtcl *)x)->x_zh = h;
+		((t_radixtcl*)x)->x_zh = h;
 		x->x_gui.x_h = h * IEMGUI_ZOOM(x) - (IEMGUI_ZOOM(x)-1)*2;  }
 	radix_borderwidth(x ,IEMGUI_ZOOM(x));
-	iemgui_size((void *)x ,&x->x_gui);
+	iemgui_size((void*)x ,&x->x_gui);
 }
 
 static void radix_delta(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
-	iemgui_delta((void *)x ,&x->x_gui ,s ,ac ,av);
+	iemgui_delta((void*)x ,&x->x_gui ,s ,ac ,av);
 }
 
 static void radix_pos(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
-	iemgui_pos((void *)x ,&x->x_gui ,s ,ac ,av);
+	iemgui_pos((void*)x ,&x->x_gui ,s ,ac ,av);
 }
 
 static void radix_range(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
@@ -509,7 +509,7 @@ static void radix_range(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void radix_color(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
-	iemgui_color((void *)x ,&x->x_gui ,s ,ac ,av);
+	iemgui_color((void*)x ,&x->x_gui ,s ,ac ,av);
 }
 
 static void radix_send(t_radix *x ,t_symbol *s) {
@@ -521,11 +521,11 @@ static void radix_receive(t_radix *x ,t_symbol *s) {
 }
 
 static void radix_label(t_radix *x ,t_symbol *s) {
-	iemgui_label((void *)x ,&x->x_gui ,s);
+	iemgui_label((void*)x ,&x->x_gui ,s);
 }
 
 static void radix_label_pos(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
-	iemgui_label_pos((void *)x ,&x->x_gui ,s ,ac ,av);
+	iemgui_label_pos((void*)x ,&x->x_gui ,s ,ac ,av);
 }
 
 static void radix_label_font(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
@@ -537,7 +537,7 @@ static void radix_label_font(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (f<0 || f>2) f = 0;
 	x->x_gui.x_fsf.x_font_style = f;
 	radix_borderwidth(x ,IEMGUI_ZOOM(x));
-	iemgui_label_font((void *)x ,&x->x_gui ,s ,ac ,av);
+	iemgui_label_font((void*)x ,&x->x_gui ,s ,ac ,av);
 }
 
 static void radix_init(t_radix *x ,t_float f) {
@@ -584,7 +584,7 @@ static void radix_key(void *z ,t_symbol *keysym ,t_float fkey) {
 }
 
 static void *radix_new(t_symbol *s ,int argc ,t_atom *argv) {
-	t_radixtcl *y = (t_radixtcl *)pd_new(radix_class);
+	t_radixtcl *y = (t_radixtcl*)pd_new(radix_class);
 	t_radix *x = &y->z;
 	int w = 0 ,h = 22;
 	int lilo = 0 ,ldx = -1 ,ldy = -10;
@@ -628,7 +628,7 @@ static void *radix_new(t_symbol *s ,int argc ,t_atom *argv) {
 	x->x_gui.x_draw = (t_iemfunptr)radix_draw;
 	x->x_gui.x_fsf.x_snd_able = 1;
 	x->x_gui.x_fsf.x_rcv_able = 1;
-	x->x_gui.x_glist = (t_glist *)canvas_getcurrent();
+	x->x_gui.x_glist = (t_glist*)canvas_getcurrent();
 	if (x->x_gui.x_isa.x_loadinit)
 		 x->x_val = v;
 	else x->x_val = 0.;

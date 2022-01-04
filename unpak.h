@@ -14,7 +14,7 @@ typedef struct {
 } t_unpak;
 
 static t_unpak *new_unpak(t_class *cl ,int ac ,t_atom *av ,int r) {
-	t_unpak *x = (t_unpak *)pd_new(cl);
+	t_unpak *x = (t_unpak*)pd_new(cl);
 	t_atom defarg[2] ,*ap;
 	t_unpakout *u;
 	int i;
@@ -26,7 +26,7 @@ static t_unpak *new_unpak(t_class *cl ,int ac ,t_atom *av ,int r) {
 		SETFLOAT(&defarg[1] ,0);  }
 
 	x->n = ac;
-	x->vec = (t_unpakout *)getbytes(ac * sizeof(t_unpakout));
+	x->vec = (t_unpakout*)getbytes(x->n * sizeof(t_unpakout));
 
 	ap = av + (r ? ac-1 : 0);
 	r = r ? -1 : 1;
@@ -68,5 +68,5 @@ static void unpak_mute(t_unpak *x ,t_float f) {
 }
 
 static void unpak_free(t_unpak *x) {
-	freebytes(x->vec ,x->n * sizeof(*x->vec));
+	freebytes(x->vec ,x->n * sizeof(t_unpakout));
 }

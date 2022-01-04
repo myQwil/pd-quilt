@@ -58,10 +58,10 @@ typedef struct {
 } t_tabosc2;
 
 static t_int *tabosc2_perform(t_int *w) {
-	t_tabosc2 *x = (t_tabosc2 *)(w[1]);
-	t_sample *in1 = (t_sample *)(w[2]);
-	t_sample *in2 = (t_sample *)(w[3]);
-	t_sample *out = (t_sample *)(w[4]);
+	t_tabosc2 *x = (t_tabosc2*)(w[1]);
+	t_sample *in1 = (t_sample*)(w[2]);
+	t_sample *in2 = (t_sample*)(w[3]);
+	t_sample *out = (t_sample*)(w[4]);
 	int n = (int)(w[5]);
 	int normhipart;
 	union tabfudge tf;
@@ -111,7 +111,7 @@ static void tabosc2_set(t_tabosc2 *x ,t_symbol *s) {
 	int npoints ,pointsinarray;
 
 	x->arrayname = s;
-	if (!(a = (t_garray *)pd_findbyclass(x->arrayname ,garray_class)))
+	if (!(a = (t_garray*)pd_findbyclass(x->arrayname ,garray_class)))
 	{	if (*s->s_name)
 			pd_error(x ,"tabosc2~: %s: no such array" ,x->arrayname->s_name);
 		x->vec = 0;  }
@@ -142,7 +142,7 @@ static void tabosc2_ft1(t_tabosc2 *x ,t_float f) {
 }
 
 static void *tabosc2_new(t_symbol *s ,t_float edge) {
-	t_tabosc2 *x = (t_tabosc2 *)pd_new(tabosc2_class);
+	t_tabosc2 *x = (t_tabosc2*)pd_new(tabosc2_class);
 	x->arrayname = s;
 	x->vec = 0;
 	x->fnpoints = 512.;

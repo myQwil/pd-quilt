@@ -20,8 +20,8 @@ typedef struct {
 } t_linp;
 
 static t_int *linp_tilde_perform(t_int *w) {
-	t_linp *x = (t_linp *)(w[1]);
-	t_sample *out = (t_sample *)(w[2]);
+	t_linp *x = (t_linp*)(w[1]);
+	t_sample *out = (t_sample*)(w[2]);
 	int n = (int)(w[3]);
 	t_sample f = x->value ,g;
 
@@ -52,8 +52,8 @@ static t_int *linp_tilde_perform(t_int *w) {
 
 /* TB: vectorized version */
 static t_int *linp_tilde_perf8(t_int *w) {
-	t_linp *x = (t_linp *)(w[1]);
-	t_sample *out = (t_sample *)(w[2]);
+	t_linp *x = (t_linp*)(w[1]);
+	t_sample *out = (t_sample*)(w[2]);
 	int n = (int)(w[3]);
 	t_sample f = x->value ,g;
 
@@ -116,7 +116,7 @@ static void linp_tilde_dsp(t_linp *x ,t_signal **sp) {
 }
 
 static void *linp_tilde_new(void) {
-	t_linp *x = (t_linp *)pd_new(linp_tilde_class);
+	t_linp *x = (t_linp*)pd_new(linp_tilde_class);
 	floatinlet_new(&x->obj ,&x->inletvalue);
 	outlet_new(&x->obj ,&s_signal);
 	x->o_on = outlet_new(&x->obj ,&s_float);

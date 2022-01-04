@@ -61,7 +61,7 @@ static void flenc_list(t_flenc *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void *flenc_new(t_symbol *s ,int argc ,t_atom *argv) {
-	t_flenc *x = (t_flenc *)pd_new(flenc_class);
+	t_flenc *x = (t_flenc*)pd_new(flenc_class);
 	outlet_new(&x->obj ,&s_float);
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("e"));
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("s"));

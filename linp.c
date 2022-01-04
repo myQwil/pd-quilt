@@ -103,7 +103,7 @@ static void linp_float(t_linp *x ,t_float f) {
 }
 
 static void *linp_new(t_float f ,t_float grain) {
-	t_linp *x = (t_linp *)pd_new(linp_class);
+	t_linp *x = (t_linp*)pd_new(linp_class);
 	x->targetval = x->setval = f;
 	x->gotinlet  = x->pause  = 0;
 	x->invtime   = 1;

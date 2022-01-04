@@ -79,7 +79,7 @@ static void chrono_tempo(t_chrono *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void *chrono_new(t_symbol *s ,int argc ,t_atom *argv) {
-	t_chrono *x = (t_chrono *)pd_new(chrono_class);
+	t_chrono *x = (t_chrono*)pd_new(chrono_class);
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_bang ,gensym("bang2"));
 	outlet_new(&x->obj ,&s_float);
 	x->o_lap = outlet_new(&x->obj ,0);

@@ -16,13 +16,13 @@ typedef struct {
 
 static void hot_pxy_bang(t_hot_pxy *p) {
 	t_bop *x = p->x;
-	pd_bang((t_pd *)x);
+	pd_bang((t_pd*)x);
 }
 
 static void hot_pxy_float(t_hot_pxy *p ,t_float f) {
 	t_bop *x = p->x;
 	x->f2 = f;
-	pd_bang((t_pd *)x);
+	pd_bang((t_pd*)x);
 }
 
 static void hot_pxy_f1(t_hot_pxy *p ,t_float f) {
@@ -37,7 +37,7 @@ static void hot_pxy_skip(t_hot_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
 	t_bop *x = p->x;
 	if (ac && av->a_type == A_FLOAT)
 		x->f1 = av->a_w.w_float;
-	pd_bang((t_pd *)x);
+	pd_bang((t_pd*)x);
 }
 
 static void hot_pxy_set(t_hot_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
@@ -51,18 +51,18 @@ static void hot_pxy_set(t_hot_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static t_hot *hot_new(t_class *cz ,t_class *cp ,t_symbol *s ,int ac ,t_atom *av) {
-	t_hot *z = (t_hot *)pd_new(cz);
-	t_hot_pxy *p = (t_hot_pxy *)pd_new(cp);
+	t_hot *z = (t_hot*)pd_new(cz);
+	t_hot_pxy *p = (t_hot_pxy*)pd_new(cp);
 	t_bop *x = &z->x;
 	z->p = p;
 	p->x = x;
 	bop_init(x ,ac ,av);
-	inlet_new(&x->bl.obj ,(t_pd *)p ,0 ,0);
+	inlet_new(&x->bl.obj ,(t_pd*)p ,0 ,0);
 	return (z);
 }
 
 static void hot_free(t_hot *z) {
-	pd_free((t_pd *)z->p);
+	pd_free((t_pd*)z->p);
 }
 
 

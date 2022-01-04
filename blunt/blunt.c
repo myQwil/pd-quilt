@@ -14,11 +14,11 @@ typedef struct {
 
 static void num_float(t_num *x ,t_float f) {
 	x->f = f;
-	pd_bang((t_pd *)x);
+	pd_bang((t_pd*)x);
 }
 
 static void *num_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
-	t_num *x = (t_num *)pd_new(cl);
+	t_num *x = (t_num*)pd_new(cl);
 	blunt_init(&x->bl ,&x->f ,ac ,av);
 	floatinlet_new(&x->bl.obj ,&x->f);
 	return (x);
@@ -367,7 +367,7 @@ static void b_bang(t_bng *x) {
 }
 
 static void *b_new(t_symbol *s ,int ac ,t_atom *av) {
-	t_bng *x = (t_bng *)pd_new(bng_class);
+	t_bng *x = (t_bng*)pd_new(bng_class);
 	outlet_new(&x->bl.obj ,&s_bang);
 	if (ac && av->a_type == A_SYMBOL)
 	{	const char *c = av->a_w.w_symbol->s_name;
@@ -420,7 +420,7 @@ static void sym_list(t_sym *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void *sym_new(t_symbol *s ,int ac ,t_atom *av) {
-	t_sym *x = (t_sym *)pd_new(sym_class);
+	t_sym *x = (t_sym*)pd_new(sym_class);
 	outlet_new      (&x->bl.obj ,&s_symbol);
 	symbolinlet_new (&x->bl.obj ,&x->sym);
 	x->sym = (ac && av->a_type == A_SYMBOL) ? av->a_w.w_symbol : &s_;

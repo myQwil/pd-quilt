@@ -107,7 +107,7 @@ static void rand_anything(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
-	t_rand *y = (t_rand *)pd_new(rand_class);
+	t_rand *y = (t_rand*)pd_new(rand_class);
 	t_rng *x = &y->z;
 	outlet_new(&x->obj ,&s_float);
 	int c = !ac ? 2 : ac;

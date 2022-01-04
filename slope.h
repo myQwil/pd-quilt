@@ -48,7 +48,7 @@ static void slope_log(t_slope *x ,t_float f) {
 }
 
 static t_slope *slope_new(t_class *cl ,int ac ,t_atom *av) {
-	t_slope *x = (t_slope *)pd_new(cl);
+	t_slope *x = (t_slope*)pd_new(cl);
 	outlet_new(&x->obj ,&s_float);
 	inlet_new (&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("min"));
 	inlet_new (&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("max"));

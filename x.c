@@ -24,7 +24,7 @@ typedef struct {
 } t_xtrigger;
 
 static void *xtrigger_new(t_symbol *s ,int argc ,t_atom *argv) {
-	t_xtrigger *x = (t_xtrigger *)pd_new(xtrigger_class);
+	t_xtrigger *x = (t_xtrigger*)pd_new(xtrigger_class);
 	t_atom defarg[2] ,*ap;
 	t_xtriggerout *u;
 	int i;
@@ -34,7 +34,7 @@ static void *xtrigger_new(t_symbol *s ,int argc ,t_atom *argv) {
 		SETFLOAT(&defarg[0] ,0);
 		SETFLOAT(&defarg[1] ,0);  }
 	x->siz = argc;
-	x->vec = (t_xtriggerout *)getbytes(argc * sizeof(*x->vec));
+	x->vec = (t_xtriggerout*)getbytes(argc * sizeof(t_xtriggerout));
 	for (i = 0 ,ap = argv ,u = x->vec; i < argc; u++ ,ap++ ,i++)
 	{	char c;
 		xtype thistype = (xtype)ap->a_type;

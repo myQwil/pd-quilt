@@ -25,7 +25,7 @@ static void rind_list(t_rind *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void *rind_new(t_symbol *s ,int ac ,t_atom *av) {
-	t_rind *y = (t_rind *)pd_new(rind_class);
+	t_rind *y = (t_rind*)pd_new(rind_class);
 	t_rng  *x = &y->z;
 	outlet_new(&x->obj ,&s_float);
 

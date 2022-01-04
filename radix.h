@@ -418,8 +418,8 @@ static void radix_lin(t_radix *x) {
 }
 
 static void radix_list(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
-	if (!ac) pd_bang((t_pd *)x);
+	if (!ac) pd_bang((t_pd*)x);
 	else if (IS_A_FLOAT(av ,0))
 	{	radix_set(x ,atom_getfloatarg(0 ,ac ,av));
-		pd_bang((t_pd *)x);  }
+		pd_bang((t_pd*)x);  }
 }

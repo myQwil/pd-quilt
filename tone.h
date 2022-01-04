@@ -19,7 +19,7 @@ static void tone_list(t_tone *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static t_tone *tone_new(t_class *cl ,int argc ,t_atom *argv) {
-	t_tone *x = (t_tone *)pd_new(cl);
+	t_tone *x = (t_tone*)pd_new(cl);
 	outlet_new(&x->obj ,&s_float);
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("ref"));
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("tet"));

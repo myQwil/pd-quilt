@@ -30,7 +30,7 @@ static int flin_resize(t_flin *x ,t_object *obj ,int n) {
 	{	if (n > 0x400)
 			return -1;
 		int d = 2 << ilog2(n-1);
-		x->fp = (t_float *)resizebytes(x->fp
+		x->fp = (t_float*)resizebytes(x->fp
 			,x->siz * sizeof(t_float) ,d * sizeof(t_float));
 		if (!x->fp)
 			return -2;

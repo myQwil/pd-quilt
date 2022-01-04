@@ -265,7 +265,7 @@ static void music_set(t_music *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static t_music *music_new(t_class *mclass ,int ac) {
-	t_music *x = (t_music *)pd_new(mclass);
+	t_music *x = (t_music*)pd_new(mclass);
 
 	x->siz = x->flin.ins = ac;
 	flin_alloc(&x->flin ,ac);

@@ -18,7 +18,7 @@ static void ceil_float(t_ceil *x ,t_float f) {
 }
 
 static void *ceil_new(t_float f) {
-	t_ceil *x = (t_ceil *)pd_new(ceil_class);
+	t_ceil *x = (t_ceil*)pd_new(ceil_class);
 	outlet_new(&x->obj ,&s_float);
 	x->f = f;
 	return (x);

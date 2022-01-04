@@ -16,10 +16,10 @@ typedef struct {
 } t_tabread2;
 
 static t_int *tabread2_perform(t_int *w) {
-	t_tabread2 *x = (t_tabread2 *)(w[1]);
-	t_sample *in1 = (t_sample *)(w[2]);
-	t_sample *in2 = (t_sample *)(w[3]);
-	t_sample *out = (t_sample *)(w[4]);
+	t_tabread2 *x = (t_tabread2*)(w[1]);
+	t_sample *in1 = (t_sample*)(w[2]);
+	t_sample *in2 = (t_sample*)(w[3]);
+	t_sample *out = (t_sample*)(w[4]);
 	int n = (int)(w[5]);
 	int maxindex;
 	t_word *buf = x->vec ,*wp;
@@ -62,7 +62,7 @@ static void tabread2_set(t_tabread2 *x ,t_symbol *s) {
 	t_garray *a;
 
 	x->arrayname = s;
-	if (!(a = (t_garray *)pd_findbyclass(x->arrayname ,garray_class)))
+	if (!(a = (t_garray*)pd_findbyclass(x->arrayname ,garray_class)))
 	{	if (*s->s_name)
 			pd_error(x ,"tabread2~: %s: no such array" ,x->arrayname->s_name);
 		x->vec = 0;  }
@@ -81,7 +81,7 @@ static void tabread2_dsp(t_tabread2 *x ,t_signal **sp) {
 }
 
 static void *tabread2_new(t_symbol *s ,t_float edge) {
-	t_tabread2 *x = (t_tabread2 *)pd_new(tabread2_class);
+	t_tabread2 *x = (t_tabread2*)pd_new(tabread2_class);
 	x->arrayname = s;
 	x->vec = 0;
 	

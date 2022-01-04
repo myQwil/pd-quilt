@@ -55,10 +55,10 @@ static void chrd_bang(t_chrd *y) {
 
 static void *chrd_new(t_symbol *s ,int ac ,t_atom *av) {
 	int n = (ac<3 ? 3 : ac);
-	t_chrd *y = (t_chrd *)music_new(chrd_class ,n);
+	t_chrd *y = (t_chrd*)music_new(chrd_class ,n);
 	t_music *x = &y->z;
 
-	y->outs = (t_outlet **)getbytes(x->flin.ins * sizeof(t_outlet *));
+	y->outs = (t_outlet**)getbytes(x->flin.ins * sizeof(t_outlet*));
 	t_float *fp = x->flin.fp;
 	t_outlet **op = y->outs;
 	fp[0]=69 ,fp[1]=7 ,fp[2]=12;
@@ -74,7 +74,7 @@ static void *chrd_new(t_symbol *s ,int ac ,t_atom *av) {
 static void chrd_free(t_chrd *y) {
 	t_music *x = &y->z;
 	flin_free(&x->flin);
-	freebytes(y->outs ,x->flin.ins * sizeof(t_outlet *));
+	freebytes(y->outs ,x->flin.ins * sizeof(t_outlet*));
 }
 
 void chrd_setup(void) {

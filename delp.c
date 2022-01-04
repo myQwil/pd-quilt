@@ -94,7 +94,7 @@ static void delp_float(t_delp *x ,t_float f) {
 }
 
 static void *delp_new(t_symbol *s ,int argc ,t_atom *argv) {
-	t_delp *x = (t_delp *)pd_new(delp_class);
+	t_delp *x = (t_delp*)pd_new(delp_class);
 	inlet_new(&x->obj ,&x->obj.ob_pd ,gensym("float") ,gensym("ft1"));
 	outlet_new(&x->obj ,gensym("bang"));
 	x->o_rem = outlet_new(&x->obj ,&s_float);

@@ -76,7 +76,7 @@ static void muse_send(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
 
 static void *muse_new(t_symbol *s ,int ac ,t_atom *av) {
 	int n = ac < 2 ? 2 : ac;
-	t_muse *y = (t_muse *)music_new(muse_class ,n);
+	t_muse *y = (t_muse*)music_new(muse_class ,n);
 	t_music *x = &y->z;
 
 	y->o_freq = outlet_new(&x->obj ,&s_float);

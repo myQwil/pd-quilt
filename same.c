@@ -10,7 +10,7 @@ typedef struct {
 } t_same;
 
 static void *same_new(t_float f) {
-	t_same *x = (t_same *)pd_new(same_class);
+	t_same *x = (t_same*)pd_new(same_class);
 	x->f = f;
 	outlet_new(&x->obj ,&s_float);
 	x->o_same = outlet_new(&x->obj ,&s_float);

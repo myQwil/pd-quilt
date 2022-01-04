@@ -31,7 +31,7 @@ struct _pak {
 };
 
 static t_pak *new_pak(t_class *cl ,t_class *pxy ,int ac ,t_atom *av ,int r) {
-	t_pak *x = (t_pak *)pd_new(cl);
+	t_pak *x = (t_pak*)pd_new(cl);
 	t_atom defarg[2] ,*vp ,*ap;
 	t_gpointer *gp;
 	int nptr=0 ,i;
@@ -43,10 +43,10 @@ static t_pak *new_pak(t_class *cl ,t_class *pxy ,int ac ,t_atom *av ,int r) {
 		SETFLOAT(&defarg[1] ,0);  }
 
 	x->n = ac;
-	x->vec = (t_atom *)getbytes(ac * sizeof(t_atom));
-	x->outvec = (t_atom *)getbytes(ac * sizeof(t_atom));
-	x->type = (t_atomtype *)getbytes(ac * sizeof(t_atomtype));
-	x->ins = (t_pak_pxy **)getbytes((ac-1) * sizeof(t_pak_pxy *));
+	x->vec = (t_atom*)getbytes(ac * sizeof(t_atom));
+	x->outvec = (t_atom*)getbytes(ac * sizeof(t_atom));
+	x->type = (t_atomtype*)getbytes(ac * sizeof(t_atomtype));
+	x->ins = (t_pak_pxy**)getbytes((ac-1) * sizeof(t_pak_pxy*));
 
 	for (i=ac ,ap=av; i--; ap++)
 	{	if (ap->a_type == A_FLOAT) nptr++;
@@ -55,7 +55,7 @@ static t_pak *new_pak(t_class *cl ,t_class *pxy ,int ac ,t_atom *av ,int r) {
 			if (strcmp(name ,"f") && strcmp(name ,s_float.s_name)
 			 && strcmp(name ,"s") && strcmp(name ,s_symbol.s_name))
 				nptr++;  }  }
-	gp = x->ptr = (t_gpointer *)t_getbytes(nptr * sizeof(t_gpointer));
+	gp = x->ptr = (t_gpointer*)t_getbytes(nptr * sizeof(t_gpointer));
 	x->nptr = nptr;
 
 	ap = av + (r ? ac-1 : 0);
@@ -89,11 +89,11 @@ static t_pak *new_pak(t_class *cl ,t_class *pxy ,int ac ,t_atom *av ,int r) {
 
 		int hasptr = (*tp==A_POINTER || *tp==A_GIMME);
 		if (i)
-		{	*pp = (t_pak_pxy *)pd_new(pxy);
+		{	*pp = (t_pak_pxy*)pd_new(pxy);
 			(*pp)->x = x;
 			(*pp)->idx = i;
 			if (hasptr) (*pp)->ptr = gp;
-			inlet_new(&x->obj ,(t_pd *)*pp ,0 ,0);
+			inlet_new(&x->obj ,(t_pd*)*pp ,0 ,0);
 			pp++;  }
 		if (hasptr)
 		{	gpointer_init(gp);
@@ -124,7 +124,7 @@ static void pak_bang(t_pak *x) {
 		else if (vp->a_type == A_POINTER)
 		{	if (!gpointer_check(gp ,1))
 			{	pd_error(x ,"%s: stale pointer %d"
-					,class_getname(*(t_pd *)x) ,i);
+					,class_getname(*(t_pd*)x) ,i);
 				return;  }
 			else gp++;  }
 
@@ -136,8 +136,8 @@ static void pak_bang(t_pak *x) {
 	{	/* LATER figure out how to deal with reentrancy and pointers... */
 		if (x->nptr)
 			post("%s_bang: warning: reentry with pointers unprotected"
-				,class_getname(*(t_pd *)x));
-		outvec = (t_atom *)t_getbytes(size);
+				,class_getname(*(t_pd*)x));
+		outvec = (t_atom*)t_getbytes(size);
 		reentered = 1;  }
 	else
 	{	outvec = x->outvec;
@@ -249,11 +249,11 @@ static void pak_free(t_pak *x) {
 
 	t_pak_pxy **pp;
 	for (pp=x->ins ,i=pn; i--; pp++)
-		if (*pp) pd_free((t_pd *)*pp);
+		if (*pp) pd_free((t_pd*)*pp);
 
-	freebytes(x->vec    ,n  * sizeof(*x->vec));
-	freebytes(x->type   ,n  * sizeof(*x->type));
-	freebytes(x->ins    ,pn * sizeof(t_pak_pxy *));
-	freebytes(x->outvec ,n  * sizeof(*x->outvec));
-	freebytes(x->ptr    ,x->nptr * sizeof(*x->ptr));
+	freebytes(x->vec    ,n  * sizeof(t_atom));
+	freebytes(x->outvec ,n  * sizeof(t_atom));
+	freebytes(x->type   ,n  * sizeof(t_atomtype));
+	freebytes(x->ins    ,pn * sizeof(t_pak_pxy*));
+	freebytes(x->ptr    ,x->nptr * sizeof(t_gpointer));
 }

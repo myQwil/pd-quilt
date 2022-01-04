@@ -93,10 +93,11 @@ static void ffplay_seek(t_ffplay *x ,t_float f) {
 }
 
 static t_int *ffplay_perform(t_int *w) {
-	t_ffplay *x = (t_ffplay *)(w[1]);
+	t_ffplay *x = (t_ffplay*)(w[1]);
 	unsigned nch = x->nch;
 	t_sample *outs[nch];
-	for (int i = nch; i--;) outs[i] = x->outs[i];
+	for (int i = nch; i--;)
+		outs[i] = x->outs[i];
 	int n = (int)w[2];
 
 	if (x->open && x->play)
@@ -369,7 +370,7 @@ static void ffplay_stop(t_ffplay *x) {
 }
 
 static void *ffplay_new(t_symbol *s ,int ac ,t_atom *av) {
-	t_ffplay *x = (t_ffplay *)pd_new(ffplay_class);
+	t_ffplay *x = (t_ffplay*)pd_new(ffplay_class);
 	x->pkt = av_packet_alloc();
 	x->frm = av_frame_alloc();
 	t_atom defarg[2];
