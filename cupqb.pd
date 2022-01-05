@@ -14,7 +14,7 @@
 #X obj 30 180 \$2;
 #X obj 30 210 sel;
 #X obj 60 240 s \$0itr;
-#X floatatom 200 120 5 0 0 0 - #0tonbx #0frnbx;
+#X floatatom 200 120 5 0 0 0 - \$0tonbx \$0frnbx 0;
 #X obj 200 140 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
 #ec8824 #4884ec #000000;
 #X obj 220 140 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
@@ -65,4 +65,4 @@
 #X connect 27 0 25 1;
 #X connect 28 0 25 1;
 #X connect 28 0 29 0;
-#X coords 0 -1 1 1 42 47 2 200 120;
+#X coords 0 -1 1 1 42 47 2 200 117;

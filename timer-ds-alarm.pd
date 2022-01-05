@@ -1,12 +1,12 @@
-#N canvas 156 600 361 301 14;
-#N canvas 720 240 461 381 alarm 0;
+#N canvas 150 600 360 300 14;
+#N canvas 720 240 460 380 alarm 0;
 #X obj 40 140 cnv 15 120 150 empty empty empty 20 12 0 14 #404040 #7c7c7c
 0;
 #X obj 210 340 dac~;
 #X obj 280 310 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10
 #000000 #fcfcfc #fcfcfc 0 1;
 #X floatatom 290 330 0 0 0 0 - - - 0;
-#N canvas 580 600 511 301 ring 0;
+#N canvas 580 600 510 300 ring 0;
 #X floatatom 130 190 0 0 0 0 - - - 0;
 #X obj 30 190 *~;
 #X obj 30 220 outlet~;
@@ -42,7 +42,7 @@
 #fcfcfc #fcfcfc;
 #X obj 50 160 bng 60 250 50 0 empty empty SNOOZE 0 -10 0 11 #80a000
 #fcfcfc #fcfcfc;
-#N canvas 1018 260 431 361 clock 0;
+#N canvas 1020 260 430 360 clock 0;
 #X msg 200 260 label \$1;
 #X obj 200 290 s \$0clock;
 #X obj 200 200 pack s s s;
@@ -96,7 +96,7 @@
 #X obj 50 20 loadbang;
 #X floatatom 120 160 0 1 60 2 mins #0z - 0;
 #X obj 150 80 s \$0z;
-#N canvas 590 460 361 301 repeat 0;
+#N canvas 590 460 360 300 repeat 0;
 #X obj 70 130 spigot;
 #X obj 70 100 t f f;
 #X obj 70 70 inlet;

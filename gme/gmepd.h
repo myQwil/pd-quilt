@@ -23,7 +23,7 @@ enum { buf_size  = NCH * FRAMES };
 enum { mask_size = 8 };
 
 static const double frames = FRAMES;
-static const double inv_frames = 1. / FRAMES;
+static const double inv_frames = 1. / frames;
 static const float short_limit = 0x8000;
 
 static gme_err_t hnd_err( const char *str ) {
