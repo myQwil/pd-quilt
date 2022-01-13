@@ -6,7 +6,7 @@
 #include <libavformat/avformat.h>
 #include <libswresample/swresample.h>
 
-#define BUFSIZE 0x1000
+#define BUFSIZE 0x400
 #define MAXCH 32
 
 typedef const char *err_t;
@@ -104,14 +104,18 @@ static t_int *ffplay_perform(t_int *w) {
 	{	t_sample **buf = x->buf;
 		unsigned pos = x->pos;
 		while (n--)
-		{	cont:
+		{	outer_while:
 			if (x->siz)
-			{	for (int i = nch; i--;)
+			{	sound:
+				for (int i = nch; i--;)
 					*outs[i]++ = buf[i][pos];
 				if (++pos >= x->siz)
 				{	x->siz = swr_convert(x->swr ,(uint8_t**)buf ,BUFSIZE ,0 ,0);
-					pos = 0;  }
-				continue;  }
+					pos = 0;
+					continue;  }
+				if (n--)
+					goto sound;
+				else break;  }
 			while (av_read_frame(x->ic ,x->pkt) >= 0)
 			{	if (x->pkt->stream_index == x->idx)
 				{	if (avcodec_send_packet(x->ctx ,x->pkt) < 0
@@ -129,7 +133,7 @@ static t_int *ffplay_perform(t_int *w) {
 					x->siz = swr_convert(x->swr ,(uint8_t**)buf ,BUFSIZE
 						,(const uint8_t**)x->frm->extended_data ,x->frm->nb_samples);
 					av_packet_unref(x->pkt);
-					goto cont;  }
+					goto outer_while;  }
 				av_packet_unref(x->pkt);  }
 
 			// reached the end

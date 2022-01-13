@@ -12,6 +12,14 @@ warn.flags = -Wall -Winline -Wstrict-aliasing -Wno-int-to-pointer-cast
 cflags = -I"game-music-emu/gme"
 
 ldlibs = -lsamplerate game-music-emu/build/gme/libgme.a
+
+# ifeq ($(MAKECMDGOALS), alldebug)
+#   build-folder := build
+# else
+#   build-folder := build-release
+# endif
+# ldlibs = -lsamplerate game-music-emu/$(build-folder)/gme/libgme.a
+
 define forWindows
   ldlibs += -Wl,-Bstatic
 endef
