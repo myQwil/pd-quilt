@@ -17,7 +17,7 @@
 #X msg 130 490 foo \$[5::-2] bar;
 #X msg 20 100 \$-5;
 #X obj 20 130 + 6;
-#X floatatom 20 160 0 0 0 0 - - -;
+#X floatatom 20 160 0 0 0 0 - - - 0;
 #X obj 60 520 print;
 #X text 210 40 foo a b c 4 e f g bar;
 #X text 220 100 foo e f g bar;

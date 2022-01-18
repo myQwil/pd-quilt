@@ -1,21 +1,21 @@
 #N canvas 720 350 490 300 14;
-#X obj 200 130 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
-#X floatatom 200 160 0 0 0 0 - - -;
+#X obj 200 130 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
+#X floatatom 200 160 0 0 0 0 - - - 0;
 #X obj 200 190 same;
-#X floatatom 200 220 0 0 0 0 - - -;
-#X floatatom 260 220 0 0 0 0 - - -;
-#X obj 200 30 cnv 15 60 24 empty empty same 4 12 0 18 -1 -262144 0
-;
+#X floatatom 200 220 0 0 0 0 - - - 0;
+#X floatatom 260 220 0 0 0 0 - - - 0;
+#X obj 200 30 cnv 15 60 24 empty empty same 4 12 0 18 #000000 #fcfcfc
+0;
 #X text 30 60 similar to [change] in that it sends different values
 through the left outlet \, but also sends repeat values through the
 right outlet;
-#X obj 180 220 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
-#X obj 240 220 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
+#X obj 180 220 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
+#X obj 240 220 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
 #X msg 240 160 set \$1;
-#X floatatom 240 130 0 0 0 0 - - -;
+#X floatatom 240 130 0 0 0 0 - - - 0;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;

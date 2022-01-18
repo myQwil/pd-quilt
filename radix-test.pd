@@ -1,14 +1,14 @@
 #N canvas 200 260 780 520 14;
-#X floatatom 230 40 0 2 64 0 - - -;
+#X floatatom 230 40 0 2 64 0 - - - 0;
 #X msg 290 140 p \$1;
-#X floatatom 290 110 0 0 0 0 - - -;
+#X floatatom 290 110 0 0 0 0 - - - 0;
 #X obj 110 80 cupqb;
-#X floatatom 160 100 0 0 0 0 - - -;
+#X floatatom 160 100 0 0 0 0 - - - 0;
 #X msg 110 50 set 1;
-#X floatatom 170 140 0 0 0 0 - - -;
+#X floatatom 170 140 0 0 0 0 - - - 0;
 #X msg 160 50 set 0.1;
 #X obj 110 140 @pow 2;
-#X floatatom 110 170 0 0 0 0 gatom - -;
+#X floatatom 110 170 0 0 0 0 gatom - - 0;
 #X msg 230 140 be \$1;
 #X obj 100 450 fldec;
 #N canvas 750 270 450 300 pcalc 0;
@@ -52,7 +52,7 @@
 #X obj 410 340 radix 0 22 0 0 0 0 empty empty base3 -52 11 0 11 #e098fc
 #c4fcc4 #fcfcfc 3 14 3 0 10;
 #X obj 270 40 mantr;
-#X floatatom 550 190 0 0 0 0 - - -;
+#X floatatom 550 190 0 0 0 0 - - - 0;
 #X obj 600 100 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
 #fcfcfc 0 1;
 #X obj 550 160 flenc 0 127;

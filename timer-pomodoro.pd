@@ -18,8 +18,8 @@
 #X obj 80 310 dac~;
 #X obj 120 250 noise~;
 #X obj 160 280 hsl 128 20 0.001 1 1 0 empty empty empty -2 -8 0 10
-#000000 #fcfcfc #fcfcfc 8467 1;
-#X floatatom 160 310 0 0 0 0 - - -;
+#000000 #fcfcfc #fcfcfc 0 1;
+#X floatatom 160 310 0 0 0 0 - - - 0;
 #X obj 80 80 % 60;
 #X obj 80 110 sel;
 #X msg 80 150 1;
@@ -29,9 +29,9 @@
 #X obj 80 280 *~;
 #X msg 120 150 0.36;
 #X msg 170 150 0.13;
-#X floatatom 240 80 0 0 0 0 - - -;
+#X floatatom 240 80 0 0 0 0 - - - 0;
 #X obj 240 110 dbtorms;
-#X floatatom 240 140 0 0 0 0 - - -;
+#X floatatom 240 140 0 0 0 0 - - - 0;
 #X connect 0 0 1 1;
 #X connect 1 0 5 0;
 #X connect 2 0 3 0;
@@ -83,9 +83,9 @@
 #X msg 110 250 stop;
 #X obj 160 320 delp sec;
 #X obj 290 260 metro 1000;
-#X floatatom 100 60 0 0 0 2 work - -;
-#X floatatom 150 60 0 0 0 2 break - -;
-#X floatatom 200 60 0 0 0 2 rest - -;
+#X floatatom 100 60 0 0 0 2 work - - 0;
+#X floatatom 150 60 0 0 0 2 break - - 0;
+#X floatatom 200 60 0 0 0 2 rest - - 0;
 #X obj 270 40 loadbang;
 #X obj 90 110 cnv 15 72 24 empty \$0clock 00:00 4 12 0 18 #000000 #fcfcfc
 0;
@@ -162,10 +162,10 @@
 #X obj 50 350 / 60;
 #X msg 90 320 60;
 #X obj 100 90 hsl 128 15 0.001 1 1 0 empty empty volume 7 7 0 10 #000000
-#fcfcfc #fcfcfc 8467 1;
-#X floatatom 190 110 5 0 0 0 - - #0vol;
+#fcfcfc #fcfcfc 0 1;
+#X floatatom 190 110 5 0 0 0 - - \$0vol 0;
 #X obj 270 160 r \$0c;
-#X floatatom 270 190 0 0 0 0 - - -;
+#X floatatom 270 190 0 0 0 0 - - - 0;
 #X obj 270 100 unpack 0 0 0 0;
 #X msg 270 70 25 5 35 0.1;
 #X connect 0 0 1 0;

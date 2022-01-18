@@ -1,6 +1,6 @@
 #N canvas 700 250 560 490 14;
 #X text 180 50 checks an atom's type.;
-#X floatatom 220 320 0 0 0 0 - - -;
+#X floatatom 220 320 0 0 0 0 - - - 0;
 #X obj 220 200 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
 #fcfcfc #fcfcfc;
 #X obj 300 200 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000

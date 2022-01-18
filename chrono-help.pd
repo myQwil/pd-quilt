@@ -14,8 +14,8 @@
 #X obj 230 250 unpack;
 #X obj 330 280 hms;
 #X obj 230 280 hms;
-#X symbolatom 330 310 0 0 0 0 - - -;
-#X symbolatom 230 310 0 0 0 0 - - -;
+#X symbolatom 330 310 0 0 0 0 - - - 0;
+#X symbolatom 230 310 0 0 0 0 - - - 0;
 #N canvas 1030 470 450 300 printit 0;
 #X obj 140 90 inlet;
 #X obj 200 90 inlet;
@@ -28,7 +28,7 @@
 #X connect 3 0 4 0;
 #X restore 240 340 pd printit;
 #X obj 130 290 hms;
-#X symbolatom 130 320 0 0 0 0 - - -;
+#X symbolatom 130 320 0 0 0 0 - - - 0;
 #X text 230 60 timer with pause and lap features;
 #X text 290 250 lap / total;
 #X obj 310 30 cnv 15 86 24 empty empty chrono 4 12 0 18 #000000 #fcfcfc

@@ -2,9 +2,9 @@
 #X obj 130 320 cupqb;
 #X obj 330 550 dac~;
 #X obj 90 260 * 100;
-#X floatatom 90 230 0 0 0 0 - - -;
+#X floatatom 90 230 0 0 0 0 - - - 0;
 #X obj 90 290 s dcay;
-#X floatatom 30 230 0 0 0 0 - - -;
+#X floatatom 30 230 0 0 0 0 - - - 0;
 #X obj 30 290 s atak;
 #N canvas 1170 250 510 400 chords 0;
 #X msg 180 40 @ 40;
@@ -51,7 +51,7 @@
 #X connect 20 0 4 0;
 #X connect 21 0 4 0;
 #X restore 180 320 pd chords;
-#X floatatom 150 260 0 0 0 0 - - -;
+#X floatatom 150 260 0 0 0 0 - - - 0;
 #X obj 150 290 s pmnto;
 #X obj 280 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
 #fcfcfc #fcfcfc;
@@ -83,7 +83,7 @@
 #fcfcfc #fcfcfc;
 #X obj 220 290 s z;
 #X obj 50 190 unpack 1 2 3 4;
-#X floatatom 220 260 0 0 0 0 - - -;
+#X floatatom 220 260 0 0 0 0 - - - 0;
 #X obj 30 260 * 10;
 #X msg 510 380 5;
 #X obj 510 350 t b a;
@@ -298,7 +298,7 @@
 #X obj 50 340 *~ 0.1667;
 #X obj 50 370 outlet~;
 #X obj 400 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
-#fcfcfc #fcfcfc 12700 1;
+#fcfcfc #fcfcfc 0 1;
 #X obj 50 300 *~ 1;
 #X obj 90 300 *~ 1;
 #X obj 130 300 *~ 1;
@@ -306,21 +306,21 @@
 #X obj 210 300 *~ 1;
 #X obj 250 300 *~ 1;
 #X obj 420 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
-#fcfcfc #fcfcfc 12700 1;
+#fcfcfc #fcfcfc 0 1;
 #X obj 440 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
-#fcfcfc #fcfcfc 12700 1;
+#fcfcfc #fcfcfc 0 1;
 #X obj 460 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
-#fcfcfc #fcfcfc 12700 1;
+#fcfcfc #fcfcfc 0 1;
 #X obj 480 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
-#fcfcfc #fcfcfc 12700 1;
+#fcfcfc #fcfcfc 0 1;
 #X obj 500 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
-#fcfcfc #fcfcfc 12700 1;
-#X floatatom 60 50 0 0 0 0 - - -;
-#X floatatom 130 50 0 0 0 0 - - -;
-#X floatatom 200 50 0 0 0 0 - - -;
-#X floatatom 270 50 0 0 0 0 - - -;
-#X floatatom 340 50 0 0 0 0 - - -;
-#X floatatom 410 50 0 0 0 0 - - -;
+#fcfcfc #fcfcfc 0 1;
+#X floatatom 60 50 0 0 0 0 - - - 0;
+#X floatatom 130 50 0 0 0 0 - - - 0;
+#X floatatom 200 50 0 0 0 0 - - - 0;
+#X floatatom 270 50 0 0 0 0 - - - 0;
+#X floatatom 340 50 0 0 0 0 - - - 0;
+#X floatatom 410 50 0 0 0 0 - - - 0;
 #X obj 470 80 loadbang;
 #X msg 470 110 1;
 #X connect 0 0 15 0;

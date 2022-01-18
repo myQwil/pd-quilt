@@ -13,21 +13,22 @@
 #X obj 280 250 x a;
 #X msg 160 220 1 2 3;
 #X msg 370 220 1 2 3;
-#X obj 60 370 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-1 1;
-#X obj 130 370 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-0 1;
-#X obj 200 370 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-0 1;
-#X obj 280 370 tgl 15 0 empty empty empty 17 7 0 10 -1 -262144 -262144
-0 1;
+#X obj 60 370 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc 0 1;
+#X obj 130 370 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc 0 1;
+#X obj 200 370 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc 0 1;
+#X obj 280 370 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc 0 1;
 #X obj 400 280 is p;
 #X obj 380 310 spigot;
 #X obj 380 340 pointer;
-#X obj 380 370 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
+#X obj 380 370 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
 #X obj 360 280 x;
-#X obj 260 20 cnv 15 21 24 empty empty x 4 12 0 18 -1 -262144 0;
+#X obj 260 20 cnv 15 21 24 empty empty x 4 12 0 18 #000000 #fcfcfc
+0;
 #X text 200 50 explicit trigger;
 #X text 30 70 A variation of [trigger] that sends 1-atom lists as the
 atom itself when either a number \, the letter 'a' \, or no creation

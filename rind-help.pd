@@ -4,21 +4,21 @@
 #X obj 30 150 metro 200;
 #X obj 40 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
 #fcfcfc;
-#X floatatom 80 180 0 0 0 0 - - -;
+#X floatatom 80 180 0 0 0 0 - - - 0;
 #X obj 150 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
 #fcfcfc #fcfcfc;
 #X obj 170 200 rind 3.2 6.7;
-#X floatatom 170 230 0 0 0 0 - - -;
+#X floatatom 170 230 0 0 0 0 - - - 0;
 #X text 210 230 2 args create boundaries;
 #X text 210 250 (number between 3.2 and 6.7);
-#X floatatom 230 170 0 0 0 0 - - -;
+#X floatatom 230 170 0 0 0 0 - - - 0;
 #X text 230 150 max;
-#X floatatom 270 170 0 0 0 0 - - -;
+#X floatatom 270 170 0 0 0 0 - - - 0;
 #X text 270 150 min;
 #X obj 210 80 rind 1 0;
 #X text 140 80 default:;
 #X obj 30 210 rind 4;
-#X floatatom 30 240 0 0 0 0 - - -;
+#X floatatom 30 240 0 0 0 0 - - - 0;
 #X msg 170 120 peek;
 #X msg 220 120 state;
 #X obj 190 30 cnv 15 60 24 empty empty rind 4 12 0 18 #000000 #fcfcfc

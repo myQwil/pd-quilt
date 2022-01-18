@@ -1,12 +1,12 @@
 #N canvas 730 420 450 330 14;
 #X obj 200 220 linp;
 #X msg 70 120 pause;
-#X floatatom 200 250 0 0 0 0 - - -;
+#X floatatom 200 250 0 0 0 0 - - - 0;
 #X msg 280 190 20;
 #X msg 320 120 0 \, 1 2000;
 #X msg 320 150 1 \, 0 2000;
 #X msg 210 120 2000 \, 0 2000;
-#X floatatom 90 260 0 0 0 0 - - -;
+#X floatatom 90 260 0 0 0 0 - - - 0;
 #X msg 200 90 2000 \, 3000 5000;
 #X obj 190 30 cnv 15 60 24 empty empty linp 4 12 0 18 #000000 #fcfcfc
 0;

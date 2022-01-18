@@ -1,8 +1,8 @@
 #N canvas 720 350 510 300 14;
-#X floatatom 20 120 0 0 0 0 - - -;
+#X floatatom 20 120 0 0 0 0 - - - 0;
 #X obj 30 150 mantissa;
 #X obj 20 180 !~;
-#X floatatom 20 210 0 0 0 0 - - -;
+#X floatatom 20 210 0 0 0 0 - - - 0;
 #X obj 30 250 mantissa;
 #X text 180 70 bitwise negation;
 #X text 180 90 inverts the bits;

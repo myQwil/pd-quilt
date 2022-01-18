@@ -1,11 +1,11 @@
 #N canvas 310 300 610 410 14;
-#X floatatom 250 160 0 0 0 0 - - -;
-#X floatatom 200 220 0 0 0 0 - - -;
-#X floatatom 320 140 0 2 64 0 base - -;
+#X floatatom 250 160 0 0 0 0 - - - 0;
+#X floatatom 200 220 0 0 0 0 - - - 0;
+#X floatatom 320 140 0 2 64 0 base - - 0;
 #X obj 200 190 @pow 2;
 #X obj 80 300 fldec;
 #N canvas 940 300 470 440 commands 0;
-#X floatatom 120 160 0 0 0 0 - - -;
+#X floatatom 120 160 0 0 0 0 - - - 0;
 #N canvas 1250 300 450 320 pcalc 0;
 #X obj 70 60 inlet;
 #X obj 70 120 @/ 24;
@@ -20,10 +20,10 @@
 #X connect 4 0 2 0;
 #X restore 120 90 pd pcalc;
 #X obj 50 30 inlet;
-#X floatatom 130 240 0 0 0 0 - - -;
+#X floatatom 130 240 0 0 0 0 - - - 0;
 #X text 270 190 default: 16;
 #X text 130 300 default: same as base;
-#X floatatom 120 340 0 0 0 0 - - -;
+#X floatatom 120 340 0 0 0 0 - - - 0;
 #X msg 120 370 be \$1;
 #X obj 40 390 outlet;
 #X msg 130 270 e \$1;
@@ -61,7 +61,7 @@
 #X text 370 130 xyzACDEFGHJKLMNP;
 #X text 370 150 QRTUVWXYZ?!@#$%&;
 #X msg 230 110 step 0.1;
-#X floatatom 430 190 0 0 0 0 - - -;
+#X floatatom 430 190 0 0 0 0 - - - 0;
 #X msg 430 220 p \$1;
 #X text 470 220 precision;
 #X msg 50 190 fs \$1;

@@ -1,30 +1,30 @@
 #N canvas 650 360 500 360 14;
 #X obj 120 310 print;
-#X obj 110 160 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
+#X obj 110 160 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
 #X msg 180 160 123;
 #X msg 220 230 hi;
 #X obj 30 160 pointer;
 #X msg 220 160 8 7;
-#X symbolatom 400 260 0 0 0 0 - - -;
-#X obj 160 30 cnv 15 178 24 empty empty @pak\ &\ @unpak 4 12 0
-18 -1 -262144 0;
+#X symbolatom 400 260 0 0 0 0 - - - 0;
+#X obj 160 30 cnv 15 178 24 empty empty @pak\\\ &\\\ @unpak 4 12 0
+18 #000000 #fcfcfc 0;
 #X obj 120 260 @pak f f a;
 #X text 170 310 a f f;
 #X msg 30 190 . . \$1;
-#X obj 400 300 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
-#X obj 340 300 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
-#X obj 280 300 bng 15 250 50 0 empty empty empty 17 7 0 10 -1 -262144
--262144;
+#X obj 400 300 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
+#X obj 340 300 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
+#X obj 280 300 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
 #X text 100 70 args are written in receiving order;
 #X text 120 50 outputs the values in reverse;
 #X msg 210 200 6 six;
 #X obj 280 230 @unpak a a a;
 #X msg 300 110 a b;
-#X symbolatom 280 260 0 0 0 0 - - -;
-#X symbolatom 340 260 0 0 0 0 - - -;
+#X symbolatom 280 260 0 0 0 0 - - - 0;
+#X symbolatom 340 260 0 0 0 0 - - - 0;
 #X msg 260 110 a;
 #X msg 340 110 a b c;
 #X msg 370 140 foo . .;
