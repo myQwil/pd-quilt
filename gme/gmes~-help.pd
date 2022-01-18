@@ -1,9 +1,9 @@
 #N canvas 150 300 640 600 14;
 #X obj 280 550 dac~;
 #N canvas 0 0 450 300 (subpatch) 0;
-#X array \$0gme 128 float 0;
-#X coords 0 1 127 -1 150 120 1 0 0;
-#X restore 270 110 graph;
+#X array \$0gme 120 float 2;
+#X coords 0 1.0833 120 -1.0833 120 130 1 0 0;
+#X restore 290 100 graph;
 #X obj 110 460 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
 #fcfcfc 0 1;
 #X floatatom 140 450 0 0 0 0 - - - 0;
@@ -34,22 +34,22 @@
 #X obj 370 520 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10
 #000000 #fcfcfc #fcfcfc 0 1;
 #X floatatom 370 540 0 0 0 0 - - - 0;
-#X obj 110 480 metro 48;
+#X obj 110 480 metro 40;
 #X obj 480 110 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 #000000
 #fcfcfc #fcfcfc 0 1;
-#N canvas 780 580 450 300 pitch 0;
-#X msg 210 200 tempo \$1;
-#X floatatom 210 140 0 0 400 0 - - - 0;
-#X floatatom 320 110 0 0 0 0 - - - 0;
-#X obj 320 140 * 100;
-#X obj 300 170 f;
-#X obj 300 150 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#N canvas 780 580 400 300 pitch 0;
+#X msg 140 200 tempo \$1;
+#X floatatom 140 140 0 0 400 0 - - - 0;
+#X floatatom 220 110 0 0 0 0 - - - 0;
+#X obj 220 140 * 100;
+#X obj 280 170 f;
+#X obj 280 140 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
 #fcfcfc #fcfcfc;
-#X floatatom 120 140 0 0 0 0 - - - 0;
-#X floatatom 210 90 0 5 2000 0 - - - 0;
-#X obj 210 30 loadbang;
-#X obj 210 250 outlet;
-#X msg 120 200 speed \$1;
+#X floatatom 50 140 0 0 0 0 - - - 0;
+#X floatatom 140 90 0 5 2000 0 - - - 0;
+#X obj 140 30 loadbang;
+#X obj 140 250 outlet;
+#X msg 50 200 speed \$1;
 #N canvas 1000 610 450 300 pitch 0;
 #X obj 100 70 inlet;
 #X obj 100 240 outlet;
@@ -62,17 +62,19 @@
 #X connect 3 0 5 0;
 #X connect 4 0 3 0;
 #X connect 5 0 2 0;
-#X restore 120 90 pd pitch;
-#X obj 120 30 cupqb;
-#X msg 300 200 seek \$1;
-#X msg 210 60 1;
+#X restore 50 90 pd pitch;
+#X obj 50 30 cupqb;
+#X msg 280 200 seek \$1;
+#X msg 140 60 1;
+#X obj 220 200 #*;
 #X connect 0 0 9 0;
 #X connect 1 0 0 0;
 #X connect 2 0 3 0;
-#X connect 3 0 4 1;
+#X connect 3 0 15 0;
 #X connect 4 0 13 0;
 #X connect 5 0 4 0;
 #X connect 6 0 10 0;
+#X connect 6 0 15 1;
 #X connect 7 0 1 0;
 #X connect 7 0 6 0;
 #X connect 8 0 14 0;
@@ -82,6 +84,7 @@
 #X connect 12 0 11 0;
 #X connect 13 0 9 0;
 #X connect 14 0 7 0;
+#X connect 15 0 4 1;
 #X restore 250 250 pd pitch;
 #X obj 110 550 tabwrite~ \$0gme;
 #X obj 550 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000

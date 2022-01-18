@@ -20,7 +20,7 @@ Shay Green <gblargg@gmail.com>
 #define FRAMES 16
 
 enum { buf_size  = NCH * FRAMES };
-enum { mask_size = 8 };
+enum { mask_size = 16 };
 
 static const double frames = FRAMES;
 static const double inv_frames = 1. / frames;
@@ -43,7 +43,7 @@ typedef struct {
 	float out[buf_size]; /* audio output buffer */
 	double tempo;     /* current tempo */
 	int track;        /* current track number */
-	byte mask;        /* muting mask */
+	short mask;       /* muting mask */
 	unsigned read:1;  /* when a file has been read but not yet played */
 	unsigned open:1;  /* when a request for playback is made */
 	unsigned stop:1;  /* flag to start from beginning on next playback */
@@ -313,7 +313,7 @@ static void gmepd_speed(t_gme *x ,t_float f) {
 	x->data.src_ratio = 1./f;
 }
 
-static byte domask(byte mask ,int ac ,t_atom *av) {
+static short domask(short mask ,int ac ,t_atom *av) {
 	for (; ac--; av++) if (av->a_type == A_FLOAT)
 	{	int d = av->a_w.w_float;
 		if (!d)
@@ -332,7 +332,7 @@ static void gmepd_mute(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void gmepd_solo(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
-	byte mask = domask(~0 ,ac ,av);
+	short mask = domask(~0 ,ac ,av);
 	x->mask = (x->mask == mask) ? 0 : mask;
 	if (x->emu) gme_mute_voices(x->emu ,x->mask);
 }
