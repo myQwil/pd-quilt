@@ -1,7 +1,7 @@
 #N canvas 730 360 350 250 14;
 #X obj 140 90 inlet;
 #X obj 210 90 inlet;
-#X obj 170 120 route bash;
+#X obj 170 120 route now;
 #X obj 140 150 pack 0 \$1;
 #X obj 80 180 sel;
 #X obj 140 180 line~;
