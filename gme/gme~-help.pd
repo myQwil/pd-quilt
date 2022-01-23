@@ -5,14 +5,14 @@
 #X array \$0gme 120 float 2;
 #X coords 0 1.0833 120 -1.0833 120 130 1 0 0;
 #X restore 370 160 graph;
-#X obj 30 440 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 30 440 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X floatatom 90 430 0 0 0 0 - - - 0;
 #X obj 50 340 cupqb 1;
 #X obj 110 210 openpanel;
 #X obj 230 510 *~;
-#X obj 220 240 bng 15 250 50 0 empty empty play/pause 19 7 0 11 #000000
-#fcfcfc #fcfcfc;
+#X obj 220 240 bng 15 250 50 0 empty empty play/pause 19 7 0 11 #ff8300
+#fcfcfc #7c7c7c;
 #X msg 230 260 stop;
 #X text 100 370 tracks;
 #X obj 200 410 gme~;
@@ -20,11 +20,11 @@
 #X obj 160 570 *~;
 #X obj 270 510 cos~;
 #X obj 270 570 *~;
-#X obj 60 320 bng 15 250 50 0 empty empty restart 17 7 0 10 #000000
-#fcfcfc #fcfcfc;
-#X obj 370 440 hsl 128 17 0.001 1 1 0 empty empty vol 25 9 0 12 #000000
+#X obj 60 320 bng 15 250 50 0 empty empty restart 17 7 0 10 #ff8300
+#fcfcfc #7c7c7c;
+#X obj 370 440 hsl 128 17 0.001 1 1 0 empty empty vol 25 9 0 12 #2f004d
 #fcfcfc #fcfcfc 0 1;
-#X obj 370 510 hsl 128 17 -0.001 -1 1 0 empty empty cos 25 9 0 12 #000000
+#X obj 370 510 hsl 128 17 -0.001 -1 1 0 empty empty cos 25 9 0 12 #2f004d
 #fcfcfc #fcfcfc 0 1;
 #X floatatom 380 470 0 0 0 0 - - - 0;
 #X floatatom 380 540 0 0 0 0 - - - 0;
@@ -73,7 +73,7 @@
 #X msg 200 280 1, f 2;
 #X obj 200 460 *~;
 #X obj 200 430 line~;
-#X obj 80 370 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 80 370 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X msg 140 300 0, f 2;
 #X msg 140 340 set \$1;
@@ -84,12 +84,12 @@
 #X obj 290 400 loadbang;
 #X floatatom 290 460 0 0 0 0 - - - 0;
 #X obj 180 100 del;
-#X obj 90 340 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 90 340 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X obj 290 490 s \$0ps;
 #X obj 110 370 r \$0ps;
 #X msg 290 430 15;
-#X obj 230 310 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 230 310 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #N canvas 300 400 450 300 display 0;
 #X obj 140 30 inlet;
@@ -124,7 +124,7 @@
 #X connect 14 0 7 0;
 #X restore 310 310 pd display;
 #N canvas 580 190 450 300 pause 0;
-#X obj 150 110 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 150 110 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X obj 150 190 t b f;
 #X obj 150 220 del;
@@ -217,7 +217,7 @@ by Shay Green and maintained by Michael Pyne at https://bitbucket.org/mpyne/game
 Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 \, AP \, SPC \, RSN \, VGM/VGZ;
 #X obj 110 160 bng 15 250 50 0 empty empty previous_directory 19 7
-0 11 #000000 #fcfcfc #fcfcfc;
+0 11 #ff8300 #fcfcfc #7c7c7c;
 #X msg 120 180 symbol ~/Music/Games;
 #X obj 320 470 zp~ 15;
 #X obj 320 540 zp~ 15;
@@ -350,7 +350,7 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X floatatom 220 110 0 0 0 0 - - - 0;
 #X obj 220 140 * 100;
 #X obj 280 170 f;
-#X obj 280 140 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 280 140 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X floatatom 50 140 0 0 0 0 - - - 0;
 #X floatatom 140 90 0 5 2000 0 - - - 0;

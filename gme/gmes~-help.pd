@@ -4,15 +4,15 @@
 #X array \$0gme 120 float 2;
 #X coords 0 1.0833 120 -1.0833 120 130 1 0 0;
 #X restore 290 100 graph;
-#X obj 110 460 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 110 460 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X floatatom 140 450 0 0 0 0 - - - 0;
 #X obj 160 190 cupqb;
 #X obj 40 110 openpanel;
-#X obj 50 220 bng 15 250 50 0 empty empty play/pause 17 7 0 10 #000000
+#X obj 50 220 bng 15 250 50 0 empty empty play/pause 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X msg 210 210 stop;
-#X obj 180 170 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 180 170 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X msg 160 240 \$1 \, info;
 #X obj 160 280 gmes~, f 34;
@@ -20,22 +20,22 @@
 #X obj 280 20 cnv 15 72 24 empty empty gmes~ 4 12 0 18 #000000 #fcfcfc
 0;
 #X text 180 50 the multi-channel version of gme~;
-#X obj 450 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
+#X obj 450 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
 #X msg 40 140 open \$1 \, path \, info \, bang;
-#X obj 470 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
+#X obj 470 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
-#X obj 490 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
+#X obj 490 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
-#X obj 510 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
+#X obj 510 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
-#X obj 530 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
+#X obj 530 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #551312
 #fcfcfc #fcfcfc 0 1;
 #X obj 370 520 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10
-#000000 #fcfcfc #fcfcfc 0 1;
+#2f004d #fcfcfc #fcfcfc 0 1;
 #X floatatom 370 540 0 0 0 0 - - - 0;
 #X obj 110 480 metro 40;
-#X obj 480 110 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 #000000
+#X obj 480 110 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
 #N canvas 780 580 400 300 pitch 0;
 #X msg 140 200 tempo \$1;
@@ -43,7 +43,7 @@
 #X floatatom 220 110 0 0 0 0 - - - 0;
 #X obj 220 140 * 100;
 #X obj 280 170 f;
-#X obj 280 140 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 280 140 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X floatatom 50 140 0 0 0 0 - - - 0;
 #X floatatom 140 90 0 5 2000 0 - - - 0;
@@ -87,11 +87,11 @@
 #X connect 15 0 4 1;
 #X restore 250 250 pd pitch;
 #X obj 110 550 tabwrite~ \$0gme;
-#X obj 550 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
+#X obj 550 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #551312
 #fcfcfc #fcfcfc 0 1;
-#X obj 570 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
+#X obj 570 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #551312
 #fcfcfc #fcfcfc 0 1;
-#X obj 590 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
+#X obj 590 170 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #551312
 #fcfcfc #fcfcfc 0 1;
 #N canvas 780 580 450 300 (subpatch) 0;
 #X obj 70 60 inlet~ l;

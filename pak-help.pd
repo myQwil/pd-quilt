@@ -13,7 +13,7 @@
 #X msg 110 210 hello;
 #X msg 170 210 12;
 #X msg 130 280 list bang;
-#X obj 240 240 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 240 240 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X msg 280 230 . 6;
 #X msg 340 180 traverse pd-foo \, bang;
@@ -45,12 +45,12 @@
 #X connect 4 2 7 0;
 #X restore 130 400 pd out;
 #X floatatom 130 490 0 0 0 0 - - - 0;
-#X obj 140 430 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 140 430 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X obj 160 460 symbol;
 #X symbolatom 160 490 0 0 0 0 - - - 0;
 #X obj 180 430 pointer;
-#X obj 220 460 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 220 460 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #N canvas 570 390 350 270 out 0;
 #X obj 70 50 inlet;
@@ -73,12 +73,12 @@
 #X connect 4 2 7 0;
 #X restore 250 400 pd out;
 #X floatatom 250 490 0 0 0 0 - - - 0;
-#X obj 260 430 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 260 430 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X obj 280 460 symbol;
 #X symbolatom 280 490 0 0 0 0 - - - 0;
 #X obj 300 430 pointer;
-#X obj 340 460 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 340 460 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #N canvas 570 390 350 270 out 0;
 #X obj 70 50 inlet;
@@ -101,12 +101,12 @@
 #X connect 4 2 7 0;
 #X restore 370 400 pd out;
 #X floatatom 370 490 0 0 0 0 - - - 0;
-#X obj 380 430 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 380 430 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X obj 400 460 symbol;
 #X symbolatom 400 490 0 0 0 0 - - - 0;
 #X obj 420 430 pointer;
-#X obj 460 460 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 460 460 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X text 150 70 lazy pack/unpack objects with 'anything' inlets/outlets
 ;

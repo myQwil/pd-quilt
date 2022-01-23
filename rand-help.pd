@@ -8,14 +8,14 @@
 #X obj 210 30 cnv 15 60 24 empty empty rand 4 12 0 18 #000000 #fcfcfc
 0;
 #N canvas 580 380 470 330 no-repeats 0;
-#X obj 100 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 100 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X floatatom 100 280 0 0 0 0 - - - 0;
 #X obj 210 130 loadbang;
 #X floatatom 190 280 0 0 0 0 - - - 0;
 #X msg 210 190 seed 123;
 #X obj 60 100 metro 100;
-#X obj 60 70 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc #fcfcfc
+#X obj 60 70 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc #fcfcfc
 0 1;
 #X obj 40 280 print;
 #X msg 190 160 nop 2;
@@ -23,10 +23,9 @@
 #X obj 290 250 random 2;
 #X obj 100 250 rand -1 1;
 #X obj 190 250 rand 20 | 1;
-#X obj 150 40 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
-#fcfcfc 0 1;
+#X obj 150 40 tgl 15 0 empty empty no-repeat\ mode 17 7 0 12 #ff0400
+#fcfcfc #7c7c7c 0 1;
 #X msg 150 100 nop \$1;
-#X text 170 40 no-repeat mode;
 #X floatatom 160 70 0 0 0 0 - - - 0;
 #X text 200 70 max repeats allowed;
 #X connect 0 0 10 0;
@@ -48,16 +47,16 @@
 #X connect 13 0 14 0;
 #X connect 14 0 11 0;
 #X connect 14 0 12 0;
-#X connect 16 0 14 0;
+#X connect 15 0 14 0;
 #X restore 360 470 pd no-repeats;
-#X obj 150 150 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 150 150 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X floatatom 70 330 0 0 0 0 - - - 0;
 #X obj 70 300 rand 4 8;
-#X obj 70 270 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 70 270 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
 #fcfcfc;
 #X floatatom 70 440 0 0 0 0 - - - 0;
-#X obj 70 380 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 70 380 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
 #fcfcfc;
 #X text 90 380 3 or more args create a list;
 #X text 60 60 Similar to [random] but with the current time worked
@@ -67,19 +66,19 @@ into the seed to produce different results with each restart of pd.
 #X text 90 270 2 args create start/stop boundaries;
 #N canvas 580 380 480 400 lists 0;
 #X floatatom 40 110 0 0 0 0 - - - 0;
-#X obj 40 50 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 40 50 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
 #fcfcfc;
 #X floatatom 40 240 0 0 0 0 - - - 0;
-#X obj 40 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 40 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
 #fcfcfc;
 #X msg 70 170 lst \$1;
-#X obj 70 150 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 70 150 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X obj 40 210 rand 1 5;
 #X obj 40 80 rand 22 or 333;
 #X text 130 170 force list or range behavior;
 #X floatatom 40 350 0 0 0 0 - - - 0;
-#X obj 40 290 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 40 290 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
 #fcfcfc;
 #X msg 80 250 size 2;
 #X msg 60 290 1.2 2.3 3.4;

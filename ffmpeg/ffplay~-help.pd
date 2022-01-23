@@ -2,28 +2,28 @@
 #X obj 220 520 *~;
 #X obj 220 550 dac~;
 #N canvas 710 780 450 300 (subpatch) 0;
-#X array \$0ffplay 1152 float 2;
-#X coords 0 1 1152 -1 128 160 1;
-#X restore 390 120 graph;
-#X obj 30 460 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X array \$0ffplay 480 float 2;
+#X coords 0 1.0833 480 -1.0833 120 130 1 0 0;
+#X restore 390 140 graph;
+#X obj 30 460 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X floatatom 90 460 0 0 0 0 - - - 0;
 #X obj 70 330 cupqb 1;
 #X obj 130 200 openpanel;
 #X obj 250 520 *~;
-#X obj 250 200 bng 15 250 50 0 empty empty play/pause 19 7 0 11 #000000
-#fcfcfc #fcfcfc;
+#X obj 250 200 bng 15 250 50 0 empty empty play/pause 19 7 0 11 #ff8300
+#fcfcfc #7c7c7c;
 #X msg 260 230 stop;
 #X text 120 360 tracks;
 #X obj 170 520 cos~;
 #X obj 170 580 *~;
 #X obj 290 520 cos~;
 #X obj 290 580 *~;
-#X obj 90 300 bng 15 250 50 0 empty empty restart 17 7 0 11 #000000
-#fcfcfc #fcfcfc;
-#X obj 380 440 hsl 128 17 0.001 1 1 0 empty empty vol 25 9 0 12 #000000
+#X obj 90 300 bng 15 250 50 0 empty empty restart 17 7 0 11 #ff8300
+#fcfcfc #7c7c7c;
+#X obj 380 440 hsl 128 17 0.001 1 1 0 empty empty vol 25 9 0 12 #2f004d
 #fcfcfc #fcfcfc 0 1;
-#X obj 380 520 hsl 128 17 -0.001 -1 1 0 empty empty cos 25 9 0 12 #000000
+#X obj 380 520 hsl 128 17 -0.001 -1 1 0 empty empty cos 25 9 0 12 #2f004d
 #fcfcfc #fcfcfc 0 1;
 #X floatatom 390 470 0 0 0 0 - - - 0;
 #X floatatom 390 550 0 0 0 0 - - - 0;
@@ -75,7 +75,7 @@
 #X obj 200 190 snapshot~;
 #X msg 200 120 set 0;
 #X obj 220 150 sig~ 1;
-#X obj 130 60 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 130 50 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
 #fcfcfc;
 #X obj 200 220 outlet;
 #X obj 110 160 r pd;
@@ -116,7 +116,7 @@
 #X connect 12 0 7 0;
 #X restore 230 80 pd is-playing;
 #X obj 300 220 outlet;
-#X obj 160 140 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 160 140 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X msg 160 190 pos;
 #X floatatom 230 130 0 0 0 0 - - - 0;
@@ -134,7 +134,7 @@
 #X connect 11 0 9 0;
 #X restore 250 260 pd time;
 #X obj 130 150 bng 15 250 50 0 empty empty previous_directory 19 7
-0 11 #000000 #fcfcfc #fcfcfc;
+0 11 #ff8300 #fcfcfc #7c7c7c;
 #X obj 330 470 zp~ 15;
 #X obj 330 550 zp~ 15;
 #N canvas 1150 350 450 300 bounds 0;
@@ -189,15 +189,15 @@
 #X obj 50 270 r \$0start;
 #X msg 140 170 symbol ~/Music;
 #X msg 130 230 open \$1;
-#X obj 30 490 metro 48;
+#X obj 30 490 metro 40;
 #X obj 100 520 /~ 2;
 #N canvas 360 600 660 190 trackbar 0;
 #X obj 30 140 outlet;
 #X msg 30 110 seek \$1;
 #X obj 60 20 hsl 576 20 0 1 0 0 empty \$0trackbar empty -2 -8 0 10
-#000000 #fcfcfc #fcfcfc 0 1;
+#2f004d #fcfcfc #fcfcfc 0 1;
 #X obj 70 50 r \$0time;
-#X obj 30 20 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 30 20 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
 #fcfcfc;
 #X obj 30 50 *;
 #X obj 40 80 s \$0seek;
@@ -248,7 +248,7 @@
 #X obj 150 50 loadbang;
 #X msg 150 80 3000;
 #X obj 400 80 @pow 2;
-#X obj 480 50 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 480 50 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
 #fcfcfc;
 #X obj 400 50 line 0 2;
 #X floatatom 510 110 10 0 0 0 - - - 0;
@@ -362,7 +362,7 @@ and playback speed manipulation.;
 #X connect 34 0 41 0;
 #X connect 35 0 41 0;
 #X connect 36 0 41 0;
-#X connect 38 0 15 0;
+#X connect 38 0 5 2;
 #X connect 41 0 0 0;
 #X connect 41 0 32 0;
 #X connect 41 0 11 0;

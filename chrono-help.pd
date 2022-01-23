@@ -1,6 +1,6 @@
 #N canvas 630 400 520 380 14;
-#X obj 140 30 tgl 15 0 empty empty reset 17 7 0 11 #000000 #fcfcfc
-#fcfcfc 0 1;
+#X obj 140 30 tgl 15 0 empty empty reset 17 7 0 11 #ff0400 #fcfcfc
+#7c7c7c 0 1;
 #X obj 140 60 t f f;
 #X obj 130 100 sel 1;
 #X obj 130 260 chrono;
@@ -33,12 +33,15 @@
 #X text 290 250 lap / total;
 #X obj 310 30 cnv 15 86 24 empty empty chrono 4 12 0 18 #000000 #fcfcfc
 0;
+#X obj 180 290 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#fcfcfc 0 1;
 #X connect 0 0 1 0;
 #X connect 1 0 4 0;
 #X connect 1 1 2 0;
 #X connect 2 0 3 0;
 #X connect 3 0 17 0;
 #X connect 3 1 11 0;
+#X connect 3 2 22 0;
 #X connect 4 0 3 1;
 #X connect 5 0 3 0;
 #X connect 6 0 3 0;

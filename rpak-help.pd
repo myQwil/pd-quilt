@@ -1,6 +1,6 @@
 #N canvas 650 360 500 360 14;
 #X obj 120 310 print;
-#X obj 110 160 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 110 160 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X msg 180 160 123;
 #X msg 220 230 hi;
@@ -12,11 +12,11 @@
 #X obj 120 260 @pak f f a;
 #X text 170 310 a f f;
 #X msg 30 190 . . \$1;
-#X obj 400 300 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 400 300 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 340 300 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 340 300 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 280 300 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 280 300 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X text 100 70 args are written in receiving order;
 #X text 120 50 outputs the values in reverse;

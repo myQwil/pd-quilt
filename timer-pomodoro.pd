@@ -1,11 +1,11 @@
-#N canvas 20 600 380 170 14;
+#N canvas 80 600 380 170 14;
 #N canvas 400 420 420 490 clock 0;
-#X obj 50 110 bng 16 250 50 0 empty empty pause -4 -10 0 11 #000000
+#X obj 50 110 bng 16 250 50 0 empty empty pause -4 -10 0 11 #ff8300
 #fcfcfc #fcfcfc;
 #X msg 50 250 pause;
-#X obj 50 60 bng 16 250 50 0 empty empty reset -4 -10 0 11 #000000
+#X obj 50 60 bng 16 250 50 0 empty empty reset -4 -10 0 11 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 80 160 tgl 16 0 empty empty reset 20 8 0 11 #000000 #fcfcfc
+#X obj 80 160 tgl 16 0 empty empty reset 20 8 0 11 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X obj 190 200 sel 1;
 #N canvas 820 420 350 370 tick 0;
@@ -18,7 +18,7 @@
 #X obj 80 310 dac~;
 #X obj 120 250 noise~;
 #X obj 160 280 hsl 128 20 0.001 1 1 0 empty empty empty -2 -8 0 10
-#000000 #fcfcfc #fcfcfc 0 1;
+#2f004d #fcfcfc #fcfcfc 0 1;
 #X floatatom 160 310 0 0 0 0 - - - 0;
 #X obj 80 80 % 60;
 #X obj 80 110 sel;
@@ -27,8 +27,8 @@
 #X obj 130 80 % 4;
 #X obj 180 250 r \$0vol;
 #X obj 80 280 *~;
-#X msg 120 150 0.36;
-#X msg 170 150 0.13;
+#X msg 120 150 0.3;
+#X msg 170 150 0.1;
 #X floatatom 240 80 0 0 0 0 - - - 0;
 #X obj 240 110 dbtorms;
 #X floatatom 240 140 0 0 0 0 - - - 0;
@@ -92,13 +92,13 @@
 #X obj 100 10 s \$0w;
 #X obj 150 10 s \$0b;
 #X obj 200 10 s \$0r;
-#X obj 250 40 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 250 40 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
 #fcfcfc;
 #N canvas 820 610 450 300 notify 0;
 #X obj 30 30 inlet;
 #X obj 30 260 outlet;
 #X obj 120 30 inlet reset;
-#X obj 30 90 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc #fcfcfc
+#X obj 30 90 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc #fcfcfc
 0 1;
 #X obj 30 120 sel 0 1;
 #X msg 60 60 set \$1;
@@ -161,7 +161,7 @@
 #X msg 50 320 1;
 #X obj 50 350 / 60;
 #X msg 90 320 60;
-#X obj 100 90 hsl 128 15 0.001 1 1 0 empty empty volume 7 7 0 10 #000000
+#X obj 100 90 hsl 128 15 0.001 1 1 0 empty empty volume 7 7 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
 #X floatatom 190 110 5 0 0 0 - - \$0vol 0;
 #X obj 270 160 r \$0c;

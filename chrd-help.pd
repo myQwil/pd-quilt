@@ -53,7 +53,7 @@
 #X restore 180 320 pd chords;
 #X floatatom 150 260 0 0 0 0 - - - 0;
 #X obj 150 290 s pmnto;
-#X obj 280 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 280 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X obj 330 520 *~;
 #X msg 310 350 1;
@@ -69,17 +69,17 @@
 #X obj 260 320 t b f;
 #X msg 270 230 size 5;
 #X obj 310 200 t a b;
-#X obj 330 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 330 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 350 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 350 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 370 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 370 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 390 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 390 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 410 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 410 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 430 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 430 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X obj 220 290 s z;
 #X obj 50 190 unpack 1 2 3 4;
@@ -91,10 +91,10 @@
 #X msg 210 490 size \$1;
 #X text 60 510 use all outlets;
 #X text 90 530 on bang;
-#X obj 70 450 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 70 450 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X msg 70 480 all \$1;
-#X obj 60 360 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 60 360 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X msg 60 380 expl \$1;
 #X msg 50 160 1 10 10 5;
@@ -297,7 +297,7 @@
 #X obj 400 20 inlet;
 #X obj 50 340 *~ 0.1667;
 #X obj 50 370 outlet~;
-#X obj 400 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
+#X obj 400 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
 #X obj 50 300 *~ 1;
 #X obj 90 300 *~ 1;
@@ -305,15 +305,15 @@
 #X obj 170 300 *~ 1;
 #X obj 210 300 *~ 1;
 #X obj 250 300 *~ 1;
-#X obj 420 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
+#X obj 420 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
-#X obj 440 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
+#X obj 440 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
-#X obj 460 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
+#X obj 460 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
-#X obj 480 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
+#X obj 480 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
-#X obj 500 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #000000
+#X obj 500 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
 #X floatatom 60 50 0 0 0 0 - - - 0;
 #X floatatom 130 50 0 0 0 0 - - - 0;
@@ -363,7 +363,7 @@
 #X connect 33 0 14 0;
 #X restore 330 490 pd instruments;
 #X obj 50 130 loadbang;
-#X obj 490 450 vsl 15 128 0.001 1 1 0 empty empty empty 0 -9 0 10 #000000
+#X obj 490 450 vsl 15 128 0.001 1 1 0 empty empty empty 0 -9 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
 #X obj 310 270 cupqb 16;
 #X obj 360 270 cupqb 19;

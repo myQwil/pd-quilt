@@ -54,7 +54,7 @@
 #X text 270 320 live sustain;
 #X obj 30 600 *~;
 #X obj 30 630 dac~;
-#X obj 70 600 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10 #000000
+#X obj 70 600 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
 #X text 280 50 envelope generator abstraction;
 #X obj 370 20 cnv 15 60 24 empty empty adsr 4 12 0 18 #000000 #fcfcfc

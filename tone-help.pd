@@ -7,7 +7,7 @@
 #X obj 80 300 *~;
 #X obj 70 330 dac~;
 #X obj 120 330 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10
-#000000 #fcfcfc #fcfcfc 0 1;
+#2f004d #fcfcfc #fcfcfc 0 1;
 #X msg 100 120 440 12;
 #X floatatom 120 150 0 0 0 0 - - - 0;
 #X floatatom 160 180 0 0 0 0 - - - 0;

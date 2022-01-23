@@ -1,11 +1,11 @@
 #N canvas 710 340 470 290 14;
-#X obj 30 130 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 30 130 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X obj 30 150 metro 200;
-#X obj 40 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 40 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
 #fcfcfc;
 #X floatatom 80 180 0 0 0 0 - - - 0;
-#X obj 150 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 150 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X obj 170 200 rind 3.2 6.7;
 #X floatatom 170 230 0 0 0 0 - - - 0;

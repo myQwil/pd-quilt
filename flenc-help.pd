@@ -6,14 +6,14 @@
 #X obj 350 140 cupqb;
 #X obj 110 200 #/;
 #X floatatom 110 230 0 0 0 0 - - - 0;
-#X obj 230 200 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 230 200 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X obj 320 200 #pow;
 #X floatatom 320 230 0 0 0 0 - - - 0;
 #X obj 200 230 fldec -0.25;
-#X floatatom 140 300 0 0 0 0 mantissa - - 0;
-#X floatatom 320 300 0 0 255 0 exponent - - 0;
-#X floatatom 400 300 0 0 1 0 sign - - 0;
+#X floatatom 140 300 0 0 0 2 mantissa - - 0;
+#X floatatom 260 300 0 0 255 2 exponent - - 0;
+#X floatatom 370 300 0 0 1 2 sign - - 0;
 #X obj 410 340 - 127;
 #X obj 410 370 @pow 2;
 #X floatatom 410 400 0 0 0 0 - - - 0;
@@ -21,15 +21,15 @@
 #X msg 210 350 m 2000 \, e 131 \, s 0;
 #X msg 220 380 set . 125 1;
 #X obj 210 410 flenc 0 125 1;
-#X obj 170 380 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 170 380 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X floatatom 210 440 0 0 0 0 - - - 0;
 #X obj 40 370 cupqb;
 #X text 170 70 float-encode & float-decode;
 #X text 30 90 splits and joins the sign \, exponent \, and mantissa
 of a float;
-#X obj 170 40 cnv 15 190 24 empty empty flenc\\\ &\\\ fldec 4 12 0
-18 #000000 #fcfcfc 0;
+#X obj 170 40 cnv 15 178 24 empty empty flenc\ &\ fldec 4 12 0 18 #000000
+#fcfcfc 0;
 #X obj 40 470 mantissa;
 #X connect 0 0 5 0;
 #X connect 1 0 5 1;

@@ -63,11 +63,7 @@ static int speed_to_srate(t_float speed) {
 		speed = 0.01;
 	speed = sys_getsr() / speed;
 	ufloat uf = {speed};
-	int d = speed;
-	if (speed <= 0.f)
-		d = 1;
-	else if (uf.ex == 0xff)
-		d = INT_MAX;
+	int d = speed <= 0.f ? 1 : (uf.ex == 0xff ? INT_MAX : speed);
 	return d;
 }
 
@@ -157,7 +153,7 @@ static void ffplay_dsp(t_ffplay *x ,t_signal **sp) {
 	dsp_add(ffplay_perform ,2 ,x ,sp[0]->s_n);
 }
 
-static err_t ffplay_load(t_ffplay *x ,const char *fname) {
+static inline err_t ffplay_load_(t_ffplay *x ,const char *fname) {
 	avformat_close_input(&x->ic);
 	x->ic = avformat_alloc_context();
 	if (avformat_open_input(&x->ic ,fname ,NULL ,NULL) != 0)
@@ -227,12 +223,12 @@ static err_t ffplay_m3u(t_ffplay *x ,t_symbol *s) {
 	return 0;
 }
 
-static err_t ffplay_start(t_ffplay *x ,int track) {
+static err_t ffplay_load(t_ffplay *x ,int track) {
 	char str[MAXPDSTRING];
 	sprintf(str ,"%s/%s"
 		,x->plist.dir->s_name
 		,x->plist.trk[track-1]->s_name);
-	err_t err_msg = ffplay_load(x ,str);
+	err_t err_msg = ffplay_load_(x ,str);
 	x->open = !err_msg;
 	x->play = 0;
 	return err_msg;
@@ -262,7 +258,7 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 	{	x->plist.siz = 1;
 		x->plist.trk[0] = gensym(path);  }
 
-	if (!err_msg) err_msg = ffplay_start(x ,1);
+	if (!err_msg) err_msg = ffplay_load(x ,1);
 	if (err_msg) post("Error: %s." ,err_msg);
 	t_atom open = {.a_type=A_FLOAT ,.a_w={.w_float = x->open}};
 	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
@@ -360,7 +356,7 @@ static void ffplay_float(t_ffplay *x ,t_float f) {
 	if (!x->open) return;
 	int d = f;
 	if (d > 0 && d <= x->plist.siz)
-	{	err_t err_msg = ffplay_start(x ,d);
+	{	err_t err_msg = ffplay_load(x ,d);
 		if (err_msg) post("Error: %s." ,err_msg);
 		x->play = !err_msg;  }
 	else

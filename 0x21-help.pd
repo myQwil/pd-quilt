@@ -1,8 +1,8 @@
 #N canvas 720 350 350 230 14;
-#X obj 160 120 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 160 120 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X obj 160 140 !, f 1;
-#X obj 160 170 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 160 170 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X text 110 60 logical negation;
 #X text 100 80 shorthand for [== 0];

@@ -13,6 +13,15 @@ Shay Green <gblargg@gmail.com>
 #include <string.h>
 #include <samplerate.h>
 
+#ifdef MSW          // when compiling for Windows
+#define EXPORT __declspec(dllexport)
+#elif __GNUC__ >= 4 // else, when compiling with GCC 4.0 or higher
+#define EXPORT __attribute__((visibility("default")))
+#endif
+#ifndef EXPORT
+#define EXPORT      // empty definition for other cases
+#endif
+
 #ifndef NCH
 #define NCH 2
 #endif
@@ -351,7 +360,6 @@ static void *gmepd_new(t_class *gmeclass ,t_symbol *s ,int ac ,t_atom *av) {
 	int i = NCH;
 	while (i--) outlet_new(&x->obj ,&s_signal);
 	x->o_meta = outlet_new(&x->obj ,0);
-	if (ac) gmepd_solo(x ,NULL ,ac ,av);
 	x->path = gensym("no track loaded");
 
 	int err;
@@ -366,6 +374,8 @@ static void *gmepd_new(t_class *gmeclass ,t_symbol *s ,int ac ,t_atom *av) {
 	x->tempo = 1.;
 	x->track = x->mask = 0;
 	x->read = x->open = x->stop = x->play = 0;
+
+	if (ac) gmepd_solo(x ,NULL ,ac ,av);
 	return (x);
 }
 

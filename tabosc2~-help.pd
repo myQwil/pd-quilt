@@ -6,7 +6,7 @@
 #X obj 60 230 osc~ 0.1;
 #X obj 60 290 *~ 0.5;
 #X obj 60 320 +~ 0.5;
-#X obj 230 100 tgl 15 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#X obj 230 100 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X obj 230 120 t f f;
 #X obj 180 170 sel 1;
@@ -18,15 +18,14 @@
 #X floatatom 100 260 0 0 0 0 - - - 0;
 #X floatatom 120 290 0 -10000 100 0 - - - 0;
 #X obj 120 320 / 100;
-#X obj 270 150 cupqb;
+#X obj 290 120 cupqb 2;
 #X obj 240 210 @pow 2;
 #X obj 250 240 pack 0 \$0;
 #X msg 250 270 \; \$2wave cosinesum \$1 0 1;
 #N canvas 0 50 450 250 (subpatch) 0;
-#X array \$0wave 7 float 3;
-#A 0 0 1 0 -1 0 1 0;
+#X array \$0wave 7 float 2;
 #X coords 0 1.0833 7 -1.0833 300 140 1 0 0;
-#X restore 340 120 graph;
+#X restore 350 30 graph;
 #N canvas 0 50 450 250 (subpatch) 0;
 #X array \$0view 482 float 2;
 #X coords 0 1.0833 482 -1.0833 241 130 1 0 0;
@@ -45,7 +44,7 @@
 #X connect 5 0 3 0;
 #X restore 490 290 pd view-size;
 #X obj 20 400 *~;
-#X obj 60 400 hsl 128 20 0.001 1 1 0 empty empty empty -2 -8 0 10 #000000
+#X obj 60 400 hsl 128 20 0.001 1 1 0 empty empty empty -2 -8 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
 #X floatatom 60 430 0 0 0 0 - - - 0;
 #X obj 20 430 dac~;
@@ -55,6 +54,8 @@
 #X text 20 140 3rd inlet: phase index;
 #X obj 20 20 cnv 15 112 24 empty empty tabosc2~ 4 12 0 18 #000000 #fcfcfc
 0;
+#X obj 300 180 loadbang;
+#X msg 300 210 4;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 2 0 14 0;
@@ -84,3 +85,5 @@
 #X connect 25 0 28 1;
 #X connect 26 0 25 1;
 #X connect 26 0 27 0;
+#X connect 34 0 35 0;
+#X connect 35 0 20 0;
