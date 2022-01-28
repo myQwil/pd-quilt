@@ -26,10 +26,10 @@ Shay Green <gblargg@gmail.com>
 #define NCH 2
 #endif
 
-#define FRAMES 16
+#define FRAMES 0x10
 
 enum { buf_size  = NCH * FRAMES };
-enum { mask_size = 16 };
+enum { mask_size = 0x10 };
 
 static const double frames = FRAMES;
 static const double inv_frames = 1. / frames;

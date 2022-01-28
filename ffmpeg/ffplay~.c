@@ -6,8 +6,8 @@
 #include <libavformat/avformat.h>
 #include <libswresample/swresample.h>
 
-#define BUFSIZE 0x400
-#define MAXCH 32
+#define BUFSIZE 0x40
+#define MAXCH 0x20
 
 typedef const char *err_t;
 
@@ -112,6 +112,7 @@ static t_int *ffplay_perform(t_int *w) {
 				if (n--)
 					goto sound;
 				else break;  }
+
 			while (av_read_frame(x->ic ,x->pkt) >= 0)
 			{	if (x->pkt->stream_index == x->idx)
 				{	if (avcodec_send_packet(x->ctx ,x->pkt) < 0
@@ -134,11 +135,12 @@ static t_int *ffplay_perform(t_int *w) {
 
 			// reached the end
 			if (x->play)
-				x->play = 0 ,n++; // don't iterate in case there's another track
+			{	x->play = 0;
+				n++; // don't iterate in case there's another track
+				outlet_anything(x->o_meta ,gensym("done") ,0 ,0);  }
 			else
 			{	ffplay_seek(x ,0);
-				goto silence;  }
-			outlet_anything(x->o_meta ,gensym("EOF") ,0 ,0);  }
+				goto silence;  }  }
 		x->pos = pos;  }
 	else while (n--)
 	{	silence:

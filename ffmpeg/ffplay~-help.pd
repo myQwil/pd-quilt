@@ -27,7 +27,7 @@
 #fcfcfc #fcfcfc 0 1;
 #X floatatom 390 470 0 0 0 0 - - - 0;
 #X floatatom 390 550 0 0 0 0 - - - 0;
-#X obj 220 20 cnv 15 88 24 empty empty ffplay~ 4 12 0 18 #000000 #fcfcfc
+#X obj 220 20 cnv 15 102 24 empty empty ffplay~ 4 12 0 18 #000000 #fcfcfc
 0;
 #N canvas 180 430 480 370 time 0;
 #X obj 80 40 inlet;
@@ -166,9 +166,9 @@
 #X obj 320 120 s \$0play;
 #X obj 180 220 s \$0open;
 #X obj 250 90 s \$0pos;
-#X obj 210 120 s \$0eof;
+#X obj 210 120 s \$0done;
 #X obj 50 180 print -n;
-#X obj 50 60 route tracks time open EOF pos play;
+#X obj 50 60 route tracks time open done pos play;
 #X msg 180 190 path \, tracks \, info;
 #X msg 50 150 \$1 tracks;
 #X connect 0 0 11 0;
@@ -201,8 +201,8 @@
 #fcfcfc;
 #X obj 30 50 *;
 #X obj 40 80 s \$0seek;
-#X floatatom 400 110 9 0 0 0 - - - 0;
-#X msg 400 140 speed \$1;
+#X floatatom 380 110 9 0 0 0 - - - 0;
+#X msg 380 140 speed \$1;
 #N canvas 1090 420 400 440 kseek 0;
 #X obj 50 20 keyname;
 #X obj 50 110 spigot;
@@ -247,15 +247,12 @@
 #X floatatom 200 80 0 0 0 0 - - - 0;
 #X obj 150 50 loadbang;
 #X msg 150 80 3000;
-#X obj 400 80 @pow 2;
-#X obj 480 50 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
-#fcfcfc;
-#X obj 400 50 line 0 2;
-#X floatatom 510 110 10 0 0 0 - - - 0;
-#X msg 290 50 1.5 5000;
-#X msg 290 80 -3 5000;
-#X msg 510 80 0 \, -1 \$1;
-#X obj 510 50 * 10 60000;
+#X obj 380 80 @pow 2;
+#X obj 380 50 line 0 2;
+#X floatatom 290 110 10 0 0 0 - - - 0;
+#X msg 480 50 1.5 5000;
+#X msg 480 80 -3 5000;
+#X msg 480 110 0;
 #X connect 1 0 0 0;
 #X connect 2 0 5 0;
 #X connect 3 0 5 1;
@@ -270,13 +267,11 @@
 #X connect 11 0 12 0;
 #X connect 12 0 10 0;
 #X connect 13 0 7 0;
-#X connect 14 0 20 0;
-#X connect 15 0 13 0;
-#X connect 15 0 16 0;
-#X connect 17 0 15 0;
-#X connect 18 0 15 0;
-#X connect 19 0 15 0;
-#X connect 20 0 19 0;
+#X connect 14 0 13 0;
+#X connect 14 0 15 0;
+#X connect 16 0 14 0;
+#X connect 17 0 14 0;
+#X connect 18 0 14 0;
 #X restore 420 300 pd trackbar;
 #N canvas 300 510 480 490 metadata 0;
 #X obj 50 440 outlet;
@@ -320,7 +315,7 @@
 #X connect 1 0 0 0;
 #X restore 420 360 pd http;
 #X symbolatom 280 320 0 0 0 0 - - - 0;
-#X obj 120 330 r \$0eof;
+#X obj 120 330 r \$0done;
 #X obj 220 610 dac~;
 #X obj 30 550 tabwrite~ \$0ffplay;
 #X obj 220 390 ffplay~ 1 2 5 6;
@@ -362,11 +357,11 @@ and playback speed manipulation.;
 #X connect 34 0 41 0;
 #X connect 35 0 41 0;
 #X connect 36 0 41 0;
-#X connect 38 0 5 2;
+#X connect 38 0 5 1;
 #X connect 41 0 0 0;
-#X connect 41 0 32 0;
 #X connect 41 0 11 0;
+#X connect 41 0 32 0;
 #X connect 41 1 7 0;
-#X connect 41 1 32 0;
 #X connect 41 1 13 0;
+#X connect 41 1 32 0;
 #X connect 41 4 26 0;
