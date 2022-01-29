@@ -170,7 +170,7 @@
 #X obj 50 180 print -n;
 #X obj 50 60 route tracks time open done pos play;
 #X msg 180 190 path \, tracks \, info;
-#X msg 50 150 \$1 tracks;
+#X msg 50 150 \$1 track(s);
 #X connect 0 0 11 0;
 #X connect 2 1 12 0;
 #X connect 2 1 4 0;

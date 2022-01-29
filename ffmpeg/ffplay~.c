@@ -337,9 +337,9 @@ static void ffplay_anything(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (!x->open) return;
 	t_atom atom = ffplay_meta(x ,s);
 	switch (atom.a_type)
-	{	case A_FLOAT:  post("%s: %g" ,s->s_name ,atom.a_w.w_float); break;
-		case A_SYMBOL: post("%s: %s" ,s->s_name ,atom.a_w.w_symbol->s_name); break;
-		default: pd_error(x ,"ffplay~: no method for '%s'" ,s->s_name);  }
+	{	case A_FLOAT  : post("%s: %g" ,s->s_name ,atom.a_w.w_float); break;
+		case A_SYMBOL : post("%s: %s" ,s->s_name ,atom.a_w.w_symbol->s_name); break;
+		default       : post("no metadata for '%s'" ,s->s_name);  }
 }
 
 static void ffplay_tracks(t_ffplay *x) {
