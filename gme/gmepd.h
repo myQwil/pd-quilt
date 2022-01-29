@@ -136,7 +136,7 @@ static t_int *gmepd_perform(t_int *w) {
 				for (int i = buf_size; i--;)
 					in[i] = buf[i] / short_limit;
 				data->input_frames = FRAMES;
-				data->data_in = x->in;  }
+				data->data_in = in;  }
 
 			data->data_out = out = x->out;
 			src_process(x->state, data);
