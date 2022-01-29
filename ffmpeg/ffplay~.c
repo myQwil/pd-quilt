@@ -411,6 +411,9 @@ static void ffplay_free(t_ffplay *x) {
 	av_frame_free(&x->frm);
 	swr_free(&x->swr);
 
+	t_playlist *pl = &x->plist;
+	freebytes(pl->trk ,pl->max * sizeof(t_symbol*));
+
 	for (int i = x->nch; i--;)
 		freebytes(x->buf[i] ,BUFSIZE * sizeof(t_sample));
 }

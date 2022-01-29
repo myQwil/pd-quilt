@@ -51,8 +51,8 @@
 #X obj 130 260 *~ 0.1;
 #X obj 230 230 r \$0vol;
 #X obj 180 90 % 4;
-#X msg 170 160 0.3;
-#X msg 220 160 0.1;
+#X msg 170 160 0.36;
+#X msg 220 160 0.13;
 #X connect 0 0 1 0;
 #X connect 1 0 8 0;
 #X connect 2 0 3 0;

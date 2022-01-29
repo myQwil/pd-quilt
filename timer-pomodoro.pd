@@ -27,8 +27,8 @@
 #X obj 130 80 % 4;
 #X obj 180 250 r \$0vol;
 #X obj 80 280 *~;
-#X msg 120 150 0.3;
-#X msg 170 150 0.1;
+#X msg 120 150 0.36;
+#X msg 170 150 0.13;
 #X floatatom 240 80 0 0 0 0 - - - 0;
 #X obj 240 110 dbtorms;
 #X floatatom 240 140 0 0 0 0 - - - 0;
