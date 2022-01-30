@@ -220,6 +220,8 @@
 #X obj 390 480 *~ 1;
 #X obj 120 520 *~ 0.5;
 #X floatatom 480 130 0 0 0 0 - - - 0;
+#X obj 20 80 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
+#fcfcfc;
 #X connect 2 0 22 0;
 #X connect 3 0 22 1;
 #X connect 4 0 9 0;
@@ -292,3 +294,4 @@
 #X connect 43 0 18 0;
 #X connect 43 0 17 0;
 #X connect 43 0 16 0;
+#X connect 44 0 5 0;

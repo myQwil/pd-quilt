@@ -121,7 +121,7 @@ static t_int *gmepd_perform(t_int *w) {
 	{	SRC_DATA *data = &x->data;
 		float *out = data->data_out;
 		while (n--)
-		{	if (data->output_frames_gen)
+		{	if (data->output_frames_gen > 0)
 			{	sound:
 				for (int i = NCH; i--;)
 					*outs[i]++ = out[i];
@@ -129,7 +129,7 @@ static t_int *gmepd_perform(t_int *w) {
 				data->output_frames_gen--;
 				continue;  }
 
-			if (!data->input_frames)
+			if (data->input_frames <= 0)
 			{	short buf[buf_size];
 				float *in = x->in;
 				hnd_err(gme_play(x->emu ,buf_size ,buf));
@@ -139,7 +139,7 @@ static t_int *gmepd_perform(t_int *w) {
 				data->data_in = in;  }
 
 			data->data_out = out = x->out;
-			src_process(x->state, data);
+			src_process(x->state ,data);
 			data->data_in += data->input_frames_used * NCH;
 			data->input_frames -= data->input_frames_used;
 			goto sound;  }
@@ -318,8 +318,8 @@ static void gmepd_tempo(t_gme *x ,t_float f) {
 }
 
 static void gmepd_speed(t_gme *x ,t_float f) {
-	f = (f > frames ? frames : (f < inv_frames ? inv_frames : f));
-	x->data.src_ratio = 1./f;
+	f = 1. / f;
+	x->data.src_ratio = f > frames ? frames : (f < inv_frames ? inv_frames : f);
 }
 
 static short domask(short mask ,int ac ,t_atom *av) {
