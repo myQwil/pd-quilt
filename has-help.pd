@@ -1,29 +1,29 @@
-#N canvas 730 400 450 300 14;
-#X msg 30 130 1 2 hi 4;
-#X msg 110 130 1 2 3 hi;
-#X msg 190 130 3;
-#X obj 50 240 has hi;
-#X obj 110 240 has 3;
-#X obj 160 240 has 4;
-#X obj 50 270 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#N canvas 400 200 490 340 14;
+#X msg 50 140 1 2 hi 4;
+#X msg 130 140 1 2 3 hi;
+#X msg 210 140 3;
+#X obj 70 250 has hi;
+#X obj 130 250 has 3;
+#X obj 180 250 has 4;
+#X obj 70 280 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
-#X obj 110 270 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 130 280 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
-#X obj 160 270 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 180 280 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
-#X obj 200 20 cnv 15 48 24 empty empty has 4 12 0 18 #000000 #fcfcfc
+#X obj 220 30 cnv 15 48 24 empty empty has 4 12 0 18 #000000 #fcfcfc
 0;
-#X obj 240 130 pointer;
-#X msg 220 240 2;
-#X obj 240 160 t p p;
-#X msg 310 130 symbol bang;
-#X obj 310 250 namecanvas foo;
-#X msg 240 100 traverse foo \, bang;
-#X obj 110 200 t a;
-#X obj 310 160 t s s;
-#X obj 160 210 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#X obj 260 140 pointer;
+#X msg 240 250 2;
+#X obj 260 170 t p p;
+#X msg 330 140 symbol bang;
+#X obj 330 260 namecanvas foo;
+#X msg 260 110 traverse foo \, bang;
+#X obj 130 210 t a;
+#X obj 330 170 t s s;
+#X obj 180 220 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X text 30 50 checks if a list contains a specific atom value;
+#X text 50 60 checks if a list contains a specific atom value;
 #X connect 0 0 16 0;
 #X connect 1 0 16 0;
 #X connect 2 0 16 0;

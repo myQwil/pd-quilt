@@ -1,38 +1,38 @@
-#N canvas 650 360 500 360 14;
-#X obj 120 310 print;
-#X obj 110 160 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#N canvas 400 200 520 390 14;
+#X obj 130 320 print;
+#X obj 120 170 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X msg 180 160 123;
-#X msg 220 230 hi;
-#X obj 30 160 pointer;
-#X msg 220 160 8 7;
-#X symbolatom 400 260 0 0 0 0 - - - 0;
-#X obj 160 30 cnv 15 178 24 empty empty @pak\\\ &\\\ @unpak 4 12 0
+#X msg 190 170 123;
+#X msg 230 240 hi;
+#X obj 40 170 pointer;
+#X msg 230 170 8 7;
+#X symbolatom 410 270 0 0 0 0 - - - 0;
+#X obj 170 40 cnv 15 178 24 empty empty @pak\\\ &\\\ @unpak 4 12 0
 18 #000000 #fcfcfc 0;
-#X obj 120 260 @pak f f a;
-#X text 170 310 a f f;
-#X msg 30 190 . . \$1;
-#X obj 400 300 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#X obj 130 270 @pak f f a;
+#X text 180 320 a f f;
+#X msg 40 200 . . \$1;
+#X obj 410 310 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 340 300 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#X obj 350 310 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 280 300 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#X obj 290 310 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X text 100 70 args are written in receiving order;
-#X text 120 50 outputs the values in reverse;
-#X msg 210 200 6 six;
-#X obj 280 230 @unpak a a a;
-#X msg 300 110 a b;
-#X symbolatom 280 260 0 0 0 0 - - - 0;
-#X symbolatom 340 260 0 0 0 0 - - - 0;
-#X msg 260 110 a;
-#X msg 340 110 a b c;
-#X msg 370 140 foo . .;
-#X msg 380 170 bar d .;
-#X msg 390 200 baz e f;
-#X msg 140 160 dud;
-#X obj 30 100 namecanvas foo;
-#X msg 30 130 traverse foo \, bang;
+#X text 110 80 args are written in receiving order;
+#X text 130 60 outputs the values in reverse;
+#X msg 220 210 6 six;
+#X obj 290 240 @unpak a a a;
+#X msg 310 120 a b;
+#X symbolatom 290 270 0 0 0 0 - - - 0;
+#X symbolatom 350 270 0 0 0 0 - - - 0;
+#X msg 270 120 a;
+#X msg 350 120 a b c;
+#X msg 380 150 foo . .;
+#X msg 390 180 bar d .;
+#X msg 400 210 baz e f;
+#X msg 150 170 dud;
+#X obj 40 110 namecanvas foo;
+#X msg 40 140 traverse foo \, bang;
 #X connect 1 0 8 0;
 #X connect 2 0 8 0;
 #X connect 3 0 8 2;

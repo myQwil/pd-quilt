@@ -1,16 +1,16 @@
-#N canvas 200 260 780 520 14;
-#X floatatom 230 40 0 2 64 0 - - - 0;
-#X msg 290 140 p \$1;
-#X floatatom 290 110 0 0 0 0 - - - 0;
-#X obj 110 80 cupqb;
-#X floatatom 160 100 0 0 0 0 - - - 0;
-#X msg 110 50 set 1;
-#X floatatom 170 140 0 0 0 0 - - - 0;
-#X msg 160 50 set 0.1;
-#X obj 110 140 @pow 2;
-#X floatatom 110 170 0 0 0 0 gatom - - 0;
-#X msg 230 140 be \$1;
-#X obj 100 450 fldec;
+#N canvas 400 200 780 560 14;
+#X floatatom 230 60 0 2 64 0 - - - 0;
+#X msg 290 160 p \$1;
+#X floatatom 290 130 0 0 0 0 - - - 0;
+#X obj 110 100 cupqb;
+#X floatatom 160 120 0 0 0 0 - - - 0;
+#X msg 110 70 set 1;
+#X floatatom 170 160 0 0 0 0 - - - 0;
+#X msg 160 70 set 0.1;
+#X obj 110 160 @pow 2;
+#X floatatom 110 190 0 0 0 0 gatom - - 0;
+#X msg 230 160 be \$1;
+#X obj 100 470 fldec;
 #N canvas 750 270 450 300 pcalc 0;
 #X obj 190 70 inlet;
 #X obj 190 130 @/ 24;
@@ -21,52 +21,52 @@
 #X connect 1 0 4 0;
 #X connect 2 0 1 0;
 #X connect 4 0 3 0;
-#X restore 290 80 pd pcalc;
-#X text 570 370 digits[64] =;
-#X text 570 390 0123456789abcdef;
-#X text 570 410 ghijkmnopqrstuvw;
-#X text 570 430 xyzACDEFGHJKLMNP;
-#X text 570 450 QRTUVWXYZ?!@#$%&;
-#X obj 100 200 radix 0 22 0 0 0 0 empty empty base10 -52 11 0 11 #b8b8b8
+#X restore 290 100 pd pcalc;
+#X text 570 390 digits[64] =;
+#X text 570 410 0123456789abcdef;
+#X text 570 430 ghijkmnopqrstuvw;
+#X text 570 450 xyzACDEFGHJKLMNP;
+#X text 570 470 QRTUVWXYZ?!@#$%&;
+#X obj 100 220 radix 0 22 0 0 0 0 empty empty base10 -52 11 0 11 #b8b8b8
 #fcfcfc #fcfcfc 10 6 10 0 10;
-#X obj 100 230 radix 0 22 0 0 0 0 empty empty base64 -52 11 0 11 #e0c4fc
+#X obj 100 250 radix 0 22 0 0 0 0 empty empty base64 -52 11 0 11 #e0c4fc
 #fce8fc #fcfcfc 64 4 64 0 10;
-#X obj 100 260 radix 0 22 0 0 0 0 empty empty base32 -52 11 0 11 #fce0c4
+#X obj 100 280 radix 0 22 0 0 0 0 empty empty base32 -52 11 0 11 #fce0c4
 #fcecd8 #fcfcfc 32 5 32 0 10;
-#X obj 100 290 radix 0 22 0 0 0 0 empty empty base16 -52 11 0 11 #c4fcfc
+#X obj 100 310 radix 0 22 0 0 0 0 empty empty base16 -52 11 0 11 #c4fcfc
 #e0fcfc #fcfcfc 16 6 16 0 10;
-#X obj 100 320 radix 0 22 0 0 0 0 empty empty base8 -52 11 0 11 #fce0c4
+#X obj 100 340 radix 0 22 0 0 0 0 empty empty base8 -52 11 0 11 #fce0c4
 #fcf0dc #fcfcfc 8 8 8 0 10;
-#X obj 100 350 radix 0 22 0 0 0 0 empty empty base4 -52 11 0 11 #fcfcc4
+#X obj 100 370 radix 0 22 0 0 0 0 empty empty base4 -52 11 0 11 #fcfcc4
 #fcfce4 #fcfcfc 4 12 4 0 10;
-#X obj 100 380 radix 0 22 0 0 0 0 empty empty base2 -52 11 0 11 #c4fcc4
+#X obj 100 400 radix 0 22 0 0 0 0 empty empty base2 -52 11 0 11 #c4fcc4
 #d8fcd8 #fcfcfc 2 24 2 0 10;
-#X obj 410 220 radix 0 22 0 0 0 0 empty empty base24 -52 11 0 11 #fc8000
+#X obj 410 240 radix 0 22 0 0 0 0 empty empty base24 -52 11 0 11 #fc8000
 #c4c4fc #fcfcfc 24 5 24 0 10;
-#X obj 410 250 radix 0 22 0 0 0 0 empty empty base12 -52 11 0 11 #fc8000
+#X obj 410 270 radix 0 22 0 0 0 0 empty empty base12 -52 11 0 11 #fc8000
 #c4fcc4 #fcfcfc 12 6 12 0 10;
-#X obj 410 280 radix 0 22 0 0 0 0 empty empty base9 -52 11 0 11 #f8fc00
+#X obj 410 300 radix 0 22 0 0 0 0 empty empty base9 -52 11 0 11 #f8fc00
 #00fc04 #fcfcfc 9 6 9 0 10;
-#X obj 410 310 radix 0 22 0 0 0 0 empty empty base6 -52 11 0 11 #00fc04
+#X obj 410 330 radix 0 22 0 0 0 0 empty empty base6 -52 11 0 11 #00fc04
 #f8fc00 #fcfcfc 6 9 6 0 10;
-#X obj 410 340 radix 0 22 0 0 0 0 empty empty base3 -52 11 0 11 #e098fc
+#X obj 410 360 radix 0 22 0 0 0 0 empty empty base3 -52 11 0 11 #e098fc
 #c4fcc4 #fcfcfc 3 14 3 0 10;
-#X obj 270 40 mantr;
-#X floatatom 550 190 0 0 0 0 - - - 0;
-#X obj 600 100 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 270 60 mantr;
+#X floatatom 550 210 0 0 0 0 - - - 0;
+#X obj 600 120 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
-#X obj 550 160 flenc 0 127;
-#X obj 600 120 t b f;
-#X obj 550 120 t b f;
-#X text 110 420 ____5____10___15___20___25___30___35;
-#X obj 550 70 cupqb;
-#X text 110 400 ----^----^----^----^----^----^----^-;
-#X obj 230 80 t f f;
-#X msg 270 10 0;
-#X msg 450 150 f \$1;
-#X obj 100 480 mantissa;
-#X obj 50 420 s \$0f;
-#X obj 410 190 r \$0f;
+#X obj 550 180 flenc 0 127;
+#X obj 600 140 t b f;
+#X obj 550 140 t b f;
+#X text 110 440 ____5____10___15___20___25___30___35;
+#X obj 550 90 cupqb;
+#X text 110 420 ----^----^----^----^----^----^----^-;
+#X obj 230 100 t f f;
+#X msg 270 30 0;
+#X msg 450 170 f \$1;
+#X obj 100 500 mantissa;
+#X obj 50 440 s \$0f;
+#X obj 410 210 r \$0f;
 #X connect 0 0 4 0;
 #X connect 0 0 39 0;
 #X connect 1 0 18 0;

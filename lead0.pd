@@ -1,13 +1,16 @@
-#N canvas 470 300 350 290 14;
-#X obj 90 30 inlet;
-#X obj 90 60 t f f;
-#X obj 170 50 < 10;
-#X obj 170 80 sel;
-#X msg 210 110 symbol \0;
-#X msg 210 150 symbol;
-#X obj 90 180 pack f s;
-#X msg 90 210 symbol \$2\$1;
-#X obj 90 240 outlet;
+#N canvas 400 200 360 360 14;
+#X obj 100 90 inlet;
+#X obj 100 120 t f f;
+#X obj 180 110 < 10;
+#X obj 180 140 sel;
+#X msg 220 170 symbol \0;
+#X msg 220 210 symbol;
+#X obj 100 240 pack f s;
+#X msg 100 270 symbol \$2\$1;
+#X obj 100 300 outlet;
+#X obj 140 30 cnv 15 72 24 empty empty lead0 4 12 0 18 #000000 #fcfcfc
+0;
+#X text 100 60 leading zero helper;
 #X connect 0 0 1 0;
 #X connect 1 0 6 0;
 #X connect 1 1 2 0;

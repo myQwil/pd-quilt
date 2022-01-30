@@ -1,4 +1,4 @@
-#N canvas 520 270 510 440 14;
+#N canvas 400 200 510 440 14;
 #X obj 60 260 print;
 #X obj 30 120 `f 5.4!;
 #X floatatom 30 150 0 0 0 0 - - -;

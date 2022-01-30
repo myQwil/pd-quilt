@@ -106,8 +106,7 @@ static t_int *ffplay_perform(t_int *w) {
 				out += nch;
 				data->output_frames_gen--;
 				continue;  }
-
-			if (data->input_frames > 0)
+			else if (data->input_frames > 0)
 			{	resample:
 				data->data_out = out = x->out;
 				src_process(x->state ,data);

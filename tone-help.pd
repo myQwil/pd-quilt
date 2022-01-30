@@ -1,26 +1,26 @@
-#N canvas 720 330 500 370 14;
-#X obj 80 210 ntof 432 13;
-#X floatatom 150 240 0 0 0 0 - - - 0;
-#X obj 150 270 fton 432 13;
-#X floatatom 150 300 0 0 0 0 - - - 0;
-#X obj 80 270 phasor~;
-#X obj 80 300 *~;
-#X obj 70 330 dac~;
-#X obj 120 330 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10
+#N canvas 400 200 550 400 14;
+#X obj 100 220 ntof 432 13;
+#X floatatom 170 250 0 0 0 0 - - - 0;
+#X obj 170 280 fton 432 13;
+#X floatatom 170 310 0 0 0 0 - - - 0;
+#X obj 100 280 phasor~;
+#X obj 100 310 *~;
+#X obj 90 340 dac~;
+#X obj 140 340 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10
 #2f004d #fcfcfc #fcfcfc 0 1;
-#X msg 100 120 440 12;
-#X floatatom 120 150 0 0 0 0 - - - 0;
-#X floatatom 160 180 0 0 0 0 - - - 0;
-#X obj 60 110 b !;
-#X obj 40 140 cupqb 69;
-#X msg 410 150 ref \$1;
-#X msg 410 180 tet \$1;
-#X text 160 150 reference pitch. default: 440;
-#X text 200 180 # of tones. default: 12;
-#X text 410 130 messages;
-#X text 30 50 similar to [mtof] and [ftom] with the added ability to
+#X msg 120 130 440 12;
+#X floatatom 140 160 0 0 0 0 - - - 0;
+#X floatatom 180 190 0 0 0 0 - - - 0;
+#X obj 80 120 b !;
+#X obj 60 150 cupqb 69;
+#X msg 430 160 ref \$1;
+#X msg 430 190 tet \$1;
+#X text 180 160 reference pitch. default: 440;
+#X text 220 190 # of tones. default: 12;
+#X text 430 140 messages;
+#X text 50 60 similar to [mtof] and [ftom] with the added ability to
 change the reference pitch and the number of tones in an octave.;
-#X obj 170 20 cnv 15 152 24 empty empty ntof\\\ &\\\ fton 4 12 0 18
+#X obj 190 30 cnv 15 152 24 empty empty ntof\\\ &\\\ fton 4 12 0 18
 #000000 #fcfcfc 0;
 #X connect 0 0 1 0;
 #X connect 0 0 4 0;

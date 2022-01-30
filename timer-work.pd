@@ -1,7 +1,7 @@
-#N canvas 80 600 370 210 14;
+#N canvas 100 700 370 210 14;
 #X obj 40 30 cnv 15 100 24 empty \$0clock 0:00:00 4 12 0 18 #000000
 #fcfcfc 0;
-#N canvas 390 600 555 400 guts 0;
+#N canvas 390 600 550 400 guts 0;
 #X obj 290 210 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #N canvas 480 600 450 340 hms 0;

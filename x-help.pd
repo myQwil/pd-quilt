@@ -1,41 +1,41 @@
-#N canvas 690 320 550 420 14;
-#X obj 80 270 t a;
-#X msg 50 130 list 12;
-#X msg 70 160 list hi;
-#X obj 90 220 pointer;
-#X obj 60 340 is list;
-#X obj 130 340 is float;
-#X obj 200 340 is symbol;
-#X obj 280 340 is pointer;
-#X msg 260 130 list 12;
-#X msg 280 160 list hi;
-#X obj 300 220 pointer;
-#X obj 280 250 x a;
-#X msg 160 220 1 2 3;
-#X msg 370 220 1 2 3;
-#X obj 60 370 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#N canvas 400 200 590 450 14;
+#X obj 100 290 t a;
+#X msg 70 150 list 12;
+#X msg 90 180 list hi;
+#X obj 110 240 pointer;
+#X obj 80 360 is list;
+#X obj 150 360 is float;
+#X obj 220 360 is symbol;
+#X obj 300 360 is pointer;
+#X msg 280 150 list 12;
+#X msg 300 180 list hi;
+#X obj 320 240 pointer;
+#X obj 300 270 x a;
+#X msg 180 240 1 2 3;
+#X msg 390 240 1 2 3;
+#X obj 80 390 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
-#X obj 130 370 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 150 390 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
-#X obj 200 370 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 220 390 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
-#X obj 280 370 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 300 390 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
-#X obj 400 280 is p;
-#X obj 380 310 spigot;
-#X obj 380 340 pointer;
-#X obj 380 370 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#X obj 420 300 is p;
+#X obj 400 330 spigot;
+#X obj 400 360 pointer;
+#X obj 400 390 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 360 280 x;
-#X obj 260 20 cnv 15 21 24 empty empty x 4 12 0 18 #000000 #fcfcfc
+#X obj 380 300 x;
+#X obj 280 40 cnv 15 21 24 empty empty x 4 12 0 18 #000000 #fcfcfc
 0;
-#X text 200 50 explicit trigger;
-#X text 30 70 A variation of [trigger] that sends 1-atom lists as the
+#X text 220 70 explicit trigger;
+#X text 50 90 A variation of [trigger] that sends 1-atom lists as the
 atom itself when either a number \, the letter 'a' \, or no creation
 args are used.;
-#X obj 400 30 namecanvas foo;
-#X msg 90 190 traverse foo \, bang;
-#X msg 300 190 traverse foo \, bang;
+#X obj 420 50 namecanvas foo;
+#X msg 110 210 traverse foo \, bang;
+#X msg 320 210 traverse foo \, bang;
 #X connect 0 0 4 0;
 #X connect 0 0 5 0;
 #X connect 0 0 6 0;

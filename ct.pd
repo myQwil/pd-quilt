@@ -1,15 +1,15 @@
-#N canvas 780 320 350 270 14;
-#X obj 120 90 inlet;
-#X obj 180 90 inlet;
-#X obj 180 120 route float on;
-#X obj 120 120 `% \$1;
-#X obj 60 150 + 1;
-#X msg 60 190 f1 \$1;
-#X obj 120 190 sel \$2;
-#X obj 120 220 outlet;
-#X obj 190 190 outlet;
-#X text 40 50 send a bang on each zero remainder;
-#X obj 90 20 cnv 15 178 24 empty empty count-trigger 4 12 0 18 #000000
+#N canvas 400 200 380 300 14;
+#X obj 130 100 inlet;
+#X obj 190 100 inlet;
+#X obj 190 130 route float on;
+#X obj 130 130 `% \$1;
+#X obj 70 160 + 1;
+#X msg 70 200 f1 \$1;
+#X obj 130 200 sel \$2;
+#X obj 130 230 outlet;
+#X obj 200 200 outlet;
+#X text 50 60 send a bang on each zero remainder;
+#X obj 100 30 cnv 15 178 24 empty empty count-trigger 4 12 0 18 #000000
 #fcfcfc 0;
 #X connect 0 0 3 0;
 #X connect 1 0 2 0;

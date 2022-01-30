@@ -1,16 +1,16 @@
-#N canvas 700 400 350 230 14;
-#X obj 50 60 inlet~;
-#X obj 150 60 inlet;
-#X obj 50 90 phasor~ \$2;
-#X obj 150 90 zp~ 5 0.5;
-#X obj 240 30 `f \$1!;
-#X obj 240 60 sel;
-#X msg 240 90 now \$1;
-#X obj 50 130 >~;
-#X obj 50 190 outlet~;
-#X obj 120 20 cnv 15 86 24 empty empty pulse~ 4 12 0 18 #000000 #fcfcfc
+#N canvas 400 200 370 260 14;
+#X obj 70 70 inlet~;
+#X obj 170 70 inlet;
+#X obj 70 100 phasor~ \$2;
+#X obj 170 100 zp~ 5 0.5;
+#X obj 260 40 `f \$1!;
+#X obj 260 70 sel;
+#X msg 260 100 now \$1;
+#X obj 70 140 >~;
+#X obj 70 200 outlet~;
+#X obj 140 30 cnv 15 86 24 empty empty pulse~ 4 12 0 18 #000000 #fcfcfc
 0;
-#X obj 50 160 -~ 0.5;
+#X obj 70 170 -~ 0.5;
 #X connect 0 0 2 0;
 #X connect 1 0 3 0;
 #X connect 2 0 7 0;

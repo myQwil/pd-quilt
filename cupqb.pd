@@ -1,38 +1,38 @@
-#N canvas 100 210 500 400 14;
-#X obj 250 20 inlet;
-#X obj 200 190 inlet;
-#X obj 340 190 inlet;
-#X obj 120 60 route set step - +;
-#X obj 120 90 s \$0set;
-#X obj 120 120 s \$0itr;
-#X obj 280 60 s \$0tonbx;
-#X obj 30 30 loadbang;
-#X obj 50 100 \$1;
-#X obj 50 130 sel;
-#X msg 80 160 set \$1;
-#X obj 80 190 s \$0tonbx;
-#X obj 30 180 \$2;
-#X obj 30 210 sel;
-#X obj 60 240 s \$0itr;
-#X floatatom 200 120 5 0 0 0 - \$0tonbx \$0frnbx 0;
-#X obj 200 140 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
+#N canvas 400 200 530 440 14;
+#X obj 270 40 inlet;
+#X obj 220 210 inlet;
+#X obj 360 210 inlet;
+#X obj 140 80 route set step - +;
+#X obj 140 110 s \$0set;
+#X obj 140 140 s \$0itr;
+#X obj 300 80 s \$0tonbx;
+#X obj 50 50 loadbang;
+#X obj 70 120 \$1;
+#X obj 70 150 sel;
+#X msg 100 180 set \$1;
+#X obj 100 210 s \$0tonbx;
+#X obj 50 200 \$2;
+#X obj 50 230 sel;
+#X obj 80 260 s \$0itr;
+#X floatatom 220 140 5 0 0 0 - \$0tonbx \$0frnbx 0;
+#X obj 220 160 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
 #ec8824 #4884ec #000000;
-#X obj 220 140 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
+#X obj 240 160 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
 #ec8824 #4884ec #000000;
-#X obj 200 220 route set;
-#X obj 170 260 1;
-#X obj 170 290 * -1;
-#X obj 340 220 route set;
-#X obj 310 260 1;
-#X obj 210 260 r \$0itr;
-#X obj 350 260 r \$0itr;
-#X obj 270 320 + \$1;
-#X obj 270 350 s \$0tonbx;
-#X obj 310 290 r \$0set;
-#X obj 380 290 r \$0frnbx;
-#X obj 380 350 outlet;
-#X text 280 130 number box with cup;
-#X obj 320 100 cnv 15 74 24 empty empty cupqb 4 12 0 18 #000000 #fcfcfc
+#X obj 220 240 route set;
+#X obj 190 280 1;
+#X obj 190 310 * -1;
+#X obj 360 240 route set;
+#X obj 330 280 1;
+#X obj 230 280 r \$0itr;
+#X obj 370 280 r \$0itr;
+#X obj 290 340 + \$1;
+#X obj 290 370 s \$0tonbx;
+#X obj 330 310 r \$0set;
+#X obj 400 310 r \$0frnbx;
+#X obj 400 370 outlet;
+#X text 300 150 number box with cup;
+#X obj 340 120 cnv 15 74 24 empty empty cupqb 4 12 0 18 #000000 #fcfcfc
 0;
 #X connect 0 0 3 0;
 #X connect 1 0 18 0;
@@ -65,4 +65,4 @@
 #X connect 27 0 25 1;
 #X connect 28 0 25 1;
 #X connect 28 0 29 0;
-#X coords 0 -1 1 1 42 47 2 200 117;
+#X coords 0 -1 1 1 42 47 2 220 137;

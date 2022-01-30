@@ -1,24 +1,24 @@
-#N canvas 700 470 450 300 14;
-#X msg 190 110 tempo 1 msec \, 2000;
-#X msg 200 140 tempo 0.5 sec \, 5;
-#X msg 60 110 tempo 0.5 msec;
-#X msg 210 170 pause;
-#X msg 220 200 stop;
-#X obj 170 160 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#N canvas 400 200 480 330 14;
+#X msg 210 120 tempo 1 msec \, 2000;
+#X msg 220 150 tempo 0.5 sec \, 5;
+#X msg 80 120 tempo 0.5 msec;
+#X msg 230 180 pause;
+#X msg 240 210 stop;
+#X obj 190 170 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 190 230 delp 2 0.5 sec;
-#X msg 330 170 1;
-#X obj 310 260 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 210 240 delp 2 0.5 sec;
+#X msg 350 180 1;
+#X obj 330 270 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
-#X floatatom 240 260 0 0 0 0 - - - 0;
-#X obj 190 260 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#X floatatom 260 270 0 0 0 0 - - - 0;
+#X obj 210 270 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X text 100 50 delay with pause functionality;
-#X text 70 70 outputs the remaining time when paused;
-#X text 260 170 /resume;
-#X obj 180 20 cnv 15 60 24 empty empty delp 4 12 0 18 #000000 #fcfcfc
+#X text 120 60 delay with pause functionality;
+#X text 90 80 outputs the remaining time when paused;
+#X text 280 180 /resume;
+#X obj 200 30 cnv 15 60 24 empty empty delp 4 12 0 18 #000000 #fcfcfc
 0;
-#X msg 270 200 time;
+#X msg 290 210 time;
 #X connect 0 0 6 0;
 #X connect 1 0 6 0;
 #X connect 2 0 6 0;

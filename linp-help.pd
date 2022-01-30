@@ -1,29 +1,29 @@
-#N canvas 730 420 450 330 14;
-#X obj 200 220 linp;
-#X msg 70 120 pause;
-#X floatatom 200 250 0 0 0 0 - - - 0;
-#X msg 280 190 20;
-#X msg 320 120 0 \, 1 2000;
-#X msg 320 150 1 \, 0 2000;
-#X msg 210 120 2000 \, 0 2000;
-#X floatatom 90 260 0 0 0 0 - - - 0;
-#X msg 200 90 2000 \, 3000 5000;
-#X obj 190 30 cnv 15 60 24 empty empty linp 4 12 0 18 #000000 #fcfcfc
+#N canvas 400 200 450 330 14;
+#X obj 190 230 linp;
+#X msg 60 130 pause;
+#X floatatom 190 260 0 0 0 0 - - - 0;
+#X msg 270 200 20;
+#X msg 310 130 0 \, 1 2000;
+#X msg 310 160 1 \, 0 2000;
+#X msg 200 130 2000 \, 0 2000;
+#X floatatom 80 270 0 0 0 0 - - - 0;
+#X msg 190 100 2000 \, 3000 5000;
+#X obj 180 30 cnv 15 60 24 empty empty linp 4 12 0 18 #000000 #fcfcfc
 0;
-#X obj 110 200 unpack;
-#X obj 200 190 t a;
-#X text 100 50 line with pause functionality;
-#X obj 70 260 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
+#X obj 100 210 unpack;
+#X obj 190 200 t a;
+#X text 90 60 line with pause functionality;
+#X obj 60 270 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
 #fcfcfc;
-#X obj 80 200 b, f 2;
-#X obj 120 240 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 70 210 b, f 2;
+#X obj 110 250 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
-#X msg 240 190 200;
-#X text 120 120 /resume;
-#X obj 70 230 delp;
-#X obj 250 230 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X msg 230 200 200;
+#X text 110 130 /resume;
+#X obj 60 240 delp;
+#X obj 240 240 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
-#X text 320 190 time grain;
+#X text 310 200 time grain;
 #X connect 0 0 2 0;
 #X connect 0 1 19 0;
 #X connect 1 0 0 0;

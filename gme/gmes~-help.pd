@@ -1,4 +1,4 @@
-#N canvas 150 300 640 600 14;
+#N canvas 400 200 640 600 14;
 #X obj 280 550 dac~;
 #N canvas 0 0 450 300 (subpatch) 0;
 #X array \$0gme 120 float 2;

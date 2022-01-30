@@ -1,25 +1,25 @@
-#N canvas 730 390 520 330 14;
-#X floatatom 220 280 0 0 0 0 - - - 0;
-#X msg 330 190 25;
-#X msg 230 150 123;
-#X msg 180 190 50;
-#X msg 200 150 1, f 2;
-#X msg 270 150 1, f 2;
-#X obj 300 150 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#N canvas 400 200 570 340 14;
+#X floatatom 250 280 0 0 0 0 - - - 0;
+#X msg 360 190 25;
+#X msg 260 150 123;
+#X msg 210 190 50;
+#X msg 230 150 1, f 2;
+#X msg 300 150 1, f 2;
+#X obj 330 150 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 310 190 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#X obj 340 190 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 160 190 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#X obj 190 190 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 230 30 cnv 15 72 24 empty empty cupqb 4 12 0 18 #000000 #fcfcfc
+#X obj 260 30 cnv 15 72 24 empty empty cupqb 4 12 0 18 #000000 #fcfcfc
 0;
-#X text 10 60 the left-most and right-most inlets will subtract and
+#X text 40 60 the left-most and right-most inlets will subtract and
 add to the current value respectively \, while the middle inlet will
 output the current value and allow for it to be set to a different
 value.;
-#X msg 320 150 set 24;
-#X obj 220 230 cupqb 42 2;
-#X msg 330 220 set 10;
+#X msg 350 150 set 24;
+#X obj 250 230 cupqb 42 2;
+#X msg 360 220 set 10;
 #X connect 1 0 12 2;
 #X connect 2 0 12 1;
 #X connect 3 0 12 0;

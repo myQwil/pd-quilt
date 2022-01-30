@@ -1,4 +1,4 @@
-#N canvas 80 600 380 170 14;
+#N canvas 100 700 380 170 14;
 #N canvas 400 420 420 490 clock 0;
 #X obj 50 110 bng 16 250 50 0 empty empty pause -4 -10 0 11 #ff8300
 #fcfcfc #fcfcfc;

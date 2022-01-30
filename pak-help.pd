@@ -1,29 +1,29 @@
-#N canvas 620 230 750 530 14;
-#X msg 250 110 one 2 3;
-#X msg 330 110 4 five 6;
-#X msg 330 140 7 8 nine;
-#X obj 220 200 unpak any 2 3;
-#X obj 220 280 pak hi b float;
-#X msg 170 110 . . 234;
+#N canvas 400 200 790 540 14;
+#X msg 260 100 one 2 3;
+#X msg 340 100 4 five 6;
+#X msg 340 130 7 8 nine;
+#X obj 230 190 unpak any 2 3;
+#X obj 230 270 pak hi b float;
+#X msg 180 100 . . 234;
 #N canvas 570 570 450 320 foo 0;
-#X restore 40 150 pd foo;
-#X msg 40 180 traverse pd-foo \, bang;
-#X obj 40 210 pointer;
-#X msg 40 240 list \$1 1234;
-#X msg 110 210 hello;
-#X msg 170 210 12;
-#X msg 130 280 list bang;
-#X obj 240 240 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#X restore 50 140 pd foo;
+#X msg 50 170 traverse pd-foo \, bang;
+#X obj 50 200 pointer;
+#X msg 50 230 list \$1 1234;
+#X msg 120 200 hello;
+#X msg 180 200 12;
+#X msg 140 270 list bang;
+#X obj 250 230 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X msg 280 230 . 6;
-#X msg 340 180 traverse pd-foo \, bang;
-#X obj 340 210 pointer;
-#X msg 340 240 yo 42 34;
-#X msg 440 230 mute 0;
-#X obj 240 310 print;
-#X obj 220 370 unpak a 2 f;
-#X msg 140 320 1 2 three;
-#X msg 80 370 mute 0;
+#X msg 290 220 . 6;
+#X msg 350 170 traverse pd-foo \, bang;
+#X obj 350 200 pointer;
+#X msg 350 230 yo 42 34;
+#X msg 450 220 mute 0;
+#X obj 250 300 print;
+#X obj 230 360 unpak a 2 f;
+#X msg 150 310 1 2 three;
+#X msg 90 360 mute 0;
 #N canvas 570 390 350 270 out 0;
 #X obj 70 50 inlet;
 #X obj 70 80 x;
@@ -43,42 +43,14 @@
 #X connect 4 0 5 0;
 #X connect 4 1 6 0;
 #X connect 4 2 7 0;
-#X restore 130 400 pd out;
-#X floatatom 130 490 0 0 0 0 - - - 0;
-#X obj 140 430 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#X restore 140 390 pd out;
+#X floatatom 140 480 0 0 0 0 - - - 0;
+#X obj 150 420 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 160 460 symbol;
-#X symbolatom 160 490 0 0 0 0 - - - 0;
-#X obj 180 430 pointer;
-#X obj 220 460 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
-#N canvas 570 390 350 270 out 0;
-#X obj 70 50 inlet;
-#X obj 70 80 x;
-#X obj 100 110 is p;
-#X obj 70 140 demux;
-#X obj 70 180 route float bang;
-#X obj 70 210 outlet;
-#X obj 130 210 outlet;
-#X obj 190 210 outlet;
-#X obj 240 180 outlet;
-#X connect 0 0 1 0;
-#X connect 1 0 3 0;
-#X connect 1 1 2 0;
-#X connect 2 0 3 1;
-#X connect 3 0 4 0;
-#X connect 3 1 8 0;
-#X connect 4 0 5 0;
-#X connect 4 1 6 0;
-#X connect 4 2 7 0;
-#X restore 250 400 pd out;
-#X floatatom 250 490 0 0 0 0 - - - 0;
-#X obj 260 430 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
-#X obj 280 460 symbol;
-#X symbolatom 280 490 0 0 0 0 - - - 0;
-#X obj 300 430 pointer;
-#X obj 340 460 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#X obj 170 450 symbol;
+#X symbolatom 170 480 0 0 0 0 - - - 0;
+#X obj 190 420 pointer;
+#X obj 230 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #N canvas 570 390 350 270 out 0;
 #X obj 70 50 inlet;
@@ -99,29 +71,57 @@
 #X connect 4 0 5 0;
 #X connect 4 1 6 0;
 #X connect 4 2 7 0;
-#X restore 370 400 pd out;
-#X floatatom 370 490 0 0 0 0 - - - 0;
-#X obj 380 430 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#X restore 260 390 pd out;
+#X floatatom 260 480 0 0 0 0 - - - 0;
+#X obj 270 420 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X obj 400 460 symbol;
-#X symbolatom 400 490 0 0 0 0 - - - 0;
-#X obj 420 430 pointer;
-#X obj 460 460 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#X obj 290 450 symbol;
+#X symbolatom 290 480 0 0 0 0 - - - 0;
+#X obj 310 420 pointer;
+#X obj 350 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
-#X text 150 70 lazy pack/unpack objects with 'anything' inlets/outlets
+#N canvas 570 390 350 270 out 0;
+#X obj 70 50 inlet;
+#X obj 70 80 x;
+#X obj 100 110 is p;
+#X obj 70 140 demux;
+#X obj 70 180 route float bang;
+#X obj 70 210 outlet;
+#X obj 130 210 outlet;
+#X obj 190 210 outlet;
+#X obj 240 180 outlet;
+#X connect 0 0 1 0;
+#X connect 1 0 3 0;
+#X connect 1 1 2 0;
+#X connect 2 0 3 1;
+#X connect 3 0 4 0;
+#X connect 3 1 8 0;
+#X connect 4 0 5 0;
+#X connect 4 1 6 0;
+#X connect 4 2 7 0;
+#X restore 380 390 pd out;
+#X floatatom 380 480 0 0 0 0 - - - 0;
+#X obj 390 420 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#fcfcfc #fcfcfc;
+#X obj 410 450 symbol;
+#X symbolatom 410 480 0 0 0 0 - - - 0;
+#X obj 430 420 pointer;
+#X obj 470 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#fcfcfc #fcfcfc;
+#X text 160 60 lazy pack/unpack objects with 'anything' inlets/outlets
 ;
-#X text 40 110 "." skips args;
-#X text 410 140 expect float but got symbol;
-#X text 440 210 error messages are off by default;
-#X text 500 230 print all strict errors;
-#X text 440 250 acts as a bit mask. -1 mutes all;
-#X text 350 280 with pak \, 'b' turns into a lazy 'bang';
-#X text 350 300 and unrecognized types become lazy symbols;
-#X text 320 350 use f(loat) \, s(ymbol) \, or p(ointer) for strict
+#X text 50 100 "." skips args;
+#X text 420 130 expect float but got symbol;
+#X text 450 200 error messages are off by default;
+#X text 510 220 print all strict errors;
+#X text 450 240 acts as a bit mask. -1 mutes all;
+#X text 360 270 with pak \, 'b' turns into a lazy 'bang';
+#X text 360 290 and unrecognized types become lazy symbols;
+#X text 330 340 use f(loat) \, s(ymbol) \, or p(ointer) for strict
 type;
-#X text 320 370 'a' \, 'any' \, or a number for 'anything';
-#X text 30 320 type mismatch;
-#X obj 290 40 cnv 15 152 24 empty empty pak\\\ &\\\ unpak 4 12 0 18
+#X text 330 360 'a' \, 'any' \, or a number for 'anything';
+#X text 40 310 type mismatch;
+#X obj 300 30 cnv 15 152 24 empty empty pak\\\ &\\\ unpak 4 12 0 18
 #000000 #fcfcfc 0;
 #X connect 0 0 3 0;
 #X connect 1 0 3 0;

@@ -1,4 +1,4 @@
-#N canvas 310 300 610 410 14;
+#N canvas 400 200 610 390 14;
 #X floatatom 250 160 0 0 0 0 - - - 0;
 #X floatatom 200 220 0 0 0 0 - - - 0;
 #X floatatom 320 140 0 2 64 2 base - - 0;
@@ -46,7 +46,7 @@
 #X connect 15 1 6 0;
 #X restore 320 210 pd commands;
 #X obj 200 140 cupqb 23 0.01;
-#X obj 240 20 cnv 15 72 24 empty empty radix 4 12 0 18 #000000 #fcfcfc
+#X obj 250 20 cnv 15 72 24 empty empty radix 4 12 0 18 #000000 #fcfcfc
 0;
 #X obj 190 250 radix 0 22 0 0 0 0 empty empty empty -1 -10 0 11 #b8b8b8
 #fcfcfc #fcfcfc 2 24 2 0 256;

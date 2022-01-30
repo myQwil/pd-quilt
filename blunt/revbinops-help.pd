@@ -1,4 +1,4 @@
-#N canvas 500 250 480 380 14;
+#N canvas 400 200 480 380 14;
 #X floatatom 80 140 0 0 0 0 - - -;
 #X floatatom 120 140 0 0 0 0 - - -;
 #X floatatom 170 140 0 0 0 0 - - -;

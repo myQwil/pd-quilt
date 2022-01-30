@@ -1,12 +1,12 @@
-#N canvas 720 350 510 300 14;
-#X floatatom 20 120 0 0 0 0 - - - 0;
-#X obj 30 150 mantissa;
-#X obj 20 180 !~;
-#X floatatom 20 210 0 0 0 0 - - - 0;
-#X obj 30 250 mantissa;
-#X text 180 70 bitwise negation;
-#X text 180 90 inverts the bits;
-#X obj 230 40 cnv 15 36 24 empty empty !~ 4 12 0 18 #000000 #fcfcfc
+#N canvas 400 200 550 300 14;
+#X floatatom 40 110 0 0 0 0 - - - 0;
+#X obj 50 140 mantissa;
+#X obj 40 170 !~;
+#X floatatom 40 200 0 0 0 0 - - - 0;
+#X obj 50 240 mantissa;
+#X text 220 70 bitwise negation;
+#X text 220 90 inverts the bits;
+#X obj 270 40 cnv 15 36 24 empty empty !~ 4 12 0 18 #000000 #fcfcfc
 0;
 #X connect 0 0 2 0;
 #X connect 0 0 1 0;

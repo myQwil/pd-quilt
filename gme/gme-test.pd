@@ -1,4 +1,4 @@
-#N canvas 520 260 720 570 14;
+#N canvas 400 200 720 570 14;
 #X obj 250 50 openpanel;
 #X obj 60 180 gme~ 1;
 #X obj 50 400 *~;

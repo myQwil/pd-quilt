@@ -1,4 +1,4 @@
-#N canvas 550 300 450 300 14;
+#N canvas 400 200 450 300 14;
 #X floatatom 200 140 0 0 0 0 - - - 0;
 #X obj 200 170 ceil;
 #X floatatom 200 200 0 0 0 0 - - - 0;

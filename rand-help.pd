@@ -1,4 +1,4 @@
-#N canvas 650 220 520 520 14;
+#N canvas 400 200 520 520 14;
 #X text 170 150 1 arg behaves just like [random];
 #X obj 150 190 rand 4;
 #X floatatom 150 220 0 0 0 0 - - - 0;
@@ -23,7 +23,7 @@
 #X obj 290 250 random 2;
 #X obj 100 250 rand -1 1;
 #X obj 190 250 rand 20 | 1;
-#X obj 150 40 tgl 15 0 empty empty no-repeat\ mode 17 7 0 12 #ff0400
+#X obj 150 40 tgl 15 0 empty empty no-repeat\\\ mode 17 7 0 12 #ff0400
 #fcfcfc #7c7c7c 0 1;
 #X msg 150 100 nop \$1;
 #X floatatom 160 70 0 0 0 0 - - - 0;
@@ -48,7 +48,7 @@
 #X connect 14 0 11 0;
 #X connect 14 0 12 0;
 #X connect 15 0 14 0;
-#X restore 360 470 pd no-repeats;
+#X restore 360 450 pd no-repeats;
 #X obj 150 150 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #fcfcfc #fcfcfc;
 #X floatatom 70 330 0 0 0 0 - - - 0;
@@ -103,7 +103,7 @@ into the seed to produce different results with each restart of pd.
 #X connect 13 0 9 0;
 #X connect 17 0 13 0;
 #X connect 18 0 13 0;
-#X restore 360 440 pd lists;
+#X restore 360 420 pd lists;
 #X obj 70 410 rand 1 22 333;
 #X connect 1 0 2 0;
 #X connect 3 0 5 0;

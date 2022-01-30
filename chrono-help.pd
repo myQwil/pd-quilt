@@ -1,21 +1,21 @@
-#N canvas 630 400 540 400 14;
-#X obj 140 30 tgl 15 0 empty empty reset 17 7 0 11 #ff0400 #fcfcfc
+#N canvas 400 200 540 410 14;
+#X obj 140 40 tgl 15 0 empty empty reset 17 7 0 11 #ff0400 #fcfcfc
 #7c7c7c 0 1;
-#X obj 140 60 t f f;
-#X obj 130 100 sel 1;
-#X obj 130 260 chrono;
-#X obj 180 100 metro 100;
-#X msg 210 130 tempo 3 msec;
-#X msg 220 160 tempo 1 msec;
-#X msg 230 190 tempo 0.5 msec;
-#X msg 240 220 push -60000;
-#X msg 40 170 lap;
-#X msg 80 170 pause;
-#X obj 230 250 unpack;
-#X obj 330 280 hms;
-#X obj 230 280 hms;
-#X symbolatom 330 310 0 0 0 0 - - - 0;
-#X symbolatom 230 310 0 0 0 0 - - - 0;
+#X obj 140 70 t f f;
+#X obj 130 110 sel 1;
+#X obj 130 270 chrono;
+#X obj 180 110 metro 100;
+#X msg 210 140 tempo 3 msec;
+#X msg 220 170 tempo 1 msec;
+#X msg 230 200 tempo 0.5 msec;
+#X msg 240 230 push -60000;
+#X msg 40 180 lap;
+#X msg 80 180 pause;
+#X obj 230 260 unpack;
+#X obj 330 290 hms;
+#X obj 230 290 hms;
+#X symbolatom 330 320 0 0 0 0 - - - 0;
+#X symbolatom 230 320 0 0 0 0 - - - 0;
 #N canvas 1030 470 450 300 printit 0;
 #X obj 140 90 inlet;
 #X obj 200 90 inlet;
@@ -26,16 +26,16 @@
 #X connect 1 0 2 1;
 #X connect 2 0 3 0;
 #X connect 3 0 4 0;
-#X restore 240 340 pd printit;
-#X obj 130 290 hms;
-#X symbolatom 130 320 0 0 0 0 - - - 0;
-#X text 230 60 timer with pause and lap features;
-#X text 290 250 lap / total;
-#X obj 310 30 cnv 15 86 24 empty empty chrono 4 12 0 18 #000000 #fcfcfc
+#X restore 240 350 pd printit;
+#X obj 130 300 hms;
+#X symbolatom 130 330 0 0 0 0 - - - 0;
+#X text 230 70 timer with pause and lap features;
+#X text 290 260 lap / total;
+#X obj 330 40 cnv 15 86 24 empty empty chrono 4 12 0 18 #000000 #fcfcfc
 0;
-#X obj 180 290 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 180 300 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
-#X floatatom 270 100 0 0 0 0 - - - 0;
+#X floatatom 270 110 0 0 0 0 - - - 0;
 #X connect 0 0 1 0;
 #X connect 1 0 4 0;
 #X connect 1 1 2 0;

@@ -1,29 +1,29 @@
-#N canvas 730 360 450 400 14;
-#X msg 80 120 pause;
-#X floatatom 100 340 0 0 0 0 - - - 0;
-#X obj 190 20 cnv 15 72 24 empty empty linp~ 4 12 0 18 #000000 #fcfcfc
+#N canvas 400 200 450 410 14;
+#X msg 90 130 pause;
+#X floatatom 110 350 0 0 0 0 - - - 0;
+#X obj 200 30 cnv 15 72 24 empty empty linp~ 4 12 0 18 #000000 #fcfcfc
 0;
-#X obj 140 240 unpack;
-#X obj 200 210 t a;
-#X obj 70 340 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
+#X obj 150 250 unpack;
+#X obj 210 220 t a;
+#X obj 80 350 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
 #fcfcfc;
-#X obj 90 280 b, f 2;
-#X obj 130 320 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 100 290 b, f 2;
+#X obj 140 330 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
-#X text 130 120 /resume;
-#X text 100 50 line~ with pause functionality;
-#X obj 200 240 linp~;
-#X obj 200 310 *~;
-#X obj 200 340 dac~;
-#X obj 310 220 vsl 15 128 0.001 1 1 0 empty empty empty 0 -9 0 10 #2f004d
+#X text 140 130 /resume;
+#X text 110 60 line~ with pause functionality;
+#X obj 210 250 linp~;
+#X obj 210 320 *~;
+#X obj 210 350 dac~;
+#X obj 320 230 vsl 15 128 0.001 1 1 0 empty empty empty 0 -9 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
-#X obj 200 280 phasor~ 220;
-#X msg 220 150 27 \, 440 6000;
-#X msg 230 180 440 \, 27 6000;
-#X obj 80 310 delp;
-#X msg 210 120 336 \, 42 1500;
-#X msg 200 90 42 \, 336 1500;
-#X obj 260 250 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 210 290 phasor~ 220;
+#X msg 230 160 27 \, 440 6000;
+#X msg 240 190 440 \, 27 6000;
+#X obj 90 320 delp;
+#X msg 220 130 336 \, 42 1500;
+#X msg 210 100 42 \, 336 1500;
+#X obj 270 260 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X connect 0 0 10 0;
 #X connect 0 0 17 0;

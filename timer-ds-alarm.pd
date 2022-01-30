@@ -1,4 +1,4 @@
-#N canvas 150 600 360 300 14;
+#N canvas 100 600 360 300 14;
 #N canvas 720 240 460 380 alarm 0;
 #X obj 40 140 cnv 15 120 150 empty empty empty 20 12 0 14 #404040 #7c7c7c
 0;
@@ -163,6 +163,6 @@
 #X connect 31 0 26 0;
 #X connect 32 0 22 0;
 #X coords 0 -1 1 1 120 150 2 40 140;
-#X restore 120 100 pd alarm;
-#X obj 120 60 cnv 15 120 24 empty \$0clock 00:00:00 8 12 0 18 #000000
+#X restore 100 100 pd alarm;
+#X obj 100 60 cnv 15 120 24 empty \$0clock 7:22:33 8 12 0 18 #000000
 #fcfcfc 0;
