@@ -277,6 +277,14 @@ static t_atom ffplay_meta(t_ffplay *x ,t_symbol *s) {
 		return (t_atom){.a_type=A_FLOAT  ,.a_w={.w_float = x->plist.siz}};
 
 	AVDictionaryEntry *entry = av_dict_get(x->ic->metadata ,s->s_name ,0 ,0);
+
+	if (!entry && !strcmp(s->s_name ,"date") // try a few other 'date' aliases
+		&& !(entry = av_dict_get(x->ic->metadata ,"time" ,0 ,0))
+		&& !(entry = av_dict_get(x->ic->metadata ,"tyer" ,0 ,0))
+		&& !(entry = av_dict_get(x->ic->metadata ,"tdat" ,0 ,0))
+		&& !(entry = av_dict_get(x->ic->metadata ,"tdrc" ,0 ,0))
+	);
+
 	if (entry)
 		return (t_atom){.a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(entry->value)}};
 	else return (t_atom){.a_type=A_NULL ,.a_w={.w_float = 0}};
@@ -301,11 +309,13 @@ static void ffplay_info_custom(t_ffplay *x ,int ac ,t_atom *av) {
 			buf[len] = 0;
 			t_atom atom = ffplay_meta(x ,gensym(buf));
 			switch (atom.a_type)
-			{	case A_FLOAT:  startpost("%g" ,atom.a_w.w_float); break;
-				case A_SYMBOL: startpost("%s" ,atom.a_w.w_symbol->s_name); break;
-				default: startpost("");  }
+			{	case A_FLOAT  : startpost("%g" ,atom.a_w.w_float);          break;
+				case A_SYMBOL : startpost("%s" ,atom.a_w.w_symbol->s_name); break;
+				default       : startpost("");  }
 			sym += len + 2;  }
-		startpost("%s%s" ,sym ,ac ? " ":"");  }
+		startpost("%s%s" ,sym ,ac ? " " : "");  }
+	else if (av->a_type == A_FLOAT)
+		startpost("%g%s" ,av->a_w.w_float ,ac ? " " : "");
 	endpost();
 }
 
