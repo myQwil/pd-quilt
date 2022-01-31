@@ -65,8 +65,9 @@ static void ffplay_position(t_ffplay *x) {
 
 static void ffplay_speed(t_ffplay *x ,t_float f) {
 	x->speed = f;
-	f = 1. / (f * x->ratio);
-	x->data.src_ratio = f > frames ? frames : (f < inv_frames ? inv_frames : f);
+	f *= x->ratio;
+	f = f > frames ? frames : (f < inv_frames ? inv_frames : f);
+	x->data.src_ratio = 1. / f;
 }
 
 static void ffplay_seek(t_ffplay *x ,t_float f) {

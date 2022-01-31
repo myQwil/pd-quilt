@@ -318,8 +318,8 @@ static void gmepd_tempo(t_gme *x ,t_float f) {
 }
 
 static void gmepd_speed(t_gme *x ,t_float f) {
-	f = 1. / f;
-	x->data.src_ratio = f > frames ? frames : (f < inv_frames ? inv_frames : f);
+	f = f > frames ? frames : (f < inv_frames ? inv_frames : f);
+	x->data.src_ratio = 1. / f;
 }
 
 static short domask(short mask ,int ac ,t_atom *av) {
