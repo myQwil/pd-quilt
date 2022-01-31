@@ -71,12 +71,12 @@ into the seed to produce different results with each restart of pd.
 #X floatatom 40 240 0 0 0 0 - - - 0;
 #X obj 40 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
 #fcfcfc;
-#X msg 70 170 lst \$1;
+#X msg 70 170 mode \$1;
 #X obj 70 150 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
 #fcfcfc 0 1;
 #X obj 40 210 rand 1 5;
 #X obj 40 80 rand 22 or 333;
-#X text 130 170 force list or range behavior;
+#X text 140 170 force range(0) or list(1) behavior;
 #X floatatom 40 350 0 0 0 0 - - - 0;
 #X obj 40 290 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
 #fcfcfc;

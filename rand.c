@@ -11,21 +11,22 @@ static inline double mod(double x ,double y) {
 /* -------------------------- rand -------------------------- */
 static t_class *rand_class;
 
+typedef enum { M_RANGE ,M_LIST } t_mode;
+
 typedef struct {
 	t_rng z;
 	t_flin flin;
-	uint16_t lst;     /* list toggle */
-	uint16_t siz;     /* list size */
-	unsigned nop;     /* no-repeat toggle & max */
-	unsigned reps;    /* repeat count */
-	unsigned prev;    /* previous index */
+	unsigned siz;  /* list size */
+	unsigned nop;  /* no-repeat toggle & max */
+	unsigned reps; /* repeat count */
+	unsigned prev; /* previous index */
+	t_mode mode;   /* toggle for range or list behavior */
 } t_rand;
 
 static void rand_peek(t_rand *x ,t_symbol *s) {
-	int list = x->lst;
 	t_float *fp = x->flin.fp;
 	if (*s->s_name) startpost("%s: " ,s->s_name);
-	if (list) for (int n=x->siz; n--; fp++)
+	if (x->mode == M_LIST) for (int n = x->siz; n--; fp++)
 	{	startpost("%g" ,*fp);
 		if (n) startpost(" | ");  }
 	else startpost("%g <=> %g" ,fp[0] ,fp[1]);
@@ -40,8 +41,8 @@ static void rand_nop(t_rand *x ,t_float f) {
 	x->nop = f;
 }
 
-static void rand_lst(t_rand *x ,t_float f) {
-	x->lst = f;
+static void rand_mode(t_rand *x ,t_float f) {
+	x->mode = f;
 }
 
 static void rand_size(t_rand *x ,t_float f) {
@@ -52,12 +53,14 @@ static void rand_size(t_rand *x ,t_float f) {
 }
 
 static void rand_bang(t_rand *x) {
+	int neg;
 	double min ,range;
-	int neg ,list = x->lst;
+	t_mode mode = x->mode;
 	t_float *fp = x->flin.fp;
-	if (list) // list method
+
+	if (mode == M_LIST)
 		range = x->siz;
-	else      // range method
+	else // mode = M_RANGE
 	{	min = fp[1];
 		range = fp[0] - min;
 		neg = (range < 0 ? -1 : 1); // make range an absolute value
@@ -73,7 +76,7 @@ static void rand_bang(t_rand *x) {
 	x->reps = (i == prev ? reps+1 : 1);
 	x->prev = i;
 
-	outlet_float(x->z.obj.ob_outlet ,list ? fp[i] : floor(d * neg + min));
+	outlet_float(x->z.obj.ob_outlet ,mode == M_LIST ? fp[i] : floor(d * neg + min));
 }
 
 static int rand_z(t_rand *x ,int i ,int ac ,t_atom *av) {
@@ -111,9 +114,9 @@ static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
 	t_rng *x = &y->z;
 	outlet_new(&x->obj ,&s_float);
 	int c = !ac ? 2 : ac;
-	y->lst = c > 2;
+	y->mode = c > 2 ? M_LIST : M_RANGE;
 
-	// 3 args with a string in the middle creates a small list (ex: 7 or 9)
+	// 3 args with a symbol in the middle creates a small list (ex: 7 or 9)
 	if (ac==3 && av[1].a_type != A_FLOAT)
 	{	av[1] = av[2];
 		c = 2;  }
@@ -149,6 +152,6 @@ void rand_setup(void) {
 	class_addmethod(rand_class ,(t_method)rand_peek ,gensym("peek")  ,A_DEFSYM ,0);
 	class_addmethod(rand_class ,(t_method)rand_ptr  ,gensym("ptr")   ,A_DEFSYM ,0);
 	class_addmethod(rand_class ,(t_method)rand_nop  ,gensym("nop")   ,A_FLOAT  ,0);
-	class_addmethod(rand_class ,(t_method)rand_lst  ,gensym("lst")   ,A_FLOAT  ,0);
+	class_addmethod(rand_class ,(t_method)rand_mode ,gensym("mode")  ,A_FLOAT  ,0);
 	class_addmethod(rand_class ,(t_method)rand_size ,gensym("size")  ,A_FLOAT  ,0);
 }
