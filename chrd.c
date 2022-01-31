@@ -5,6 +5,7 @@ static t_class *chrd_class;
 
 typedef struct {
 	t_music z;
+	unsigned ins;    /* number of inlets */
 	unsigned all:1;  /* all-outlets toggle */
 	unsigned midi:1; /* midi-note toggle */
 	t_outlet **outs; /* outlets */
@@ -37,7 +38,7 @@ static void music_f(t_music *x ,t_float f ,char c ,t_float g) {
 		nte += dir * (f-d) * (nxt-nte);  }
 	if (c)
 		music_operate(&nte ,c ,g);
-	int n = x->flin.ins-1 ,i = (d - (d>0)) % n;
+	int n = y->ins-1 ,i = (d - (d>0)) % n;
 	i += (i<0)*n + 1;
 	if (!d) i = 0;
 	outlet_float(y->outs[i] ,y->midi ? nte : ntof(&x->note ,nte));
@@ -45,7 +46,7 @@ static void music_f(t_music *x ,t_float f ,char c ,t_float g) {
 
 static void chrd_bang(t_chrd *y) {
 	t_music *x = &y->z;
-	int n = x->siz ,i = x->flin.ins;
+	int n = x->siz ,i = y->ins;
 	i = y->all ? i : (n>i ? i : n);
 	for (t_outlet **op = y->outs+i; op-- ,i--;)
 	{	double nte = chrd_note(x ,i);
@@ -54,11 +55,12 @@ static void chrd_bang(t_chrd *y) {
 }
 
 static void *chrd_new(t_symbol *s ,int ac ,t_atom *av) {
-	int n = (ac<3 ? 3 : ac);
+	int n = ac < 3 ? 3 : ac;
 	t_chrd *y = (t_chrd*)music_new(chrd_class ,n);
 	t_music *x = &y->z;
 
-	y->outs = (t_outlet**)getbytes(x->flin.ins * sizeof(t_outlet*));
+	y->ins = n;
+	y->outs = (t_outlet**)getbytes(y->ins * sizeof(t_outlet*));
 	t_float *fp = x->flin.fp;
 	t_outlet **op = y->outs;
 	fp[0]=69 ,fp[1]=7 ,fp[2]=12;
@@ -74,7 +76,7 @@ static void *chrd_new(t_symbol *s ,int ac ,t_atom *av) {
 static void chrd_free(t_chrd *y) {
 	t_music *x = &y->z;
 	flin_free(&x->flin);
-	freebytes(y->outs ,x->flin.ins * sizeof(t_outlet*));
+	freebytes(y->outs ,y->ins * sizeof(t_outlet*));
 }
 
 void chrd_setup(void) {

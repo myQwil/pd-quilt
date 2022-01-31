@@ -53,7 +53,7 @@ static void muse_slice(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
 
 static void muse_send(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
 	t_music *x = &y->z;
-	t_flin flin = {0,0,0};
+	t_flin flin = {0 ,0};
 	flin_alloc(&flin ,x->siz);
 	memcpy(flin.fp ,x->flin.fp ,x->siz * sizeof(t_float));
 

@@ -117,7 +117,7 @@ static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
 	if (ac==3 && av[1].a_type != A_FLOAT)
 	{	av[1] = av[2];
 		c = 2;  }
-	y->siz = y->flin.ins = c;
+	y->siz = c;
 
 	// always have a pointer size of at least 2 numbers for min and max
 	flin_alloc(&y->flin ,c<2 ? 2 : c);

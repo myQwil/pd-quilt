@@ -232,8 +232,7 @@ static void music_size(t_music *x ,t_float f) {
 	int i = f;
 	if      (i < 0) i = i % x->siz + x->siz;
 	else if (i < 1) i = 1;
-	int res = flin_resize(&x->flin ,&x->obj ,i);
-	switch (res)
+	switch (flin_resize(&x->flin ,&x->obj ,i))
 	{	case -2: x->siz = 0;
 		case -1: break;
 		default: x->siz = i;  }
@@ -264,11 +263,11 @@ static void music_set(t_music *x ,t_symbol *s ,int ac ,t_atom *av) {
 	note_set(&x->note ,ac ,av);
 }
 
-static t_music *music_new(t_class *mclass ,int ac) {
+static t_music *music_new(t_class *mclass ,int n) {
 	t_music *x = (t_music*)pd_new(mclass);
 
-	x->siz = x->flin.ins = ac;
-	flin_alloc(&x->flin ,ac);
+	x->siz = n;
+	flin_alloc(&x->flin ,n);
 
 	t_atom atms[] =
 	{	 {.a_type=A_FLOAT ,.a_w={.w_float = 440}}
