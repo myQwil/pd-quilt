@@ -16,9 +16,10 @@ A lazy version of pack/unpack objects with anything inlets/outlets. While these 
 ## [ntof $1 $2] & [fton $1 $2]
 Similar to pd's `[mtof]` and `[ftom]` with the added ability to change the reference pitch(`$1`) and the # of tones in equal temperament(`$2`).
 
-## [sploat $1] & [gloat $1 $2 $3]
-`[sploat]` Splits a float(`$1`) into its sign, exponent, and mantissa.
-`[gloat]` Joins the mantissa(`$1`), exponent(`$2`), and sign(`$3`) to create a new float.
+## [flenc $1 $2 $3] & [fldec $1]
+`[flenc]` Joins the mantissa(`$1`), exponent(`$2`), and sign(`$3`) to create a new float.
+`[fldec]` Splits a float(`$1`) into its sign, exponent, and mantissa.
+
 
 ## [muse $..] & [chrd $..]
 `[muse]` Creates a musical scale and uses various messages to quickly change the structure of the scale
