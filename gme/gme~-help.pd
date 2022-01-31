@@ -1,4 +1,6 @@
 #N canvas 400 200 550 660 14;
+#X declare -path xtra;
+#X declare -lib blunt;
 #X obj 200 510 *~;
 #X obj 200 600 dac~;
 #N canvas 710 770 450 300 (subpatch) 0;
@@ -444,6 +446,10 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X obj 30 540 tabwrite~ \$0gme;
 #X obj 30 460 metro 40;
 #X obj 200 540 dac~;
+#N canvas 0 705 450 300 libs 0;
+#X obj 130 120 declare -path xtra;
+#X obj 130 150 declare -lib blunt;
+#X restore 400 600 pd libs;
 #X connect 0 0 44 0;
 #X connect 3 0 43 0;
 #X connect 4 0 43 1;

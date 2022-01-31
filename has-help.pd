@@ -17,7 +17,7 @@
 #X msg 240 250 2;
 #X obj 260 170 t p p;
 #X msg 330 140 symbol bang;
-#X obj 330 260 namecanvas foo;
+#X obj 320 250 namecanvas foo;
 #X msg 260 110 traverse foo \, bang;
 #X obj 130 210 t a;
 #X obj 330 170 t s s;

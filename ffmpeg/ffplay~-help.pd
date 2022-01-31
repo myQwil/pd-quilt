@@ -1,4 +1,6 @@
 #N canvas 400 200 570 680 14;
+#X declare -path xtra;
+#X declare -lib blunt;
 #X obj 230 530 *~;
 #X obj 230 560 dac~;
 #N canvas 710 780 450 300 (subpatch) 0;
@@ -191,7 +193,7 @@
 #X msg 140 240 open \$1;
 #X obj 40 500 metro 40;
 #X obj 110 530 /~ 2;
-#N canvas 100 670 660 190 trackbar 0;
+#N canvas 100 670 680 200 trackbar 0;
 #X obj 30 140 outlet;
 #X msg 30 110 seek \$1;
 #X obj 60 20 hsl 576 20 0 1 0 0 empty \$0trackbar empty -2 -8 0 10
@@ -347,6 +349,10 @@ and playback speed manipulation.;
 #X connect 7 0 8 0;
 #X connect 8 0 5 1;
 #X restore 60 270 pd next;
+#N canvas 0 705 450 300 libs 0;
+#X obj 130 120 declare -path xtra;
+#X obj 130 150 declare -lib blunt;
+#X restore 400 620 pd libs;
 #X connect 0 0 1 0;
 #X connect 3 0 30 0;
 #X connect 4 0 30 1;

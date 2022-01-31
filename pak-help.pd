@@ -1,4 +1,5 @@
 #N canvas 400 200 790 540 14;
+#X declare -lib zexy;
 #X msg 260 100 one 2 3;
 #X msg 340 100 4 five 6;
 #X msg 340 130 7 8 nine;
@@ -123,6 +124,7 @@ type;
 #X text 40 310 type mismatch;
 #X obj 300 30 cnv 15 152 24 empty empty pak\\\ &\\\ unpak 4 12 0 18
 #000000 #fcfcfc 0;
+#X obj 540 450 declare -lib zexy;
 #X connect 0 0 3 0;
 #X connect 1 0 3 0;
 #X connect 2 0 3 0;

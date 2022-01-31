@@ -8,10 +8,9 @@
 #X obj 90 340 dac~;
 #X obj 140 340 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10
 #2f004d #fcfcfc #fcfcfc 0 1;
-#X msg 120 130 440 12;
+#X msg 130 120 440 12;
 #X floatatom 140 160 0 0 0 0 - - - 0;
 #X floatatom 180 190 0 0 0 0 - - - 0;
-#X obj 80 120 b !;
 #X obj 60 150 cupqb 69;
 #X msg 430 160 ref \$1;
 #X msg 430 190 tet \$1;
@@ -22,6 +21,7 @@
 change the reference pitch and the number of tones in an octave.;
 #X obj 190 30 cnv 15 152 24 empty empty ntof\\\ &\\\ fton 4 12 0 18
 #000000 #fcfcfc 0;
+#X obj 50 120 loadbang;
 #X connect 0 0 1 0;
 #X connect 0 0 4 0;
 #X connect 1 0 2 0;
@@ -33,5 +33,5 @@ change the reference pitch and the number of tones in an octave.;
 #X connect 8 0 0 0;
 #X connect 9 0 0 1;
 #X connect 10 0 0 2;
-#X connect 11 0 12 1;
-#X connect 12 0 0 0;
+#X connect 11 0 0 0;
+#X connect 19 0 11 1;

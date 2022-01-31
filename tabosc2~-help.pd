@@ -1,4 +1,5 @@
 #N canvas 400 200 730 540 14;
+#X declare -lib blunt;
 #X msg 50 320 100;
 #X floatatom 50 350 0 0 0 0 - - - 0;
 #X obj 50 380 tabosc2~ \$0wave 0.9;
@@ -56,6 +57,7 @@
 0;
 #X obj 330 210 loadbang;
 #X msg 330 240 4;
+#X obj 520 250 declare -lib blunt;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 2 0 14 0;

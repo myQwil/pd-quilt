@@ -1,4 +1,5 @@
 #N canvas 400 200 670 700 14;
+#X declare -lib blunt;
 #N canvas 0 0 450 300 (subpatch) 0;
 #X array \$0adsr 44100 float 0;
 #X coords 0 1.02 44099 -1.02 200 130 1;
@@ -62,6 +63,7 @@
 #X msg 200 160 . 10 s 20 \, 1;
 #X obj 60 480 tabwrite~ \$0adsr;
 #X msg 200 130 . 500 0.33 r \, 1;
+#X obj 180 550 declare -lib blunt;
 #X connect 1 0 24 0;
 #X connect 2 0 56 0;
 #X connect 3 0 5 0;

@@ -1,7 +1,7 @@
 #N canvas 400 200 590 450 14;
 #X obj 100 290 t a;
-#X msg 70 150 list 12;
-#X msg 90 180 list hi;
+#X msg 80 150 list 12;
+#X msg 100 180 list hi;
 #X obj 110 240 pointer;
 #X obj 80 360 is list;
 #X obj 150 360 is float;
