@@ -119,31 +119,31 @@ static t_int *gmepd_perform(t_int *w) {
 
 	if (x->emu && x->play)
 	{	SRC_DATA *data = &x->data;
-		float *out = data->data_out;
 		while (n--)
 		{	if (data->output_frames_gen > 0)
-			{	sound:
+			{	perform:
 				for (int i = NCH; i--;)
-					*outs[i]++ = out[i];
-				out += NCH;
+					*outs[i]++ = data->data_out[i];
+				data->data_out += NCH;
 				data->output_frames_gen--;
 				continue;  }
-
-			if (data->input_frames <= 0)
-			{	short buf[buf_size];
+			else if (data->input_frames > 0)
+			{	resample:
+				data->data_out = x->out;
+				src_process(x->state ,data);
+				data->input_frames -= data->input_frames_used;
+				data->data_in += data->input_frames_used * NCH;
+				goto perform;  }
+			else
+			{	// receive
 				float *in = x->in;
+				data->data_in = in;
+				short arr[buf_size] ,*buf = arr;
 				hnd_err(gme_play(x->emu ,buf_size ,buf));
-				for (int i = buf_size; i--;)
-					in[i] = buf[i] / short_limit;
+				for (int i = buf_size; i--; in++ ,buf++)
+					*in = *buf / short_limit;
 				data->input_frames = FRAMES;
-				data->data_in = in;  }
-
-			data->data_out = out = x->out;
-			src_process(x->state ,data);
-			data->data_in += data->input_frames_used * NCH;
-			data->input_frames -= data->input_frames_used;
-			goto sound;  }
-		data->data_out = out;  }
+				goto resample;  }  }  }
 	else while (n--)
 		for (int i = NCH; i--;)
 			*outs[i]++ = 0;

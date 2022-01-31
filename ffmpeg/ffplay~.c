@@ -98,18 +98,17 @@ static t_int *ffplay_perform(t_int *w) {
 
 	if (x->open && x->play)
 	{	SRC_DATA *data = &x->data;
-		float *out = data->data_out;
 		while (n--)
 		{	if (data->output_frames_gen > 0)
-			{	sound:
+			{	perform:
 				for (int i = nch; i--;)
-					*outs[i]++ = out[i];
-				out += nch;
+					*outs[i]++ = data->data_out[i];
+				data->data_out += nch;
 				data->output_frames_gen--;
 				continue;  }
 			else if (data->input_frames > 0)
 			{	resample:
-				data->data_out = out = x->out;
+				data->data_out = x->out;
 				src_process(x->state ,data);
 				data->input_frames -= data->input_frames_used;
 				if (data->input_frames <= 0)
@@ -117,9 +116,10 @@ static t_int *ffplay_perform(t_int *w) {
 					data->input_frames =
 						swr_convert(x->swr ,(uint8_t**)&x->in ,FRAMES ,0 ,0);  }
 				else data->data_in += data->input_frames_used * nch;
-				goto sound;  }
+				goto perform;  }
 			else
-			{	data->data_in = x->in;
+			{	// receive
+				data->data_in = x->in;
 				while (av_read_frame(x->ic ,x->pkt) >= 0)
 				{	if (x->pkt->stream_index == x->idx)
 					{	if (avcodec_send_packet(x->ctx ,x->pkt) < 0
@@ -138,8 +138,7 @@ static t_int *ffplay_perform(t_int *w) {
 				outlet_anything(x->o_meta ,gensym("done") ,0 ,0);  }
 			else
 			{	ffplay_seek(x ,0);
-				goto silence;  }  }
-		data->data_out = out;  }
+				goto silence;  }  }  }
 	else while (n--)
 	{	silence:
 		for (int i = nch; i--;)
@@ -261,8 +260,8 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 	{	x->plist.siz = 1;
 		x->plist.trk[0] = gensym(path);  }
 
-	if (!err_msg) err_msg = ffplay_load(x ,1);
-	if (err_msg) post("Error: %s." ,err_msg);
+	if (err_msg || (err_msg = ffplay_load(x ,1)))
+		post("Error: %s." ,err_msg);
 	t_atom open = {.a_type=A_FLOAT ,.a_w={.w_float = x->open}};
 	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
 }
