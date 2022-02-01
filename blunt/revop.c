@@ -119,7 +119,7 @@ void revop_setup(void) {
 	{	t_class **class;
 		const char *name;
 		t_newmethod new;
-		t_bopmethod bang;  }
+		void *bang;  }
 	objs[] =
 	{	 { &rminus_class ,"@-"   ,(t_newmethod)rminus_new ,rminus_bang }
 		,{ &rdiv_class   ,"@/"   ,(t_newmethod)rdiv_new   ,rdiv_bang   }
@@ -131,17 +131,15 @@ void revop_setup(void) {
 		,{ &rpc_class    ,"@%"   ,(t_newmethod)rpc_new    ,rpc_bang    }
 		,{ &rmod_class   ,"@mod" ,(t_newmethod)rmod_new   ,rmod_bang   }
 		,{ &rdivm_class  ,"@div" ,(t_newmethod)rdiv_new   ,rdiv_bang   }
-		,{ NULL }  };
+		,{ NULL }  } ,*obj = objs;
 
-	t_symbol *rev_sym = gensym("revbinops");
-	for (int i=0; objs[i].class; i++)
-	{	struct _obj obj = objs[i];
-
-		*obj.class = class_new(gensym(obj.name) ,obj.new  ,0
+	t_symbol *s_rev = gensym("revbinops");
+	for (; obj->class; obj++)
+	{	*obj->class = class_new(gensym(obj->name) ,obj->new  ,0
 			,sizeof(t_bop) ,0 ,A_GIMME ,0);
 
-		t_class *class = *obj.class;
-		class_addbang  (class ,obj.bang);
+		t_class *class = *obj->class;
+		class_addbang  (class ,obj->bang);
 		class_addfloat (class ,bop_float);
 		class_addmethod(class ,(t_method)bop_f1   ,gensym("f1")  ,A_FLOAT ,0);
 		class_addmethod(class ,(t_method)bop_f2	,gensym("f2")  ,A_FLOAT ,0);
@@ -149,5 +147,5 @@ void revop_setup(void) {
 		class_addmethod(class ,(t_method)bop_set  ,gensym("set") ,A_GIMME ,0);
 		class_addmethod(class ,(t_method)blunt_loadbang
 			,gensym("loadbang") ,A_DEFFLOAT ,0);
-		class_sethelpsymbol(class ,rev_sym);  }
+		class_sethelpsymbol(class ,s_rev);  }
 }

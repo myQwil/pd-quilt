@@ -385,7 +385,7 @@ void hotop_setup(void) {
 		t_class **proxy;
 		const char *name;
 		t_newmethod new;
-		t_bopmethod bang;  }
+		void *bang;  }
 	objs[] =
 	{	 { &hplus_class  ,&hplus_proxy  ,"#+"   ,(t_newmethod)hplus_new  ,hplus_bang  }
 		,{ &hminus_class ,&hminus_proxy ,"#-"   ,(t_newmethod)hminus_new ,hminus_bang }
@@ -415,28 +415,24 @@ void hotop_setup(void) {
 		,{ &hdivm_class  ,&hdivm_proxy  ,"#div" ,(t_newmethod)hdivm_new  ,hdivm_bang  }
 		,{ NULL }
 		,{ &hxor_class   ,&hxor_proxy   ,"#^"   ,(t_newmethod)hxor_new   ,hxor_bang   }
-		,{ NULL }  };
+		,{ NULL }  } ,*obj = objs;
 
 	t_symbol *syms[] =
 	{	 gensym("hotbinops1") ,gensym("hotbinops2") ,gensym("hotbinops3")
-		,gensym("0x5e") ,NULL  };
+		,gensym("0x5e") ,NULL  } ,**sym = syms;
 
-	int i=0 ,j=0;
 	char alt[10] = "_";
-	for (; syms[i]; i++ ,j++)
-	{	for (; objs[j].class; j++)
-		{	struct _obj obj = objs[j];
-			const char *name = obj.name;
-
-			*obj.class = class_new(gensym(name) ,obj.new ,(t_method)hot_free
+	for (; *sym; sym++ ,obj++)
+	{	for (; obj->class; obj++)
+		{	*obj->class = class_new(gensym(obj->name) ,obj->new ,(t_method)hot_free
 				,sizeof(t_hot) ,0 ,A_GIMME ,0);
-			strcpy(stpcpy(alt+1 ,name) ,"_pxy");
-			*obj.proxy = class_new(gensym(alt) ,0 ,0
+			strcpy(stpcpy(alt+1 ,obj->name) ,"_pxy");
+			*obj->proxy = class_new(gensym(alt) ,0 ,0
 				,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
 
-			t_class *class = *obj.class;
-			t_class *proxy = *obj.proxy;
-			class_addbang  (class ,obj.bang);
+			t_class *class = *obj->class;
+			t_class *proxy = *obj->proxy;
+			class_addbang  (class ,obj->bang);
 			class_addfloat (class ,bop_float);
 			class_addmethod(class ,(t_method)bop_f1   ,gensym("f1")  ,A_FLOAT ,0);
 			class_addmethod(class ,(t_method)bop_f2   ,gensym("f2")  ,A_FLOAT ,0);
@@ -452,5 +448,5 @@ void hotop_setup(void) {
 			class_addmethod(proxy ,(t_method)hot_pxy_skip ,gensym(".")   ,A_GIMME ,0);
 			class_addmethod(proxy ,(t_method)hot_pxy_set  ,gensym("set") ,A_GIMME ,0);
 
-			class_sethelpsymbol(class ,syms[i]);  }  }
+			class_sethelpsymbol(class ,*sym);  }  }
 }

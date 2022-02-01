@@ -12,9 +12,22 @@ typedef struct {
 	t_float f;
 } t_num;
 
-static void num_float(t_num *x ,t_float f) {
+static inline void num_set(t_num *x ,t_float f) {
 	x->f = f;
+}
+
+static inline void num_float(t_num *x ,t_float f) {
+	num_set(x ,f);
 	pd_bang((t_pd*)x);
+}
+
+static void num_symbol(t_num *x ,t_symbol *s) {
+	t_float f = 0.;
+	char *str_end = NULL;
+	f = strtof(s->s_name ,&str_end);
+	if (f == 0 && s->s_name == str_end)
+		pd_error(x ,"Couldn't convert %s to float." ,s->s_name);
+	else num_float(x ,f);
 }
 
 static void *num_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
@@ -47,15 +60,6 @@ static t_class *f_class;
 
 static void f_bang(t_num *x) {
 	outlet_float(x->bl.obj.ob_outlet ,x->f);
-}
-
-static void f_symbol(t_num *x ,t_symbol *s) {
-	t_float f = 0.0f;
-	char *str_end = NULL;
-	f = strtof(s->s_name ,&str_end);
-	if (f == 0 && s->s_name == str_end)
-		pd_error(x ,"Couldn't convert %s to float." ,s->s_name);
-	else outlet_float(x->bl.obj.ob_outlet ,x->f = f);
 }
 
 static void f_send(t_num *x ,t_symbol *s) {
@@ -444,37 +448,39 @@ void sym_setup(void) {
 
 void blunt_setup(void) {
 
-	post("Blunt! version 1.4");
+	post("Blunt! version 1.5");
 
 	/* ---------------- connectives --------------------- */
 
-	i_class = class_new(gensym("i") ,(t_newmethod)i_new ,0
-		,sizeof(t_num) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)i_new ,gensym("`i") ,A_GIMME ,0);
-	class_addmethod(i_class ,(t_method)i_send ,gensym("send") ,A_SYMBOL ,0);
-	class_addbang  (i_class ,i_bang);
-
-	f_class = class_new(gensym("f") ,(t_newmethod)f_new ,0
-		,sizeof(t_num) ,0 ,A_GIMME ,0);
-	class_addcreator((t_newmethod)f_new ,gensym("`f") ,A_GIMME ,0);
-	class_addmethod(f_class ,(t_method)f_send ,gensym("send") ,A_SYMBOL ,0);
-	class_addbang  (f_class ,f_bang);
-	class_addsymbol(f_class ,f_symbol);
-
-	t_class *nums[] = { i_class ,f_class ,NULL };
-	t_symbol *num_sym = gensym("blunt");
-	for (int i=0; nums[i]; i++)
-	{	class_addfloat (nums[i] ,num_float);
-		class_addmethod(nums[i] ,(t_method)blunt_loadbang
-			,gensym("loadbang") ,A_DEFFLOAT ,0);
-		class_sethelpsymbol(nums[i] ,num_sym);  }
-
-	const struct _obj
+	t_symbol *s_blunt = gensym("blunt");
+	char alt[5] = "`";
+	struct _obj
 	{	t_class **class;
 		const char *name;
 		t_newmethod new;
-		t_bopmethod bang;  }
-	objs[] =
+		void *bang;  };
+
+	const struct _obj nums[] =
+	{	 { &i_class ,"i" ,(t_newmethod)i_new ,i_bang }
+		,{ &f_class ,"f" ,(t_newmethod)f_new ,f_bang }
+		,{ NULL }  } ,*num = nums;
+
+	for (; num->class; num++)
+	{	*num->class = class_new(gensym(num->name) ,num->new ,0
+			,sizeof(t_bop) ,0 ,A_GIMME ,0);
+		strcpy(alt+1 ,num->name);
+		class_addcreator(num->new ,gensym(alt) ,A_GIMME ,0);
+
+		t_class *class = *num->class;
+		class_addbang  (class ,num->bang);
+		class_addfloat (class ,num_float);
+		class_addsymbol(class ,num_symbol);
+		class_addmethod(class ,(t_method)num_set ,gensym("set") ,A_FLOAT ,0);
+		class_addmethod(class ,(t_method)blunt_loadbang
+			,gensym("loadbang") ,A_DEFFLOAT ,0);
+		class_sethelpsymbol(class ,s_blunt);  }
+
+	const struct _obj bops[] =
 	{	 { &b1_plus_class  ,"+"   ,(t_newmethod)b1_plus_new  ,b1_plus_bang  }
 		,{ &b1_minus_class ,"-"   ,(t_newmethod)b1_minus_new ,b1_minus_bang }
 		,{ &b1_times_class ,"*"   ,(t_newmethod)b1_times_new ,b1_times_bang }
@@ -501,25 +507,19 @@ void blunt_setup(void) {
 		,{ &b3_div_class   ,"div" ,(t_newmethod)b3_div_new   ,b3_div_bang   }
 		,{ NULL }
 		,{ &b3_xor_class   ,"^"   ,(t_newmethod)b3_xor_new   ,b3_xor_bang   }
-		,{ NULL }  };
+		,{ NULL }  } ,*bop = bops;
 
-	t_symbol *syms[] = { num_sym ,gensym("0x5e") ,NULL };
+	t_symbol *syms[] = { s_blunt ,gensym("0x5e") ,NULL } ,**sym = syms;
 
-	int i=0 ,j=0;
-	char alt[5] = "`";
-	for (; syms[i]; i++ ,j++)
-	{	for (; objs[j].class; j++)
-		{	struct _obj obj = objs[j];
-			const char *name = obj.name;
-			t_newmethod new = obj.new;
-
-			*obj.class = class_new(gensym(name) ,new ,0
+	for (; *sym; sym++ ,bop++)
+	{	for (; bop->class; bop++)
+		{	*bop->class = class_new(gensym(bop->name) ,bop->new ,0
 				,sizeof(t_bop) ,0 ,A_GIMME ,0);
-			strcpy(alt+1 ,name);
-			class_addcreator(new ,gensym(alt) ,A_GIMME ,0);
+			strcpy(alt+1 ,bop->name);
+			class_addcreator(bop->new ,gensym(alt) ,A_GIMME ,0);
 
-			t_class *class = *obj.class;
-			class_addbang  (class ,obj.bang);
+			t_class *class = *bop->class;
+			class_addbang  (class ,bop->bang);
 			class_addfloat (class ,bop_float);
 			class_addmethod(class ,(t_method)bop_f1   ,gensym("f1")  ,A_FLOAT ,0);
 			class_addmethod(class ,(t_method)bop_f2   ,gensym("f2")  ,A_FLOAT ,0);
@@ -527,7 +527,7 @@ void blunt_setup(void) {
 			class_addmethod(class ,(t_method)bop_set  ,gensym("set") ,A_GIMME ,0);
 			class_addmethod(class ,(t_method)blunt_loadbang
 				,gensym("loadbang") ,A_DEFFLOAT ,0);
-			class_sethelpsymbol(class ,syms[i]);  }  }
+			class_sethelpsymbol(class ,*sym);  }  }
 
 	/* hot & reverse binops */
 	hotop_setup();
