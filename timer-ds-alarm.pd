@@ -128,7 +128,7 @@
 #X text 100 240 :;
 #X msg 350 50 \; pd dsp \$1;
 #X msg 350 170 1;
-#X msg 50 50 30;
+#X msg 50 50 20;
 #X connect 2 0 3 0;
 #X connect 2 0 11 1;
 #X connect 4 0 8 0;

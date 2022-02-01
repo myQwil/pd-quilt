@@ -27,16 +27,16 @@ typedef struct {
 
 typedef struct {
 	t_object obj;
-	AVFormatContext *ic;
-	AVCodecContext  *ctx;
+	float       *in;
+	float       *out;
+	SRC_DATA     data;
+	SRC_STATE   *state;
 	AVPacket        *pkt;
 	AVFrame         *frm;
 	SwrContext      *swr;
-	SRC_STATE   *state;
-	SRC_DATA     data;
-	float       *in;  /* audio input buffer */
-	float       *out; /* audio output buffer */
-	t_sample *outs[MAXCH];
+	AVCodecContext  *ctx;
+	AVFormatContext *ic;
+	t_sample  *outs[MAXCH];
 	t_playlist plist;
 	int64_t  layout;  /* channel layout bit-mask */
 	t_float  speed;   /* playback speed */
@@ -422,12 +422,12 @@ static void *ffplay_new(t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void ffplay_free(t_ffplay *x) {
-	avformat_close_input(&x->ic);
 	avcodec_free_context(&x->ctx);
+	avformat_close_input(&x->ic);
 	av_packet_free(&x->pkt);
 	av_frame_free(&x->frm);
-	swr_free(&x->swr);
 	src_delete(x->state);
+	swr_free(&x->swr);
 
 	t_playlist *pl = &x->plist;
 	freebytes(pl->trk ,pl->max * sizeof(t_symbol*));
