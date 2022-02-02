@@ -6,11 +6,11 @@
 #X msg 230 150 1, f 2;
 #X msg 300 150 1, f 2;
 #X obj 330 150 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X obj 340 190 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X obj 190 190 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X obj 260 30 cnv 15 72 24 empty empty cupqb 4 12 0 18 #000000 #fcfcfc
 0;
 #X text 40 60 the left-most and right-most inlets will subtract and

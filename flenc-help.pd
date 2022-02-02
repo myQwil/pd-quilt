@@ -8,7 +8,7 @@
 #X obj 120 200 #/;
 #X floatatom 120 230 0 0 0 0 - - - 0;
 #X obj 240 200 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X obj 330 200 #pow;
 #X floatatom 330 230 0 0 0 0 - - - 0;
 #X obj 210 230 fldec -0.25;
@@ -23,7 +23,7 @@
 #X msg 230 380 set . 125 1;
 #X obj 220 410 flenc 0 125 1;
 #X obj 180 380 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X floatatom 220 440 0 0 0 0 - - - 0;
 #X obj 50 370 cupqb;
 #X text 180 70 float-encode & float-decode;

@@ -1,7 +1,7 @@
 #N canvas 400 200 520 390 14;
 #X obj 130 320 print;
 #X obj 120 170 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X msg 190 170 123;
 #X msg 230 240 hi;
 #X obj 40 170 pointer;
@@ -13,11 +13,11 @@
 #X text 180 320 a f f;
 #X msg 40 200 . . \$1;
 #X obj 410 310 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X obj 350 310 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X obj 290 310 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X text 110 80 args are written in receiving order;
 #X text 130 60 outputs the values in reverse;
 #X msg 220 210 6 six;

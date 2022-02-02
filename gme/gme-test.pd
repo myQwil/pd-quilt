@@ -26,7 +26,7 @@
 #X obj 420 180 gme~ 7;
 #X obj 480 180 gme~ 8;
 #X obj 50 50 cupqb;
-#X obj 70 30 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
+#X obj 70 30 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400
 #fcfcfc;
 #X msg 200 50 stop;
 #X floatatom 350 60 5 0 0 0 - - - 0;
@@ -35,7 +35,7 @@
 #X msg 50 140 info;
 #X obj 50 110 change;
 #X msg 110 140 path;
-#X obj 170 60 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #fcfcfc
+#X obj 170 60 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400
 #fcfcfc;
 #X obj 530 220 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;

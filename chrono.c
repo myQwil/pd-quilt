@@ -25,13 +25,13 @@ static void chrono_bang(t_chrono *x) {
 	outlet_float(x->o_on ,1);
 }
 
-static void chrono_push(t_chrono *x ,t_float f) {
+static void chrono_delay(t_chrono *x ,t_float f) {
 	x->setmore -= f;
 }
 
 static void chrono_float(t_chrono *x ,t_float f) {
 	chrono_bang(x);
-	chrono_push(x ,f);
+	chrono_delay(x ,f);
 }
 
 static void chrono_bang2(t_chrono *x) {
@@ -72,9 +72,9 @@ static void chrono_tempo(t_chrono *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (ac > 2) ac = 2;
 	while (ac--)
 	{	switch (av[ac].a_type)
-		{	case A_FLOAT  :x->unit     = av[ac].a_w.w_float  ;break;
-			case A_SYMBOL :x->unitname = av[ac].a_w.w_symbol ;break;
-			default: break;  }  }
+		{	case A_FLOAT  : x->unit     = av[ac].a_w.w_float  ;break;
+			case A_SYMBOL : x->unitname = av[ac].a_w.w_symbol ;break;
+			default       : break;  }  }
 	parsetimeunits(x ,x->unit ,x->unitname ,&x->unit ,&x->samps);
 }
 
@@ -102,6 +102,7 @@ void chrono_setup(void) {
 	class_addmethod(chrono_class ,(t_method)chrono_bang2 ,gensym("bang2") ,A_NULL);
 	class_addmethod(chrono_class ,(t_method)chrono_pause ,gensym("pause") ,A_NULL);
 	class_addmethod(chrono_class ,(t_method)chrono_lap   ,gensym("lap")   ,A_NULL);
-	class_addmethod(chrono_class ,(t_method)chrono_push  ,gensym("push")  ,A_FLOAT ,0);
+	class_addmethod(chrono_class ,(t_method)chrono_delay ,gensym("del")   ,A_FLOAT ,0);
+	class_addmethod(chrono_class ,(t_method)chrono_delay ,gensym("delay") ,A_FLOAT ,0);
 	class_addmethod(chrono_class ,(t_method)chrono_tempo ,gensym("tempo") ,A_GIMME ,0);
 }

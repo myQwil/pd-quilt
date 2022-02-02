@@ -1,12 +1,12 @@
 #N canvas 400 200 860 550 14;
 #X obj 40 60 inlet;
-#X obj 290 280 tgl 18 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 290 280 tgl 18 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
 #fcfcfc 0 1;
-#X obj 310 280 tgl 18 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 310 280 tgl 18 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
 #fcfcfc 0 1;
-#X obj 330 280 tgl 18 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 330 280 tgl 18 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
 #fcfcfc 0 1;
-#X obj 350 280 tgl 18 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 350 280 tgl 18 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
 #fcfcfc 0 1;
 #X obj 370 280 tgl 18 0 empty empty empty 17 7 0 10 #551312 #fcfcfc
 #fcfcfc 0 1;

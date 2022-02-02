@@ -1,6 +1,6 @@
 #N canvas 400 200 510 300 14;
 #X obj 210 140 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X floatatom 210 170 0 0 0 0 - - - 0;
 #X obj 210 200 same;
 #X floatatom 210 230 0 0 0 0 - - - 0;
@@ -11,9 +11,9 @@
 through the left outlet \, but also sends repeat values through the
 right outlet;
 #X obj 190 230 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X obj 250 230 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X msg 250 170 set \$1;
 #X floatatom 250 140 0 0 0 0 - - - 0;
 #X connect 0 0 1 0;

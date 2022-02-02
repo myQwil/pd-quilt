@@ -13,19 +13,19 @@
 #X obj 300 270 x a;
 #X msg 180 240 1 2 3;
 #X msg 390 240 1 2 3;
-#X obj 80 390 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 80 390 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
 #fcfcfc 0 1;
-#X obj 150 390 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 150 390 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
 #fcfcfc 0 1;
-#X obj 220 390 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 220 390 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
 #fcfcfc 0 1;
-#X obj 300 390 tgl 15 0 empty empty empty 17 7 0 10 #ff0400 #fcfcfc
+#X obj 300 390 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
 #fcfcfc 0 1;
 #X obj 420 300 is p;
 #X obj 400 330 spigot;
 #X obj 400 360 pointer;
 #X obj 400 390 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X obj 380 300 x;
 #X obj 280 40 cnv 15 21 24 empty empty x 4 12 0 18 #000000 #fcfcfc
 0;

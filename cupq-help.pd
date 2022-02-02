@@ -6,11 +6,11 @@
 #X msg 210 140 1, f 2;
 #X msg 280 140 1, f 2;
 #X obj 320 140 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X obj 320 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X obj 160 170 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X obj 210 210 cupq 42 2;
 #X obj 260 20 cnv 15 60 24 empty empty cupq 4 12 0 18 #000000 #fcfcfc
 0;

@@ -2,9 +2,9 @@
 #X text 190 60 checks an atom's type.;
 #X floatatom 230 330 0 0 0 0 - - - 0;
 #X obj 230 210 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X obj 310 210 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#fcfcfc #fcfcfc;
+#ff0400 #fcfcfc;
 #X text 340 250 set with either the name;
 #X text 340 270 or an example of the type;
 #X msg 150 230 peek;

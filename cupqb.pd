@@ -16,9 +16,9 @@
 #X obj 80 260 s \$0itr;
 #X floatatom 220 140 5 0 0 0 - \$0tonbx \$0frnbx 0;
 #X obj 220 160 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
-#ec8824 #4884ec #000000;
+#ff8300 #ff0400 #000000;
 #X obj 240 160 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
-#ec8824 #4884ec #000000;
+#ff8300 #ff0400 #000000;
 #X obj 220 240 route set;
 #X obj 190 280 1;
 #X obj 190 310 * -1;

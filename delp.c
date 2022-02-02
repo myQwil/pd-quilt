@@ -34,7 +34,7 @@ static void delp_stop(t_delp *x) {
 	outlet_float(x->o_on ,0);
 }
 
-static void delp_push(t_delp *x ,t_float f) {
+static void delp_delay(t_delp *x ,t_float f) {
 	x->remtime += f;
 	if (!x->stop && !x->pause)
 	{	clock_unset(x->clock);
@@ -68,9 +68,9 @@ static void delp_tempo(t_delp *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (ac > 2) ac = 2;
 	while (ac--)
 	{	switch (av[ac].a_type)
-		{	case A_FLOAT  :x->unit     = av[ac].a_w.w_float  ;break;
-			case A_SYMBOL :x->unitname = av[ac].a_w.w_symbol ;break;
-			default: break;  }  }
+		{	case A_FLOAT  : x->unit     = av[ac].a_w.w_float  ;break;
+			case A_SYMBOL : x->unitname = av[ac].a_w.w_symbol ;break;
+			default       : break;  }  }
 	parsetimeunits(x ,x->unit ,x->unitname ,&x->unit ,&x->samps);
 	clock_setunit(x->clock ,x->unit ,x->samps);
 }
@@ -126,6 +126,7 @@ void delp_setup(void) {
 	class_addmethod(delp_class ,(t_method)delp_time  ,gensym("time")  ,A_NULL);
 	class_addmethod(delp_class ,(t_method)delp_pause ,gensym("pause") ,A_NULL);
 	class_addmethod(delp_class ,(t_method)delp_ft1   ,gensym("ft1")   ,A_FLOAT ,0);
-	class_addmethod(delp_class ,(t_method)delp_push  ,gensym("push")  ,A_FLOAT ,0);
+	class_addmethod(delp_class ,(t_method)delp_delay ,gensym("del")   ,A_FLOAT ,0);
+	class_addmethod(delp_class ,(t_method)delp_delay ,gensym("delay") ,A_FLOAT ,0);
 	class_addmethod(delp_class ,(t_method)delp_tempo ,gensym("tempo") ,A_GIMME ,0);
 }
