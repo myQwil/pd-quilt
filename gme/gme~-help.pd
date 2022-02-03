@@ -343,7 +343,7 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X connect 34 0 10 0;
 #X connect 36 0 3 1;
 #X restore 350 310 pd muting_commands;
-#N canvas 1210 480 400 300 misc_commands 0;
+#N canvas 1210 480 400 320 misc_commands 0;
 #X msg 140 200 tempo \$1;
 #X floatatom 140 140 0 0 400 0 - - - 0;
 #X floatatom 220 110 0 0 0 0 - - - 0;

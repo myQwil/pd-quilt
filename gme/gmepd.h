@@ -302,10 +302,11 @@ static void gmepd_float(t_gme *x ,t_float f) {
 	int d = f;
 	gme_err_t err_msg = "";
 	if (d > 0 && d <= gme_track_count(x->emu))
-	{	err_msg = gme_start_track(x->emu ,d-1);
+	{	d--;
+		err_msg = gme_start_track(x->emu ,d);
 		if (!hnd_err(err_msg))
 		{	gme_free_info(x->info);
-			gme_track_info(x->emu ,&x->info ,d-1);
+			gme_track_info(x->emu ,&x->info ,d);
 			gme_set_fade(x->emu ,-1 ,0);
 			src_reset(x->state);
 			x->data.output_frames_gen = 0;

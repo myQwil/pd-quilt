@@ -1,9 +1,5 @@
 #include "m_pd.h"
-#include <stdio.h>
-#include <float.h>
-#include <string.h>
 #include <samplerate.h>
-#include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libswresample/swresample.h>
 
