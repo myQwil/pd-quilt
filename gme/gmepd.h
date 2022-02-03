@@ -56,43 +56,6 @@ typedef struct {
 	t_outlet *o_meta; /* outputs track metadata */
 } t_gme;
 
-static void gmepd_m3u(t_gme *x) {
-	char m3u_path [256 + 5];
-	strncpy(m3u_path ,x->path->s_name ,256);
-	m3u_path [256] = 0;
-	char *p = strrchr(m3u_path ,'.');
-	if (!p) p = m3u_path + strlen(m3u_path);
-	strcpy(p ,".m3u");
-	if (gme_load_m3u(x->emu ,m3u_path)) { } // ignore error
-}
-
-static Music_Emu *gmepd_emu(t_gme *x) {
-	return NULL;
-}
-
-static void gmepd_time(t_gme *x) {
-	if (!x->emu) return;
-	t_atom flts[] =
-	{	 {.a_type=A_FLOAT ,.a_w={.w_float = (x->info->length > 0 ?
-			x->info->length : x->info->play_length)}}
-		,{.a_type=A_FLOAT ,.a_w={.w_float = x->info->fade_length}}  };
-	outlet_anything(x->o_meta ,gensym("time") ,2 ,flts);
-}
-
-static void gmepd_start(t_gme *x) {
-	x->play = 1;
-}
-
-static void gmepd_seek(t_gme *x ,t_float f) {
-	if (!x->emu) return;
-	gme_seek(x->emu ,f);
-	gme_set_fade(x->emu ,-1 ,0);
-
-	src_reset(x->state);
-	x->data.output_frames_gen = 0;
-	x->data.input_frames = 0;
-}
-
 static t_int *gmepd_perform(t_int *w) {
 	t_gme *x = (t_gme*)(w[1]);
 	t_sample *outs[NCH];
@@ -133,6 +96,84 @@ static t_int *gmepd_perform(t_int *w) {
 	return (w+NCH+3);
 }
 
+static void gmepd_time(t_gme *x) {
+	if (!x->emu) return;
+	t_atom flts[] =
+	{	 {.a_type=A_FLOAT ,.a_w={.w_float = (x->info->length > 0 ?
+			x->info->length : x->info->play_length)}}
+		,{.a_type=A_FLOAT ,.a_w={.w_float = x->info->fade_length}}  };
+	outlet_anything(x->o_meta ,gensym("time") ,2 ,flts);
+}
+
+static void gmepd_seek(t_gme *x ,t_float f) {
+	if (!x->emu) return;
+	gme_seek(x->emu ,f);
+	gme_set_fade(x->emu ,-1 ,0);
+
+	src_reset(x->state);
+	x->data.output_frames_gen = 0;
+	x->data.input_frames = 0;
+}
+
+static void gmepd_tempo(t_gme *x ,t_float f) {
+	x->tempo = f;
+	if (x->emu) gme_set_tempo(x->emu ,x->tempo);
+}
+
+static void gmepd_speed(t_gme *x ,t_float f) {
+	f = f > frames ? frames : (f < inv_frames ? inv_frames : f);
+	x->data.src_ratio = 1. / f;
+}
+
+static inline short domask(short mask ,int ac ,t_atom *av) {
+	for (; ac--; av++) if (av->a_type == A_FLOAT)
+	{	int d = av->a_w.w_float;
+		if (!d)
+		{	mask = 0;
+			continue;  }
+		if (d > 0) d--;
+		d %= mask_size;
+		if (d < 0) d += mask_size;
+		mask ^= 1 << d;  }
+	return mask;
+}
+
+static void gmepd_mute(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
+	x->mask = domask(x->mask ,ac ,av);
+	if (x->emu) gme_mute_voices(x->emu ,x->mask);
+}
+
+static void gmepd_solo(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
+	short mask = domask(~0 ,ac ,av);
+	x->mask = (x->mask == mask) ? 0 : mask;
+	if (x->emu) gme_mute_voices(x->emu ,x->mask);
+}
+
+static void gmepd_mask(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
+	if (ac && av->a_type == A_FLOAT)
+	{	x->mask = av->a_w.w_float;
+		if (x->emu) gme_mute_voices(x->emu ,x->mask);  }
+	else
+	{	t_atom flt = {.a_type=A_FLOAT ,.a_w={.w_float = x->mask}};
+		outlet_anything(x->o_meta ,gensym("mask") ,1 ,&flt);  }
+}
+
+static void gmepd_tracks(t_gme *x) {
+	if (!x->emu) return;
+	t_atom tracks = {.a_type=A_FLOAT ,.a_w={.w_float = gme_track_count(x->emu)}};
+	outlet_anything(x->o_meta ,gensym("tracks") ,1 ,&tracks);
+}
+
+static void gmepd_m3u(t_gme *x) {
+	char m3u_path [256 + 5];
+	strncpy(m3u_path ,x->path->s_name ,256);
+	m3u_path [256] = 0;
+	char *p = strrchr(m3u_path ,'.');
+	if (!p) p = m3u_path + strlen(m3u_path);
+	strcpy(p ,".m3u");
+	if (gme_load_m3u(x->emu ,m3u_path)) { } // ignore error
+}
+
 static void gmepd_open(t_gme *x ,t_symbol *s) {
 	gme_delete(x->emu); x->emu = NULL;
 	gme_err_t err_msg = gme_open_file(s->s_name ,&x->emu ,sys_getsr() ,NCH > 2);
@@ -152,43 +193,6 @@ static void gmepd_open(t_gme *x ,t_symbol *s) {
 	x->play = 0;
 	t_atom open = {.a_type=A_FLOAT ,.a_w={.w_float = !err_msg}};
 	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
-}
-
-static void gmepd_bang(t_gme *x) {
-	if (!x->emu) return;
-	x->play = !x->play;
-	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
-	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
-}
-
-static void gmepd_float(t_gme *x ,t_float f) {
-	if (!x->emu) return;
-	int d = f;
-	gme_err_t err_msg = "";
-	if (d > 0 && d <= gme_track_count(x->emu))
-	{	err_msg = gme_start_track(x->emu ,d-1);
-		if (!hnd_err(err_msg))
-		{	gme_free_info(x->info);
-			gme_track_info(x->emu ,&x->info ,d-1);
-			gme_set_fade(x->emu ,-1 ,0);
-			src_reset(x->state);
-			x->data.output_frames_gen = 0;
-			x->data.input_frames = 0;  }  }
-	else
-		gmepd_seek(x ,0);
-	x->play = !err_msg;
-	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
-	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
-}
-
-static void gmepd_stop(t_gme *x) {
-	gmepd_float(x ,0);
-}
-
-static void gmepd_tracks(t_gme *x) {
-	if (!x->emu) return;
-	t_atom tracks = {.a_type=A_FLOAT ,.a_w={.w_float = gme_track_count(x->emu)}};
-	outlet_anything(x->o_meta ,gensym("tracks") ,1 ,&tracks);
 }
 
 static const t_symbol *dict[] = {
@@ -286,47 +290,35 @@ static void gmepd_anything(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
 		default       : post("no metadata for '%s'" ,s->s_name);  }
 }
 
-static void gmepd_tempo(t_gme *x ,t_float f) {
-	x->tempo = f;
-	if (x->emu) gme_set_tempo(x->emu ,x->tempo);
+static void gmepd_bang(t_gme *x) {
+	if (!x->emu) return;
+	x->play = !x->play;
+	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
+	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
 }
 
-static void gmepd_speed(t_gme *x ,t_float f) {
-	f = f > frames ? frames : (f < inv_frames ? inv_frames : f);
-	x->data.src_ratio = 1. / f;
-}
-
-static inline short domask(short mask ,int ac ,t_atom *av) {
-	for (; ac--; av++) if (av->a_type == A_FLOAT)
-	{	int d = av->a_w.w_float;
-		if (!d)
-		{	mask = 0;
-			continue;  }
-		if (d > 0) d--;
-		d %= mask_size;
-		if (d < 0) d += mask_size;
-		mask ^= 1 << d;  }
-	return mask;
-}
-
-static void gmepd_mute(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
-	x->mask = domask(x->mask ,ac ,av);
-	if (x->emu) gme_mute_voices(x->emu ,x->mask);
-}
-
-static void gmepd_solo(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
-	short mask = domask(~0 ,ac ,av);
-	x->mask = (x->mask == mask) ? 0 : mask;
-	if (x->emu) gme_mute_voices(x->emu ,x->mask);
-}
-
-static void gmepd_mask(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
-	if (ac && av->a_type == A_FLOAT)
-	{	x->mask = av->a_w.w_float;
-		if (x->emu) gme_mute_voices(x->emu ,x->mask);  }
+static void gmepd_float(t_gme *x ,t_float f) {
+	if (!x->emu) return;
+	int d = f;
+	gme_err_t err_msg = "";
+	if (d > 0 && d <= gme_track_count(x->emu))
+	{	err_msg = gme_start_track(x->emu ,d-1);
+		if (!hnd_err(err_msg))
+		{	gme_free_info(x->info);
+			gme_track_info(x->emu ,&x->info ,d-1);
+			gme_set_fade(x->emu ,-1 ,0);
+			src_reset(x->state);
+			x->data.output_frames_gen = 0;
+			x->data.input_frames = 0;  }  }
 	else
-	{	t_atom flt = {.a_type=A_FLOAT ,.a_w={.w_float = x->mask}};
-		outlet_anything(x->o_meta ,gensym("mask") ,1 ,&flt);  }
+		gmepd_seek(x ,0);
+	x->play = !err_msg;
+	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
+	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
+}
+
+static void gmepd_stop(t_gme *x) {
+	gmepd_float(x ,0);
 }
 
 static void *gmepd_new(t_class *gmeclass ,t_symbol *s ,int ac ,t_atom *av) {

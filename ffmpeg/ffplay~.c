@@ -48,28 +48,6 @@ typedef struct {
 	t_outlet *o_meta; /* outputs track metadata */
 } t_ffplay;
 
-static void ffplay_time(t_ffplay *x) {
-	if (!x->open) return;
-	t_float f = x->ic->duration / 1000.; // AV_TIME_BASE is in microseconds
-	t_atom time = {.a_type=A_FLOAT ,.a_w={.w_float = f}};
-	outlet_anything(x->o_meta ,gensym("time") ,1 ,&time);
-}
-
-static void ffplay_position(t_ffplay *x) {
-	if (!x->open) return;
-	AVRational ratio = x->ic->streams[x->idx]->time_base;
-	t_float f = 1000. * x->frm->pts * ratio.num / ratio.den;
-	t_atom pos = {.a_type=A_FLOAT ,.a_w={.w_float = f}};
-	outlet_anything(x->o_meta ,gensym("pos") ,1 ,&pos);
-}
-
-static void ffplay_speed(t_ffplay *x ,t_float f) {
-	x->speed = f;
-	f *= x->ratio;
-	f = f > frames ? frames : (f < inv_frames ? inv_frames : f);
-	x->data.src_ratio = 1. / f;
-}
-
 static void ffplay_seek(t_ffplay *x ,t_float f) {
 	if (!x->open) return;
 	int64_t ts = 1000L * f;
@@ -152,6 +130,58 @@ static void ffplay_dsp(t_ffplay *x ,t_signal **sp) {
 	dsp_add(ffplay_perform ,2 ,x ,sp[0]->s_n);
 }
 
+static void ffplay_time(t_ffplay *x) {
+	if (!x->open) return;
+	t_float f = x->ic->duration / 1000.; // AV_TIME_BASE is in microseconds
+	t_atom time = {.a_type=A_FLOAT ,.a_w={.w_float = f}};
+	outlet_anything(x->o_meta ,gensym("time") ,1 ,&time);
+}
+
+static void ffplay_position(t_ffplay *x) {
+	if (!x->open) return;
+	AVRational ratio = x->ic->streams[x->idx]->time_base;
+	t_float f = 1000. * x->frm->pts * ratio.num / ratio.den;
+	t_atom pos = {.a_type=A_FLOAT ,.a_w={.w_float = f}};
+	outlet_anything(x->o_meta ,gensym("pos") ,1 ,&pos);
+}
+
+static void ffplay_speed(t_ffplay *x ,t_float f) {
+	x->speed = f;
+	f *= x->ratio;
+	f = f > frames ? frames : (f < inv_frames ? inv_frames : f);
+	x->data.src_ratio = 1. / f;
+}
+
+static void ffplay_tracks(t_ffplay *x) {
+	t_atom tracks = {.a_type=A_FLOAT ,.a_w={.w_float = x->plist.siz}};
+	outlet_anything(x->o_meta ,gensym("tracks") ,1 ,&tracks);
+}
+
+static inline err_t ffplay_m3u(t_ffplay *x ,t_symbol *s) {
+	int size = 0;
+	char str[MAXPDSTRING];
+	t_playlist *pl = &x->plist;
+	FILE *fp = fopen(s->s_name ,"r");
+	if (!fp)
+		return "Could not open m3u";
+
+	while (fgets(str ,MAXPDSTRING ,fp) != NULL)
+		size++;
+	if (size > pl->max)
+	{	pl->trk = (t_symbol**)resizebytes(pl->trk
+			,pl->max * sizeof(t_symbol*) ,size * sizeof(t_symbol*));
+		pl->max = size;  }
+	pl->siz = size;
+	rewind(fp);
+
+	for (int i=0; fgets(str ,MAXPDSTRING ,fp) != NULL; i++)
+	{	str[strcspn(str ,"\r\n")] = 0;
+		pl->trk[i] = gensym(str);  }
+
+	fclose(fp);
+	return 0;
+}
+
 static inline err_t ffplay_load_(t_ffplay *x ,const char *fname) {
 	avformat_close_input(&x->ic);
 	x->ic = avformat_alloc_context();
@@ -198,31 +228,6 @@ static inline err_t ffplay_load_(t_ffplay *x ,const char *fname) {
 	src_reset(x->state);
 	x->data.output_frames_gen = 0;
 	x->data.input_frames = 0;
-	return 0;
-}
-
-static inline err_t ffplay_m3u(t_ffplay *x ,t_symbol *s) {
-	int size = 0;
-	char str[MAXPDSTRING];
-	t_playlist *pl = &x->plist;
-	FILE *fp = fopen(s->s_name ,"r");
-	if (!fp)
-		return "Could not open m3u";
-
-	while (fgets(str ,MAXPDSTRING ,fp) != NULL)
-		size++;
-	if (size > pl->max)
-	{	pl->trk = (t_symbol**)resizebytes(pl->trk
-			,pl->max * sizeof(t_symbol*) ,size * sizeof(t_symbol*));
-		pl->max = size;  }
-	pl->siz = size;
-	rewind(fp);
-
-	for (int i=0; fgets(str ,MAXPDSTRING ,fp) != NULL; i++)
-	{	str[strcspn(str ,"\r\n")] = 0;
-		pl->trk[i] = gensym(str);  }
-
-	fclose(fp);
 	return 0;
 }
 
@@ -350,11 +355,6 @@ static void ffplay_anything(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
 	{	case A_FLOAT  : post("%s: %g" ,s->s_name ,atom.a_w.w_float); break;
 		case A_SYMBOL : post("%s: %s" ,s->s_name ,atom.a_w.w_symbol->s_name); break;
 		default       : post("no metadata for '%s'" ,s->s_name);  }
-}
-
-static void ffplay_tracks(t_ffplay *x) {
-	t_atom tracks = {.a_type=A_FLOAT ,.a_w={.w_float = x->plist.siz}};
-	outlet_anything(x->o_meta ,gensym("tracks") ,1 ,&tracks);
 }
 
 static void ffplay_bang(t_ffplay *x) {
