@@ -195,12 +195,13 @@ static inline err_t ffplay_load_(t_ffplay *x ,const char *fname) {
 
 	x->ratio = (double)x->ctx->sample_rate / sys_getsr();
 	ffplay_speed(x ,x->speed);
+	src_reset(x->state);
 	x->data.output_frames_gen = 0;
 	x->data.input_frames = 0;
 	return 0;
 }
 
-static err_t ffplay_m3u(t_ffplay *x ,t_symbol *s) {
+static inline err_t ffplay_m3u(t_ffplay *x ,t_symbol *s) {
 	int size = 0;
 	char str[MAXPDSTRING];
 	t_playlist *pl = &x->plist;
@@ -232,27 +233,25 @@ static err_t ffplay_load(t_ffplay *x ,int track) {
 		,x->plist.trk[track-1]->s_name);
 	err_t err_msg = ffplay_load_(x ,str);
 	x->open = !err_msg;
-	x->play = 0;
 	return err_msg;
 }
 
 static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 	int len = 0;
-	err_t err_msg = 0;
-	char str[MAXPDSTRING];
-
+	char dir[MAXPDSTRING];
 	const char *path = strrchr(s->s_name ,'/');
 	if (path)
 	{	len = path - s->s_name;
-		strncpy(str ,s->s_name ,len);
+		strncpy(dir ,s->s_name ,len);
 		path++;  }
 	else
 	{	len = 1;
-		str[0] = '.';
+		dir[0] = '.';
 		path = s->s_name;  }
-	str[len] = '\0';
-	x->plist.dir = gensym(str);
+	dir[len] = '\0';
+	x->plist.dir = gensym(dir);
 
+	err_t err_msg = 0;
 	char *ext = strrchr(s->s_name ,'.');
 	if (ext && !strcmp(ext+1 ,"m3u"))
 		err_msg = ffplay_m3u(x ,s);
@@ -262,6 +261,7 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 
 	if (err_msg || (err_msg = ffplay_load(x ,1)))
 		post("Error: %s." ,err_msg);
+	x->play = 0;
 	t_atom open = {.a_type=A_FLOAT ,.a_w={.w_float = x->open}};
 	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
 }
@@ -287,7 +287,7 @@ static t_atom ffplay_meta(t_ffplay *x ,t_symbol *s) {
 
 	if (entry)
 		return (t_atom){.a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(entry->value)}};
-	else return (t_atom){.a_type=A_NULL ,.a_w={.w_float = 0}};
+	else return (t_atom){A_NULL};
 }
 
 static void ffplay_info_custom(t_ffplay *x ,int ac ,t_atom *av) {
@@ -307,11 +307,11 @@ static void ffplay_info_custom(t_ffplay *x ,int ac ,t_atom *av) {
 			char buf[len + 1];
 			strncpy(buf ,pct ,len);
 			buf[len] = 0;
-			t_atom atom = ffplay_meta(x ,gensym(buf));
-			switch (atom.a_type)
-			{	case A_FLOAT  : startpost("%g" ,atom.a_w.w_float);          break;
-				case A_SYMBOL : startpost("%s" ,atom.a_w.w_symbol->s_name); break;
-				default       : startpost("");  }
+			t_atom meta = ffplay_meta(x ,gensym(buf));
+			switch (meta.a_type)
+			{	case A_FLOAT  : startpost("%g" ,meta.a_w.w_float);          break;
+				case A_SYMBOL : startpost("%s" ,meta.a_w.w_symbol->s_name); break;
+				default       : startpost("_");  }
 			sym += len + 2;  }
 		startpost("%s%s" ,sym ,ac ? " " : "");  }
 	else if (av->a_type == A_FLOAT)
@@ -328,9 +328,9 @@ static void ffplay_info(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
 	AVDictionaryEntry *title  = av_dict_get(meta ,"title" ,0 ,0);
 	if (artist || title)
 		post("%s%s%s"
-			,artist ? artist->value : ""
-			,artist ? " - " : ""
-			,title  ? title->value  : "");
+			,artist ? artist->value : "_"
+			," - "
+			,title  ? title->value  : "_");
 }
 
 static void ffplay_send(t_ffplay *x ,t_symbol *s) {
@@ -340,7 +340,7 @@ static void ffplay_send(t_ffplay *x ,t_symbol *s) {
 	{	t_atom args[] =
 		{	{.a_type=A_SYMBOL ,.a_w={.w_symbol = s}} ,meta  };
 		outlet_anything(x->o_meta ,&s_list ,2 ,args);  }
-	else pd_error(x ,"ffplay_send: '%s' not found" ,s->s_name);
+	else post("no metadata for '%s'" ,s->s_name);
 }
 
 static void ffplay_anything(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
@@ -367,13 +367,13 @@ static void ffplay_bang(t_ffplay *x) {
 static void ffplay_float(t_ffplay *x ,t_float f) {
 	if (!x->open) return;
 	int d = f;
+	err_t err_msg = "";
 	if (d > 0 && d <= x->plist.siz)
-	{	err_t err_msg = ffplay_load(x ,d);
-		if (err_msg) post("Error: %s." ,err_msg);
-		x->play = !err_msg;  }
+	{	err_msg = ffplay_load(x ,d);
+		if (err_msg) post("Error: %s." ,err_msg);  }
 	else
-	{	x->play = 0;
-		ffplay_seek(x ,0);  }
+		ffplay_seek(x ,0);
+	x->play = !err_msg;
 	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
 	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
 }
