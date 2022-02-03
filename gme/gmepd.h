@@ -35,11 +35,6 @@ static const double frames = FRAMES;
 static const double inv_frames = 1. / frames;
 static const float short_limit = 0x8000;
 
-static gme_err_t hnd_err( const char *str ) {
-	if (str) post("Error: %s" ,str);
-	return str;
-}
-
 /* ------------------------- Game Music Emu player ------------------------- */
 typedef struct {
 	t_object obj;
@@ -63,7 +58,7 @@ static t_int *gmepd_perform(t_int *w) {
 		outs[i] = (t_sample*)(w[i+2]);
 	int n = (int)(w[NCH+2]);
 
-	if (x->emu && x->play)
+	if (x->play)
 	{	SRC_DATA *data = &x->data;
 		while (n--)
 		{	if (data->output_frames_gen > 0)
@@ -85,7 +80,7 @@ static t_int *gmepd_perform(t_int *w) {
 				data->data_in = x->in;
 				float *in = x->in;
 				short arr[buf_size] ,*buf = arr;
-				hnd_err(gme_play(x->emu ,buf_size ,buf));
+				gme_play(x->emu ,buf_size ,buf);
 				for (int i = buf_size; i--; in++ ,buf++)
 					*in = *buf / short_limit;
 				data->input_frames = FRAMES;
@@ -164,33 +159,43 @@ static void gmepd_tracks(t_gme *x) {
 	outlet_anything(x->o_meta ,gensym("tracks") ,1 ,&tracks);
 }
 
-static void gmepd_m3u(t_gme *x) {
-	char m3u_path [256 + 5];
-	strncpy(m3u_path ,x->path->s_name ,256);
-	m3u_path [256] = 0;
-	char *p = strrchr(m3u_path ,'.');
-	if (!p) p = m3u_path + strlen(m3u_path);
-	strcpy(p ,".m3u");
-	if (gme_load_m3u(x->emu ,m3u_path)) { } // ignore error
+static gme_err_t gmepd_load(t_gme *x ,int track) {
+	track--;
+	gme_err_t err_msg;
+	if ( (err_msg = gme_start_track(x->emu ,track)) )
+		return err_msg;
+
+	gme_free_info(x->info);
+	if ( (err_msg = gme_track_info(x->emu ,&x->info ,track)) )
+		return err_msg;
+
+	gme_set_fade(x->emu ,-1 ,0);
+	src_reset(x->state);
+	x->data.output_frames_gen = 0;
+	x->data.input_frames = 0;
+	return 0;
 }
 
 static void gmepd_open(t_gme *x ,t_symbol *s) {
-	gme_delete(x->emu); x->emu = NULL;
-	gme_err_t err_msg = gme_open_file(s->s_name ,&x->emu ,sys_getsr() ,NCH > 2);
-	if (!hnd_err(err_msg))
-	{	x->path = s;
-		gmepd_m3u(x);
-		if (!hnd_err(err_msg = gme_start_track(x->emu ,0)))
-		{	gme_free_info(x->info);
-			gme_track_info(x->emu ,&x->info ,0);
-			gme_ignore_silence ( x->emu ,1        );
-			gme_mute_voices    ( x->emu ,x->mask  );
-			gme_set_tempo      ( x->emu ,x->tempo );
-			gme_set_fade       ( x->emu ,-1 ,0    );
-			src_reset(x->state);
-			x->data.output_frames_gen = 0;
-			x->data.input_frames = 0;  }  }
 	x->play = 0;
+	gme_err_t err_msg;
+	gme_delete(x->emu); x->emu = NULL;
+	if ( !(err_msg = gme_open_file(s->s_name ,&x->emu ,sys_getsr() ,NCH > 2)) )
+	{	// check for a .m3u file of the same name
+		char m3u_path [256 + 5];
+		strncpy(m3u_path ,s->s_name ,256);
+		m3u_path [256] = 0;
+		char *p = strrchr(m3u_path ,'.');
+		if (!p) p = m3u_path + strlen(m3u_path);
+		strcpy(p ,".m3u");
+		gme_load_m3u(x->emu ,m3u_path);
+
+		gme_ignore_silence ( x->emu ,1        );
+		gme_mute_voices    ( x->emu ,x->mask  );
+		gme_set_tempo      ( x->emu ,x->tempo );
+		err_msg = gmepd_load(x ,1);
+		x->path = s;  }
+	if (err_msg) post("Error: %s" ,err_msg);
 	t_atom open = {.a_type=A_FLOAT ,.a_w={.w_float = !err_msg}};
 	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
 }
@@ -299,20 +304,12 @@ static void gmepd_bang(t_gme *x) {
 
 static void gmepd_float(t_gme *x ,t_float f) {
 	if (!x->emu) return;
-	int d = f;
+	int track = f;
 	gme_err_t err_msg = "";
-	if (d > 0 && d <= gme_track_count(x->emu))
-	{	d--;
-		err_msg = gme_start_track(x->emu ,d);
-		if (!hnd_err(err_msg))
-		{	gme_free_info(x->info);
-			gme_track_info(x->emu ,&x->info ,d);
-			gme_set_fade(x->emu ,-1 ,0);
-			src_reset(x->state);
-			x->data.output_frames_gen = 0;
-			x->data.input_frames = 0;  }  }
-	else
-		gmepd_seek(x ,0);
+	if (track > 0 && track <= gme_track_count(x->emu))
+	{	if ( (err_msg = gmepd_load(x ,track)) )
+			post("Error: %s" ,err_msg);  }
+	else gmepd_seek(x ,0);
 	x->play = !err_msg;
 	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
 	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);

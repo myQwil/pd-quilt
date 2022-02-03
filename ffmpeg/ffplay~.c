@@ -70,7 +70,7 @@ static t_int *ffplay_perform(t_int *w) {
 		outs[i] = x->outs[i];
 	int n = (int)w[2];
 
-	if (x->open && x->play)
+	if (x->play)
 	{	SRC_DATA *data = &x->data;
 		while (n--)
 		{	if (data->output_frames_gen > 0)
@@ -178,7 +178,12 @@ static inline err_t ffplay_m3u(t_ffplay *x ,t_symbol *s) {
 	return 0;
 }
 
-static inline err_t ffplay_load_(t_ffplay *x ,const char *fname) {
+static err_t ffplay_load(t_ffplay *x ,int track) {
+	char fname[MAXPDSTRING];
+	sprintf(fname ,"%s/%s"
+		,x->plist.dir->s_name
+		,x->plist.trk[track-1]->s_name);
+
 	avformat_close_input(&x->ic);
 	x->ic = avformat_alloc_context();
 	if (avformat_open_input(&x->ic ,fname ,NULL ,NULL) != 0)
@@ -227,17 +232,8 @@ static inline err_t ffplay_load_(t_ffplay *x ,const char *fname) {
 	return 0;
 }
 
-static err_t ffplay_load(t_ffplay *x ,int track) {
-	char str[MAXPDSTRING];
-	sprintf(str ,"%s/%s"
-		,x->plist.dir->s_name
-		,x->plist.trk[track-1]->s_name);
-	err_t err_msg = ffplay_load_(x ,str);
-	x->open = !err_msg;
-	return err_msg;
-}
-
 static void ffplay_open(t_ffplay *x ,t_symbol *s) {
+	x->play = 0;
 	int len = 0;
 	char dir[MAXPDSTRING];
 	const char *path = strrchr(s->s_name ,'/');
@@ -260,9 +256,9 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 	{	x->plist.siz = 1;
 		x->plist.trk[0] = gensym(path);  }
 
-	if (err_msg || (err_msg = ffplay_load(x ,1)))
+	if ( err_msg || (err_msg = ffplay_load(x ,1)) )
 		post("Error: %s." ,err_msg);
-	x->play = 0;
+	x->open = !err_msg;
 	t_atom open = {.a_type=A_FLOAT ,.a_w={.w_float = x->open}};
 	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
 }
@@ -361,14 +357,14 @@ static void ffplay_bang(t_ffplay *x) {
 }
 
 static void ffplay_float(t_ffplay *x ,t_float f) {
-	if (!x->open) return;
-	int d = f;
+	x->play = 0;
+	int track = f;
 	err_t err_msg = "";
-	if (d > 0 && d <= x->plist.siz)
-	{	err_msg = ffplay_load(x ,d);
-		if (err_msg) post("Error: %s." ,err_msg);  }
-	else
-		ffplay_seek(x ,0);
+	if (track > 0 && track <= x->plist.siz)
+	{	if ( (err_msg = ffplay_load(x ,track)) )
+			post("Error: %s." ,err_msg);
+		x->open = !err_msg;  }
+	else ffplay_seek(x ,0);
 	x->play = !err_msg;
 	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
 	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
