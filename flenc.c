@@ -8,7 +8,7 @@ typedef struct {
 	ufloat uf;
 } t_flenc;
 
-static void flenc_peek(t_flenc *x ,t_symbol *s) {
+static void flenc_print(t_flenc *x ,t_symbol *s) {
 	ufloat uf = x->uf;
 	post("%s%s0x%x %u %u = %g"
 		,s->s_name ,*s->s_name?": ":""
@@ -77,11 +77,11 @@ void flenc_setup(void) {
 	class_addbang  (flenc_class ,flenc_bang);
 	class_addfloat (flenc_class ,flenc_float);
 	class_addlist  (flenc_class ,flenc_list);
-	class_addmethod(flenc_class ,(t_method)flenc_mantissa ,gensym("m")    ,A_FLOAT  ,0);
-	class_addmethod(flenc_class ,(t_method)flenc_exponent ,gensym("e")    ,A_FLOAT  ,0);
-	class_addmethod(flenc_class ,(t_method)flenc_sign     ,gensym("s")    ,A_FLOAT  ,0);
-	class_addmethod(flenc_class ,(t_method)flenc_f        ,gensym("f")    ,A_FLOAT  ,0);
-	class_addmethod(flenc_class ,(t_method)flenc_u        ,gensym("u")    ,A_FLOAT  ,0);
-	class_addmethod(flenc_class ,(t_method)flenc_set      ,gensym("set")  ,A_GIMME  ,0);
-	class_addmethod(flenc_class ,(t_method)flenc_peek     ,gensym("peek") ,A_DEFSYM ,0);
+	class_addmethod(flenc_class ,(t_method)flenc_mantissa ,gensym("m")     ,A_FLOAT  ,0);
+	class_addmethod(flenc_class ,(t_method)flenc_exponent ,gensym("e")     ,A_FLOAT  ,0);
+	class_addmethod(flenc_class ,(t_method)flenc_sign     ,gensym("s")     ,A_FLOAT  ,0);
+	class_addmethod(flenc_class ,(t_method)flenc_f        ,gensym("f")     ,A_FLOAT  ,0);
+	class_addmethod(flenc_class ,(t_method)flenc_u        ,gensym("u")     ,A_FLOAT  ,0);
+	class_addmethod(flenc_class ,(t_method)flenc_set      ,gensym("set")   ,A_GIMME  ,0);
+	class_addmethod(flenc_class ,(t_method)flenc_print    ,gensym("print") ,A_DEFSYM ,0);
 }

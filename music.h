@@ -16,8 +16,7 @@ typedef struct {
 	unsigned strict:1; /* strict scale size toggle */
 } t_music;
 
-static inline t_float music_step(t_music *x ,t_float *fp ,int d) {
-	int n = x->siz;
+static inline t_float music_step(t_music *x ,t_float *fp ,int d ,int n) {
 	int i = d % n;
 	int neg = i < 0;
 	if (neg) i += n;
@@ -26,15 +25,17 @@ static inline t_float music_step(t_music *x ,t_float *fp ,int d) {
 
 static inline t_float music_interval(t_music *x ,t_float *fp ,t_float f) {
 	int d = f;
-	t_float step = music_step(x ,fp ,d);
+	int n = x->siz;
+	t_float step = music_step(x ,fp ,d ,n);
 	if (f != d) // between two intervals
 	{	int dir = f < 0 ? -1 : 1;
-		t_float next = music_step(x ,fp ,d+dir);
+		t_float next = music_step(x ,fp ,d+dir ,n);
 		step += dir * (f-d) * (next-step);  }
 	return step;
 }
 
 static inline t_float music_getfloat(t_music *x ,t_float *temp ,const char *cp) {
+	// ampersand before the number means it's a reference to the scale by index
 	int ref = (*cp=='&');
 	t_float f = cp[ref] ? strtof(cp+ref ,0) : 1;
 	if (ref) f = music_interval(x ,temp ,f);
@@ -58,7 +59,7 @@ static void music_ptr(t_music *x ,t_symbol *s) {
 	post("%s%s%d" ,s->s_name ,*s->s_name?": ":"" ,x->flin.siz);
 }
 
-static void music_peek(t_music *x ,t_symbol *s) {
+static void music_print(t_music *x ,t_symbol *s) {
 	t_float *fp = x->flin.fp;
 	if (*s->s_name) startpost("%s: " ,s->s_name);
 	for (int i=x->siz; i--; fp++) startpost("%g " ,*fp);
@@ -288,7 +289,7 @@ static t_class *class_music
 	class_addanything(mclass ,music_anything);
 
 	class_addmethod(mclass ,(t_method)music_ptr    ,gensym("ptr")    ,A_DEFSYM ,0);
-	class_addmethod(mclass ,(t_method)music_peek   ,gensym("peek")   ,A_DEFSYM ,0);
+	class_addmethod(mclass ,(t_method)music_print  ,gensym("print")  ,A_DEFSYM ,0);
 	class_addmethod(mclass ,(t_method)music_set    ,gensym("set")    ,A_GIMME  ,0);
 	class_addmethod(mclass ,(t_method)music_size   ,gensym("size")   ,A_FLOAT  ,0);
 	class_addmethod(mclass ,(t_method)music_strict ,gensym("strict") ,A_FLOAT  ,0);

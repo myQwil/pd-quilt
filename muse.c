@@ -22,18 +22,23 @@ static void muse_slice(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
 	t_music *x = &y->z;
 	int n = x->siz;
 	int strt=0 ,stop=n ,step=0;
-	if (ac > 2 && av[2].a_type == A_FLOAT)
-	{	step = atom_getint(av+2);
-		if (step < 0)
-			strt = n ,stop = 0;  }
-	if (ac > 1 && av[1].a_type == A_FLOAT)
-	{	stop = atom_getint(av+1) % n;
-		if (stop < 0)
-			stop += n;  }
-	if (ac > 0 && av[0].a_type == A_FLOAT)
-	{	strt = atom_getint(av+0) % n;
-		if (strt < 0)
-			strt += n;  }
+
+	switch (ac)
+	{case 3:
+		if (av[2].a_type == A_FLOAT)
+		{	step = atom_getint(av+2);
+			if (step < 0)
+				strt = n ,stop = 0;  }
+	 case 2:
+		if (av[1].a_type == A_FLOAT)
+		{	stop = atom_getint(av+1) % n;
+			if (stop < 0)
+				stop += n;  }
+	 case 1:
+		if (av[0].a_type == A_FLOAT)
+		{	strt = atom_getint(av+0) % n;
+			if (strt < 0)
+				strt += n;  }  }
 	if (!step)
 		step = (strt > stop) ? -1 : 1;
 

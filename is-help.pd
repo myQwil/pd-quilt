@@ -7,7 +7,7 @@
 #ff0400 #fcfcfc;
 #X text 340 250 set with either the name;
 #X text 340 270 or an example of the type;
-#X msg 150 230 peek;
+#X msg 150 230 print;
 #X text 100 360 set the 2nd inlet;
 #X msg 100 300 symbol list;
 #X msg 190 90 5;

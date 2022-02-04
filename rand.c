@@ -23,7 +23,7 @@ typedef struct {
 	t_mode mode;   /* toggle for range or list behavior */
 } t_rand;
 
-static void rand_peek(t_rand *x ,t_symbol *s) {
+static void rand_print(t_rand *x ,t_symbol *s) {
 	t_float *fp = x->flin.fp;
 	if (*s->s_name) startpost("%s: " ,s->s_name);
 	if (x->mode == M_LIST) for (int n = x->siz; n--; fp++)
@@ -148,9 +148,9 @@ void rand_setup(void) {
 	class_addanything(rand_class ,rand_anything);
 
 	class_addrng(rand_class);
-	class_addmethod(rand_class ,(t_method)rand_peek ,gensym("peek")  ,A_DEFSYM ,0);
-	class_addmethod(rand_class ,(t_method)rand_ptr  ,gensym("ptr")   ,A_DEFSYM ,0);
-	class_addmethod(rand_class ,(t_method)rand_nop  ,gensym("nop")   ,A_FLOAT  ,0);
-	class_addmethod(rand_class ,(t_method)rand_mode ,gensym("mode")  ,A_FLOAT  ,0);
-	class_addmethod(rand_class ,(t_method)rand_size ,gensym("size")  ,A_FLOAT  ,0);
+	class_addmethod(rand_class ,(t_method)rand_print ,gensym("print") ,A_DEFSYM ,0);
+	class_addmethod(rand_class ,(t_method)rand_ptr   ,gensym("ptr")   ,A_DEFSYM ,0);
+	class_addmethod(rand_class ,(t_method)rand_nop   ,gensym("nop")   ,A_FLOAT  ,0);
+	class_addmethod(rand_class ,(t_method)rand_mode  ,gensym("mode")  ,A_FLOAT  ,0);
+	class_addmethod(rand_class ,(t_method)rand_size  ,gensym("size")  ,A_FLOAT  ,0);
 }

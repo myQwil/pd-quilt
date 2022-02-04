@@ -18,7 +18,7 @@ struct _is {
 	t_symbol *type;
 };
 
-static void is_peek(t_is *x ,t_symbol *s) {
+static void is_print(t_is *x ,t_symbol *s) {
 	if (*s->s_name) startpost("%s: " ,s->s_name);
 	post("%s" ,x->type->s_name);
 }
@@ -80,10 +80,8 @@ void is_setup(void) {
 	class_addbang     (is_class ,is_bang);
 	class_addanything (is_class ,is_anything);
 
-	class_addmethod(is_class ,(t_method)is_set
-		,gensym("set") ,A_GIMME  ,0);
-	class_addmethod(is_class ,(t_method)is_peek
-		,gensym("peek") ,A_DEFSYM ,0);
+	class_addmethod(is_class ,(t_method)is_set   ,gensym("set")   ,A_GIMME  ,0);
+	class_addmethod(is_class ,(t_method)is_print ,gensym("print") ,A_DEFSYM ,0);
 
 	is_proxy = class_new(gensym("_is_pxy") ,0 ,0
 		,sizeof(t_is_pxy) ,CLASS_PD | CLASS_NOINLET ,0);

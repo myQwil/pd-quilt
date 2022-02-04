@@ -11,7 +11,7 @@ typedef struct {
 	t_outlet *o_sg;
 } t_fldec;
 
-static void fldec_peek(t_fldec *x ,t_symbol *s) {
+static void fldec_print(t_fldec *x ,t_symbol *s) {
 	ufloat uf = x->uf;
 	post("%s%s0x%x %u %u = %g"
 		,s->s_name ,*s->s_name?": ":""
@@ -50,7 +50,7 @@ void fldec_setup(void) {
 		,A_DEFFLOAT ,0);
 	class_addbang  (fldec_class ,fldec_bang);
 	class_addfloat (fldec_class ,fldec_float);
-	class_addmethod(fldec_class ,(t_method)fldec_set  ,gensym("set")  ,A_FLOAT  ,0);
-	class_addmethod(fldec_class ,(t_method)fldec_peek ,gensym("peek") ,A_DEFSYM ,0);
+	class_addmethod(fldec_class ,(t_method)fldec_set   ,gensym("set")   ,A_FLOAT  ,0);
+	class_addmethod(fldec_class ,(t_method)fldec_print ,gensym("print") ,A_DEFSYM ,0);
 	class_sethelpsymbol(fldec_class ,gensym("flenc"));
 }

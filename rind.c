@@ -9,7 +9,7 @@ typedef struct {
 	t_float max;
 } t_rind;
 
-static void rind_peek(t_rind *x ,t_symbol *s) {
+static void rind_print(t_rind *x ,t_symbol *s) {
 	post("%s%s%g <=> %g" ,s->s_name ,*s->s_name?": ":"" ,x->max ,x->min);
 }
 
@@ -50,5 +50,5 @@ void rind_setup(void) {
 	class_addbang(rind_class ,rind_bang);
 	class_addlist(rind_class ,rind_list);
 	class_addrng(rind_class);
-	class_addmethod(rind_class ,(t_method)rind_peek ,gensym("peek")  ,A_DEFSYM ,0);
+	class_addmethod(rind_class ,(t_method)rind_print ,gensym("print") ,A_DEFSYM ,0);
 }
