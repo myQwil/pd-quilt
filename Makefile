@@ -1,6 +1,6 @@
-# Makefile for myQwil
+# Makefile for xtra
 
-lib.name = myQwil
+lib.name = xtra
 
 class.sources := $(patsubst %, %.c, \
 muse chrd rand rind ntof fton flenc fldec slx sly same ceil delp linp linp~ \

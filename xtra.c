@@ -33,7 +33,7 @@ void blunt_setup(void);
 // void gme_tilde_setup(void);
 // void gmes_tilde_setup(void);
 
-void myQwil_setup(void) {
+void xtra_setup(void) {
 	muse_setup();
 	chrd_setup();
 	rand_setup();
