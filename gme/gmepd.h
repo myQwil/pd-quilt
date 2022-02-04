@@ -47,6 +47,7 @@ typedef struct {
 	t_symbol *path;   /* path to the most recently read file */
 	double   tempo;   /* current tempo */
 	short    mask;    /* muting mask */
+	unsigned open:1;  /* true when a track has been successfully started */
 	unsigned play:1;  /* play/pause toggle */
 	t_outlet *o_meta; /* outputs track metadata */
 } t_gme;
@@ -92,7 +93,7 @@ static t_int *gmepd_perform(t_int *w) {
 }
 
 static void gmepd_time(t_gme *x) {
-	if (!x->emu) return;
+	if (!x->open) return;
 	t_atom flts[] =
 	{	 {.a_type=A_FLOAT ,.a_w={.w_float = (x->info->length > 0 ?
 			x->info->length : x->info->play_length)}}
@@ -101,7 +102,7 @@ static void gmepd_time(t_gme *x) {
 }
 
 static void gmepd_seek(t_gme *x ,t_float f) {
-	if (!x->emu) return;
+	if (!x->open) return;
 	gme_seek(x->emu ,f);
 	gme_set_fade(x->emu ,-1 ,0);
 
@@ -195,8 +196,10 @@ static void gmepd_open(t_gme *x ,t_symbol *s) {
 		gme_set_tempo      ( x->emu ,x->tempo );
 		err_msg = gmepd_load(x ,1);
 		x->path = s;  }
-	if (err_msg) post("Error: %s" ,err_msg);
-	t_atom open = {.a_type=A_FLOAT ,.a_w={.w_float = !err_msg}};
+	if (err_msg)
+		post("Error: %s" ,err_msg);
+	x->open = !err_msg;
+	t_atom open = {.a_type=A_FLOAT ,.a_w={.w_float = x->open}};
 	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
 }
 
@@ -257,7 +260,7 @@ static void gmepd_info_custom(t_gme *x ,int ac ,t_atom *av) {
 			switch (meta.a_type)
 			{	case A_FLOAT  : startpost("%g" ,meta.a_w.w_float);          break;
 				case A_SYMBOL : startpost("%s" ,meta.a_w.w_symbol->s_name); break;
-				default       : startpost("_");  }
+				default       : startpost("");  }
 			sym += len + 2;  }
 		startpost("%s%s" ,sym ,ac ? " " : "");  }
 	else if (av->a_type == A_FLOAT)
@@ -266,18 +269,18 @@ static void gmepd_info_custom(t_gme *x ,int ac ,t_atom *av) {
 }
 
 static void gmepd_info(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
-	if (!x->emu) return;
+	if (!x->open) return;
 	if (ac) return gmepd_info_custom(x ,ac ,av);
 
 	if (x->info->game || x->info->song)
 		post("%s%s%s"
-			,*x->info->game ? x->info->game : "_"
+			,*x->info->game ? x->info->game : ""
 			," - "
-			,*x->info->song ? x->info->song : "_");
+			,*x->info->song ? x->info->song : "");
 }
 
 static void gmepd_send(t_gme *x ,t_symbol *s) {
-	if (!x->emu) return;
+	if (!x->open) return;
 	t_atom meta = gmepd_meta(x ,s);
 	if (meta.a_type)
 	{	t_atom args[] =
@@ -287,7 +290,7 @@ static void gmepd_send(t_gme *x ,t_symbol *s) {
 }
 
 static void gmepd_anything(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
-	if (!x->emu) return;
+	if (!x->open) return;
 	t_atom atom = gmepd_meta(x ,s);
 	switch (atom.a_type)
 	{	case A_FLOAT  : post("%s: %g" ,s->s_name ,atom.a_w.w_float); break;
@@ -296,7 +299,7 @@ static void gmepd_anything(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void gmepd_bang(t_gme *x) {
-	if (!x->emu) return;
+	if (!x->open) return;
 	x->play = !x->play;
 	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
 	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
@@ -308,7 +311,8 @@ static void gmepd_float(t_gme *x ,t_float f) {
 	gme_err_t err_msg = "";
 	if (track > 0 && track <= gme_track_count(x->emu))
 	{	if ( (err_msg = gmepd_load(x ,track)) )
-			post("Error: %s" ,err_msg);  }
+			post("Error: %s" ,err_msg);
+		x->open = !err_msg;  }
 	else gmepd_seek(x ,0);
 	x->play = !err_msg;
 	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
@@ -335,7 +339,7 @@ static void *gmepd_new(t_class *gmeclass ,t_symbol *s ,int ac ,t_atom *av) {
 	if (ac) gmepd_solo(x ,NULL ,ac ,av);
 
 	x->tempo = 1.;
-	x->play = 0;
+	x->open = x->play = 0;
 	return (x);
 }
 

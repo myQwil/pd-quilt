@@ -49,9 +49,6 @@ static void ffplay_seek(t_ffplay *x ,t_float f) {
 	int64_t ts = 1000L * f;
 	avformat_seek_file(x->ic ,-1 ,0 ,ts ,x->ic->duration ,0);
 	swr_init(x->swr);
-	src_reset(x->state);
-	x->data.output_frames_gen = 0;
-	x->data.input_frames = 0;
 
 	// avcodec_flush_buffers(x->ctx); // doesn't always flush properly
 	avcodec_free_context(&x->ctx);
@@ -60,6 +57,10 @@ static void ffplay_seek(t_ffplay *x ,t_float f) {
 	x->ctx->pkt_timebase = x->ic->streams[x->idx]->time_base;
 	AVCodec *codec = avcodec_find_decoder(x->ctx->codec_id);
 	avcodec_open2(x->ctx ,codec ,NULL);
+
+	src_reset(x->state);
+	x->data.output_frames_gen = 0;
+	x->data.input_frames = 0;
 }
 
 static t_int *ffplay_perform(t_int *w) {
@@ -308,7 +309,7 @@ static void ffplay_info_custom(t_ffplay *x ,int ac ,t_atom *av) {
 			switch (meta.a_type)
 			{	case A_FLOAT  : startpost("%g" ,meta.a_w.w_float);          break;
 				case A_SYMBOL : startpost("%s" ,meta.a_w.w_symbol->s_name); break;
-				default       : startpost("_");  }
+				default       : startpost("");  }
 			sym += len + 2;  }
 		startpost("%s%s" ,sym ,ac ? " " : "");  }
 	else if (av->a_type == A_FLOAT)
@@ -325,9 +326,9 @@ static void ffplay_info(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
 	AVDictionaryEntry *title  = av_dict_get(meta ,"title" ,0 ,0);
 	if (artist || title)
 		post("%s%s%s"
-			,artist ? artist->value : "_"
+			,artist ? artist->value : ""
 			," - "
-			,title  ? title->value  : "_");
+			,title  ? title->value  : "");
 }
 
 static void ffplay_send(t_ffplay *x ,t_symbol *s) {
