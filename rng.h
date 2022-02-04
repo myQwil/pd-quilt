@@ -34,3 +34,8 @@ static inline double rng_next(t_rng *x) {
 	x->state = x->state * 472940017 + 832416023;
 	return (double)x->state / UINT_LIMIT;
 }
+
+static void class_addrng(t_class *c) {
+	class_addmethod(c ,(t_method)rng_seed   ,gensym("seed")  ,A_GIMME  ,0);
+	class_addmethod(c ,(t_method)rng_state  ,gensym("state") ,A_DEFSYM ,0);
+}

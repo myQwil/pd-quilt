@@ -49,7 +49,6 @@ void rind_setup(void) {
 		,A_GIMME ,0);
 	class_addbang(rind_class ,rind_bang);
 	class_addlist(rind_class ,rind_list);
-	class_addmethod(rind_class ,(t_method)rng_seed  ,gensym("seed")  ,A_GIMME  ,0);
-	class_addmethod(rind_class ,(t_method)rng_state ,gensym("state") ,A_DEFSYM ,0);
+	class_addrng(rind_class);
 	class_addmethod(rind_class ,(t_method)rind_peek ,gensym("peek")  ,A_DEFSYM ,0);
 }

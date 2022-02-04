@@ -39,7 +39,6 @@ void setup_0x40unpak(void) {
 		,A_GIMME ,0);
 	class_addlist     (runpak_class ,unpak_list);
 	class_addanything (runpak_class ,unpak_anything);
-	class_addmethod   (runpak_class ,(t_method)unpak_mute
-		,gensym("mute") ,A_FLOAT ,0);
+	class_addmethod   (runpak_class ,(t_method)unpak_mute ,gensym("mute") ,A_FLOAT ,0);
 	class_sethelpsymbol(runpak_class ,gensym("rpak"));
 }
