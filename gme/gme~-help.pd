@@ -274,7 +274,7 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X restore 270 440 pd route;
 #X symbolatom 290 290 0 0 0 0 - - - 0;
 #X obj 140 270 r \$0open;
-#N canvas 1210 380 560 400 muting_commands 0;
+#N canvas 1100 460 560 400 muting_commands 0;
 #X text 140 230 get;
 #X text 140 200 set;
 #X msg 70 200 mask \$1;
@@ -312,6 +312,7 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X msg 110 260 bmask;
 #X text 160 260 print;
 #X msg 30 30 set \$1;
+#X msg 130 290 voices;
 #X connect 2 0 10 0;
 #X connect 3 0 4 0;
 #X connect 4 0 2 0;
@@ -342,6 +343,7 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X connect 32 0 31 0;
 #X connect 34 0 10 0;
 #X connect 36 0 3 1;
+#X connect 37 0 10 0;
 #X restore 350 310 pd muting_commands;
 #N canvas 1210 480 400 320 misc_commands 0;
 #X msg 140 200 tempo \$1;

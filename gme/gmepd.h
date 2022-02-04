@@ -28,8 +28,7 @@ Shay Green <gblargg@gmail.com>
 
 #define FRAMES 0x10
 
-enum { buf_size  = NCH * FRAMES };
-enum { mask_size = 0x10 };
+enum { buf_size = NCH * FRAMES };
 
 static const double frames = FRAMES;
 static const double inv_frames = 1. / frames;
@@ -46,7 +45,8 @@ typedef struct {
 	gme_info_t *info; /* current track info */
 	t_symbol *path;   /* path to the most recently read file */
 	double   tempo;   /* current tempo */
-	short    mask;    /* muting mask */
+	int      mask;    /* muting mask */
+	int      voices;  /* number of voices */
 	unsigned open:1;  /* true when a track has been successfully started */
 	unsigned play:1;  /* play/pause toggle */
 	t_outlet *o_meta; /* outputs track metadata */
@@ -121,27 +121,28 @@ static void gmepd_speed(t_gme *x ,t_float f) {
 	x->data.src_ratio = 1. / f;
 }
 
-static inline short domask(short mask ,int ac ,t_atom *av) {
+static inline int domask(int mask ,int voices ,int ac ,t_atom *av) {
 	for (; ac--; av++) if (av->a_type == A_FLOAT)
 	{	int d = av->a_w.w_float;
 		if (!d)
 		{	mask = 0;
 			continue;  }
 		if (d > 0) d--;
-		d %= mask_size;
-		if (d < 0) d += mask_size;
+		d %= voices;
+		if (d < 0) d += voices;
 		mask ^= 1 << d;  }
 	return mask;
 }
 
 static void gmepd_mute(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
-	x->mask = domask(x->mask ,ac ,av);
+	x->mask = domask(x->mask ,x->voices ,ac ,av);
 	if (x->emu) gme_mute_voices(x->emu ,x->mask);
 }
 
 static void gmepd_solo(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
-	short mask = domask(~0 ,ac ,av);
-	x->mask = (x->mask == mask) ? 0 : mask;
+	int mask = domask(~0 ,x->voices ,ac ,av);
+	mask &= (1 << x->voices) - 1;
+	x->mask = (x->mask == mask ? 0 : mask);
 	if (x->emu) gme_mute_voices(x->emu ,x->mask);
 }
 
@@ -194,6 +195,7 @@ static void gmepd_open(t_gme *x ,t_symbol *s) {
 		gme_ignore_silence ( x->emu ,1        );
 		gme_mute_voices    ( x->emu ,x->mask  );
 		gme_set_tempo      ( x->emu ,x->tempo );
+		x->voices = gme_voice_count(x->emu);
 		err_msg = gmepd_load(x ,1);
 		x->path = s;  }
 	if (err_msg)
@@ -206,8 +208,8 @@ static void gmepd_open(t_gme *x ,t_symbol *s) {
 static const t_symbol *dict[] = {
 	 gensym("system")    ,gensym("game")    ,gensym("song")   ,gensym("author")
 	,gensym("copyright") ,gensym("comment") ,gensym("dumper") ,gensym("path")
-	,gensym("length")    ,gensym("fade")    ,gensym("tracks") ,gensym("mask")
-	,gensym("bmask")
+	,gensym("length")    ,gensym("fade")    ,gensym("tracks") ,gensym("voices")
+	,gensym("mask")      ,gensym("bmask")
 };
 
 static t_atom gmepd_meta(t_gme *x ,t_symbol *sym) {
@@ -223,13 +225,16 @@ static t_atom gmepd_meta(t_gme *x ,t_symbol *sym) {
 	else if (sym == dict[8])  SETFLOAT (&meta ,x->info->length);
 	else if (sym == dict[9])  SETFLOAT (&meta ,x->info->fade_length);
 	else if (sym == dict[10]) SETFLOAT (&meta ,gme_track_count(x->emu));
-	else if (sym == dict[11]) SETFLOAT (&meta ,x->mask);
-	else if (sym == dict[12])
-	{	char buf[14];
+	else if (sym == dict[11]) SETFLOAT (&meta ,x->voices);
+	else if (sym == dict[12]) SETFLOAT (&meta ,x->mask);
+	else if (sym == dict[13])
+	{	char buf[17] ,*b = buf;
 		int m = x->mask;
-		sprintf(buf ,"%d%d%d%d%d%d%d%d%d%d%d%d%d" ,m&1 ,(m>>1)&1 ,(m>>2)&1
-			,(m>>3)&1 ,(m>>4)&1 ,(m>>5)&1  ,(m>>6)&1  ,(m>>7)&1
-			,(m>>8)&1 ,(m>>9)&1 ,(m>>10)&1 ,(m>>11)&1 ,(m>>12)&1);
+		int v = x->voices;
+		v = v > 16 ? 16 : v;
+		for (int i = 0; i < v; i++ ,b++)
+			*b = ((m>>i)&1) + '0';
+		*b = '\0';
 		SETSYMBOL(&meta ,gensym(buf));  }
 	else meta = {A_NULL};
 
@@ -335,7 +340,7 @@ static void *gmepd_new(t_class *gmeclass ,t_symbol *s ,int ac ,t_atom *av) {
 		printf ("\n\nError : src_new() failed : %s.\n\n" ,src_strerror(err)) ;
 	x->data.output_frames = FRAMES;
 
-	x->mask = 0;
+	x->mask = x->voices = 0;
 	if (ac) gmepd_solo(x ,NULL ,ac ,av);
 
 	x->tempo = 1.;
