@@ -598,12 +598,12 @@ static void *radix_new(t_symbol *s ,int argc ,t_atom *argv) {
 	x->x_gui.x_lcol = PD_COLOR_FG;
 
 	if (argc>=20)
-	{	w    = atom_getfloatarg(0 ,argc ,argv);
-		h    = atom_getfloatarg(1 ,argc ,argv);
-		min  = atom_getfloatarg(2 ,argc ,argv);
-		max  = atom_getfloatarg(3 ,argc ,argv);
-		lilo = atom_getfloatarg(4 ,argc ,argv);
-		ldx  = atom_getfloatarg(9 ,argc ,argv);
+	{	w    = atom_getfloatarg(0  ,argc ,argv);
+		h    = atom_getfloatarg(1  ,argc ,argv);
+		min  = atom_getfloatarg(2  ,argc ,argv);
+		max  = atom_getfloatarg(3  ,argc ,argv);
+		lilo = atom_getfloatarg(4  ,argc ,argv);
+		ldx  = atom_getfloatarg(9  ,argc ,argv);
 		ldy  = atom_getfloatarg(10 ,argc ,argv);
 		fs   = atom_getfloatarg(12 ,argc ,argv);
 		base = atom_getfloatarg(16 ,argc ,argv);

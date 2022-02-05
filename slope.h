@@ -57,7 +57,7 @@ static t_slope *slope_new(t_class *cl ,int ac ,t_atom *av) {
 
 	if (ac && av->a_type == A_SYMBOL)
 	{	x->log = !strcmp(av->a_w.w_symbol->s_name ,"log");
-		ac-=1 ,av+=1;  }
+		ac-- ,av++;  }
 	else x->log = 0;
 
 	switch (ac)

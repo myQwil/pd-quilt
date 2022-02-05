@@ -417,10 +417,9 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X msg 210 280 send song;
 #X text 300 280 send through outlet;
 #X text 270 210 print metadata;
-#X msg 150 380 info ©%copyright%\\\, for the "%system%";
-#X msg 150 410 print track %track% of %tracks%;
-#X text 150 440 print is an alias for info;
-#X msg 150 350 info %author% - %song% (%comment%);
+#X text 150 410 print is an alias for info;
+#X msg 150 350 info ©%copyright%\\\, for the "%system%";
+#X msg 150 380 print %author% - %song% (%comment%);
 #X connect 1 0 0 0;
 #X connect 5 0 0 0;
 #X connect 7 0 0 0;
@@ -434,9 +433,8 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X connect 17 0 0 0;
 #X connect 18 0 0 0;
 #X connect 19 0 0 0;
-#X connect 22 0 0 0;
 #X connect 23 0 0 0;
-#X connect 25 0 0 0;
+#X connect 24 0 0 0;
 #X restore 400 370 pd info_msgs;
 #X obj 30 290 r \$0start;
 #X msg 110 240 open \$1;
