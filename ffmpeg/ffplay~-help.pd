@@ -1,4 +1,4 @@
-#N canvas 400 200 570 590 14;
+#N canvas 400 200 580 600 14;
 #X declare -path xtra;
 #X declare -lib blunt;
 #X obj 210 500 *~;
@@ -300,6 +300,15 @@
 #X msg 150 310 print from %album%\\\, released %date%;
 #X msg 80 170 date;
 #X msg 70 140 track;
+#N canvas 970 230 450 300 specs 0;
+#X obj 40 170 outlet;
+#X msg 40 60 print Bit Rate: %bitrate% kb/s;
+#X msg 50 90 print Sample Rate: %samplerate% Hz;
+#X msg 60 120 print Sample Format: %samplefmt%;
+#X connect 1 0 0 0;
+#X connect 2 0 0 0;
+#X connect 3 0 0 0;
+#X restore 160 250 pd specs;
 #X connect 1 0 0 0;
 #X connect 5 0 0 0;
 #X connect 7 0 0 0;
@@ -311,6 +320,7 @@
 #X connect 16 0 0 0;
 #X connect 17 0 0 0;
 #X connect 18 0 0 0;
+#X connect 19 0 0 0;
 #X restore 420 340 pd metadata;
 #X obj 160 270 r \$0open;
 #N canvas 160 270 720 300 http 0;

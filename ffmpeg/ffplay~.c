@@ -48,11 +48,18 @@ typedef struct {
 	t_outlet *o_meta; /* outputs track metadata */
 } t_ffplay;
 
+static inline void ffplay_reset(t_ffplay *x) {
+	src_reset(x->state);
+	x->data.output_frames_gen = 0;
+	x->data.input_frames = 0;
+}
+
 static void ffplay_seek(t_ffplay *x ,t_float f) {
-	if (!x->open) return;
+	if (!x->open) return; // quietly
 	int64_t ts = 1000L * f;
 	avformat_seek_file(x->ic ,-1 ,0 ,ts ,x->ic->duration ,0);
 	swr_init(x->swr);
+	ffplay_reset(x);
 
 	// avcodec_flush_buffers(x->a.ctx); // doesn't always flush properly
 	avcodec_free_context(&x->a.ctx);
@@ -61,10 +68,6 @@ static void ffplay_seek(t_ffplay *x ,t_float f) {
 	x->a.ctx->pkt_timebase = x->ic->streams[x->a.idx]->time_base;
 	AVCodec *codec = avcodec_find_decoder(x->a.ctx->codec_id);
 	avcodec_open2(x->a.ctx ,codec ,NULL);
-
-	src_reset(x->state);
-	x->data.output_frames_gen = 0;
-	x->data.input_frames = 0;
 }
 
 static t_int *ffplay_perform(t_int *w) {
@@ -136,14 +139,14 @@ static void ffplay_dsp(t_ffplay *x ,t_signal **sp) {
 }
 
 static void ffplay_time(t_ffplay *x) {
-	if (!x->open) return;
+	if (!x->open) return post("No file opened.");
 	t_float f = x->ic->duration / 1000.; // AV_TIME_BASE is in microseconds
 	t_atom time = {.a_type=A_FLOAT ,.a_w={.w_float = f}};
 	outlet_anything(x->o_meta ,gensym("time") ,1 ,&time);
 }
 
 static void ffplay_position(t_ffplay *x) {
-	if (!x->open) return;
+	if (!x->open) return post("No file opened.");
 	AVRational ratio = x->ic->streams[x->a.idx]->time_base;
 	t_float f = 1000. * x->frm->pts * ratio.num / ratio.den;
 	t_atom pos = {.a_type=A_FLOAT ,.a_w={.w_float = f}};
@@ -243,9 +246,7 @@ static err_t ffplay_load(t_ffplay *x ,int track) {
 
 	x->ratio = (double)x->a.ctx->sample_rate / sys_getsr();
 	ffplay_speed(x ,x->speed);
-	src_reset(x->state);
-	x->data.output_frames_gen = 0;
-	x->data.input_frames = 0;
+	ffplay_reset(x);
 	return 0;
 }
 
@@ -282,13 +283,25 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 
 static t_atom ffplay_meta(t_ffplay *x ,t_symbol *s) {
 	if (!strcmp(s->s_name ,"path") || !strcmp(s->s_name ,"url"))
-		return (t_atom){.a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(x->ic->url)}};
+		return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(x->ic->url)} };
+
 	if (!strcmp(s->s_name ,"filename"))
 	{	const char *name = strrchr(x->ic->url ,'/');
 		name = name ? name+1 : x->ic->url;
-		return (t_atom){.a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(name)}};  }
+		return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(name)} };  }
+
+	if (!strcmp(s->s_name ,"samplefmt"))
+		return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol =
+			gensym(av_get_sample_fmt_name(x->a.ctx->sample_fmt))} };
+
+	if (!strcmp(s->s_name ,"samplerate"))
+		return (t_atom){ .a_type=A_FLOAT  ,.a_w={.w_float  = x->a.ctx->sample_rate} };
+
+	if (!strcmp(s->s_name ,"bitrate"))
+		return (t_atom){ .a_type=A_FLOAT  ,.a_w={.w_float  = x->ic->bit_rate / 1000.} };
+
 	if (!strcmp(s->s_name ,"tracks"))
-		return (t_atom){.a_type=A_FLOAT  ,.a_w={.w_float = x->plist.siz}};
+		return (t_atom){ .a_type=A_FLOAT  ,.a_w={.w_float  = x->plist.siz} };
 
 	AVDictionaryEntry *entry = av_dict_get(x->ic->metadata ,s->s_name ,0 ,0);
 
@@ -300,7 +313,7 @@ static t_atom ffplay_meta(t_ffplay *x ,t_symbol *s) {
 	);
 
 	if (entry)
-		return (t_atom){.a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(entry->value)}};
+		return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(entry->value)} };
 	else return (t_atom){A_NULL};
 }
 
@@ -334,7 +347,7 @@ static void ffplay_info_custom(t_ffplay *x ,int ac ,t_atom *av) {
 }
 
 static void ffplay_info(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
-	if (!x->open) return;
+	if (!x->open) return post("No file opened.");
 	if (ac) return ffplay_info_custom(x ,ac ,av);
 
 	AVDictionary *meta = x->ic->metadata;
@@ -348,7 +361,7 @@ static void ffplay_info(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void ffplay_send(t_ffplay *x ,t_symbol *s) {
-	if (!x->open) return;
+	if (!x->open) return post("No file opened.");
 	t_atom meta = ffplay_meta(x ,s);
 	if (meta.a_type)
 	{	t_atom args[] =
@@ -358,7 +371,7 @@ static void ffplay_send(t_ffplay *x ,t_symbol *s) {
 }
 
 static void ffplay_anything(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
-	if (!x->open) return;
+	if (!x->open) return post("No file opened.");
 	t_atom atom = ffplay_meta(x ,s);
 	switch (atom.a_type)
 	{	case A_FLOAT  : post("%s: %g" ,s->s_name ,atom.a_w.w_float); break;
@@ -367,7 +380,7 @@ static void ffplay_anything(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void ffplay_bang(t_ffplay *x) {
-	if (!x->open) return;
+	if (!x->open) return post("No file opened.");
 	x->play = !x->play;
 	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
 	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
