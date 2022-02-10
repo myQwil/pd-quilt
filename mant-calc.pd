@@ -68,9 +68,9 @@
 #X obj 600 140 t b f;
 #X obj 50 140 t b f;
 #X obj 50 370 outlet;
-#X obj 570 30 cnv 15 98 24 empty empty mancalc 4 12 0 18 #000000 #fcfcfc
-0;
-#X text 540 50 mantissa calculator;
+#X obj 560 30 cnv 15 124 24 empty empty mant-calc 4 12 0 18 #000000
+#fcfcfc 0;
+#X text 540 60 mantissa calculator;
 #X obj 50 260 b;
 #X obj 50 340 expr $f1 + $f2 + $f3 + $f4 + $f5 + $f6 + $f7 + $f8 +
 $f9 + $f10 + $f11 + $f12 + $f13 + $f14 + $f15 + $f16 + $f17 + $f18

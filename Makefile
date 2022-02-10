@@ -12,7 +12,7 @@ radix 0x21 0x21~ x is has pak rpak chrono tabread2~ tabosc2~ ad adsr cupq cupqb)
 
 datafiles += $(patsubst %, %.pd, \
 ad adsr add~ all~ ct cupq cupqb linp~ dollar-slice fkick~ \
-hms lead0 mancalc mantissa mantr phi fmosc~ fmore~ zp zp~)
+hms lead0 mantissa mant-calc phi fmosc~ fmore~ zp zp~)
 
 suppress-wunused = yes
 warn.flags = -Wall -Wshadow -Winline -Wstrict-aliasing
