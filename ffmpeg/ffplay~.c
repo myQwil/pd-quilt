@@ -32,7 +32,7 @@ typedef struct {
 	float      *out;
 	SRC_DATA     data;
 	SRC_STATE   *state;
-	t_avstream         a; /* audio stream */
+	t_avstream       a;   /* audio stream */
 	AVPacket        *pkt;
 	AVFrame         *frm;
 	SwrContext      *swr;
@@ -68,6 +68,14 @@ static void ffplay_seek(t_ffplay *x ,t_float f) {
 	x->a.ctx->pkt_timebase = x->ic->streams[x->a.idx]->time_base;
 	AVCodec *codec = avcodec_find_decoder(x->a.ctx->codec_id);
 	avcodec_open2(x->a.ctx ,codec ,NULL);
+}
+
+static void ffplay_position(t_ffplay *x) {
+	if (!x->open) return; // quietly
+	AVRational ratio = x->ic->streams[x->a.idx]->time_base;
+	t_float f = 1000. * x->frm->pts * ratio.num / ratio.den;
+	t_atom pos = { .a_type=A_FLOAT ,.a_w={.w_float = f} };
+	outlet_anything(x->o_meta ,gensym("pos") ,1 ,&pos);
 }
 
 static t_int *ffplay_perform(t_int *w) {
@@ -141,16 +149,8 @@ static void ffplay_dsp(t_ffplay *x ,t_signal **sp) {
 static void ffplay_time(t_ffplay *x) {
 	if (!x->open) return post("No file opened.");
 	t_float f = x->ic->duration / 1000.; // AV_TIME_BASE is in microseconds
-	t_atom time = {.a_type=A_FLOAT ,.a_w={.w_float = f}};
+	t_atom time = { .a_type=A_FLOAT ,.a_w={.w_float = f} };
 	outlet_anything(x->o_meta ,gensym("time") ,1 ,&time);
-}
-
-static void ffplay_position(t_ffplay *x) {
-	if (!x->open) return post("No file opened.");
-	AVRational ratio = x->ic->streams[x->a.idx]->time_base;
-	t_float f = 1000. * x->frm->pts * ratio.num / ratio.den;
-	t_atom pos = {.a_type=A_FLOAT ,.a_w={.w_float = f}};
-	outlet_anything(x->o_meta ,gensym("pos") ,1 ,&pos);
 }
 
 static void ffplay_speed(t_ffplay *x ,t_float f) {
@@ -161,7 +161,7 @@ static void ffplay_speed(t_ffplay *x ,t_float f) {
 }
 
 static void ffplay_tracks(t_ffplay *x) {
-	t_atom tracks = {.a_type=A_FLOAT ,.a_w={.w_float = x->plist.siz}};
+	t_atom tracks = { .a_type=A_FLOAT ,.a_w={.w_float = x->plist.siz} };
 	outlet_anything(x->o_meta ,gensym("tracks") ,1 ,&tracks);
 }
 
@@ -190,7 +190,7 @@ static inline err_t ffplay_m3u(t_ffplay *x ,t_symbol *s) {
 	return 0;
 }
 
-static err_t ffplay_get_stream(t_ffplay *x ,t_avstream *s ,enum AVMediaType type) {
+static inline err_t ffplay_stream(t_ffplay *x ,t_avstream *s ,enum AVMediaType type) {
 	int i = -1;
 	for (unsigned j = x->ic->nb_streams; j--;)
 		if (x->ic->streams[j]->codecpar->codec_type == type)
@@ -199,7 +199,7 @@ static err_t ffplay_get_stream(t_ffplay *x ,t_avstream *s ,enum AVMediaType type
 	s->idx = i;
 	if (i < 0)
 	{	post("stream type: %s" ,av_get_media_type_string(type));
-		return "No stream of that type found";  }
+		return "No stream found";  }
 
 	avcodec_free_context(&s->ctx);
 	s->ctx = avcodec_alloc_context3(NULL);
@@ -232,7 +232,7 @@ static err_t ffplay_load(t_ffplay *x ,int track) {
 		return "Couldn't find stream information";
 	x->ic->seek2any = 1;
 
-	err_t err_msg = ffplay_get_stream(x ,&x->a ,AVMEDIA_TYPE_AUDIO);
+	err_t err_msg = ffplay_stream(x ,&x->a ,AVMEDIA_TYPE_AUDIO);
 	if (err_msg) return err_msg;
 
 	swr_free(&x->swr);
@@ -277,7 +277,7 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 	if ( err_msg || (err_msg = ffplay_load(x ,1)) )
 		post("Error: %s." ,err_msg);
 	x->open = !err_msg;
-	t_atom open = {.a_type=A_FLOAT ,.a_w={.w_float = x->open}};
+	t_atom open = { .a_type=A_FLOAT ,.a_w={.w_float = x->open} };
 	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
 }
 
@@ -314,7 +314,7 @@ static t_atom ffplay_meta(t_ffplay *x ,t_symbol *s) {
 
 	if (entry)
 		return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(entry->value)} };
-	else return (t_atom){A_NULL};
+	else return (t_atom){ A_NULL };
 }
 
 static void ffplay_info_custom(t_ffplay *x ,int ac ,t_atom *av) {
@@ -365,7 +365,7 @@ static void ffplay_send(t_ffplay *x ,t_symbol *s) {
 	t_atom meta = ffplay_meta(x ,s);
 	if (meta.a_type)
 	{	t_atom args[] =
-		{	{.a_type=A_SYMBOL ,.a_w={.w_symbol = s}} ,meta  };
+		{	{ .a_type=A_SYMBOL ,.a_w={.w_symbol = s} } ,meta  };
 		outlet_anything(x->o_meta ,&s_list ,2 ,args);  }
 	else post("no metadata for '%s'" ,s->s_name);
 }
@@ -382,7 +382,7 @@ static void ffplay_anything(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
 static void ffplay_bang(t_ffplay *x) {
 	if (!x->open) return post("No file opened.");
 	x->play = !x->play;
-	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
+	t_atom play = { .a_type=A_FLOAT ,.a_w={.w_float = x->play} };
 	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
 }
 
@@ -396,7 +396,7 @@ static void ffplay_float(t_ffplay *x ,t_float f) {
 		x->open = !err_msg;  }
 	else ffplay_seek(x ,0);
 	x->play = !err_msg;
-	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
+	t_atom play = { .a_type=A_FLOAT ,.a_w={.w_float = x->play} };
 	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
 }
 

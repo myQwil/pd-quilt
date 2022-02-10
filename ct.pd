@@ -1,7 +1,7 @@
 #N canvas 400 200 380 320 14;
 #X obj 80 90 inlet;
 #X obj 190 160 inlet;
-#X obj 190 190 route on;
+#X obj 190 190 route float on;
 #X obj 100 190 % \$1;
 #X obj 140 160 + 1;
 #X obj 100 230 sel \$2;
@@ -14,8 +14,8 @@
 #X obj 80 120 route set;
 #X connect 0 0 11 0;
 #X connect 1 0 2 0;
-#X connect 2 0 5 1;
-#X connect 2 1 3 1;
+#X connect 2 0 3 1;
+#X connect 2 1 5 1;
 #X connect 3 0 4 0;
 #X connect 3 0 7 0;
 #X connect 3 0 5 0;
