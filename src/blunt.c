@@ -30,7 +30,7 @@ static void num_symbol(t_num *x ,t_symbol *s) {
 	else num_float(x ,f);
 }
 
-static void *num_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
+static t_num *num_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
 	t_num *x = (t_num*)pd_new(cl);
 	blunt_init(&x->bl ,&x->f ,ac ,av);
 	floatinlet_new(&x->bl.obj ,&x->f);
@@ -77,7 +77,60 @@ static void *f_new(t_symbol *s ,int ac ,t_atom *av) {
 /*                           arithmetics                           */
 /* --------------------------------------------------------------- */
 
-/* --------------------- binop1:  + ,- ,* ,/ --------------------- */
+/* --------------------- unop:  !  ~  floor  ceil  --------------- */
+
+static t_object *uop_new(t_class *cl) {
+	t_object *x = (t_object*)pd_new(cl);
+	outlet_new(x ,&s_float);
+	return (x);
+}
+
+/* --------------------- logical negation ------------------------ */
+static t_class *lnot_class;
+
+static void lnot_float(t_object *x ,t_float f) {
+	outlet_float(x->ob_outlet ,!(int)f);
+}
+
+static void *lnot_new() {
+	return (uop_new(lnot_class));
+}
+
+/* --------------------- bitwise negation ------------------------ */
+static t_class *bnot_class;
+
+static void bnot_float(t_object *x ,t_float f) {
+	outlet_float(x->ob_outlet ,~(int)f);
+}
+
+static void *bnot_new() {
+	return (uop_new(bnot_class));
+}
+
+/* --------------------- floor ----------------------------------- */
+static t_class *floor_class;
+
+static void floor_float(t_object *x ,t_float f) {
+	outlet_float(x->ob_outlet ,floor(f));
+}
+
+static void *floor_new() {
+	return (uop_new(floor_class));
+}
+
+/* --------------------- ceiling --------------------------------- */
+static t_class *ceil_class;
+
+static void ceil_float(t_object *x ,t_float f) {
+	outlet_float(x->ob_outlet ,ceil(f));
+}
+
+static void *ceil_new() {
+	return (uop_new(ceil_class));
+}
+
+
+/* --------------------- binop1:  +  -  *  /  -------------------- */
 
 /* --------------------- addition -------------------------------- */
 static t_class *b1_plus_class;
@@ -167,7 +220,8 @@ static void *b1_min_new(t_symbol *s ,int ac ,t_atom *av) {
 	return (bop_new(b1_min_class ,s ,ac ,av));
 }
 
-/* --------------- binop2: == ,!= ,> ,< ,>= ,<=. ----------------- */
+
+/* --------------- binop2:  ==  !=  >  <  >=  <=  ---------------- */
 
 /* --------------------- == -------------------------------------- */
 static t_class *b2_ee_class;
@@ -235,7 +289,8 @@ static void *b2_le_new(t_symbol *s ,int ac ,t_atom *av) {
 	return (bop_new(b2_le_class ,s ,ac ,av));
 }
 
-/* ------- binop3: & ,| ,&& ,|| ,<< ,>> ,^ ,% ,mod ,div ---------- */
+
+/* ------- binop3:  &  |  &&  ||  <<  >>  ^  %  mod  div  -------- */
 
 /* --------------------- & --------------------------------------- */
 static t_class *b3_ba_class;
@@ -448,9 +503,7 @@ void sym_setup(void) {
 
 void blunt_setup(void) {
 
-	post("Blunt! version 1.5");
-
-	/* ---------------- connectives --------------------- */
+	post("Blunt! version 1.6.0");
 
 	t_symbol *s_blunt = gensym("blunt");
 	char alt[5] = "`";
@@ -458,7 +511,10 @@ void blunt_setup(void) {
 	{	t_class **class;
 		const char *name;
 		t_newmethod new;
-		void *bang;  };
+		void *fn;  };
+
+
+	/* ---------------- connectives --------------------- */
 
 	const struct _obj nums[] =
 	{	 { &i_class ,"i" ,(t_newmethod)i_new ,i_bang }
@@ -472,7 +528,7 @@ void blunt_setup(void) {
 		class_addcreator(num->new ,gensym(alt) ,A_GIMME ,0);
 
 		t_class *class = *num->class;
-		class_addbang  (class ,num->bang);
+		class_addbang  (class ,num->fn);
 		class_addfloat (class ,num_float);
 		class_addsymbol(class ,num_symbol);
 		class_addmethod(class ,(t_method)num_set ,gensym("set") ,A_FLOAT ,0);
@@ -480,6 +536,28 @@ void blunt_setup(void) {
 			,gensym("loadbang") ,A_DEFFLOAT ,0);
 		class_sethelpsymbol(class ,s_blunt);  }
 
+
+	/* ---------------- unops --------------------- */
+
+	t_symbol *usyms[] = { gensym("negation") ,gensym("rounding") ,NULL } ,**usym = usyms;
+	const struct _obj uops[] =
+	{	 { &lnot_class  ,"!"     ,(t_newmethod)lnot_new  ,lnot_float  }
+		,{ &bnot_class  ,"~"     ,(t_newmethod)bnot_new  ,bnot_float  }
+		,{ NULL }
+		,{ &floor_class ,"floor" ,(t_newmethod)floor_new ,floor_float }
+		,{ &ceil_class  ,"ceil"  ,(t_newmethod)ceil_new  ,ceil_float  }
+		,{ NULL }  } ,*uop = uops;
+
+	for (; *usym; usym++ ,uop++) for (; uop->class; uop++)
+	{	*uop->class = class_new(gensym(uop->name) ,uop->new ,0
+			,sizeof(t_object) ,0 ,A_NULL);
+		class_addfloat(*uop->class ,uop->fn);
+		class_sethelpsymbol(*uop->class ,*usym);  }
+
+
+	/* ---------------- binops --------------------- */
+
+	t_symbol *bsyms[] = { s_blunt ,gensym("0x5e") ,NULL } ,**bsym = bsyms;
 	const struct _obj bops[] =
 	{	 { &b1_plus_class  ,"+"   ,(t_newmethod)b1_plus_new  ,b1_plus_bang  }
 		,{ &b1_minus_class ,"-"   ,(t_newmethod)b1_minus_new ,b1_minus_bang }
@@ -509,25 +587,22 @@ void blunt_setup(void) {
 		,{ &b3_xor_class   ,"^"   ,(t_newmethod)b3_xor_new   ,b3_xor_bang   }
 		,{ NULL }  } ,*bop = bops;
 
-	t_symbol *syms[] = { s_blunt ,gensym("0x5e") ,NULL } ,**sym = syms;
+	for (; *bsym; bsym++ ,bop++) for (; bop->class; bop++)
+	{	*bop->class = class_new(gensym(bop->name) ,bop->new ,0
+			,sizeof(t_bop) ,0 ,A_GIMME ,0);
+		strcpy(alt+1 ,bop->name);
+		class_addcreator(bop->new ,gensym(alt) ,A_GIMME ,0);
 
-	for (; *sym; sym++ ,bop++)
-	{	for (; bop->class; bop++)
-		{	*bop->class = class_new(gensym(bop->name) ,bop->new ,0
-				,sizeof(t_bop) ,0 ,A_GIMME ,0);
-			strcpy(alt+1 ,bop->name);
-			class_addcreator(bop->new ,gensym(alt) ,A_GIMME ,0);
-
-			t_class *class = *bop->class;
-			class_addbang  (class ,bop->bang);
-			class_addfloat (class ,bop_float);
-			class_addmethod(class ,(t_method)bop_f1   ,gensym("f1")  ,A_FLOAT ,0);
-			class_addmethod(class ,(t_method)bop_f2   ,gensym("f2")  ,A_FLOAT ,0);
-			class_addmethod(class ,(t_method)bop_skip ,gensym(".")   ,A_GIMME ,0);
-			class_addmethod(class ,(t_method)bop_set  ,gensym("set") ,A_GIMME ,0);
-			class_addmethod(class ,(t_method)blunt_loadbang
-				,gensym("loadbang") ,A_DEFFLOAT ,0);
-			class_sethelpsymbol(class ,*sym);  }  }
+		t_class *class = *bop->class;
+		class_addbang  (class ,bop->fn);
+		class_addfloat (class ,bop_float);
+		class_addmethod(class ,(t_method)bop_f1   ,gensym("f1")  ,A_FLOAT ,0);
+		class_addmethod(class ,(t_method)bop_f2   ,gensym("f2")  ,A_FLOAT ,0);
+		class_addmethod(class ,(t_method)bop_skip ,gensym(".")   ,A_GIMME ,0);
+		class_addmethod(class ,(t_method)bop_set  ,gensym("set") ,A_GIMME ,0);
+		class_addmethod(class ,(t_method)blunt_loadbang
+			,gensym("loadbang") ,A_DEFFLOAT ,0);
+		class_sethelpsymbol(class ,*bsym);  }
 
 	/* hot & reverse binops */
 	hotop_setup();

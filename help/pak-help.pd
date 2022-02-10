@@ -27,7 +27,7 @@
 #X msg 90 360 mute 0;
 #N canvas 570 390 350 270 out 0;
 #X obj 70 50 inlet;
-#X obj 70 80 x;
+#X obj 70 80 t a a;
 #X obj 100 110 is p;
 #X obj 70 140 demux;
 #X obj 70 180 route float bang;
@@ -55,7 +55,7 @@
 #ff0400 #fcfcfc;
 #N canvas 570 390 350 270 out 0;
 #X obj 70 50 inlet;
-#X obj 70 80 x;
+#X obj 70 80 t a a;
 #X obj 100 110 is p;
 #X obj 70 140 demux;
 #X obj 70 180 route float bang;
@@ -83,7 +83,7 @@
 #ff0400 #fcfcfc;
 #N canvas 570 390 350 270 out 0;
 #X obj 70 50 inlet;
-#X obj 70 80 x;
+#X obj 70 80 t a a;
 #X obj 100 110 is p;
 #X obj 70 140 demux;
 #X obj 70 180 route float bang;

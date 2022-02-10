@@ -1,18 +1,37 @@
 # Makefile for xtra
 
+# PDLIBDIR = $(HOME)/.local/lib/pd/extra
+PDLIBDIR = extra
+
 lib.name = xtra
 
-class.sources := $(patsubst %, %.c, \
-muse chrd rand rind ntof fton flenc fldec slx sly same ceil delp linp linp~ \
-radix 0x21 0x21~ x is has pak unpak 0x40pak 0x40unpak chrono tabread2~ tabosc2~)
+class.sources = $(patsubst %, src/%.c, \
+0x40pak 0x40unpak blunt chrd chrono delp ffplay~ fldec flenc fton has is \
+linp linp~ muse ntof pak radix rand rind same slx sly tabosc2~ tabread2~ unpak)
+class.sources += $(patsubst %, src/%.cpp, gme~ gmes~)
 
-datafiles := $(patsubst %, %-help.pd, \
-muse chrd rand rind ntof flenc slope same ceil delp linp linp~ \
-radix 0x21 0x21~ x is has pak rpak chrono tabread2~ tabosc2~ ad adsr cupq cupqb)
+datafiles = $(patsubst %, abstractions/%.pd, \
+ad add~ adsr all~ ct cupq cupqb fkick~ fmore~ fmosc~ \
+gme-mask hms lead0 mant-calc mantissa phi pulse~ zp zp~)
 
-datafiles += $(patsubst %, %.pd, \
-ad adsr add~ all~ ct cupq cupqb linp~ dollar-slice fkick~ \
-hms lead0 mantissa mant-calc phi fmosc~ fmore~ zp zp~)
+datafiles += $(patsubst %, help/%-help.pd, \
+adsr chrd chrono cupq cupqb delp ffplay~ flenc gme~ gmes~ has is linp linp~ \
+muse pak radix rand rind rpak same slope tabosc2~ tabread2~ tone)
+
+# Blunt
+blunt.class.sources = $(patsubst %, src/%.c, hotop revop)
+datadirs = blunt
+
+# Game Music Emu
+cflags = -I"game-music-emu/gme"
+gme~.class.ldlibs  = game-music-emu/build/gme/libgme.a -l:libsamplerate.a -lz -lunrar
+gmes~.class.ldlibs = $(gme~.class.ldlibs)
+define forWindows
+  gme~.class.ldlibs  := -Wl,-Bstatic $(gme~.class.ldlibs)
+endef
+
+# FFplay
+ffplay~.class.ldlibs = -lavutil -lavcodec -lavformat -lswresample -l:libsamplerate.a
 
 suppress-wunused = yes
 warn.flags = -Wall -Wshadow -Winline -Wstrict-aliasing

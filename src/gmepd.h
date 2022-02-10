@@ -95,9 +95,9 @@ static t_int *gmepd_perform(t_int *w) {
 static void gmepd_time(t_gme *x) {
 	if (!x->open) return;
 	t_atom flts[] =
-	{	 {.a_type=A_FLOAT ,.a_w={.w_float = (x->info->length > 0 ?
+	{	 {.a_type=A_FLOAT ,.a_w={.w_float = (t_float)(x->info->length > 0 ?
 			x->info->length : x->info->play_length)}}
-		,{.a_type=A_FLOAT ,.a_w={.w_float = x->info->fade_length}}  };
+		,{.a_type=A_FLOAT ,.a_w={.w_float = (t_float)x->info->fade_length}}  };
 	outlet_anything(x->o_meta ,gensym("time") ,2 ,flts);
 }
 
@@ -151,13 +151,13 @@ static void gmepd_mask(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
 	{	x->mask = av->a_w.w_float;
 		if (x->emu) gme_mute_voices(x->emu ,x->mask);  }
 	else
-	{	t_atom flt = {.a_type=A_FLOAT ,.a_w={.w_float = x->mask}};
+	{	t_atom flt = {.a_type=A_FLOAT ,.a_w={.w_float = (t_float)x->mask}};
 		outlet_anything(x->o_meta ,gensym("mask") ,1 ,&flt);  }
 }
 
 static void gmepd_tracks(t_gme *x) {
 	if (!x->emu) return;
-	t_atom tracks = {.a_type=A_FLOAT ,.a_w={.w_float = gme_track_count(x->emu)}};
+	t_atom tracks = {.a_type=A_FLOAT ,.a_w={.w_float = (t_float)gme_track_count(x->emu)}};
 	outlet_anything(x->o_meta ,gensym("tracks") ,1 ,&tracks);
 }
 
@@ -201,7 +201,7 @@ static void gmepd_open(t_gme *x ,t_symbol *s) {
 	if (err_msg)
 		post("Error: %s" ,err_msg);
 	x->open = !err_msg;
-	t_atom open = {.a_type=A_FLOAT ,.a_w={.w_float = x->open}};
+	t_atom open = {.a_type=A_FLOAT ,.a_w={.w_float = (t_float)x->open}};
 	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
 }
 
@@ -306,7 +306,7 @@ static void gmepd_anything(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
 static void gmepd_bang(t_gme *x) {
 	if (!x->open) return;
 	x->play = !x->play;
-	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
+	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = (t_float)x->play}};
 	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
 }
 
@@ -320,7 +320,7 @@ static void gmepd_float(t_gme *x ,t_float f) {
 		x->open = !err_msg;  }
 	else gmepd_seek(x ,0);
 	x->play = !err_msg;
-	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = x->play}};
+	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = (t_float)x->play}};
 	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
 }
 
