@@ -1,4 +1,5 @@
 #N canvas 400 200 780 560 14;
+#X declare -lib blunt;
 #X floatatom 230 60 0 2 64 0 - - - 0;
 #X msg 290 160 p \$1;
 #X floatatom 290 130 0 0 0 0 - - - 0;
@@ -67,6 +68,9 @@
 #X obj 100 500 mantissa;
 #X obj 50 440 s \$0f;
 #X obj 410 210 r \$0f;
+#N canvas 400 200 450 300 lib 0;
+#X obj 140 120 declare -lib blunt;
+#X restore 30 30 pd lib;
 #X connect 0 0 4 0;
 #X connect 0 0 39 0;
 #X connect 1 0 18 0;

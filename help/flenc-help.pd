@@ -32,7 +32,9 @@ of a float;
 #X obj 180 40 cnv 15 178 24 empty empty flenc\\\ &\\\ fldec 4 12 0
 18 #000000 #fcfcfc 0;
 #X obj 50 470 mantissa;
-#X obj 380 200 declare -lib blunt;
+#N canvas 400 200 450 300 lib 0;
+#X obj 140 120 declare -lib blunt;
+#X restore 30 30 pd lib;
 #X connect 0 0 5 0;
 #X connect 1 0 5 1;
 #X connect 2 0 10 0;

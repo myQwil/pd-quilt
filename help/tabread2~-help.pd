@@ -52,15 +52,17 @@
 #fcfcfc #fcfcfc 0 1;
 #X floatatom 90 460 0 0 0 0 - - - 0;
 #X obj 50 460 dac~;
-#X text 50 80 linear interpolating table lookup;
+#X text 50 90 linear interpolating table lookup;
 #X text 50 130 1st inlet: frequency;
 #X text 50 150 2nd inlet: threshold;
 #X text 50 170 3rd inlet: onset;
-#X obj 50 50 cnv 15 124 24 empty empty tabread2~ 4 12 0 18 #000000
+#X obj 50 60 cnv 15 124 24 empty empty tabread2~ 4 12 0 18 #000000
 #fcfcfc 0;
 #X obj 330 210 loadbang;
 #X msg 330 240 4;
-#X obj 520 250 declare -lib blunt;
+#N canvas 400 200 450 300 lib 0;
+#X obj 140 120 declare -lib blunt;
+#X restore 30 30 pd lib;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;

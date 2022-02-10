@@ -1,18 +1,22 @@
-#N canvas 400 200 530 300 14;
-#X floatatom 250 70 0 0 0 0 - - - 0;
-#X obj 370 170 ceil;
-#X floatatom 300 240 0 0 0 0 - - - 0;
-#X obj 190 30 cnv 15 166 24 empty empty floor\\\ &\\\ ceil 4 12 0 18
+#N canvas 400 200 420 310 14;
+#X declare -lib blunt;
+#X floatatom 180 70 0 0 0 0 - - - 0;
+#X obj 300 170 ceil;
+#X floatatom 230 240 0 0 0 0 - - - 0;
+#X obj 120 30 cnv 15 166 24 empty empty floor\\\ &\\\ ceil 4 12 0 18
 #000000 #fcfcfc 0;
-#X floatatom 250 240 0 0 0 0 - - - 0;
-#X obj 250 170 int;
-#X floatatom 200 240 0 0 0 0 - - - 0;
-#X obj 130 170 floor;
-#X obj 250 100 / 10;
-#X floatatom 250 130 0 0 0 0 - - - 0;
-#X text 110 140 rounds down;
-#X text 360 140 rounds up;
-#X text 190 200 gravitates to zero;
+#X floatatom 180 240 0 0 0 0 - - - 0;
+#X obj 180 170 int;
+#X floatatom 130 240 0 0 0 0 - - - 0;
+#X obj 60 170 floor;
+#X obj 180 100 / 10;
+#X floatatom 180 130 0 0 0 0 - - - 0;
+#X text 40 140 rounds down;
+#X text 290 140 rounds up;
+#X text 120 200 gravitates to zero;
+#N canvas 400 200 450 300 lib 0;
+#X obj 140 120 declare -lib blunt;
+#X restore 30 30 pd lib;
 #X connect 0 0 8 0;
 #X connect 1 0 2 0;
 #X connect 5 0 4 0;

@@ -28,7 +28,7 @@
 #X msg 350 400 0, f 2;
 #X obj 60 250 t a;
 #X obj 50 420 adsr, f 9;
-#X msg 200 190 500 d s 1000 \, 1;
+#X msg 250 190 500 d s 1000 \, 1;
 #X floatatom 240 230 0 0 0 0 - - - 0;
 #X msg 240 260 s \$1;
 #X floatatom 190 230 0 0 0 0 - - - 0;
@@ -41,29 +41,31 @@
 #X floatatom 240 300 0 0 1 0 - - - 0;
 #X floatatom 290 410 0 0 0 0 - - - 0;
 #X obj 290 440 #+ 200;
-#X msg 200 100 10 d 0 r \, 1;
+#X msg 250 100 10 d 0 r \, 1;
 #X msg 240 330 #s \$1;
 #X obj 60 300 t a;
 #X floatatom 340 230 0 0 0 0 - - - 0;
 #X msg 340 260 z \$1;
 #X text 380 260 zero delay on negative trigger;
-#X msg 120 50 -1;
-#X msg 90 50 1, f 2;
-#X msg 130 80 0.5;
-#X msg 140 110 -0.5;
-#X msg 60 50 0, f 2;
+#X msg 120 100 -1;
+#X msg 90 100 1, f 2;
+#X msg 160 100 0.5;
+#X msg 200 100 -0.5;
+#X msg 60 100 0, f 2;
 #X text 290 330 live sustain;
 #X obj 50 610 *~;
 #X obj 50 640 dac~;
 #X obj 90 610 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10 #2f004d
 #fcfcfc #fcfcfc 0 1;
-#X text 300 60 envelope generator abstraction;
-#X obj 390 30 cnv 15 60 24 empty empty adsr 4 12 0 18 #000000 #fcfcfc
+#X text 200 60 envelope generator abstraction;
+#X obj 290 30 cnv 15 60 24 empty empty adsr 4 12 0 18 #000000 #fcfcfc
 0;
-#X msg 200 160 . 10 s 20 \, 1;
+#X msg 250 160 . 10 s 20 \, 1;
 #X obj 60 480 tabwrite~ \$0adsr;
-#X msg 200 130 . 500 0.33 r \, 1;
-#X obj 180 550 declare -lib blunt;
+#X msg 250 130 . 500 0.33 r \, 1;
+#N canvas 400 200 450 300 lib 0;
+#X obj 140 120 declare -lib blunt;
+#X restore 30 30 pd lib;
 #X connect 1 0 24 0;
 #X connect 2 0 56 0;
 #X connect 3 0 5 0;

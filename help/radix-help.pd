@@ -47,20 +47,20 @@
 #X connect 15 1 6 0;
 #X restore 320 210 pd commands;
 #X obj 200 140 cupqb 23 0.01;
-#X obj 250 20 cnv 15 72 24 empty empty radix 4 12 0 18 #000000 #fcfcfc
+#X obj 270 20 cnv 15 72 24 empty empty radix 4 12 0 18 #000000 #fcfcfc
 0;
 #X obj 190 250 radix 0 22 0 0 0 0 empty empty empty -1 -10 0 11 #b8b8b8
 #fcfcfc #fcfcfc 2 24 2 0 256;
 #X msg 220 80 step 1;
 #X obj 80 330 mantissa;
-#X text 90 50 number box with specifiable radix and precision;
+#X text 110 50 number box with specifiable radix and precision;
 #X text 200 290 ____5____10___15___20___25___30___35;
 #X text 200 270 ----^----^----^----^----^----^----^-;
-#X text 370 70 digits[64] =;
-#X text 370 90 0123456789abcdef;
-#X text 370 110 ghijkmnopqrstuvw;
-#X text 370 130 xyzACDEFGHJKLMNP;
-#X text 370 150 QRTUVWXYZ?!@#$%&;
+#X text 380 80 digits[64] =;
+#X text 380 100 0123456789abcdef;
+#X text 380 120 ghijkmnopqrstuvw;
+#X text 380 140 xyzACDEFGHJKLMNP;
+#X text 380 160 QRTUVWXYZ?!@#$%&;
 #X msg 230 110 step 0.1;
 #X floatatom 430 190 0 0 0 0 - - - 0;
 #X msg 430 220 p \$1;
@@ -74,7 +74,9 @@
 #X obj 70 90 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400
 #fcfcfc;
 #X msg 100 80 step 0.72;
-#X obj 400 20 declare -lib blunt;
+#N canvas 400 200 450 300 lib 0;
+#X obj 140 120 declare -lib blunt;
+#X restore 30 30 pd lib;
 #X connect 0 0 3 1;
 #X connect 1 0 8 0;
 #X connect 2 0 0 0;

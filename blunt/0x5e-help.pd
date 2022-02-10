@@ -1,4 +1,5 @@
 #N canvas 400 200 560 310 14;
+#X declare -lib blunt;
 #X obj 160 90 ^;
 #X text 190 90 and;
 #X obj 230 90 #^;
@@ -13,6 +14,9 @@
 #X obj 40 90 `f 64!;
 #X obj 50 150 mantissa;
 #X obj 50 240 mantissa;
+#N canvas 400 200 450 300 lib 0;
+#X obj 140 120 declare -lib blunt;
+#X restore 30 30 pd lib;
 #X connect 4 0 9 0;
 #X connect 4 0 11 0;
 #X connect 5 0 9 1;

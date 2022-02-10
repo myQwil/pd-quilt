@@ -18,4 +18,8 @@ hours.txt
 # file manager layout files
 .directory
 
+# VSCode folder
 .vscode
+
+# Local install folder
+xtra

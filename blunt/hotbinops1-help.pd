@@ -1,4 +1,5 @@
 #N canvas 400 200 550 420 14;
+#X declare -lib blunt;
 #X floatatom 100 200 0 0 0 0 - - - 0;
 #X floatatom 150 200 0 0 0 0 - - - 0;
 #X floatatom 200 200 0 0 0 0 - - - 0;
@@ -43,6 +44,9 @@
 #X text 170 90 arithmetic with hot inlets;
 #X obj 190 40 cnv 15 164 24 empty empty hot\\\ binops\\\ 1 4 12 0 18
 #000000 #fcfcfc 0;
+#N canvas 400 200 450 300 lib 0;
+#X obj 140 120 declare -lib blunt;
+#X restore 30 30 pd lib;
 #X connect 0 0 16 0;
 #X connect 1 0 16 1;
 #X connect 2 0 17 0;

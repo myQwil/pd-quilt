@@ -1,7 +1,7 @@
 # Makefile for xtra
 
 # PDLIBDIR = $(HOME)/.local/lib/pd/extra
-PDLIBDIR = extra
+PDLIBDIR = .
 
 lib.name = xtra
 
@@ -31,7 +31,7 @@ define forWindows
 endef
 
 # FFplay
-ffplay~.class.ldlibs = -lavutil -lavcodec -lavformat -lswresample -l:libsamplerate.a
+ffplay~.class.ldlibs = -l:libsamplerate.a -lavutil -lavcodec -lavformat -lswresample
 
 suppress-wunused = yes
 warn.flags = -Wall -Wshadow -Winline -Wstrict-aliasing
