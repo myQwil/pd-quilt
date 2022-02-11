@@ -18,20 +18,22 @@ datafiles += $(patsubst %, help/%-help.pd, \
 adsr chrd chrono cupq cupqb delp ffplay~ flenc gme~ gmes~ has is linp linp~ \
 muse pak radix rand rind rpak same slope tabosc2~ tabread2~ tone)
 
+datafiles += help/libgme-LICENSE.txt
+
 # Blunt
 blunt.class.sources = $(patsubst %, src/%.c, hotop revop)
 datadirs = blunt
 
 # Game Music Emu
 cflags = -I"game-music-emu/gme"
-gme~.class.ldlibs  = game-music-emu/build/gme/libgme.a -l:libsamplerate.a -lz -lunrar
+gme~.class.ldlibs  = game-music-emu/build/gme/libgme.so -lsamplerate -lz -lunrar
 gmes~.class.ldlibs = $(gme~.class.ldlibs)
 define forWindows
   gme~.class.ldlibs  := -Wl,-Bstatic $(gme~.class.ldlibs)
 endef
 
 # FFplay
-ffplay~.class.ldlibs = -l:libsamplerate.a -lavutil -lavcodec -lavformat -lswresample
+ffplay~.class.ldlibs = -lsamplerate -lavutil -lavcodec -lavformat -lswresample
 
 suppress-wunused = yes
 warn.flags = -Wall -Wshadow -Winline -Wstrict-aliasing
