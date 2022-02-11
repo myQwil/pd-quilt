@@ -29,7 +29,7 @@ cflags = -I"game-music-emu/gme"
 gme~.class.ldlibs  = game-music-emu/build/gme/libgme.so -lsamplerate -lz -lunrar
 gmes~.class.ldlibs = $(gme~.class.ldlibs)
 define forWindows
-  gme~.class.ldlibs  := -Wl,-Bstatic $(gme~.class.ldlibs)
+  gme~.class.ldlibs := -Wl,-Bstatic $(gme~.class.ldlibs)
 endef
 
 # FFplay

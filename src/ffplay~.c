@@ -281,6 +281,18 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
 }
 
+static inline t_atom ffplay_ftime(t_ffplay *x) {
+	char time[32] ,*t = time;
+	int64_t ms  = x->ic->duration / 1000;
+	int64_t min =  ms / 60000;
+	int64_t sec = (ms - 60000 * min) / 1000;
+	if (min >= 60)
+	{	sprintf(t ,"%ld:" ,min/60);
+		t += strlen(t);  }
+	sprintf(t ,"%02ld:%02ld" ,min%60 ,sec);
+	return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(time)} };
+}
+
 static t_atom ffplay_meta(t_ffplay *x ,t_symbol *s) {
 	if (!strcmp(s->s_name ,"path") || !strcmp(s->s_name ,"url"))
 		return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(x->ic->url)} };
@@ -302,6 +314,9 @@ static t_atom ffplay_meta(t_ffplay *x ,t_symbol *s) {
 
 	if (!strcmp(s->s_name ,"tracks"))
 		return (t_atom){ .a_type=A_FLOAT  ,.a_w={.w_float  = x->plist.siz} };
+
+	if (!strcmp(s->s_name ,"ftime"))
+		return ffplay_ftime(x);
 
 	AVDictionaryEntry *entry = av_dict_get(x->ic->metadata ,s->s_name ,0 ,0);
 
