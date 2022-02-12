@@ -41,7 +41,7 @@ typedef struct {
 	t_playlist plist;
 	int64_t  layout;  /* channel layout bit-mask */
 	t_float  speed;   /* playback speed */
-	double   ratio;   /* samplerate ratio */
+	double   ratio;   /* resampling ratio */
 	unsigned nch;     /* number of channels */
 	unsigned open:1;  /* true when a file has been successfully opened */
 	unsigned play:1;  /* play/pause toggle */
