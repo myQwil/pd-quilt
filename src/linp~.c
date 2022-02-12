@@ -88,11 +88,15 @@ static void linp_tilde_stop(t_linp *x) {
 	x->ticksleft = x->retarget = 0;
 }
 
-static void linp_tilde_pause(t_linp *x) {
+static void linp_tilde_pause(t_linp *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (x->target == x->value)
 		return;
-	outlet_float(x->o_on ,x->pause);
-	x->pause = !x->pause;
+	if (ac && av->a_type == A_FLOAT)
+	{	int pause = !!av->a_w.w_float;
+		if (x->pause == pause) return;
+		else x->pause = pause;  }
+	else x->pause = !x->pause;
+	outlet_float(x->o_on ,!x->pause);
 }
 
 static void linp_tilde_float(t_linp *x ,t_float f) {
@@ -130,8 +134,8 @@ void linp_tilde_setup(void) {
 		,linp_tilde_new ,0
 		,sizeof(t_linp) ,0
 		,0);
-	class_addfloat(linp_tilde_class ,(t_method)linp_tilde_float);
-	class_addmethod(linp_tilde_class ,(t_method)linp_tilde_dsp  ,gensym("dsp") ,A_CANT ,0);
-	class_addmethod(linp_tilde_class ,(t_method)linp_tilde_stop  ,gensym("stop")  ,A_NULL);
-	class_addmethod(linp_tilde_class ,(t_method)linp_tilde_pause ,gensym("pause") ,A_NULL);
+	class_addfloat (linp_tilde_class,(t_method)linp_tilde_float);
+	class_addmethod(linp_tilde_class,(t_method)linp_tilde_dsp  ,gensym("dsp")  ,A_CANT ,0);
+	class_addmethod(linp_tilde_class,(t_method)linp_tilde_pause,gensym("pause"),A_GIMME,0);
+	class_addmethod(linp_tilde_class,(t_method)linp_tilde_stop ,gensym("stop") ,A_NULL);
 }

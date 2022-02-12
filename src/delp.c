@@ -48,10 +48,15 @@ static void delp_time(t_delp *x) {
 		timesince(x->settime ,x->unit ,x->samps) ));
 }
 
-static void delp_pause(t_delp *x) {
+static void delp_pause(t_delp *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (x->stop) return;
-	outlet_float(x->o_on ,x->pause);
-	x->pause = !x->pause;
+	if (ac && av->a_type == A_FLOAT)
+	{	int pause = !!av->a_w.w_float;
+		if (x->pause == pause) return;
+		else x->pause = pause;  }
+	else x->pause = !x->pause;
+	outlet_float(x->o_on ,!x->pause);
+
 	if (x->pause)
 	{	clock_unset(x->clock);
 		x->remtime -= timesince(x->settime ,x->unit ,x->samps);
@@ -122,11 +127,11 @@ void delp_setup(void) {
 		,A_GIMME ,0);
 	class_addbang  (delp_class ,delp_bang);
 	class_addfloat (delp_class ,delp_float);
-	class_addmethod(delp_class ,(t_method)delp_stop  ,gensym("stop")  ,A_NULL);
-	class_addmethod(delp_class ,(t_method)delp_time  ,gensym("time")  ,A_NULL);
-	class_addmethod(delp_class ,(t_method)delp_pause ,gensym("pause") ,A_NULL);
 	class_addmethod(delp_class ,(t_method)delp_ft1   ,gensym("ft1")   ,A_FLOAT ,0);
 	class_addmethod(delp_class ,(t_method)delp_delay ,gensym("del")   ,A_FLOAT ,0);
 	class_addmethod(delp_class ,(t_method)delp_delay ,gensym("delay") ,A_FLOAT ,0);
+	class_addmethod(delp_class ,(t_method)delp_pause ,gensym("pause") ,A_GIMME ,0);
 	class_addmethod(delp_class ,(t_method)delp_tempo ,gensym("tempo") ,A_GIMME ,0);
+	class_addmethod(delp_class ,(t_method)delp_stop  ,gensym("stop")  ,A_NULL);
+	class_addmethod(delp_class ,(t_method)delp_time  ,gensym("time")  ,A_NULL);
 }

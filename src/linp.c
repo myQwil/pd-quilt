@@ -44,11 +44,16 @@ static void linp_stop(t_linp *x) {
 	outlet_float(x->o_on ,0);
 }
 
-static void linp_pause(t_linp *x) {
+static void linp_pause(t_linp *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (x->setval == x->targetval)
 		return;
-	outlet_float(x->o_on ,x->pause);
-	x->pause = !x->pause;
+	if (ac && av->a_type == A_FLOAT)
+	{	int pause = !!av->a_w.w_float;
+		if (x->pause == pause) return;
+		else x->pause = pause;  }
+	else x->pause = !x->pause;
+	outlet_float(x->o_on ,!x->pause);
+
 	if (x->pause)
 	{	linp_freeze(x);
 		x->targettime = -clock_gettimesince(x->targettime);  }
@@ -129,6 +134,6 @@ void linp_setup(void) {
 	class_addfloat(linp_class ,(t_method)linp_float);
 	class_addmethod(linp_class ,(t_method)linp_ft1   ,gensym("ft1")   ,A_FLOAT ,0);
 	class_addmethod(linp_class ,(t_method)linp_set   ,gensym("set")   ,A_FLOAT ,0);
+	class_addmethod(linp_class ,(t_method)linp_pause ,gensym("pause") ,A_GIMME ,0);
 	class_addmethod(linp_class ,(t_method)linp_stop  ,gensym("stop")  ,A_NULL);
-	class_addmethod(linp_class ,(t_method)linp_pause ,gensym("pause") ,A_NULL);
 }
