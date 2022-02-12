@@ -48,7 +48,7 @@ typedef struct {
 	t_outlet *o_meta; /* outputs track metadata */
 } t_ffplay;
 
-static inline void ffplay_reset(t_ffplay *x) {
+static inline void ffplay_reset_src(t_ffplay *x) {
 	src_reset(x->state);
 	x->data.output_frames_gen = 0;
 	x->data.input_frames = 0;
@@ -59,7 +59,7 @@ static void ffplay_seek(t_ffplay *x ,t_float f) {
 	int64_t ts = 1000L * f;
 	avformat_seek_file(x->ic ,-1 ,0 ,ts ,x->ic->duration ,0);
 	swr_init(x->swr);
-	ffplay_reset(x);
+	ffplay_reset_src(x);
 
 	// avcodec_flush_buffers(x->a.ctx); // doesn't always flush properly
 	avcodec_free_context(&x->a.ctx);
@@ -146,23 +146,11 @@ static void ffplay_dsp(t_ffplay *x ,t_signal **sp) {
 	dsp_add(ffplay_perform ,2 ,x ,sp[0]->s_n);
 }
 
-static void ffplay_time(t_ffplay *x) {
-	if (!x->open) return post("No file opened.");
-	t_float f = x->ic->duration / 1000.; // AV_TIME_BASE is in microseconds
-	t_atom time = { .a_type=A_FLOAT ,.a_w={.w_float = f} };
-	outlet_anything(x->o_meta ,gensym("time") ,1 ,&time);
-}
-
 static void ffplay_speed(t_ffplay *x ,t_float f) {
 	x->speed = f;
 	f *= x->ratio;
 	f = f > frames ? frames : (f < inv_frames ? inv_frames : f);
 	x->data.src_ratio = 1. / f;
-}
-
-static void ffplay_tracks(t_ffplay *x) {
-	t_atom tracks = { .a_type=A_FLOAT ,.a_w={.w_float = x->plist.siz} };
-	outlet_anything(x->o_meta ,gensym("tracks") ,1 ,&tracks);
 }
 
 static inline err_t ffplay_m3u(t_ffplay *x ,t_symbol *s) {
@@ -246,7 +234,7 @@ static err_t ffplay_load(t_ffplay *x ,int track) {
 
 	x->ratio = (double)x->a.ctx->sample_rate / sys_getsr();
 	ffplay_speed(x ,x->speed);
-	ffplay_reset(x);
+	ffplay_reset_src(x);
 	return 0;
 }
 
@@ -281,8 +269,13 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
 }
 
+static inline t_atom ffplay_time(t_ffplay *x) {
+	t_float f = x->ic->duration / 1000.; // AV_TIME_BASE is in microseconds
+	return (t_atom){ .a_type=A_FLOAT ,.a_w={.w_float = f} };
+}
+
 static inline t_atom ffplay_ftime(t_ffplay *x) {
-	char time[32] ,*t = time;
+	char time[33] ,*t = time;
 	int64_t ms  = x->ic->duration / 1000;
 	int64_t min =  ms / 60000;
 	int64_t sec = (ms - 60000 * min) / 1000;
@@ -293,43 +286,35 @@ static inline t_atom ffplay_ftime(t_ffplay *x) {
 	return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(time)} };
 }
 
-static t_atom ffplay_meta(t_ffplay *x ,t_symbol *s) {
-	if (!strcmp(s->s_name ,"path") || !strcmp(s->s_name ,"url"))
-		return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(x->ic->url)} };
+static t_symbol *dict[9];
 
-	if (!strcmp(s->s_name ,"filename"))
+static t_atom ffplay_meta(t_ffplay *x ,t_symbol *s) {
+	t_atom meta;
+	if      (s == dict[0]
+	      || s == dict[1]) SETSYMBOL(&meta ,gensym(x->ic->url));
+	else if (s == dict[2])
 	{	const char *name = strrchr(x->ic->url ,'/');
 		name = name ? name+1 : x->ic->url;
-		return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(name)} };  }
+		SETSYMBOL(&meta ,gensym(name));  }
+	else if (s == dict[3]) meta = ffplay_time(x);
+	else if (s == dict[4]) meta = ffplay_ftime(x);
+	else if (s == dict[5]) SETFLOAT (&meta ,x->plist.siz);
+	else if (s == dict[6]) SETSYMBOL(&meta
+		,gensym(av_get_sample_fmt_name(x->a.ctx->sample_fmt)));
+	else if (s == dict[7]) SETFLOAT (&meta ,x->a.ctx->sample_rate);
+	else if (s == dict[8]) SETFLOAT (&meta ,x->ic->bit_rate / 1000.);
+	else
+	{	AVDictionaryEntry *entry = av_dict_get(x->ic->metadata ,s->s_name ,0 ,0);
+		if (!entry && !strcmp(s->s_name ,"date") // try a few other 'date' aliases
+			&& !(entry = av_dict_get(x->ic->metadata ,"time" ,0 ,0))
+			&& !(entry = av_dict_get(x->ic->metadata ,"tyer" ,0 ,0))
+			&& !(entry = av_dict_get(x->ic->metadata ,"tdat" ,0 ,0))
+			&& !(entry = av_dict_get(x->ic->metadata ,"tdrc" ,0 ,0))
+		);
+		if (entry) SETSYMBOL(&meta ,gensym(entry->value));
+		else meta = (t_atom){ A_NULL };  }
 
-	if (!strcmp(s->s_name ,"samplefmt"))
-		return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol =
-			gensym(av_get_sample_fmt_name(x->a.ctx->sample_fmt))} };
-
-	if (!strcmp(s->s_name ,"samplerate"))
-		return (t_atom){ .a_type=A_FLOAT  ,.a_w={.w_float  = x->a.ctx->sample_rate} };
-
-	if (!strcmp(s->s_name ,"bitrate"))
-		return (t_atom){ .a_type=A_FLOAT  ,.a_w={.w_float  = x->ic->bit_rate / 1000.} };
-
-	if (!strcmp(s->s_name ,"tracks"))
-		return (t_atom){ .a_type=A_FLOAT  ,.a_w={.w_float  = x->plist.siz} };
-
-	if (!strcmp(s->s_name ,"ftime"))
-		return ffplay_ftime(x);
-
-	AVDictionaryEntry *entry = av_dict_get(x->ic->metadata ,s->s_name ,0 ,0);
-
-	if (!entry && !strcmp(s->s_name ,"date") // try a few other 'date' aliases
-		&& !(entry = av_dict_get(x->ic->metadata ,"time" ,0 ,0))
-		&& !(entry = av_dict_get(x->ic->metadata ,"tyer" ,0 ,0))
-		&& !(entry = av_dict_get(x->ic->metadata ,"tdat" ,0 ,0))
-		&& !(entry = av_dict_get(x->ic->metadata ,"tdrc" ,0 ,0))
-	);
-
-	if (entry)
-		return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(entry->value)} };
-	else return (t_atom){ A_NULL };
+	return meta;
 }
 
 static void ffplay_info_custom(t_ffplay *x ,int ac ,t_atom *av) {
@@ -379,19 +364,12 @@ static void ffplay_send(t_ffplay *x ,t_symbol *s) {
 	if (!x->open) return post("No file opened.");
 	t_atom meta = ffplay_meta(x ,s);
 	if (meta.a_type)
-	{	t_atom args[] =
-		{	{ .a_type=A_SYMBOL ,.a_w={.w_symbol = s} } ,meta  };
-		outlet_anything(x->o_meta ,&s_list ,2 ,args);  }
+		outlet_anything(x->o_meta ,s ,1 ,&meta);
 	else post("no metadata for '%s'" ,s->s_name);
 }
 
 static void ffplay_anything(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
-	if (!x->open) return post("No file opened.");
-	t_atom atom = ffplay_meta(x ,s);
-	switch (atom.a_type)
-	{	case A_FLOAT  : post("%s: %g" ,s->s_name ,atom.a_w.w_float); break;
-		case A_SYMBOL : post("%s: %s" ,s->s_name ,atom.a_w.w_symbol->s_name); break;
-		default       : post("no metadata for '%s'" ,s->s_name);  }
+	ffplay_send(x ,s);
 }
 
 static void ffplay_bang(t_ffplay *x) {
@@ -473,6 +451,16 @@ static void ffplay_free(t_ffplay *x) {
 }
 
 void ffplay_tilde_setup(void) {
+	dict[0] = gensym("path");
+	dict[1] = gensym("url");
+	dict[2] = gensym("filename");
+	dict[3] = gensym("time");
+	dict[4] = gensym("ftime");
+	dict[5] = gensym("tracks");
+	dict[6] = gensym("samplefmt");
+	dict[7] = gensym("samplerate");
+	dict[8] = gensym("bitrate");
+
 	ffplay_class = class_new(gensym("ffplay~")
 		,(t_newmethod)ffplay_new ,(t_method)ffplay_free
 		,sizeof(t_ffplay) ,0
@@ -490,7 +478,5 @@ void ffplay_tilde_setup(void) {
 	class_addmethod(ffplay_class ,(t_method)ffplay_open   ,gensym("open")   ,A_SYMBOL ,0);
 	class_addmethod(ffplay_class ,(t_method)ffplay_bang   ,gensym("play")   ,A_NULL);
 	class_addmethod(ffplay_class ,(t_method)ffplay_stop   ,gensym("stop")   ,A_NULL);
-	class_addmethod(ffplay_class ,(t_method)ffplay_time   ,gensym("time")   ,A_NULL);
-	class_addmethod(ffplay_class ,(t_method)ffplay_tracks ,gensym("tracks") ,A_NULL);
 	class_addmethod(ffplay_class ,(t_method)ffplay_position ,gensym("pos")  ,A_NULL);
 }

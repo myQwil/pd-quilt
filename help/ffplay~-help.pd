@@ -1,5 +1,6 @@
 #N canvas 400 200 580 600 14;
 #X declare -lib blunt;
+#X declare -lib gme~;
 #X obj 210 500 *~;
 #X obj 220 530 dac~;
 #N canvas 710 780 450 300 (subpatch) 0;
@@ -10,7 +11,7 @@
 #fcfcfc 0 1;
 #X floatatom 110 440 0 0 0 0 - - - 0;
 #X obj 70 340 cupqb;
-#X obj 130 210 openpanel;
+#X obj 130 200 openpanel;
 #X obj 260 500 *~;
 #X obj 250 210 bng 15 250 50 0 empty empty play/pause 19 7 0 11 #ff8300
 #ff0400 #7c7c7c;
@@ -25,9 +26,9 @@
 0;
 #N canvas 180 430 480 370 time 0;
 #X obj 80 40 inlet;
-#X obj 380 220 outlet;
+#X obj 290 230 outlet;
 #X obj 80 230 outlet;
-#N canvas 140 230 480 340 display 0;
+#N canvas 970 290 480 340 display 0;
 #X obj 130 40 r \$0time;
 #X obj 110 160 @-;
 #X msg 190 190 set \$1;
@@ -43,6 +44,8 @@
 #X floatatom 340 120 0 0 0 0 - - - 0;
 #X obj 320 80 f;
 #X obj 320 40 r \$0seek;
+#X obj 40 40 r \$0reset;
+#X msg 180 80 0;
 #X connect 0 0 3 1;
 #X connect 0 0 1 1;
 #X connect 1 0 6 0;
@@ -56,7 +59,10 @@
 #X connect 13 0 5 0;
 #X connect 13 0 1 0;
 #X connect 14 0 13 0;
-#X restore 300 170 pd display;
+#X connect 15 0 16 0;
+#X connect 16 0 5 0;
+#X connect 16 0 1 0;
+#X restore 210 190 pd display;
 #X obj 140 80 route stop;
 #X msg 140 110 0;
 #N canvas 260 520 450 300 is-playing 0;
@@ -109,12 +115,12 @@
 #X connect 9 0 12 0;
 #X connect 12 0 7 0;
 #X restore 230 80 pd is-playing;
-#X obj 300 220 outlet;
+#X obj 210 230 outlet;
 #X obj 160 140 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
 #fcfcfc 0 1;
 #X msg 160 190 pos;
-#X floatatom 230 130 0 0 0 0 - - - 0;
-#X obj 160 160 metro 250;
+#X floatatom 250 160 0 0 0 0 - - - 0;
+#X obj 160 160 metro 1000;
 #X connect 0 0 2 0;
 #X connect 0 0 4 0;
 #X connect 3 0 7 0;
@@ -127,34 +133,35 @@
 #X connect 10 0 11 1;
 #X connect 11 0 9 0;
 #X restore 250 270 pd time;
-#X obj 130 160 bng 15 250 50 0 empty empty previous_directory 19 7
+#X obj 130 140 bng 15 250 50 0 empty empty previous_directory 19 7
 0 11 #ff8300 #ff0400 #7c7c7c;
-#N canvas 970 560 470 290 bounds 0;
+#N canvas 980 560 520 340 bounds 0;
 #X obj 40 40 inlet;
-#X obj 120 70 + 1;
-#X obj 40 190 outlet;
-#X obj 120 40 r \$0n;
+#X obj 110 70 + 1;
+#X obj 40 270 outlet;
+#X obj 110 40 r \$0n;
 #X obj 40 70 moses 1;
-#X obj 70 100 moses 2;
-#X obj 140 150 s \$0nbx;
-#X obj 140 100 r \$0start;
-#X obj 100 150 t;
-#X obj 50 150 t b f;
-#X msg 50 220 info %disc%|%track% - %title% (%ftime%) \, time;
+#X obj 50 100 moses 2;
+#X obj 100 180 s \$0nbx;
+#X obj 120 100 r \$0start;
+#X obj 50 180 t b a;
+#X msg 50 240 \$1 \, info %disc%|%track% - %title% [ %ftime% ] \, time
+;
+#X obj 50 210 s \$0reset;
+#X msg 120 140 symbol bang;
 #X connect 0 0 4 0;
 #X connect 1 0 5 1;
 #X connect 3 0 1 0;
 #X connect 4 0 2 0;
 #X connect 4 1 5 0;
 #X connect 5 0 6 0;
-#X connect 5 0 9 0;
-#X connect 7 0 8 0;
+#X connect 5 0 8 0;
 #X connect 7 0 6 0;
+#X connect 7 0 11 0;
 #X connect 8 0 10 0;
-#X connect 8 1 2 0;
-#X connect 9 0 10 0;
-#X connect 9 1 2 0;
-#X connect 10 0 2 0;
+#X connect 8 1 9 0;
+#X connect 9 0 2 0;
+#X connect 11 0 8 0;
 #X restore 70 400 pd bounds;
 #N canvas 120 600 450 270 route 0;
 #X obj 40 30 inlet;
@@ -189,11 +196,11 @@
 #X connect 14 1 12 0;
 #X restore 360 400 pd route;
 #X symbolatom 300 300 0 0 0 0 - - - 0;
-#X msg 140 180 symbol ~/Music;
-#X msg 130 240 open \$1;
+#X msg 140 170 symbol ~/Music;
+#X msg 130 230 open \$1;
 #X obj 50 470 metro 40;
 #X obj 140 470 /~ 2;
-#N canvas 100 670 680 200 trackbar 0;
+#N canvas 70 670 680 200 trackbar 0;
 #X obj 30 140 outlet;
 #X msg 30 110 seek \$1;
 #X obj 60 20 hsl 576 20 0 1 0 0 empty \$0trackbar empty -2 -8 0 10
@@ -286,15 +293,13 @@
 #X text 90 70 file path;
 #X text 120 100 total tracks in playlist;
 #X msg 50 70 path;
-#X text 310 260 custom info;
+#X text 150 250 custom info;
 #X msg 60 100 tracks;
-#X text 270 220 send through outlet;
-#X text 190 140 print metadata;
+#X text 190 140 send metadata via last outlet;
 #X text 150 340 print is an alias for info;
 #X msg 130 140 album;
 #X msg 190 170 artist;
 #X msg 130 170 title;
-#X msg 170 220 send title;
 #X msg 150 280 info %artist% - %title% (%album%);
 #X msg 150 310 print from %album%\\\, released %date%;
 #X msg 80 170 date;
@@ -307,10 +312,11 @@
 #X connect 1 0 0 0;
 #X connect 2 0 0 0;
 #X connect 3 0 0 0;
-#X restore 160 250 pd specs;
+#X restore 190 200 pd specs;
 #X connect 1 0 0 0;
 #X connect 5 0 0 0;
 #X connect 7 0 0 0;
+#X connect 10 0 0 0;
 #X connect 11 0 0 0;
 #X connect 12 0 0 0;
 #X connect 13 0 0 0;
@@ -318,23 +324,21 @@
 #X connect 15 0 0 0;
 #X connect 16 0 0 0;
 #X connect 17 0 0 0;
-#X connect 18 0 0 0;
-#X connect 19 0 0 0;
 #X restore 420 340 pd metadata;
-#X obj 160 270 r \$0open;
+#X obj 160 260 r \$0open;
 #N canvas 160 270 720 300 http 0;
 #X obj 180 210 outlet;
 #X msg 20 40 open https://upload.wikimedia.org/wikipedia/en/1/10/Michael_Jackson_Thriller.ogg
 , f 81;
 #X connect 1 0 0 0;
 #X restore 420 370 pd http;
-#X symbolatom 280 330 0 0 0 0 - - - 0;
+#X symbolatom 270 330 0 0 0 0 - - - 0;
 #X obj 50 500 tabwrite~ \$0ffplay;
 #X obj 220 400 ffplay~ 1 2 5 6;
 #X text 60 60 An implementation of the FFmpeg libraries for the audio
 playback of various media formats. Includes m3u playlist functionality
 and playback speed manipulation.;
-#N canvas 970 200 450 310 next 0;
+#N canvas 980 200 450 310 next 0;
 #X obj 60 250 outlet;
 #X obj 300 90 r \$0n;
 #X obj 80 80 r \$0done;
@@ -397,6 +401,9 @@ and playback speed manipulation.;
 #X restore 360 470 pd vol;
 #N canvas 400 200 450 300 lib 0;
 #X obj 140 120 declare -lib blunt;
+#X obj 140 170 declare -lib gme~;
+#X text 40 200 let gme~ load the custom version of libgme before FFmpeg
+can load the standard version, f 44;
 #X restore 30 30 pd lib;
 #X connect 0 0 1 0;
 #X connect 3 0 22 0;

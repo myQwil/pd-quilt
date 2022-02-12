@@ -52,6 +52,19 @@ typedef struct {
 	t_outlet *o_meta; /* outputs track metadata */
 } t_gme;
 
+static inline void gmepd_reset_src(t_gme *x) {
+	src_reset(x->state);
+	x->data.output_frames_gen = 0;
+	x->data.input_frames = 0;
+}
+
+static void gmepd_seek(t_gme *x ,t_float f) {
+	if (!x->open) return; // quietly
+	gme_seek(x->emu ,f);
+	gme_set_fade(x->emu ,-1 ,0);
+	gmepd_reset_src(x);
+}
+
 static t_int *gmepd_perform(t_int *w) {
 	t_gme *x = (t_gme*)(w[1]);
 	t_sample *outs[NCH];
@@ -68,14 +81,16 @@ static t_int *gmepd_perform(t_int *w) {
 					*outs[i]++ = data->data_out[i];
 				data->data_out += NCH;
 				data->output_frames_gen--;
-				continue;  }
+				continue;
+			}
 			else if (data->input_frames > 0)
 			{	resample:
 				data->data_out = x->out;
 				src_process(x->state ,data);
 				data->input_frames -= data->input_frames_used;
 				data->data_in += data->input_frames_used * NCH;
-				goto perform;  }
+				goto perform;
+			}
 			else
 			{	// receive
 				data->data_in = x->in;
@@ -85,30 +100,14 @@ static t_int *gmepd_perform(t_int *w) {
 				for (int i = buf_size; i--; in++ ,buf++)
 					*in = *buf / short_limit;
 				data->input_frames = FRAMES;
-				goto resample;  }  }  }
+				goto resample;
+			}
+		}
+	}
 	else while (n--)
 		for (int i = NCH; i--;)
 			*outs[i]++ = 0;
 	return (w+NCH+3);
-}
-
-static void gmepd_time(t_gme *x) {
-	if (!x->open) return;
-	t_atom flts[] =
-	{	 {.a_type=A_FLOAT ,.a_w={.w_float = (t_float)(x->info->length > 0 ?
-			x->info->length : x->info->play_length)}}
-		,{.a_type=A_FLOAT ,.a_w={.w_float = (t_float)x->info->fade_length}}  };
-	outlet_anything(x->o_meta ,gensym("time") ,2 ,flts);
-}
-
-static void gmepd_seek(t_gme *x ,t_float f) {
-	if (!x->open) return;
-	gme_seek(x->emu ,f);
-	gme_set_fade(x->emu ,-1 ,0);
-
-	src_reset(x->state);
-	x->data.output_frames_gen = 0;
-	x->data.input_frames = 0;
 }
 
 static void gmepd_tempo(t_gme *x ,t_float f) {
@@ -151,14 +150,8 @@ static void gmepd_mask(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
 	{	x->mask = av->a_w.w_float;
 		if (x->emu) gme_mute_voices(x->emu ,x->mask);  }
 	else
-	{	t_atom flt = {.a_type=A_FLOAT ,.a_w={.w_float = (t_float)x->mask}};
+	{	t_atom flt = { .a_type=A_FLOAT ,.a_w={.w_float = (t_float)x->mask} };
 		outlet_anything(x->o_meta ,gensym("mask") ,1 ,&flt);  }
-}
-
-static void gmepd_tracks(t_gme *x) {
-	if (!x->emu) return;
-	t_atom tracks = {.a_type=A_FLOAT ,.a_w={.w_float = (t_float)gme_track_count(x->emu)}};
-	outlet_anything(x->o_meta ,gensym("tracks") ,1 ,&tracks);
 }
 
 static gme_err_t gmepd_load(t_gme *x ,int track) {
@@ -172,9 +165,7 @@ static gme_err_t gmepd_load(t_gme *x ,int track) {
 		return err_msg;
 
 	gme_set_fade(x->emu ,-1 ,0);
-	src_reset(x->state);
-	x->data.output_frames_gen = 0;
-	x->data.input_frames = 0;
+	gmepd_reset_src(x);
 	return 0;
 }
 
@@ -201,46 +192,73 @@ static void gmepd_open(t_gme *x ,t_symbol *s) {
 	if (err_msg)
 		post("Error: %s" ,err_msg);
 	x->open = !err_msg;
-	t_atom open = {.a_type=A_FLOAT ,.a_w={.w_float = (t_float)x->open}};
+	t_atom open = { .a_type=A_FLOAT ,.a_w={.w_float = (t_float)x->open} };
 	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
 }
 
+static inline t_float gmepd_length(t_gme *x) {
+	t_float f = x->info->length;
+	if (f < 0) // try intro + 2 loops
+	{	int intro = x->info->intro_length ,loop = x->info->loop_length;
+		if (intro < 0 && loop < 0)
+			return f;
+		f = (intro >= 0 ? intro : 0) + (loop >= 0 ? loop * 2 : 0);  }
+	return f;
+}
+
+static inline t_atom gmepd_time(t_gme *x) {
+	return (t_atom){ .a_type=A_FLOAT ,.a_w={.w_float = gmepd_length(x)} };
+}
+
+static inline t_atom gmepd_ftime(t_gme *x) {
+	char time[33] ,*t = time;
+	int ms  = gmepd_length(x);
+	if (ms < 0) ms = 0;
+	if (x->info->fade_length > 0)
+		ms += x->info->fade_length;
+
+	int min =  ms / 60000;
+	int sec = (ms - 60000 * min) / 1000;
+	if (min >= 60)
+	{	sprintf(t ,"%d:" ,min/60);
+		t += strlen(t);  }
+	sprintf(t ,"%02d:%02d" ,min%60 ,sec);
+	return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(time)} };
+}
+
 static const t_symbol *dict[] = {
-	 gensym("system")    ,gensym("game")    ,gensym("song")   ,gensym("author")
-	,gensym("copyright") ,gensym("comment") ,gensym("dumper") ,gensym("path")
-	,gensym("length")    ,gensym("fade")    ,gensym("tracks") ,gensym("voices")
-	,gensym("mask")      ,gensym("bmask")
+	 gensym("path")      ,gensym("time")    ,gensym("ftime")  ,gensym("fade")
+	,gensym("tracks")    ,gensym("mask")    ,gensym("voices") ,gensym("bmask")
+	,gensym("system")    ,gensym("game")    ,gensym("song")   ,gensym("author")
+	,gensym("copyright") ,gensym("comment") ,gensym("dumper")
 };
 
-static t_atom gmepd_meta(t_gme *x ,t_symbol *sym) {
+static t_atom gmepd_meta(t_gme *x ,t_symbol *s) {
 	t_atom meta;
-	if      (sym == dict[0])  SETSYMBOL(&meta ,gensym(x->info->system));
-	else if (sym == dict[1])  SETSYMBOL(&meta ,gensym(x->info->game));
-	else if (sym == dict[2])  SETSYMBOL(&meta ,gensym(x->info->song));
-	else if (sym == dict[3])  SETSYMBOL(&meta ,gensym(x->info->author));
-	else if (sym == dict[4])  SETSYMBOL(&meta ,gensym(x->info->copyright));
-	else if (sym == dict[5])  SETSYMBOL(&meta ,gensym(x->info->comment));
-	else if (sym == dict[6])  SETSYMBOL(&meta ,gensym(x->info->dumper));
-	else if (sym == dict[7])  SETSYMBOL(&meta ,x->path);
-	else if (sym == dict[8])  SETFLOAT (&meta ,x->info->length);
-	else if (sym == dict[9])  SETFLOAT (&meta ,x->info->fade_length);
-	else if (sym == dict[10]) SETFLOAT (&meta ,gme_track_count(x->emu));
-	else if (sym == dict[11]) SETFLOAT (&meta ,x->voices);
-	else if (sym == dict[12]) SETFLOAT (&meta ,x->mask);
-	else if (sym == dict[13])
-	{	char buf[17] ,*b = buf;
+	if      (s == dict[0])  SETSYMBOL(&meta ,x->path);
+	else if (s == dict[1])  meta = gmepd_time(x);
+	else if (s == dict[2])  meta = gmepd_ftime(x);
+	else if (s == dict[3])  SETFLOAT (&meta ,x->info->fade_length);
+	else if (s == dict[4])  SETFLOAT (&meta ,gme_track_count(x->emu));
+	else if (s == dict[5])  SETFLOAT (&meta ,x->mask);
+	else if (s == dict[6])  SETFLOAT (&meta ,x->voices);
+	else if (s == dict[7])
+	{	char buf[33] ,*b = buf;
 		int m = x->mask;
 		int v = x->voices;
-		v = v > 16 ? 16 : v;
 		for (int i = 0; i < v; i++ ,b++)
 			*b = ((m>>i)&1) + '0';
 		*b = '\0';
 		SETSYMBOL(&meta ,gensym(buf));  }
-	else meta = {A_NULL};
 
-	if (meta.a_type == A_SYMBOL && !*meta.a_w.w_symbol->s_name)
-		meta = {A_NULL};
-
+	else if (s == dict[8])  SETSYMBOL(&meta ,gensym(x->info->system));
+	else if (s == dict[9])  SETSYMBOL(&meta ,gensym(x->info->game));
+	else if (s == dict[10]) SETSYMBOL(&meta ,gensym(x->info->song));
+	else if (s == dict[11]) SETSYMBOL(&meta ,gensym(x->info->author));
+	else if (s == dict[12]) SETSYMBOL(&meta ,gensym(x->info->copyright));
+	else if (s == dict[13]) SETSYMBOL(&meta ,gensym(x->info->comment));
+	else if (s == dict[14]) SETSYMBOL(&meta ,gensym(x->info->dumper));
+	else meta = { A_NULL };
 	return meta;
 }
 
@@ -274,7 +292,7 @@ static void gmepd_info_custom(t_gme *x ,int ac ,t_atom *av) {
 }
 
 static void gmepd_info(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
-	if (!x->open) return;
+	if (!x->open) return post("No file opened.");
 	if (ac) return gmepd_info_custom(x ,ac ,av);
 
 	if (x->info->game || x->info->song)
@@ -285,33 +303,26 @@ static void gmepd_info(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void gmepd_send(t_gme *x ,t_symbol *s) {
-	if (!x->open) return;
+	if (!x->open) return post("No file opened.");
 	t_atom meta = gmepd_meta(x ,s);
 	if (meta.a_type)
-	{	t_atom args[] =
-		{	{.a_type=A_SYMBOL ,.a_w={.w_symbol = s}} ,meta  };
-		outlet_anything(x->o_meta ,&s_list ,2 ,args);  }
+		outlet_anything(x->o_meta ,s ,1 ,&meta);
 	else post("no metadata for '%s'" ,s->s_name);
 }
 
 static void gmepd_anything(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
-	if (!x->open) return;
-	t_atom atom = gmepd_meta(x ,s);
-	switch (atom.a_type)
-	{	case A_FLOAT  : post("%s: %g" ,s->s_name ,atom.a_w.w_float); break;
-		case A_SYMBOL : post("%s: %s" ,s->s_name ,atom.a_w.w_symbol->s_name); break;
-		default       : post("no metadata for '%s'" ,s->s_name);  }
+	gmepd_send(x ,s);
 }
 
 static void gmepd_bang(t_gme *x) {
-	if (!x->open) return;
+	if (!x->open) return post("No file opened.");
 	x->play = !x->play;
-	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = (t_float)x->play}};
+	t_atom play = { .a_type=A_FLOAT ,.a_w={.w_float = (t_float)x->play} };
 	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
 }
 
 static void gmepd_float(t_gme *x ,t_float f) {
-	if (!x->emu) return;
+	if (!x->emu) return post("No file opened.");
 	int track = f;
 	gme_err_t err_msg = "";
 	if (track > 0 && track <= gme_track_count(x->emu))
@@ -320,7 +331,7 @@ static void gmepd_float(t_gme *x ,t_float f) {
 		x->open = !err_msg;  }
 	else gmepd_seek(x ,0);
 	x->play = !err_msg;
-	t_atom play = {.a_type=A_FLOAT ,.a_w={.w_float = (t_float)x->play}};
+	t_atom play = { .a_type=A_FLOAT ,.a_w={.w_float = (t_float)x->play} };
 	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
 }
 
@@ -373,8 +384,6 @@ static t_class *gmepd_setup(t_symbol *s ,t_newmethod newm) {
 	class_addmethod(gmeclass ,(t_method)gmepd_open   ,gensym("open")   ,A_SYMBOL   ,0);
 	class_addmethod(gmeclass ,(t_method)gmepd_bang   ,gensym("play")   ,A_NULL);
 	class_addmethod(gmeclass ,(t_method)gmepd_stop   ,gensym("stop")   ,A_NULL);
-	class_addmethod(gmeclass ,(t_method)gmepd_time   ,gensym("time")   ,A_NULL);
-	class_addmethod(gmeclass ,(t_method)gmepd_tracks ,gensym("tracks") ,A_NULL);
 
 	return gmeclass;
 }
