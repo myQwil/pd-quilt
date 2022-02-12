@@ -395,6 +395,7 @@ static void ffplay_float(t_ffplay *x ,t_float f) {
 
 static void ffplay_stop(t_ffplay *x) {
 	ffplay_float(x ,0);
+	x->frm->pts = 0; // reset internal position
 }
 
 static void *ffplay_new(t_symbol *s ,int ac ,t_atom *av) {
