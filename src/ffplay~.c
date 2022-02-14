@@ -4,10 +4,15 @@
 #include <libswresample/swresample.h>
 
 #define FRAMES 0x10
-#define MAXCH 0x20
+#define MAXCH 30
 
 static const double frames = FRAMES;
 static const double inv_frames = 1. / FRAMES;
+
+static t_symbol *s_open;
+static t_symbol *s_play;
+static t_symbol *s_done;
+static t_symbol *s_pos;
 
 typedef const char *err_t;
 
@@ -75,7 +80,7 @@ static void ffplay_position(t_ffplay *x) {
 	AVRational ratio = x->ic->streams[x->a.idx]->time_base;
 	t_float f = 1000. * x->frm->pts * ratio.num / ratio.den;
 	t_atom pos = { .a_type=A_FLOAT ,.a_w={.w_float = f} };
-	outlet_anything(x->o_meta ,gensym("pos") ,1 ,&pos);
+	outlet_anything(x->o_meta ,s_pos ,1 ,&pos);
 }
 
 static t_int *ffplay_perform(t_int *w) {
@@ -127,7 +132,7 @@ static t_int *ffplay_perform(t_int *w) {
 			if (x->play)
 			{	x->play = 0;
 				n++; // don't iterate in case there's another track
-				outlet_anything(x->o_meta ,gensym("done") ,0 ,0);  }
+				outlet_anything(x->o_meta ,s_done ,0 ,0);  }
 			else
 			{	ffplay_seek(x ,0);
 				goto silence;  }
@@ -207,6 +212,8 @@ static inline err_t ffplay_stream(t_ffplay *x ,t_avstream *s ,enum AVMediaType t
 }
 
 static err_t ffplay_load(t_ffplay *x ,int track) {
+	if (!x->state)
+		return "SRC has not been initialized";
 	char fname[MAXPDSTRING];
 	sprintf(fname ,"%s/%s"
 		,x->plist.dir->s_name
@@ -230,11 +237,12 @@ static err_t ffplay_load(t_ffplay *x ,int track) {
 		,layout_in ,x->a.ctx->sample_fmt ,x->a.ctx->sample_rate
 		,0 ,NULL);
 	if (swr_init(x->swr) < 0)
-		return "Resampler initialization failed";
+		return "SWResampler initialization failed";
 
 	x->ratio = (double)x->a.ctx->sample_rate / sys_getsr();
 	ffplay_speed(x ,x->speed);
 	ffplay_reset_src(x);
+	x->frm->pts = 0;
 	return 0;
 }
 
@@ -266,7 +274,22 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 		post("Error: %s." ,err_msg);
 	x->open = !err_msg;
 	t_atom open = { .a_type=A_FLOAT ,.a_w={.w_float = x->open} };
-	outlet_anything(x->o_meta ,gensym("open") ,1 ,&open);
+	outlet_anything(x->o_meta ,s_open ,1 ,&open);
+}
+
+static void ffplay_interp(t_ffplay *x ,t_float f) {
+	int d = f;
+	if (d < SRC_SINC_BEST_QUALITY || d > SRC_LINEAR)
+		return;
+
+	int play = x->play;
+	x->play = 0;
+	int err;
+	src_delete(x->state);
+	if ((x->state = src_new(d ,x->nch ,&err)) == NULL)
+	{	post("Error : src_new() failed : %s." ,src_strerror(err));
+		x->open = 0;  }
+	else x->play = play;
 }
 
 static inline t_atom ffplay_time(t_ffplay *x) {
@@ -280,9 +303,9 @@ static inline t_atom ffplay_ftime(t_ffplay *x) {
 	int64_t min =  ms / 60000;
 	int64_t sec = (ms - 60000 * min) / 1000;
 	if (min >= 60)
-	{	sprintf(t ,"%ld:" ,min/60);
+	{	sprintf(t ,"%lld:" ,min/60);
 		t += strlen(t);  }
-	sprintf(t ,"%02ld:%02ld" ,min%60 ,sec);
+	sprintf(t ,"%02lld:%02lld" ,min%60 ,sec);
 	return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(time)} };
 }
 
@@ -376,7 +399,7 @@ static void ffplay_bang(t_ffplay *x) {
 	if (!x->open) return post("No file opened.");
 	x->play = !x->play;
 	t_atom play = { .a_type=A_FLOAT ,.a_w={.w_float = x->play} };
-	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
+	outlet_anything(x->o_meta ,s_play ,1 ,&play);
 }
 
 static void ffplay_float(t_ffplay *x ,t_float f) {
@@ -390,7 +413,7 @@ static void ffplay_float(t_ffplay *x ,t_float f) {
 	else ffplay_seek(x ,0);
 	x->play = !err_msg;
 	t_atom play = { .a_type=A_FLOAT ,.a_w={.w_float = x->play} };
-	outlet_anything(x->o_meta ,gensym("play") ,1 ,&play);
+	outlet_anything(x->o_meta ,s_play ,1 ,&play);
 }
 
 static void ffplay_stop(t_ffplay *x) {
@@ -402,6 +425,7 @@ static void *ffplay_new(t_symbol *s ,int ac ,t_atom *av) {
 	t_ffplay *x = (t_ffplay*)pd_new(ffplay_class);
 	x->pkt = av_packet_alloc();
 	x->frm = av_frame_alloc();
+	x->frm->pts = 0;
 	t_atom defarg[2];
 
 	if (!ac)
@@ -425,7 +449,7 @@ static void *ffplay_new(t_symbol *s ,int ac ,t_atom *av) {
 
 	int err;
 	if ((x->state = src_new(SRC_LINEAR ,x->nch ,&err)) == NULL)
-		printf ("\n\nError : src_new() failed : %s.\n\n" ,src_strerror(err)) ;
+		post("Error : src_new() failed : %s." ,src_strerror(err));
 	x->data.output_frames = FRAMES;
 
 	x->plist.siz = 0;
@@ -462,6 +486,11 @@ void ffplay_tilde_setup(void) {
 	dict[7] = gensym("samplerate");
 	dict[8] = gensym("bitrate");
 
+	s_open = gensym("open");
+	s_play = gensym("play");
+	s_done = gensym("done");
+	s_pos  = gensym("pos");
+
 	ffplay_class = class_new(gensym("ffplay~")
 		,(t_newmethod)ffplay_new ,(t_method)ffplay_free
 		,sizeof(t_ffplay) ,0
@@ -473,6 +502,7 @@ void ffplay_tilde_setup(void) {
 	class_addmethod(ffplay_class ,(t_method)ffplay_dsp    ,gensym("dsp")    ,A_CANT   ,0);
 	class_addmethod(ffplay_class ,(t_method)ffplay_seek   ,gensym("seek")   ,A_FLOAT  ,0);
 	class_addmethod(ffplay_class ,(t_method)ffplay_speed  ,gensym("speed")  ,A_FLOAT  ,0);
+	class_addmethod(ffplay_class ,(t_method)ffplay_interp ,gensym("interp") ,A_FLOAT  ,0);
 	class_addmethod(ffplay_class ,(t_method)ffplay_info   ,gensym("info")   ,A_GIMME  ,0);
 	class_addmethod(ffplay_class ,(t_method)ffplay_info   ,gensym("print")  ,A_GIMME  ,0);
 	class_addmethod(ffplay_class ,(t_method)ffplay_send   ,gensym("send")   ,A_SYMBOL ,0);

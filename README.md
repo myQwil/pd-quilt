@@ -27,9 +27,7 @@ Includes the following features:
 1. numeric list
 	- The channel layout. Defaults to stereo if no args given.
 
-	- In the help file, you'll notice ffplay~ has the creation arguments `1 2 5 6`. The 5 and 6 represent rear-left and rear-right channels.
-
-	- A full list of available channels can be found here: <https://github.com/FFmpeg/FFmpeg/blob/master/libavutil/channel_layout.h>
+	- Numbers specified represent the bits of an audio channel bit-mask. A full list of available channels can be found here: <https://github.com/FFmpeg/FFmpeg/blob/master/libavutil/channel_layout.h>
 
 ### Inlets
 
@@ -39,24 +37,27 @@ Includes the following features:
 	float - (Re)start playback of a given track number
 	- Zero will stop playback.
 
-- A file must be successfully opened for either of these to work
+	anything - Look for matching metadata
+	- If metadata is found, it will be sent through the right-most outlet.
+
+- A file must be successfully opened for any of these to work
 
 ### Outlets
 
 1. signal - Left channel
 
 2. signal - Right channel
-	- The number of signal outlets there are depends on the number of creation args given, with the default being stereo.
+	- The number of signal outlets there are depends on the number of creation args given, with the default being 2 signals for stereo.
 
 3. list - Outputs various messages including information regarding whether a file was successfully opened, whether a track is currently playing, track metadata, etc.
 
 ### Messages
 
-- \[ **info** \$.. ( - Prints metadata info.
+- \[ **print** \$.. ( or \[ **info** \$.. ( - Prints metadata info.
 	- If no args given, it will print general info. Otherwise, it will print custom info.
 
 	- metadata needs to be surrounded with percent signs.
-		- Example \[ **info** %artist% - %title% (
+		- Example \[ **print** %artist% - %title% (
 
 - \[ **send** \$.. ( - Sends metadata info through the
 last outlet.
@@ -68,11 +69,15 @@ last outlet.
 
 - \[ **speed** \$1 ( - Set the playback speed.
 
-- \[ **play** \$1 ( - An alias for \[ **bang** (.
+- \[ **play** ( - An alias for \[ **bang** (.
+
+- \[ **interp** \$1 ( - Change the interpolation algorithm.
+	- Options include:
+		- Sinc (good | medium | fast)
+		- Zero-order hold
+		- Linear (the default)
 
 - \[ **stop** ( - An alias for \[ **0** (.
-
-- \[ **tracks** ( - Returns the total number of tracks within the current playlist.
 
 - \[ **pos** ( - Returns the track position.
 
@@ -101,6 +106,9 @@ Compatible formats include: AY, GBS, GYM, HES, KSS, NSF/NSFE, SAP, SPC, VGM/VGZ
 	float - (Re)start playback of a given track number
 	- Zero will stop playback.
 
+	anything - Look for matching metadata
+	- If metadata is found, it will be sent through the right-most outlet.
+
 - A file must be successfully opened for either of these to work
 
 ### Outlets
@@ -115,11 +123,11 @@ Compatible formats include: AY, GBS, GYM, HES, KSS, NSF/NSFE, SAP, SPC, VGM/VGZ
 
 ### Messages
 
-- \[ **info** \$.. ( - Prints metadata info.
+- \[ **print** \$.. ( or \[ **info** \$.. ( - Prints metadata info.
 	- If no args given, it will print general info. Otherwise, it will print custom info.
 
 	- metadata needs to be surrounded with percent signs.
-		- Example \[ **info** %game% - %song% (
+		- Example \[ **print** %game% - %song% (
 
 	- Acceptable metadata terms include:
 		- system, game, song, author, copyright, comment, dumper, path, length, fade, tracks
@@ -154,11 +162,19 @@ last outlet.
 
 	- Speed and tempo together can pitch-shift very effectively.
 
-- \[ **play** \$1 ( - An alias for \[ **bang** (.
+- \[ **interp** \$1 ( - Change the interpolation algorithm.
+	- Options include:
+		- Sinc (good | medium | fast)
+		- Zero-order hold
+		- Linear (the default)
+
+- \[ **play** ( - An alias for \[ **bang** (.
 
 - \[ **stop** ( - An alias for \[ **0** (.
 
-- \[ **time** ( - Returns both the song length and fade length in the form of a list.
+- \[ **time** ( - Returns the track's duration or -1 if unknown.
+
+- \[ **fade** ( - Returns the track's fade duration or -1 if unknown.
 
 --------------------------------------------------
 

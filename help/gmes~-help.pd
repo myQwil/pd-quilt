@@ -15,7 +15,7 @@
 #X msg 230 220 stop;
 #X obj 200 180 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #ff0400 #fcfcfc;
-#X msg 180 250 \$1 \, info \$1 - %song%;
+#X msg 180 250 \$1 \, print \$1 - %song%;
 #X obj 180 290 gmes~, f 34;
 #X msg 60 90 symbol ~/Music/Games;
 #X obj 300 30 cnv 15 72 24 empty empty gmes~ 4 12 0 18 #000000 #fcfcfc
@@ -229,7 +229,7 @@
 #X obj 140 130 s \$0start;
 #X obj 90 100 sel;
 #X obj 90 190 s \$0open;
-#X msg 90 160 tracks \, info %game%;
+#X msg 90 160 tracks \, print %game%;
 #X msg 190 70 \; pd dsp \$1;
 #X connect 0 0 1 0;
 #X connect 1 0 4 0;
