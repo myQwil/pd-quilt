@@ -9,7 +9,7 @@
 #X msg 220 170 tempo 1 msec;
 #X msg 230 200 tempo 0.5 msec;
 #X msg 240 230 delay 60000;
-#X msg 40 180 lap;
+#X msg 100 210 lap;
 #X msg 80 180 pause;
 #X obj 240 290 unpack;
 #X obj 340 320 hms;
@@ -38,6 +38,9 @@
 #X floatatom 270 110 0 0 0 0 - - - 0;
 #X msg 250 260 5000;
 #X text 300 260 reset with initial delay;
+#X text 120 180 toggle;
+#X text 120 150 force;
+#X msg 60 150 pause 1;
 #X connect 0 0 1 0;
 #X connect 1 0 4 0;
 #X connect 1 1 2 0;
@@ -61,3 +64,4 @@
 #X connect 17 0 18 0;
 #X connect 23 0 4 1;
 #X connect 24 0 3 0;
+#X connect 28 0 3 0;

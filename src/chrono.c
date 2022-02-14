@@ -54,9 +54,13 @@ static void chrono_lap(t_chrono *x) {
 	outlet_list(x->o_lap ,0 ,2 ,lap);
 }
 
-static void chrono_pause(t_chrono *x) {
-	outlet_float(x->o_on ,x->pause);
-	x->pause = !x->pause;
+static void chrono_pause(t_chrono *x ,t_symbol *s ,int ac ,t_atom *av) {
+	if (ac && av->a_type == A_FLOAT)
+	{	int pause = !!av->a_w.w_float;
+		if (x->pause == pause) return;
+		else x->pause = pause;  }
+	else x->pause = !x->pause;
+	outlet_float(x->o_on ,!x->pause);
 	if (x->pause)
 	{	x->setmore += timesince(x->settime ,x->unit ,x->samps);
 		x->lapmore += timesince(x->laptime ,x->unit ,x->samps);  }
@@ -100,9 +104,9 @@ void chrono_setup(void) {
 	class_addbang  (chrono_class ,chrono_bang);
 	class_addfloat (chrono_class ,chrono_float);
 	class_addmethod(chrono_class ,(t_method)chrono_bang2 ,gensym("bang2") ,A_NULL);
-	class_addmethod(chrono_class ,(t_method)chrono_pause ,gensym("pause") ,A_NULL);
 	class_addmethod(chrono_class ,(t_method)chrono_lap   ,gensym("lap")   ,A_NULL);
 	class_addmethod(chrono_class ,(t_method)chrono_delay ,gensym("del")   ,A_FLOAT ,0);
 	class_addmethod(chrono_class ,(t_method)chrono_delay ,gensym("delay") ,A_FLOAT ,0);
+	class_addmethod(chrono_class ,(t_method)chrono_pause ,gensym("pause") ,A_GIMME ,0);
 	class_addmethod(chrono_class ,(t_method)chrono_tempo ,gensym("tempo") ,A_GIMME ,0);
 }
