@@ -144,8 +144,8 @@
 #X obj 100 180 s \$0nbx;
 #X obj 120 100 r \$0start;
 #X obj 50 180 t b a;
-#X msg 50 240 \$1 \, print %disc%|%track% - %title% [ %ftime% ] \, time
-;
+#X msg 50 240 \$1 \, print %disc%|%track% - %title% [ %ftime% ] \,
+time;
 #X obj 50 210 s \$0reset;
 #X msg 120 140 symbol bang;
 #X obj 40 270 s \$0ffplay;
@@ -256,7 +256,7 @@
 #X connect 15 0 17 0;
 #X connect 16 0 17 0;
 #X restore 410 370 pd metadata;
-#X symbolatom 210 260 0 0 0 0 - - - 0;
+#X symbolatom 190 260 0 0 0 0 - - - 0;
 #X text 60 60 An implementation of the FFmpeg libraries for the audio
 playback of various media formats. Includes m3u playlist functionality
 and playback speed manipulation.;
@@ -331,7 +331,7 @@ can load the standard version, f 44;
 #X obj 220 370 r \$0ffplay;
 #X obj 70 250 s \$0ffplay;
 #X obj 80 530 tabwrite~ \$0view;
-#N canvas 980 450 650 340 misc 0;
+#N canvas 980 440 730 360 misc 0;
 #X floatatom 350 230 9 0 0 0 - - - 0;
 #X msg 350 260 speed \$1;
 #X obj 350 200 @pow 2;

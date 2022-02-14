@@ -11,9 +11,9 @@
 #X obj 60 380 cupqb 1;
 #X obj 40 240 openpanel;
 #X obj 240 520 *~;
-#X obj 220 210 bng 15 250 50 0 empty empty play/pause 17 7 0 12 #ff8300
+#X obj 240 210 bng 15 250 50 0 empty empty play/pause 17 7 0 12 #ff8300
 #ff0400 #7c7c7c;
-#X msg 230 240 stop;
+#X msg 250 240 stop;
 #X text 110 410 tracks;
 #X obj 210 410 gme~;
 #X obj 110 350 bng 15 250 50 0 empty empty restart 17 7 0 12 #ff8300
@@ -169,7 +169,7 @@
 #X connect 10 0 11 0;
 #X connect 12 0 13 0;
 #X connect 13 0 2 0;
-#X restore 220 270 pd time;
+#X restore 240 270 pd time;
 #X text 50 60 A Pd interface for the Game Music Emu library \, created
 by Shay Green and maintained by Michael Pyne at https://bitbucket.org/mpyne/game-music-emu
 Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
@@ -234,7 +234,7 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X connect 11 5 3 0;
 #X connect 12 0 13 0;
 #X restore 260 410 pd route;
-#X symbolatom 200 300 0 0 0 0 - - - 0;
+#X symbolatom 180 300 0 0 0 0 - - - 0;
 #X obj 40 350 r \$0start;
 #X msg 40 270 open \$1;
 #X obj 50 520 metro 40;
@@ -314,7 +314,7 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X connect 36 0 37 0;
 #X connect 38 0 35 0;
 #X restore 380 350 pd muting;
-#N canvas 950 530 440 350 tempo 0;
+#N canvas 950 274 440 350 tempo 0;
 #X msg 170 240 tempo \$1;
 #X floatatom 170 200 0 0 400 0 - - - 0;
 #X floatatom 250 180 0 0 0 0 - - - 0;
@@ -404,7 +404,7 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X connect 16 0 18 0;
 #X connect 17 0 18 0;
 #X restore 380 380 pd metadata;
-#X symbolatom 280 300 0 0 0 0 - - - 0;
+#X symbolatom 270 300 0 0 0 0 - - - 0;
 #X obj 290 490 hsl 128 20 0.001 1 1 0 empty empty vol 25 10 0 12 #2f004d
 #fcfcfc #fcfcfc 0 1;
 #X floatatom 350 520 0 0 0 0 - - - 0;

@@ -301,11 +301,11 @@ static inline t_atom ffplay_ftime(t_ffplay *x) {
 	char time[33] ,*t = time;
 	int64_t ms  = x->ic->duration / 1000;
 	int64_t min =  ms / 60000;
-	int64_t sec = (ms - 60000 * min) / 1000;
+	int     sec = (ms - 60000 * min) / 1000;
 	if (min >= 60)
-	{	sprintf(t ,"%lld:" ,min/60);
+	{	sprintf(t ,"%d:" ,(int)min/60);
 		t += strlen(t);  }
-	sprintf(t ,"%02lld:%02lld" ,min%60 ,sec);
+	sprintf(t ,"%02d:%02d" ,(int)min%60 ,sec);
 	return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(time)} };
 }
 
