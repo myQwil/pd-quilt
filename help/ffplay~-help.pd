@@ -19,7 +19,7 @@
 #X text 100 380 tracks;
 #X obj 100 340 bng 15 250 50 0 empty empty restart 17 7 0 12 #ff8300
 #ff0400 #7c7c7c;
-#X obj 310 470 hsl 128 20 0.001 1 1 0 empty empty vol 25 10 0 12 #2f004d
+#X obj 310 470 hsl 128 20 0.001 1 1 0 empty empty vol 47 10 0 12 #2f004d
 #fcfcfc #fcfcfc 0 1;
 #X floatatom 370 500 0 0 0 0 - - - 0;
 #X obj 220 30 cnv 15 102 24 empty empty ffplay~ 4 12 0 18 #000000 #fcfcfc
@@ -331,31 +331,35 @@ can load the standard version, f 44;
 #X obj 220 370 r \$0ffplay;
 #X obj 70 250 s \$0ffplay;
 #X obj 80 530 tabwrite~ \$0view;
-#N canvas 980 440 730 360 misc 0;
-#X floatatom 350 230 9 0 0 0 - - - 0;
-#X msg 350 260 speed \$1;
-#X obj 350 200 @pow 2;
-#X msg 430 170 0;
-#X obj 350 110 cupqb;
-#X obj 350 170 / 12;
-#X msg 420 140 -4 10000;
-#X msg 410 110 4 10000;
-#X msg 470 170 0 \, -2 60000;
-#X obj 410 200 line 0 2;
-#X obj 350 290 s \$0ffplay;
-#X text 420 260 Playback speed factor;
-#X obj 60 200 cupqb;
-#X msg 60 260 interp \$1;
-#X obj 30 290 s \$0ffplay;
-#X text 110 150 0 = Sinc (Best Quality);
-#X text 110 170 1 = Sinc (Medium Quality);
-#X text 110 190 2 = Sinc (Fastest);
-#X text 110 210 3 = Zero-order hold;
-#X text 110 230 4 = Linear (default);
-#X msg 30 60 open https://upload.wikimedia.org/wikipedia/en/1/10/Michael_Jackson_Thriller.ogg
+#N canvas 980 420 730 380 misc 0;
+#X floatatom 410 250 9 0 0 0 - - - 0;
+#X msg 410 280 speed \$1;
+#X obj 410 220 @pow 2;
+#X msg 490 190 0;
+#X obj 410 130 cupqb;
+#X obj 410 190 / 12;
+#X msg 480 160 -4 10000;
+#X msg 470 130 4 10000;
+#X msg 530 190 0 \, -2 60000;
+#X obj 470 220 line 0 2;
+#X obj 410 310 s \$0ffplay;
+#X text 490 280 Playback speed factor;
+#X obj 60 220 cupqb;
+#X msg 60 280 interp \$1;
+#X obj 30 310 s \$0ffplay;
+#X text 110 170 0 = Sinc (Best Quality);
+#X text 110 190 1 = Sinc (Medium Quality);
+#X text 110 210 2 = Sinc (Fastest);
+#X text 110 230 3 = Zero-order hold;
+#X text 110 250 4 = Linear (default);
+#X msg 30 50 open https://upload.wikimedia.org/wikipedia/en/1/10/Michael_Jackson_Thriller.ogg
 , f 81;
-#X text 30 30 FFmpeg accepts urls;
-#X text 140 260 Interpolation method;
+#X text 30 20 FFmpeg accepts urls;
+#X text 150 280 Interpolation method;
+#X msg 40 100 play 0;
+#X msg 50 130 play;
+#X text 100 100 force pause;
+#X text 100 130 toggle play/pause;
 #X connect 0 0 1 0;
 #X connect 1 0 10 0;
 #X connect 2 0 0 0;
@@ -369,6 +373,8 @@ can load the standard version, f 44;
 #X connect 12 0 13 0;
 #X connect 13 0 14 0;
 #X connect 20 0 14 0;
+#X connect 23 0 14 0;
+#X connect 24 0 14 0;
 #X restore 410 400 pd misc;
 #N canvas 990 170 470 660 channel_layout 0;
 #X text 30 20 1 = Front Left;

@@ -321,11 +321,19 @@ static void gmepd_anything(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
 	gmepd_send(x ,s);
 }
 
-static void gmepd_bang(t_gme *x) {
+static void gmepd_play(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (!x->open) return post("No file opened.");
-	x->play = !x->play;
+	if (ac && av->a_type == A_FLOAT)
+	{	int play = !!av->a_w.w_float;
+		if (x->play == play) return;
+		else x->play = play;  }
+	else x->play = !x->play;
 	t_atom play = { .a_type=A_FLOAT ,.a_w={.w_float = x->play} };
 	outlet_anything(x->o_meta ,s_play ,1 ,&play);
+}
+
+static void gmepd_bang(t_gme *x) {
+	gmepd_play(x ,0 ,0 ,0);
 }
 
 static void gmepd_float(t_gme *x ,t_float f) {
@@ -408,9 +416,9 @@ static t_class *gmepd_setup(t_symbol *s ,t_newmethod newm) {
 	class_addmethod(gmeclass ,(t_method)gmepd_mask   ,gensym("mask")   ,A_GIMME  ,0);
 	class_addmethod(gmeclass ,(t_method)gmepd_info   ,gensym("info")   ,A_GIMME  ,0);
 	class_addmethod(gmeclass ,(t_method)gmepd_info   ,gensym("print")  ,A_GIMME  ,0);
+	class_addmethod(gmeclass ,(t_method)gmepd_play   ,gensym("play")   ,A_GIMME  ,0);
 	class_addmethod(gmeclass ,(t_method)gmepd_send   ,gensym("send")   ,A_SYMBOL ,0);
 	class_addmethod(gmeclass ,(t_method)gmepd_open   ,gensym("open")   ,A_SYMBOL ,0);
-	class_addmethod(gmeclass ,(t_method)gmepd_bang   ,gensym("play")   ,A_NULL);
 	class_addmethod(gmeclass ,(t_method)gmepd_stop   ,gensym("stop")   ,A_NULL);
 
 	return gmeclass;

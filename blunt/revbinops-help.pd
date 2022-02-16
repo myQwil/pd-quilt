@@ -1,4 +1,4 @@
-#N canvas 400 200 480 380 14;
+#N canvas 400 200 490 380 14;
 #X declare -lib blunt;
 #X floatatom 80 140 0 0 0 0 - - - 0;
 #X floatatom 120 140 0 0 0 0 - - - 0;
@@ -38,8 +38,8 @@
 #X floatatom 390 320 0 0 0 0 - - - 0;
 #X text 120 70 - \, / \, pow \, << \, >> \, % \, mod \, div;
 #X text 120 90 binops with reversed operands;
-#X obj 150 40 cnv 15 188 24 empty empty reverse-binops 4 12 0 18 #000000
-#fcfcfc 0;
+#X obj 150 40 cnv 15 192 24 empty empty reverse\\\ binops 4 12 0 18
+#000000 #fcfcfc 0;
 #N canvas 400 200 450 300 lib 0;
 #X obj 140 120 declare -lib blunt;
 #X restore 30 30 pd lib;

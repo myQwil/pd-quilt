@@ -396,11 +396,19 @@ static void ffplay_anything(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
 	ffplay_send(x ,s);
 }
 
-static void ffplay_bang(t_ffplay *x) {
+static void ffplay_play(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
 	if (!x->open) return post("No file opened.");
-	x->play = !x->play;
+	if (ac && av->a_type == A_FLOAT)
+	{	int play = !!av->a_w.w_float;
+		if (x->play == play) return;
+		else x->play = play;  }
+	else x->play = !x->play;
 	t_atom play = { .a_type=A_FLOAT ,.a_w={.w_float = x->play} };
 	outlet_anything(x->o_meta ,s_play ,1 ,&play);
+}
+
+static void ffplay_bang(t_ffplay *x) {
+	ffplay_play(x ,0 ,0 ,0);
 }
 
 static void ffplay_float(t_ffplay *x ,t_float f) {
@@ -506,9 +514,9 @@ void ffplay_tilde_setup(void) {
 	class_addmethod(ffplay_class ,(t_method)ffplay_interp ,gensym("interp") ,A_FLOAT  ,0);
 	class_addmethod(ffplay_class ,(t_method)ffplay_info   ,gensym("info")   ,A_GIMME  ,0);
 	class_addmethod(ffplay_class ,(t_method)ffplay_info   ,gensym("print")  ,A_GIMME  ,0);
+	class_addmethod(ffplay_class ,(t_method)ffplay_play   ,gensym("play")   ,A_GIMME  ,0);
 	class_addmethod(ffplay_class ,(t_method)ffplay_send   ,gensym("send")   ,A_SYMBOL ,0);
 	class_addmethod(ffplay_class ,(t_method)ffplay_open   ,gensym("open")   ,A_SYMBOL ,0);
-	class_addmethod(ffplay_class ,(t_method)ffplay_bang   ,gensym("play")   ,A_NULL);
 	class_addmethod(ffplay_class ,(t_method)ffplay_stop   ,gensym("stop")   ,A_NULL);
 	class_addmethod(ffplay_class ,(t_method)ffplay_position ,gensym("pos")  ,A_NULL);
 }
