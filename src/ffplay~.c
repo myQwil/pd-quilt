@@ -61,10 +61,11 @@ static inline void ffplay_reset_src(t_ffplay *x) {
 
 static void ffplay_seek(t_ffplay *x ,t_float f) {
 	if (!x->open) return; // quietly
-	int64_t ts = 1000L * f;
-	avformat_seek_file(x->ic ,-1 ,0 ,ts ,x->ic->duration ,0);
-	swr_init(x->swr);
+	avformat_seek_file(x->ic ,-1 ,0 ,f * 1000 ,x->ic->duration ,0);
+	AVRational ratio = x->ic->streams[x->a.idx]->time_base;
+	x->frm->pts = f * ratio.den / (ratio.num * 1000);
 	ffplay_reset_src(x);
+	swr_init(x->swr);
 
 	// avcodec_flush_buffers(x->a.ctx); // doesn't always flush properly
 	avcodec_free_context(&x->a.ctx);
@@ -78,7 +79,7 @@ static void ffplay_seek(t_ffplay *x ,t_float f) {
 static void ffplay_position(t_ffplay *x) {
 	if (!x->open) return; // quietly
 	AVRational ratio = x->ic->streams[x->a.idx]->time_base;
-	t_float f = 1000. * x->frm->pts * ratio.num / ratio.den;
+	t_float f = x->frm->pts * ratio.num * 1000 / (t_float)ratio.den;
 	t_atom pos = { .a_type=A_FLOAT ,.a_w={.w_float = f} };
 	outlet_anything(x->o_meta ,s_pos ,1 ,&pos);
 }
