@@ -3,7 +3,27 @@
 
 --------------------------------------------------
 
-## \[ **ffplay\~** ]
+### Table of Contents
+- \[ [ffplay\~](#-ffplay-) \]
+- \[ [gme\~](#-gme----gmes-) \] & \[ [gmes\~](#-gme----gmes-) \]
+- \[ [ntof](#-ntof----fton-) \] & \[ [fton](#-ntof----fton-) \]
+- \[ [muse](#-muse----chrd-) \] & \[ [chrd](#-muse----chrd-) \]
+- \[ [rand](#-rand-) \]
+- \[ [rind](#-rind-) \]
+- \[ [flenc](#-flenc----fldec-) \] & \[ [fldec](#-flenc----fldec-) \]
+- \[ [radix](#-radix-) \]
+- \[ [slx](#-slx----sly-) \] & \[ [sly](#-slx----sly-) \]
+- \[ [is](#-is-) \]
+- \[ [has](#-has-) \]
+- \[ [pak](#-pak----unpak-) \] & \[ [unpak](#-pak----unpak-) \]
+- \[ [tabread2\~](#-tabread2----tabosc2-) \] & \[ [tabosc2\~](#-tabread2----tabosc2-) \]
+- \[ [chrono](#-chrono-) \]
+- \[ [delp](#-delp-) \]
+- \[ [linp](#-linp----linp-) \] & \[ [linp\~](#-linp----linp-) \]
+
+--------------------------------------------------
+
+## \[ **ffplay\~** \]
 
 An implementation of FFmpeg for audio playback of almost any media format
 
@@ -69,7 +89,9 @@ last outlet.
 
 - \[ **speed** \$1 ( - Set the playback speed.
 
-- \[ **play** ( - An alias for \[ **bang** (.
+- \[ **play** \$1 ( - Set playback state to either playing or paused.
+	- Acts as a toggle when no args are given.
+	- When an arg is given, state is forced to playing(1) or paused(0).
 
 - \[ **interp** \$1 ( - Change the interpolation algorithm.
 	- Options include:
@@ -83,7 +105,7 @@ last outlet.
 
 --------------------------------------------------
 
-## \[ **gme\~** ] & \[ **gmes\~** ]
+## \[ **gme\~** \] & \[ **gmes\~** \]
 
 A Pd interface for the Game Music Emu library, created by Shay Green and maintained by Michael Pyne at https://bitbucket.org/mpyne/game-music-emu
 
@@ -91,7 +113,7 @@ This repository includes a fork of the library as a submodule.
 
 Compatible formats include: AY, GBS, GYM, HES, KSS, NSF/NSFE, SAP, SPC, VGM/VGZ
 
-\[ **gmes\~** ] - The multi-channel version of \[ **gme\~** ]. Not all formats will work properly with this external.
+\[ **gmes\~** \] - The multi-channel version of \[ **gme\~** \]. Not all formats will work properly with this external.
 
 ### Creation args
 
@@ -119,7 +141,7 @@ Compatible formats include: AY, GBS, GYM, HES, KSS, NSF/NSFE, SAP, SPC, VGM/VGZ
 
 3. list - Outputs various messages including information regarding whether a file was successfully opened, whether a track is currently playing, track metadata, etc.
 
-\[ **gmes\~** ] works with 16 signal outlets, one left and one right channel for 8 distinct voices.
+\[ **gmes\~** \] works with 16 signal outlets, one left and one right channel for 8 distinct voices.
 
 ### Messages
 
@@ -168,7 +190,9 @@ last outlet.
 		- Zero-order hold
 		- Linear (the default)
 
-- \[ **play** ( - An alias for \[ **bang** (.
+- \[ **play** \$1 ( - Set playback state to either playing or paused.
+	- Acts as a toggle when no args are given.
+	- When an arg is given, state is forced to playing(1) or paused(0).
 
 - \[ **stop** ( - An alias for \[ **0** (.
 
@@ -178,9 +202,9 @@ last outlet.
 
 --------------------------------------------------
 
-## \[ **ntof** ] & \[ **fton** ]
+## \[ **ntof** \] & \[ **fton** \]
 
-Similar to pd's \[ **mtof** ] and \[ **ftom** ] objects but with modifiable reference pitch and number of tones in equal temperament.
+Similar to pd's \[ **mtof** \] and \[ **ftom** \] objects but with modifiable reference pitch and number of tones in equal temperament.
 
 ### Creation args
 
@@ -191,8 +215,8 @@ Similar to pd's \[ **mtof** ] and \[ **ftom** ] objects but with modifiable refe
 ### Inlets
 
 1. float
-	- \[ **ntof** ] - MIDI note
-	- \[ **fton** ] - frequency
+	- \[ **ntof** \] - MIDI note
+	- \[ **fton** \] - frequency
 
 2. float - Reference pitch
 
@@ -201,8 +225,8 @@ Similar to pd's \[ **mtof** ] and \[ **ftom** ] objects but with modifiable refe
 ### Outlets
 
 1. float
-	- \[ **ntof** ] - frequency
-	- \[ **fton** ] - MIDI note
+	- \[ **ntof** \] - frequency
+	- \[ **fton** \] - MIDI note
 
 ### Messages
 
@@ -215,11 +239,11 @@ Similar to pd's \[ **mtof** ] and \[ **ftom** ] objects but with modifiable refe
 
 --------------------------------------------------
 
-## \[ **muse** ] & \[ **chrd** ]
+## \[ **muse** \] & \[ **chrd** \]
 
-\[ **muse** ] - Creates a musical scale and uses various messages to quickly change the structure of the scale.
+\[ **muse** \] - Creates a musical scale and uses various messages to quickly change the structure of the scale.
 
-\[ **chrd** ] - The chord equivalent of \[ **muse** ] that produces multiple outlets based on the number of creation arguments specified.
+\[ **chrd** \] - The chord equivalent of \[ **muse** \] that produces multiple outlets based on the number of creation arguments specified.
 
 ### Creation args
 
@@ -243,13 +267,13 @@ Similar to pd's \[ **mtof** ] and \[ **ftom** ] objects but with modifiable refe
 
 - The inlets that follow will match the number of creation args and be associated with a specific interval or root.
 
-### Outlets for \[ **muse** ]
+### Outlets for \[ **muse** \]
 
 1. float - The frequency of the scale index
 
 2. float - The midi note of the scale index
 
-### Outlets for \[ **chrd** ]
+### Outlets for \[ **chrd** \]
 
 - The frequencies or midi notes of the creation args.
 	- Outputs frequencies by default, but this can be changed to midi notes by sending the message \[ midi 1 (.
@@ -325,7 +349,7 @@ Similar to pd's \[ **mtof** ] and \[ **ftom** ] objects but with modifiable refe
 
 --------------------------------------------------
 
-## \[ **rand** ]
+## \[ **rand** \]
 
 A random number generator that seeds with the current time so that the seed is always different even after restarting pd.
 
@@ -342,13 +366,13 @@ For 2 or no args:
 - More accurately, these are start and stop values. This means that the difference between `max` and `min` will always equal the correct range.
 	- We can also allow non-whole numbers to make fringe values less likely to occur.
 
-	- Example: \[ **rand** 2.8 5.2 ] will mostly output 3's and 4's, but there will also be the occasional 2's and 5's.
+	- Example: \[ **rand** 2.8 5.2 \] will mostly output 3's and 4's, but there will also be the occasional 2's and 5's.
 
 For 3 or more args:
 
 1. numeric list
 	- The random number's range will be the size of the list and the result will be used as an index to output one of the list's items.
-	- You can also make a small list using a `f-s-f` pattern of args. Example: \[ **rand** 2 or 5 ] will output either 2 or 5 .
+	- You can also make a small list using a `f-s-f` pattern of args. Example: \[ **rand** 2 or 5 \] will output either 2 or 5 .
 
 ### Inlets
 
@@ -384,7 +408,7 @@ For 3 or more args:
 
 --------------------------------------------------
 
-## \[ **rind** ]
+## \[ **rind** \]
 
 A high-precision random number generator. Allows for a max value, or min and max values to be specified.
 
@@ -417,15 +441,15 @@ For 2 or no args:
 
 --------------------------------------------------
 
-## \[ **flenc** ] & \[ **fldec** ]
+## \[ **flenc** \] & \[ **fldec** \]
 
 float-encode & float-decode
 
-\[ **flenc** ] - Joins the mantissa, exponent, and sign to create a new float.
+\[ **flenc** \] - Joins the mantissa, exponent, and sign to create a new float.
 
-\[ **fldec** ] - Splits a float into its sign, exponent, and mantissa.
+\[ **fldec** \] - Splits a float into its sign, exponent, and mantissa.
 
-### Inlets & Creation args for \[ **flenc** ]
+### Inlets & Creation args for \[ **flenc** \]
 
 1. float - Mantissa
 
@@ -433,7 +457,7 @@ float-encode & float-decode
 
 3. float - Sign
 
-### Inlets & Creation args for \[ **fldec** ]
+### Inlets & Creation args for \[ **fldec** \]
 
 1. float - The float to be split
 
@@ -455,7 +479,7 @@ The oulets of these externals are the same as the inlets of the other.
 
 --------------------------------------------------
 
-## \[ **radix** ]
+## \[ **radix** \]
 
 A gui number box that uses a custom number base between 2 and 64.
 
@@ -495,15 +519,15 @@ A gui number box that uses a custom number base between 2 and 64.
 
 --------------------------------------------------
 
-## \[ **slx** ] & \[ **sly** ]
+## \[ **slx** \] & \[ **sly** \]
 
 Slope objects.
 
 These can be thought of as sliders without the gui interface. They use the line equation in slope-intercept form with either a linear or logarithmic method.
 
-\[ **sly** ] - Solves for y ( y = mx + b )
+\[ **sly** \] - Solves for y ( y = mx + b )
 
-\[ **slx** ] - Solves for x ( x = (y-b) / m ).
+\[ **slx** \] - Solves for x ( x = (y-b) / m ).
 
 Only, for these objects, we use a slightly altered equation with min and max values:
 ```
@@ -523,16 +547,16 @@ x = (y - min) / m
 ### Inlets
 
 1. float
-	- \[ **sly** ] receives x 
-	- \[ **slx** ] receives y 
+	- \[ **sly** \] receives x 
+	- \[ **slx** \] receives y 
 
 - The inlets that follow are the same as the creation args.
 
 ### Outlets
 
 1. float
-	- \[ **sly** ] outputs the solution for y 
-	- \[ **slx** ] outputs the solution for x 
+	- \[ **sly** \] outputs the solution for y 
+	- \[ **slx** \] outputs the solution for x 
 
 ### Messages
 
@@ -552,7 +576,7 @@ x = (y - min) / m
 
 --------------------------------------------------
 
-## \[ **is** ]
+## \[ **is** \]
 
 Checks an atom's type or message.
 
@@ -578,7 +602,7 @@ Checks an atom's type or message.
 
 --------------------------------------------------
 
-## \[ **has** ]
+## \[ **has** \]
 
 Checks if a list contains a specific atom value.
 
@@ -602,9 +626,9 @@ Checks if a list contains a specific atom value.
 
 --------------------------------------------------
 
-## \[ **pak** ] & \[ **unpak** ]
+## \[ **pak** \] & \[ **unpak** \]
 
-Similar to pd's \[ **pack** ] and \[ **unpack** ] objects but with special 'lazy' inlets/outlets that allow anything to pass through them.
+Similar to pd's \[ **pack** \] and \[ **unpack** \] objects but with special 'lazy' inlets/outlets that allow anything to pass through them.
 
 ### Inlets/Outlets & Creation args
 
@@ -630,11 +654,11 @@ Similar to pd's \[ **pack** ] and \[ **unpack** ] objects but with special 'lazy
 
 --------------------------------------------------
 
-## \[ **tabread2\~** ] & \[ **tabosc2\~** ]
+## \[ **tabread2\~** \] & \[ **tabosc2\~** \]
 
 Table reader/oscillator that uses linear interpolation
 
-Much like \[ **tabread4\~** ] and \[ **tabosc4\~** ], these objects work best with tables whose size is a power of 2, plus three. Linear interpolation really only requires 1 additional point, such that the first and last points are the same value, but for the sake of compatibility, the wave starts at index 1, while index 0 is just ignored. Pd's 4-point interpolation has 1 look-behind point and expects the beginning of the wave to be at index 1. Messages like sinesum and cosinesum generate arrays with this in mind.
+Much like \[ **tabread4\~** \] and \[ **tabosc4\~** \], these objects work best with tables whose size is a power of 2, plus three. Linear interpolation really only requires 1 additional point, such that the first and last points are the same value, but for the sake of compatibility, the wave starts at index 1, while index 0 is just ignored. Pd's 4-point interpolation has 1 look-behind point and expects the beginning of the wave to be at index 1. Messages like sinesum and cosinesum generate arrays with this in mind.
 
 ### Creation Args
 
@@ -652,9 +676,9 @@ Much like \[ **tabread4\~** ] and \[ **tabosc4\~** ], these objects work best wi
 2. signal - Threshold
 
 3. float
-	- \[ **tabread2\~** ] - Onset
+	- \[ **tabread2\~** \] - Onset
 		- You can use this to improve the accuracy of indexing into the array.
-	- \[ **tabosc2\~** ] - Phase Index
+	- \[ **tabosc2\~** \] - Phase Index
 
 ### Outlets
 
@@ -664,13 +688,13 @@ Much like \[ **tabread4\~** ] and \[ **tabosc4\~** ], these objects work best wi
 
 - \[ **set** \$1 ( - Set the table name.
 
-[ **tabosc2\~** ] :
+[ **tabosc2\~** \] :
 
 - \[ **ft1** \$1 ( - Set the phase index.
 
 --------------------------------------------------
 
-## \[ **chrono** ]
+## \[ **chrono** \]
 
 A timer object with pause and lap functions.
 
@@ -703,6 +727,10 @@ A timer object with pause and lap functions.
 
 - \[ **pause** ( - Pause/resume the timer.
 
+- \[ **pause** \$1 ( - Pause/resume the timer.
+	- Acts as a toggle when no args are given.
+	- When an arg is given, state is forced to playing(0) or paused(1).
+
 - \[ **lap** ( - Send the lap time and total time as a list through the 2nd outlet.
 
 - \[ **delay** $1 ( - Add delay.
@@ -710,7 +738,7 @@ A timer object with pause and lap functions.
 
 --------------------------------------------------
 
-## \[ **delp** ]
+## \[ **delp** \]
 
 A delay object with a pause function.
 
@@ -743,7 +771,9 @@ A delay object with a pause function.
 
 ### Messages
 
-- \[ **pause** ( - Pause/resume the delay.
+- \[ **pause** \$1 ( - Pause/resume the timer.
+	- Acts as a toggle when no args are given.
+	- When an arg is given, state is forced to playing(0) or paused(1).
 
 - \[ **time** ( - Output remaining time.
 
@@ -752,11 +782,11 @@ A delay object with a pause function.
 
 --------------------------------------------------
 
-## \[ **linp** ] & \[ **linp\~** ]
+## \[ **linp** \] & \[ **linp\~** \]
 
-\[ **line** ] and \[ **line\~** ] objects with a pause function.
+\[ **line** \] and \[ **line\~** \] objects with a pause function.
 
-### Creation Args for [ **linp** ]
+### Creation Args for [ **linp** \]
 
 1. float - Initial value
 
@@ -764,7 +794,7 @@ A delay object with a pause function.
 
 ### Inlets
 
-- Exactly the same as \[ **line** ] and \[ **line\~** ]
+- Exactly the same as \[ **line** \] and \[ **line\~** \]
 
 ### Outlets
 
@@ -775,4 +805,6 @@ A delay object with a pause function.
 
 ### Messages
 
-- \[ **pause** ( - Pause/resume the delay.
+- \[ **pause** \$1 ( - Pause/resume the timer.
+	- Acts as a toggle when no args are given.
+	- When an arg is given, state is forced to playing(0) or paused(1).
