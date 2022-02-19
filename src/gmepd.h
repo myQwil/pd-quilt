@@ -22,7 +22,7 @@ Shay Green <gblargg@gmail.com>
 enum { buf_size = NCH * FRAMES };
 
 static const double frames = FRAMES;
-static const double inv_frames = 1. / frames;
+static const double inv_frames = 1. / FRAMES;
 static const float short_limit = 0x8000;
 
 static t_symbol *s_open;
