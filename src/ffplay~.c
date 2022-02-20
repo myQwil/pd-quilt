@@ -136,6 +136,8 @@ static t_int *ffplay_perform(t_int *w) {
 				outlet_anything(x->o_meta ,s_done ,0 ,0);  }
 			else
 			{	ffplay_seek(x ,0);
+				t_atom play = { .a_type=A_FLOAT ,.a_w={.w_float = x->play} };
+				outlet_anything(x->o_meta ,s_play ,1 ,&play);
 				goto silence;  }
 		}
 	}
