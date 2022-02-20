@@ -166,7 +166,8 @@ static int m3u_size(FILE *fp ,char *dir ,int dlen) {
 	char line[MAXPDSTRING];
 	while (fgets(line ,MAXPDSTRING ,fp) != NULL)
 	{	line[strcspn(line ,"\r\n")] = '\0';
-		if (dlen + strlen(line) >= MAXPDSTRING)
+		int isabs = (line[0] == '/');
+		if (dlen * isabs + strlen(line) >= MAXPDSTRING)
 			continue;
 		char *ext = strrchr(line ,'.');
 		if (ext && !strcmp(ext+1 ,"m3u"))
@@ -186,7 +187,8 @@ static int playlist_fill(t_playlist *pl ,FILE *fp ,char *dir ,int dlen ,int i) {
 	int oldlen = strlen(pl->dir->s_name);
 	while (fgets(line ,MAXPDSTRING ,fp) != NULL)
 	{	line[strcspn(line ,"\r\n")] = '\0';
-		if (dlen + strlen(line) >= MAXPDSTRING)
+		int isabs = (line[0] == '/');
+		if (dlen * isabs + strlen(line) >= MAXPDSTRING)
 			continue;
 		strcpy(dir+dlen ,line);
 		char *ext = strrchr(line ,'.');
@@ -253,9 +255,14 @@ static inline err_t ffplay_stream(t_ffplay *x ,t_avstream *s ,enum AVMediaType t
 static err_t ffplay_load(t_ffplay *x ,int track) {
 	if (!x->state)
 		return "SRC has not been initialized";
+
 	char url[MAXPDSTRING];
-	strcpy(url ,x->plist.dir->s_name);
-	strcat(url ,x->plist.trk[track-1]->s_name);
+	const char *trk = x->plist.trk[track-1]->s_name;
+	if (trk[0] == '/') // absolute path
+		strcpy(url ,trk);
+	else
+	{	strcpy(url ,x->plist.dir->s_name);
+		strcat(url ,trk);  }
 
 	avformat_close_input(&x->ic);
 	x->ic = avformat_alloc_context();
