@@ -38,9 +38,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define DBL_EXP_DIG 11
 
 #if PD_FLOATSIZE == 32
-#define BUFSIZE FLT_MANT_DIG + FLT_EXP_DIG + 5 // 5 = -.^±\0
+enum { buf_size = FLT_MANT_DIG + FLT_EXP_DIG + 5 }; // 5 = -.^±\0
 #elif PD_FLOATSIZE == 64
-#define BUFSIZE DBL_MANT_DIG + DBL_EXP_DIG + 5
+enum { buf_size = DBL_MANT_DIG + DBL_EXP_DIG + 5 };
 #endif
 
 #define MINDIGITS 0
@@ -77,7 +77,7 @@ typedef struct {
 	double   x_min;
 	double   x_max;
 	double   x_k;
-	char     x_buf[BUFSIZE];
+	char     x_buf[buf_size];
 	int      x_buflen;
 	int      x_numwidth;
 	int      x_log_height;

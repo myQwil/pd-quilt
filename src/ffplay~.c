@@ -161,16 +161,55 @@ static void ffplay_speed(t_ffplay *x ,t_float f) {
 	x->data.src_ratio = 1. / f;
 }
 
-static inline err_t ffplay_m3u(t_ffplay *x ,t_symbol *s) {
+static int m3u_size(FILE *fp ,char *dir ,int dlen) {
 	int size = 0;
-	char str[MAXPDSTRING];
-	t_playlist *pl = &x->plist;
+	char line[MAXPDSTRING];
+	while (fgets(line ,MAXPDSTRING ,fp) != NULL)
+	{	line[strcspn(line ,"\r\n")] = '\0';
+		if (dlen + strlen(line) >= MAXPDSTRING)
+			continue;
+		char *ext = strrchr(line ,'.');
+		if (ext && !strcmp(ext+1 ,"m3u"))
+		{	strcpy(dir+dlen ,line);
+			char *fname = strrchr(line ,'/');
+			int len = (fname) ? ++fname - line : 0;
+			FILE *m3u = fopen(dir ,"r");
+			if (m3u)
+			{	size += m3u_size(m3u ,dir ,dlen+len);
+				fclose(m3u);  }  }
+		else size++;  }
+	return size;
+}
+
+static int playlist_fill(t_playlist *pl ,FILE *fp ,char *dir ,int dlen ,int i) {
+	char line[MAXPDSTRING];
+	int oldlen = strlen(pl->dir->s_name);
+	while (fgets(line ,MAXPDSTRING ,fp) != NULL)
+	{	line[strcspn(line ,"\r\n")] = '\0';
+		if (dlen + strlen(line) >= MAXPDSTRING)
+			continue;
+		strcpy(dir+dlen ,line);
+		char *ext = strrchr(line ,'.');
+		if (ext && !strcmp(ext+1 ,"m3u"))
+		{	char *fname = strrchr(line ,'/');
+			int len = (fname) ? ++fname - line : 0;
+			FILE *m3u = fopen(dir ,"r");
+			if (m3u)
+			{	i = playlist_fill(pl ,m3u ,dir ,dlen+len ,i);
+				fclose(m3u);  }  }
+		else pl->trk[i++] = gensym(dir+oldlen);  }
+	return i;
+}
+
+static inline err_t ffplay_m3u(t_ffplay *x ,t_symbol *s) {
 	FILE *fp = fopen(s->s_name ,"r");
 	if (!fp)
 		return "Could not open m3u";
 
-	while (fgets(str ,MAXPDSTRING ,fp) != NULL)
-		size++;
+	t_playlist *pl = &x->plist;
+	char dir[MAXPDSTRING];
+	strcpy(dir ,pl->dir->s_name);
+	int size = m3u_size(fp ,dir ,strlen(dir));
 	if (size > pl->max)
 	{	pl->trk = (t_symbol**)resizebytes(pl->trk
 			,pl->max * sizeof(t_symbol*) ,size * sizeof(t_symbol*));
@@ -178,10 +217,7 @@ static inline err_t ffplay_m3u(t_ffplay *x ,t_symbol *s) {
 	pl->siz = size;
 	rewind(fp);
 
-	for (int i=0; fgets(str ,MAXPDSTRING ,fp) != NULL; i++)
-	{	str[strcspn(str ,"\r\n")] = 0;
-		pl->trk[i] = gensym(str);  }
-
+	playlist_fill(pl ,fp ,dir ,strlen(pl->dir->s_name) ,0);
 	fclose(fp);
 	return 0;
 }
@@ -217,21 +253,21 @@ static inline err_t ffplay_stream(t_ffplay *x ,t_avstream *s ,enum AVMediaType t
 static err_t ffplay_load(t_ffplay *x ,int track) {
 	if (!x->state)
 		return "SRC has not been initialized";
-	char fname[MAXPDSTRING];
-	sprintf(fname ,"%s/%s"
-		,x->plist.dir->s_name
-		,x->plist.trk[track-1]->s_name);
+	char url[MAXPDSTRING];
+	strcpy(url ,x->plist.dir->s_name);
+	strcat(url ,x->plist.trk[track-1]->s_name);
 
 	avformat_close_input(&x->ic);
 	x->ic = avformat_alloc_context();
-	if (avformat_open_input(&x->ic ,fname ,NULL ,NULL) != 0)
+	if (avformat_open_input(&x->ic ,url ,NULL ,NULL) != 0)
 		return "Couldn't open input stream";
 	if (avformat_find_stream_info(x->ic ,NULL) < 0)
 		return "Couldn't find stream information";
 	x->ic->seek2any = 1;
 
-	err_t err_msg = ffplay_stream(x ,&x->a ,AVMEDIA_TYPE_AUDIO);
-	if (err_msg) return err_msg;
+	err_t err_msg;
+	if ( (err_msg = ffplay_stream(x ,&x->a ,AVMEDIA_TYPE_AUDIO)) )
+		return err_msg;
 
 	swr_free(&x->swr);
 	int64_t layout_in = av_get_default_channel_layout(x->a.ctx->channels);
@@ -251,27 +287,28 @@ static err_t ffplay_load(t_ffplay *x ,int track) {
 
 static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 	x->play = 0;
-	int len = 0;
-	char dir[MAXPDSTRING];
-	const char *path = strrchr(s->s_name ,'/');
-	if (path)
-	{	len = path - s->s_name;
-		strncpy(dir ,s->s_name ,len);
-		path++;  }
-	else
-	{	len = 1;
-		dir[0] = '.';
-		path = s->s_name;  }
-	dir[len] = '\0';
-	x->plist.dir = gensym(dir);
-
 	err_t err_msg = 0;
-	char *ext = strrchr(s->s_name ,'.');
-	if (ext && !strcmp(ext+1 ,"m3u"))
-		err_msg = ffplay_m3u(x ,s);
+	const char *sym = s->s_name;
+	if (strlen(sym) >= MAXPDSTRING)
+		err_msg = "File path is too long";
 	else
-	{	x->plist.siz = 1;
-		x->plist.trk[0] = gensym(path);  }
+	{	char dir[MAXPDSTRING];
+		const char *fname = strrchr(sym ,'/');
+		if (fname)
+		{	int len = ++fname - sym;
+			strncpy(dir ,sym ,len);
+			dir[len] = '\0';  }
+		else
+		{	fname = sym;
+			strcpy(dir ,"./");  }
+		x->plist.dir = gensym(dir);
+
+		char *ext = strrchr(sym ,'.');
+		if (ext && !strcmp(ext+1 ,"m3u"))
+			err_msg = ffplay_m3u(x ,s);
+		else
+		{	x->plist.siz = 1;
+			x->plist.trk[0] = gensym(fname);  }  }
 
 	if ( err_msg || (err_msg = ffplay_load(x ,1)) )
 		post("Error: %s." ,err_msg);
