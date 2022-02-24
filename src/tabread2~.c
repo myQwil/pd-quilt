@@ -15,6 +15,11 @@ typedef struct {
 	int npoints;
 } t_tabread2;
 
+static inline void tabread2_edge(t_tabread2 *x ,t_float edge) {
+	x->edge = edge;
+	x->k = 1. / (1. - edge);
+}
+
 static t_int *tabread2_perform(t_int *w) {
 	t_tabread2 *x = (t_tabread2*)(w[1]);
 	t_sample *in1 = (t_sample*)(w[2]);
@@ -44,13 +49,10 @@ static t_int *tabread2_perform(t_int *w) {
 			*out++ = wp[0].w_float;
 		else
 		{	if (x->edge != edge)
-			{	if (edge < 1)
-					x->k = 1. / (1. - edge);
-				x->edge = edge;  }
+				tabread2_edge(x ,edge);
 			a = wp[0].w_float;
 			b = wp[1].w_float;
-			frac = (frac - edge) * x->k;
-			*out++ = frac * b + (1.-frac) * a;  }  }
+			*out++ = a + (frac - edge) * x->k * (b - a);  }  }
 	return (w+6);
  zero:
 	while (n--) *out++ = 0;
@@ -84,7 +86,8 @@ static void *tabread2_new(t_symbol *s ,t_float edge) {
 	t_tabread2 *x = (t_tabread2*)pd_new(tabread2_class);
 	x->arrayname = s;
 	x->vec = 0;
-	
+
+	tabread2_edge(x ,edge);
 	signalinlet_new(&x->obj ,edge);
 	floatinlet_new(&x->obj ,&x->onset);
 	outlet_new(&x->obj ,gensym("signal"));
@@ -93,12 +96,9 @@ static void *tabread2_new(t_symbol *s ,t_float edge) {
 	return (x);
 }
 
-static void tabread2_free(t_tabread2 *x) {
-}
-
 void tabread2_tilde_setup(void) {
 	tabread2_class = class_new(gensym("tabread2~")
-		,(t_newmethod)tabread2_new ,(t_method)tabread2_free
+		,(t_newmethod)tabread2_new ,0
 		,sizeof(t_tabread2) ,0
 		,A_DEFSYM ,A_DEFFLOAT ,0);
 	CLASS_MAINSIGNALIN(tabread2_class ,t_tabread2 ,f);

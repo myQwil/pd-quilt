@@ -20,7 +20,7 @@
 #X floatatom 340 350 0 0 0 0 - - - 0;
 #X obj 260 420 tabwrite~ \$0view;
 #X floatatom 210 320 0 0 0 0 - - - 0;
-#X floatatom 210 350 0 -10000 100 0 - - - 0;
+#X floatatom 210 350 0 -10000 125 0 - - - 0;
 #X obj 210 380 / 100;
 #X obj 320 150 cupqb 2;
 #X obj 270 240 @pow 2;

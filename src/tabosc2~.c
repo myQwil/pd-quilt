@@ -26,7 +26,7 @@
 #endif
 
 #if !defined(BYTE_ORDER) || !defined(LITTLE_ENDIAN)
-#error No byte order defined
+#include <endian.h>
 #endif
 
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -57,6 +57,11 @@ typedef struct {
 	double phase;
 } t_tabosc2;
 
+static inline void tabosc2_edge(t_tabosc2 *x ,t_float edge) {
+	x->edge = edge;
+	x->k = 1. / (1. - edge);
+}
+
 static t_int *tabosc2_perform(t_int *w) {
 	t_tabosc2 *x = (t_tabosc2*)(w[1]);
 	t_sample *in1 = (t_sample*)(w[2]);
@@ -86,13 +91,10 @@ static t_int *tabosc2_perform(t_int *w) {
 			*out++ = addr[1].w_float;
 		else
 		{	if (x->edge != edge)
-			{	if (edge < 1)
-					x->k = 1. / (1. - edge);
-				x->edge = edge;  }
+				tabosc2_edge(x ,edge);
 			a = addr[1].w_float;
 			b = addr[2].w_float;
-			frac = (frac - edge) * x->k;
-			*out++ = frac * b + (1.-frac) * a;  }  }
+			*out++ = a + (frac - edge) * x->k * (b - a);  }  }
 
 	tf.d = UNITBIT32 * fnpoints;
 	normhipart = tf.i[HIOFFSET];
@@ -147,11 +149,12 @@ static void *tabosc2_new(t_symbol *s ,t_float edge) {
 	x->vec = 0;
 	x->fnpoints = 512.;
 	x->finvnpoints = 1. / x->fnpoints;
+
+	tabosc2_edge(x ,edge);
 	signalinlet_new(&x->obj ,edge);
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("ft1"));
 	outlet_new(&x->obj ,&s_signal);
 	x->f = 0;
-	x->k = 1;
 	return (x);
 }
 
