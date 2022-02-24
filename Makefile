@@ -1,9 +1,9 @@
-# Makefile for xtra
+# Makefile for quilt
 
 # PDLIBDIR = $(HOME)/.local/lib/pd/extra
 PDLIBDIR = .
 
-lib.name = xtra
+lib.name = quilt
 
 class.sources = $(patsubst %, src/%.c, \
 0x40pak 0x40unpak blunt chrd chrono delp ffplay~ fldec flenc fton gme~ gmes~ has is \
@@ -17,7 +17,7 @@ datafiles += $(patsubst %, help/%-help.pd, \
 adsr chrd chrono cupq cupqb delp ffplay~ flenc gme~ gmes~ has is linp linp~ \
 muse pak radix rand rind rpak same slope tabosc2~ tabread2~ tone)
 
-datafiles += help/LICENSE-libgme.txt
+datafiles += help/LICENSE-libgme.txt help/README.md
 
 # Blunt
 blunt.class.sources = $(patsubst %, src/%.c, hotop revop)

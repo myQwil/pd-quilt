@@ -503,7 +503,7 @@ void sym_setup(void) {
 
 void blunt_setup(void) {
 
-	post("Blunt! version 1.6.0");
+	post("Blunt! version 0.6.0");
 
 	t_symbol *s_blunt = gensym("blunt");
 	char alt[5] = "`";
