@@ -120,14 +120,11 @@ static void gmepd_interp(t_gme *x ,t_float f) {
 	if (d < SRC_SINC_BEST_QUALITY || d > SRC_LINEAR)
 		return;
 
-	int play = x->play;
-	x->play = 0;
 	int err;
 	src_delete(x->state);
 	if ((x->state = src_new(d ,NCH ,&err)) == NULL)
 	{	post("Error : src_new() failed : %s." ,src_strerror(err));
-		x->open = 0;  }
-	else x->play = play;
+		x->open = x->play = 0;  }
 }
 
 static inline int domask(int mask ,int voices ,int ac ,t_atom *av) {
@@ -164,16 +161,16 @@ static void gmepd_mask(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
 		outlet_anything(x->o_meta ,s_mask ,1 ,&flt);  }
 }
 
-static gme_err_t gmepd_load(t_gme *x ,int track) {
+static gme_err_t gmepd_load(t_gme *x ,int index) {
 	if (!x->state)
 		return "SRC has not been initialized";
-	track--;
+
 	gme_err_t err_msg;
-	if ( (err_msg = gme_start_track(x->emu ,track)) )
+	if ( (err_msg = gme_start_track(x->emu ,index)) )
 		return err_msg;
 
 	gme_free_info(x->info);
-	if ( (err_msg = gme_track_info(x->emu ,&x->info ,track)) )
+	if ( (err_msg = gme_track_info(x->emu ,&x->info ,index)) )
 		return err_msg;
 
 	gme_set_fade(x->emu ,-1 ,0);
@@ -199,7 +196,7 @@ static void gmepd_open(t_gme *x ,t_symbol *s) {
 		gme_mute_voices    ( x->emu ,x->mask  );
 		gme_set_tempo      ( x->emu ,x->tempo );
 		x->voices = gme_voice_count(x->emu);
-		err_msg = gmepd_load(x ,1);
+		err_msg = gmepd_load(x ,0);
 		x->path = s;  }
 	if (err_msg)
 		post("Error: %s" ,err_msg);
@@ -341,7 +338,7 @@ static void gmepd_float(t_gme *x ,t_float f) {
 	int track = f;
 	gme_err_t err_msg = "";
 	if (track > 0 && track <= gme_track_count(x->emu))
-	{	if ( (err_msg = gmepd_load(x ,track)) )
+	{	if ( (err_msg = gmepd_load(x ,track-1)) )
 			post("Error: %s" ,err_msg);
 		x->open = !err_msg;  }
 	else gmepd_seek(x ,0);

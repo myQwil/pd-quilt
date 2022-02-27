@@ -161,6 +161,18 @@ static void ffplay_speed(t_ffplay *x ,t_float f) {
 	x->data.src_ratio = 1. / f;
 }
 
+static void ffplay_interp(t_ffplay *x ,t_float f) {
+	int d = f;
+	if (d < SRC_SINC_BEST_QUALITY || d > SRC_LINEAR)
+		return;
+
+	int err;
+	src_delete(x->state);
+	if ((x->state = src_new(d ,x->nch ,&err)) == NULL)
+	{	post("Error : src_new() failed : %s." ,src_strerror(err));
+		x->open = x->play = 0;  }
+}
+
 static int m3u_size(FILE *fp ,char *dir ,int dlen) {
 	int size = 0;
 	char line[MAXPDSTRING];
@@ -252,12 +264,12 @@ static inline err_t ffplay_stream(t_ffplay *x ,t_avstream *s ,enum AVMediaType t
 	return 0;
 }
 
-static err_t ffplay_load(t_ffplay *x ,int track) {
+static err_t ffplay_load(t_ffplay *x ,int index) {
 	if (!x->state)
 		return "SRC has not been initialized";
 
 	char url[MAXPDSTRING];
-	const char *trk = x->plist.trk[track-1]->s_name;
+	const char *trk = x->plist.trk[index]->s_name;
 	if (trk[0] == '/') // absolute path
 		strcpy(url ,trk);
 	else
@@ -317,26 +329,11 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 		{	x->plist.siz = 1;
 			x->plist.trk[0] = gensym(fname);  }  }
 
-	if ( err_msg || (err_msg = ffplay_load(x ,1)) )
+	if ( err_msg || (err_msg = ffplay_load(x ,0)) )
 		post("Error: %s." ,err_msg);
 	x->open = !err_msg;
 	t_atom open = { .a_type=A_FLOAT ,.a_w={.w_float = x->open} };
 	outlet_anything(x->o_meta ,s_open ,1 ,&open);
-}
-
-static void ffplay_interp(t_ffplay *x ,t_float f) {
-	int d = f;
-	if (d < SRC_SINC_BEST_QUALITY || d > SRC_LINEAR)
-		return;
-
-	int play = x->play;
-	x->play = 0;
-	int err;
-	src_delete(x->state);
-	if ((x->state = src_new(d ,x->nch ,&err)) == NULL)
-	{	post("Error : src_new() failed : %s." ,src_strerror(err));
-		x->open = 0;  }
-	else x->play = play;
 }
 
 static inline t_atom ffplay_time(t_ffplay *x) {
@@ -458,11 +455,10 @@ static void ffplay_bang(t_ffplay *x) {
 }
 
 static void ffplay_float(t_ffplay *x ,t_float f) {
-	x->play = 0;
 	int track = f;
 	err_t err_msg = "";
 	if (track > 0 && track <= x->plist.siz)
-	{	if ( (err_msg = ffplay_load(x ,track)) )
+	{	if ( (err_msg = ffplay_load(x ,track-1)) )
 			post("Error: %s." ,err_msg);
 		x->open = !err_msg;  }
 	else ffplay_seek(x ,0);
