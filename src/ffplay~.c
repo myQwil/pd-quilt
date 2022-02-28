@@ -179,7 +179,7 @@ static int m3u_size(FILE *fp ,char *dir ,int dlen) {
 	while (fgets(line ,MAXPDSTRING ,fp) != NULL)
 	{	line[strcspn(line ,"\r\n")] = '\0';
 		int isabs = (line[0] == '/');
-		if (dlen * isabs + strlen(line) >= MAXPDSTRING)
+		if ((isabs ? 0 : dlen) + strlen(line) >= MAXPDSTRING)
 			continue;
 		char *ext = strrchr(line ,'.');
 		if (ext && !strcmp(ext+1 ,"m3u"))
@@ -200,7 +200,7 @@ static int playlist_fill(t_playlist *pl ,FILE *fp ,char *dir ,int dlen ,int i) {
 	while (fgets(line ,MAXPDSTRING ,fp) != NULL)
 	{	line[strcspn(line ,"\r\n")] = '\0';
 		int isabs = (line[0] == '/');
-		if (dlen * isabs + strlen(line) >= MAXPDSTRING)
+		if ((isabs ? 0 : dlen) + strlen(line) >= MAXPDSTRING)
 			continue;
 		strcpy(dir+dlen ,line);
 		char *ext = strrchr(line ,'.');

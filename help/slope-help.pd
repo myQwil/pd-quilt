@@ -37,7 +37,7 @@
 #X obj 260 30 cnv 15 72 24 empty empty slope 4 12 0 18 #000000 #fcfcfc
 0;
 #X msg 290 340 log 0;
-#X text 60 290 set all 3 args;
+#X text 60 290 set multiple args;
 #X msg 60 340 . . 134;
 #X text 60 310 non-numbers are skipped;
 #X connect 0 0 4 0;
