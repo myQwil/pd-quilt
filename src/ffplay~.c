@@ -476,7 +476,6 @@ static void *ffplay_new(t_symbol *s ,int ac ,t_atom *av) {
 	t_ffplay *x = (t_ffplay*)pd_new(ffplay_class);
 	x->pkt = av_packet_alloc();
 	x->frm = av_frame_alloc();
-	x->frm->pts = 0;
 	t_atom defarg[2];
 
 	if (!ac)
