@@ -8,7 +8,7 @@ Nuked OPN2 emulator copyright (C) 2017 Alexey Khokholov (Nuke.YKT)
 Shay Green <gblargg@gmail.com>
 */
 
-#include "m_pd.h"
+#include "inlet.h"
 #include <gme.h>
 #include <string.h>
 #include <samplerate.h>
@@ -39,7 +39,8 @@ typedef struct {
 	Music_Emu *emu;
 	gme_info_t *info; /* current track info */
 	t_symbol *path;   /* path to the most recently read file */
-	double   tempo;   /* current tempo */
+	t_float  *speed;  /* rate of playback */
+	t_float  *tempo;  /* rate of emulation */
 	int      mask;    /* muting mask */
 	int      voices;  /* number of voices */
 	unsigned open:1;  /* true when a track has been successfully started */
@@ -60,12 +61,25 @@ static void gmepd_seek(t_gme *x ,t_float f) {
 	gmepd_reset_src(x);
 }
 
+static inline void gmepd_speed(t_gme *x ,t_float f) {
+	*x->speed = f;
+	f = f > frames ? frames : (f < inv_frames ? inv_frames : f);
+	x->data.src_ratio = 1. / f;
+}
+
+static void gmepd_tempo(t_gme *x ,t_float f) {
+	*x->tempo = f;
+	if (x->emu) gme_set_tempo(x->emu ,*x->tempo);
+}
+
 static t_int *gmepd_perform(t_int *w) {
 	t_gme *x = (t_gme*)(w[1]);
+	t_sample *in2 = (t_sample*)(w[2]);
+	t_sample *in3 = (t_sample*)(w[3]);
 	t_sample *outs[NCH];
 	for (int i=NCH; i--;)
-		outs[i] = (t_sample*)(w[i+2]);
-	int n = (int)(w[NCH+2]);
+		outs[i] = (t_sample*)(w[i+4]);
+	int n = (int)(w[NCH+4]);
 
 	if (x->play)
 	{	SRC_DATA *data = &x->data;
@@ -76,10 +90,13 @@ static t_int *gmepd_perform(t_int *w) {
 					*outs[i]++ = data->data_out[i];
 				data->data_out += NCH;
 				data->output_frames_gen--;
+				in2++ ,in3++;
 				continue;
 			}
 			else if (data->input_frames > 0)
 			{	resample:
+				if (*x->speed != *in2)
+					gmepd_speed(x ,*in2);
 				data->data_out = x->out;
 				src_process(x->state ,data);
 				data->input_frames -= data->input_frames_used;
@@ -88,6 +105,8 @@ static t_int *gmepd_perform(t_int *w) {
 			}
 			else
 			{	// receive
+				if (*x->tempo != *in3)
+					gmepd_tempo(x ,*in3);
 				data->data_in = x->in;
 				float *in = x->in;
 				short arr[buf_size] ,*buf = arr;
@@ -102,17 +121,7 @@ static t_int *gmepd_perform(t_int *w) {
 	else while (n--)
 		for (int i = NCH; i--;)
 			*outs[i]++ = 0;
-	return (w+NCH+3);
-}
-
-static void gmepd_speed(t_gme *x ,t_float f) {
-	f = f > frames ? frames : (f < inv_frames ? inv_frames : f);
-	x->data.src_ratio = 1. / f;
-}
-
-static void gmepd_tempo(t_gme *x ,t_float f) {
-	x->tempo = f;
-	if (x->emu) gme_set_tempo(x->emu ,x->tempo);
+	return (w+NCH+5);
 }
 
 static void gmepd_interp(t_gme *x ,t_float f) {
@@ -192,9 +201,9 @@ static void gmepd_open(t_gme *x ,t_symbol *s) {
 		strcpy(p ,".m3u");
 		gme_load_m3u(x->emu ,m3u_path);
 
-		gme_ignore_silence ( x->emu ,1        );
-		gme_mute_voices    ( x->emu ,x->mask  );
-		gme_set_tempo      ( x->emu ,x->tempo );
+		gme_ignore_silence ( x->emu ,1         );
+		gme_mute_voices    ( x->emu ,x->mask   );
+		gme_set_tempo      ( x->emu ,*x->tempo );
 		x->voices = gme_voice_count(x->emu);
 		err_msg = gmepd_load(x ,0);
 		x->path = s;  }
@@ -353,6 +362,11 @@ static void gmepd_stop(t_gme *x) {
 
 static void *gmepd_new(t_class *gmeclass ,t_symbol *s ,int ac ,t_atom *av) {
 	t_gme *x = (t_gme*)pd_new(gmeclass);
+	t_inlet *in2 = signalinlet_new(&x->obj ,1.);
+	t_inlet *in3 = signalinlet_new(&x->obj ,1.);
+	x->speed = &in2->i_un.iu_floatsignalvalue;
+	x->tempo = &in3->i_un.iu_floatsignalvalue;
+
 	int i = NCH;
 	while (i--) outlet_new(&x->obj ,&s_signal);
 	x->o_meta = outlet_new(&x->obj ,0);
@@ -362,11 +376,11 @@ static void *gmepd_new(t_class *gmeclass ,t_symbol *s ,int ac ,t_atom *av) {
 	if ((x->state = src_new(SRC_LINEAR ,NCH ,&err)) == NULL)
 		post("Error : src_new() failed : %s." ,src_strerror(err)) ;
 	x->data.output_frames = FRAMES;
+	x->data.src_ratio = 1.;
 
 	x->mask = x->voices = 0;
 	if (ac) gmepd_solo(x ,NULL ,ac ,av);
 
-	x->tempo = 1.;
 	x->open = x->play = 0;
 	return (x);
 }

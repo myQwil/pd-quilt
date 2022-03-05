@@ -11,7 +11,7 @@ linp linp~ muse ntof pak radix rand rind same slx sly tabosc2~ tabread2~ unpak)
 
 datafiles = $(patsubst %, abstractions/%.pd, \
 ad add~ adsr all~ ct cupq cupqb fkick~ fmore~ fmosc~ \
-gme-mask hms lead0 mant-calc mantissa phi pulse~ zp zp~)
+gauge gme-mask hms lead0 mant-calc mantissa phi pulse~ zp zp~)
 
 datafiles += $(patsubst %, help/%-help.pd, \
 adsr chrd chrono cupq cupqb delp ffplay~ flenc gme~ gmes~ has is linp linp~ \

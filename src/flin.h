@@ -1,15 +1,6 @@
-#include "m_pd.h"
+#include "inlet.h"
 
 static const int max = 0x400;
-
-struct _inlet {
-	t_pd i_pd;
-	struct _inlet *i_next;
-	t_object *i_owner;
-	t_pd *i_dest;
-	t_symbol *i_symfrom;
-	t_float *i_floatslot;
-};
 
 typedef struct {
 	t_float *fp;  /* array pointer */
@@ -41,6 +32,6 @@ static int flin_resize(t_flin *x ,t_object *obj ,int n) {
 		t_float *fp = x->fp;
 		t_inlet *ip = obj->ob_inlet;
 		for (int i = x->siz; i-- && ip; fp++ ,ip = ip->i_next)
-			ip->i_floatslot = fp;  }
+			ip->i_un.iu_floatslot = fp;  }
 	return 0;
 }

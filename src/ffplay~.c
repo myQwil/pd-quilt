@@ -1,4 +1,4 @@
-#include "m_pd.h"
+#include "inlet.h"
 #include <samplerate.h>
 #include <libavformat/avformat.h>
 #include <libswresample/swresample.h>
@@ -45,7 +45,7 @@ typedef struct {
 	t_sample  *outs[MAXCH];
 	t_playlist plist;
 	int64_t  layout;  /* channel layout bit-mask */
-	t_float  speed;   /* playback speed */
+	t_float  *speed;  /* playback speed */
 	double   ratio;   /* resampling ratio */
 	unsigned nch;     /* number of channels */
 	unsigned open:1;  /* true when a file has been successfully opened */
@@ -84,13 +84,21 @@ static void ffplay_position(t_ffplay *x) {
 	outlet_anything(x->o_meta ,s_pos ,1 ,&pos);
 }
 
+static inline void ffplay_speed(t_ffplay *x ,t_float f) {
+	*x->speed = f;
+	f *= x->ratio;
+	f = f > frames ? frames : (f < inv_frames ? inv_frames : f);
+	x->data.src_ratio = 1. / f;
+}
+
 static t_int *ffplay_perform(t_int *w) {
 	t_ffplay *x = (t_ffplay*)(w[1]);
+	t_sample *in2 = (t_sample*)(w[2]);
 	unsigned nch = x->nch;
 	t_sample *outs[nch];
 	for (int i = nch; i--;)
 		outs[i] = x->outs[i];
-	int n = (int)w[2];
+	int n = (int)w[3];
 
 	if (x->play)
 	{	SRC_DATA *data = &x->data;
@@ -101,10 +109,13 @@ static t_int *ffplay_perform(t_int *w) {
 					*outs[i]++ = data->data_out[i];
 				data->data_out += nch;
 				data->output_frames_gen--;
+				in2++;
 				continue;
 			}
 			else if (data->input_frames > 0)
 			{	resample:
+				if (*x->speed != *in2)
+					ffplay_speed(x ,*in2);
 				data->data_out = x->out;
 				src_process(x->state ,data);
 				data->input_frames -= data->input_frames_used;
@@ -145,20 +156,13 @@ static t_int *ffplay_perform(t_int *w) {
 	{	silence:
 		for (int i = nch; i--;)
 			*outs[i]++ = 0;  }
-	return (w+3);
+	return (w+4);
 }
 
 static void ffplay_dsp(t_ffplay *x ,t_signal **sp) {
 	for (int i = x->nch; i--;)
-		x->outs[i] = sp[i]->s_vec;
-	dsp_add(ffplay_perform ,2 ,x ,sp[0]->s_n);
-}
-
-static void ffplay_speed(t_ffplay *x ,t_float f) {
-	x->speed = f;
-	f *= x->ratio;
-	f = f > frames ? frames : (f < inv_frames ? inv_frames : f);
-	x->data.src_ratio = 1. / f;
+		x->outs[i] = sp[i+1]->s_vec;
+	dsp_add(ffplay_perform ,3 ,x ,sp[0]->s_vec ,sp[0]->s_n);
 }
 
 static void ffplay_interp(t_ffplay *x ,t_float f) {
@@ -298,7 +302,7 @@ static err_t ffplay_load(t_ffplay *x ,int index) {
 		return "SWResampler initialization failed";
 
 	x->ratio = (double)x->a.ctx->sample_rate / sys_getsr();
-	ffplay_speed(x ,x->speed);
+	ffplay_speed(x ,*x->speed);
 	ffplay_reset_src(x);
 	x->frm->pts = 0;
 	return 0;
@@ -474,6 +478,8 @@ static void ffplay_stop(t_ffplay *x) {
 
 static void *ffplay_new(t_symbol *s ,int ac ,t_atom *av) {
 	t_ffplay *x = (t_ffplay*)pd_new(ffplay_class);
+	t_inlet *in2 = signalinlet_new(&x->obj ,1.);
+	x->speed = &in2->i_un.iu_floatsignalvalue;
 	x->pkt = av_packet_alloc();
 	x->frm = av_frame_alloc();
 	t_atom defarg[2];
@@ -506,7 +512,6 @@ static void *ffplay_new(t_symbol *s ,int ac ,t_atom *av) {
 	x->plist.max = 1;
 	x->plist.trk = (t_symbol**)getbytes(sizeof(t_symbol*));
 
-	x->speed = 1.;
 	x->open = x->play = 0;
 	return (x);
 }

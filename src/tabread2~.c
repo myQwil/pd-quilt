@@ -1,4 +1,4 @@
-#include "m_pd.h"
+#include "inlet.h"
 
 /******************** tabread2~ ***********************/
 
@@ -10,13 +10,13 @@ typedef struct {
 	t_word *vec;
 	t_float f;
 	t_float onset;
-	t_float edge;
+	t_float *edge;
 	t_float k;
 	int npoints;
 } t_tabread2;
 
 static inline void tabread2_edge(t_tabread2 *x ,t_float edge) {
-	x->edge = edge;
+	*x->edge = edge;
 	x->k = 1. / (1. - edge);
 }
 
@@ -35,8 +35,8 @@ static t_int *tabread2_perform(t_int *w) {
 
 	if (!buf) goto zero;
 
-	for (t_sample frac ,edge ,a ,b; n--;)
-	{	double findex = *in1++ + onset;
+	for (t_sample frac ,edge ,a ,b; n--; in1++ ,in2++)
+	{	double findex = *in1 + onset;
 		int index = findex;
 		if (index < 1)
 			index = 1 ,frac = 0;
@@ -44,11 +44,11 @@ static t_int *tabread2_perform(t_int *w) {
 			index = maxindex ,frac = 1;
 		else frac = findex - index;
 		wp = buf + index;
-		edge = *in2++;
+		edge = *in2;
 		if (frac <= edge)
 			*out++ = wp[0].w_float;
 		else
-		{	if (x->edge != edge)
+		{	if (*x->edge != edge)
 				tabread2_edge(x ,edge);
 			a = wp[0].w_float;
 			b = wp[1].w_float;
@@ -87,8 +87,10 @@ static void *tabread2_new(t_symbol *s ,t_float edge) {
 	x->arrayname = s;
 	x->vec = 0;
 
+	t_inlet *in2 = signalinlet_new(&x->obj ,edge);
+	x->edge = &in2->i_un.iu_floatsignalvalue;
 	tabread2_edge(x ,edge);
-	signalinlet_new(&x->obj ,edge);
+
 	floatinlet_new(&x->obj ,&x->onset);
 	outlet_new(&x->obj ,gensym("signal"));
 	x->f = 0;
@@ -102,6 +104,7 @@ void tabread2_tilde_setup(void) {
 		,sizeof(t_tabread2) ,0
 		,A_DEFSYM ,A_DEFFLOAT ,0);
 	CLASS_MAINSIGNALIN(tabread2_class ,t_tabread2 ,f);
-	class_addmethod(tabread2_class ,(t_method)tabread2_dsp ,gensym("dsp") ,A_CANT   ,0);
-	class_addmethod(tabread2_class ,(t_method)tabread2_set ,gensym("set") ,A_SYMBOL ,0);
+	class_addmethod(tabread2_class ,(t_method)tabread2_dsp  ,gensym("dsp")  ,A_CANT   ,0);
+	class_addmethod(tabread2_class ,(t_method)tabread2_set  ,gensym("set")  ,A_SYMBOL ,0);
+	class_addmethod(tabread2_class ,(t_method)tabread2_edge ,gensym("edge") ,A_FLOAT  ,0);
 }

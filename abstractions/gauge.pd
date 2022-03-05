@@ -1,0 +1,20 @@
+#N canvas 400 200 450 300 14;
+#X obj 190 40 loadbang;
+#X obj 210 130 sel;
+#X obj 210 100 \$1;
+#X obj 190 70 t;
+#X obj 190 160 metro 50;
+#X obj 170 200 snapshot~;
+#X obj 170 230 outlet;
+#X obj 120 160 inlet~;
+#X obj 60 70 cnv 15 72 24 empty empty gauge 4 12 0 18 #000000 #fcfcfc
+0;
+#X text 40 100 signal checker;
+#X connect 0 0 3 0;
+#X connect 1 1 4 1;
+#X connect 2 0 1 0;
+#X connect 3 0 4 0;
+#X connect 3 1 2 0;
+#X connect 4 0 5 0;
+#X connect 5 0 6 0;
+#X connect 7 0 5 0;
