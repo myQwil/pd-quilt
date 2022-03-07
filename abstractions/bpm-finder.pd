@@ -1,0 +1,22 @@
+#N canvas 400 200 370 300 14;
+#X declare -lib blunt;
+#X floatatom 120 50 0 0 0 0 - - - 0;
+#X obj 120 110 @/ 60000;
+#X obj 120 140 tick;
+#X obj 200 110 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#fcfcfc #fcfcfc;
+#X obj 120 210 dac~;
+#X obj 200 210 @/ 60000;
+#X floatatom 200 240 0 0 0 0 - - - 0;
+#N canvas 400 200 450 300 lib 0;
+#X obj 140 120 declare -lib blunt;
+#X restore 30 30 pd lib;
+#X obj 120 80 @moses;
+#X connect 0 0 8 0;
+#X connect 1 0 2 0;
+#X connect 2 0 4 0;
+#X connect 2 0 4 1;
+#X connect 2 1 5 0;
+#X connect 3 0 2 1;
+#X connect 5 0 6 0;
+#X connect 8 0 1 0;

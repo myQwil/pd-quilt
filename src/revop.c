@@ -114,6 +114,37 @@ static void *rdivm_new(t_symbol *s ,int ac ,t_atom *av) {
 	return (bop_new(rdivm_class ,s ,ac ,av));
 }
 
+
+/* ------------------- reverse moses ----------------------------- */
+static t_class *rmoses_class;
+
+typedef struct {
+	t_object obj;
+	t_outlet *out2;
+	t_float y;
+} t_rmoses;
+
+static void *rmoses_new(t_float f) {
+	t_rmoses *x = (t_rmoses*)pd_new(rmoses_class);
+	floatinlet_new(&x->obj ,&x->y);
+	outlet_new(&x->obj ,&s_float);
+	x->out2 = outlet_new(&x->obj ,&s_float);
+	x->y = f;
+	return (x);
+}
+
+static void rmoses_float(t_rmoses *x ,t_float f) {
+	if (f > x->y) outlet_float(x->obj.ob_outlet ,f);
+	else outlet_float(x->out2 ,f);
+}
+
+static void rmoses_setup(void) {
+	rmoses_class = class_new(gensym("@moses") ,(t_newmethod)rmoses_new ,0
+		,sizeof(t_rmoses) ,0 ,A_DEFFLOAT ,0);
+	class_addfloat(rmoses_class ,rmoses_float);
+	class_sethelpsymbol(rmoses_class ,gensym("revbinops"));
+}
+
 void revop_setup(void) {
 	const struct _obj
 	{	t_class **class;
@@ -148,4 +179,6 @@ void revop_setup(void) {
 		class_addmethod(class ,(t_method)blunt_loadbang
 			,gensym("loadbang") ,A_DEFFLOAT ,0);
 		class_sethelpsymbol(class ,s_rev);  }
+
+	rmoses_setup();
 }
