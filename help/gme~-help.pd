@@ -186,9 +186,8 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X obj 50 90 moses 2;
 #X obj 100 180 s \$0nbx;
 #X obj 120 120 r \$0start;
-#X obj 50 180 t b a;
+#X obj 50 180 t b f;
 #X obj 50 210 s \$0reset;
-#X msg 120 150 symbol bang;
 #X msg 50 240 \$1 \, print \$1 - %song% [ %ftime% ] \, fade \, time
 ;
 #X obj 40 270 s \$0gme;
@@ -196,17 +195,16 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X connect 0 0 3 0;
 #X connect 1 0 4 1;
 #X connect 2 0 1 0;
-#X connect 3 0 11 0;
+#X connect 3 0 10 0;
 #X connect 3 1 4 0;
 #X connect 4 0 5 0;
 #X connect 4 0 7 0;
-#X connect 4 1 12 0;
+#X connect 4 1 11 0;
 #X connect 6 0 5 0;
-#X connect 6 0 9 0;
+#X connect 6 0 7 0;
 #X connect 7 0 8 0;
-#X connect 7 1 10 0;
-#X connect 9 0 7 0;
-#X connect 10 0 11 0;
+#X connect 7 1 9 0;
+#X connect 9 0 10 0;
 #X restore 60 440 pd bounds;
 #N canvas 800 530 450 280 route 0;
 #X obj 70 30 inlet;

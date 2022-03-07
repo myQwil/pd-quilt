@@ -19,32 +19,35 @@ typedef struct {
 	t_outlet *o_on;
 } t_linp;
 
-static t_int *linp_tilde_perform(t_int *w) {
-	t_linp *x = (t_linp*)(w[1]);
-	t_sample *out = (t_sample*)(w[2]);
-	int n = (int)(w[3]);
-	t_sample f = x->value ,g;
-
-	if (PD_BIGORSMALL(f))
-		x->value = f = 0;
-	if (x->retarget)
-	{	int nticks = x->inletwas * x->dspticktomsec;
-		if (!nticks) nticks = 1;
-		x->ticksleft = nticks;
-		x->biginc = (x->target - x->value)/(t_float)nticks;
-		x->inc = x->coefn * x->biginc;
-		x->retarget = 0;  }
-	if (x->ticksleft && !x->pause)
-	{	g = x->value;
-		while (n--)
-			*out++ = g ,g += x->inc;
-		x->value += x->biginc;
-		x->ticksleft--;  }
-	else
-	{	if (!x->pause)
-		{	x->value = x->target;
-			outlet_float(x->o_on ,0);  }
+#define PERF_MAIN \
+	t_linp *x = (t_linp*)(w[1]); \
+	t_sample *out = (t_sample*)(w[2]); \
+	int n = (int)(w[3]); \
+	t_sample f = x->value ,g; \
+\
+	if (PD_BIGORSMALL(f)) \
+		x->value = f = 0; \
+	if (x->retarget) \
+	{	int nticks = x->inletwas * x->dspticktomsec; \
+		if (!nticks) nticks = 1; \
+		x->ticksleft = nticks; \
+		x->biginc = (x->target - x->value)/(t_sample)nticks; \
+		x->inc = x->coefn * x->biginc; \
+		x->retarget = 0;  } \
+	if (x->ticksleft && !x->pause) \
+	{	g = x->value; \
+		while (n--) \
+			*out++ = g ,g += x->inc; \
+		x->value += x->biginc; \
+		x->ticksleft--;  } \
+	else \
+	{	if (!x->pause) \
+		{	x->value = x->target; \
+			outlet_float(x->o_on ,0);  } \
 		g = x->value;
+
+static t_int *linp_tilde_perform(t_int *w) {
+	PERF_MAIN
 		while (n--)
 			*out++ = g;  }
 	return (w+4);
@@ -52,31 +55,7 @@ static t_int *linp_tilde_perform(t_int *w) {
 
 /* TB: vectorized version */
 static t_int *linp_tilde_perf8(t_int *w) {
-	t_linp *x = (t_linp*)(w[1]);
-	t_sample *out = (t_sample*)(w[2]);
-	int n = (int)(w[3]);
-	t_sample f = x->value ,g;
-
-	if (PD_BIGORSMALL(f))
-		x->value = f = 0;
-	if (x->retarget)
-	{	int nticks = x->inletwas * x->dspticktomsec;
-		if (!nticks) nticks = 1;
-		x->ticksleft = nticks;
-		x->biginc = (x->target - x->value)/(t_sample)nticks;
-		x->inc = x->coefn * x->biginc;
-		x->retarget = 0;  }
-	if (x->ticksleft && !x->pause)
-	{	g = x->value;
-		while (n--)
-			*out++ = g ,g += x->inc;
-		x->value += x->biginc;
-		x->ticksleft--;  }
-	else
-	{	if (!x->pause)
-		{	x->value = x->target;
-			outlet_float(x->o_on ,0);  }
-		g = x->value;
+	PERF_MAIN
 		for (; n; n -= 8 ,out += 8)
 		{	out[0] = out[1] = out[2] = out[3] =
 			out[4] = out[5] = out[6] = out[7] = g;  }  }
