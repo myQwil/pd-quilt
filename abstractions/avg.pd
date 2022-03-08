@@ -1,14 +1,14 @@
-#N canvas 400 200 380 300 14;
+#N canvas 400 200 380 310 14;
 #X obj 100 100 inlet;
 #X obj 100 130 t f b;
-#X obj 180 170 1;
-#X obj 220 170 + 1;
-#X obj 100 170 +;
-#X obj 140 170 f;
-#X obj 150 210 /;
-#X obj 150 240 outlet;
-#X obj 180 100 inlet reset;
-#X msg 180 130 0;
+#X obj 190 180 1;
+#X obj 230 180 + 1;
+#X obj 100 180 +;
+#X obj 140 180 f;
+#X obj 160 220 /;
+#X obj 160 250 outlet;
+#X obj 190 100 inlet reset;
+#X msg 190 130 0;
 #X obj 150 30 cnv 15 48 24 empty empty avg 4 12 0 18 #000000 #fcfcfc
 0;
 #X text 60 60 average of all received values;
@@ -19,10 +19,9 @@
 #X connect 2 0 6 1;
 #X connect 3 0 2 1;
 #X connect 4 0 5 0;
+#X connect 4 0 6 0;
 #X connect 5 0 4 1;
-#X connect 5 0 6 0;
 #X connect 6 0 7 0;
 #X connect 8 0 9 0;
-#X connect 9 0 2 0;
-#X connect 9 0 5 1;
 #X connect 9 0 4 1;
+#X connect 9 0 3 0;

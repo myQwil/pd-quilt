@@ -3,7 +3,7 @@
 #X floatatom 120 50 0 0 0 0 - - - 0;
 #X obj 120 110 @/ 60000;
 #X obj 120 140 tick;
-#X obj 200 110 bng 15 250 50 0 empty empty empty 17 7 0 10 #000000
+#X obj 200 110 bng 15 250 50 0 empty empty reset\\\ avg 17 7 0 12 #000000
 #fcfcfc #fcfcfc;
 #X obj 120 210 dac~;
 #X obj 200 210 @/ 60000;

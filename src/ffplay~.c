@@ -319,12 +319,15 @@ static t_atom ffplay_meta(void *y ,t_symbol *s) {
 	else if (s == dict[8]) SETFLOAT (&meta ,x->ic->bit_rate / 1000.);
 	else
 	{	AVDictionaryEntry *entry = av_dict_get(x->ic->metadata ,s->s_name ,0 ,0);
-		if (!entry && !strcmp(s->s_name ,"date") // try a few other 'date' aliases
-			&& !(entry = av_dict_get(x->ic->metadata ,"time" ,0 ,0))
-			&& !(entry = av_dict_get(x->ic->metadata ,"tyer" ,0 ,0))
-			&& !(entry = av_dict_get(x->ic->metadata ,"tdat" ,0 ,0))
-			&& !(entry = av_dict_get(x->ic->metadata ,"tdrc" ,0 ,0))
-		);
+		if (!entry) // try some aliases for common terms
+		{	if (!strcmp(s->s_name ,"date"))
+			{	if (!(entry = av_dict_get(x->ic->metadata ,"time" ,0 ,0))
+				 && !(entry = av_dict_get(x->ic->metadata ,"tyer" ,0 ,0))
+				 && !(entry = av_dict_get(x->ic->metadata ,"tdat" ,0 ,0))
+				 && !(entry = av_dict_get(x->ic->metadata ,"tdrc" ,0 ,0)));  }
+			else if (!strcmp(s->s_name ,"bpm"))
+				entry = av_dict_get(x->ic->metadata ,"tbpm" ,0 ,0);  }
+
 		if (entry) SETSYMBOL(&meta ,gensym(entry->value));
 		else meta = (t_atom){ A_NULL };  }
 
