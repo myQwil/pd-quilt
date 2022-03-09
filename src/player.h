@@ -100,7 +100,6 @@ static void player_send(t_player *x ,t_symbol *s) {
 	t_atom meta = fn_meta(x ,s);
 	if (meta.a_type)
 		outlet_anything(x->o_meta ,s ,1 ,&meta);
-	else post("no metadata for '%s'" ,s->s_name);
 }
 
 static void player_anything(t_player *x ,t_symbol *s ,int ac ,t_atom *av) {

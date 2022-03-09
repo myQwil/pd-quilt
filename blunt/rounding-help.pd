@@ -17,6 +17,8 @@
 #N canvas 400 200 450 300 lib 0;
 #X obj 140 120 declare -lib blunt;
 #X restore 30 30 pd lib;
+#X msg 260 70 1;
+#X msg 220 70 -1;
 #X connect 0 0 8 0;
 #X connect 1 0 2 0;
 #X connect 5 0 4 0;
@@ -25,3 +27,5 @@
 #X connect 9 0 7 0;
 #X connect 9 0 5 0;
 #X connect 9 0 1 0;
+#X connect 14 0 8 0;
+#X connect 15 0 8 0;

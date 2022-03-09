@@ -72,26 +72,27 @@ static inline t_float blunt_divm(t_float f1 ,t_float f2) {
 }
 
 /* -------------------------- blunt base -------------------------- */
+static t_symbol *s_load;
+static t_symbol *s_init;
+static t_symbol *s_close;
+
 typedef struct {
 	t_object obj;
 	int loadbang;
 } t_blunt;
 
 static void blunt_loadbang(t_blunt *x ,t_float action) {
-	if (x->loadbang && !action) pd_bang((t_pd*)x);
+	if (x->loadbang == action) pd_bang((t_pd*)x);
 }
 
-static inline void blunt_init(t_blunt *x ,t_float *f ,int ac ,t_atom *av) {
-	*f = x->loadbang = 0;
-	if (ac)
-	{	if (av->a_type == A_FLOAT)
-			*f = av->a_w.w_float;
-		else if (av->a_type == A_SYMBOL)
-		{	const char *c = av->a_w.w_symbol->s_name;
-			if (c[strlen(c)-1] == '!')
-			{	*f = strtof(c ,NULL);
-				x->loadbang = 1;  }  }  }
-	outlet_new(&x->obj ,&s_float);
+static void blunt_init(t_blunt *x ,int *ac ,t_atom *av) {
+	x->loadbang = -1;
+	if (*ac && av[*ac-1].a_type == A_SYMBOL)
+	{	t_symbol *lb = av[*ac-1].a_w.w_symbol;
+		if      (lb == s_load)  x->loadbang = 0;
+		else if (lb == s_init)  x->loadbang = 1;
+		else if (lb == s_close) x->loadbang = 2;
+		if (x->loadbang >= 0) *ac--;  }
 }
 
 /* -------------------------- blunt binops -------------------------- */
@@ -129,12 +130,17 @@ static void bop_set(t_bop *x ,t_symbol *s ,int ac ,t_atom *av) {
 		x->f2 = av->a_w.w_float;
 }
 
-static inline void bop_init(t_bop *x ,int ac ,t_atom *av) {
+static void bop_init(t_bop *x ,int ac ,t_atom *av) {
+	blunt_init(&x->bl ,&ac ,av);
+
+	// set the 1st float, but only if there are 2 args
 	if (ac>1 && av->a_type == A_FLOAT)
 	{	x->f1 = av->a_w.w_float;
 		av++;  }
 	else x->f1 = 0;
-	blunt_init(&x->bl ,&x->f2 ,ac ,av);
+	x->f2 = atom_getfloatarg(0 ,ac ,av);
+
+	outlet_new(&x->bl.obj ,&s_float);
 }
 
 static t_bop *bop_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {

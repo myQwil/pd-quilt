@@ -1,18 +1,25 @@
-#N canvas 400 200 370 300 14;
+#N canvas 400 200 370 330 14;
 #X declare -lib blunt;
-#X floatatom 120 50 0 0 0 0 - - - 0;
-#X obj 120 110 @/ 60000;
-#X obj 120 140 tick;
-#X obj 200 110 bng 15 250 50 0 empty empty reset\\\ avg 17 7 0 12 #000000
+#X floatatom 120 30 0 0 0 0 - - - 0;
+#X obj 120 150 @/ 60000;
+#X obj 120 180 tick;
+#X obj 200 150 bng 15 250 50 0 empty empty reset\\\ avg 17 7 0 12 #000000
 #fcfcfc #fcfcfc;
-#X obj 120 210 dac~;
-#X obj 200 210 @/ 60000;
-#X floatatom 200 240 0 0 0 0 - - - 0;
+#X obj 120 250 dac~;
+#X obj 200 250 @/ 60000;
+#X floatatom 200 280 0 0 0 0 - - - 0;
 #N canvas 400 200 450 300 lib 0;
 #X obj 140 120 declare -lib blunt;
-#X restore 30 30 pd lib;
-#X obj 120 80 @moses;
-#X connect 0 0 8 0;
+#X restore 60 280 pd lib;
+#X obj 120 120 @moses;
+#X obj 200 60 @pow 2;
+#X obj 200 30 r pow;
+#X floatatom 120 90 0 0 0 0 - - - 0;
+#X obj 60 30 r bpm;
+#X obj 60 60 symbol;
+#X obj 60 90 f;
+#X obj 120 60 #* 1;
+#X connect 0 0 15 0;
 #X connect 1 0 2 0;
 #X connect 2 0 4 0;
 #X connect 2 0 4 1;
@@ -20,3 +27,10 @@
 #X connect 3 0 2 1;
 #X connect 5 0 6 0;
 #X connect 8 0 1 0;
+#X connect 9 0 15 1;
+#X connect 10 0 9 0;
+#X connect 11 0 8 0;
+#X connect 12 0 13 0;
+#X connect 13 0 14 0;
+#X connect 14 0 0 0;
+#X connect 15 0 11 0;

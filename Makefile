@@ -19,8 +19,6 @@ muse pak radix rand rind rpak same slope tabosc2~ tabread2~ tone)
 
 datafiles += help/LICENSE-libgme.txt help/README.md
 
-# Blunt
-blunt.class.sources = $(patsubst %, src/%.c, hotop revop)
 datadirs = blunt
 
 # Game Music Emu
