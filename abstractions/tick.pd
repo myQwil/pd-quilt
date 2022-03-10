@@ -34,6 +34,7 @@
 #X obj 230 300 outlet;
 #X obj 210 240 f;
 #X obj 230 270 avg;
+#X obj 60 130 inlet;
 #X connect 0 0 10 0;
 #X connect 1 0 18 1;
 #X connect 2 0 15 0;
@@ -51,4 +52,5 @@
 #X connect 15 0 10 0;
 #X connect 17 0 18 0;
 #X connect 18 0 16 0;
+#X connect 19 0 14 0;
 #X coords 0 -1 1 1 80 60 2 135 165;

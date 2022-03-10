@@ -299,7 +299,7 @@ static void ffplay_open(t_ffplay *x ,t_symbol *s) {
 	outlet_anything(x->z.o_meta ,s_open ,1 ,&open);
 }
 
-static t_symbol *dict[9];
+static t_symbol *dict[11];
 
 static t_atom ffplay_meta(void *y ,t_symbol *s) {
 	t_ffplay *x = (t_ffplay*)y;
@@ -320,12 +320,12 @@ static t_atom ffplay_meta(void *y ,t_symbol *s) {
 	else
 	{	AVDictionaryEntry *entry = av_dict_get(x->ic->metadata ,s->s_name ,0 ,0);
 		if (!entry) // try some aliases for common terms
-		{	if (!strcmp(s->s_name ,"date"))
+		{	if      (s == dict[9])
 			{	if (!(entry = av_dict_get(x->ic->metadata ,"time" ,0 ,0))
 				 && !(entry = av_dict_get(x->ic->metadata ,"tyer" ,0 ,0))
 				 && !(entry = av_dict_get(x->ic->metadata ,"tdat" ,0 ,0))
 				 && !(entry = av_dict_get(x->ic->metadata ,"tdrc" ,0 ,0)));  }
-			else if (!strcmp(s->s_name ,"bpm"))
+			else if (s == dict[10])
 				entry = av_dict_get(x->ic->metadata ,"tbpm" ,0 ,0);  }
 
 		if (entry) SETSYMBOL(&meta ,gensym(entry->value));
@@ -405,15 +405,17 @@ static void ffplay_free(t_ffplay *x) {
 }
 
 void ffplay_tilde_setup(void) {
-	dict[0] = gensym("path");
-	dict[1] = gensym("url");
-	dict[2] = gensym("filename");
-	dict[3] = gensym("time");
-	dict[4] = gensym("ftime");
-	dict[5] = gensym("tracks");
-	dict[6] = gensym("samplefmt");
-	dict[7] = gensym("samplerate");
-	dict[8] = gensym("bitrate");
+	dict[0]  = gensym("path");
+	dict[1]  = gensym("url");
+	dict[2]  = gensym("filename");
+	dict[3]  = gensym("time");
+	dict[4]  = gensym("ftime");
+	dict[5]  = gensym("tracks");
+	dict[6]  = gensym("samplefmt");
+	dict[7]  = gensym("samplerate");
+	dict[8]  = gensym("bitrate");
+	dict[9]  = gensym("date");
+	dict[10] = gensym("bpm");
 
 	s_done  = gensym("done");
 	s_pos   = gensym("pos");
