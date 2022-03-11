@@ -359,6 +359,17 @@ static void *b3_rs_new(t_symbol *s ,int ac ,t_atom *av) {
 	return (bop_new(b3_rs_class ,s ,ac ,av));
 }
 
+/* --------------------- f% --------------------------------------- */
+static t_class *b3_fpc_class;
+
+static void b3_fpc_bang(t_bop *x) {
+	outlet_float(x->bl.obj.ob_outlet ,blunt_fpc(x->f1 ,x->f2));
+}
+
+static void *b3_fpc_new(t_symbol *s ,int ac ,t_atom *av) {
+	return (bop_new(b3_fpc_class ,s ,ac ,av));
+}
+
 /* --------------------- % --------------------------------------- */
 static t_class *b3_pc_class;
 
@@ -401,17 +412,6 @@ static void b3_xor_bang(t_bop *x) {
 
 static void *b3_xor_new(t_symbol *s ,int ac ,t_atom *av) {
 	return (bop_new(b3_xor_class ,s ,ac ,av));
-}
-
-/* --------------------- f% --------------------------------------- */
-static t_class *b3_fpc_class;
-
-static void b3_fpc_bang(t_bop *x) {
-	outlet_float(x->bl.obj.ob_outlet ,blunt_fpc(x->f1 ,x->f2));
-}
-
-static void *b3_fpc_new(t_symbol *s ,int ac ,t_atom *av) {
-	return (bop_new(b3_fpc_class ,s ,ac ,av));
 }
 
 
@@ -691,7 +691,7 @@ char *stpcpy(char *dest ,const char *src) {
 #endif
 
 /* --------------------------------------------------------------- */
-/*                       hot arithmetics                           */
+/*                       hot-inlet arithmetics                     */
 /* --------------------------------------------------------------- */
 
 typedef struct {

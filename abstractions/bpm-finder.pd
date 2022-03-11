@@ -34,7 +34,7 @@
 #X obj 50 200 timer;
 #X obj 50 170 b;
 #X floatatom 50 260 0 0 0 0 - - - 0;
-#X obj 50 230 f%;
+#X obj 50 230 #f%;
 #X connect 0 0 12 0;
 #X connect 1 0 2 1;
 #X connect 1 0 22 1;

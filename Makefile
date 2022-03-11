@@ -10,7 +10,7 @@ class.sources = $(patsubst %, src/%.c, \
 linp linp~ muse ntof pak radix rand rind same slx sly tabosc2~ tabread2~ unpak)
 
 datafiles = $(patsubst %, abstractions/%.pd, \
-ad add~ adsr all~ avg ct cupq cupqb fkick~ fmore~ fmosc~ gauge \
+ad add~ adsr all~ avg bpm-finder ct cupq cupqb fkick~ fmore~ fmosc~ gauge \
 gme-mask hms lead0 mant-calc mantissa phi pulse~ tick zp zp~)
 
 datafiles += $(patsubst %, help/%-help.pd, \
