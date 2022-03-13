@@ -78,23 +78,30 @@ static t_symbol *s_load;
 static t_symbol *s_init;
 static t_symbol *s_close;
 
+typedef enum {
+	 LB_NONE  = -1
+	,LB_LOAD  = 0   // "loadbang" actions - 0 for original meaning
+	,LB_INIT  = 1   // loaded but not yet connected to parent patch
+	,LB_CLOSE = 2   // about to close
+} t_lbtype;
+
 typedef struct {
 	t_object obj;
-	int loadbang;
+	t_lbtype action;
 } t_blunt;
 
 static void blunt_loadbang(t_blunt *x ,t_float action) {
-	if (x->loadbang == action) pd_bang((t_pd*)x);
+	if (x->action == action) pd_bang((t_pd*)x);
 }
 
 static void blunt_init(t_blunt *x ,int *ac ,t_atom *av) {
-	x->loadbang = -1;
+	x->action = LB_NONE;
 	if (*ac && av[*ac-1].a_type == A_SYMBOL)
 	{	t_symbol *lb = av[*ac-1].a_w.w_symbol;
-		if      (lb == s_load)  x->loadbang = 0;
-		else if (lb == s_init)  x->loadbang = 1;
-		else if (lb == s_close) x->loadbang = 2;
-		if (x->loadbang >= 0) *ac--;  }
+		if      (lb == s_load)  x->action = LB_LOAD;
+		else if (lb == s_init)  x->action = LB_INIT;
+		else if (lb == s_close) x->action = LB_CLOSE;
+		*ac -= (x->action != LB_NONE);  }
 }
 
 /* -------------------------- blunt binops -------------------------- */

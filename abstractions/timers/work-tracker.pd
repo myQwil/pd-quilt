@@ -154,7 +154,6 @@
 #X connect 9 2 8 0;
 #X connect 11 0 1 0;
 #X restore 290 280 pd kde-notify;
-#X obj 280 370 hms;
 #X connect 0 0 31 0;
 #X connect 1 0 3 0;
 #X connect 2 0 7 1;
