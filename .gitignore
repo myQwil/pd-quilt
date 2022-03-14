@@ -23,4 +23,4 @@ hours.txt
 .vscode
 
 # Installation files and folders
-quilt*
+/quilt*
