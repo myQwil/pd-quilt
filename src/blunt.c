@@ -683,7 +683,7 @@ void revop_setup(void) {
 }
 
 
-#ifdef MSW // MSYS2 cannot find this function in <string.h>
+#ifdef _WIN32 // MSYS2 cannot find this function in <string.h>
 char *stpcpy(char *dest ,const char *src) {
 	size_t len = strlen(src);
 	return memcpy(dest ,src ,len + 1) + len;
