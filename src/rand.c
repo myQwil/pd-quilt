@@ -72,7 +72,7 @@ static void rand_bang(t_rand *x) {
 	     d = mod(next * (range-1) + (prev+1) ,range ? range : 1);
 	else d = next * range;
 
-	int i = d;
+	unsigned i = d;
 	x->reps = (i == prev ? reps+1 : 1);
 	x->prev = i;
 

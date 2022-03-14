@@ -116,7 +116,7 @@ static void radix_draw_update(t_gobj *client ,t_glist *glist) {
 	if (x->x_gui.x_change)
 	{	if (x->x_buf[0])
 		{	char *cp = x->x_buf;
-			int sl = strlen(x->x_buf);
+			unsigned sl = strlen(x->x_buf);
 			x->x_buf[sl] = '>';
 			x->x_buf[sl+1] = 0;
 			if (sl >= x->x_numwidth)

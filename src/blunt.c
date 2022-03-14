@@ -112,7 +112,7 @@ static void *bnot_new() {
 static t_class *floor_class;
 
 static void floor_float(t_object *x ,t_float f) {
-	outlet_float(x->ob_outlet ,floor(f));
+	outlet_float(x->ob_outlet ,FLOOR(f));
 }
 
 static void *floor_new() {
@@ -123,7 +123,7 @@ static void *floor_new() {
 static t_class *ceil_class;
 
 static void ceil_float(t_object *x ,t_float f) {
-	outlet_float(x->ob_outlet ,ceil(f));
+	outlet_float(x->ob_outlet ,CEIL(f));
 }
 
 static void *ceil_new() {
@@ -661,7 +661,7 @@ void revop_setup(void) {
 		,{ &rpc_class    ,"@%"   ,(t_newmethod)rpc_new    ,rpc_bang    }
 		,{ &rmod_class   ,"@mod" ,(t_newmethod)rmod_new   ,rmod_bang   }
 		,{ &rdivm_class  ,"@div" ,(t_newmethod)rdiv_new   ,rdiv_bang   }
-		,{ NULL }  } ,*obj = objs;
+		,{ NULL ,NULL ,NULL ,NULL }  } ,*obj = objs;
 
 	t_symbol *s_rev = gensym("revbinops");
 	for (; obj->class; obj++)
@@ -1074,14 +1074,14 @@ void hotop_setup(void) {
 		,{ &hpow_class   ,&hpow_proxy   ,"#pow" ,(t_newmethod)hpow_new   ,hpow_bang   }
 		,{ &hmax_class   ,&hmax_proxy   ,"#max" ,(t_newmethod)hmax_new   ,hmax_bang   }
 		,{ &hmin_class   ,&hmin_proxy   ,"#min" ,(t_newmethod)hmin_new   ,hmin_bang   }
-		,{ NULL }
+		,{ NULL ,NULL ,NULL ,NULL ,NULL }
 		,{ &hee_class    ,&hee_proxy    ,"#=="  ,(t_newmethod)hee_new    ,hee_bang    }
 		,{ &hne_class    ,&hne_proxy    ,"#!="  ,(t_newmethod)hne_new    ,hne_bang    }
 		,{ &hgt_class    ,&hgt_proxy    ,"#>"   ,(t_newmethod)hgt_new    ,hgt_bang    }
 		,{ &hlt_class    ,&hlt_proxy    ,"#<"   ,(t_newmethod)hlt_new    ,hlt_bang    }
 		,{ &hge_class    ,&hge_proxy    ,"#>="  ,(t_newmethod)hge_new    ,hge_bang    }
 		,{ &hle_class    ,&hle_proxy    ,"#<="  ,(t_newmethod)hle_new    ,hle_bang    }
-		,{ NULL }
+		,{ NULL ,NULL ,NULL ,NULL ,NULL }
 		,{ &hba_class    ,&hba_proxy    ,"#&"   ,(t_newmethod)hba_new    ,hba_bang    }
 		,{ &hla_class    ,&hla_proxy    ,"#&&"  ,(t_newmethod)hla_new    ,hla_bang    }
 		,{ &hbo_class    ,&hbo_proxy    ,"#|"   ,(t_newmethod)hbo_new    ,hbo_bang    }
@@ -1092,9 +1092,9 @@ void hotop_setup(void) {
 		,{ &hpc_class    ,&hpc_proxy    ,"#%"   ,(t_newmethod)hpc_new    ,hpc_bang    }
 		,{ &hmod_class   ,&hmod_proxy   ,"#mod" ,(t_newmethod)hmod_new   ,hmod_bang   }
 		,{ &hdivm_class  ,&hdivm_proxy  ,"#div" ,(t_newmethod)hdivm_new  ,hdivm_bang  }
-		,{ NULL }
+		,{ NULL ,NULL ,NULL ,NULL ,NULL }
 		,{ &hxor_class   ,&hxor_proxy   ,"#^"   ,(t_newmethod)hxor_new   ,hxor_bang   }
-		,{ NULL }  } ,*obj = objs;
+		,{ NULL ,NULL ,NULL ,NULL ,NULL }  } ,*obj = objs;
 
 	t_symbol *syms[] =
 	{	 gensym("hotbinops1") ,gensym("hotbinops2") ,gensym("hotbinops3")
@@ -1139,22 +1139,20 @@ void blunt_setup(void) {
 	s_load  = gensym("!");
 	s_init  = gensym("$");
 	s_close = gensym("&");
-
 	char alt[5] = "`";
-	struct _obj
+
+	/* ---------------- connectives --------------------- */
+
+	const struct
 	{	t_class **class;
 		const char *name;
 		t_newmethod new;
 		void *fn;
-		void *fn2;  };
-
-
-	/* ---------------- connectives --------------------- */
-
-	const struct _obj nums[] =
+		void *fn2;  }
+	nums[] =
 	{	 { &i_class ,"i" ,(t_newmethod)i_new ,i_bang ,i_send }
 		,{ &f_class ,"f" ,(t_newmethod)f_new ,f_bang ,f_send }
-		,{ NULL }  } ,*num = nums;
+		,{ NULL ,NULL ,NULL ,NULL ,NULL }  } ,*num = nums;
 
 	for (; num->class; num++)
 	{	*num->class = class_new(gensym(num->name) ,num->new ,0
@@ -1175,14 +1173,20 @@ void blunt_setup(void) {
 
 	/* ---------------- unops --------------------- */
 
+	struct _obj
+	{	t_class **class;
+		const char *name;
+		t_newmethod new;
+		void *fn;  };
+
 	t_symbol *usyms[] = { gensym("negation") ,gensym("rounding") ,NULL } ,**usym = usyms;
 	const struct _obj uops[] =
 	{	 { &lnot_class  ,"!"     ,(t_newmethod)lnot_new  ,lnot_float  }
 		,{ &bnot_class  ,"~"     ,(t_newmethod)bnot_new  ,bnot_float  }
-		,{ NULL }
+		,{ NULL ,NULL ,NULL ,NULL }
 		,{ &floor_class ,"floor" ,(t_newmethod)floor_new ,floor_float }
 		,{ &ceil_class  ,"ceil"  ,(t_newmethod)ceil_new  ,ceil_float  }
-		,{ NULL }  } ,*uop = uops;
+		,{ NULL ,NULL ,NULL ,NULL }  } ,*uop = uops;
 
 	for (; *usym; usym++ ,uop++) for (; uop->class; uop++)
 	{	*uop->class = class_new(gensym(uop->name) ,uop->new ,0
@@ -1219,9 +1223,9 @@ void blunt_setup(void) {
 		,{ &b3_pc_class    ,"%"   ,(t_newmethod)b3_pc_new    ,b3_pc_bang    }
 		,{ &b3_mod_class   ,"mod" ,(t_newmethod)b3_mod_new   ,b3_mod_bang   }
 		,{ &b3_div_class   ,"div" ,(t_newmethod)b3_div_new   ,b3_div_bang   }
-		,{ NULL }
+		,{ NULL ,NULL ,NULL ,NULL }
 		,{ &b3_xor_class   ,"^"   ,(t_newmethod)b3_xor_new   ,b3_xor_bang   }
-		,{ NULL }  } ,*bop = bops;
+		,{ NULL ,NULL ,NULL ,NULL }  } ,*bop = bops;
 
 	for (; *bsym; bsym++ ,bop++) for (; bop->class; bop++)
 	{	*bop->class = class_new(gensym(bop->name) ,bop->new ,0

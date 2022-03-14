@@ -324,12 +324,13 @@ static t_atom ffplay_meta(void *y ,t_symbol *s) {
 			{	if (!(entry = av_dict_get(x->ic->metadata ,"time" ,0 ,0))
 				 && !(entry = av_dict_get(x->ic->metadata ,"tyer" ,0 ,0))
 				 && !(entry = av_dict_get(x->ic->metadata ,"tdat" ,0 ,0))
-				 && !(entry = av_dict_get(x->ic->metadata ,"tdrc" ,0 ,0)));  }
+				 && !(entry = av_dict_get(x->ic->metadata ,"tdrc" ,0 ,0)))
+				;  }
 			else if (s == dict[10])
 				entry = av_dict_get(x->ic->metadata ,"tbpm" ,0 ,0);  }
 
 		if (entry) SETSYMBOL(&meta ,gensym(entry->value));
-		else meta = (t_atom){ A_NULL };  }
+		else meta = (t_atom){ A_NULL,{0} };  }
 
 	return meta;
 }

@@ -7,10 +7,14 @@
 # define POW powf
 # define LOG logf
 # define FMOD fmodf
+# define FLOOR floorf
+# define CEIL ceilf
 #else
 # define POW pow
 # define LOG log
 # define FMOD fmod
+# define FLOOR floor
+# define CEIL ceil
 #endif
 
 	// binop1:  +, -, *, /

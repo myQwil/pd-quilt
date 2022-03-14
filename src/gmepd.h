@@ -209,7 +209,7 @@ static t_atom gmepd_meta(void *y ,t_symbol *s) {
 	else if (s == dict[12]) SETSYMBOL(&meta ,gensym(x->info->copyright));
 	else if (s == dict[13]) SETSYMBOL(&meta ,gensym(x->info->comment));
 	else if (s == dict[14]) SETSYMBOL(&meta ,gensym(x->info->dumper));
-	else meta = (t_atom){ A_NULL };
+	else meta = (t_atom){ A_NULL,{0} };
 	return meta;
 }
 

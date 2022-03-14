@@ -18,7 +18,7 @@ static void flin_free(t_flin *x) {
 }
 
 // return 0 on success, -1 on too large, and -2 on memory shortage
-static int flin_resize(t_flin *x ,t_object *obj ,int n) {
+static int flin_resize(t_flin *x ,t_object *obj ,unsigned n) {
 	if (n > x->siz)
 	{	if (n > max)
 			return -1;

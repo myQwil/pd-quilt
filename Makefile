@@ -5,10 +5,12 @@ PDLIBDIR = .
 
 lib.name = quilt
 
+CC  = clang
+CXX = clang++
+
 class.sources = $(shell echo src/*.c)
 
-datafiles  = $(shell echo abstractions/*.pd)
-datafiles += $(shell echo help/*.pd)
+datafiles  = $(shell echo abstractions/*.pd) $(shell echo help/*.pd)
 datafiles += help/LICENSE-libgme.txt help/README.md
 datadirs   = blunt
 
@@ -31,6 +33,5 @@ endef
 ffplay~.class.ldlibs = -lsamplerate -lavutil -lavcodec -lavformat -lswresample
 
 suppress-wunused = yes
-warn.flags = -Wall -Wshadow -Winline -Wstrict-aliasing
 
 include pd-lib-builder/Makefile.pdlibbuilder

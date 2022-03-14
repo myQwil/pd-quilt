@@ -79,13 +79,13 @@ typedef struct {
 	double   x_k;
 	char     x_buf[buf_size];
 	int      x_buflen;
-	int      x_numwidth;
 	int      x_log_height;
-	int      x_base;     // radix
-	int      x_prec;     // precision
-	int      x_e;        // e-notation radix
 	int      x_bexp;     // base exponent
 	int      x_texp;     // power of 2 exponent
+	unsigned x_numwidth;
+	unsigned x_base;     // radix
+	unsigned x_prec;     // precision
+	unsigned x_e;        // e-notation radix
 	unsigned x_pwr;      // largest base power inside of 32 bits
 	unsigned x_resize:1; // 1 if the border width needs to be resized
 	unsigned x_lilo:1;   // 0 for lin, 1 for log
@@ -132,7 +132,7 @@ static void radix_precision(t_radix *x ,t_float f) {
 	x->x_prec = f;
 }
 
-static int radix_bounds(t_float base) {
+static unsigned radix_bounds(t_float base) {
 	int m = sizeof(dgt) / sizeof*(dgt);
 	if      (base < 2) base = 2;
 	else if (base > m) base = m;
@@ -169,7 +169,7 @@ static void radix_be(t_radix *x ,t_float base) {
 	sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);
 }
 
-static void out(char num[] ,int *i ,const char *s ,int l) {
+static void out(char num[] ,unsigned *i ,const char *s ,int l) {
 	for (; l--; s++) num[(*i)++] = *s;
 }
 
@@ -204,7 +204,7 @@ static void radix_ftoa(t_radix *x) {
 		+ (LDBL_MAX_EXP+LDBL_MANT_DIG+xt+xb)/bx; // exponent expansion
 	uint32_t big[size];
 	uint32_t *a ,*d ,*r ,*z;
-	int e2=0 ,e ,i ,j ,l;
+	int e2=0 ,e ,i ,j;
 	char buf[bx+LDBL_MANT_DIG/4];
 	char ebuf0[3*sizeof(int)] ,*ebuf=&ebuf0[3*sizeof(int)] ,*estr;
 
@@ -248,7 +248,7 @@ static void radix_ftoa(t_radix *x) {
 		if (z-b > need) z = b+need;
 		e2+=sh;  }
 
-	if (a<z) for (i=radx ,e=bx*(r-a); *a>=i; i*=radx ,e++);
+	if (a<z) for (i=radx ,e=bx*(r-a); (int)*a>=i; i*=radx ,e++);
 	else e=0;
 
 	/* Perform rounding: j is precision after the radix (possibly neg) */
@@ -265,10 +265,10 @@ static void radix_ftoa(t_radix *x) {
 		if (u || d+1!=z)
 		{	long double round = 2/LDBL_EPSILON;
 			long double small;
-			if ((*d/i & 1) || (i==pwr && d>a && (d[-1]&1)))
+			if ((*d/i & 1) || (i==(int)pwr && d>a && (d[-1]&1)))
 				round += 2;
-			if      (u< i/2)           small=0x0.8p0;
-			else if (u==i/2 && d+1==z) small=0x1.0p0;
+			if      ((int)u< i/2)           small=0x0.8p0;
+			else if ((int)u==i/2 && d+1==z) small=0x1.0p0;
 			else                       small=0x1.8p0;
 			if (neg) round*=-1 ,small*=-1;
 			*d -= u;
@@ -279,7 +279,7 @@ static void radix_ftoa(t_radix *x) {
 				{	*d--=0;
 					if (d<a) *--a=0;
 					(*d)++;  }
-				for (i=radx ,e=bx*(r-a); *a>=i; i*=radx ,e++);  }  }
+				for (i=radx ,e=bx*(r-a); (int)*a>=i; i*=radx ,e++);  }  }
 		if (z>d+1) z=d+1;  }
 
 	for (; z>a && !z[-1]; z--);
@@ -298,19 +298,15 @@ static void radix_ftoa(t_radix *x) {
 	else
 		p = MIN(p,MAX(0,bx*(z-r-1)+e-j));
 
-	l = 1 + p + (p>0);
-	if ((t|32)=='f')
-	{	if (e>0) l+=e;  }
-	else
+	if ((t|32)!='f')
 	{	int erad = x->x_e;
 		estr=fmt_u(e<0 ? -e : e ,ebuf ,erad);
 		while(ebuf-estr<LEAD) *--estr='0';
 		*--estr = (e<0 ? '-' : '+');
-		*--estr = '^';
-		l += ebuf-estr;  }
+		*--estr = '^';  }
 
 	char *num = x->x_buf ,*dec=0 ,*nxt=0;
-	int ni=0;
+	unsigned ni=0;
 	out(num ,&ni ,"-" ,neg);
 
 	if ((t|32)=='f')
