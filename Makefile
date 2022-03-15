@@ -8,9 +8,9 @@ lib.name = quilt
 CC  = clang
 CXX = clang++
 
-class.sources = $(shell echo src/*.c)
+class.sources = $(wildcard src/*.c)
 
-datafiles  = $(shell echo abstractions/*.pd) $(shell echo help/*.pd)
+datafiles  = $(wildcard abstractions/*.pd) $(wildcard help/*.pd)
 datafiles += help/LICENSE-libgme.txt help/README.md
 datadirs   = blunt
 

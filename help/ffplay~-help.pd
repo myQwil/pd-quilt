@@ -19,8 +19,8 @@
 #X text 100 380 tracks;
 #X obj 110 340 bng 15 250 50 0 empty empty restart 17 7 0 12 #ff8300
 #ff0400 #7c7c7c;
-#X obj 310 470 hsl 128 20 0.001 1 1 0 empty empty vol 47 10 0 12 #2f004d
-#fcfcfc #fcfcfc 0 1;
+#X obj 310 470 hsl 128 20 0.001 1 1 0 empty empty volume 35 10 0 12
+#2f004d #fcfcfc #fcfcfc 0 1;
 #X floatatom 370 500 0 0 0 0 - - - 0;
 #X obj 220 30 cnv 15 102 24 empty empty ffplay~ 4 12 0 18 #000000 #fcfcfc
 0;
