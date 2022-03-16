@@ -62,6 +62,11 @@ Includes the following features:
 
 - A file must be successfully opened for any of these to work
 
+2. signal - Change the playback speed.
+	- speed can be a factor between 16 and 1/16th.
+
+	- speed can also be altered by sending the message \[ **speed** \$1 ( to the 1st inlet.
+
 ### Outlets
 
 1. signal - Left channel
@@ -132,6 +137,16 @@ Compatible formats include: AY, GBS, GYM, HES, KSS, NSF/NSFE, SAP, SPC, VGM/VGZ
 	- If metadata is found, it will be sent through the right-most outlet.
 
 - A file must be successfully opened for either of these to work
+
+2. signal - Change the playback speed.
+	- speed can be a factor between 16 and 1/16th.
+
+	- speed can also be altered by sending the message \[ **speed** \$1 ( to the 1st inlet.
+
+2. signal - Change the tempo (rate of emulation).
+	- tempo can be a factor between 4 and 0.02.
+
+	- tempo can also be altered by sending the message \[ **tempo** \$1 ( to the 1st inlet.
 
 ### Outlets
 
