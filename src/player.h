@@ -4,9 +4,6 @@
 
 #define FRAMES 0x10
 
-static const double frames = FRAMES - .00001; // SRC gets stuck if too accurate
-static const double inv_frames = 1. / FRAMES;
-
 static t_symbol *s_open;
 static t_symbol *s_play;
 
@@ -32,10 +29,13 @@ static inline void player_reset(t_player *x) {
 	x->data.input_frames = 0;
 }
 
+static const t_float fastest = FRAMES - (1./128.); // SRC can get stuck if too fast
+static const t_float slowest = 1. / FRAMES;
+
 static inline void player_speed(t_player *x ,t_float f) {
 	*x->speed = f;
 	f *= x->ratio;
-	f = f > frames ? frames : (f < inv_frames ? inv_frames : f);
+	f = f > fastest ? fastest : (f < slowest ? slowest : f);
 	x->data.src_ratio = 1. / f;
 }
 
