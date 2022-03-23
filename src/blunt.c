@@ -1133,7 +1133,7 @@ void hotop_setup(void) {
 
 void blunt_setup(void) {
 
-	post("Blunt! version 0.8.0");
+	post("\nBlunt! version " VERSION "\ncompiled " DATE " " TIME " UTC");
 
 	t_symbol *s_blunt = gensym("blunt");
 	s_load  = gensym("!");

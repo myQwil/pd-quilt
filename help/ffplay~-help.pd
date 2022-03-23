@@ -138,7 +138,7 @@
 #X restore 230 230 pd time;
 #X obj 70 130 bng 15 250 50 0 empty empty previous\\\ directory 17
 7 0 12 #ff8300 #ff0400 #7c7c7c;
-#N canvas 980 560 550 280 bounds 0;
+#N canvas 980 500 550 300 bounds 0;
 #X obj 40 30 inlet;
 #X obj 110 60 + 1;
 #X obj 110 30 r \$0n;

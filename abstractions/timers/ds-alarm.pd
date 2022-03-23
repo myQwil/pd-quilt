@@ -5,7 +5,7 @@
 0;
 #X obj 230 350 dac~;
 #X obj 300 320 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10
-#000000 #fcfcfc #fcfcfc 0 1;
+#2f004d #fcfcfc #fcfcfc 0 1;
 #X floatatom 310 340 0 0 0 0 - - - 0;
 #N canvas 580 600 540 300 ring 0;
 #X floatatom 140 210 0 0 0 0 - - - 0;
@@ -156,10 +156,10 @@
 #X connect 6 1 7 0;
 #X restore 50 120 pd kpress;
 #X obj 320 210 dbtorms;
-#X obj 320 170 70;
-#X msg 320 130 70;
 #X obj 360 170 + 0.4;
 #X msg 360 130 100;
+#X msg 320 130 67;
+#X obj 320 170 67;
 #X connect 2 0 3 0;
 #X connect 2 0 10 1;
 #X connect 4 0 7 0;
@@ -177,7 +177,7 @@
 #X connect 12 0 6 0;
 #X connect 13 0 6 0;
 #X connect 13 0 26 0;
-#X connect 13 0 31 0;
+#X connect 13 0 32 0;
 #X connect 13 0 5 0;
 #X connect 14 0 6 0;
 #X connect 14 0 26 0;
@@ -189,17 +189,17 @@
 #X connect 17 2 21 0;
 #X connect 18 0 27 0;
 #X connect 19 0 21 1;
-#X connect 22 0 30 0;
+#X connect 22 0 33 0;
 #X connect 23 0 17 0;
 #X connect 24 0 17 1;
 #X connect 27 0 20 0;
 #X connect 28 0 16 0;
 #X connect 28 1 15 0;
 #X connect 29 0 8 0;
-#X connect 30 0 29 0;
-#X connect 30 0 32 0;
-#X connect 31 0 30 0;
-#X connect 32 0 30 1;
+#X connect 30 0 33 1;
+#X connect 31 0 33 0;
+#X connect 32 0 33 0;
+#X connect 33 0 29 0;
 #X connect 33 0 30 0;
 #X coords 0 -1 1 1 120 150 2 60 150;
 #X restore 50 80 pd alarm;
