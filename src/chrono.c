@@ -19,9 +19,13 @@ typedef struct {
 	t_outlet *o_on;   /* outputs play/pause state */
 } t_chrono;
 
-static void chrono_bang(t_chrono *x) {
+static inline void chrono_reset(t_chrono *x) {
 	x->settime = x->laptime = clock_getlogicaltime();
 	x->setmore = x->lapmore = x->pause = 0;
+}
+
+static void chrono_bang(t_chrono *x) {
+	chrono_reset(x);
 	outlet_float(x->o_on ,1);
 }
 
@@ -30,8 +34,9 @@ static void chrono_delay(t_chrono *x ,t_float f) {
 }
 
 static void chrono_float(t_chrono *x ,t_float f) {
-	chrono_bang(x);
+	chrono_reset(x);
 	chrono_delay(x ,f);
+	outlet_float(x->o_on ,1);
 }
 
 static void chrono_bang2(t_chrono *x) {
@@ -60,12 +65,14 @@ static void chrono_pause(t_chrono *x ,t_symbol *s ,int ac ,t_atom *av) {
 		if (x->pause == pause) return;
 		else x->pause = pause;  }
 	else x->pause = !x->pause;
-	outlet_float(x->o_on ,!x->pause);
+
 	if (x->pause)
 	{	x->setmore += timesince(x->settime ,x->unit ,x->samps);
 		x->lapmore += timesince(x->laptime ,x->unit ,x->samps);  }
 	else
 		x->settime = x->laptime = clock_getlogicaltime();
+
+	outlet_float(x->o_on ,!x->pause);
 }
 
 static void chrono_tempo(t_chrono *x ,t_symbol *s ,int ac ,t_atom *av) {

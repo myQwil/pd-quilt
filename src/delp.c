@@ -55,7 +55,6 @@ static void delp_pause(t_delp *x ,t_symbol *s ,int ac ,t_atom *av) {
 		if (x->pause == pause) return;
 		else x->pause = pause;  }
 	else x->pause = !x->pause;
-	outlet_float(x->o_on ,!x->pause);
 
 	if (x->pause)
 	{	clock_unset(x->clock);
@@ -64,6 +63,8 @@ static void delp_pause(t_delp *x ,t_symbol *s ,int ac ,t_atom *av) {
 	else
 	{	x->settime = clock_getlogicaltime();
 		clock_delay(x->clock ,x->remtime);  }
+
+	outlet_float(x->o_on ,!x->pause);
 }
 
 static void delp_tempo(t_delp *x ,t_symbol *s ,int ac ,t_atom *av) {
