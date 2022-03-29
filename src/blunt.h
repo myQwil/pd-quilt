@@ -5,13 +5,17 @@
 
 #if PD_FLOATSIZE == 32
 # define POW powf
+# define SQRT sqrtf
 # define LOG logf
+# define EXP expf
 # define FMOD fmodf
 # define FLOOR floorf
 # define CEIL ceilf
 #else
 # define POW pow
+# define SQRT sqrt
 # define LOG log
+# define EXP exp
 # define FMOD fmod
 # define FLOOR floor
 # define CEIL ceil
@@ -75,6 +79,15 @@ static inline t_float blunt_divm(t_float f1 ,t_float f2) {
 	if (n1 < 0) n1 -= (n2-1);
 	result = n1 / n2;
 	return (t_float)result;
+}
+
+static inline t_float blunt_factorial(int d) {
+	if (d > 8) // use stirling's approximation
+		return POW(d ,d) * EXP(-d) * SQRT(d) * SQRT(2 * M_PI);
+
+	t_float f = 1;
+	while (d > 0) f *= d--;
+	return f;
 }
 
 /* -------------------------- blunt base -------------------------- */

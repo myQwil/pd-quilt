@@ -78,7 +78,7 @@ static void *f_new(t_symbol *s ,int ac ,t_atom *av) {
 /*                           arithmetics                           */
 /* --------------------------------------------------------------- */
 
-/* --------------------- unop:  !  ~  floor  ceil  --------------- */
+/* ------------ unop:  !  ~  floor  ceil  factorial  ------------- */
 
 static t_object *uop_new(t_class *cl) {
 	t_object *x = (t_object*)pd_new(cl);
@@ -128,6 +128,17 @@ static void ceil_float(t_object *x ,t_float f) {
 
 static void *ceil_new() {
 	return (uop_new(ceil_class));
+}
+
+/* --------------------- factorial ------------------------------- */
+static t_class *fact_class;
+
+static void fact_float(t_object *x ,t_float f) {
+	outlet_float(x->ob_outlet ,blunt_factorial(f));
+}
+
+static void *fact_new() {
+	return (uop_new(fact_class));
 }
 
 
@@ -1179,13 +1190,17 @@ void blunt_setup(void) {
 		t_newmethod new;
 		void *fn;  };
 
-	t_symbol *usyms[] = { gensym("negation") ,gensym("rounding") ,NULL } ,**usym = usyms;
+	t_symbol *usyms[] =
+		{ gensym("negation") ,gensym("rounding") ,gensym("factorial") ,NULL }
+		,**usym = usyms;
 	const struct _obj uops[] =
 	{	 { &lnot_class  ,"!"     ,(t_newmethod)lnot_new  ,lnot_float  }
 		,{ &bnot_class  ,"~"     ,(t_newmethod)bnot_new  ,bnot_float  }
 		,{ NULL ,NULL ,NULL ,NULL }
 		,{ &floor_class ,"floor" ,(t_newmethod)floor_new ,floor_float }
 		,{ &ceil_class  ,"ceil"  ,(t_newmethod)ceil_new  ,ceil_float  }
+		,{ NULL ,NULL ,NULL ,NULL }
+		,{ &fact_class  ,"n!"    ,(t_newmethod)fact_new  ,fact_float  }
 		,{ NULL ,NULL ,NULL ,NULL }  } ,*uop = uops;
 
 	for (; *usym; usym++ ,uop++) for (; uop->class; uop++)

@@ -19,7 +19,7 @@ typedef struct {
 	t_outlet *o_on;
 } t_linp;
 
-#define PERF_MAIN \
+#define PERF_MAIN(expr) \
 	t_linp *x = (t_linp*)(w[1]); \
 	t_sample *out = (t_sample*)(w[2]); \
 	int n = (int)(w[3]); \
@@ -44,21 +44,24 @@ typedef struct {
 	{	if (!x->pause) \
 		{	x->value = x->target; \
 			outlet_float(x->o_on ,0);  } \
-		g = x->value;
+		g = x->value; \
+		expr  }
 
 static t_int *linp_tilde_perform(t_int *w) {
-	PERF_MAIN
+	PERF_MAIN (
 		while (n--)
-			*out++ = g;  }
+			*out++ = g;
+	)
 	return (w+4);
 }
 
 /* TB: vectorized version */
 static t_int *linp_tilde_perf8(t_int *w) {
-	PERF_MAIN
+	PERF_MAIN (
 		for (; n; n -= 8 ,out += 8)
 		{	out[0] = out[1] = out[2] = out[3] =
-			out[4] = out[5] = out[6] = out[7] = g;  }  }
+			out[4] = out[5] = out[6] = out[7] = g;  }
+	)
 	return (w+4);
 }
 
