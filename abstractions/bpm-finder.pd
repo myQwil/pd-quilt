@@ -39,7 +39,7 @@
 #X obj 160 270 f;
 #X obj 200 300 + 1;
 #X floatatom 160 300 0 0 0 0 - - - 0;
-#X msg 200 270 1;
+#X msg 200 270 0;
 #X msg 200 150 0;
 #N canvas 400 540 450 300 sync 0;
 #X obj 180 70 r sync;
@@ -54,6 +54,7 @@
 #X connect 3 0 5 0;
 #X connect 4 0 3 1;
 #X restore 30 60 pd sync;
+#X obj 200 60 r stop;
 #X connect 0 0 1 1;
 #X connect 0 0 15 1;
 #X connect 1 0 3 0;
@@ -81,3 +82,4 @@
 #X connect 20 0 1 0;
 #X connect 21 0 10 0;
 #X connect 21 0 13 0;
+#X connect 22 0 20 0;
