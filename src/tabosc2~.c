@@ -1,4 +1,4 @@
-#include "inlet.h"
+#include "tab2.h"
 
 /******************** tabosc2~ ***********************/
 
@@ -45,36 +45,27 @@ union tabfudge {
 static t_class *tabosc2_class;
 
 typedef struct {
-	t_object obj;
-	t_symbol *arrayname;
-	t_word *vec;
-	t_float f;
+	t_tab2 z;
 	t_float conv;
 	t_float fnpoints;
 	t_float finvnpoints;
-	t_float *edge;
-	t_float k;
 	double phase;
 } t_tabosc2;
 
-static inline void tabosc2_edge(t_tabosc2 *x ,t_float edge) {
-	*x->edge = edge;
-	x->k = 1. / (1. - edge);
-}
-
 static t_int *tabosc2_perform(t_int *w) {
-	t_tabosc2 *x = (t_tabosc2*)(w[1]);
+	t_tabosc2 *y = (t_tabosc2*)(w[1]);
+	t_tab2 *x = &y->z;
 	t_sample *in1 = (t_sample*)(w[2]);
 	t_sample *in2 = (t_sample*)(w[3]);
 	t_sample *out = (t_sample*)(w[4]);
 	int n = (int)(w[5]);
 	int normhipart;
 	union tabfudge tf;
-	t_float fnpoints = x->fnpoints;
+	t_float fnpoints = y->fnpoints;
 	int mask = fnpoints - 1;
-	t_float conv = fnpoints * x->conv;
+	t_float conv = fnpoints * y->conv;
 	t_word *tab = x->vec ,*addr;
-	double dphase = fnpoints * x->phase + UNITBIT32;
+	double dphase = fnpoints * y->phase + UNITBIT32;
 
 	if (!tab) goto zero;
 	tf.d = UNITBIT32;
@@ -86,21 +77,13 @@ static t_int *tabosc2_perform(t_int *w) {
 		addr = tab + (tf.i[HIOFFSET] & mask);
 		tf.i[HIOFFSET] = normhipart;
 		frac = tf.d - UNITBIT32;
-		edge = *in2;
-		if (frac <= edge)
-			*out++ = addr[1].w_float;
-		else
-		{	if (*x->edge != edge)
-				tabosc2_edge(x ,edge);
-			a = addr[1].w_float;
-			b = addr[2].w_float;
-			*out++ = a + (frac - edge) * x->k * (b - a);  }  }
+		TAB2_INTERPOLATE(addr[1] ,addr[2])  }
 
 	tf.d = UNITBIT32 * fnpoints;
 	normhipart = tf.i[HIOFFSET];
 	tf.d = dphase + (UNITBIT32 * fnpoints - UNITBIT32);
 	tf.i[HIOFFSET] = normhipart;
-	x->phase = (tf.d - UNITBIT32 * fnpoints)  * x->finvnpoints;
+	y->phase = (tf.d - UNITBIT32 * fnpoints)  * y->finvnpoints;
 	return (w+6);
  zero:
 	while (n--) *out++ = 0;
@@ -108,8 +91,9 @@ static t_int *tabosc2_perform(t_int *w) {
 	return (w+6);
 }
 
-static void tabosc2_set(t_tabosc2 *x ,t_symbol *s) {
+static void tabosc2_set(t_tabosc2 *y ,t_symbol *s) {
 	t_garray *a;
+	t_tab2 *x = &y->z;
 	int npoints ,pointsinarray;
 
 	x->arrayname = s;
@@ -126,14 +110,14 @@ static void tabosc2_set(t_tabosc2 *x ,t_symbol *s) {
 		x->vec = 0;
 		garray_usedindsp(a);  }
 	else
-	{	x->fnpoints = npoints;
-		x->finvnpoints = 1. / npoints;
+	{	y->fnpoints = npoints;
+		y->finvnpoints = 1. / npoints;
 		garray_usedindsp(a);  }
 }
 
 static void tabosc2_dsp(t_tabosc2 *x ,t_signal **sp) {
 	x->conv = 1. / sp[0]->s_sr;
-	tabosc2_set(x ,x->arrayname);
+	tabosc2_set(x ,x->z.arrayname);
 
 	dsp_add(tabosc2_perform ,5 ,x
 		,sp[0]->s_vec ,sp[1]->s_vec ,sp[2]->s_vec ,(t_int)sp[0]->s_n);
@@ -144,30 +128,19 @@ static void tabosc2_ft1(t_tabosc2 *x ,t_float f) {
 }
 
 static void *tabosc2_new(t_symbol *s ,t_float edge) {
-	t_tabosc2 *x = (t_tabosc2*)pd_new(tabosc2_class);
-	x->arrayname = s;
-	x->vec = 0;
-	x->fnpoints = 512.;
-	x->finvnpoints = 1. / x->fnpoints;
-
-	t_inlet *in2 = signalinlet_new(&x->obj ,edge);
-	x->edge = &in2->i_un.iu_floatsignalvalue;
-	tabosc2_edge(x ,edge);
-
+	t_tabosc2 *y = (t_tabosc2*)tab2_new(tabosc2_class ,s ,edge);
+	t_tab2 *x = &y->z;
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("ft1"));
-	outlet_new(&x->obj ,&s_signal);
-	x->f = 0;
+
+	y->fnpoints = 512.;
+	y->finvnpoints = 1. / y->fnpoints;
 	return (x);
 }
 
 void tabosc2_tilde_setup(void) {
-	tabosc2_class = class_new(gensym("tabosc2~")
-		,(t_newmethod)tabosc2_new ,0
-		,sizeof(t_tabosc2) ,0
-		,A_DEFSYM ,A_DEFFLOAT ,0);
-	class_domainsignalin(tabosc2_class ,(intptr_t)(&((t_tabosc2*)0)->f));
-	class_addmethod(tabosc2_class ,(t_method)tabosc2_dsp  ,gensym("dsp")  ,A_CANT   ,0);
-	class_addmethod(tabosc2_class ,(t_method)tabosc2_set  ,gensym("set")  ,A_SYMBOL ,0);
-	class_addmethod(tabosc2_class ,(t_method)tabosc2_ft1  ,gensym("ft1")  ,A_FLOAT  ,0);
-	class_addmethod(tabosc2_class ,(t_method)tabosc2_edge ,gensym("edge") ,A_FLOAT  ,0);
+	tabosc2_class = class_tab2(gensym("tabosc2~")
+		,(t_newmethod)tabosc2_new ,sizeof(t_tabosc2));
+	class_addmethod(tabosc2_class ,(t_method)tabosc2_dsp ,gensym("dsp") ,A_CANT   ,0);
+	class_addmethod(tabosc2_class ,(t_method)tabosc2_set ,gensym("set") ,A_SYMBOL ,0);
+	class_addmethod(tabosc2_class ,(t_method)tabosc2_ft1 ,gensym("ft1") ,A_FLOAT  ,0);
 }
