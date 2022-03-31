@@ -8,6 +8,7 @@
 # define SQRT sqrtf
 # define LOG logf
 # define EXP expf
+# define FABS fabsf
 # define FMOD fmodf
 # define FLOOR floorf
 # define CEIL ceilf
@@ -16,6 +17,7 @@
 # define SQRT sqrt
 # define LOG log
 # define EXP exp
+# define FABS fabs
 # define FMOD fmod
 # define FLOOR floor
 # define CEIL ceil
@@ -71,6 +73,14 @@ static inline t_float blunt_mod(t_float f1 ,t_float f2) {
 	result = (int)f1 % n2;
 	if (result < 0) result += n2;
 	return (t_float)result;
+}
+
+static inline t_float blunt_fmod(t_float f1 ,t_float f2) {
+	f2 = FABS(f2);
+	if (!f2) f2 = 1;
+	t_float result = FMOD(f1 ,f2);
+	if (result < 0) result += f2;
+	return result;
 }
 
 static inline t_float blunt_divm(t_float f1 ,t_float f2) {

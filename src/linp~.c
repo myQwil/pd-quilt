@@ -48,20 +48,18 @@ typedef struct {
 		expr  }
 
 static t_int *linp_tilde_perform(t_int *w) {
-	PERF_MAIN (
-		while (n--)
-			*out++ = g;
-	)
+	PERF_MAIN
+	(	while (n--)
+			*out++ = g;  )
 	return (w+4);
 }
 
 /* TB: vectorized version */
 static t_int *linp_tilde_perf8(t_int *w) {
-	PERF_MAIN (
-		for (; n; n -= 8 ,out += 8)
+	PERF_MAIN
+	(	for (; n; n -= 8 ,out += 8)
 		{	out[0] = out[1] = out[2] = out[3] =
-			out[4] = out[5] = out[6] = out[7] = g;  }
-	)
+			out[4] = out[5] = out[6] = out[7] = g;  }  )
 	return (w+4);
 }
 

@@ -106,7 +106,7 @@
 #X connect 27 0 25 0;
 #X restore 60 320 pd clock;
 #X obj 70 30 loadbang;
-#X floatatom 140 170 0 1 60 2 mins \$0z - 0;
+#X floatatom 140 170 0 1 60 2 mins \$0z - 12;
 #X obj 70 90 s \$0z;
 #N canvas 590 460 360 300 repeat 0;
 #X obj 70 130 spigot;

@@ -43,8 +43,8 @@
 #X obj 190 90 sel;
 #X obj 190 60 % 4;
 #X msg 130 130 1;
-#X msg 170 130 0.28;
-#X msg 220 130 0.064;
+#X msg 170 130 0.32;
+#X msg 220 130 0.1;
 #X obj 130 170 ad 1 10;
 #X obj 170 230 r~ \$0vol;
 #X obj 130 230 *~;
@@ -77,10 +77,10 @@
 #X obj 170 210 f;
 #X obj 60 60 bng 20 250 50 0 \$0reset empty reset -4 -10 0 12 #ff8300
 #ff0400 #fcfcfc;
-#X floatatom 110 60 0 0 0 2 hours - - 0;
+#X floatatom 110 60 0 0 0 2 hours - - 12;
 #X obj 60 110 bng 20 250 50 0 empty empty pause -4 -10 0 12 #ff8300
 #ff0400 #fcfcfc;
-#X floatatom 110 110 0 0 0 2 del - - 0;
+#X floatatom 110 110 0 0 0 2 delay - - 12;
 #X obj 300 150 / 600;
 #X msg 300 120 1;
 #X msg 340 120 600;

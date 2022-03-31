@@ -370,17 +370,6 @@ static void *b3_rs_new(t_symbol *s ,int ac ,t_atom *av) {
 	return (bop_new(b3_rs_class ,s ,ac ,av));
 }
 
-/* --------------------- f% --------------------------------------- */
-static t_class *b3_fpc_class;
-
-static void b3_fpc_bang(t_bop *x) {
-	outlet_float(x->bl.obj.ob_outlet ,blunt_fpc(x->f1 ,x->f2));
-}
-
-static void *b3_fpc_new(t_symbol *s ,int ac ,t_atom *av) {
-	return (bop_new(b3_fpc_class ,s ,ac ,av));
-}
-
 /* --------------------- % --------------------------------------- */
 static t_class *b3_pc_class;
 
@@ -392,6 +381,17 @@ static void *b3_pc_new(t_symbol *s ,int ac ,t_atom *av) {
 	return (bop_new(b3_pc_class ,s ,ac ,av));
 }
 
+/* --------------------- f% --------------------------------------- */
+static t_class *b3_fpc_class;
+
+static void b3_fpc_bang(t_bop *x) {
+	outlet_float(x->bl.obj.ob_outlet ,blunt_fpc(x->f1 ,x->f2));
+}
+
+static void *b3_fpc_new(t_symbol *s ,int ac ,t_atom *av) {
+	return (bop_new(b3_fpc_class ,s ,ac ,av));
+}
+
 /* --------------------- mod ------------------------------------- */
 static t_class *b3_mod_class;
 
@@ -401,6 +401,17 @@ static void b3_mod_bang(t_bop *x) {
 
 static void *b3_mod_new(t_symbol *s ,int ac ,t_atom *av) {
 	return (bop_new(b3_mod_class ,s ,ac ,av));
+}
+
+/* --------------------- fmod ------------------------------------ */
+static t_class *b3_fmod_class;
+
+static void b3_fmod_bang(t_bop *x) {
+	outlet_float(x->bl.obj.ob_outlet ,blunt_fmod(x->f1 ,x->f2));
+}
+
+static void *b3_fmod_new(t_symbol *s ,int ac ,t_atom *av) {
+	return (bop_new(b3_fmod_class ,s ,ac ,av));
 }
 
 /* --------------------- div ------------------------------------- */
@@ -580,17 +591,6 @@ static void *rrs_new(t_symbol *s ,int ac ,t_atom *av) {
 	return (bop_new(rrs_class ,s ,ac ,av));
 }
 
-/* --------------------- f% --------------------------------------- */
-static t_class *rfpc_class;
-
-static void rfpc_bang(t_bop *x) {
-	outlet_float(x->bl.obj.ob_outlet ,blunt_fpc(x->f2 ,x->f1));
-}
-
-static void *rfpc_new(t_symbol *s ,int ac ,t_atom *av) {
-	return (bop_new(rfpc_class ,s ,ac ,av));
-}
-
 /* --------------------- % --------------------------------------- */
 static t_class *rpc_class;
 
@@ -602,6 +602,17 @@ static void *rpc_new(t_symbol *s ,int ac ,t_atom *av) {
 	return (bop_new(rpc_class ,s ,ac ,av));
 }
 
+/* --------------------- f% -------------------------------------- */
+static t_class *rfpc_class;
+
+static void rfpc_bang(t_bop *x) {
+	outlet_float(x->bl.obj.ob_outlet ,blunt_fpc(x->f2 ,x->f1));
+}
+
+static void *rfpc_new(t_symbol *s ,int ac ,t_atom *av) {
+	return (bop_new(rfpc_class ,s ,ac ,av));
+}
+
 /* --------------------- mod ------------------------------------- */
 static t_class *rmod_class;
 
@@ -611,6 +622,17 @@ static void rmod_bang(t_bop *x) {
 
 static void *rmod_new(t_symbol *s ,int ac ,t_atom *av) {
 	return (bop_new(rmod_class ,s ,ac ,av));
+}
+
+/* --------------------- fmod ------------------------------------ */
+static t_class *rfmod_class;
+
+static void rfmod_bang(t_bop *x) {
+	outlet_float(x->bl.obj.ob_outlet ,blunt_fmod(x->f2 ,x->f1));
+}
+
+static void *rfmod_new(t_symbol *s ,int ac ,t_atom *av) {
+	return (bop_new(rfmod_class ,s ,ac ,av));
 }
 
 /* --------------------- div ------------------------------------- */
@@ -662,16 +684,17 @@ void revop_setup(void) {
 		t_newmethod new;
 		void (*bang)(t_bop*);  }
 	objs[] =
-	{	 { &rminus_class ,"@-"   ,(t_newmethod)rminus_new ,rminus_bang }
-		,{ &rdiv_class   ,"@/"   ,(t_newmethod)rdiv_new   ,rdiv_bang   }
-		,{ &rlog_class   ,"@log" ,(t_newmethod)rlog_new   ,rlog_bang   }
-		,{ &rpow_class   ,"@pow" ,(t_newmethod)rpow_new   ,rpow_bang   }
-		,{ &rls_class    ,"@<<"  ,(t_newmethod)rls_new    ,rls_bang    }
-		,{ &rrs_class    ,"@>>"  ,(t_newmethod)rrs_new    ,rrs_bang    }
-		,{ &rfpc_class   ,"@f%"  ,(t_newmethod)rfpc_new   ,rfpc_bang   }
-		,{ &rpc_class    ,"@%"   ,(t_newmethod)rpc_new    ,rpc_bang    }
-		,{ &rmod_class   ,"@mod" ,(t_newmethod)rmod_new   ,rmod_bang   }
-		,{ &rdivm_class  ,"@div" ,(t_newmethod)rdiv_new   ,rdiv_bang   }
+	{	 { &rminus_class ,"@-"    ,(t_newmethod)rminus_new ,rminus_bang }
+		,{ &rdiv_class   ,"@/"    ,(t_newmethod)rdiv_new   ,rdiv_bang   }
+		,{ &rlog_class   ,"@log"  ,(t_newmethod)rlog_new   ,rlog_bang   }
+		,{ &rpow_class   ,"@pow"  ,(t_newmethod)rpow_new   ,rpow_bang   }
+		,{ &rls_class    ,"@<<"   ,(t_newmethod)rls_new    ,rls_bang    }
+		,{ &rrs_class    ,"@>>"   ,(t_newmethod)rrs_new    ,rrs_bang    }
+		,{ &rpc_class    ,"@%"    ,(t_newmethod)rpc_new    ,rpc_bang    }
+		,{ &rfpc_class   ,"@f%"   ,(t_newmethod)rfpc_new   ,rfpc_bang   }
+		,{ &rmod_class   ,"@mod"  ,(t_newmethod)rmod_new   ,rmod_bang   }
+		,{ &rfmod_class  ,"@fmod" ,(t_newmethod)rfmod_new  ,rfmod_bang  }
+		,{ &rdivm_class  ,"@div"  ,(t_newmethod)rdiv_new   ,rdiv_bang   }
 		,{ NULL ,NULL ,NULL ,NULL }  } ,*obj = objs;
 
 	t_symbol *s_rev = gensym("revbinops");
@@ -1021,18 +1044,6 @@ static void *hxor_new(t_symbol *s ,int ac ,t_atom *av) {
 	return (hot_new(hxor_class ,hxor_proxy ,s ,ac ,av));
 }
 
-/* --------------------- f% --------------------------------------- */
-static t_class *hfpc_class;
-static t_class *hfpc_proxy;
-
-static void hfpc_bang(t_bop *x) {
-	outlet_float(x->bl.obj.ob_outlet ,blunt_fpc(x->f1 ,x->f2));
-}
-
-static void *hfpc_new(t_symbol *s ,int ac ,t_atom *av) {
-	return (hot_new(hfpc_class ,hfpc_proxy ,s ,ac ,av));
-}
-
 /* --------------------- % --------------------------------------- */
 static t_class *hpc_class;
 static t_class *hpc_proxy;
@@ -1045,6 +1056,18 @@ static void *hpc_new(t_symbol *s ,int ac ,t_atom *av) {
 	return (hot_new(hpc_class ,hpc_proxy ,s ,ac ,av));
 }
 
+/* --------------------- f% --------------------------------------- */
+static t_class *hfpc_class;
+static t_class *hfpc_proxy;
+
+static void hfpc_bang(t_bop *x) {
+	outlet_float(x->bl.obj.ob_outlet ,blunt_fpc(x->f1 ,x->f2));
+}
+
+static void *hfpc_new(t_symbol *s ,int ac ,t_atom *av) {
+	return (hot_new(hfpc_class ,hfpc_proxy ,s ,ac ,av));
+}
+
 /* --------------------- mod ------------------------------------- */
 static t_class *hmod_class;
 static t_class *hmod_proxy;
@@ -1055,6 +1078,18 @@ static void hmod_bang(t_bop *x) {
 
 static void *hmod_new(t_symbol *s ,int ac ,t_atom *av) {
 	return (hot_new(hmod_class ,hmod_proxy ,s ,ac ,av));
+}
+
+/* --------------------- fmod ------------------------------------ */
+static t_class *hfmod_class;
+static t_class *hfmod_proxy;
+
+static void hfmod_bang(t_bop *x) {
+	outlet_float(x->bl.obj.ob_outlet ,blunt_fmod(x->f1 ,x->f2));
+}
+
+static void *hfmod_new(t_symbol *s ,int ac ,t_atom *av) {
+	return (hot_new(hfmod_class ,hfmod_proxy ,s ,ac ,av));
 }
 
 /* --------------------- div ------------------------------------- */
@@ -1077,41 +1112,42 @@ void hotop_setup(void) {
 		t_newmethod new;
 		void (*bang)(t_bop*);  }
 	objs[] =
-	{	 { &hplus_class  ,&hplus_proxy  ,"#+"   ,(t_newmethod)hplus_new  ,hplus_bang  }
-		,{ &hminus_class ,&hminus_proxy ,"#-"   ,(t_newmethod)hminus_new ,hminus_bang }
-		,{ &htimes_class ,&htimes_proxy ,"#*"   ,(t_newmethod)htimes_new ,htimes_bang }
-		,{ &hdiv_class   ,&hdiv_proxy   ,"#/"   ,(t_newmethod)hdiv_new   ,hdiv_bang   }
-		,{ &hlog_class   ,&hlog_proxy   ,"#log" ,(t_newmethod)hlog_new   ,hlog_bang   }
-		,{ &hpow_class   ,&hpow_proxy   ,"#pow" ,(t_newmethod)hpow_new   ,hpow_bang   }
-		,{ &hmax_class   ,&hmax_proxy   ,"#max" ,(t_newmethod)hmax_new   ,hmax_bang   }
-		,{ &hmin_class   ,&hmin_proxy   ,"#min" ,(t_newmethod)hmin_new   ,hmin_bang   }
+	{	 { &hplus_class  ,&hplus_proxy  ,"#+"    ,(t_newmethod)hplus_new  ,hplus_bang  }
+		,{ &hminus_class ,&hminus_proxy ,"#-"    ,(t_newmethod)hminus_new ,hminus_bang }
+		,{ &htimes_class ,&htimes_proxy ,"#*"    ,(t_newmethod)htimes_new ,htimes_bang }
+		,{ &hdiv_class   ,&hdiv_proxy   ,"#/"    ,(t_newmethod)hdiv_new   ,hdiv_bang   }
+		,{ &hlog_class   ,&hlog_proxy   ,"#log"  ,(t_newmethod)hlog_new   ,hlog_bang   }
+		,{ &hpow_class   ,&hpow_proxy   ,"#pow"  ,(t_newmethod)hpow_new   ,hpow_bang   }
+		,{ &hmax_class   ,&hmax_proxy   ,"#max"  ,(t_newmethod)hmax_new   ,hmax_bang   }
+		,{ &hmin_class   ,&hmin_proxy   ,"#min"  ,(t_newmethod)hmin_new   ,hmin_bang   }
 		,{ NULL ,NULL ,NULL ,NULL ,NULL }
-		,{ &hee_class    ,&hee_proxy    ,"#=="  ,(t_newmethod)hee_new    ,hee_bang    }
-		,{ &hne_class    ,&hne_proxy    ,"#!="  ,(t_newmethod)hne_new    ,hne_bang    }
-		,{ &hgt_class    ,&hgt_proxy    ,"#>"   ,(t_newmethod)hgt_new    ,hgt_bang    }
-		,{ &hlt_class    ,&hlt_proxy    ,"#<"   ,(t_newmethod)hlt_new    ,hlt_bang    }
-		,{ &hge_class    ,&hge_proxy    ,"#>="  ,(t_newmethod)hge_new    ,hge_bang    }
-		,{ &hle_class    ,&hle_proxy    ,"#<="  ,(t_newmethod)hle_new    ,hle_bang    }
+		,{ &hee_class    ,&hee_proxy    ,"#=="   ,(t_newmethod)hee_new    ,hee_bang    }
+		,{ &hne_class    ,&hne_proxy    ,"#!="   ,(t_newmethod)hne_new    ,hne_bang    }
+		,{ &hgt_class    ,&hgt_proxy    ,"#>"    ,(t_newmethod)hgt_new    ,hgt_bang    }
+		,{ &hlt_class    ,&hlt_proxy    ,"#<"    ,(t_newmethod)hlt_new    ,hlt_bang    }
+		,{ &hge_class    ,&hge_proxy    ,"#>="   ,(t_newmethod)hge_new    ,hge_bang    }
+		,{ &hle_class    ,&hle_proxy    ,"#<="   ,(t_newmethod)hle_new    ,hle_bang    }
 		,{ NULL ,NULL ,NULL ,NULL ,NULL }
-		,{ &hba_class    ,&hba_proxy    ,"#&"   ,(t_newmethod)hba_new    ,hba_bang    }
-		,{ &hla_class    ,&hla_proxy    ,"#&&"  ,(t_newmethod)hla_new    ,hla_bang    }
-		,{ &hbo_class    ,&hbo_proxy    ,"#|"   ,(t_newmethod)hbo_new    ,hbo_bang    }
-		,{ &hlo_class    ,&hlo_proxy    ,"#||"  ,(t_newmethod)hlo_new    ,hlo_bang    }
-		,{ &hls_class    ,&hls_proxy    ,"#<<"  ,(t_newmethod)hls_new    ,hls_bang    }
-		,{ &hrs_class    ,&hrs_proxy    ,"#>>"  ,(t_newmethod)hrs_new    ,hrs_bang    }
-		,{ &hfpc_class   ,&hfpc_proxy   ,"#f%"  ,(t_newmethod)hfpc_new   ,hfpc_bang   }
-		,{ &hpc_class    ,&hpc_proxy    ,"#%"   ,(t_newmethod)hpc_new    ,hpc_bang    }
-		,{ &hmod_class   ,&hmod_proxy   ,"#mod" ,(t_newmethod)hmod_new   ,hmod_bang   }
-		,{ &hdivm_class  ,&hdivm_proxy  ,"#div" ,(t_newmethod)hdivm_new  ,hdivm_bang  }
+		,{ &hba_class    ,&hba_proxy    ,"#&"    ,(t_newmethod)hba_new    ,hba_bang    }
+		,{ &hla_class    ,&hla_proxy    ,"#&&"   ,(t_newmethod)hla_new    ,hla_bang    }
+		,{ &hbo_class    ,&hbo_proxy    ,"#|"    ,(t_newmethod)hbo_new    ,hbo_bang    }
+		,{ &hlo_class    ,&hlo_proxy    ,"#||"   ,(t_newmethod)hlo_new    ,hlo_bang    }
+		,{ &hls_class    ,&hls_proxy    ,"#<<"   ,(t_newmethod)hls_new    ,hls_bang    }
+		,{ &hrs_class    ,&hrs_proxy    ,"#>>"   ,(t_newmethod)hrs_new    ,hrs_bang    }
+		,{ &hpc_class    ,&hpc_proxy    ,"#%"    ,(t_newmethod)hpc_new    ,hpc_bang    }
+		,{ &hfpc_class   ,&hfpc_proxy   ,"#f%"   ,(t_newmethod)hfpc_new   ,hfpc_bang   }
+		,{ &hmod_class   ,&hmod_proxy   ,"#mod"  ,(t_newmethod)hmod_new   ,hmod_bang   }
+		,{ &hfmod_class  ,&hfmod_proxy  ,"#fmod" ,(t_newmethod)hfmod_new  ,hfmod_bang  }
+		,{ &hdivm_class  ,&hdivm_proxy  ,"#div"  ,(t_newmethod)hdivm_new  ,hdivm_bang  }
 		,{ NULL ,NULL ,NULL ,NULL ,NULL }
-		,{ &hxor_class   ,&hxor_proxy   ,"#^"   ,(t_newmethod)hxor_new   ,hxor_bang   }
+		,{ &hxor_class   ,&hxor_proxy   ,"#^"    ,(t_newmethod)hxor_new   ,hxor_bang   }
 		,{ NULL ,NULL ,NULL ,NULL ,NULL }  } ,*obj = objs;
 
 	t_symbol *syms[] =
 	{	 gensym("hotbinops1") ,gensym("hotbinops2") ,gensym("hotbinops3")
 		,gensym("0x5e") ,NULL  } ,**sym = syms;
 
-	char alt[10] = "_";
+	char alt[11] = "_";
 	for (; *sym; sym++ ,obj++)
 	{	for (; obj->class; obj++)
 		{	*obj->class = class_new(gensym(obj->name) ,obj->new ,(t_method)hot_free
@@ -1150,7 +1186,7 @@ void blunt_setup(void) {
 	s_load  = gensym("!");
 	s_init  = gensym("$");
 	s_close = gensym("&");
-	char alt[5] = "`";
+	char alt[6] = "`";
 
 	/* ---------------- connectives --------------------- */
 
@@ -1214,32 +1250,33 @@ void blunt_setup(void) {
 
 	t_symbol *bsyms[] = { s_blunt ,gensym("0x5e") ,NULL } ,**bsym = bsyms;
 	const struct _obj bops[] =
-	{	 { &b1_plus_class  ,"+"   ,(t_newmethod)b1_plus_new  ,b1_plus_bang  }
-		,{ &b1_minus_class ,"-"   ,(t_newmethod)b1_minus_new ,b1_minus_bang }
-		,{ &b1_times_class ,"*"   ,(t_newmethod)b1_times_new ,b1_times_bang }
-		,{ &b1_div_class   ,"/"   ,(t_newmethod)b1_div_new   ,b1_div_bang   }
-		,{ &b1_log_class   ,"log" ,(t_newmethod)b1_log_new   ,b1_log_bang   }
-		,{ &b1_pow_class   ,"pow" ,(t_newmethod)b1_pow_new   ,b1_pow_bang   }
-		,{ &b1_max_class   ,"max" ,(t_newmethod)b1_max_new   ,b1_max_bang   }
-		,{ &b1_min_class   ,"min" ,(t_newmethod)b1_min_new   ,b1_min_bang   }
-		,{ &b2_ee_class    ,"=="  ,(t_newmethod)b2_ee_new    ,b2_ee_bang    }
-		,{ &b2_ne_class    ,"!="  ,(t_newmethod)b2_ne_new    ,b2_ne_bang    }
-		,{ &b2_gt_class    ,">"   ,(t_newmethod)b2_gt_new    ,b2_gt_bang    }
-		,{ &b2_lt_class    ,"<"   ,(t_newmethod)b2_lt_new    ,b2_lt_bang    }
-		,{ &b2_ge_class    ,">="  ,(t_newmethod)b2_ge_new    ,b2_ge_bang    }
-		,{ &b2_le_class    ,"<="  ,(t_newmethod)b2_le_new    ,b2_le_bang    }
-		,{ &b3_ba_class    ,"&"   ,(t_newmethod)b3_ba_new    ,b3_ba_bang    }
-		,{ &b3_la_class    ,"&&"  ,(t_newmethod)b3_la_new    ,b3_la_bang    }
-		,{ &b3_bo_class    ,"|"   ,(t_newmethod)b3_bo_new    ,b3_bo_bang    }
-		,{ &b3_lo_class    ,"||"  ,(t_newmethod)b3_lo_new    ,b3_lo_bang    }
-		,{ &b3_ls_class    ,"<<"  ,(t_newmethod)b3_ls_new    ,b3_ls_bang    }
-		,{ &b3_rs_class    ,">>"  ,(t_newmethod)b3_rs_new    ,b3_rs_bang    }
-		,{ &b3_fpc_class   ,"f%"  ,(t_newmethod)b3_fpc_new   ,b3_fpc_bang   }
-		,{ &b3_pc_class    ,"%"   ,(t_newmethod)b3_pc_new    ,b3_pc_bang    }
-		,{ &b3_mod_class   ,"mod" ,(t_newmethod)b3_mod_new   ,b3_mod_bang   }
-		,{ &b3_div_class   ,"div" ,(t_newmethod)b3_div_new   ,b3_div_bang   }
+	{	 { &b1_plus_class  ,"+"    ,(t_newmethod)b1_plus_new  ,b1_plus_bang  }
+		,{ &b1_minus_class ,"-"    ,(t_newmethod)b1_minus_new ,b1_minus_bang }
+		,{ &b1_times_class ,"*"    ,(t_newmethod)b1_times_new ,b1_times_bang }
+		,{ &b1_div_class   ,"/"    ,(t_newmethod)b1_div_new   ,b1_div_bang   }
+		,{ &b1_log_class   ,"log"  ,(t_newmethod)b1_log_new   ,b1_log_bang   }
+		,{ &b1_pow_class   ,"pow"  ,(t_newmethod)b1_pow_new   ,b1_pow_bang   }
+		,{ &b1_max_class   ,"max"  ,(t_newmethod)b1_max_new   ,b1_max_bang   }
+		,{ &b1_min_class   ,"min"  ,(t_newmethod)b1_min_new   ,b1_min_bang   }
+		,{ &b2_ee_class    ,"=="   ,(t_newmethod)b2_ee_new    ,b2_ee_bang    }
+		,{ &b2_ne_class    ,"!="   ,(t_newmethod)b2_ne_new    ,b2_ne_bang    }
+		,{ &b2_gt_class    ,">"    ,(t_newmethod)b2_gt_new    ,b2_gt_bang    }
+		,{ &b2_lt_class    ,"<"    ,(t_newmethod)b2_lt_new    ,b2_lt_bang    }
+		,{ &b2_ge_class    ,">="   ,(t_newmethod)b2_ge_new    ,b2_ge_bang    }
+		,{ &b2_le_class    ,"<="   ,(t_newmethod)b2_le_new    ,b2_le_bang    }
+		,{ &b3_ba_class    ,"&"    ,(t_newmethod)b3_ba_new    ,b3_ba_bang    }
+		,{ &b3_la_class    ,"&&"   ,(t_newmethod)b3_la_new    ,b3_la_bang    }
+		,{ &b3_bo_class    ,"|"    ,(t_newmethod)b3_bo_new    ,b3_bo_bang    }
+		,{ &b3_lo_class    ,"||"   ,(t_newmethod)b3_lo_new    ,b3_lo_bang    }
+		,{ &b3_ls_class    ,"<<"   ,(t_newmethod)b3_ls_new    ,b3_ls_bang    }
+		,{ &b3_rs_class    ,">>"   ,(t_newmethod)b3_rs_new    ,b3_rs_bang    }
+		,{ &b3_pc_class    ,"%"    ,(t_newmethod)b3_pc_new    ,b3_pc_bang    }
+		,{ &b3_fpc_class   ,"f%"   ,(t_newmethod)b3_fpc_new   ,b3_fpc_bang   }
+		,{ &b3_mod_class   ,"mod"  ,(t_newmethod)b3_mod_new   ,b3_mod_bang   }
+		,{ &b3_fmod_class  ,"fmod" ,(t_newmethod)b3_fmod_new  ,b3_fmod_bang  }
+		,{ &b3_div_class   ,"div"  ,(t_newmethod)b3_div_new   ,b3_div_bang   }
 		,{ NULL ,NULL ,NULL ,NULL }
-		,{ &b3_xor_class   ,"^"   ,(t_newmethod)b3_xor_new   ,b3_xor_bang   }
+		,{ &b3_xor_class   ,"^"    ,(t_newmethod)b3_xor_new   ,b3_xor_bang   }
 		,{ NULL ,NULL ,NULL ,NULL }  } ,*bop = bops;
 
 	for (; *bsym; bsym++ ,bop++) for (; bop->class; bop++)
