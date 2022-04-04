@@ -352,6 +352,7 @@ static void radix_save(t_gobj *z ,t_binbuf *b) {
 }
 
 static void radix_properties(t_gobj *z ,t_glist *owner) {
+	(void)owner;
 	t_radix *x = (t_radix*)z;
 	char buf[800];
 	t_symbol *srl[3];
@@ -388,6 +389,7 @@ static void radix_bang(t_radix *x) {
 }
 
 static void radix_dialog(t_radix *x ,t_symbol *s ,int argc ,t_atom *argv) {
+	(void)s;
 	t_symbol *srl[3];
 	int w          = atom_getfloatarg(0 ,argc ,argv);
 	int h          = atom_getfloatarg(1 ,argc ,argv);
@@ -422,6 +424,7 @@ static void radix_dialog(t_radix *x ,t_symbol *s ,int argc ,t_atom *argv) {
 }
 
 static void radix_motion(t_radix *x ,t_float dx ,t_float dy) {
+	(void)dx;
 	double k2 = 1. ,pwr = x->x_base * x->x_base ,fin = 1/pwr;
 	ufloat uf = {.f = x->x_val};
 	if (uf.ex > 150) k2 *= pow(2 ,uf.ex-150);
@@ -446,8 +449,10 @@ static void radix_float(t_radix *x ,t_float f) {
 		radix_bang(x);
 }
 
-static void radix_click(t_radix *x ,t_float xpos ,t_float ypos
-,t_float shift ,t_float ctrl ,t_float alt) {
+static void radix_click
+(t_radix *x ,t_float xpos ,t_float ypos ,t_float shift ,t_float ctrl ,t_float alt) {
+	(void)shift;
+	(void)ctrl;
 	if (alt)
 	{	if (x->x_val != 0)
 		{	x->x_tog = x->x_val;
@@ -460,6 +465,8 @@ static void radix_click(t_radix *x ,t_float xpos ,t_float ypos
 
 static int radix_newclick(t_gobj *z ,struct _glist *glist
 ,int xpix ,int ypix ,int shift ,int alt ,int dbl ,int doit) {
+	(void)glist;
+	(void)dbl;
 	t_radix* x = (t_radix*)z;
 	if (doit)
 	{	radix_click(x ,xpix ,ypix ,shift ,0 ,alt);
@@ -478,6 +485,7 @@ static int radix_newclick(t_gobj *z ,struct _glist *glist
 }
 
 static void radix_size(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	int w ,h;
 	w = atom_getintarg(0 ,ac ,av);
 	if (w < MINDIGITS)
@@ -502,6 +510,7 @@ static void radix_pos(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void radix_range(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (radix_check_minmax( x
 	,atom_getfloatarg(0 ,ac ,av) ,atom_getfloatarg(1 ,ac ,av)))
 	{	sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);
@@ -551,6 +560,7 @@ static void radix_loadbang(t_radix *x ,t_float action) {
 }
 
 static void radix_key(void *z ,t_symbol *keysym ,t_float fkey) {
+	(void)keysym;
 	t_radix *x = z;
 	char c = fkey;
 	char buf[3];
@@ -584,6 +594,7 @@ static void radix_key(void *z ,t_symbol *keysym ,t_float fkey) {
 }
 
 static void *radix_new(t_symbol *s ,int argc ,t_atom *argv) {
+	(void)s;
 	t_radixtcl *y = (t_radixtcl*)pd_new(radix_class);
 	t_radix *x = &y->z;
 	int w = 0 ,h = 22;
@@ -597,7 +608,7 @@ static void *radix_new(t_symbol *s ,int argc ,t_atom *argv) {
 	x->x_gui.x_fcol = PD_COLOR_FG;
 	x->x_gui.x_lcol = PD_COLOR_FG;
 
-	if (argc>=20)
+	if (argc >= 20)
 	{	w    = atom_getfloatarg(0  ,argc ,argv);
 		h    = atom_getfloatarg(1  ,argc ,argv);
 		min  = atom_getfloatarg(2  ,argc ,argv);
@@ -615,9 +626,9 @@ static void *radix_new(t_symbol *s ,int argc ,t_atom *argv) {
 		iemgui_all_loadcolors(&x->x_gui ,argv+13 ,argv+14 ,argv+15);
 		iemgui_new_getnames(&x->x_gui ,6 ,argv);  }
 	else iemgui_new_getnames(&x->x_gui ,6 ,0);
-	if (argc==21) log_height = atom_getfloatarg(20 ,argc ,argv);
+	if (argc == 21) log_height = atom_getfloatarg(20 ,argc ,argv);
 
-	if (argc>=1 && argc<=3)
+	if (argc >= 1 && argc <= 3)
 	{	base = atom_getfloatarg(0 ,argc ,argv);
 		prec = atom_getfloatarg(1 ,argc ,argv);
 		e    = atom_getfloatarg(2 ,argc ,argv);  }

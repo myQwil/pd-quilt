@@ -30,7 +30,8 @@ struct _pak {
 	int nptr;          /* number of pointers */
 };
 
-static t_pak *new_pak(t_class *cl ,t_class *pxy ,int ac ,t_atom *av ,int r) {
+static t_pak *new_pak(t_class *cl ,t_class *pxy ,t_symbol *s ,int ac ,t_atom *av ,int r) {
+	(void)s;
 	t_pak *x = (t_pak*)pd_new(cl);
 	t_atom defarg[2] ,*vp ,*ap;
 	t_gpointer *gp;
@@ -87,7 +88,7 @@ static t_pak *new_pak(t_class *cl ,t_class *pxy ,int ac ,t_atom *av ,int r) {
 					SETSYMBOL(vp ,ap->a_w.w_symbol);
 				else SETFLOAT(vp ,0);  }  }
 
-		int hasptr = (*tp==A_POINTER || *tp==A_GIMME);
+		int hasptr = (*tp == A_POINTER || *tp == A_GIMME);
 		if (i)
 		{	*pp = (t_pak_pxy*)pd_new(pxy);
 			(*pp)->x = x;
@@ -103,9 +104,9 @@ static t_pak *new_pak(t_class *cl ,t_class *pxy ,int ac ,t_atom *av ,int r) {
 }
 
 static const char *pak_check(t_atomtype type) {
-	if      (type==A_FLOAT)   return s_float.s_name;
-	else if (type==A_SYMBOL)  return s_symbol.s_name;
-	else if (type==A_POINTER) return s_pointer.s_name;
+	if      (type == A_FLOAT)   return s_float.s_name;
+	else if (type == A_SYMBOL)  return s_symbol.s_name;
+	else if (type == A_POINTER) return s_pointer.s_name;
 	else return "null";
 }
 
@@ -154,7 +155,7 @@ static void pak_pxy_bang(t_pak_pxy *p) {
 	t_atomtype type = x->type[i];
 	if (type == A_SYMBOL || type == A_GIMME)
 		SETSYMBOL(x->vec+i ,&s_bang);
-	else if ((x->mute>>i)&1) pak_error(x ,i ,s_bang.s_name);
+	else if ((x->mute >> i) & 1) pak_error(x ,i ,s_bang.s_name);
 }
 
 static inline void pak_p(t_pak *x ,t_gpointer *ptr ,t_gpointer *gp ,int i) {
@@ -165,7 +166,7 @@ static inline void pak_p(t_pak *x ,t_gpointer *ptr ,t_gpointer *gp ,int i) {
 		if (gp->gp_stub) gp->gp_stub->gs_refcount++;
 		SETPOINTER(x->vec+i ,ptr);
 		if (i == PAK_FIRST(x)) pak_bang(x);  }
-	else if ((x->mute>>i) & 1) pak_error(x ,i ,s_pointer.s_name);
+	else if ((x->mute >> i) & 1) pak_error(x ,i ,s_pointer.s_name);
 }
 
 
@@ -174,7 +175,7 @@ static inline void pak_f(t_pak *x ,t_float f ,int i) {
 	if (type == A_FLOAT || type == A_GIMME)
 	{	SETFLOAT(x->vec+i ,f);
 		if (i == PAK_FIRST(x)) pak_bang(x);  }
-	else if ((x->mute>>i) & 1) pak_error(x ,i ,s_float.s_name);
+	else if ((x->mute >> i) & 1) pak_error(x ,i ,s_float.s_name);
 }
 static void pak_float(t_pak *x ,t_float f) {
 	pak_f(x ,f ,PAK_FIRST(x));
@@ -189,7 +190,7 @@ static inline void pak_s(t_pak *x ,t_symbol *s ,int i) {
 	if (type == A_SYMBOL || type == A_GIMME)
 	{	SETSYMBOL(x->vec+i ,s);
 		if (i == PAK_FIRST(x)) pak_bang(x);  }
-	else if ((x->mute>>i) & 1) pak_error(x ,i ,s_symbol.s_name);
+	else if ((x->mute >> i) & 1) pak_error(x ,i ,s_symbol.s_name);
 }
 static void pak_symbol(t_pak *x ,t_symbol *s) {
 	pak_s(x ,s ,PAK_FIRST(x));
@@ -199,8 +200,8 @@ static void pak_pxy_symbol(t_pak_pxy *p ,t_symbol *s) {
 }
 
 
-static int pak_set(t_pak *x ,t_atom *v ,t_gpointer *p ,t_atom a ,t_atomtype t) {
-	if (t==a.a_type || t==A_GIMME)
+static int pak_set(t_atom *v ,t_gpointer *p ,t_atom a ,t_atomtype t) {
+	if (t == a.a_type || t == A_GIMME)
 	{	if (a.a_type == A_POINTER)
 		{	t_gpointer *gp = a.a_w.w_gpointer;
 			gpointer_unset(p);
@@ -212,12 +213,14 @@ static int pak_set(t_pak *x ,t_atom *v ,t_gpointer *p ,t_atom a ,t_atomtype t) {
 	else return 0;
 }
 
-static inline int pak_l(t_pak *x ,t_symbol *s ,int ac ,t_atom *av ,int i);
+static inline int pak_l(t_pak *x ,int ac ,t_atom *av ,int i);
 static void pak_list(t_pak *x ,t_symbol *s ,int ac ,t_atom *av) {
-	if (pak_l(x ,0 ,ac ,av ,PAK_FIRST(x))) pak_bang(x);
+	(void)s;
+	if (pak_l(x ,ac ,av ,PAK_FIRST(x))) pak_bang(x);
 }
 static void pak_pxy_list(t_pak_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
-	pak_l(p->x ,s ,ac ,av ,PAK_INDEX(p));
+	(void)s;
+	pak_l(p->x ,ac ,av ,PAK_INDEX(p));
 }
 
 
@@ -225,7 +228,7 @@ static inline int pak_a(t_pak *x ,t_symbol *s ,int ac ,t_atom *av ,int j) {
 	t_atom atoms[ac+1];
 	atoms[0] = (t_atom){.a_type=A_SYMBOL ,.a_w={.w_symbol = s}};
 	memcpy(atoms+1 ,av ,ac * sizeof(t_atom));
-	int result = pak_l(x ,0 ,ac+1 ,atoms ,j);
+	int result = pak_l(x ,ac+1 ,atoms ,j);
 	return result;
 }
 static void pak_anything(t_pak *x ,t_symbol *s ,int ac ,t_atom *av) {

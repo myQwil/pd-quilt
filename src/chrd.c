@@ -55,6 +55,7 @@ static void chrd_bang(t_chrd *y) {
 }
 
 static void *chrd_new(t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	int n = ac < 3 ? 3 : ac;
 	t_chrd *y = (t_chrd*)music_new(chrd_class ,n);
 	t_music *x = &y->z;

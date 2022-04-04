@@ -23,6 +23,7 @@ static void rng_makeseed(t_rng *x) {
 }
 
 static void rng_seed(t_rng *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	x->state = ac ? (unsigned)atom_getfloat(av) : rng_time();
 }
 

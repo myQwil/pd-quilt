@@ -19,12 +19,14 @@ static void rind_bang(t_rind *x) {
 }
 
 static void rind_list(t_rind *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	switch (ac)
 	{	case 2: if (av[1].a_type == A_FLOAT) x->min = av[1].a_w.w_float;
 		case 1: if (av[0].a_type == A_FLOAT) x->max = av[0].a_w.w_float;  }
 }
 
 static void *rind_new(t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	t_rind *y = (t_rind*)pd_new(rind_class);
 	t_rng  *x = &y->z;
 	outlet_new(&x->obj ,&s_float);

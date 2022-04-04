@@ -18,7 +18,7 @@ static void sly_float(t_slope *x ,t_float f) {
 }
 
 static void *sly_new(t_symbol *s ,int argc ,t_atom *argv) {
-	return (slope_new(sly_class ,argc ,argv));
+	return (slope_new(sly_class ,s ,argc ,argv));
 }
 
 void sly_setup(void) {

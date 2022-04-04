@@ -60,6 +60,7 @@ static void chrono_lap(t_chrono *x) {
 }
 
 static void chrono_pause(t_chrono *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (ac && av->a_type == A_FLOAT)
 	{	int pause = !!av->a_w.w_float;
 		if (x->pause == pause) return;
@@ -76,6 +77,7 @@ static void chrono_pause(t_chrono *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void chrono_tempo(t_chrono *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (!x->pause)
 	{	x->setmore += timesince(x->settime ,x->unit ,x->samps);
 		x->lapmore += timesince(x->laptime ,x->unit ,x->samps);
@@ -90,6 +92,7 @@ static void chrono_tempo(t_chrono *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void *chrono_new(t_symbol *s ,int argc ,t_atom *argv) {
+	(void)s;
 	t_chrono *x = (t_chrono*)pd_new(chrono_class);
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_bang ,gensym("bang2"));
 	outlet_new(&x->obj ,&s_float);

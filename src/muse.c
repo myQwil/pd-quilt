@@ -19,6 +19,7 @@ static void music_f(t_music *x ,t_float f ,char c ,t_float g) {
 }
 
 static void muse_slice(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	t_music *x = &y->z;
 	int n = x->siz;
 	int strt=0 ,stop=n ,step=0;
@@ -80,6 +81,7 @@ static void muse_send(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void *muse_new(t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	int n = ac < 2 ? 2 : ac;
 	t_muse *y = (t_muse*)music_new(muse_class ,n);
 	t_music *x = &y->z;

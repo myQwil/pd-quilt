@@ -15,10 +15,12 @@ static void tone_tet(t_tone *x ,t_float f) {
 }
 
 static void tone_list(t_tone *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	note_set(&x->note ,ac ,av);
 }
 
-static t_tone *tone_new(t_class *cl ,int argc ,t_atom *argv) {
+static t_tone *tone_new(t_class *cl ,t_symbol *s ,int argc ,t_atom *argv) {
+	(void)s;
 	t_tone *x = (t_tone*)pd_new(cl);
 	outlet_new(&x->obj ,&s_float);
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("ref"));

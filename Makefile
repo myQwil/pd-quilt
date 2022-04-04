@@ -37,6 +37,4 @@ endef
 # FFplay
 ffplay~.class.ldlibs = -lsamplerate -lavutil -lavcodec -lavformat -lswresample
 
-suppress-wunused = yes
-
 include pd-lib-builder/Makefile.pdlibbuilder

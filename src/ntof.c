@@ -8,7 +8,7 @@ static void ntof_float(t_tone *x ,t_float f) {
 }
 
 static void *ntof_new(t_symbol *s ,int argc ,t_atom *argv) {
-	return (tone_new(ntof_class ,argc ,argv));
+	return (tone_new(ntof_class ,s ,argc ,argv));
 }
 
 void ntof_setup(void) {

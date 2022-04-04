@@ -94,6 +94,7 @@ static int rand_z(t_rand *x ,int i ,int ac ,t_atom *av) {
 }
 
 static void rand_list(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	x->siz = rand_z(x ,0 ,ac ,av);
 }
 
@@ -110,6 +111,7 @@ static void rand_anything(t_rand *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	t_rand *y = (t_rand*)pd_new(rand_class);
 	t_rng *x = &y->z;
 	outlet_new(&x->obj ,&s_float);
@@ -117,7 +119,7 @@ static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
 	y->mode = c > 2 ? M_LIST : M_RANGE;
 
 	// 3 args with a symbol in the middle creates a small list (ex: 7 or 9)
-	if (ac==3 && av[1].a_type != A_FLOAT)
+	if (ac == 3 && av[1].a_type != A_FLOAT)
 	{	av[1] = av[2];
 		c = 2;  }
 	y->siz = c;

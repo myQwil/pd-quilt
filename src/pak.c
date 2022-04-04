@@ -5,7 +5,7 @@ static t_class *pak_class;
 static t_class *pak_proxy;
 
 static void *pak_new(t_symbol *s ,int argc ,t_atom *argv) {
-	return (new_pak(pak_class ,pak_proxy ,argc ,argv ,0));
+	return (new_pak(pak_class ,pak_proxy ,s ,argc ,argv ,0));
 }
 
 static void pak_pointer(t_pak *x ,t_gpointer *gp) {
@@ -16,16 +16,16 @@ static void pak_pxy_pointer(t_pak_pxy *p ,t_gpointer *gp) {
 	pak_p(p->x ,p->ptr ,gp ,p->idx);
 }
 
-static int pak_l(t_pak *x ,t_symbol *s ,int ac ,t_atom *av ,int i) {
+static int pak_l(t_pak *x ,int ac ,t_atom *av ,int i) {
 	int ins = x->n - i ,result = 1;
 	t_atom *vp     = x->vec  + i;
 	t_atomtype *tp = x->type + i;
 	t_pak_pxy **pp = x->ins  + (i-1);
 	for (; ac-- && ins--; i++ ,vp++ ,tp++ ,pp++ ,av++)
-	{	if (av->a_type==A_SYMBOL && !strcmp(av->a_w.w_symbol->s_name ,"."))
+	{	if (av->a_type == A_SYMBOL && !strcmp(av->a_w.w_symbol->s_name ,"."))
 			continue;
 		t_gpointer *ptr = i ? (*pp)->ptr : x->ptr;
-		if (!pak_set(x ,vp ,ptr ,*av ,*tp) && ((x->mute>>i) & 1))
+		if (!pak_set(vp ,ptr ,*av ,*tp) && ((x->mute >> i) & 1))
 		{	if (i) pd_error(x ,"inlet: expected '%s' but got '%s'"
 				,pak_check(*tp) ,pak_check(av->a_type));
 			else

@@ -49,6 +49,7 @@ static void delp_time(t_delp *x) {
 }
 
 static void delp_pause(t_delp *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (x->stop) return;
 	if (ac && av->a_type == A_FLOAT)
 	{	int pause = !!av->a_w.w_float;
@@ -68,6 +69,7 @@ static void delp_pause(t_delp *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void delp_tempo(t_delp *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (!x->stop && !x->pause)
 	{	x->remtime -= timesince(x->settime ,x->unit ,x->samps);
 		x->settime = clock_getlogicaltime();  }
@@ -100,6 +102,7 @@ static void delp_float(t_delp *x ,t_float f) {
 }
 
 static void *delp_new(t_symbol *s ,int argc ,t_atom *argv) {
+	(void)s;
 	t_delp *x = (t_delp*)pd_new(delp_class);
 	inlet_new(&x->obj ,&x->obj.ob_pd ,gensym("float") ,gensym("ft1"));
 	outlet_new(&x->obj ,gensym("bang"));

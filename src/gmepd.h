@@ -99,11 +99,13 @@ static inline int domask(int mask ,int voices ,int ac ,t_atom *av) {
 }
 
 static void gmepd_mute(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	x->mask = domask(x->mask ,x->voices ,ac ,av);
 	if (x->emu) gme_mute_voices(x->emu ,x->mask);
 }
 
 static void gmepd_solo(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	int mask = domask(~0 ,x->voices ,ac ,av);
 	mask &= (1 << x->voices) - 1;
 	x->mask = (x->mask == mask ? 0 : mask);
@@ -111,6 +113,7 @@ static void gmepd_solo(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void gmepd_mask(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (ac && av->a_type == A_FLOAT)
 	{	x->mask = av->a_w.w_float;
 		if (x->emu) gme_mute_voices(x->emu ,x->mask);  }
@@ -174,11 +177,11 @@ static inline t_float gmepd_length(t_gme *x) {
 }
 
 static inline t_atom gmepd_ftime(t_gme *x) {
-	int ms  = gmepd_length(x);
+	int ms = gmepd_length(x);
 	if (ms < 0) ms = 0;
 	if (x->info->fade_length > 0)
 		ms += x->info->fade_length;
-	return player_ftime(&x->z ,ms);
+	return player_ftime(ms);
 }
 
 static const t_symbol *dict[15];
@@ -187,7 +190,7 @@ static t_atom gmepd_meta(void *y ,t_symbol *s) {
 	t_gme *x = (t_gme*)y;
 	t_atom meta;
 	if      (s == dict[0])  SETSYMBOL(&meta ,x->path);
-	else if (s == dict[1])  meta = player_time(&x->z ,gmepd_length(x));
+	else if (s == dict[1])  meta = player_time(gmepd_length(x));
 	else if (s == dict[2])  meta = gmepd_ftime(x);
 	else if (s == dict[3])  SETFLOAT (&meta ,x->info->fade_length);
 	else if (s == dict[4])  SETFLOAT (&meta ,gme_track_count(x->emu));
@@ -198,7 +201,7 @@ static t_atom gmepd_meta(void *y ,t_symbol *s) {
 		int m = x->mask;
 		int v = x->voices;
 		for (int i = 0; i < v; i++ ,b++)
-			*b = ((m>>i)&1) + '0';
+			*b = ((m >> i) & 1) + '0';
 		*b = '\0';
 		SETSYMBOL(&meta ,gensym(buf));  }
 
@@ -214,6 +217,7 @@ static t_atom gmepd_meta(void *y ,t_symbol *s) {
 }
 
 static void gmepd_info(t_gme *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (!x->z.open) return post("No file opened.");
 	if (ac) return player_info_custom(&x->z ,ac ,av);
 
@@ -243,6 +247,7 @@ static void gmepd_stop(t_gme *x) {
 }
 
 static void *gmepd_new(t_class *gmeclass ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	t_gme *x = (t_gme*)player_new(gmeclass ,NCH);
 	t_inlet *in3 = signalinlet_new(&x->z.obj ,1.);
 	x->tempo = &in3->i_un.iu_floatsignalvalue;

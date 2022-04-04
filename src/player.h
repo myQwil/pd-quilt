@@ -51,11 +51,11 @@ static void player_interp(t_player *x ,t_float f) {
 		x->open = x->play = 0;  }
 }
 
-static inline t_atom player_time(t_player *x ,t_float ms) {
+static inline t_atom player_time(t_float ms) {
 	return (t_atom){ .a_type=A_FLOAT ,.a_w={.w_float = ms} };
 }
 
-static inline t_atom player_ftime(t_player *x ,int64_t ms) {
+static inline t_atom player_ftime(int64_t ms) {
 	char time[33] ,*t = time;
 	int64_t min =  ms / 60000;
 	int     sec = (ms - 60000 * min) / 1000;
@@ -103,10 +103,13 @@ static void player_send(t_player *x ,t_symbol *s) {
 }
 
 static void player_anything(t_player *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)ac;
+	(void)av;
 	player_send(x ,s);
 }
 
 static void player_play(t_player *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (!x->open) return post("No file opened.");
 	if (ac && av->a_type == A_FLOAT)
 	{	int play = !!av->a_w.w_float;

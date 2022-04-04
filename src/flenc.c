@@ -45,6 +45,7 @@ static void flenc_float(t_flenc *x ,t_float f) {
 }
 
 static void flenc_set(t_flenc *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (ac>3) ac = 3;
 	switch (ac)
 	{ case 3: if ((av+2)->a_type == A_FLOAT)

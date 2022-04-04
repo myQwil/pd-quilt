@@ -14,6 +14,7 @@ static void has_bang(t_has *x) {
 }
 
 static void has_list(t_has *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	int found = 0;
 	t_atomtype type = x->a.a_type;
 	for (; ac--; av++)
@@ -26,10 +27,12 @@ static void has_list(t_has *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void has_set(t_has *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (ac) x->a = *av;
 }
 
 static void *has_new(t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	t_has *x = (t_has*)pd_new(has_class);
 	outlet_new (&x->obj ,&s_float);
 	inlet_new  (&x->obj ,&x->obj.ob_pd ,&s_list ,gensym("set"));

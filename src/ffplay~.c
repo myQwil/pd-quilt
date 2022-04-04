@@ -310,8 +310,8 @@ static t_atom ffplay_meta(void *y ,t_symbol *s) {
 	{	const char *name = strrchr(x->ic->url ,'/');
 		name = name ? name+1 : x->ic->url;
 		SETSYMBOL(&meta ,gensym(name));  }
-	else if (s == dict[3]) meta = player_time(&x->z ,x->ic->duration / 1000);
-	else if (s == dict[4]) meta = player_ftime(&x->z ,x->ic->duration / 1000);
+	else if (s == dict[3]) meta = player_time(x->ic->duration / 1000.);
+	else if (s == dict[4]) meta = player_ftime(x->ic->duration / 1000);
 	else if (s == dict[5]) SETFLOAT (&meta ,x->plist.siz);
 	else if (s == dict[6]) SETSYMBOL(&meta
 		,gensym(av_get_sample_fmt_name(x->a.ctx->sample_fmt)));
@@ -336,6 +336,7 @@ static t_atom ffplay_meta(void *y ,t_symbol *s) {
 }
 
 static void ffplay_info(t_ffplay *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (!x->z.open) return post("No file opened.");
 	if (ac) return player_info_custom(&x->z ,ac ,av);
 
@@ -368,6 +369,7 @@ static void ffplay_stop(t_ffplay *x) {
 }
 
 static void *ffplay_new(t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	t_atom defarg[2];
 	if (!ac)
 	{	ac = 2;

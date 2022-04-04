@@ -22,7 +22,7 @@ static t_int *tabread2_perform(t_int *w) {
 	double onset = y->onset;
 
 	maxindex = y->npoints - 3;
-	if(maxindex<0) goto zero;
+	if (maxindex < 0) goto zero;
 
 	if (!buf) goto zero;
 

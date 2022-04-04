@@ -28,6 +28,8 @@ static void is_bang(t_is *x) {
 }
 
 static void is_anything(t_is *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)ac;
+	(void)av;
 	int result = (x->type == s);
 	outlet_float(x->obj.ob_outlet ,result);
 }
@@ -45,10 +47,13 @@ static t_symbol *is_check(t_symbol *s) {
 }
 
 static void is_pxy_anything(t_is_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)ac;
+	(void)av;
 	p->x->type = is_check(s);
 }
 
 static void is_set(t_is *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (!ac) return;
 	if      (av->a_type == A_SYMBOL)  x->type = is_check(av->a_w.w_symbol);
 	else if (av->a_type == A_FLOAT)   x->type = &s_float;

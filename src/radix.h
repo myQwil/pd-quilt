@@ -213,7 +213,7 @@ static void radix_ftoa(t_radix *x) {
 		  ? x->x_numwidth-neg : x->x_prec;
 
 	y = frexpl(y ,&e2) * 2;
-	if (y) y *= (1<<xt) ,e2-=tx;
+	if (y) y *= (1 << xt) ,e2-=tx;
 
 	if (e2<0) a=r=z=big;
 	else a=r=z=big+sizeof(big)/sizeof(*big) - LDBL_MANT_DIG - 1;
@@ -226,8 +226,8 @@ static void radix_ftoa(t_radix *x) {
 	while (e2>0)
 	{	uint32_t carry=0;
 		int sh=MIN(tx,e2);
-		for (d=z-1; d>=a; d--)
-		{	uint64_t u = ((uint64_t)*d<<sh)+carry;
+		for (d=z-1; d >= a; d--)
+		{	uint64_t u = ((uint64_t)*d << sh)+carry;
 			*d = u % pwr;
 			carry = u / pwr;  }
 		if (carry) *--a = carry;
@@ -238,9 +238,9 @@ static void radix_ftoa(t_radix *x) {
 	{	uint32_t carry=0 ,*b;
 		int sh=MIN(bx,-e2) ,need=1+(p+LDBL_MANT_DIG/3U+xb)/bx;
 		for (d=a; d<z; d++)
-		{	uint32_t rm = *d & ((1<<sh)-1);
-			*d = (*d>>sh) + carry;
-			carry = (pwr>>sh) * rm;  }
+		{	uint32_t rm = *d & ((1 << sh)-1);
+			*d = (*d >> sh) + carry;
+			carry = (pwr >> sh) * rm;  }
 		if (!*a) a++;
 		if (carry) *z++ = carry;
 		/* Avoid (slow!) computation past requested precision */
@@ -248,7 +248,7 @@ static void radix_ftoa(t_radix *x) {
 		if (z-b > need) z = b+need;
 		e2+=sh;  }
 
-	if (a<z) for (i=radx ,e=bx*(r-a); (int)*a>=i; i*=radx ,e++);
+	if (a<z) for (i=radx ,e=bx*(r-a); (int)*a >= i; i*=radx ,e++);
 	else e=0;
 
 	/* Perform rounding: j is precision after the radix (possibly neg) */
@@ -262,80 +262,80 @@ static void radix_ftoa(t_radix *x) {
 		for (i=radx ,j++; j<bx; i*=radx ,j++);
 		u = *d % i;
 		/* Are there any significant digits past j? */
-		if (u || d+1!=z)
+		if (u || d+1 != z)
 		{	long double round = 2/LDBL_EPSILON;
 			long double small;
-			if ((*d/i & 1) || (i==(int)pwr && d>a && (d[-1]&1)))
+			if ((*d / i & 1) || (i == (int)pwr && d > a && (d[-1] & 1)))
 				round += 2;
-			if      ((int)u< i/2)           small=0x0.8p0;
-			else if ((int)u==i/2 && d+1==z) small=0x1.0p0;
+			if      ((int)u <  i/2)             small=0x0.8p0;
+			else if ((int)u == i/2 && d+1 == z) small=0x1.0p0;
 			else                       small=0x1.8p0;
-			if (neg) round*=-1 ,small*=-1;
+			if (neg) round *= -1 ,small *= -1;
 			*d -= u;
 			/* Decide whether to round by probing round+small */
 			if (round+small != round)
 			{	*d = *d + i;
 				while (*d > pwr-1)
-				{	*d--=0;
-					if (d<a) *--a=0;
+				{	*d-- = 0;
+					if (d < a) *--a = 0;
 					(*d)++;  }
-				for (i=radx ,e=bx*(r-a); (int)*a>=i; i*=radx ,e++);  }  }
-		if (z>d+1) z=d+1;  }
+				for (i = radx ,e = bx*(r - a); (int)*a >= i; i *= radx ,e++);  }  }
+		if (z > d+1) z = d+1;  }
 
-	for (; z>a && !z[-1]; z--);
+	for (; z > a && !z[-1]; z--);
 
 	if (!p) p++;
-	if (p>e && e>=-4)
-	{	t--; p-=e+1;  }
+	if (p > e && e >= -4)
+	{	t--; p -= e+1;  }
 	else
-	{	t-=2; p--;  }
+	{	t -= 2; p--;  }
 
 	/* Count trailing zeros in last place */
-	if (z>a && z[-1]) for (i=radx ,j=0; z[-1]%i==0; i*=radx ,j++);
+	if (z > a && z[-1]) for (i = radx ,j = 0; z[-1] % i == 0; i *= radx ,j++);
 	else j=bx;
-	if ((t|32)=='f')
-		p = MIN(p,MAX(0,bx*(z-r-1)-j));
+	if ((t|32) == 'f')
+		p = MIN(p ,MAX(0 ,bx * (z-r-1) - j));
 	else
-		p = MIN(p,MAX(0,bx*(z-r-1)+e-j));
+		p = MIN(p ,MAX(0 ,bx * (z-r-1) + e-j));
 
-	if ((t|32)!='f')
+	if ((t | 32) != 'f')
 	{	int erad = x->x_e;
-		estr=fmt_u(e<0 ? -e : e ,ebuf ,erad);
-		while(ebuf-estr<LEAD) *--estr='0';
-		*--estr = (e<0 ? '-' : '+');
+		estr=fmt_u(e < 0 ? -e : e ,ebuf ,erad);
+		while (ebuf-estr < LEAD) *--estr = '0';
+		*--estr = (e < 0 ? '-' : '+');
 		*--estr = '^';  }
 
 	char *num = x->x_buf ,*dec=0 ,*nxt=0;
-	unsigned ni=0;
+	unsigned ni = 0;
 	out(num ,&ni ,"-" ,neg);
 
-	if ((t|32)=='f')
-	{	if (a>r) a=r;
-		for (d=a; d<=r; d++)
+	if ((t | 32)=='f')
+	{	if (a > r) a = r;
+		for (d = a; d <= r; d++)
 		{	char *s = fmt_u(*d ,buf+bx ,radx);
-			if (d!=a) while (s>buf) *--s='0';
-			else if (s==buf+bx) *--s='0';
-			out(num ,&ni ,s ,buf+bx-s);  }
+			if (d != a) while (s > buf) *--s = '0';
+			else if (s == buf+bx) *--s = '0';
+			out(num ,&ni ,s ,buf+bx - s);  }
 		if (p)
 		{	dec = num+ni;
 			out(num ,&ni ,"." ,1);  }
-		for (; d<z && p>0; d++ ,p-=bx)
+		for (; d < z && p > 0; d++ ,p -= bx)
 		{	char *s = fmt_u(*d ,buf+bx ,radx);
-			while (s>buf) *--s='0';
-			out(num ,&ni ,s ,MIN(bx,p));  }  }
+			while (s > buf) *--s = '0';
+			out(num ,&ni ,s ,MIN(bx ,p));  }  }
 	else
-	{	if (z<=a) z=a+1;
-		for (d=a; d<z && p>=0; d++)
+	{	if (z <= a) z = a+1;
+		for (d = a; d < z && p >= 0; d++)
 		{	char *s = fmt_u(*d ,buf+bx ,radx);
-			if (s==buf+bx) *--s='0';
-			if (d!=a) while (s>buf) *--s='0';
+			if (s == buf+bx) *--s = '0';
+			if (d != a) while (s > buf) *--s = '0';
 			else
 			{	out(num ,&ni ,s++ ,1);
-				if (p>0)
+				if (p > 0)
 				{	dec = num+ni;
 					out(num ,&ni ,"." ,1);  }  }
-			out(num ,&ni ,s ,MIN(buf+bx-s ,p));
-			p -= buf+bx-s;  }
+			out(num ,&ni ,s ,MIN(buf+bx - s ,p));
+			p -= buf+bx - s;  }
 		nxt = num+ni;
 		out(num ,&ni ,estr ,ebuf-estr);  }
 	num[ni] = '\0';
@@ -364,14 +364,14 @@ static int radix_check_minmax(t_radix *x ,double min ,double max) {
 	int ret = 0;
 	double fine = 1. / (x->x_base * x->x_base);
 	if (x->x_lilo)
-	{	if (min==0. && max==0.) max = 1.;
+	{	if (min == 0. && max == 0.) max = 1.;
 		if (max > 0.)
 		{	if (min <= 0.) min = fine * max;  }
 		else
 		{	if (min >  0.) max = fine * min;  }  }
 	x->x_min = min;
 	x->x_max = max;
-	if (!x->x_lilo && min==0. && max==0.)
+	if (!x->x_lilo && min == 0. && max == 0.)
 		return (ret);
 	if (x->x_val < x->x_min)
 	{	x->x_val = x->x_min;
@@ -414,6 +414,7 @@ static void radix_lin(t_radix *x) {
 }
 
 static void radix_list(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (!ac) pd_bang((t_pd*)x);
 	else if (IS_A_FLOAT(av ,0))
 	{	radix_set(x ,atom_getfloatarg(0 ,ac ,av));

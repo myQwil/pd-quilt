@@ -69,6 +69,7 @@ static void linp_tilde_stop(t_linp *x) {
 }
 
 static void linp_tilde_pause(t_linp *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (x->target == x->value)
 		return;
 	if (ac && av->a_type == A_FLOAT)
@@ -92,7 +93,7 @@ static void linp_tilde_float(t_linp *x ,t_float f) {
 }
 
 static void linp_tilde_dsp(t_linp *x ,t_signal **sp) {
-	if(sp[0]->s_n&7)
+	if (sp[0]->s_n & 7)
 	     dsp_add(linp_tilde_perform ,3 ,x ,sp[0]->s_vec ,(t_int)sp[0]->s_n);
 	else dsp_add(linp_tilde_perf8   ,3 ,x ,sp[0]->s_vec ,(t_int)sp[0]->s_n);
 	x->coefn = 1./sp[0]->s_n;

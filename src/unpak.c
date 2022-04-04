@@ -4,22 +4,23 @@
 static t_class *unpak_class;
 
 static void *unpak_new(t_symbol *s ,int argc ,t_atom *argv) {
-	return (new_unpak(unpak_class ,argc ,argv ,0));
+	return (new_unpak(unpak_class ,s ,argc ,argv ,0));
 }
 
 static void unpak_list(t_unpak *x ,t_symbol *s ,int argc ,t_atom *argv) {
+	(void)s;
 	t_atom *ap;
 	t_unpakout *u;
 	int i;
 	if (argc > x->n) argc = (int)x->n;
 	for (i = argc ,u = x->vec + i ,ap = argv + i; u-- ,ap-- ,i--;)
-	{	if (ap->a_type==A_SYMBOL && !strcmp(ap->a_w.w_symbol->s_name ,"."))
+	{	if (ap->a_type == A_SYMBOL && !strcmp(ap->a_w.w_symbol->s_name ,"."))
 			continue;
 
 		t_atomtype type = u->type;
 		if (type == A_GIMME) type = ap->a_type;
 		else if (type != ap->a_type)
-		{	if ((x->mute>>i)&1) pd_error(x ,"unpak: type mismatch");
+		{	if ((x->mute >> i) & 1) pd_error(x ,"unpak: type mismatch");
 			continue;  }
 
 		if (type == A_FLOAT)

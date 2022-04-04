@@ -45,6 +45,7 @@ static void linp_stop(t_linp *x) {
 }
 
 static void linp_pause(t_linp *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (x->setval == x->targetval)
 		return;
 	if (ac && av->a_type == A_FLOAT)

@@ -13,7 +13,8 @@ typedef struct {
 	int n;
 } t_unpak;
 
-static t_unpak *new_unpak(t_class *cl ,int ac ,t_atom *av ,int r) {
+static t_unpak *new_unpak(t_class *cl ,t_symbol *s ,int ac ,t_atom *av ,int r) {
+	(void)s;
 	t_unpak *x = (t_unpak*)pd_new(cl);
 	t_atom defarg[2] ,*ap;
 	t_unpakout *u;

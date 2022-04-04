@@ -36,7 +36,7 @@ static inline t_float music_interval(t_music *x ,t_float *fp ,t_float f) {
 
 static inline t_float music_getfloat(t_music *x ,t_float *temp ,const char *cp) {
 	// ampersand before the number means it's a reference to the scale by index
-	int ref = (*cp=='&');
+	int ref = (*cp == '&');
 	t_float f = cp[ref] ? strtof(cp+ref ,0) : 1;
 	if (ref) f = music_interval(x ,temp ,f);
 	return f;
@@ -105,7 +105,7 @@ static int music_scale(t_music *x ,t_flin *flin ,int n ,int ac ,t_atom *av) {
 				else z = m;  }
 
 			char c = cp[0];
-			if (c=='&')
+			if (c == '&')
 				*fp = music_interval(x ,temp ,(cp[1] ? strtof(cp+1 ,0) : 1));
 			else if (isoperator(c))
 			{	if (cp[0] == cp[1]) // ++, --, etc.
@@ -115,7 +115,7 @@ static int music_scale(t_music *x ,t_flin *flin ,int n ,int ac ,t_atom *av) {
 						music_operate(fp ,c ,f);
 					continue;  }
 				else music_operate(fp ,c ,music_getfloat(x ,temp ,cp+1));  }
-			else if (c=='<' || c=='>') // scale inversion
+			else if (c == '<' || c == '>') // scale inversion
 			{	int mvrt = cp[0] == cp[1]; // << or >> moves the root
 				cp += 1 + mvrt;
 				t_float f = (c-'=') * (*cp ? strtof(cp ,0) : 1); // direction and amount
@@ -187,6 +187,7 @@ static inline int music_z(t_music *x ,t_flin *flin ,int i ,int ac ,t_atom *av) {
 }
 
 static void music_list(t_music *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	int n = music_z(x ,&x->flin ,0 ,ac ,av);
 	if (n) x->siz = n;
 }
@@ -203,7 +204,7 @@ static int music_any(t_music *x ,t_flin *flin ,t_symbol *s ,int ac ,t_atom *av) 
 	if (!ac)
 	{	char *p;
 		t_float f = strtof(cp ,&p);
-		if (cp!=p && p[0]!=p[1] && isoperator(*p)) // interval ± semitones
+		if (cp != p && p[0] != p[1] && isoperator(*p)) // interval ± semitones
 			music_f(x ,f ,*p ,strtof(p+1 ,0));
 		else
 		{	t_atom atom = {.a_type=A_SYMBOL ,.a_w={.w_symbol = s}};
@@ -261,6 +262,7 @@ static void music_octet(t_music *x ,t_float f) {
 }
 
 static void music_set(t_music *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	note_set(&x->note ,ac ,av);
 }
 

@@ -8,7 +8,7 @@ static t_class *rpak_class;
 static t_class *rpak_proxy;
 
 static void *rpak_new(t_symbol *s ,int argc ,t_atom *argv) {
-	return (new_pak(rpak_class ,rpak_proxy ,argc ,argv ,1));
+	return (new_pak(rpak_class ,rpak_proxy ,s ,argc ,argv ,1));
 }
 
 static void rpak_pointer(t_pak *x ,t_gpointer *gp) {
@@ -24,16 +24,16 @@ static void rpak_pxy_pointer(t_pak_pxy *p ,t_gpointer *gp) {
 	pak_p(x ,ptr ,gp ,i);
 }
 
-static int pak_l(t_pak *x ,t_symbol *s ,int ac ,t_atom *av ,int i) {
+static int pak_l(t_pak *x ,int ac ,t_atom *av ,int i) {
 	int result = 1;
-	t_atom *vp     = x->vec  + i;
+	t_atom     *vp = x->vec  + i;
 	t_atomtype *tp = x->type + i;
 	t_pak_pxy **pp = x->ins  + (i-1);
 	for (i++; ac-- && i--; vp-- ,tp-- ,pp-- ,av++)
-	{	if (av->a_type==A_SYMBOL && !strcmp(av->a_w.w_symbol->s_name ,"."))
+	{	if (av->a_type == A_SYMBOL && !strcmp(av->a_w.w_symbol->s_name ,"."))
 			continue;
 		t_gpointer *ptr = i ? (*pp)->ptr : x->ptr;
-		if (!pak_set(x ,vp ,ptr ,*av ,*tp) && ((x->mute>>i) & 1))
+		if (!pak_set(vp ,ptr ,*av ,*tp) && ((x->mute >> i) & 1))
 		{	if (i >= x->n-1)
 			{	pd_error(x ,"@pak_%s: wrong type" ,pak_check(av->a_type));
 				result = 0;  }

@@ -28,6 +28,7 @@ static void num_symbol(t_num *x ,t_symbol *s) {
 }
 
 static t_num *num_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	t_num *x = (t_num*)pd_new(cl);
 	blunt_init(&x->bl ,&ac ,av);
 	x->f = atom_getfloatarg(0 ,ac ,av);
@@ -449,6 +450,7 @@ static void b_bang(t_bng *x) {
 }
 
 static void *b_new(t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	t_bng *x = (t_bng*)pd_new(bng_class);
 	blunt_init(&x->bl ,&ac ,av);
 	outlet_new(&x->bl.obj ,&s_bang);
@@ -488,10 +490,13 @@ static void sym_symbol(t_sym *x ,t_symbol *s) {
 }
 
 static void sym_anything(t_sym *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)ac;
+	(void)av;
 	outlet_symbol(x->bl.obj.ob_outlet ,x->sym = s);
 }
 
 static void sym_list(t_sym *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (!ac)
 		sym_bang(x);
 	else if (av->a_type == A_SYMBOL)
@@ -500,6 +505,7 @@ static void sym_list(t_sym *x ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static void *sym_new(t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	t_sym *x = (t_sym*)pd_new(sym_class);
 	blunt_init(&x->bl ,&ac ,av);
 	x->sym = atom_getsymbolarg(0 ,ac ,av);
@@ -514,6 +520,7 @@ void sym_setup(void) {
 		,sizeof(t_sym) ,0 ,A_GIMME ,0);
 	class_addbang     (sym_class ,sym_bang);
 	class_addsymbol   (sym_class ,sym_symbol);
+	class_addlist     (sym_class ,sym_list);
 	class_addanything (sym_class ,sym_anything);
 	class_addmethod(sym_class ,(t_method)blunt_loadbang
 		,gensym("loadbang") ,A_DEFFLOAT ,0);
@@ -694,7 +701,7 @@ void revop_setup(void) {
 		,{ &rfpc_class   ,"@f%"   ,(t_newmethod)rfpc_new   ,rfpc_bang   }
 		,{ &rmod_class   ,"@mod"  ,(t_newmethod)rmod_new   ,rmod_bang   }
 		,{ &rfmod_class  ,"@fmod" ,(t_newmethod)rfmod_new  ,rfmod_bang  }
-		,{ &rdivm_class  ,"@div"  ,(t_newmethod)rdiv_new   ,rdiv_bang   }
+		,{ &rdivm_class  ,"@div"  ,(t_newmethod)rdivm_new  ,rdivm_bang  }
 		,{ NULL ,NULL ,NULL ,NULL }  } ,*obj = objs;
 
 	t_symbol *s_rev = gensym("revbinops");
@@ -756,12 +763,14 @@ static void hot_pxy_f2(t_hot_pxy *p ,t_float f) {
 }
 
 static void hot_pxy_skip(t_hot_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (ac && av->a_type == A_FLOAT)
 		p->x->f1 = av->a_w.w_float;
 	pd_bang((t_pd*)p->x);
 }
 
 static void hot_pxy_set(t_hot_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	if (ac)
 	{	if (av->a_type == A_FLOAT)
 			p->x->f2 = av->a_w.w_float;
@@ -771,6 +780,7 @@ static void hot_pxy_set(t_hot_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
 }
 
 static t_hot *hot_new(t_class *cz ,t_class *cp ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
 	t_hot *z = (t_hot*)pd_new(cz);
 	t_hot_pxy *p = (t_hot_pxy*)pd_new(cp);
 	t_bop *x = &z->x;
