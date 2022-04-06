@@ -13,7 +13,7 @@ static void gmes_tilde_dsp(t_gme *x ,t_signal **sp) {
 }
 
 static void *gmes_tilde_new(t_symbol *s ,int ac ,t_atom *av) {
-	return (gmepd_new(gmes_tilde_class ,s ,ac ,av));
+	return gmepd_new(gmes_tilde_class ,s ,ac ,av);
 }
 
 void gmes_tilde_setup(void) {

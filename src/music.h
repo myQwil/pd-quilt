@@ -20,7 +20,7 @@ static inline t_float music_step(t_music *x ,t_float *fp ,int d ,int n) {
 	int i = d % n;
 	int neg = i < 0;
 	if (neg) i += n;
-	return (i ? fp[i] : 0) + x->oct * (d/n - neg);
+	return ( (i ? fp[i] : 0) + x->oct * (d/n - neg) );
 }
 
 static inline t_float music_interval(t_music *x ,t_float *fp ,t_float f) {

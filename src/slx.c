@@ -18,7 +18,7 @@ static void slx_float(t_slope *x ,t_float f) {
 }
 
 static void *slx_new(t_symbol *s ,int argc ,t_atom *argv) {
-	return (slope_new(slx_class ,s ,argc ,argv));
+	return slope_new(slx_class ,s ,argc ,argv);
 }
 
 void slx_setup(void) {

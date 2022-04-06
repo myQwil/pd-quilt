@@ -8,7 +8,7 @@ static t_class *rpak_class;
 static t_class *rpak_proxy;
 
 static void *rpak_new(t_symbol *s ,int argc ,t_atom *argv) {
-	return (new_pak(rpak_class ,rpak_proxy ,s ,argc ,argv ,1));
+	return new_pak(rpak_class ,rpak_proxy ,s ,argc ,argv ,1);
 }
 
 static void rpak_pointer(t_pak *x ,t_gpointer *gp) {

@@ -117,7 +117,7 @@ static void *delp_new(t_symbol *s ,int argc ,t_atom *argv) {
 	x->unit = x->stop = 1 ,x->samps = 0;
 	x->unitname = gensym("msec");
 	delp_tempo(x ,0 ,argc ,argv);
-	return (x);
+	return x;
 }
 
 static void delp_free(t_delp *x) {

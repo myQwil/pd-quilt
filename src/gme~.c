@@ -10,7 +10,7 @@ static void gme_tilde_dsp(t_gme *x ,t_signal **sp) {
 }
 
 static void *gme_tilde_new(t_symbol *s ,int ac ,t_atom *av) {
-	return (gmepd_new(gme_tilde_class ,s ,ac ,av));
+	return gmepd_new(gme_tilde_class ,s ,ac ,av);
 }
 
 void gme_tilde_setup(void) {

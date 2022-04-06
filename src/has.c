@@ -37,7 +37,7 @@ static void *has_new(t_symbol *s ,int ac ,t_atom *av) {
 	outlet_new (&x->obj ,&s_float);
 	inlet_new  (&x->obj ,&x->obj.ob_pd ,&s_list ,gensym("set"));
 	x->a = (ac) ? *av : (t_atom){.a_type=A_FLOAT ,.a_w={.w_float = 0}};
-	return (x);
+	return x;
 }
 
 void has_setup(void) {

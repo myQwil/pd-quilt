@@ -36,7 +36,7 @@ static t_tab2 *tab2_new(t_class *cl ,t_symbol *s ,t_float edge) {
 
 	outlet_new(&x->obj ,&s_signal);
 	x->f = 0;
-	return (x);
+	return x;
 }
 
 static t_class *class_tab2(t_symbol *s ,t_newmethod newm ,size_t size) {

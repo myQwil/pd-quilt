@@ -481,7 +481,7 @@ static int radix_newclick(t_gobj *z ,struct _glist *glist
 			clock_unset(x->x_clock_reset);
 			x->x_buf[0] = 0;
 			sys_queuegui(x ,x->x_gui.x_glist ,radix_draw_update);  }  }
-	return (1);
+	return 1;
 }
 
 static void radix_size(t_radix *x ,t_symbol *s ,int ac ,t_atom *av) {
@@ -686,7 +686,7 @@ static void *radix_new(t_symbol *s ,int argc ,t_atom *argv) {
 	iemgui_newzoom(&x->x_gui);
 	radix_borderwidth(x ,IEMGUI_ZOOM(x));
 	outlet_new(&x->x_gui.x_obj ,&s_float);
-	return (y);
+	return y;
 }
 
 static void radix_free(t_radix *x) {

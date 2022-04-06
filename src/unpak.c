@@ -4,7 +4,7 @@
 static t_class *unpak_class;
 
 static void *unpak_new(t_symbol *s ,int argc ,t_atom *argv) {
-	return (new_unpak(unpak_class ,s ,argc ,argv ,0));
+	return new_unpak(unpak_class ,s ,argc ,argv ,0);
 }
 
 static void unpak_list(t_unpak *x ,t_symbol *s ,int argc ,t_atom *argv) {

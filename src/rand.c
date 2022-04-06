@@ -132,7 +132,7 @@ static void *rand_new(t_symbol *s ,int ac ,t_atom *av) {
 		*fp = atom_getfloat(av);  }
 	y->nop = y->reps = y->prev = 0;
 	rng_makeseed(x);
-	return (y);
+	return y;
 }
 
 static void rand_free(t_rand *x) {

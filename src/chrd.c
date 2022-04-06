@@ -25,7 +25,7 @@ static t_float chrd_note(t_music *x ,int d) {
 	int i = (d - (d>0)) % n ,neg = i<0;
 	i += n * neg + 1;
 	t_float step = x->flin.fp[i];
-	return (x->oct * ((d - !neg)/n - neg) + x->flin.fp[0] + step);
+	return ( x->oct * ((d - !neg)/n - neg) + x->flin.fp[0] + step );
 }
 
 static void music_f(t_music *x ,t_float f ,char c ,t_float g) {
@@ -71,7 +71,7 @@ static void *chrd_new(t_symbol *s ,int ac ,t_atom *av) {
 		floatinlet_new(&x->obj ,fp);
 		if (i<ac) *fp = atom_getfloat(av++);  }
 
-	return (y);
+	return y;
 }
 
 static void chrd_free(t_chrd *y) {

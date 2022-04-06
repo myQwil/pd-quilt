@@ -70,7 +70,7 @@ static void *is_new(t_symbol *s) {
 
 	inlet_new((t_object*)x ,(t_pd*)p ,0 ,0);
 	outlet_new(&x->obj ,&s_float);
-	return (x);
+	return x;
 }
 
 static void is_free(t_is *x) {

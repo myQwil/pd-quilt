@@ -103,7 +103,7 @@ static void *chrono_new(t_symbol *s ,int argc ,t_atom *argv) {
 	x->unitname = gensym("msec");
 	chrono_bang(x);
 	chrono_tempo(x ,0 ,argc ,argv);
-	return (x);
+	return x;
 }
 
 void chrono_setup(void) {

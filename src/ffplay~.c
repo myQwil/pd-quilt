@@ -127,7 +127,7 @@ static t_int *ffplay_perform(t_int *w) {
 	{	silence:
 		for (int i = nch; i--;)
 			*outs[i]++ = 0;  }
-	return (w+4);
+	return (w + 4);
 }
 
 static void ffplay_dsp(t_ffplay *x ,t_signal **sp) {
@@ -392,7 +392,7 @@ static void *ffplay_new(t_symbol *s ,int ac ,t_atom *av) {
 	x->plist.siz = 0;
 	x->plist.max = 1;
 	x->plist.trk = (t_symbol**)getbytes(sizeof(t_symbol*));
-	return (x);
+	return x;
 }
 
 static void ffplay_free(t_ffplay *x) {

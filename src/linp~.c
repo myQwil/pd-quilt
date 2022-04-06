@@ -51,7 +51,7 @@ static t_int *linp_tilde_perform(t_int *w) {
 	PERF_MAIN
 	(	while (n--)
 			*out++ = g;  )
-	return (w+4);
+	return (w + 4);
 }
 
 /* TB: vectorized version */
@@ -60,7 +60,7 @@ static t_int *linp_tilde_perf8(t_int *w) {
 	(	for (; n; n -= 8 ,out += 8)
 		{	out[0] = out[1] = out[2] = out[3] =
 			out[4] = out[5] = out[6] = out[7] = g;  }  )
-	return (w+4);
+	return (w + 4);
 }
 
 static void linp_tilde_stop(t_linp *x) {
@@ -107,7 +107,7 @@ static void *linp_tilde_new(void) {
 	x->o_on = outlet_new(&x->obj ,&s_float);
 	x->ticksleft = x->retarget = x->pause = 0;
 	x->value = x->target = x->inletvalue = x->inletwas = 0;
-	return (x);
+	return x;
 }
 
 void linp_tilde_setup(void) {
@@ -115,7 +115,7 @@ void linp_tilde_setup(void) {
 		,linp_tilde_new ,0
 		,sizeof(t_linp) ,0
 		,0);
-	class_addfloat (linp_tilde_class,(t_method)linp_tilde_float);
+	class_addfloat (linp_tilde_class,linp_tilde_float);
 	class_addmethod(linp_tilde_class,(t_method)linp_tilde_dsp  ,gensym("dsp")  ,A_CANT ,0);
 	class_addmethod(linp_tilde_class,(t_method)linp_tilde_pause,gensym("pause"),A_GIMME,0);
 	class_addmethod(linp_tilde_class,(t_method)linp_tilde_stop ,gensym("stop") ,A_NULL);

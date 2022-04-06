@@ -40,7 +40,7 @@ static void *fldec_new(t_float f) {
 	x->o_sg = outlet_new(&x->obj ,&s_float);
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("set"));
 	fldec_set(x ,f);
-	return (x);
+	return x;
 }
 
 void fldec_setup(void) {

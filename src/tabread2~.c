@@ -36,11 +36,11 @@ static t_int *tabread2_perform(t_int *w) {
 		else frac = findex - index;
 		wp = buf + index;
 		TAB2_INTERPOLATE(wp[0] ,wp[1])  }
-	return (w+6);
+	return (w + 6);
  zero:
 	while (n--) *out++ = 0;
 
-	return (w+6);
+	return (w + 6);
 }
 
 static void tabread2_set(t_tabread2 *y ,t_symbol *s) {
@@ -71,7 +71,7 @@ static void *tabread2_new(t_symbol *s ,t_float edge) {
 	floatinlet_new(&x->obj ,&y->onset);
 
 	y->onset = 0;
-	return (x);
+	return x;
 }
 
 void tabread2_tilde_setup(void) {

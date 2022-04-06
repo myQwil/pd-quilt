@@ -120,7 +120,7 @@ static void *linp_new(t_float f ,t_float grain) {
 	x->o_on = outlet_new(&x->obj ,&s_float);
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("ft1"));
 	floatinlet_new(&x->obj ,&x->grain);
-	return (x);
+	return x;
 }
 
 static void linp_free(t_linp *x) {
@@ -132,7 +132,7 @@ void linp_setup(void) {
 		,(t_newmethod)linp_new ,(t_method)linp_free
 		,sizeof(t_linp) ,0
 		,A_DEFFLOAT ,A_DEFFLOAT ,0);
-	class_addfloat(linp_class ,(t_method)linp_float);
+	class_addfloat(linp_class ,linp_float);
 	class_addmethod(linp_class ,(t_method)linp_ft1   ,gensym("ft1")   ,A_FLOAT ,0);
 	class_addmethod(linp_class ,(t_method)linp_set   ,gensym("set")   ,A_FLOAT ,0);
 	class_addmethod(linp_class ,(t_method)linp_pause ,gensym("pause") ,A_GIMME ,0);

@@ -372,7 +372,7 @@ static int radix_check_minmax(t_radix *x ,double min ,double max) {
 	x->x_min = min;
 	x->x_max = max;
 	if (!x->x_lilo && min == 0. && max == 0.)
-		return (ret);
+		return ret;
 	if (x->x_val < x->x_min)
 	{	x->x_val = x->x_min;
 		ret = 1;  }
@@ -383,7 +383,7 @@ static int radix_check_minmax(t_radix *x ,double min ,double max) {
 	if (x->x_lilo)
 		x->x_k = exp(log(x->x_max/x->x_min) / x->x_log_height);
 	else x->x_k = 1.;
-	return(ret);
+	return ret;
 }
 
 static void radix_set(t_radix *x ,t_float f) {

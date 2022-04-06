@@ -67,7 +67,7 @@ static void *flenc_new(t_symbol *s ,int argc ,t_atom *argv) {
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("e"));
 	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("s"));
 	flenc_set(x ,s ,argc ,argv);
-	return (x);
+	return x;
 }
 
 void flenc_setup(void) {

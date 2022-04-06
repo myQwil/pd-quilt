@@ -143,7 +143,7 @@ static t_player *player_new(t_class *cl ,unsigned nch) {
 	x->o_meta = outlet_new(&x->obj ,0);
 
 	x->open = x->play = 0;
-	return (x);
+	return x;
 }
 
 static void player_free(t_player *x) {

@@ -82,7 +82,7 @@ static t_int *gmepd_perform(t_int *w) {
 	else while (n--)
 		for (int i = NCH; i--;)
 			*outs[i]++ = 0;
-	return (w+NCH+5);
+	return (w + NCH + 5);
 }
 
 static inline int domask(int mask ,int voices ,int ac ,t_atom *av) {
@@ -256,7 +256,7 @@ static void *gmepd_new(t_class *gmeclass ,t_symbol *s ,int ac ,t_atom *av) {
 	x->mask = 0;
 	x->voices = 32;
 	if (ac) gmepd_solo(x ,NULL ,ac ,av);
-	return (x);
+	return x;
 }
 
 static void gmepd_free(t_gme *x) {

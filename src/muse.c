@@ -97,7 +97,7 @@ static void *muse_new(t_symbol *s ,int ac ,t_atom *av) {
 		if (i < ac)
 			*fp = atom_getfloat(av++);  }
 
-	return (y);
+	return y;
 }
 
 static void muse_free(t_music *x) {

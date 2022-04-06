@@ -11,7 +11,7 @@ static void fton_float(t_tone *x ,t_float f) {
 }
 
 static void *fton_new(t_symbol *s ,int argc ,t_atom *argv) {
-	return (tone_new(fton_class ,s ,argc ,argv));
+	return tone_new(fton_class ,s ,argc ,argv);
 }
 
 void fton_setup(void) {

@@ -14,7 +14,7 @@ static void *same_new(t_float f) {
 	x->f = f;
 	outlet_new(&x->obj ,&s_float);
 	x->o_same = outlet_new(&x->obj ,&s_float);
-	return (x);
+	return x;
 }
 
 static void same_bang(t_same *x) {

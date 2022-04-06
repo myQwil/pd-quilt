@@ -84,11 +84,11 @@ static t_int *tabosc2_perform(t_int *w) {
 	tf.d = dphase + (UNITBIT32 * fnpoints - UNITBIT32);
 	tf.i[HIOFFSET] = normhipart;
 	y->phase = (tf.d - UNITBIT32 * fnpoints)  * y->finvnpoints;
-	return (w+6);
+	return (w + 6);
  zero:
 	while (n--) *out++ = 0;
 
-	return (w+6);
+	return (w + 6);
 }
 
 static void tabosc2_set(t_tabosc2 *y ,t_symbol *s) {
@@ -134,7 +134,7 @@ static void *tabosc2_new(t_symbol *s ,t_float edge) {
 
 	y->fnpoints = 512.;
 	y->finvnpoints = 1. / y->fnpoints;
-	return (x);
+	return x;
 }
 
 void tabosc2_tilde_setup(void) {

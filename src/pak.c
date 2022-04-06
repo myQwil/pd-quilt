@@ -5,7 +5,7 @@ static t_class *pak_class;
 static t_class *pak_proxy;
 
 static void *pak_new(t_symbol *s ,int argc ,t_atom *argv) {
-	return (new_pak(pak_class ,pak_proxy ,s ,argc ,argv ,0));
+	return new_pak(pak_class ,pak_proxy ,s ,argc ,argv ,0);
 }
 
 static void pak_pointer(t_pak *x ,t_gpointer *gp) {

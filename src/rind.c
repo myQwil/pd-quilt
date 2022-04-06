@@ -40,7 +40,7 @@ static void *rind_new(t_symbol *s ,int ac ,t_atom *av) {
 	if (!ac) y->max = 1;
 
 	rng_makeseed(x);
-	return (y);
+	return y;
 }
 
 void rind_setup(void) {

@@ -24,42 +24,44 @@
 #endif
 
 	// binop1:  +, -, *, /
-static inline t_float blunt_plus  (t_float f1 ,t_float f2) { return f1 + f2; }
-static inline t_float blunt_minus (t_float f1 ,t_float f2) { return f1 - f2; }
-static inline t_float blunt_times (t_float f1 ,t_float f2) { return f1 * f2; }
+static inline t_float blunt_plus  (t_float f1 ,t_float f2) { return (f1 + f2); }
+static inline t_float blunt_minus (t_float f1 ,t_float f2) { return (f1 - f2); }
+static inline t_float blunt_times (t_float f1 ,t_float f2) { return (f1 * f2); }
 static inline t_float blunt_div   (t_float f1 ,t_float f2) { return (f2!=0 ? f1/f2 : 0); }
 
 static inline t_float blunt_log(t_float f1 ,t_float f2) {
-	return f1 <= 0 ? -1000
-		: (f2 <= 0 ? LOG(f1)
-		: LOG(f1) / LOG(f2));
+	return
+	(	f1 <= 0 ? -1000
+		: ( f2 <= 0 ? LOG(f1)
+		: LOG(f1) / LOG(f2) )  );
 }
 
 static inline t_float blunt_pow(t_float f1 ,t_float f2) {
-	return (f1 == 0 &&  f2 < 0)
-	    || (f1 <  0 && (f2 - (int)f2) != 0)
-	     ? 0 : POW(f1 ,f2);
+	return
+	(	   (f1 == 0 && f2 < 0)
+		|| (f1 <  0 && (f2 - (int)f2) != 0)
+			? 0 : POW(f1 ,f2)  );
 }
 
 static inline t_float blunt_max(t_float f1 ,t_float f2) { return (f1 > f2 ? f1 : f2); }
 static inline t_float blunt_min(t_float f1 ,t_float f2) { return (f1 < f2 ? f1 : f2); }
 
 	// binop2: ==, !=, >, <, >=, <=
-static inline t_float blunt_ee(t_float f1 ,t_float f2) { return f1 == f2; }
-static inline t_float blunt_ne(t_float f1 ,t_float f2) { return f1 != f2; }
-static inline t_float blunt_gt(t_float f1 ,t_float f2) { return f1 >  f2; }
-static inline t_float blunt_lt(t_float f1 ,t_float f2) { return f1 <  f2; }
-static inline t_float blunt_ge(t_float f1 ,t_float f2) { return f1 >= f2; }
-static inline t_float blunt_le(t_float f1 ,t_float f2) { return f1 <= f2; }
+static inline t_float blunt_ee(t_float f1 ,t_float f2) { return (f1 == f2); }
+static inline t_float blunt_ne(t_float f1 ,t_float f2) { return (f1 != f2); }
+static inline t_float blunt_gt(t_float f1 ,t_float f2) { return (f1 >  f2); }
+static inline t_float blunt_lt(t_float f1 ,t_float f2) { return (f1 <  f2); }
+static inline t_float blunt_ge(t_float f1 ,t_float f2) { return (f1 >= f2); }
+static inline t_float blunt_le(t_float f1 ,t_float f2) { return (f1 <= f2); }
 
 	// binop3: &, |, &&, ||, <<, >>, ^, %, mod, div
-static inline t_float blunt_ba  (t_float f1 ,t_float f2) { return (int)f1 &  (int)f2; }
-static inline t_float blunt_la  (t_float f1 ,t_float f2) { return (int)f1 && (int)f2; }
-static inline t_float blunt_bo  (t_float f1 ,t_float f2) { return (int)f1 |  (int)f2; }
-static inline t_float blunt_lo  (t_float f1 ,t_float f2) { return (int)f1 || (int)f2; }
-static inline t_float blunt_ls  (t_float f1 ,t_float f2) { return (int)f1 << (int)f2; }
-static inline t_float blunt_rs  (t_float f1 ,t_float f2) { return (int)f1 >> (int)f2; }
-static inline t_float blunt_xor (t_float f1 ,t_float f2) { return (int)f1 ^  (int)f2; }
+static inline t_float blunt_ba  (t_float f1 ,t_float f2) { return ((int)f1 &  (int)f2); }
+static inline t_float blunt_la  (t_float f1 ,t_float f2) { return ((int)f1 && (int)f2); }
+static inline t_float blunt_bo  (t_float f1 ,t_float f2) { return ((int)f1 |  (int)f2); }
+static inline t_float blunt_lo  (t_float f1 ,t_float f2) { return ((int)f1 || (int)f2); }
+static inline t_float blunt_ls  (t_float f1 ,t_float f2) { return ((int)f1 << (int)f2); }
+static inline t_float blunt_rs  (t_float f1 ,t_float f2) { return ((int)f1 >> (int)f2); }
+static inline t_float blunt_xor (t_float f1 ,t_float f2) { return ((int)f1 ^  (int)f2); }
 static inline t_float blunt_fpc (t_float f1 ,t_float f2) { return FMOD(f1 ,f2); }
 
 static inline t_float blunt_pc(t_float f1 ,t_float f2) {
