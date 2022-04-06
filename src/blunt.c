@@ -9,6 +9,12 @@ typedef struct {
 	t_float f;
 } t_num;
 
+static void num_print(t_num *x ,t_symbol *s) {
+	if (*s->s_name) startpost("%s: " ,s->s_name);
+	startpost("%g" ,x->f);
+	endpost();
+}
+
 static inline void num_set(t_num *x ,t_float f) {
 	x->f = f;
 }
@@ -37,18 +43,31 @@ static t_num *num_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
 	return x;
 }
 
+static t_class *class_num(t_symbol *s ,t_newmethod newm ,t_method bang ,t_method send) {
+	t_class *c = class_new(s ,newm ,0 ,sizeof(t_bop) ,0 ,A_GIMME ,0);
+	class_addbang  (c ,bang);
+	class_addfloat (c ,num_float);
+	class_addsymbol(c ,num_symbol);
+
+	blunt_addmethod(c);
+	class_addmethod(c ,(t_method)num_print ,gensym("print") ,A_DEFSYM ,0);
+	class_addmethod(c ,(t_method)num_set   ,gensym("set")   ,A_FLOAT  ,0);
+	class_addmethod(c ,(t_method)send      ,gensym("send")  ,A_SYMBOL ,0);
+	class_sethelpsymbol(c ,gensym("blunt"));
+	return c;
+}
 
 /* --------------------- int ------------------------------------- */
 static t_class *i_class;
-
-static void i_bang(t_num *x) {
-	outlet_float(x->bl.obj.ob_outlet ,(t_float)(int64_t)x->f);
-}
 
 static void i_send(t_num *x ,t_symbol *s) {
 	if (s->s_thing)
 		pd_float(s->s_thing ,(t_float)(int64_t)x->f);
 	else pd_error(x ,"%s: no such object" ,s->s_name);
+}
+
+static void i_bang(t_num *x) {
+	outlet_float(x->bl.obj.ob_outlet ,(t_float)(int64_t)x->f);
 }
 
 static void *i_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -58,14 +77,14 @@ static void *i_new(t_symbol *s ,int ac ,t_atom *av) {
 /* --------------------- float ----------------------------------- */
 static t_class *f_class;
 
-static void f_bang(t_num *x) {
-	outlet_float(x->bl.obj.ob_outlet ,x->f);
-}
-
 static void f_send(t_num *x ,t_symbol *s) {
 	if (s->s_thing)
 		pd_float(s->s_thing ,x->f);
 	else pd_error(x ,"%s: no such object" ,s->s_name);
+}
+
+static void f_bang(t_num *x) {
+	outlet_float(x->bl.obj.ob_outlet ,x->f);
 }
 
 static void *f_new(t_symbol *s ,int ac ,t_atom *av) {
@@ -467,8 +486,8 @@ static void bng_setup(void) {
 	class_addsymbol   (bng_class ,b_bang);
 	class_addlist     (bng_class ,b_bang);
 	class_addanything (bng_class ,b_bang);
-	class_addmethod(bng_class ,(t_method)blunt_loadbang
-		,gensym("loadbang") ,A_DEFFLOAT ,0);
+
+	blunt_addmethod(bng_class);
 	class_sethelpsymbol(bng_class ,gensym("blunt"));
 }
 
@@ -480,6 +499,12 @@ typedef struct {
 	t_blunt bl;
 	t_symbol *sym;
 } t_sym;
+
+static void sym_print(t_sym *x ,t_symbol *s) {
+	if (*s->s_name) startpost("%s: " ,s->s_name);
+	startpost("%s" ,x->sym->s_name);
+	endpost();
+}
 
 static void sym_bang(t_sym *x) {
 	outlet_symbol(x->bl.obj.ob_outlet ,x->sym);
@@ -522,8 +547,9 @@ void sym_setup(void) {
 	class_addsymbol   (sym_class ,sym_symbol);
 	class_addlist     (sym_class ,sym_list);
 	class_addanything (sym_class ,sym_anything);
-	class_addmethod(sym_class ,(t_method)blunt_loadbang
-		,gensym("loadbang") ,A_DEFFLOAT ,0);
+
+	blunt_addmethod(sym_class);
+	class_addmethod(sym_class ,(t_method)sym_print ,gensym("print") ,A_DEFSYM ,0);
 	class_sethelpsymbol(sym_class ,gensym("blunt"));
 }
 
@@ -685,40 +711,30 @@ static void rmoses_setup(void) {
 }
 
 void revop_setup(void) {
-	const struct _obj
-	{	t_class **class;
+	const struct
+	{	t_class **cls;
 		const char *name;
-		t_newmethod new;
-		void (*bang)(t_bop*);  }
+		void (*bang)(t_bop*);
+		void *(*new)(t_symbol* ,int ,t_atom*);  }
 	objs[] =
-	{	 { &rminus_class ,"@-"    ,(t_newmethod)rminus_new ,rminus_bang }
-		,{ &rdiv_class   ,"@/"    ,(t_newmethod)rdiv_new   ,rdiv_bang   }
-		,{ &rlog_class   ,"@log"  ,(t_newmethod)rlog_new   ,rlog_bang   }
-		,{ &rpow_class   ,"@pow"  ,(t_newmethod)rpow_new   ,rpow_bang   }
-		,{ &rls_class    ,"@<<"   ,(t_newmethod)rls_new    ,rls_bang    }
-		,{ &rrs_class    ,"@>>"   ,(t_newmethod)rrs_new    ,rrs_bang    }
-		,{ &rpc_class    ,"@%"    ,(t_newmethod)rpc_new    ,rpc_bang    }
-		,{ &rfpc_class   ,"@f%"   ,(t_newmethod)rfpc_new   ,rfpc_bang   }
-		,{ &rmod_class   ,"@mod"  ,(t_newmethod)rmod_new   ,rmod_bang   }
-		,{ &rfmod_class  ,"@fmod" ,(t_newmethod)rfmod_new  ,rfmod_bang  }
-		,{ &rdivm_class  ,"@div"  ,(t_newmethod)rdivm_new  ,rdivm_bang  }
+	{	 { &rminus_class ,"@-"    ,rminus_bang ,rminus_new }
+		,{ &rdiv_class   ,"@/"    ,rdiv_bang   ,rdiv_new   }
+		,{ &rlog_class   ,"@log"  ,rlog_bang   ,rlog_new   }
+		,{ &rpow_class   ,"@pow"  ,rpow_bang   ,rpow_new   }
+		,{ &rls_class    ,"@<<"   ,rls_bang    ,rls_new    }
+		,{ &rrs_class    ,"@>>"   ,rrs_bang    ,rrs_new    }
+		,{ &rpc_class    ,"@%"    ,rpc_bang    ,rpc_new    }
+		,{ &rfpc_class   ,"@f%"   ,rfpc_bang   ,rfpc_new   }
+		,{ &rmod_class   ,"@mod"  ,rmod_bang   ,rmod_new   }
+		,{ &rfmod_class  ,"@fmod" ,rfmod_bang  ,rfmod_new  }
+		,{ &rdivm_class  ,"@div"  ,rdivm_bang  ,rdivm_new  }
 		,{ NULL ,NULL ,NULL ,NULL }  } ,*obj = objs;
 
 	t_symbol *s_rev = gensym("revbinops");
-	for (; obj->class; obj++)
-	{	*obj->class = class_new(gensym(obj->name) ,obj->new  ,0
-			,sizeof(t_bop) ,0 ,A_GIMME ,0);
-
-		t_class *class = *obj->class;
-		class_addbang  (class ,obj->bang);
-		class_addfloat (class ,bop_float);
-		class_addmethod(class ,(t_method)bop_f1   ,gensym("f1")  ,A_FLOAT ,0);
-		class_addmethod(class ,(t_method)bop_f2	,gensym("f2")  ,A_FLOAT ,0);
-		class_addmethod(class ,(t_method)bop_skip ,gensym(".")   ,A_GIMME ,0);
-		class_addmethod(class ,(t_method)bop_set  ,gensym("set") ,A_GIMME ,0);
-		class_addmethod(class ,(t_method)blunt_loadbang
-			,gensym("loadbang") ,A_DEFFLOAT ,0);
-		class_sethelpsymbol(class ,s_rev);  }
+	for (; obj->cls; obj++)
+	{	*obj->cls = class_bop(gensym(obj->name)
+			,(t_newmethod)obj->new ,(t_method)obj->bang);
+		class_sethelpsymbol(*obj->cls ,s_rev);  }
 
 	rmoses_setup();
 }
@@ -745,15 +761,6 @@ typedef struct {
 	t_hot_pxy *p;
 } t_hot;
 
-static void hot_pxy_bang(t_hot_pxy *p) {
-	pd_bang((t_pd*)p->x);
-}
-
-static void hot_pxy_float(t_hot_pxy *p ,t_float f) {
-	p->x->f2 = f;
-	pd_bang((t_pd*)p->x);
-}
-
 static void hot_pxy_f1(t_hot_pxy *p ,t_float f) {
 	bop_f1(p->x ,f);
 }
@@ -762,21 +769,31 @@ static void hot_pxy_f2(t_hot_pxy *p ,t_float f) {
 	bop_f2(p->x ,f);
 }
 
-static void hot_pxy_skip(t_hot_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
+static inline void hot_pxy_set(t_hot_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
+	if (ac > 1 && av[1].a_type == A_FLOAT) p->x->f1 = av[1].a_w.w_float;
+	if (ac     && av[0].a_type == A_FLOAT) p->x->f2 = av[0].a_w.w_float;
+}
+
+static void hot_pxy_bang(t_hot_pxy *p) {
+	pd_bang((t_pd*)p->x);
+}
+
+static void hot_pxy_float(t_hot_pxy *p ,t_float f) {
+	bop_f2(p->x ,f);
+	pd_bang((t_pd*)p->x);
+}
+
+static void hot_pxy_list(t_hot_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
+	hot_pxy_set(p ,s ,ac ,av);
+	pd_bang((t_pd*)p->x);
+}
+
+static void hot_pxy_anything(t_hot_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
 	(void)s;
 	if (ac && av->a_type == A_FLOAT)
 		p->x->f1 = av->a_w.w_float;
 	pd_bang((t_pd*)p->x);
-}
-
-static void hot_pxy_set(t_hot_pxy *p ,t_symbol *s ,int ac ,t_atom *av) {
-	(void)s;
-	if (ac)
-	{	if (av->a_type == A_FLOAT)
-			p->x->f2 = av->a_w.w_float;
-		ac-- ,av++;  }
-	if (ac && av->a_type == A_FLOAT)
-		p->x->f1 = av->a_w.w_float;
 }
 
 static t_hot *hot_new(t_class *cz ,t_class *cp ,t_symbol *s ,int ac ,t_atom *av) {
@@ -789,6 +806,22 @@ static t_hot *hot_new(t_class *cz ,t_class *cp ,t_symbol *s ,int ac ,t_atom *av)
 	bop_init(x ,ac ,av);
 	inlet_new(&x->bl.obj ,(t_pd*)p ,0 ,0);
 	return z;
+}
+
+static t_class *class_hot_pxy(const char *name) {
+	char alt[11] = "_";
+	strcpy(stpcpy(alt+1 ,name) ,"_pxy");
+
+	t_class *c = class_new(gensym(alt) ,0 ,0
+		,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
+	class_addbang     (c ,hot_pxy_bang);
+	class_addfloat    (c ,hot_pxy_float);
+	class_addlist     (c ,hot_pxy_list);
+	class_addanything (c ,hot_pxy_anything);
+	class_addmethod(c ,(t_method)hot_pxy_f1  ,gensym("f1")  ,A_FLOAT ,0);
+	class_addmethod(c ,(t_method)hot_pxy_f2  ,gensym("f2")  ,A_FLOAT ,0);
+	class_addmethod(c ,(t_method)hot_pxy_set ,gensym("set") ,A_GIMME ,0);
+	return c;
 }
 
 static void hot_free(t_hot *z) {
@@ -1115,76 +1148,56 @@ static void *hdivm_new(t_symbol *s ,int ac ,t_atom *av) {
 }
 
 void hotop_setup(void) {
-	const struct _obj
-	{	t_class **class;
-		t_class **proxy;
+	const struct
+	{	t_class **cls;
+		t_class **pxy;
 		const char *name;
-		t_newmethod new;
-		void (*bang)(t_bop*);  }
+		void (*bang)(t_bop*);
+		void *(*new)(t_symbol* ,int ,t_atom*);  }
 	objs[] =
-	{	 { &hplus_class  ,&hplus_proxy  ,"#+"    ,(t_newmethod)hplus_new  ,hplus_bang  }
-		,{ &hminus_class ,&hminus_proxy ,"#-"    ,(t_newmethod)hminus_new ,hminus_bang }
-		,{ &htimes_class ,&htimes_proxy ,"#*"    ,(t_newmethod)htimes_new ,htimes_bang }
-		,{ &hdiv_class   ,&hdiv_proxy   ,"#/"    ,(t_newmethod)hdiv_new   ,hdiv_bang   }
-		,{ &hlog_class   ,&hlog_proxy   ,"#log"  ,(t_newmethod)hlog_new   ,hlog_bang   }
-		,{ &hpow_class   ,&hpow_proxy   ,"#pow"  ,(t_newmethod)hpow_new   ,hpow_bang   }
-		,{ &hmax_class   ,&hmax_proxy   ,"#max"  ,(t_newmethod)hmax_new   ,hmax_bang   }
-		,{ &hmin_class   ,&hmin_proxy   ,"#min"  ,(t_newmethod)hmin_new   ,hmin_bang   }
+	{	 { &hplus_class  ,&hplus_proxy  ,"#+"    ,hplus_bang  ,hplus_new  }
+		,{ &hminus_class ,&hminus_proxy ,"#-"    ,hminus_bang ,hminus_new }
+		,{ &htimes_class ,&htimes_proxy ,"#*"    ,htimes_bang ,htimes_new }
+		,{ &hdiv_class   ,&hdiv_proxy   ,"#/"    ,hdiv_bang   ,hdiv_new   }
+		,{ &hlog_class   ,&hlog_proxy   ,"#log"  ,hlog_bang   ,hlog_new   }
+		,{ &hpow_class   ,&hpow_proxy   ,"#pow"  ,hpow_bang   ,hpow_new   }
+		,{ &hmax_class   ,&hmax_proxy   ,"#max"  ,hmax_bang   ,hmax_new   }
+		,{ &hmin_class   ,&hmin_proxy   ,"#min"  ,hmin_bang   ,hmin_new   }
 		,{ NULL ,NULL ,NULL ,NULL ,NULL }
-		,{ &hee_class    ,&hee_proxy    ,"#=="   ,(t_newmethod)hee_new    ,hee_bang    }
-		,{ &hne_class    ,&hne_proxy    ,"#!="   ,(t_newmethod)hne_new    ,hne_bang    }
-		,{ &hgt_class    ,&hgt_proxy    ,"#>"    ,(t_newmethod)hgt_new    ,hgt_bang    }
-		,{ &hlt_class    ,&hlt_proxy    ,"#<"    ,(t_newmethod)hlt_new    ,hlt_bang    }
-		,{ &hge_class    ,&hge_proxy    ,"#>="   ,(t_newmethod)hge_new    ,hge_bang    }
-		,{ &hle_class    ,&hle_proxy    ,"#<="   ,(t_newmethod)hle_new    ,hle_bang    }
+		,{ &hee_class    ,&hee_proxy    ,"#=="   ,hee_bang    ,hee_new    }
+		,{ &hne_class    ,&hne_proxy    ,"#!="   ,hne_bang    ,hne_new    }
+		,{ &hgt_class    ,&hgt_proxy    ,"#>"    ,hgt_bang    ,hgt_new    }
+		,{ &hlt_class    ,&hlt_proxy    ,"#<"    ,hlt_bang    ,hlt_new    }
+		,{ &hge_class    ,&hge_proxy    ,"#>="   ,hge_bang    ,hge_new    }
+		,{ &hle_class    ,&hle_proxy    ,"#<="   ,hle_bang    ,hle_new    }
 		,{ NULL ,NULL ,NULL ,NULL ,NULL }
-		,{ &hba_class    ,&hba_proxy    ,"#&"    ,(t_newmethod)hba_new    ,hba_bang    }
-		,{ &hla_class    ,&hla_proxy    ,"#&&"   ,(t_newmethod)hla_new    ,hla_bang    }
-		,{ &hbo_class    ,&hbo_proxy    ,"#|"    ,(t_newmethod)hbo_new    ,hbo_bang    }
-		,{ &hlo_class    ,&hlo_proxy    ,"#||"   ,(t_newmethod)hlo_new    ,hlo_bang    }
-		,{ &hls_class    ,&hls_proxy    ,"#<<"   ,(t_newmethod)hls_new    ,hls_bang    }
-		,{ &hrs_class    ,&hrs_proxy    ,"#>>"   ,(t_newmethod)hrs_new    ,hrs_bang    }
-		,{ &hpc_class    ,&hpc_proxy    ,"#%"    ,(t_newmethod)hpc_new    ,hpc_bang    }
-		,{ &hfpc_class   ,&hfpc_proxy   ,"#f%"   ,(t_newmethod)hfpc_new   ,hfpc_bang   }
-		,{ &hmod_class   ,&hmod_proxy   ,"#mod"  ,(t_newmethod)hmod_new   ,hmod_bang   }
-		,{ &hfmod_class  ,&hfmod_proxy  ,"#fmod" ,(t_newmethod)hfmod_new  ,hfmod_bang  }
-		,{ &hdivm_class  ,&hdivm_proxy  ,"#div"  ,(t_newmethod)hdivm_new  ,hdivm_bang  }
+		,{ &hba_class    ,&hba_proxy    ,"#&"    ,hba_bang    ,hba_new    }
+		,{ &hla_class    ,&hla_proxy    ,"#&&"   ,hla_bang    ,hla_new    }
+		,{ &hbo_class    ,&hbo_proxy    ,"#|"    ,hbo_bang    ,hbo_new    }
+		,{ &hlo_class    ,&hlo_proxy    ,"#||"   ,hlo_bang    ,hlo_new    }
+		,{ &hls_class    ,&hls_proxy    ,"#<<"   ,hls_bang    ,hls_new    }
+		,{ &hrs_class    ,&hrs_proxy    ,"#>>"   ,hrs_bang    ,hrs_new    }
+		,{ &hpc_class    ,&hpc_proxy    ,"#%"    ,hpc_bang    ,hpc_new    }
+		,{ &hfpc_class   ,&hfpc_proxy   ,"#f%"   ,hfpc_bang   ,hfpc_new   }
+		,{ &hmod_class   ,&hmod_proxy   ,"#mod"  ,hmod_bang   ,hmod_new   }
+		,{ &hfmod_class  ,&hfmod_proxy  ,"#fmod" ,hfmod_bang  ,hfmod_new  }
+		,{ &hdivm_class  ,&hdivm_proxy  ,"#div"  ,hdivm_bang  ,hdivm_new  }
 		,{ NULL ,NULL ,NULL ,NULL ,NULL }
-		,{ &hxor_class   ,&hxor_proxy   ,"#^"    ,(t_newmethod)hxor_new   ,hxor_bang   }
+		,{ &hxor_class   ,&hxor_proxy   ,"#^"    ,hxor_bang   ,hxor_new   }
 		,{ NULL ,NULL ,NULL ,NULL ,NULL }  } ,*obj = objs;
 
 	t_symbol *syms[] =
 	{	 gensym("hotbinops1") ,gensym("hotbinops2") ,gensym("hotbinops3")
 		,gensym("0x5e") ,NULL  } ,**sym = syms;
 
-	char alt[11] = "_";
-	for (; *sym; sym++ ,obj++)
-	{	for (; obj->class; obj++)
-		{	*obj->class = class_new(gensym(obj->name) ,obj->new ,(t_method)hot_free
-				,sizeof(t_hot) ,0 ,A_GIMME ,0);
-			strcpy(stpcpy(alt+1 ,obj->name) ,"_pxy");
-			*obj->proxy = class_new(gensym(alt) ,0 ,0
-				,sizeof(t_hot_pxy) ,CLASS_PD | CLASS_NOINLET ,0);
+	for (; *sym; sym++ ,obj++) for (; obj->cls; obj++)
+	{	*obj->pxy = class_hot_pxy(obj->name);
+		*obj->cls = class_new(gensym(obj->name)
+			,(t_newmethod)obj->new ,(t_method)hot_free
+			,sizeof(t_hot) ,0 ,A_GIMME ,0);
 
-			t_class *class = *obj->class;
-			t_class *proxy = *obj->proxy;
-			class_addbang  (class ,obj->bang);
-			class_addfloat (class ,bop_float);
-			class_addmethod(class ,(t_method)bop_f1   ,gensym("f1")  ,A_FLOAT ,0);
-			class_addmethod(class ,(t_method)bop_f2   ,gensym("f2")  ,A_FLOAT ,0);
-			class_addmethod(class ,(t_method)bop_skip ,gensym(".")   ,A_GIMME ,0);
-			class_addmethod(class ,(t_method)bop_set  ,gensym("set") ,A_GIMME ,0);
-			class_addmethod(class ,(t_method)blunt_loadbang
-				,gensym("loadbang") ,A_DEFFLOAT ,0);
-
-			class_addbang  (proxy ,hot_pxy_bang);
-			class_addfloat (proxy ,hot_pxy_float);
-			class_addmethod(proxy ,(t_method)hot_pxy_f1   ,gensym("f1")  ,A_FLOAT ,0);
-			class_addmethod(proxy ,(t_method)hot_pxy_f2   ,gensym("f2")  ,A_FLOAT ,0);
-			class_addmethod(proxy ,(t_method)hot_pxy_skip ,gensym(".")   ,A_GIMME ,0);
-			class_addmethod(proxy ,(t_method)hot_pxy_set  ,gensym("set") ,A_GIMME ,0);
-
-			class_sethelpsymbol(class ,*sym);  }  }
+		bop_addmethods(*obj->cls ,(t_method)obj->bang);
+		class_sethelpsymbol(*obj->cls ,*sym);  }
 }
 
 
@@ -1201,110 +1214,94 @@ void blunt_setup(void) {
 	/* ---------------- connectives --------------------- */
 
 	const struct
-	{	t_class **class;
+	{	t_class **cls;
 		const char *name;
-		t_newmethod new;
-		void *fn;
-		void *fn2;  }
+		void (*bang)(t_num*);
+		void (*send)(t_num* ,t_symbol*);
+		void *(*new)(t_symbol* ,int ,t_atom*);  }
 	nums[] =
-	{	 { &i_class ,"i" ,(t_newmethod)i_new ,i_bang ,i_send }
-		,{ &f_class ,"f" ,(t_newmethod)f_new ,f_bang ,f_send }
+	{	 { &i_class ,"i" ,i_bang ,i_send ,i_new }
+		,{ &f_class ,"f" ,f_bang ,f_send ,f_new }
 		,{ NULL ,NULL ,NULL ,NULL ,NULL }  } ,*num = nums;
 
-	for (; num->class; num++)
-	{	*num->class = class_new(gensym(num->name) ,num->new ,0
-			,sizeof(t_bop) ,0 ,A_GIMME ,0);
+	for (; num->cls; num++)
+	{	*num->cls = class_num(gensym(num->name)
+			,(t_newmethod)num->new ,(t_method)num->bang ,(t_method)num->send);
 		strcpy(alt+1 ,num->name);
-		class_addcreator(num->new ,gensym(alt) ,A_GIMME ,0);
-
-		t_class *class = *num->class;
-		class_addbang  (class ,num->fn);
-		class_addfloat (class ,num_float);
-		class_addsymbol(class ,num_symbol);
-		class_addmethod(class ,(t_method)num_set  ,gensym("set")  ,A_FLOAT  ,0);
-		class_addmethod(class ,(t_method)num->fn2 ,gensym("send") ,A_SYMBOL ,0);
-		class_addmethod(class ,(t_method)blunt_loadbang
-			,gensym("loadbang") ,A_DEFFLOAT ,0);
-		class_sethelpsymbol(class ,s_blunt);  }
+		class_addcreator((t_newmethod)num->new ,gensym(alt) ,A_GIMME ,0);  }
 
 
 	/* ---------------- unops --------------------- */
 
-	struct _obj
-	{	t_class **class;
-		const char *name;
-		t_newmethod new;
-		void *fn;  };
-
 	t_symbol *usyms[] =
 		{ gensym("negation") ,gensym("rounding") ,gensym("factorial") ,NULL }
 		,**usym = usyms;
-	const struct _obj uops[] =
-	{	 { &lnot_class  ,"!"     ,(t_newmethod)lnot_new  ,lnot_float  }
-		,{ &bnot_class  ,"~"     ,(t_newmethod)bnot_new  ,bnot_float  }
+	const struct
+	{	t_class **cls;
+		const char *name;
+		void (*flt)(t_object* ,t_float);
+		void *(*new)(t_symbol* ,int ,t_atom*);  }
+	uops[] =
+	{	 { &lnot_class  ,"!"     ,lnot_float  ,lnot_new  }
+		,{ &bnot_class  ,"~"     ,bnot_float  ,bnot_new  }
 		,{ NULL ,NULL ,NULL ,NULL }
-		,{ &floor_class ,"floor" ,(t_newmethod)floor_new ,floor_float }
-		,{ &ceil_class  ,"ceil"  ,(t_newmethod)ceil_new  ,ceil_float  }
+		,{ &floor_class ,"floor" ,floor_float ,floor_new }
+		,{ &ceil_class  ,"ceil"  ,ceil_float  ,ceil_new  }
 		,{ NULL ,NULL ,NULL ,NULL }
-		,{ &fact_class  ,"n!"    ,(t_newmethod)fact_new  ,fact_float  }
+		,{ &fact_class  ,"n!"    ,fact_float  ,fact_new  }
 		,{ NULL ,NULL ,NULL ,NULL }  } ,*uop = uops;
 
-	for (; *usym; usym++ ,uop++) for (; uop->class; uop++)
-	{	*uop->class = class_new(gensym(uop->name) ,uop->new ,0
+	for (; *usym; usym++ ,uop++) for (; uop->cls; uop++)
+	{	*uop->cls = class_new(gensym(uop->name) ,(t_newmethod)uop->new ,0
 			,sizeof(t_object) ,0 ,A_NULL);
-		class_addfloat(*uop->class ,uop->fn);
-		class_sethelpsymbol(*uop->class ,*usym);  }
+		class_addfloat(*uop->cls ,uop->flt);
+		class_sethelpsymbol(*uop->cls ,*usym);  }
 
 
 	/* ---------------- binops --------------------- */
 
 	t_symbol *bsyms[] = { s_blunt ,gensym("0x5e") ,NULL } ,**bsym = bsyms;
-	const struct _obj bops[] =
-	{	 { &b1_plus_class  ,"+"    ,(t_newmethod)b1_plus_new  ,b1_plus_bang  }
-		,{ &b1_minus_class ,"-"    ,(t_newmethod)b1_minus_new ,b1_minus_bang }
-		,{ &b1_times_class ,"*"    ,(t_newmethod)b1_times_new ,b1_times_bang }
-		,{ &b1_div_class   ,"/"    ,(t_newmethod)b1_div_new   ,b1_div_bang   }
-		,{ &b1_log_class   ,"log"  ,(t_newmethod)b1_log_new   ,b1_log_bang   }
-		,{ &b1_pow_class   ,"pow"  ,(t_newmethod)b1_pow_new   ,b1_pow_bang   }
-		,{ &b1_max_class   ,"max"  ,(t_newmethod)b1_max_new   ,b1_max_bang   }
-		,{ &b1_min_class   ,"min"  ,(t_newmethod)b1_min_new   ,b1_min_bang   }
-		,{ &b2_ee_class    ,"=="   ,(t_newmethod)b2_ee_new    ,b2_ee_bang    }
-		,{ &b2_ne_class    ,"!="   ,(t_newmethod)b2_ne_new    ,b2_ne_bang    }
-		,{ &b2_gt_class    ,">"    ,(t_newmethod)b2_gt_new    ,b2_gt_bang    }
-		,{ &b2_lt_class    ,"<"    ,(t_newmethod)b2_lt_new    ,b2_lt_bang    }
-		,{ &b2_ge_class    ,">="   ,(t_newmethod)b2_ge_new    ,b2_ge_bang    }
-		,{ &b2_le_class    ,"<="   ,(t_newmethod)b2_le_new    ,b2_le_bang    }
-		,{ &b3_ba_class    ,"&"    ,(t_newmethod)b3_ba_new    ,b3_ba_bang    }
-		,{ &b3_la_class    ,"&&"   ,(t_newmethod)b3_la_new    ,b3_la_bang    }
-		,{ &b3_bo_class    ,"|"    ,(t_newmethod)b3_bo_new    ,b3_bo_bang    }
-		,{ &b3_lo_class    ,"||"   ,(t_newmethod)b3_lo_new    ,b3_lo_bang    }
-		,{ &b3_ls_class    ,"<<"   ,(t_newmethod)b3_ls_new    ,b3_ls_bang    }
-		,{ &b3_rs_class    ,">>"   ,(t_newmethod)b3_rs_new    ,b3_rs_bang    }
-		,{ &b3_pc_class    ,"%"    ,(t_newmethod)b3_pc_new    ,b3_pc_bang    }
-		,{ &b3_fpc_class   ,"f%"   ,(t_newmethod)b3_fpc_new   ,b3_fpc_bang   }
-		,{ &b3_mod_class   ,"mod"  ,(t_newmethod)b3_mod_new   ,b3_mod_bang   }
-		,{ &b3_fmod_class  ,"fmod" ,(t_newmethod)b3_fmod_new  ,b3_fmod_bang  }
-		,{ &b3_div_class   ,"div"  ,(t_newmethod)b3_div_new   ,b3_div_bang   }
+	const struct
+	{	t_class **cls;
+		const char *name;
+		void (*bang)(t_bop*);
+		void *(*new)(t_symbol* ,int ,t_atom*);  }
+	bops[] =
+	{	 { &b1_plus_class  ,"+"    ,b1_plus_bang  ,b1_plus_new  }
+		,{ &b1_minus_class ,"-"    ,b1_minus_bang ,b1_minus_new }
+		,{ &b1_times_class ,"*"    ,b1_times_bang ,b1_times_new }
+		,{ &b1_div_class   ,"/"    ,b1_div_bang   ,b1_div_new   }
+		,{ &b1_log_class   ,"log"  ,b1_log_bang   ,b1_log_new   }
+		,{ &b1_pow_class   ,"pow"  ,b1_pow_bang   ,b1_pow_new   }
+		,{ &b1_max_class   ,"max"  ,b1_max_bang   ,b1_max_new   }
+		,{ &b1_min_class   ,"min"  ,b1_min_bang   ,b1_min_new   }
+		,{ &b2_ee_class    ,"=="   ,b2_ee_bang    ,b2_ee_new    }
+		,{ &b2_ne_class    ,"!="   ,b2_ne_bang    ,b2_ne_new    }
+		,{ &b2_gt_class    ,">"    ,b2_gt_bang    ,b2_gt_new    }
+		,{ &b2_lt_class    ,"<"    ,b2_lt_bang    ,b2_lt_new    }
+		,{ &b2_ge_class    ,">="   ,b2_ge_bang    ,b2_ge_new    }
+		,{ &b2_le_class    ,"<="   ,b2_le_bang    ,b2_le_new    }
+		,{ &b3_ba_class    ,"&"    ,b3_ba_bang    ,b3_ba_new    }
+		,{ &b3_la_class    ,"&&"   ,b3_la_bang    ,b3_la_new    }
+		,{ &b3_bo_class    ,"|"    ,b3_bo_bang    ,b3_bo_new    }
+		,{ &b3_lo_class    ,"||"   ,b3_lo_bang    ,b3_lo_new    }
+		,{ &b3_ls_class    ,"<<"   ,b3_ls_bang    ,b3_ls_new    }
+		,{ &b3_rs_class    ,">>"   ,b3_rs_bang    ,b3_rs_new    }
+		,{ &b3_pc_class    ,"%"    ,b3_pc_bang    ,b3_pc_new    }
+		,{ &b3_fpc_class   ,"f%"   ,b3_fpc_bang   ,b3_fpc_new   }
+		,{ &b3_mod_class   ,"mod"  ,b3_mod_bang   ,b3_mod_new   }
+		,{ &b3_fmod_class  ,"fmod" ,b3_fmod_bang  ,b3_fmod_new  }
+		,{ &b3_div_class   ,"div"  ,b3_div_bang   ,b3_div_new   }
 		,{ NULL ,NULL ,NULL ,NULL }
-		,{ &b3_xor_class   ,"^"    ,(t_newmethod)b3_xor_new   ,b3_xor_bang   }
+		,{ &b3_xor_class   ,"^"    ,b3_xor_bang   ,b3_xor_new   }
 		,{ NULL ,NULL ,NULL ,NULL }  } ,*bop = bops;
 
-	for (; *bsym; bsym++ ,bop++) for (; bop->class; bop++)
-	{	*bop->class = class_new(gensym(bop->name) ,bop->new ,0
-			,sizeof(t_bop) ,0 ,A_GIMME ,0);
+	for (; *bsym; bsym++ ,bop++) for (; bop->cls; bop++)
+	{	*bop->cls = class_bop(gensym(bop->name)
+			,(t_newmethod)bop->new ,(t_method)bop->bang);
 		strcpy(alt+1 ,bop->name);
-		class_addcreator(bop->new ,gensym(alt) ,A_GIMME ,0);
-
-		t_class *class = *bop->class;
-		class_addbang  (class ,bop->fn);
-		class_addfloat (class ,bop_float);
-		class_addmethod(class ,(t_method)bop_f1   ,gensym("f1")  ,A_FLOAT ,0);
-		class_addmethod(class ,(t_method)bop_f2   ,gensym("f2")  ,A_FLOAT ,0);
-		class_addmethod(class ,(t_method)bop_skip ,gensym(".")   ,A_GIMME ,0);
-		class_addmethod(class ,(t_method)bop_set  ,gensym("set") ,A_GIMME ,0);
-		class_addmethod(class ,(t_method)blunt_loadbang
-			,gensym("loadbang") ,A_DEFFLOAT ,0);
-		class_sethelpsymbol(class ,*bsym);  }
+		class_addcreator((t_newmethod)bop->new ,gensym(alt) ,A_GIMME ,0);
+		class_sethelpsymbol(*bop->cls ,*bsym);  }
 
 	/* hot & reverse binops */
 	hotop_setup();

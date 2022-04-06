@@ -151,8 +151,8 @@
 #X msg 140 150 symbol bang;
 #X obj 40 240 s \$0ffplay;
 #X obj 140 90 s \$0end;
-#X msg 50 190 \$1 \, print %disc%|%track% - %title% [ %ftime% ] \,
-time \, bpm \, sytc, f 48;
+#X msg 50 190 \$1 \, print %disc%|%track% - %title% [%ftime%] \, time
+\, bpm \, sytc, f 46;
 #X connect 0 0 3 0;
 #X connect 1 0 4 1;
 #X connect 2 0 1 0;

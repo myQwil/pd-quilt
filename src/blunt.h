@@ -133,12 +133,22 @@ static void blunt_init(t_blunt *x ,int *ac ,t_atom *av) {
 		*ac -= (x->action != LB_NONE);  }
 }
 
+static inline void blunt_addmethod(t_class *c) {
+	class_addmethod(c ,(t_method)blunt_loadbang ,gensym("loadbang") ,A_DEFFLOAT ,0);
+}
+
 /* -------------------------- blunt binops -------------------------- */
 typedef struct {
 	t_blunt bl;
 	t_float f1;
 	t_float f2;
 } t_bop;
+
+static void bop_print(t_bop *x ,t_symbol *s) {
+	if (*s->s_name) startpost("%s: " ,s->s_name);
+	startpost("%g %g" ,x->f1 ,x->f2);
+	endpost();
+}
 
 static inline void bop_f1(t_bop *x ,t_float f) {
 	x->f1 = f;
@@ -148,37 +158,35 @@ static inline void bop_f2(t_bop *x ,t_float f) {
 	x->f2 = f;
 }
 
+static inline void bop_set(t_bop *x ,t_symbol *s ,int ac ,t_atom *av) {
+	(void)s;
+	if (ac > 1 && av[1].a_type == A_FLOAT) x->f2 = av[1].a_w.w_float;
+	if (ac     && av[0].a_type == A_FLOAT) x->f1 = av[0].a_w.w_float;
+}
+
 static void bop_float(t_bop *x ,t_float f) {
 	bop_f1(x ,f);
 	pd_bang((t_pd*)x);
 }
 
-static void bop_skip(t_bop *x ,t_symbol *s ,int ac ,t_atom *av) {
+static void bop_list(t_bop *x ,t_symbol *s ,int ac ,t_atom *av) {
+	bop_set(x ,s ,ac ,av);
+	pd_bang((t_pd*)x);
+}
+
+static void bop_anything(t_bop *x ,t_symbol *s ,int ac ,t_atom *av) {
 	(void)s;
 	if (ac && av->a_type == A_FLOAT)
 		x->f2 = av->a_w.w_float;
 	pd_bang((t_pd*)x);
-}
-
-static void bop_set(t_bop *x ,t_symbol *s ,int ac ,t_atom *av) {
-	(void)s;
-	if (ac)
-	{	if (av->a_type == A_FLOAT)
-			x->f1 = av->a_w.w_float;
-		ac-- ,av++;  }
-	if (ac && av->a_type == A_FLOAT)
-		x->f2 = av->a_w.w_float;
 }
 
 static void bop_init(t_bop *x ,int ac ,t_atom *av) {
 	blunt_init(&x->bl ,&ac ,av);
 
 	// set the 1st float, but only if there are 2 args
-	if (ac>1 && av->a_type == A_FLOAT)
-	{	x->f1 = av->a_w.w_float;
-		av++;  }
-	else x->f1 = 0;
-	x->f2 = atom_getfloatarg(0 ,ac ,av);
+	x->f1 = (ac > 1 ? atom_getfloatarg(0 ,ac ,av++) : 0);
+	x->f2 = (ac     ? atom_getfloatarg(0 ,ac ,av)   : 0);
 
 	outlet_new(&x->bl.obj ,&s_float);
 }
@@ -189,4 +197,23 @@ static t_bop *bop_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
 	bop_init(x ,ac ,av);
 	floatinlet_new(&x->bl.obj ,&x->f2);
 	return (x);
+}
+
+static inline void bop_addmethods(t_class *c ,t_method bop_bang) {
+	class_addbang     (c ,bop_bang);
+	class_addfloat    (c ,bop_float);
+	class_addlist     (c ,bop_list);
+	class_addanything (c ,bop_anything);
+
+	blunt_addmethod(c);
+	class_addmethod(c ,(t_method)bop_print ,gensym("print") ,A_DEFSYM ,0);
+	class_addmethod(c ,(t_method)bop_set   ,gensym("set")   ,A_GIMME  ,0);
+	class_addmethod(c ,(t_method)bop_f1    ,gensym("f1")    ,A_FLOAT  ,0);
+	class_addmethod(c ,(t_method)bop_f2    ,gensym("f2")    ,A_FLOAT  ,0);
+}
+
+static t_class *class_bop(t_symbol *s ,t_newmethod newmethod ,t_method bang) {
+	t_class *c = class_new(s ,newmethod ,0 ,sizeof(t_bop) ,0 ,A_GIMME ,0);
+	bop_addmethods(c ,bang);
+	return c;
 }

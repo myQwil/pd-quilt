@@ -46,6 +46,8 @@
 #X connect 5 0 3 0;
 #X connect 6 0 3 0;
 #X restore 50 400 pd loadbangs;
+#X msg 240 240 print;
+#X text 290 240 print the current values;
 #X connect 1 0 0 0;
 #X connect 2 0 3 0;
 #X connect 4 0 0 0;
@@ -63,3 +65,4 @@
 #X connect 27 0 5 0;
 #X connect 28 0 1 0;
 #X connect 29 0 4 0;
+#X connect 31 0 11 0;
