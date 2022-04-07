@@ -62,14 +62,15 @@ static void ffplay_position(t_ffplay *x) {
 }
 
 static t_int *ffplay_perform(t_int *w) {
-	t_ffplay *y = (t_ffplay*)(w[1]);
-	t_player *x = &y->z;
+	t_ffplay *y   = (t_ffplay*)(w[1]);
 	t_sample *in2 = (t_sample*)(w[2]);
+	int n = (int)w[3];
+
+	t_player *x = &y->z;
 	unsigned nch = x->nch;
 	t_sample *outs[nch];
 	for (int i = nch; i--;)
 		outs[i] = y->outs[i];
-	int n = (int)w[3];
 
 	if (x->play)
 	{	SRC_DATA *data = &x->data;

@@ -23,7 +23,7 @@
 # define CEIL ceil
 #endif
 
-	// binop1:  +, -, *, /
+	// binop1:  +  -  *  /
 static t_float fn_plus  (t_float f1 ,t_float f2) { return (f1 + f2); }
 static t_float fn_minus (t_float f1 ,t_float f2) { return (f1 - f2); }
 static t_float fn_times (t_float f1 ,t_float f2) { return (f1 * f2); }
@@ -46,7 +46,7 @@ static t_float fn_pow(t_float f1 ,t_float f2) {
 static t_float fn_max(t_float f1 ,t_float f2) { return (f1 > f2 ? f1 : f2); }
 static t_float fn_min(t_float f1 ,t_float f2) { return (f1 < f2 ? f1 : f2); }
 
-	// binop2: ==, !=, >, <, >=, <=
+	// binop2:  ==  !=  >  <  >=  <=
 static t_float fn_ee(t_float f1 ,t_float f2) { return (f1 == f2); }
 static t_float fn_ne(t_float f1 ,t_float f2) { return (f1 != f2); }
 static t_float fn_gt(t_float f1 ,t_float f2) { return (f1 >  f2); }
@@ -54,7 +54,7 @@ static t_float fn_lt(t_float f1 ,t_float f2) { return (f1 <  f2); }
 static t_float fn_ge(t_float f1 ,t_float f2) { return (f1 >= f2); }
 static t_float fn_le(t_float f1 ,t_float f2) { return (f1 <= f2); }
 
-	// binop3: &, |, &&, ||, <<, >>, ^, %, mod, div
+	// binop3:  &  |  &&  ||  <<  >>  ^  %  mod  div
 static t_float fn_ba  (t_float f1 ,t_float f2) { return ((int)f1 &  (int)f2); }
 static t_float fn_la  (t_float f1 ,t_float f2) { return ((int)f1 && (int)f2); }
 static t_float fn_bo  (t_float f1 ,t_float f2) { return ((int)f1 |  (int)f2); }
@@ -66,7 +66,7 @@ static t_float fn_fpc (t_float f1 ,t_float f2) { return FMOD(f1 ,f2); }
 
 static t_float fn_pc(t_float f1 ,t_float f2) {
 	int n2 = f2;
-	return (n2 == -1) ? 0 : (int)f1 % (n2 ? n2 : 1);
+	return ( n2 == -1 ? 0 : (int)f1 % (n2 ? n2 : 1) );
 }
 
 static t_float fn_mod(t_float f1 ,t_float f2) {
@@ -93,7 +93,24 @@ static t_float fn_divm(t_float f1 ,t_float f2) {
 	return (t_float)result;
 }
 
-/* -------------------------- blunt base -------------------------- */
+	// unop:  int  float  !  ~  factorial
+static t_float fn_float (t_float f) { return f; }
+static t_float fn_int   (t_float f) { return  (int64_t)f; }
+static t_float fn_lnot  (t_float f) { return !(int64_t)f; }
+static t_float fn_bnot  (t_float f) { return ~(int64_t)f; }
+
+static t_float fn_factorial(t_float f) {
+	int64_t d = f;
+	if (d > 8) // use stirling's approximation
+		return POW(f ,f) * EXP(-f) * SQRT(f) * SQRT(2 * M_PI);
+
+	t_float g = 1;
+	while (d > 0) g *= d--;
+	return g;
+}
+
+
+/* ----------------------blunt base ------------------------------- */
 static t_symbol *s_load;
 static t_symbol *s_init;
 static t_symbol *s_close;
@@ -128,7 +145,8 @@ static inline void blunt_addmethod(t_class *c) {
 	class_addmethod(c ,(t_method)blunt_loadbang ,gensym("loadbang") ,A_DEFFLOAT ,0);
 }
 
-/* -------------------------- blunt binops -------------------------- */
+
+/* --------------------- blunt binops ----------------------------- */
 typedef t_float (*t_bopfn)(t_float ,t_float);
 
 typedef struct {

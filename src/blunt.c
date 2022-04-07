@@ -1,31 +1,15 @@
 #include "blunt.h"
 
-// we'll use this in setup functions for convenience
-struct _obj
-{	t_class **cls;
+struct _obj { // we'll use this in setup functions for convenience
+	t_class **cls;
 	const char *name;
-	void *(*new)(t_symbol* ,int ,t_atom*);  };
+	void *(*new)(t_symbol* ,int ,t_atom*);
+};
 
+/* ---------------------------------------------------------------- */
+/*                           connectives                            */
+/* ---------------------------------------------------------------- */
 
-	// unop:  int  float  !  ~  factorial
-static t_float fn_float(t_float f) { return f; }
-static t_float fn_int(t_float f)   { return  (int64_t)f; }
-static t_float fn_lnot(t_float f)  { return !(int64_t)f; }
-static t_float fn_bnot(t_float f)  { return ~(int64_t)f; }
-
-static t_float fn_factorial(t_float f) {
-	int64_t d = f;
-	if (d > 8) // use stirling's approximation
-		return POW(f ,f) * EXP(-f) * SQRT(f) * SQRT(2 * M_PI);
-
-	t_float g = 1;
-	while (d > 0) g *= d--;
-	return g;
-}
-
-/* --------------------------------------------------------------- */
-/*                           connectives                           */
-/* --------------------------------------------------------------- */
 typedef t_float (*t_uopfn)(t_float);
 
 typedef struct {
@@ -93,13 +77,11 @@ static t_class *class_num(t_symbol *s ,t_newmethod n) {
 	return c;
 }
 
-/* --------------------- int ------------------------------------- */
-static t_class *i_class;
+static t_class *i_class; /* ------------------- int ------------------------- */
 static void *i_new(t_symbol *s ,int ac ,t_atom *av)
 {	return num_new(i_class ,fn_int ,s ,ac ,av);  }
 
-/* --------------------- float ----------------------------------- */
-static t_class *f_class;
+static t_class *f_class; /* ------------------- float ----------------------- */
 static void *f_new(t_symbol *s ,int ac ,t_atom *av) {
 	t_num *x = num_new(f_class ,fn_float ,s ,ac ,av);
 	pd_this->pd_newest = &x->bl.obj.ob_pd;
@@ -107,188 +89,7 @@ static void *f_new(t_symbol *s ,int ac ,t_atom *av) {
 }
 
 
-/* --------------------------------------------------------------- */
-/*                           arithmetics                           */
-/* --------------------------------------------------------------- */
-
-/* ------------ unop:  !  ~  floor  ceil  factorial  ------------- */
-typedef struct {
-	t_object obj;
-	t_uopfn fn;
-} t_uop;
-
-static void uop_float(t_uop *x ,t_float f) {
-	outlet_float(x->obj.ob_outlet ,x->fn(f));
-}
-
-static t_uop *uop_new(t_class *cl ,t_uopfn fn) {
-	t_uop *x = (t_uop*)pd_new(cl);
-	outlet_new(&x->obj ,&s_float);
-	x->fn = fn;
-	return x;
-}
-
-/* --------------------- logical negation ------------------------ */
-static t_class *lnot_class;
-static void *lnot_new() { return uop_new(lnot_class ,fn_lnot); }
-
-/* --------------------- bitwise negation ------------------------ */
-static t_class *bnot_class;
-static void *bnot_new() { return uop_new(bnot_class ,fn_bnot); }
-
-/* --------------------- floor ----------------------------------- */
-static t_class *floor_class;
-static void *floor_new() { return uop_new(floor_class ,FLOOR); }
-
-/* --------------------- ceiling --------------------------------- */
-static t_class *ceil_class;
-static void *ceil_new() { return uop_new(ceil_class ,CEIL); }
-
-/* --------------------- factorial ------------------------------- */
-static t_class *fact_class;
-static void *fact_new() { return uop_new(fact_class ,fn_factorial); }
-
-
-/* --------------------- binop1:  +  -  *  /  -------------------- */
-
-/* --------------------- addition -------------------------------- */
-static t_class *b1_plus_class;
-static void *b1_plus_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b1_plus_class ,fn_plus ,s ,ac ,av);  }
-
-/* --------------------- subtraction ----------------------------- */
-static t_class *b1_minus_class;
-static void *b1_minus_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b1_minus_class ,fn_minus ,s ,ac ,av);  }
-
-/* --------------------- multiplication -------------------------- */
-static t_class *b1_times_class;
-static void *b1_times_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b1_times_class ,fn_times ,s ,ac ,av);  }
-
-/* --------------------- division -------------------------------- */
-static t_class *b1_div_class;
-static void *b1_div_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b1_div_class ,fn_div ,s ,ac ,av);  }
-
-/* --------------------- log ------------------------------------- */
-static t_class *b1_log_class;
-static void *b1_log_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b1_log_class ,fn_log ,s ,ac ,av);  }
-
-/* --------------------- pow ------------------------------------- */
-static t_class *b1_pow_class;
-static void *b1_pow_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b1_pow_class ,fn_pow ,s ,ac ,av);  }
-
-/* --------------------- max ------------------------------------- */
-static t_class *b1_max_class;
-static void *b1_max_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b1_max_class ,fn_max ,s ,ac ,av);  }
-
-/* --------------------- min ------------------------------------- */
-static t_class *b1_min_class;
-static void *b1_min_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b1_min_class ,fn_min ,s ,ac ,av);  }
-
-
-/* --------------- binop2:  ==  !=  >  <  >=  <=  ---------------- */
-
-/* --------------------- == -------------------------------------- */
-static t_class *b2_ee_class;
-static void *b2_ee_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b2_ee_class ,fn_ee ,s ,ac ,av);  }
-
-/* --------------------- != -------------------------------------- */
-static t_class *b2_ne_class;
-static void *b2_ne_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b2_ne_class ,fn_ne ,s ,ac ,av);  }
-
-/* --------------------- > --------------------------------------- */
-static t_class *b2_gt_class;
-static void *b2_gt_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b2_gt_class ,fn_gt ,s ,ac ,av);  }
-
-/* --------------------- < --------------------------------------- */
-static t_class *b2_lt_class;
-static void *b2_lt_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b2_lt_class ,fn_lt ,s ,ac ,av);  }
-
-/* --------------------- >= -------------------------------------- */
-static t_class *b2_ge_class;
-static void *b2_ge_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b2_ge_class ,fn_ge ,s ,ac ,av);  }
-
-/* --------------------- <= -------------------------------------- */
-static t_class *b2_le_class;
-static void *b2_le_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b2_le_class ,fn_le ,s ,ac ,av);  }
-
-
-/* ------- binop3:  &  |  &&  ||  <<  >>  ^  %  mod  div  -------- */
-
-/* --------------------- & --------------------------------------- */
-static t_class *b3_ba_class;
-static void *b3_ba_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b3_ba_class ,fn_ba ,s ,ac ,av);  }
-
-/* --------------------- && -------------------------------------- */
-static t_class *b3_la_class;
-static void *b3_la_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b3_la_class ,fn_la ,s ,ac ,av);  }
-
-/* --------------------- | --------------------------------------- */
-static t_class *b3_bo_class;
-static void *b3_bo_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b3_bo_class ,fn_bo ,s ,ac ,av);  }
-
-/* --------------------- || -------------------------------------- */
-static t_class *b3_lo_class;
-static void *b3_lo_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b3_lo_class ,fn_lo ,s ,ac ,av);  }
-
-/* --------------------- << -------------------------------------- */
-static t_class *b3_ls_class;
-static void *b3_ls_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b3_ls_class ,fn_ls ,s ,ac ,av);  }
-
-/* --------------------- >> -------------------------------------- */
-static t_class *b3_rs_class;
-static void *b3_rs_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b3_rs_class ,fn_rs ,s ,ac ,av);  }
-
-/* --------------------- % --------------------------------------- */
-static t_class *b3_pc_class;
-static void *b3_pc_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b3_pc_class ,fn_pc ,s ,ac ,av);  }
-
-/* --------------------- f% --------------------------------------- */
-static t_class *b3_fpc_class;
-static void *b3_fpc_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b3_fpc_class ,fn_fpc ,s ,ac ,av);  }
-
-/* --------------------- mod ------------------------------------- */
-static t_class *b3_mod_class;
-static void *b3_mod_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b3_mod_class ,fn_mod ,s ,ac ,av);  }
-
-/* --------------------- fmod ------------------------------------ */
-static t_class *b3_fmod_class;
-static void *b3_fmod_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b3_fmod_class ,fn_fmod ,s ,ac ,av);  }
-
-/* --------------------- div ------------------------------------- */
-static t_class *b3_div_class;
-static void *b3_div_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b3_div_class ,fn_divm ,s ,ac ,av);  }
-
-/* --------------------- ^ --------------------------------------- */
-static t_class *b3_xor_class;
-static void *b3_xor_new(t_symbol *s ,int ac ,t_atom *av)
-{	return bop_new(b3_xor_class ,fn_xor ,s ,ac ,av);  }
-
-
-/* -------------------------- bang ------------------------------ */
+/* --------------------- bang ------------------------------------- */
 static t_class *bng_class;
 
 typedef struct {
@@ -322,8 +123,7 @@ static void bng_setup(void) {
 	class_sethelpsymbol(bng_class ,gensym("blunt"));
 }
 
-
-/* -------------------------- symbol ------------------------------ */
+/* --------------------- symbol ----------------------------------- */
 static t_class *sym_class;
 
 typedef struct {
@@ -385,9 +185,159 @@ void sym_setup(void) {
 }
 
 
-/* --------------------------------------------------------------- */
-/*                   reverse arithmetics                           */
-/* --------------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+/*                           arithmetics                            */
+/* ---------------------------------------------------------------- */
+
+/* ------------- unop:  !  ~  floor  ceil  factorial  ------------- */
+typedef struct {
+	t_object obj;
+	t_uopfn fn;
+} t_uop;
+
+static void uop_float(t_uop *x ,t_float f) {
+	outlet_float(x->obj.ob_outlet ,x->fn(f));
+}
+
+static t_uop *uop_new(t_class *cl ,t_uopfn fn) {
+	t_uop *x = (t_uop*)pd_new(cl);
+	outlet_new(&x->obj ,&s_float);
+	x->fn = fn;
+	return x;
+}
+
+static t_class *lnot_class; /* ---------------- logical negation ------------ */
+static void *lnot_new()  { return uop_new(lnot_class  ,fn_lnot); }
+
+static t_class *bnot_class; /* ---------------- bitwise negation ------------ */
+static void *bnot_new()  { return uop_new(bnot_class  ,fn_bnot); }
+
+static t_class *floor_class; /* --------------- floor ----------------------- */
+static void *floor_new() { return uop_new(floor_class ,FLOOR); }
+
+static t_class *ceil_class; /* ---------------- ceiling --------------------- */
+static void *ceil_new()  { return uop_new(ceil_class  ,CEIL); }
+
+static t_class *fact_class; /* ---------------- factorial ------------------- */
+static void *fact_new()  { return uop_new(fact_class  ,fn_factorial); }
+
+
+/* --------------------- binop1:  +  -  *  /  --------------------- */
+
+static t_class *b1_plus_class; /* ------------- addition -------------------- */
+static void *b1_plus_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b1_plus_class ,fn_plus ,s ,ac ,av);  }
+
+static t_class *b1_minus_class; /* ------------ subtraction ----------------- */
+static void *b1_minus_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b1_minus_class ,fn_minus ,s ,ac ,av);  }
+
+static t_class *b1_times_class; /* ------------ multiplication -------------- */
+static void *b1_times_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b1_times_class ,fn_times ,s ,ac ,av);  }
+
+static t_class *b1_div_class; /* -------------- division -------------------- */
+static void *b1_div_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b1_div_class ,fn_div ,s ,ac ,av);  }
+
+static t_class *b1_log_class; /* -------------- log ------------------------- */
+static void *b1_log_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b1_log_class ,fn_log ,s ,ac ,av);  }
+
+static t_class *b1_pow_class; /* -------------- pow ------------------------- */
+static void *b1_pow_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b1_pow_class ,fn_pow ,s ,ac ,av);  }
+
+static t_class *b1_max_class; /* -------------- max ------------------------- */
+static void *b1_max_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b1_max_class ,fn_max ,s ,ac ,av);  }
+
+static t_class *b1_min_class; /* -------------- min ------------------------- */
+static void *b1_min_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b1_min_class ,fn_min ,s ,ac ,av);  }
+
+
+/* ---------------- binop2:  ==  !=  >  <  >=  <=  ---------------- */
+
+static t_class *b2_ee_class; /* --------------- == -------------------------- */
+static void *b2_ee_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b2_ee_class ,fn_ee ,s ,ac ,av);  }
+
+static t_class *b2_ne_class; /* --------------- != -------------------------- */
+static void *b2_ne_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b2_ne_class ,fn_ne ,s ,ac ,av);  }
+
+static t_class *b2_gt_class; /* --------------- > --------------------------- */
+static void *b2_gt_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b2_gt_class ,fn_gt ,s ,ac ,av);  }
+
+static t_class *b2_lt_class; /* --------------- < --------------------------- */
+static void *b2_lt_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b2_lt_class ,fn_lt ,s ,ac ,av);  }
+
+static t_class *b2_ge_class; /* --------------- >= -------------------------- */
+static void *b2_ge_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b2_ge_class ,fn_ge ,s ,ac ,av);  }
+
+static t_class *b2_le_class; /* --------------- <= -------------------------- */
+static void *b2_le_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b2_le_class ,fn_le ,s ,ac ,av);  }
+
+
+/* -------- binop3:  &  |  &&  ||  <<  >>  ^  %  mod  div  -------- */
+
+static t_class *b3_ba_class; /* --------------- & --------------------------- */
+static void *b3_ba_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b3_ba_class ,fn_ba ,s ,ac ,av);  }
+
+static t_class *b3_la_class; /* --------------- && -------------------------- */
+static void *b3_la_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b3_la_class ,fn_la ,s ,ac ,av);  }
+
+static t_class *b3_bo_class; /* --------------- | --------------------------- */
+static void *b3_bo_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b3_bo_class ,fn_bo ,s ,ac ,av);  }
+
+static t_class *b3_lo_class; /* --------------- || -------------------------- */
+static void *b3_lo_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b3_lo_class ,fn_lo ,s ,ac ,av);  }
+
+static t_class *b3_ls_class; /* --------------- << -------------------------- */
+static void *b3_ls_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b3_ls_class ,fn_ls ,s ,ac ,av);  }
+
+static t_class *b3_rs_class; /* --------------- >> -------------------------- */
+static void *b3_rs_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b3_rs_class ,fn_rs ,s ,ac ,av);  }
+
+static t_class *b3_pc_class; /* --------------- % --------------------------- */
+static void *b3_pc_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b3_pc_class ,fn_pc ,s ,ac ,av);  }
+
+static t_class *b3_fpc_class; /* -------------- f% -------------------------- */
+static void *b3_fpc_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b3_fpc_class ,fn_fpc ,s ,ac ,av);  }
+
+static t_class *b3_mod_class; /* -------------- mod ------------------------- */
+static void *b3_mod_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b3_mod_class ,fn_mod ,s ,ac ,av);  }
+
+static t_class *b3_fmod_class; /* ------------- fmod ------------------------ */
+static void *b3_fmod_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b3_fmod_class ,fn_fmod ,s ,ac ,av);  }
+
+static t_class *b3_div_class; /* -------------- div ------------------------- */
+static void *b3_div_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b3_div_class ,fn_divm ,s ,ac ,av);  }
+
+static t_class *b3_xor_class; /* -------------- ^ --------------------------- */
+static void *b3_xor_new(t_symbol *s ,int ac ,t_atom *av)
+{	return bop_new(b3_xor_class ,fn_xor ,s ,ac ,av);  }
+
+
+/* ---------------------------------------------------------------- */
+/*                       reverse arithmetics                        */
+/* ---------------------------------------------------------------- */
 
 static inline void rev_bang(t_bop *x) {
 	outlet_float(x->bl.obj.ob_outlet ,x->fn(x->f2 ,x->f1));
@@ -410,64 +360,52 @@ static void rev_anything(t_bop *x ,t_symbol *s ,int ac ,t_atom *av) {
 	rev_bang(x);
 }
 
-
-/* --------------------- subtraction ----------------------------- */
-static t_class *rminus_class;
+static t_class *rminus_class; /* -------------- subtraction ----------------- */
 static void *rminus_new(t_symbol *s ,int ac ,t_atom *av)
 {	return bop_new(rminus_class ,fn_minus ,s ,ac ,av);  }
 
-/* --------------------- division -------------------------------- */
-static t_class *rdiv_class;
+static t_class *rdiv_class; /* ---------------- division -------------------- */
 static void *rdiv_new(t_symbol *s ,int ac ,t_atom *av)
 {	return bop_new(rdiv_class ,fn_div ,s ,ac ,av);  }
 
-/* --------------------- log ------------------------------------- */
-static t_class *rlog_class;
+static t_class *rlog_class; /* ---------------- log ------------------------- */
 static void *rlog_new(t_symbol *s ,int ac ,t_atom *av)
 {	return bop_new(rlog_class ,fn_log ,s ,ac ,av);  }
 
-/* --------------------- pow ------------------------------------- */
-static t_class *rpow_class;
+static t_class *rpow_class; /* ---------------- pow ------------------------- */
 static void *rpow_new(t_symbol *s ,int ac ,t_atom *av)
 {	return bop_new(rpow_class ,fn_pow ,s ,ac ,av);  }
 
-/* --------------------- << -------------------------------------- */
-static t_class *rls_class;
+static t_class *rls_class; /* ----------------- << -------------------------- */
 static void *rls_new(t_symbol *s ,int ac ,t_atom *av)
 {	return bop_new(rls_class ,fn_ls ,s ,ac ,av);  }
 
-/* --------------------- >> -------------------------------------- */
-static t_class *rrs_class;
+static t_class *rrs_class; /* ----------------- >> -------------------------- */
 static void *rrs_new(t_symbol *s ,int ac ,t_atom *av)
 {	return bop_new(rrs_class ,fn_rs ,s ,ac ,av);  }
 
-/* --------------------- % --------------------------------------- */
-static t_class *rpc_class;
+static t_class *rpc_class; /* ----------------- % --------------------------- */
 static void *rpc_new(t_symbol *s ,int ac ,t_atom *av)
 {	return bop_new(rpc_class ,fn_pc ,s ,ac ,av);  }
 
-/* --------------------- f% -------------------------------------- */
-static t_class *rfpc_class;
+static t_class *rfpc_class; /* ---------------- f% -------------------------- */
 static void *rfpc_new(t_symbol *s ,int ac ,t_atom *av)
 {	return bop_new(rfpc_class ,fn_fpc ,s ,ac ,av);  }
 
-/* --------------------- mod ------------------------------------- */
-static t_class *rmod_class;
+static t_class *rmod_class; /* ---------------- mod ------------------------- */
 static void *rmod_new(t_symbol *s ,int ac ,t_atom *av)
 {	return bop_new(rmod_class ,fn_mod ,s ,ac ,av);  }
 
-/* --------------------- fmod ------------------------------------ */
-static t_class *rfmod_class;
+static t_class *rfmod_class; /* --------------- fmod ------------------------ */
 static void *rfmod_new(t_symbol *s ,int ac ,t_atom *av)
 {	return bop_new(rfmod_class ,fn_fmod ,s ,ac ,av);  }
 
-/* --------------------- div ------------------------------------- */
-static t_class *rdivm_class;
+static t_class *rdivm_class; /* --------------- div ------------------------- */
 static void *rdivm_new(t_symbol *s ,int ac ,t_atom *av)
 {	return bop_new(rdivm_class ,fn_divm ,s ,ac ,av);  }
 
 
-/* ------------------- reverse moses ----------------------------- */
+/* --------------------- reverse moses ---------------------------- */
 static t_class *rmoses_class;
 
 typedef struct {
@@ -497,6 +435,8 @@ static void rmoses_setup(void) {
 	class_sethelpsymbol(rmoses_class ,gensym("revbinops"));
 }
 
+
+/* --------------------- revop setup ------------------------------ */
 void revop_setup(void) {
 	const struct _obj objs[] =
 	{	 { &rminus_class ,"@-"    ,rminus_new }
@@ -525,16 +465,9 @@ void revop_setup(void) {
 }
 
 
-#ifdef _WIN32 // MSYS2 cannot find this function in <string.h>
-char *stpcpy(char *dest ,const char *src) {
-	size_t len = strlen(src);
-	return memcpy(dest ,src ,len + 1) + len;
-}
-#endif
-
-/* --------------------------------------------------------------- */
-/*                       hot-inlet arithmetics                     */
-/* --------------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+/*                      hot-inlet arithmetics                       */
+/* ---------------------------------------------------------------- */
 
 typedef struct {
 	t_object obj;
@@ -595,6 +528,13 @@ static t_hot *hot_new
 	return z;
 }
 
+#ifdef _WIN32 // MSYS2 cannot find this function in <string.h>
+char *stpcpy(char *dest ,const char *src) {
+	size_t len = strlen(src);
+	return memcpy(dest ,src ,len + 1) + len;
+}
+#endif
+
 static t_class *class_hot_pxy(const char *name) {
 	char alt[11] = "_";
 	strcpy(stpcpy(alt+1 ,name) ,"_pxy");
@@ -616,168 +556,144 @@ static void hot_free(t_hot *z) {
 }
 
 
-/* --------------------- binop1:  + ,- ,* ,/ --------------------- */
+/* --------------------- binop1:  +  -  *  /  --------------------- */
 
-/* --------------------- addition -------------------------------- */
-static t_class *hplus_class;
+static t_class *hplus_class; /* --------------- addition -------------------- */
 static t_class *hplus_proxy;
 static void *hplus_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hplus_class ,hplus_proxy ,fn_plus ,s ,ac ,av);  }
 
-/* --------------------- subtraction ----------------------------- */
-static t_class *hminus_class;
+static t_class *hminus_class; /* -------------- subtraction ----------------- */
 static t_class *hminus_proxy;
 static void *hminus_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hminus_class ,hminus_proxy ,fn_minus ,s ,ac ,av);  }
 
-/* --------------------- multiplication -------------------------- */
-static t_class *htimes_class;
+static t_class *htimes_class; /* -------------- multiplication -------------- */
 static t_class *htimes_proxy;
 static void *htimes_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(htimes_class ,htimes_proxy ,fn_times ,s ,ac ,av);  }
 
-/* --------------------- division -------------------------------- */
-static t_class *hdiv_class;
+static t_class *hdiv_class; /* ---------------- division -------------------- */
 static t_class *hdiv_proxy;
 static void *hdiv_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hdiv_class ,hdiv_proxy ,fn_div ,s ,ac ,av);  }
 
-/* --------------------- log ------------------------------------- */
-static t_class *hlog_class;
+static t_class *hlog_class; /* ---------------- log ------------------------- */
 static t_class *hlog_proxy;
 static void *hlog_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hlog_class ,hlog_proxy ,fn_log ,s ,ac ,av);  }
 
-/* --------------------- pow ------------------------------------- */
-static t_class *hpow_class;
+static t_class *hpow_class; /* ---------------- pow ------------------------- */
 static t_class *hpow_proxy;
 static void *hpow_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hpow_class ,hpow_proxy ,fn_pow ,s ,ac ,av);  }
 
-/* --------------------- max ------------------------------------- */
-static t_class *hmax_class;
+static t_class *hmax_class; /* ---------------- max ------------------------- */
 static t_class *hmax_proxy;
 static void *hmax_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hmax_class ,hmax_proxy ,fn_max ,s ,ac ,av);  }
 
-/* --------------------- min ------------------------------------- */
-static t_class *hmin_class;
+static t_class *hmin_class; /* ---------------- min ------------------------- */
 static t_class *hmin_proxy;
 static void *hmin_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hmin_class ,hmin_proxy ,fn_min ,s ,ac ,av);  }
 
-/* --------------- binop2: == ,!= ,> ,< ,>= ,<=. ----------------- */
+/* ---------------- binop2:  ==  !=  >  <  >=  <=  ---------------- */
 
-/* --------------------- == -------------------------------------- */
-static t_class *hee_class;
+static t_class *hee_class; /* ----------------- == -------------------------- */
 static t_class *hee_proxy;
 static void *hee_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hee_class ,hee_proxy ,fn_ee ,s ,ac ,av);  }
 
-/* --------------------- != -------------------------------------- */
-static t_class *hne_class;
+static t_class *hne_class; /* ----------------- != -------------------------- */
 static t_class *hne_proxy;
 static void *hne_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hne_class ,hne_proxy ,fn_ne ,s ,ac ,av);  }
 
-/* --------------------- > --------------------------------------- */
-static t_class *hgt_class;
+static t_class *hgt_class; /* ----------------- > --------------------------- */
 static t_class *hgt_proxy;
 static void *hgt_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hgt_class ,hgt_proxy ,fn_gt ,s ,ac ,av);  }
 
-/* --------------------- < --------------------------------------- */
-static t_class *hlt_class;
+static t_class *hlt_class; /* ----------------- < --------------------------- */
 static t_class *hlt_proxy;
 static void *hlt_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hlt_class ,hlt_proxy ,fn_lt ,s ,ac ,av);  }
 
-/* --------------------- >= -------------------------------------- */
-static t_class *hge_class;
+static t_class *hge_class; /* ----------------- >= -------------------------- */
 static t_class *hge_proxy;
 static void *hge_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hge_class ,hge_proxy ,fn_ge ,s ,ac ,av);  }
 
-/* --------------------- <= -------------------------------------- */
-static t_class *hle_class;
+static t_class *hle_class; /* ----------------- <= -------------------------- */
 static t_class *hle_proxy;
 static void *hle_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hle_class ,hle_proxy ,fn_le ,s ,ac ,av);  }
 
-/* ------- binop3: & ,| ,&& ,|| ,<< ,>> ,^ ,% ,mod ,div ------------- */
+/* -------- binop3:  &  |  &&  ||  <<  >>  ^  %  mod  div  -------- */
 
-/* --------------------- & --------------------------------------- */
-static t_class *hba_class;
+static t_class *hba_class; /* ----------------- & --------------------------- */
 static t_class *hba_proxy;
 static void *hba_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hba_class ,hba_proxy ,fn_ba ,s ,ac ,av);  }
 
-/* --------------------- && -------------------------------------- */
-static t_class *hla_class;
+static t_class *hla_class; /* ----------------- && -------------------------- */
 static t_class *hla_proxy;
 static void *hla_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hla_class ,hla_proxy ,fn_la ,s ,ac ,av);  }
 
-/* --------------------- | --------------------------------------- */
-static t_class *hbo_class;
+static t_class *hbo_class; /* ----------------- | --------------------------- */
 static t_class *hbo_proxy;
 static void *hbo_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hbo_class ,hbo_proxy ,fn_bo ,s ,ac ,av);  }
 
-/* --------------------- || -------------------------------------- */
-static t_class *hlo_class;
+static t_class *hlo_class; /* ----------------- || -------------------------- */
 static t_class *hlo_proxy;
 static void *hlo_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hlo_class ,hlo_proxy ,fn_lo ,s ,ac ,av);  }
 
-/* --------------------- << -------------------------------------- */
-static t_class *hls_class;
+static t_class *hls_class; /* ----------------- << -------------------------- */
 static t_class *hls_proxy;
 static void *hls_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hls_class ,hls_proxy ,fn_ls ,s ,ac ,av);  }
 
-/* --------------------- >> -------------------------------------- */
-static t_class *hrs_class;
+static t_class *hrs_class; /* ----------------- >> -------------------------- */
 static t_class *hrs_proxy;
 static void *hrs_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hrs_class ,hrs_proxy ,fn_rs ,s ,ac ,av);  }
 
-/* --------------------- ^ --------------------------------------- */
-static t_class *hxor_class;
+static t_class *hxor_class; /* ---------------- ^ --------------------------- */
 static t_class *hxor_proxy;
 static void *hxor_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hxor_class ,hxor_proxy ,fn_xor ,s ,ac ,av);  }
 
-/* --------------------- % --------------------------------------- */
-static t_class *hpc_class;
+static t_class *hpc_class; /* ----------------- % --------------------------- */
 static t_class *hpc_proxy;
 static void *hpc_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hpc_class ,hpc_proxy ,fn_pc ,s ,ac ,av);  }
 
-/* --------------------- f% --------------------------------------- */
-static t_class *hfpc_class;
+static t_class *hfpc_class; /* ---------------- f% -------------------------- */
 static t_class *hfpc_proxy;
 static void *hfpc_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hfpc_class ,hfpc_proxy ,fn_fpc ,s ,ac ,av);  }
 
-/* --------------------- mod ------------------------------------- */
-static t_class *hmod_class;
+static t_class *hmod_class; /* ---------------- mod ------------------------- */
 static t_class *hmod_proxy;
 static void *hmod_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hmod_class ,hmod_proxy ,fn_mod ,s ,ac ,av);  }
 
-/* --------------------- fmod ------------------------------------ */
-static t_class *hfmod_class;
+static t_class *hfmod_class; /* --------------- fmod ------------------------ */
 static t_class *hfmod_proxy;
 static void *hfmod_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hfmod_class ,hfmod_proxy ,fn_fmod ,s ,ac ,av);  }
 
-/* --------------------- div ------------------------------------- */
-static t_class *hdivm_class;
+static t_class *hdivm_class; /* --------------- div ------------------------- */
 static t_class *hdivm_proxy;
 static void *hdivm_new(t_symbol *s ,int ac ,t_atom *av)
 {	return hot_new(hdivm_class ,hdivm_proxy ,fn_divm ,s ,ac ,av);  }
 
+
+/* --------------------- hotop setup ------------------------------ */
 void hotop_setup(void) {
 	const struct
 	{	t_class **cls;
@@ -831,6 +747,7 @@ void hotop_setup(void) {
 }
 
 
+/* --------------------- blunt setup ------------------------------ */
 void blunt_setup(void) {
 
 	post("\nBlunt! version " VERSION "\ncompiled " DATE " " TIME " UTC");
@@ -841,7 +758,7 @@ void blunt_setup(void) {
 	s_close = gensym("&");
 	char alt[6] = "`";
 
-	/* ---------------- connectives --------------------- */
+	/* --------------- connectives ----------------------- */
 
 	const struct _obj nums[] =
 	{	 { &i_class ,"i" ,i_new }
@@ -854,7 +771,7 @@ void blunt_setup(void) {
 		class_addcreator((t_newmethod)num->new ,gensym(alt) ,A_GIMME ,0);  }
 
 
-	/* ---------------- unops --------------------- */
+	/* --------------- unops ----------------------------- */
 
 	t_symbol *usyms[] =
 		{ gensym("negation") ,gensym("rounding") ,gensym("factorial") ,NULL }
@@ -876,7 +793,7 @@ void blunt_setup(void) {
 		class_sethelpsymbol(*uop->cls ,*usym);  }
 
 
-	/* ---------------- binops --------------------- */
+	/* --------------- binops ---------------------------- */
 
 	t_symbol *bsyms[] = { s_blunt ,gensym("0x5e") ,NULL } ,**bsym = bsyms;
 	const struct _obj bops[] =
