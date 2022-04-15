@@ -44,14 +44,13 @@ static t_int *gmepd_perform(t_int *w) {
 
 	if (x->play)
 	{	SRC_DATA *data = &x->data;
-		while (n--)
+		for (; n--; in2++ ,in3++)
 		{	if (data->output_frames_gen > 0)
 			{	perform:
 				for (int i = NCH; i--;)
 					*outs[i]++ = data->data_out[i];
 				data->data_out += NCH;
 				data->output_frames_gen--;
-				in2++ ,in3++;
 				continue;
 			}
 			else if (data->input_frames > 0)

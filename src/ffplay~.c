@@ -74,14 +74,13 @@ static t_int *ffplay_perform(t_int *w) {
 
 	if (x->play)
 	{	SRC_DATA *data = &x->data;
-		while (n--)
+		for (; n--; in2++)
 		{	if (data->output_frames_gen > 0)
 			{	perform:
 				for (int i = nch; i--;)
 					*outs[i]++ = data->data_out[i];
 				data->data_out += nch;
 				data->output_frames_gen--;
-				in2++;
 				continue;
 			}
 			else if (data->input_frames > 0)
