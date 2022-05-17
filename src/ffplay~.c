@@ -2,8 +2,6 @@
 #include <libavformat/avformat.h>
 #include <libswresample/swresample.h>
 
-#define MAXCH 30
-
 static t_symbol *s_done;
 static t_symbol *s_pos;
 
@@ -26,14 +24,13 @@ typedef struct {
 
 typedef struct {
 	t_player z;
-	t_avstream       a;   /* audio stream */
+	t_avstream       a; /* audio stream */
 	AVPacket        *pkt;
 	AVFrame         *frm;
 	SwrContext      *swr;
 	AVFormatContext *ic;
-	t_sample  *outs[MAXCH];
 	t_playlist plist;
-	int64_t  layout;  /* channel layout bit-mask */
+	int64_t  layout; /* channel layout bit-mask */
 } t_ffplay;
 
 static void ffplay_seek(t_ffplay *x ,t_float f) {
@@ -62,18 +59,18 @@ static void ffplay_position(t_ffplay *x) {
 }
 
 static t_int *ffplay_perform(t_int *w) {
-	t_ffplay *y   = (t_ffplay*)(w[1]);
-	t_sample *in2 = (t_sample*)(w[2]);
+	t_ffplay *y = (t_ffplay*)(w[1]);
 	int n = (int)w[3];
 
 	t_player *x = &y->z;
 	unsigned nch = x->nch;
 	t_sample *outs[nch];
 	for (int i = nch; i--;)
-		outs[i] = y->outs[i];
+		outs[i] = x->outs[i];
 
 	if (x->play)
-	{	SRC_DATA *data = &x->data;
+	{	t_sample *in2 = (t_sample*)(w[2]);
+		SRC_DATA *data = &x->data;
 		for (; n--; in2++)
 		{	if (data->output_frames_gen > 0)
 			{	perform:
@@ -130,10 +127,11 @@ static t_int *ffplay_perform(t_int *w) {
 	return (w + 4);
 }
 
-static void ffplay_dsp(t_ffplay *x ,t_signal **sp) {
-	for (int i = x->z.nch; i--;)
+static void ffplay_dsp(t_ffplay *y ,t_signal **sp) {
+	t_player *x = &y->z;
+	for (int i = x->nch; i--;)
 		x->outs[i] = sp[i+1]->s_vec;
-	dsp_add(ffplay_perform ,3 ,x ,sp[0]->s_vec ,sp[0]->s_n);
+	dsp_add(ffplay_perform ,3 ,y ,sp[0]->s_vec ,sp[0]->s_n);
 }
 
 static int m3u_size(FILE *fp ,char *dir ,int dlen) {
@@ -376,8 +374,6 @@ static void *ffplay_new(t_symbol *s ,int ac ,t_atom *av) {
 		av = defarg;
 		SETFLOAT(&defarg[0] ,1);
 		SETFLOAT(&defarg[1] ,2);  }
-	else if (ac > MAXCH)
-		ac = MAXCH;
 
 	t_ffplay *x = (t_ffplay*)player_new(ffplay_class ,ac);
 	x->pkt = av_packet_alloc();

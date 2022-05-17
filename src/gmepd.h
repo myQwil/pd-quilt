@@ -1,11 +1,6 @@
 #include "player.h"
 #include <gme.h>
 
-#ifndef NCH
-#define NCH 2
-#endif
-
-enum { buf_size = NCH * FRAMES };
 static const float short_limit = 0x8000;
 static t_symbol *s_mask;
 
@@ -34,22 +29,25 @@ static void gmepd_tempo(t_gme *x ,t_float f) {
 
 static t_int *gmepd_perform(t_int *w) {
 	t_gme *y = (t_gme*)(w[1]);
+	int n = (int)(w[4]);
+
 	t_player *x = &y->z;
-	t_sample *in2 = (t_sample*)(w[2]);
-	t_sample *in3 = (t_sample*)(w[3]);
-	t_sample *outs[NCH];
-	for (int i=NCH; i--;)
-		outs[i] = (t_sample*)(w[i+4]);
-	int n = (int)(w[NCH+4]);
+	unsigned nch = x->nch;
+	t_sample *outs[nch];
+	for (int i = nch; i--;)
+		outs[i] = x->outs[i];
 
 	if (x->play)
-	{	SRC_DATA *data = &x->data;
+	{	t_sample *in2 = (t_sample*)(w[2]);
+		t_sample *in3 = (t_sample*)(w[3]);
+		int buf_size = nch * FRAMES;
+		SRC_DATA *data = &x->data;
 		for (; n--; in2++ ,in3++)
 		{	if (data->output_frames_gen > 0)
 			{	perform:
-				for (int i = NCH; i--;)
+				for (int i = nch; i--;)
 					*outs[i]++ = data->data_out[i];
-				data->data_out += NCH;
+				data->data_out += nch;
 				data->output_frames_gen--;
 				continue;
 			}
@@ -60,7 +58,7 @@ static t_int *gmepd_perform(t_int *w) {
 				data->data_out = x->out;
 				src_process(x->state ,data);
 				data->input_frames -= data->input_frames_used;
-				data->data_in += data->input_frames_used * NCH;
+				data->data_in += data->input_frames_used * nch;
 				goto perform;
 			}
 			else
@@ -79,9 +77,16 @@ static t_int *gmepd_perform(t_int *w) {
 		}
 	}
 	else while (n--)
-		for (int i = NCH; i--;)
+		for (int i = nch; i--;)
 			*outs[i]++ = 0;
-	return (w + NCH + 5);
+	return (w + 5);
+}
+
+static void gmepd_dsp(t_gme *y ,t_signal **sp) {
+	t_player *x = &y->z;
+	for (int i = x->nch; i--;)
+		x->outs[i] = sp[i+2]->s_vec;
+	dsp_add(gmepd_perform ,4 ,y ,sp[0]->s_vec ,sp[1]->s_vec ,sp[0]->s_n);
 }
 
 static inline int domask(int mask ,int voices ,int ac ,t_atom *av) {
@@ -142,7 +147,7 @@ static void gmepd_open(t_gme *x ,t_symbol *s) {
 	x->z.play = 0;
 	gme_err_t err_msg;
 	gme_delete(x->emu); x->emu = NULL;
-	if ( !(err_msg = gme_open_file(s->s_name ,&x->emu ,sys_getsr() ,NCH > 2)) )
+	if ( !(err_msg = gme_open_file(s->s_name ,&x->emu ,sys_getsr() ,x->z.nch > 2)) )
 	{	// check for a .m3u file of the same name
 		char m3u_path [256 + 5];
 		strncpy(m3u_path ,s->s_name ,256);
@@ -245,9 +250,9 @@ static void gmepd_stop(t_gme *x) {
 	gmepd_float(x ,0);
 }
 
-static void *gmepd_new(t_class *gmeclass ,t_symbol *s ,int ac ,t_atom *av) {
+static void *gmepd_new(t_class *gmeclass ,int nch ,t_symbol *s ,int ac ,t_atom *av) {
 	(void)s;
-	t_gme *x = (t_gme*)player_new(gmeclass ,NCH);
+	t_gme *x = (t_gme*)player_new(gmeclass ,nch);
 	t_inlet *in3 = signalinlet_new(&x->z.obj ,1.);
 	x->tempo = &in3->i_un.iu_floatsignalvalue;
 	x->path = gensym("no track loaded");

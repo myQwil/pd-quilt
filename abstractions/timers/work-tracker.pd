@@ -44,27 +44,29 @@
 #X obj 190 60 % 4;
 #X msg 130 130 1;
 #X msg 170 130 0.32;
-#X msg 220 130 0.1;
 #X obj 130 170 ad 1 10;
 #X obj 170 230 r~ \$0vol;
 #X obj 130 230 *~;
 #X obj 130 60 mod 60;
-#X connect 0 0 13 0;
-#X connect 1 0 12 0;
+#X obj 230 90 + 2;
+#X obj 230 130 @/ 0.32;
+#X connect 0 0 12 0;
+#X connect 1 0 11 0;
 #X connect 3 0 1 1;
 #X connect 4 0 7 0;
 #X connect 4 1 6 0;
 #X connect 5 0 8 0;
-#X connect 5 1 9 0;
+#X connect 5 1 13 0;
 #X connect 6 0 5 0;
-#X connect 7 0 10 0;
-#X connect 8 0 10 0;
-#X connect 9 0 10 0;
-#X connect 10 0 1 0;
-#X connect 11 0 12 1;
-#X connect 12 0 2 0;
-#X connect 12 0 2 1;
-#X connect 13 0 4 0;
+#X connect 7 0 9 0;
+#X connect 8 0 9 0;
+#X connect 9 0 1 0;
+#X connect 10 0 11 1;
+#X connect 11 0 2 0;
+#X connect 11 0 2 1;
+#X connect 12 0 4 0;
+#X connect 13 0 14 0;
+#X connect 14 0 9 0;
 #X restore 210 350 pd tick;
 #X msg 60 180 pause;
 #X obj 110 260 chrono sec;
@@ -72,8 +74,8 @@
 #X msg 300 180 tempo \$1;
 #X msg 100 210 del \$1;
 #X obj 120 180 f;
-#X obj 150 90 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400
-#fcfcfc;
+#X obj 150 110 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
+#ff0400 #fcfcfc;
 #X obj 170 210 f;
 #X obj 60 60 bng 20 250 50 0 \$0reset empty reset -4 -10 0 12 #ff8300
 #ff0400 #fcfcfc;
@@ -119,9 +121,9 @@
 #X msg 40 150 kdialog --passivepopup 'Worked \$1 hours' 10;
 #X obj 80 120 + 0.25;
 #X obj 120 90 f;
-#X msg 120 60 0;
-#X obj 120 30 r \$0new;
-#X obj 160 60 inlet;
+#X msg 170 60 0;
+#X obj 170 30 r \$0new;
+#X obj 120 60 inlet;
 #X obj 100 180 outlet;
 #X obj 160 90 r \$0reset;
 #N canvas 840 620 450 300 sel 0;
@@ -161,7 +163,7 @@
 #X connect 3 0 0 0;
 #X connect 4 0 1 1;
 #X connect 5 0 1 1;
-#X connect 6 0 5 0;
+#X connect 6 0 5 1;
 #X connect 7 0 6 0;
 #X connect 8 0 5 0;
 #X connect 10 0 5 0;

@@ -750,7 +750,7 @@ void hotop_setup(void) {
 /* --------------------- blunt setup ------------------------------ */
 void blunt_setup(void) {
 
-	post("\nBlunt! version " VERSION "\ncompiled " DATE " " TIME " UTC");
+	post("\nBlunt! version " VERSION "\ncompiled " DATE " " TIME " UTC\n");
 
 	t_symbol *s_blunt = gensym("blunt");
 	s_load  = gensym("!");

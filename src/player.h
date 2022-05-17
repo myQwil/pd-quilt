@@ -15,6 +15,7 @@ typedef struct {
 	float     *out;
 	SRC_DATA   data;
 	SRC_STATE *state;
+	t_sample **outs;
 	t_float   *speed;  /* playback speed */
 	double     ratio;  /* resampling ratio */
 	unsigned   play:1; /* play/pause toggle */
@@ -139,6 +140,7 @@ static t_player *player_new(t_class *cl ,unsigned nch) {
 	t_inlet *in2 = signalinlet_new(&x->obj ,1.);
 	x->speed = &in2->i_un.iu_floatsignalvalue;
 
+	x->outs = (t_sample**)getbytes(nch * sizeof(t_sample*));
 	while (nch--) outlet_new(&x->obj ,&s_signal);
 	x->o_meta = outlet_new(&x->obj ,0);
 
@@ -148,8 +150,9 @@ static t_player *player_new(t_class *cl ,unsigned nch) {
 
 static void player_free(t_player *x) {
 	src_delete(x->state);
-	freebytes(x->in  ,x->nch * FRAMES * sizeof(t_sample));
-	freebytes(x->out ,x->nch * FRAMES * sizeof(t_sample));
+	freebytes(x->in   ,x->nch * sizeof(t_sample) * FRAMES);
+	freebytes(x->out  ,x->nch * sizeof(t_sample) * FRAMES);
+	freebytes(x->outs ,x->nch * sizeof(t_sample*));
 }
 
 static t_class *class_player
