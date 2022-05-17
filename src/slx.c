@@ -22,7 +22,5 @@ static void *slx_new(t_symbol *s ,int argc ,t_atom *argv) {
 }
 
 void slx_setup(void) {
-	slx_class = slope_setup(gensym("slx") ,(t_newmethod)slx_new);
-	class_addfloat(slx_class ,slx_float);
-	class_sethelpsymbol(slx_class ,gensym("slope"));
+	slx_class = slope_setup(gensym("slx") ,(t_newmethod)slx_new ,(t_method)slx_float);
 }

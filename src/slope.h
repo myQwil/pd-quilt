@@ -13,13 +13,13 @@ typedef struct {
 
 static void slope_minmax(t_slope *x) {
 	double min=x->min ,max=x->max;
-	if ((min == 0.0) && (max == 0.0))
-		max = 1.0;
-	if (max > 0.0)
-	{	if (min <= 0.0)
+	if ((min == 0.) && (max == 0.))
+		max = 1.;
+	if (max > 0.)
+	{	if (min <= 0.)
 			min = 0.01 * max;  }
 	else
-	{	if (min >  0.0)
+	{	if (min >  0.)
 			max = 0.01 * min;  }
 	x->min = min;
 	x->max = max;
@@ -90,15 +90,17 @@ static t_slope *slope_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
 	return x;
 }
 
-static t_class *slope_setup(t_symbol *s ,t_newmethod newm) {
-	t_class *xclass = class_new(s ,newm ,0 ,sizeof(t_slope) ,0 ,A_GIMME ,0);
-	class_addlist    (xclass ,slope_list);
-	class_addanything(xclass ,slope_anything);
+static t_class *slope_setup(t_symbol *s ,t_newmethod nmet ,t_method fmet) {
+	t_class *cls = class_new(s ,nmet ,0 ,sizeof(t_slope) ,0 ,A_GIMME ,0);
+	class_addfloat    (cls ,fmet);
+	class_addlist     (cls ,slope_list);
+	class_addanything (cls ,slope_anything);
 
-	class_addmethod(xclass ,(t_method)slope_min ,gensym("min") ,A_FLOAT ,0);
-	class_addmethod(xclass ,(t_method)slope_max ,gensym("max") ,A_FLOAT ,0);
-	class_addmethod(xclass ,(t_method)slope_run ,gensym("run") ,A_FLOAT ,0);
-	class_addmethod(xclass ,(t_method)slope_log ,gensym("log") ,A_FLOAT ,0);
+	class_addmethod(cls ,(t_method)slope_min ,gensym("min") ,A_FLOAT ,0);
+	class_addmethod(cls ,(t_method)slope_max ,gensym("max") ,A_FLOAT ,0);
+	class_addmethod(cls ,(t_method)slope_run ,gensym("run") ,A_FLOAT ,0);
+	class_addmethod(cls ,(t_method)slope_log ,gensym("log") ,A_FLOAT ,0);
+	class_sethelpsymbol(cls ,gensym("slope"));
 
-	return xclass;
+	return cls;
 }

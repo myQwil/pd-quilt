@@ -22,7 +22,5 @@ static void *sly_new(t_symbol *s ,int argc ,t_atom *argv) {
 }
 
 void sly_setup(void) {
-	sly_class = slope_setup(gensym("sly") ,(t_newmethod)sly_new);
-	class_addfloat(sly_class ,sly_float);
-	class_sethelpsymbol(sly_class ,gensym("slope"));
+	sly_class = slope_setup(gensym("sly") ,(t_newmethod)sly_new ,(t_method)sly_float);
 }
