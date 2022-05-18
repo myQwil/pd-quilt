@@ -68,7 +68,10 @@ static t_int *metro_tilde_perform(t_int *w) {
 	{	tf.i[HIOFFSET] = normhipart;
 		dphase += *in * conv;
 		t_sample f = tf.d - UNITBIT32;
-		if (*in >= 0 && f > x->prev)
+		if (*in < 0)
+		{	if (f < x->prev)
+				outlet_bang(x->obj.ob_outlet);  }
+		else if (f > x->prev)
 			outlet_bang(x->obj.ob_outlet);
 		x->prev = f;
 		tf.d = dphase;  }
