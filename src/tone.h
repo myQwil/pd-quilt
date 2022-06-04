@@ -29,6 +29,7 @@ static t_tone *tone_new(t_class *cl ,t_symbol *s ,int argc ,t_atom *argv) {
 	t_float ref=440 ,tet=12;
 	switch (argc)
 	{	case 2: tet = atom_getfloat(argv+1);
+		// fall through
 		case 1: ref = atom_getfloat(argv);  }
 	x->note.ref = ref;
 	note_tet(&x->note ,tet);

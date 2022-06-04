@@ -1,6 +1,6 @@
 #include "inlet.h"
 
-static const int max = 0x400;
+static const unsigned max = 0x400;
 
 typedef struct {
 	t_float *fp;  /* array pointer */

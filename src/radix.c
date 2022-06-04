@@ -19,7 +19,7 @@ t_widgetbehavior radix_widgetbehavior;
 
 static void radix_borderwidth(t_radix *x ,t_float zoom) {
 	t_radixtcl *y = (t_radixtcl*)x;
-	int n = x->x_numwidth ? x->x_numwidth : x->x_buflen;
+	int n = x->x_numwidth ? (int)x->x_numwidth : x->x_buflen;
   #ifdef __APPLE__
 	x->x_gui.x_w = n * y->x_fontwidth * zoom;
   #else

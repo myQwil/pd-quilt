@@ -30,11 +30,13 @@ static void muse_slice(t_muse *y ,t_symbol *s ,int ac ,t_atom *av) {
 		{	step = atom_getint(av+2);
 			if (step < 0)
 				strt = n ,stop = 0;  }
+		// fall through
 	 case 2:
 		if (av[1].a_type == A_FLOAT)
 		{	stop = atom_getint(av+1) % n;
 			if (stop < 0)
 				stop += n;  }
+		// fall through
 	 case 1:
 		if (av[0].a_type == A_FLOAT)
 		{	strt = atom_getint(av+0) % n;

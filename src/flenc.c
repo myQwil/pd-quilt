@@ -50,8 +50,10 @@ static void flenc_set(t_flenc *x ,t_symbol *s ,int ac ,t_atom *av) {
 	switch (ac)
 	{ case 3: if ((av+2)->a_type == A_FLOAT)
 		x->uf.sg = (av+2)->a_w.w_float;
+		// fall through
 	  case 2: if ((av+1)->a_type == A_FLOAT)
 		x->uf.ex = (av+1)->a_w.w_float;
+		// fall through
 	  case 1: if (av->a_type == A_FLOAT)
 		x->uf.mt = av->a_w.w_float; }
 }

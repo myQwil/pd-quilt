@@ -50,8 +50,10 @@ static void slope_log(t_slope *x ,t_float f) {
 static void slope_list(t_slope *x ,t_symbol *s ,int ac ,t_atom *av) {
 	(void)s;
 	switch (ac)
-	{ case 3: if (av[2].a_type == A_FLOAT) x->run = atom_getfloat(av+2); // no break
-	  case 2: if (av[1].a_type == A_FLOAT) x->max = atom_getfloat(av+1); // no break
+	{ case 3: if (av[2].a_type == A_FLOAT) x->run = atom_getfloat(av+2);
+	  // fall through
+	  case 2: if (av[1].a_type == A_FLOAT) x->max = atom_getfloat(av+1);
+	  // fall through
 	  case 1: if (av[0].a_type == A_FLOAT) x->min = atom_getfloat(av+0); slope_k(x);  }
 }
 
@@ -78,7 +80,8 @@ static t_slope *slope_new(t_class *cl ,t_symbol *s ,int ac ,t_atom *av) {
 
 	switch (ac)
 	{ case 3:
-		run = atom_getfloat(av+2); // no break
+		run = atom_getfloat(av+2);
+		// fall through
 	  case 2:
 		max = atom_getfloat(av+1);
 		min = atom_getfloat(av);
