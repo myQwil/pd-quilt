@@ -8,11 +8,12 @@ static t_symbol *s_mask;
 typedef struct {
 	t_player z;
 	Music_Emu  *emu;
-	gme_info_t *info;  /* current track info */
-	t_symbol   *path;  /* path to the most recently read file */
-	t_float    *tempo; /* rate of emulation */
-	int      voices;   /* number of voices */
-	int      mask;     /* muting mask */
+	gme_info_t *info;   /* current track info */
+	t_symbol   *path;   /* path to the most recently read file */
+	t_float    *tempo;  /* rate of emulation (inlet pointer) */
+	t_float     tempo_; /* rate of emulation (prev value) */
+	int      voices;    /* number of voices */
+	int      mask;      /* muting mask */
 } t_gme;
 
 static void gmepd_seek(t_gme *x ,t_float f) {
@@ -22,9 +23,13 @@ static void gmepd_seek(t_gme *x ,t_float f) {
 	player_reset(&x->z);
 }
 
+static inline void gmepd_tempo_(t_gme *x ,t_float f) {
+	x->tempo_ = f;
+	if (x->emu) gme_set_tempo(x->emu ,x->tempo_);
+}
+
 static void gmepd_tempo(t_gme *x ,t_float f) {
 	*x->tempo = f;
-	if (x->emu) gme_set_tempo(x->emu ,*x->tempo);
 }
 
 static t_int *gmepd_perform(t_int *w) {
@@ -53,8 +58,8 @@ static t_int *gmepd_perform(t_int *w) {
 			}
 			else if (data->input_frames > 0)
 			{	resample:
-				if (*x->speed != *in2)
-					player_speed(x ,*in2);
+				if (x->speed_ != *in2)
+					player_speed_(x ,*in2);
 				data->data_out = x->out;
 				src_process(x->state ,data);
 				data->input_frames -= data->input_frames_used;
@@ -63,8 +68,8 @@ static t_int *gmepd_perform(t_int *w) {
 			}
 			else
 			{	// receive
-				if (*y->tempo != *in3)
-					gmepd_tempo(y ,*in3);
+				if (y->tempo_ != *in3)
+					gmepd_tempo_(y ,*in3);
 				data->data_in = x->in;
 				float *in = x->in;
 				short arr[buf_size] ,*buf = arr;
@@ -253,12 +258,14 @@ static void gmepd_stop(t_gme *x) {
 static void *gmepd_new(t_class *gmeclass ,int nch ,t_symbol *s ,int ac ,t_atom *av) {
 	(void)s;
 	t_gme *x = (t_gme*)player_new(gmeclass ,nch);
-	t_inlet *in3 = signalinlet_new(&x->z.obj ,1.);
+
+	x->tempo_ = 1.;
+	t_inlet *in3 = signalinlet_new(&x->z.obj ,x->tempo_);
 	x->tempo = &in3->i_un.iu_floatsignalvalue;
-	x->path = gensym("no track loaded");
 
 	x->mask = 0;
 	x->voices = 32;
+	x->path = gensym("no track loaded");
 	if (ac) gmepd_solo(x ,NULL ,ac ,av);
 	return x;
 }

@@ -16,7 +16,8 @@ typedef struct {
 	SRC_DATA   data;
 	SRC_STATE *state;
 	t_sample **outs;
-	t_float   *speed;  /* playback speed */
+	t_float   *speed;  /* playback speed (inlet pointer) */
+	t_float    speed_; /* playback speed (prev value) */
 	double     ratio;  /* resampling ratio */
 	unsigned   play:1; /* play/pause toggle */
 	unsigned   open:1; /* true when a file has been successfully opened */
@@ -33,11 +34,15 @@ static inline void player_reset(t_player *x) {
 static const t_float fastest = FRAMES - (1./128.); // SRC can get stuck if too fast
 static const t_float slowest = 1. / FRAMES;
 
-static inline void player_speed(t_player *x ,t_float f) {
-	*x->speed = f;
+static inline void player_speed_(t_player *x ,t_float f) {
+	x->speed_ = f;
 	f *= x->ratio;
 	f = f > fastest ? fastest : (f < slowest ? slowest : f);
 	x->data.src_ratio = 1. / f;
+}
+
+static void player_speed(t_player *x ,t_float f) {
+	*x->speed = f;
 }
 
 static void player_interp(t_player *x ,t_float f) {
@@ -138,7 +143,8 @@ static t_player *player_new(t_class *cl ,unsigned nch) {
 	x->data.src_ratio = x->ratio = 1.;
 	x->data.output_frames = FRAMES;
 
-	t_inlet *in2 = signalinlet_new(&x->obj ,1.);
+	x->speed_ = 1.;
+	t_inlet *in2 = signalinlet_new(&x->obj ,x->speed_);
 	x->speed = &in2->i_un.iu_floatsignalvalue;
 
 	x->outs = (t_sample**)getbytes(nch * sizeof(t_sample*));

@@ -82,8 +82,8 @@ static t_int *ffplay_perform(t_int *w) {
 			}
 			else if (data->input_frames > 0)
 			{	resample:
-				if (*x->speed != *in2)
-					player_speed(x ,*in2);
+				if (x->speed_ != *in2)
+					player_speed_(x ,*in2);
 				data->data_out = x->out;
 				src_process(x->state ,data);
 				data->input_frames -= data->input_frames_used;
@@ -259,7 +259,7 @@ static err_t ffplay_load(t_ffplay *x ,int index) {
 		return "SWResampler initialization failed";
 
 	x->z.ratio = (double)x->a.ctx->sample_rate / sys_getsr();
-	player_speed(&x->z ,*x->z.speed);
+	player_speed_(&x->z ,*x->z.speed);
 	player_reset(&x->z);
 	x->frm->pts = 0;
 	return 0;
