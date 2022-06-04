@@ -1,5 +1,5 @@
-void setup_0x40pak(void);
-void setup_0x40unpak(void);
+void setup_0x40paq(void);
+void setup_0x40unpaq(void);
 void blunt_setup(void);
 void chrd_setup(void);
 void chrono_setup(void);
@@ -13,7 +13,7 @@ void linp_setup(void);
 void linp_tilde_setup(void);
 void muse_setup(void);
 void ntof_setup(void);
-void pak_setup(void);
+void paq_setup(void);
 void radix_setup(void);
 void rand_setup(void);
 void rind_setup(void);
@@ -22,15 +22,15 @@ void slx_setup(void);
 void sly_setup(void);
 void tabosc2_tilde_setup(void);
 void tabread2_tilde_setup(void);
-void unpak_setup(void);
+void unpaq_setup(void);
 
 // void ffplay_tilde_setup(void);
 // void gme_tilde_setup(void);
 // void gmes_tilde_setup(void);
 
 void quilt_setup(void) {
-	setup_0x40pak();
-	setup_0x40unpak();
+	setup_0x40paq();
+	setup_0x40unpaq();
 	blunt_setup();
 	chrd_setup();
 	chrono_setup();
@@ -44,7 +44,7 @@ void quilt_setup(void) {
 	linp_tilde_setup();
 	muse_setup();
 	ntof_setup();
-	pak_setup();
+	paq_setup();
 	radix_setup();
 	rand_setup();
 	rind_setup();
@@ -53,7 +53,7 @@ void quilt_setup(void) {
 	sly_setup();
 	tabosc2_tilde_setup();
 	tabread2_tilde_setup();
-	unpak_setup();
+	unpaq_setup();
 
 	// ffplay_tilde_setup();
 	// gme_tilde_setup();

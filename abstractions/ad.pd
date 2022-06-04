@@ -3,7 +3,7 @@
 #X obj 320 70 inlet attack;
 #X obj 430 70 inlet decay;
 #X obj 40 70 route float bang a d z;
-#X obj 230 70 unpak f f;
+#X obj 230 70 unpaq f f;
 #X obj 260 150 t f;
 #X obj 360 150 t f;
 #X obj 50 100 1;

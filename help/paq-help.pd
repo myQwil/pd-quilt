@@ -3,8 +3,8 @@
 #X msg 260 100 one 2 3;
 #X msg 340 100 4 five 6;
 #X msg 340 130 7 8 nine;
-#X obj 230 190 unpak any 2 3;
-#X obj 230 270 pak hi b float;
+#X obj 230 190 unpaq any 2 3;
+#X obj 230 270 paq hi b float;
 #X msg 180 100 . . 234;
 #N canvas 570 570 450 320 foo 0;
 #X restore 50 140 pd foo;
@@ -22,7 +22,7 @@
 #X msg 350 230 yo 42 34;
 #X msg 450 220 mute 0;
 #X obj 250 300 print;
-#X obj 230 360 unpak a 2 f;
+#X obj 230 360 unpaq a 2 f;
 #X msg 150 310 1 2 three;
 #X msg 90 360 mute 0;
 #N canvas 570 390 350 270 out 0;
@@ -116,13 +116,13 @@
 #X text 450 200 error messages are off by default;
 #X text 510 220 print all strict errors;
 #X text 450 240 acts as a bit mask. -1 mutes all;
-#X text 360 270 with pak \, 'b' turns into a lazy 'bang';
+#X text 360 270 with paq \, 'b' turns into a lazy 'bang';
 #X text 360 290 and unrecognized types become lazy symbols;
 #X text 330 340 use f(loat) \, s(ymbol) \, or p(ointer) for strict
 type;
 #X text 330 360 'a' \, 'any' \, or a number for 'anything';
 #X text 40 310 type mismatch;
-#X obj 300 30 cnv 15 152 24 empty empty pak\\\ &\\\ unpak 4 12 0 18
+#X obj 300 30 cnv 15 152 24 empty empty paq\\\ &\\\ unpaq 4 12 0 18
 #000000 #fcfcfc 0;
 #X obj 540 450 declare -lib zexy;
 #X connect 0 0 3 0;

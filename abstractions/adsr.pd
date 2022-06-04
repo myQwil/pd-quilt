@@ -5,7 +5,7 @@
 #X obj 550 100 inlet sustain;
 #X obj 590 130 inlet release;
 #X obj 40 70 route float bang a d #s s r z;
-#X obj 290 70 unpak f f f f;
+#X obj 290 70 unpaq f f f f;
 #X obj 260 160 t f;
 #X obj 360 160 t f;
 #X obj 460 160 t f;

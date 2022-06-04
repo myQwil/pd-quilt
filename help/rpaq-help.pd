@@ -7,9 +7,9 @@
 #X obj 40 170 pointer;
 #X msg 230 170 8 7;
 #X symbolatom 410 270 0 0 0 0 - - - 0;
-#X obj 170 40 cnv 15 178 24 empty empty @pak\\\ &\\\ @unpak 4 12 0
+#X obj 170 40 cnv 15 178 24 empty empty @paq\\\ &\\\ @unpaq 4 12 0
 18 #000000 #fcfcfc 0;
-#X obj 130 270 @pak f f a;
+#X obj 130 270 @paq f f a;
 #X text 180 320 a f f;
 #X msg 40 200 . . \$1;
 #X obj 410 310 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
@@ -21,7 +21,7 @@
 #X text 110 80 args are written in receiving order;
 #X text 130 60 outputs the values in reverse;
 #X msg 220 210 6 six;
-#X obj 290 240 @unpak a a a;
+#X obj 290 240 @unpaq a a a;
 #X msg 310 120 a b;
 #X symbolatom 290 270 0 0 0 0 - - - 0;
 #X symbolatom 350 270 0 0 0 0 - - - 0;
