@@ -4,9 +4,8 @@
 PDLIBDIR = .
 
 lib.name    = quilt
-lib.version = 0.8.1
 
-cflags = -DVERSION=\"${lib.version}\" \
+cflags = -DBLUNT=1 \
 -DDATE=\"$(shell date -u +%F)\" \
 -DTIME=\"$(shell date -u +%T)\"
 
