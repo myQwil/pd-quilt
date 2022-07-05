@@ -450,7 +450,7 @@ void revop_setup(void) {
 		,{ &rmod_class   ,"@mod"  ,rmod_new   }
 		,{ &rfmod_class  ,"@fmod" ,rfmod_new  }
 		,{ &rdivm_class  ,"@div"  ,rdivm_new  }
-		,{ NULL ,NULL ,NULL }  } ,*obj = objs;
+		,{ NULL ,NULL ,NULL                   }  } ,*obj = objs;
 
 	t_symbol *s_rev = gensym("revbinops");
 	for (; obj->cls; obj++)
@@ -709,14 +709,14 @@ void hotop_setup(void) {
 		,{ &hpow_class   ,&hpow_proxy   ,"#pow"  ,hpow_new   }
 		,{ &hmax_class   ,&hmax_proxy   ,"#max"  ,hmax_new   }
 		,{ &hmin_class   ,&hmin_proxy   ,"#min"  ,hmin_new   }
-		,{ NULL ,NULL ,NULL ,NULL }
+		,{ NULL ,NULL ,NULL ,NULL                            }
 		,{ &hee_class    ,&hee_proxy    ,"#=="   ,hee_new    }
 		,{ &hne_class    ,&hne_proxy    ,"#!="   ,hne_new    }
 		,{ &hgt_class    ,&hgt_proxy    ,"#>"    ,hgt_new    }
 		,{ &hlt_class    ,&hlt_proxy    ,"#<"    ,hlt_new    }
 		,{ &hge_class    ,&hge_proxy    ,"#>="   ,hge_new    }
 		,{ &hle_class    ,&hle_proxy    ,"#<="   ,hle_new    }
-		,{ NULL ,NULL ,NULL ,NULL }
+		,{ NULL ,NULL ,NULL ,NULL                            }
 		,{ &hba_class    ,&hba_proxy    ,"#&"    ,hba_new    }
 		,{ &hla_class    ,&hla_proxy    ,"#&&"   ,hla_new    }
 		,{ &hbo_class    ,&hbo_proxy    ,"#|"    ,hbo_new    }
@@ -728,9 +728,9 @@ void hotop_setup(void) {
 		,{ &hmod_class   ,&hmod_proxy   ,"#mod"  ,hmod_new   }
 		,{ &hfmod_class  ,&hfmod_proxy  ,"#fmod" ,hfmod_new  }
 		,{ &hdivm_class  ,&hdivm_proxy  ,"#div"  ,hdivm_new  }
-		,{ NULL ,NULL ,NULL ,NULL }
+		,{ NULL ,NULL ,NULL ,NULL                            }
 		,{ &hxor_class   ,&hxor_proxy   ,"#^"    ,hxor_new   }
-		,{ NULL ,NULL ,NULL ,NULL }  } ,*obj = objs;
+		,{ NULL ,NULL ,NULL ,NULL                            }  } ,*obj = objs;
 
 	t_symbol *syms[] =
 	{	 gensym("hotbinops1") ,gensym("hotbinops2") ,gensym("hotbinops3")
@@ -767,7 +767,7 @@ void blunt_setup(void) {
 	const struct _obj nums[] =
 	{	 { &i_class ,"i" ,i_new }
 		,{ &f_class ,"f" ,f_new }
-		,{ NULL ,NULL ,NULL }  } ,*num = nums;
+		,{ NULL ,NULL ,NULL     }  } ,*num = nums;
 
 	for (; num->cls; num++)
 	{	*num->cls = class_num(gensym(num->name) ,(t_newmethod)num->new);
@@ -783,12 +783,12 @@ void blunt_setup(void) {
 	const struct _obj uops[] =
 	{	 { &lnot_class  ,"!"     ,lnot_new  }
 		,{ &bnot_class  ,"~"     ,bnot_new  }
-		,{ NULL ,NULL ,NULL }
+		,{ NULL ,NULL ,NULL                 }
 		,{ &floor_class ,"floor" ,floor_new }
 		,{ &ceil_class  ,"ceil"  ,ceil_new  }
-		,{ NULL ,NULL ,NULL }
+		,{ NULL ,NULL ,NULL                 }
 		,{ &fact_class  ,"n!"    ,fact_new  }
-		,{ NULL ,NULL ,NULL }  } ,*uop = uops;
+		,{ NULL ,NULL ,NULL                 }  } ,*uop = uops;
 
 	for (; *usym; usym++ ,uop++) for (; uop->cls; uop++)
 	{	*uop->cls = class_new(gensym(uop->name) ,(t_newmethod)uop->new ,0
@@ -826,9 +826,9 @@ void blunt_setup(void) {
 		,{ &b3_mod_class   ,"mod"  ,b3_mod_new   }
 		,{ &b3_fmod_class  ,"fmod" ,b3_fmod_new  }
 		,{ &b3_div_class   ,"div"  ,b3_div_new   }
-		,{ NULL ,NULL ,NULL }
+		,{ NULL ,NULL ,NULL                      }
 		,{ &b3_xor_class   ,"^"    ,b3_xor_new   }
-		,{ NULL ,NULL ,NULL }  } ,*bop = bops;
+		,{ NULL ,NULL ,NULL                      }  } ,*bop = bops;
 
 	for (; *bsym; bsym++ ,bop++) for (; bop->cls; bop++)
 	{	*bop->cls = class_bop(gensym(bop->name) ,(t_newmethod)bop->new);
