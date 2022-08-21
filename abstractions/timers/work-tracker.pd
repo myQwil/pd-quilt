@@ -1,7 +1,7 @@
-#N canvas 30 500 370 210 14;
+#N canvas 20 500 370 210 14;
 #X declare -lib blunt;
 #X declare -path ggee;
-#X obj 40 30 cnv 15 100 24 empty \$0clock 0:00:00 4 12 0 18 #000000
+#X obj 20 30 cnv 15 100 24 empty \$0clock 0:00:00 4 12 0 18 #000000
 #fcfcfc 0;
 #N canvas 400 500 430 420 guts 0;
 #N canvas 300 500 380 350 hms 0;
@@ -111,24 +111,18 @@
 #X restore 300 50 pd lib;
 #X obj 170 150 r \$0reset;
 #X obj 110 150 * 60;
-#N canvas 840 500 420 210 kde-notify 0;
-#X obj 40 140 shell;
-#X obj 40 50 inlet;
-#X msg 40 110 kdialog --passivepopup Worked_\$1_hours 5;
-#N canvas 840 620 450 300 change 0;
+#N canvas 840 500 420 240 kde-notify 0;
+#X obj 40 180 shell;
 #X obj 40 30 inlet;
-#X obj 40 240 outlet;
+#X msg 40 150 kdialog --passivepopup Worked_\$1_hours 5;
 #X obj 40 60 div 900;
 #X obj 40 120 / 4;
 #X obj 40 90 change -9000;
-#X connect 0 0 2 0;
-#X connect 2 0 4 0;
-#X connect 3 0 1 0;
-#X connect 4 0 3 0;
-#X restore 40 80 pd change;
 #X connect 1 0 3 0;
 #X connect 2 0 0 0;
-#X connect 3 0 2 0;
+#X connect 3 0 5 0;
+#X connect 4 0 2 0;
+#X connect 5 0 4 0;
 #X restore 210 290 pd kde-notify;
 #N canvas 1020 490 370 270 recall 0;
 #X obj 40 100 textfile;

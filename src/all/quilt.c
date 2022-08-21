@@ -11,6 +11,7 @@ void has_setup(void);
 void is_setup(void);
 void linp_setup(void);
 void linp_tilde_setup(void);
+void metro_tilde_setup(void);
 void muse_setup(void);
 void ntof_setup(void);
 void paq_setup(void);
@@ -42,6 +43,7 @@ void quilt_setup(void) {
 	is_setup();
 	linp_setup();
 	linp_tilde_setup();
+	metro_tilde_setup();
 	muse_setup();
 	ntof_setup();
 	paq_setup();

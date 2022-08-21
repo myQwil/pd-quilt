@@ -58,12 +58,13 @@ static inline t_atom player_time(t_float ms) {
 
 static inline t_atom player_ftime(int64_t ms) {
 	char time[33] ,*t = time;
-	int64_t min =  ms / 60000;
-	int     sec = (ms - 60000 * min) / 1000;
-	if (min >= 60)
-	{	sprintf(t ,"%d:" ,(int)min/60);
+	double hr = ms / 3600000.;
+	float mn = (hr - (int)hr) * 60;
+	float sc = (mn - (int)mn) * 60;
+	if (hr >= 1)
+	{	sprintf(t ,"%d:" ,(int)hr);
 		t += strlen(t);  }
-	sprintf(t ,"%02d:%02d" ,(int)min%60 ,sec);
+	sprintf(t ,"%02d:%02d" ,(int)mn ,(int)sc);
 	return (t_atom){ .a_type=A_SYMBOL ,.a_w={.w_symbol = gensym(time)} };
 }
 

@@ -2,7 +2,7 @@
 #X obj 180 130 inlet;
 #X obj 240 130 inlet reset;
 #X obj 140 100 loadbang;
-#X obj 150 270 ad 1 10;
+#X obj 150 270 ad 1.5 15;
 #X obj 80 240 noise~;
 #X obj 80 270 *~;
 #X obj 80 330 outlet~;

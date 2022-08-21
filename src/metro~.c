@@ -40,7 +40,7 @@ union tabfudge {
 	int32_t i[2];
 };
 
-/* -------------------------- metro_tilde~ ------------------------------ */
+/* -------------------------- metro~ ------------------------------ */
 static t_class *metro_tilde_class;
 
 typedef struct {
