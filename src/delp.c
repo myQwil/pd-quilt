@@ -22,16 +22,19 @@ typedef struct {
 	t_outlet *o_on;   /* outputs play/pause state */
 } t_delp;
 
-static void delp_tick(t_delp *x) {
+static inline void delp_end(t_delp *x) {
 	x->stop = 1;
 	outlet_float(x->o_on ,0);
+}
+
+static void delp_tick(t_delp *x) {
+	delp_end(x);
 	outlet_bang(x->obj.ob_outlet);
 }
 
 static void delp_stop(t_delp *x) {
+	delp_end(x);
 	clock_unset(x->clock);
-	x->stop = 1;
-	outlet_float(x->o_on ,0);
 }
 
 static void delp_delay(t_delp *x ,t_float f) {
@@ -56,6 +59,7 @@ static void delp_pause(t_delp *x ,t_symbol *s ,int ac ,t_atom *av) {
 		if (x->pause == pause) return;
 		else x->pause = pause;  }
 	else x->pause = !x->pause;
+	outlet_float(x->o_on ,!x->pause);
 
 	if (x->pause)
 	{	clock_unset(x->clock);
@@ -64,8 +68,6 @@ static void delp_pause(t_delp *x ,t_symbol *s ,int ac ,t_atom *av) {
 	else
 	{	x->settime = clock_getlogicaltime();
 		clock_delay(x->clock ,x->remtime);  }
-
-	outlet_float(x->o_on ,!x->pause);
 }
 
 static void delp_tempo(t_delp *x ,t_symbol *s ,int ac ,t_atom *av) {

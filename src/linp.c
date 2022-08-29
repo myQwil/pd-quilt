@@ -33,7 +33,7 @@ static void linp_freeze(t_linp *x) {
 	if (clock_getsystime() >= x->targettime)
 	     x->setval  = x->targetval;
 	else x->setval += x->invtime * (clock_getsystime() - x->prevtime)
-	                              * (x->targetval - x->setval);
+	                             * (x->targetval - x->setval);
 	clock_unset(x->clock);
 }
 

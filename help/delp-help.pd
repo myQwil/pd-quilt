@@ -8,8 +8,8 @@
 #X floatatom 160 360 0 0 0 0 - - - 0;
 #X obj 120 360 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
 #ff0400 #fcfcfc;
-#X text 120 60 delay with pause functionality;
-#X text 90 80 outputs the remaining time when paused;
+#X text 80 60 delay with the ability to pause/resume;
+#X text 80 80 outputs the remaining time when paused;
 #X obj 200 30 cnv 15 60 24 empty empty delp 4 12 0 18 #000000 #fcfcfc
 0;
 #X msg 160 270 time;

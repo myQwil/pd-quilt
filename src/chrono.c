@@ -24,13 +24,13 @@ static inline void chrono_reset(t_chrono *x) {
 	x->setmore = x->lapmore = x->pause = 0;
 }
 
+static inline void chrono_delay(t_chrono *x ,t_float f) {
+	x->setmore -= f;
+}
+
 static void chrono_bang(t_chrono *x) {
 	chrono_reset(x);
 	outlet_float(x->o_on ,1);
-}
-
-static void chrono_delay(t_chrono *x ,t_float f) {
-	x->setmore -= f;
 }
 
 static void chrono_float(t_chrono *x ,t_float f) {
