@@ -64,35 +64,38 @@ static t_int *metro_tilde_perform(t_int *w) {
 	normhipart = tf.i[HIOFFSET];
 	tf.d = dphase;
 
-	for (; n--; in++)
-	{	tf.i[HIOFFSET] = normhipart;
+	for (; n--; in++) {
+		tf.i[HIOFFSET] = normhipart;
 		dphase += *in * conv;
 		t_sample f = tf.d - UNITBIT32;
-		if (*in < 0)
-		{	if (f < x->prev)
-				outlet_bang(x->obj.ob_outlet);  }
-		else if (f > x->prev)
+		if (*in < 0) {
+			if (f < x->prev) {
+				outlet_bang(x->obj.ob_outlet);
+			}
+		} else if (f > x->prev) {
 			outlet_bang(x->obj.ob_outlet);
+		}
 		x->prev = f;
-		tf.d = dphase;  }
+		tf.d = dphase;
+	}
 	tf.i[HIOFFSET] = normhipart;
 	x->phase = tf.d - UNITBIT32;
 	return (w + 4);
 }
 
-static void metro_tilde_dsp(t_metro_tilde *x ,t_signal **sp) {
+static void metro_tilde_dsp(t_metro_tilde *x, t_signal **sp) {
 	x->conv = -1. / sp[0]->s_sr;
-	dsp_add(metro_tilde_perform ,3 ,x ,sp[0]->s_vec ,(t_int)sp[0]->s_n);
+	dsp_add(metro_tilde_perform, 3, x, sp[0]->s_vec, (t_int)sp[0]->s_n);
 }
 
-static void metro_tilde_ft1(t_metro_tilde *x ,t_float f) {
+static void metro_tilde_ft1(t_metro_tilde *x, t_float f) {
 	x->phase = (double)f;
 }
 
 static void *metro_tilde_new(t_floatarg f) {
 	t_metro_tilde *x = (t_metro_tilde *)pd_new(metro_tilde_class);
-	inlet_new(&x->obj ,&x->obj.ob_pd ,&s_float ,gensym("ft1"));
-	outlet_new(&x->obj ,&s_bang);
+	inlet_new(&x->obj, &x->obj.ob_pd, &s_float, gensym("ft1"));
+	outlet_new(&x->obj, &s_bang);
 	x->phase = x->conv = x->prev = 0;
 	x->f = f;
 	return x;
@@ -100,12 +103,12 @@ static void *metro_tilde_new(t_floatarg f) {
 
 void metro_tilde_setup(void) {
 	metro_tilde_class = class_new(gensym("metro~")
-		,(t_newmethod)metro_tilde_new ,0
-		,sizeof(t_metro_tilde) ,0
-		,A_DEFFLOAT ,0);
-	class_domainsignalin(metro_tilde_class ,(intptr_t)(&((t_metro_tilde*)0)->f));
-	class_addmethod(metro_tilde_class ,(t_method)metro_tilde_dsp
-		,gensym("dsp") ,A_CANT  ,0);
-	class_addmethod(metro_tilde_class ,(t_method)metro_tilde_ft1
-		,gensym("ft1") ,A_FLOAT ,0);
+	, (t_newmethod)metro_tilde_new, 0
+	, sizeof(t_metro_tilde), 0
+	, A_DEFFLOAT, 0);
+	class_domainsignalin(metro_tilde_class, (intptr_t)(&((t_metro_tilde *)0)->f));
+	class_addmethod(metro_tilde_class, (t_method)metro_tilde_dsp
+	, gensym("dsp"), A_CANT, 0);
+	class_addmethod(metro_tilde_class, (t_method)metro_tilde_ft1
+	, gensym("ft1"), A_FLOAT, 0);
 }

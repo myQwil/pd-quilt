@@ -14,7 +14,7 @@ static unsigned rng_time(void) {
 	// multiplying by 2 gives us a new value every second
 	// rather than every other second
 	unsigned thym = (time(0) * 2) % UINT_LIMIT;
-	return (thym|1); // odd numbers only
+	return (thym | 1); // odd numbers only
 }
 
 static void rng_makeseed(t_rng *x) {
@@ -22,13 +22,13 @@ static void rng_makeseed(t_rng *x) {
 	x->state = seed;
 }
 
-static void rng_seed(t_rng *x ,t_symbol *s ,int ac ,t_atom *av) {
+static void rng_seed(t_rng *x, t_symbol *s, int ac, t_atom *av) {
 	(void)s;
 	x->state = ac ? (unsigned)atom_getfloat(av) : rng_time();
 }
 
-static void rng_state(t_rng *x ,t_symbol *s) {
-	post("%s%s%u" ,s->s_name ,*s->s_name?": ":"" ,x->state);
+static void rng_state(t_rng *x, t_symbol *s) {
+	post("%s%s%u", s->s_name, *s->s_name ? ": " : "", x->state);
 }
 
 static inline double rng_next(t_rng *x) {
@@ -37,6 +37,6 @@ static inline double rng_next(t_rng *x) {
 }
 
 static void class_addrng(t_class *c) {
-	class_addmethod(c ,(t_method)rng_seed   ,gensym("seed")  ,A_GIMME  ,0);
-	class_addmethod(c ,(t_method)rng_state  ,gensym("state") ,A_DEFSYM ,0);
+	class_addmethod(c, (t_method)rng_seed, gensym("seed"), A_GIMME, 0);
+	class_addmethod(c, (t_method)rng_state, gensym("state"), A_DEFSYM, 0);
 }
