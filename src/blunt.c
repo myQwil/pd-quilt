@@ -617,8 +617,8 @@ static t_class *class_hot_pxy(const char *name) {
 	, sizeof(t_hot_pxy), CLASS_PD | CLASS_NOINLET
 	, A_NULL);
 	class_addbang(c, hot_pxy_bang);
-	class_addfloat(c, hot_pxy_float);
 	class_addlist(c, hot_pxy_list);
+	class_addfloat(c, hot_pxy_float);
 	class_addanything(c, hot_pxy_anything);
 	class_addmethod(c, (t_method)hot_pxy_f1, gensym("f1"), A_FLOAT, 0);
 	class_addmethod(c, (t_method)hot_pxy_f2, gensym("f2"), A_FLOAT, 0);
