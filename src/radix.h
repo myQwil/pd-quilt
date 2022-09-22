@@ -248,7 +248,7 @@ static void radix_ftoa(t_radix *x) {
 		if (z-b > need) z = b+need;
 		e2+=sh;  }
 
-	if (a<z) for (i=radx ,e=bx*(r-a); (int)*a >= i; i*=radx ,e++);
+	if (a<z) for (i=radx ,e=bx*(r-a); *a >= (uint32_t)i; i*=radx ,e++);
 	else e=0;
 
 	/* Perform rounding: j is precision after the radix (possibly neg) */
