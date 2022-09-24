@@ -6,7 +6,7 @@
 #endif
 
 #ifndef BASE
-#define BASE(x) (x)->ref * pow(2 ,-69 / (x)->tet)
+#define BASE(x) (x)->ref * pow(2, -69 / (x)->tet)
 #endif
 
 typedef struct {

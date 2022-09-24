@@ -1,10 +1,10 @@
-#include "timer.h"
+#include "thyme.h"
 
 /* -------------------------- chrono ------------------------------ */
 static t_class *chrono_class;
 
 typedef struct {
-	t_time z;
+	t_thyme z;
 	double   settime, laptime;
 	double   setmore, lapmore; /* paused time and tempo changes */
 	t_outlet *o_lap;           /* outputs lap & total time */
@@ -32,7 +32,7 @@ static void chrono_float(t_chrono *x, t_float f) {
 
 static void chrono_bang2(t_chrono *x) {
 	outlet_float(x->z.obj.ob_outlet
-	, x->setmore + (x->z.pause ? 0 : time_since(&x->z, x->settime)));
+	, x->setmore + (x->z.pause ? 0 : thyme_since(&x->z, x->settime)));
 }
 
 static void chrono_lap(t_chrono *x) {
@@ -45,8 +45,8 @@ static void chrono_lap(t_chrono *x) {
 		x->laptime = clock_getlogicaltime();
 	}
 	t_atom lap[] = {
-	  {.a_type = A_FLOAT ,.a_w = {time_since(&x->z, laptime) + x->lapmore} }
-	, {.a_type = A_FLOAT ,.a_w = {time_since(&x->z, settime) + x->setmore} }
+	  {.a_type = A_FLOAT, .a_w = {thyme_since(&x->z, laptime) + x->lapmore} }
+	, {.a_type = A_FLOAT, .a_w = {thyme_since(&x->z, settime) + x->setmore} }
 	};
 	x->lapmore = 0;
 	outlet_list(x->o_lap, 0, 2, lap);
@@ -60,8 +60,8 @@ static void chrono_pause(t_chrono *x, t_symbol *s, int ac, t_atom *av) {
 	outlet_float(x->z.o_on, !x->z.pause);
 
 	if (x->z.pause) {
-		x->setmore += time_since(&x->z, x->settime);
-		x->lapmore += time_since(&x->z, x->laptime);
+		x->setmore += thyme_since(&x->z, x->settime);
+		x->lapmore += thyme_since(&x->z, x->laptime);
 	} else {
 		x->settime = x->laptime = clock_getlogicaltime();
 	}
@@ -70,22 +70,22 @@ static void chrono_pause(t_chrono *x, t_symbol *s, int ac, t_atom *av) {
 static void chrono_tempo(t_chrono *x, t_symbol *s, int ac, t_atom *av) {
 	(void)s;
 	if (!x->z.pause) {
-		x->setmore += time_since(&x->z, x->settime);
-		x->lapmore += time_since(&x->z, x->laptime);
+		x->setmore += thyme_since(&x->z, x->settime);
+		x->lapmore += thyme_since(&x->z, x->laptime);
 		x->settime = x->laptime = clock_getlogicaltime();
 	}
-	time_parse(&x->z, ac, av);
+	thyme_parse(&x->z, ac, av);
 }
 
 static void *chrono_new(t_symbol *s, int argc, t_atom *argv) {
 	(void)s;
 	t_chrono *y = (t_chrono *)pd_new(chrono_class);
-	t_time *x = &y->z;
+	t_thyme *x = &y->z;
 	inlet_new(&x->obj, &x->obj.ob_pd, &s_bang, gensym("bang2"));
 	outlet_new(&x->obj, &s_float);
 	y->o_lap = outlet_new(&x->obj, 0);
 
-	time_init(x);
+	thyme_init(x);
 	chrono_bang(y);
 	chrono_tempo(y, 0, argc, argv);
 	return y;

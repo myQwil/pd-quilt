@@ -279,7 +279,7 @@ static void paq_pxy_list(t_paq_pxy *p, t_symbol *s, int ac, t_atom *av) {
 
 static inline int paq_a(t_paq *x, t_symbol *s, int ac, t_atom *av, int j) {
 	t_atom atoms[ac + 1];
-	atoms[0] = (t_atom){ .a_type = A_SYMBOL ,.a_w = {.w_symbol = s} };
+	atoms[0] = (t_atom){ .a_type = A_SYMBOL, .a_w = {.w_symbol = s} };
 	memcpy(atoms + 1, av, ac * sizeof(t_atom));
 	int result = paq_l(x, ac + 1, atoms, j);
 	return result;

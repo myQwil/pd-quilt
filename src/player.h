@@ -18,11 +18,11 @@ typedef struct {
 	SRC_STATE *state;
 	t_sample **outs;
 	t_float *speed;     /* playback speed (inlet pointer) */
-	t_float    speed_;  /* playback speed (prev value) */
-	double     ratio;   /* resampling ratio */
+	t_float  speed_;    /* playback speed (prev value) */
+	double ratio;       /* resampling ratio */
 	unsigned char play; /* play/pause toggle */
 	unsigned char open; /* true when a file has been successfully opened */
-	unsigned   nch;     /* number of channels */
+	unsigned nch;       /* number of channels */
 	t_outlet *o_meta;   /* outputs track metadata */
 } t_player;
 
@@ -139,7 +139,7 @@ static void player_play(t_player *x, t_symbol *s, int ac, t_atom *av) {
 	if (pause_state(&x->play, ac, av)) {
 		return;
 	}
-	t_atom play = { .a_type = A_FLOAT ,.a_w = {.w_float = x->play} };
+	t_atom play = { .a_type = A_FLOAT, .a_w = {.w_float = x->play} };
 	outlet_anything(x->o_meta, s_play, 1, &play);
 }
 

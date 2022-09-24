@@ -23,7 +23,7 @@ typedef struct {
 	t_linp *x = (t_linp*)(w[1]); \
 	t_sample *out = (t_sample*)(w[2]); \
 	int n = (int)(w[3]); \
-	t_sample f = x->value ,g; \
+	t_sample f = x->value, g; \
 \
 	if (PD_BIGORSMALL(f)) { \
 		x->value = f = 0; \

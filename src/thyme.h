@@ -10,13 +10,13 @@ typedef struct {
 	int samps;
 	unsigned char pause; /* play/pause toggle */
 	t_outlet *o_on;      /* outputs play/pause state */
-} t_time;
+} t_thyme;
 
-static inline double time_since(t_time *x, double f) {
+static inline double thyme_since(t_thyme *x, double f) {
 	return clock_gettimesincewithunits(f, x->unit, x->samps);
 }
 
-static inline void time_parse(t_time *x, int ac, t_atom *av) {
+static inline void thyme_parse(t_thyme *x, int ac, t_atom *av) {
 	if (ac > 2) {
 		ac = 2;
 	}
@@ -30,7 +30,7 @@ static inline void time_parse(t_time *x, int ac, t_atom *av) {
 	parsetimeunits(x, x->unit, x->unitname, &x->unit, &x->samps);
 }
 
-static inline void time_init(t_time *x) {
+static inline void thyme_init(t_thyme *x) {
 	x->unit = 1, x->samps = 0;
 	x->unitname = gensym("msec");
 	x->o_on = outlet_new(&x->obj, &s_float);

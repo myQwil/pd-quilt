@@ -19,13 +19,13 @@ static void tab2_edge(t_tab2 *x, t_float f) {
 	*x->edge = f;
 }
 
-#define TAB2_INTERPOLATE(m ,n) \
+#define TAB2_INTERPOLATE(m, n) \
 	edge = *in2; \
 	if (frac <= edge) { \
 		*out++ = m.w_float; \
 	} else { \
 		if (x->edge_ != edge) { \
-			tab2_edge_(x ,edge); \
+			tab2_edge_(x, edge); \
 		} \
 		a = m.w_float; \
 		b = n.w_float; \

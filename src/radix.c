@@ -413,7 +413,7 @@ static void radix_properties(t_gobj *z, t_glist *owner) {
 	, x->x_numwidth, MINDIGITS, ((t_radixtcl *)x)->x_zh, IEM_GUI_MINSIZE
 	, x->x_min, x->x_max, 0 /*no_schedule*/
 	, x->x_lilo, x->x_gui.x_isa.x_loadinit, -1
-	, x->x_log_height /*no multi ,but iem-characteristic*/
+	, x->x_log_height /*no multi, but iem-characteristic*/
 	, srl[0]->s_name, srl[1]->s_name
 	, srl[2]->s_name, x->x_gui.x_ldx, x->x_gui.x_ldy
 	, x->x_gui.x_fsf.x_font_style, x->x_gui.x_fontsize
@@ -459,7 +459,7 @@ static void radix_dialog(t_radix *x, t_symbol *s, int argc, t_atom *argv) {
 	}
 	x->x_log_height = log_height;
 	radix_borderwidth(x, IEMGUI_ZOOM(x));
-	// if (radix_check_minmax(x ,min ,max)) {
+	// if (radix_check_minmax(x, min, max)) {
 	// 	radix_bang(x);
 	// }
 	radix_check_minmax(x, min, max);
@@ -573,7 +573,7 @@ static void radix_pos(t_radix *x, t_symbol *s, int ac, t_atom *av) {
 static void radix_range(t_radix *x, t_symbol *s, int ac, t_atom *av) {
 	(void)s;
 	if (radix_check_minmax(x
-	, atom_getfloatarg(0, ac, av), atom_getfloatarg(1, ac, av))) {
+		, atom_getfloatarg(0, ac, av), atom_getfloatarg(1, ac, av))) {
 		sys_queuegui(x, x->x_gui.x_glist, radix_draw_update);
 		/*radix_bang(x);*/
 	}

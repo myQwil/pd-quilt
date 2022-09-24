@@ -58,7 +58,7 @@ static void ffplay_position(t_ffplay *x) {
 	}
 	AVRational ratio = x->ic->streams[x->a.idx]->time_base;
 	t_float f = x->frm->pts * ratio.num * 1000 / (t_float)ratio.den;
-	t_atom pos = { .a_type = A_FLOAT ,.a_w = {.w_float = f} };
+	t_atom pos = { .a_type = A_FLOAT, .a_w = {.w_float = f} };
 	outlet_anything(x->z.o_meta, s_pos, 1, &pos);
 }
 
@@ -126,7 +126,7 @@ static t_int *ffplay_perform(t_int *w) {
 				outlet_anything(x->o_meta, s_done, 0, 0);
 			} else {
 				ffplay_seek(y, 0);
-				t_atom play = { .a_type = A_FLOAT ,.a_w = {.w_float = x->play} };
+				t_atom play = { .a_type = A_FLOAT, .a_w = {.w_float = x->play} };
 				outlet_anything(x->o_meta, s_play, 1, &play);
 				goto silence;
 			}
@@ -336,7 +336,7 @@ static void ffplay_open(t_ffplay *x, t_symbol *s) {
 		post("Error: %s.", err_msg);
 	}
 	x->z.open = !err_msg;
-	t_atom open = { .a_type = A_FLOAT ,.a_w = {.w_float = x->z.open} };
+	t_atom open = { .a_type = A_FLOAT, .a_w = {.w_float = x->z.open} };
 	outlet_anything(x->z.o_meta, s_open, 1, &open);
 }
 
@@ -419,7 +419,7 @@ static void ffplay_float(t_ffplay *x, t_float f) {
 		ffplay_seek(x, 0);
 	}
 	x->z.play = !err_msg;
-	t_atom play = { .a_type = A_FLOAT ,.a_w = {.w_float = x->z.play} };
+	t_atom play = { .a_type = A_FLOAT, .a_w = {.w_float = x->z.play} };
 	outlet_anything(x->z.o_meta, s_play, 1, &play);
 }
 

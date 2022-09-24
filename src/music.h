@@ -254,7 +254,7 @@ static int music_any(t_music *x, t_flin *flin, t_symbol *s, int ac, t_atom *av) 
 		if (cp != p && p[0] != p[1] && isoperator(*p)) { // interval ± semitones
 			music_f(x, f, *p, strtof(p + 1, 0));
 		} else {
-			t_atom atom = { .a_type = A_SYMBOL ,.a_w = {.w_symbol = s} };
+			t_atom atom = { .a_type = A_SYMBOL, .a_w = {.w_symbol = s} };
 			n = music_z(x, flin, 0, 1, &atom);
 		}
 	} else switch (*cp) {
@@ -266,7 +266,7 @@ static int music_any(t_music *x, t_flin *flin, t_symbol *s, int ac, t_atom *av) 
 		n = music_x(x, flin, atoi(cp + 1), ac, av); break; // strict
 	default: {
 		t_atom atoms[ac + 1];
-		atoms[0] = (t_atom){ .a_type = A_SYMBOL ,.a_w = {.w_symbol = s} };
+		atoms[0] = (t_atom){ .a_type = A_SYMBOL, .a_w = {.w_symbol = s} };
 		memcpy(atoms + 1, av, ac * sizeof(t_atom));
 		n = music_z(x, flin, 0, ac + 1, atoms);
 	}

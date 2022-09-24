@@ -1,10 +1,10 @@
-#include "timer.h"
+#include "thyme.h"
 
 /* -------------------------- delp ------------------------------ */
 static t_class *delp_class;
 
 typedef struct {
-	t_time z;
+	t_thyme z;
 	t_clock *clock;
 	double   deltime;    /* delay time */
 	double   settime;    /* logical clock time */
@@ -32,7 +32,7 @@ static void delp_delay(t_delp *x, t_float f) {
 	x->remtime += f;
 	if (!x->stop && !x->z.pause) {
 		clock_unset(x->clock);
-		x->remtime -= time_since(&x->z, x->settime);
+		x->remtime -= thyme_since(&x->z, x->settime);
 		x->settime = clock_getlogicaltime();
 		clock_delay(x->clock, x->remtime);
 	}
@@ -40,7 +40,7 @@ static void delp_delay(t_delp *x, t_float f) {
 
 static void delp_time(t_delp *x) {
 	outlet_float(x->o_rem
-	, x->remtime - (x->z.pause ? 0 : time_since(&x->z, x->settime)));
+	, x->remtime - (x->z.pause ? 0 : thyme_since(&x->z, x->settime)));
 }
 
 static void delp_pause(t_delp *x, t_symbol *s, int ac, t_atom *av) {
@@ -52,7 +52,7 @@ static void delp_pause(t_delp *x, t_symbol *s, int ac, t_atom *av) {
 
 	if (x->z.pause) {
 		clock_unset(x->clock);
-		x->remtime -= time_since(&x->z, x->settime);
+		x->remtime -= thyme_since(&x->z, x->settime);
 		outlet_float(x->o_rem, x->remtime);
 	} else {
 		x->settime = clock_getlogicaltime();
@@ -63,10 +63,10 @@ static void delp_pause(t_delp *x, t_symbol *s, int ac, t_atom *av) {
 static void delp_tempo(t_delp *x, t_symbol *s, int ac, t_atom *av) {
 	(void)s;
 	if (!x->stop && !x->z.pause) {
-		x->remtime -= time_since(&x->z, x->settime);
+		x->remtime -= thyme_since(&x->z, x->settime);
 		x->settime = clock_getlogicaltime();
 	}
-	time_parse(&x->z, ac, av);
+	thyme_parse(&x->z, ac, av);
 	clock_setunit(x->clock, x->z.unit, x->z.samps);
 }
 
@@ -93,7 +93,7 @@ static void delp_float(t_delp *x, t_float f) {
 static void *delp_new(t_symbol *s, int argc, t_atom *argv) {
 	(void)s;
 	t_delp *y = (t_delp *)pd_new(delp_class);
-	t_time *x = &y->z;
+	t_thyme *x = &y->z;
 	inlet_new(&x->obj, &x->obj.ob_pd, &s_float, gensym("ft1"));
 	outlet_new(&x->obj, &s_bang);
 	y->o_rem = outlet_new(&x->obj, &s_float);
@@ -105,7 +105,7 @@ static void *delp_new(t_symbol *s, int argc, t_atom *argv) {
 		argc--, argv++;
 	}
 	y->stop = 1;
-	time_init(x);
+	thyme_init(x);
 	delp_tempo(y, 0, argc, argv);
 	return y;
 }

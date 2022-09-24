@@ -8,12 +8,12 @@ static t_symbol *s_mask;
 typedef struct {
 	t_player z;
 	Music_Emu *emu;
-	gme_info_t *info;   /* current track info */
+	gme_info_t *info; /* current track info */
 	t_symbol *path;   /* path to the most recently read file */
-	t_float *tempo;  /* rate of emulation (inlet pointer) */
-	t_float     tempo_; /* rate of emulation (prev value) */
-	int      voices;    /* number of voices */
-	int      mask;      /* muting mask */
+	t_float *tempo;   /* rate of emulation (inlet pointer) */
+	t_float  tempo_;  /* rate of emulation (prev value) */
+	int voices;       /* number of voices */
+	int mask;         /* muting mask */
 } t_gme;
 
 static void gmepd_seek(t_gme *x, t_float f) {
@@ -149,7 +149,7 @@ static void gmepd_mask(t_gme *x, t_symbol *s, int ac, t_atom *av) {
 			gme_mute_voices(x->emu, x->mask);
 		}
 	} else {
-		t_atom flt = { .a_type = A_FLOAT ,.a_w = {.w_float = x->mask} };
+		t_atom flt = { .a_type = A_FLOAT, .a_w = {.w_float = x->mask} };
 		outlet_anything(x->z.o_meta, s_mask, 1, &flt);
 	}
 }
@@ -200,7 +200,7 @@ static void gmepd_open(t_gme *x, t_symbol *s) {
 		post("Error: %s", err_msg);
 	}
 	x->z.open = !err_msg;
-	t_atom open = { .a_type = A_FLOAT ,.a_w = {.w_float = x->z.open} };
+	t_atom open = { .a_type = A_FLOAT, .a_w = {.w_float = x->z.open} };
 	outlet_anything(x->z.o_meta, s_open, 1, &open);
 }
 
@@ -309,7 +309,7 @@ static void gmepd_float(t_gme *x, t_float f) {
 		gmepd_seek(x, 0);
 	}
 	x->z.play = !err_msg;
-	t_atom play = { .a_type = A_FLOAT ,.a_w = {.w_float = x->z.play} };
+	t_atom play = { .a_type = A_FLOAT, .a_w = {.w_float = x->z.play} };
 	outlet_anything(x->z.o_meta, s_play, 1, &play);
 }
 
