@@ -3,7 +3,7 @@
 # PDLIBDIR = $(HOME)/.local/lib/pd/extra
 PDLIBDIR = .
 
-lib.name    = quilt
+lib.name = quilt
 
 cflags = -DBLUNT=1 \
 -DDATE=\"$(shell date -u +%F)\" \
