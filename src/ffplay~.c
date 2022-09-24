@@ -407,12 +407,14 @@ static void ffplay_info(t_ffplay *x, t_symbol *s, int ac, t_atom *av) {
 	}
 }
 
-static void ffplay_float(t_ffplay *x, t_float f) {
+static void ffplay_start(t_ffplay *x, t_float f, t_float ms) {
 	int track = f;
 	err_t err_msg = "";
 	if (0 < track && track <= x->plist.siz) {
 		if ((err_msg = ffplay_load(x, track - 1))) {
 			post("Error: %s.", err_msg);
+		} else if (ms > 0) {
+			ffplay_seek(x, ms);
 		}
 		x->z.open = !err_msg;
 	} else {
@@ -421,6 +423,17 @@ static void ffplay_float(t_ffplay *x, t_float f) {
 	x->z.play = !err_msg;
 	t_atom play = { .a_type = A_FLOAT, .a_w = {.w_float = x->z.play} };
 	outlet_anything(x->z.o_meta, s_play, 1, &play);
+}
+
+static void ffplay_list(t_ffplay *x, t_symbol *s, int ac, t_atom *av) {
+	(void)s;
+	if (ac > 1 && av[0].a_type == A_FLOAT && av[1].a_type == A_FLOAT) {
+		ffplay_start(x, av[0].a_w.w_float, av[1].a_w.w_float);
+	}
+}
+
+static void ffplay_float(t_ffplay *x, t_float f) {
+	ffplay_start(x, f, 0);
 }
 
 static void ffplay_stop(t_ffplay *x) {
@@ -490,6 +503,7 @@ void ffplay_tilde_setup(void) {
 	, (t_newmethod)ffplay_new, (t_method)ffplay_free
 	, sizeof(t_ffplay));
 	class_addfloat(ffplay_class, ffplay_float);
+	class_addlist(ffplay_class, ffplay_list);
 
 	class_addmethod(ffplay_class, (t_method)ffplay_dsp, gensym("dsp"), A_CANT, 0);
 	class_addmethod(ffplay_class, (t_method)ffplay_seek, gensym("seek"), A_FLOAT, 0);
