@@ -38,15 +38,18 @@ static t_float fn_div(t_float f1, t_float f2) {
 }
 
 static t_float fn_log(t_float f1, t_float f2) {
-	return (f1 <= 0 ?
-		-1000 : (f2 <= 0 ?
-			LOG(f1) : LOG(f1) / LOG(f2))
+	return (f1 <= 0
+		? -1000
+		: (f2 <= 0
+			? LOG(f1)
+			: LOG(f1) / LOG(f2))
 	);
 }
 
 static t_float fn_pow(t_float f1, t_float f2) {
-	return ((f1 == 0 && f2 < 0) || (f1 < 0 && (f2 - (int)f2) != 0) ?
-		0 : POW(f1, f2)
+	return ((f1 == 0 && f2 < 0) || (f1 < 0 && (f2 - (int)f2) != 0)
+		? 0
+		: POW(f1, f2)
 	);
 }
 

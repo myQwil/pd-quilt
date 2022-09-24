@@ -272,7 +272,7 @@ static t_atom gmepd_meta(void *y, t_symbol *s) {
 	} else if (s == dict[14]) {
 		SETSYMBOL(&meta, gensym(x->info->dumper));
 	} else {
-		meta = (t_atom){ A_NULL,{0} };
+		meta = (t_atom){ A_NULL, {0} };
 	}
 	return meta;
 }
@@ -300,7 +300,7 @@ static void gmepd_float(t_gme *x, t_float f) {
 	}
 	int track = f;
 	gme_err_t err_msg = "";
-	if (track > 0 && track <= gme_track_count(x->emu)) {
+	if (0 < track && track <= gme_track_count(x->emu)) {
 		if ((err_msg = gmepd_load(x, track - 1))) {
 			post("Error: %s", err_msg);
 		}

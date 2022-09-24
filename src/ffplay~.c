@@ -380,7 +380,7 @@ static t_atom ffplay_meta(void *y, t_symbol *s) {
 		if (entry) {
 			SETSYMBOL(&meta, gensym(entry->value));
 		} else {
-			meta = (t_atom){ A_NULL,{0} };
+			meta = (t_atom){ A_NULL, {0} };
 		}
 	}
 	return meta;
@@ -410,7 +410,7 @@ static void ffplay_info(t_ffplay *x, t_symbol *s, int ac, t_atom *av) {
 static void ffplay_float(t_ffplay *x, t_float f) {
 	int track = f;
 	err_t err_msg = "";
-	if (track > 0 && track <= x->plist.siz) {
+	if (0 < track && track <= x->plist.siz) {
 		if ((err_msg = ffplay_load(x, track - 1))) {
 			post("Error: %s.", err_msg);
 		}

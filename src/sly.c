@@ -13,8 +13,9 @@ static void slope_k(t_slope *x) {
 }
 
 static void sly_float(t_slope *x, t_float f) {
-	t_float res = (x->log) ?
-		exp(x->k * f) * x->min : x->k * f + x->min;
+	t_float res = (x->log)
+		? exp(x->k * f) * x->min
+		: x->k * f + x->min;
 	outlet_float(x->obj.ob_outlet, res);
 }
 

@@ -7,7 +7,7 @@ typedef struct {
 	t_thyme z;
 	double   settime, laptime;
 	double   setmore, lapmore; /* paused time and tempo changes */
-	t_outlet *o_lap;           /* outputs lap & total time */
+	t_outlet *o_lap;           /* outputs lap time */
 } t_chrono;
 
 static inline void chrono_reset(t_chrono *x) {
@@ -36,20 +36,10 @@ static void chrono_bang2(t_chrono *x) {
 }
 
 static void chrono_lap(t_chrono *x) {
-	double settime, laptime;
-	if (x->z.pause) {
-		settime = laptime = clock_getlogicaltime();
-	} else {
-		settime = x->settime;
-		laptime = x->laptime;
-		x->laptime = clock_getlogicaltime();
-	}
-	t_atom lap[] = {
-	  {.a_type = A_FLOAT, .a_w = {thyme_since(&x->z, laptime) + x->lapmore} }
-	, {.a_type = A_FLOAT, .a_w = {thyme_since(&x->z, settime) + x->setmore} }
-	};
+	outlet_float(x->o_lap
+	, x->lapmore + (x->z.pause ? 0 : thyme_since(&x->z, x->laptime)));
+	x->laptime = clock_getlogicaltime();
 	x->lapmore = 0;
-	outlet_list(x->o_lap, 0, 2, lap);
 }
 
 static void chrono_pause(t_chrono *x, t_symbol *s, int ac, t_atom *av) {
@@ -83,7 +73,7 @@ static void *chrono_new(t_symbol *s, int argc, t_atom *argv) {
 	t_thyme *x = &y->z;
 	inlet_new(&x->obj, &x->obj.ob_pd, &s_bang, gensym("bang2"));
 	outlet_new(&x->obj, &s_float);
-	y->o_lap = outlet_new(&x->obj, 0);
+	y->o_lap = outlet_new(&x->obj, &s_float);
 
 	thyme_init(x);
 	chrono_bang(y);
