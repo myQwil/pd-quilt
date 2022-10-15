@@ -1,5 +1,5 @@
-#define BASE(x) 1. / ((x)->ref * pow(2, -69 / (x)->tet))
-#define SEMI(x) 1. / (log(2) / (x)->tet)
+#define SEMI(x) (x)->tet / M_LN2
+#define BASE(x) exp(ln2_69 / (x)->tet) / (x)->ref
 
 #include "tone.h"
 
