@@ -18,7 +18,7 @@ typedef struct {
 	SRC_STATE *state;
 	t_sample **outs;
 	t_float *speed;     /* playback speed (inlet pointer) */
-	t_float  speed_;    /* playback speed (prev value) */
+	t_float  speed_;    /* playback speed (private value) */
 	double ratio;       /* resampling ratio */
 	unsigned char play; /* play/pause toggle */
 	unsigned char open; /* true when a file has been successfully opened */
@@ -32,14 +32,15 @@ static inline void player_reset(t_player *x) {
 	x->data.input_frames = 0;
 }
 
-static const t_float fastest = FRAMES - (1. / 128.); // SRC can get stuck if too fast
-static const t_float slowest = 1. / FRAMES;
+// SRC can get stuck if it's too close to the fastest possible speed
+static const t_float fastest = 1. / (FRAMES - (1. / 128.));
+static const t_float slowest = FRAMES;
 
 static inline void player_speed_(t_player *x, t_float f) {
 	x->speed_ = f;
 	f *= x->ratio;
-	f = f > fastest ? fastest : (f < slowest ? slowest : f);
-	x->data.src_ratio = 1. / f;
+	f = f < fastest ? fastest : (f > slowest ? slowest : f);
+	x->data.src_ratio = f;
 }
 
 static void player_speed(t_player *x, t_float f) {

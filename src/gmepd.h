@@ -11,7 +11,7 @@ typedef struct {
 	gme_info_t *info; /* current track info */
 	t_symbol *path;   /* path to the most recently read file */
 	t_float *tempo;   /* rate of emulation (inlet pointer) */
-	t_float  tempo_;  /* rate of emulation (prev value) */
+	t_float  tempo_;  /* rate of emulation (private value) */
 	int voices;       /* number of voices */
 	int mask;         /* muting mask */
 } t_gme;
@@ -27,9 +27,7 @@ static void gmepd_seek(t_gme *x, t_float f) {
 
 static inline void gmepd_tempo_(t_gme *x, t_float f) {
 	x->tempo_ = f;
-	if (x->emu) {
-		gme_set_tempo(x->emu, x->tempo_);
-	}
+	gme_set_tempo(x->emu, x->tempo_);
 }
 
 static void gmepd_tempo(t_gme *x, t_float f) {
@@ -178,7 +176,8 @@ static void gmepd_open(t_gme *x, t_symbol *s) {
 	x->z.play = 0;
 	gme_err_t err_msg;
 	gme_delete(x->emu); x->emu = NULL;
-	if (!(err_msg = gme_open_file(s->s_name, &x->emu, sys_getsr(), x->z.nch > 2))) {	// check for a .m3u file of the same name
+	if (!(err_msg = gme_open_file(s->s_name, &x->emu, sys_getsr(), x->z.nch > 2))) {
+		// check for a .m3u file of the same name
 		char m3u_path[256 + 5];
 		strncpy(m3u_path, s->s_name, 256);
 		m3u_path[256] = 0;
@@ -191,7 +190,7 @@ static void gmepd_open(t_gme *x, t_symbol *s) {
 
 		gme_ignore_silence(x->emu, 1);
 		gme_mute_voices(x->emu, x->mask);
-		gme_set_tempo(x->emu, *x->tempo);
+		gme_set_tempo(x->emu, x->tempo_);
 		x->voices = gme_voice_count(x->emu);
 		err_msg = gmepd_load(x, 0);
 		x->path = s;

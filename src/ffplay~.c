@@ -297,8 +297,8 @@ static err_t ffplay_load(t_ffplay *x, int index) {
 		return "SWResampler initialization failed";
 	}
 
-	x->z.ratio = (double)x->a.ctx->sample_rate / sys_getsr();
-	player_speed_(&x->z, *x->z.speed);
+	x->z.ratio = sys_getsr() / (double)x->a.ctx->sample_rate;
+	player_speed_(&x->z, x->z.speed_);
 	player_reset(&x->z);
 	x->frm->pts = 0;
 	return 0;
@@ -411,7 +411,7 @@ static void ffplay_start(t_ffplay *x, t_float f, t_float ms) {
 	int track = f;
 	err_t err_msg = "";
 	if (0 < track && track <= x->plist.siz) {
-		if ((err_msg = ffplay_load(x, track - 1))) {
+		if ( (err_msg = ffplay_load(x, track - 1)) ) {
 			post("Error: %s.", err_msg);
 		} else if (ms > 0) {
 			ffplay_seek(x, ms);
