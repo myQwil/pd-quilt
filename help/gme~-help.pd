@@ -271,11 +271,11 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X msg 430 210 6, f 2;
 #X msg 460 210 7, f 2;
 #X msg 490 210 8, f 2;
-#X text 260 160 repeated value acts as a toggle;
-#X text 260 180 negative value works in reverse;
+#X text 240 160 mute toggles while solo does not;
+#X text 240 180 negative values are reverse indexes;
 #X msg 290 260 mute \$1;
 #X msg 290 370 solo \$1;
-#X text 310 140 zero resets all channels;
+#X text 240 140 zero resets all channels;
 #X msg 110 290 bmask;
 #X text 160 290 print;
 #X msg 30 30 set \$1;
@@ -284,6 +284,7 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X msg 360 260 mute 0 -1 -2;
 #X obj 290 290 s \$0gme;
 #X msg 390 370 solo 1 3 -1 -3;
+#X text 360 280 zero prevents toggle;
 #X connect 2 0 35 0;
 #X connect 3 0 4 0;
 #X connect 4 0 2 0;

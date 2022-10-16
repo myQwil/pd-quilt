@@ -100,43 +100,35 @@ static void gmepd_dsp(t_gme *y, t_signal **sp) {
 	dsp_add(gmepd_perform, 4, y, sp[0]->s_vec, sp[1]->s_vec, sp[0]->s_n);
 }
 
-static inline int domask(int mask, int voices, int ac, t_atom *av) {
+static inline void gmepd_chan(t_gme *x, int mask, int ac, t_atom *av) {
 	for (; ac--; av++) {
 		if (av->a_type == A_FLOAT) {
 			int d = av->a_w.w_float;
-			if (!d) {
-				mask = 0;
+			if (d == 0) {
+				mask = 0; // reset the mask
 				continue;
 			}
-			if (d > 0) {
-				d--;
-			}
-			d %= voices;
+			d = (d - (d > 0)) % x->voices;
 			if (d < 0) {
-				d += voices;
+				d += x->voices;
 			}
-			mask ^= 1 << d;
+			mask ^= 1 << d; // toggle the bit at d position
 		}
 	}
-	return mask;
+	x->mask = mask;
+	if (x->emu) {
+		gme_mute_voices(x->emu, x->mask);
+	}
 }
 
 static void gmepd_mute(t_gme *x, t_symbol *s, int ac, t_atom *av) {
 	(void)s;
-	x->mask = domask(x->mask, x->voices, ac, av);
-	if (x->emu) {
-		gme_mute_voices(x->emu, x->mask);
-	}
+	gmepd_chan(x, x->mask, ac, av);
 }
 
 static void gmepd_solo(t_gme *x, t_symbol *s, int ac, t_atom *av) {
 	(void)s;
-	int mask = domask(~0, x->voices, ac, av);
-	mask &= (1 << x->voices) - 1;
-	x->mask = (x->mask == mask ? 0 : mask);
-	if (x->emu) {
-		gme_mute_voices(x->emu, x->mask);
-	}
+	gmepd_chan(x, ~0, ac, av);
 }
 
 static void gmepd_mask(t_gme *x, t_symbol *s, int ac, t_atom *av) {
@@ -324,7 +316,7 @@ static void *gmepd_new(t_class *gmeclass, int nch, t_symbol *s, int ac, t_atom *
 	x->tempo = &in3->i_un.iu_floatsignalvalue;
 
 	x->mask = 0;
-	x->voices = 32;
+	x->voices = 16;
 	x->path = gensym("no track loaded");
 	if (ac) {
 		gmepd_solo(x, NULL, ac, av);
