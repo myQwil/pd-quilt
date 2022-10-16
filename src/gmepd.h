@@ -276,7 +276,7 @@ static t_atom gmepd_meta(void *y, t_symbol *s) {
 	return meta;
 }
 
-static void gmepd_info(t_gme *x, t_symbol *s, int ac, t_atom *av) {
+static void gmepd_print(t_gme *x, t_symbol *s, int ac, t_atom *av) {
 	(void)s;
 	if (!x->z.open) {
 		return post("No file opened.");
@@ -286,6 +286,7 @@ static void gmepd_info(t_gme *x, t_symbol *s, int ac, t_atom *av) {
 	}
 
 	if (x->info->game || x->info->song) {
+		// general track info: %game% - %song%
 		post("%s%s%s"
 		, *x->info->game ? x->info->game : ""
 		, " - "
@@ -367,8 +368,7 @@ static t_class *gmepd_setup(t_symbol *s, t_newmethod newm) {
 	class_addmethod(cls, (t_method)gmepd_mute, gensym("mute"), A_GIMME, 0);
 	class_addmethod(cls, (t_method)gmepd_solo, gensym("solo"), A_GIMME, 0);
 	class_addmethod(cls, (t_method)gmepd_mask, gensym("mask"), A_GIMME, 0);
-	class_addmethod(cls, (t_method)gmepd_info, gensym("info"), A_GIMME, 0);
-	class_addmethod(cls, (t_method)gmepd_info, gensym("print"), A_GIMME, 0);
+	class_addmethod(cls, (t_method)gmepd_print, gensym("print"), A_GIMME, 0);
 	class_addmethod(cls, (t_method)gmepd_open, gensym("open"), A_SYMBOL, 0);
 	class_addmethod(cls, (t_method)gmepd_stop, gensym("stop"), A_NULL);
 

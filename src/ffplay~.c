@@ -386,7 +386,7 @@ static t_atom ffplay_meta(void *y, t_symbol *s) {
 	return meta;
 }
 
-static void ffplay_info(t_ffplay *x, t_symbol *s, int ac, t_atom *av) {
+static void ffplay_print(t_ffplay *x, t_symbol *s, int ac, t_atom *av) {
 	(void)s;
 	if (!x->z.open) {
 		return post("No file opened.");
@@ -399,6 +399,7 @@ static void ffplay_info(t_ffplay *x, t_symbol *s, int ac, t_atom *av) {
 	AVDictionaryEntry *artist = av_dict_get(meta, "artist", 0, 0);
 	AVDictionaryEntry *title = av_dict_get(meta, "title", 0, 0);
 	if (artist || title) {
+		// general track info: %artist% - %title%
 		post("%s%s%s"
 		, artist ? artist->value : ""
 		, " - "
@@ -507,8 +508,7 @@ void ffplay_tilde_setup(void) {
 
 	class_addmethod(ffplay_class, (t_method)ffplay_dsp, gensym("dsp"), A_CANT, 0);
 	class_addmethod(ffplay_class, (t_method)ffplay_seek, gensym("seek"), A_FLOAT, 0);
-	class_addmethod(ffplay_class, (t_method)ffplay_info, gensym("info"), A_GIMME, 0);
-	class_addmethod(ffplay_class, (t_method)ffplay_info, gensym("print"), A_GIMME, 0);
+	class_addmethod(ffplay_class, (t_method)ffplay_print, gensym("print"), A_GIMME, 0);
 	class_addmethod(ffplay_class, (t_method)ffplay_open, gensym("open"), A_SYMBOL, 0);
 	class_addmethod(ffplay_class, (t_method)ffplay_stop, gensym("stop"), A_NULL);
 	class_addmethod(ffplay_class, (t_method)ffplay_position, gensym("pos"), A_NULL);
