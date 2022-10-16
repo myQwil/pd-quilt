@@ -18,7 +18,7 @@
 #X restore 60 250 pd neg;
 #X obj 80 160 abs;
 #N canvas 220 260 360 360 format 0;
-#X obj 30 30 inlet;
+#X obj 110 20 inlet;
 #X obj 80 180 sel;
 #X msg 120 210 symbol;
 #X obj 30 210 lead0;
@@ -35,7 +35,7 @@
 #X obj 80 150 == 0;
 #X obj 210 90 * 0.1;
 #X obj 30 90 * 0.01;
-#X obj 30 60 t f f;
+#X obj 110 50 t f f;
 #X obj 30 120 t f f;
 #X connect 0 0 17 0;
 #X connect 1 0 2 0;

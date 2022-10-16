@@ -5,9 +5,9 @@ static t_class *chrono_class;
 
 typedef struct {
 	t_thyme z;
-	double   settime, laptime;
-	double   setmore, lapmore; /* paused time and tempo changes */
-	t_outlet *o_lap;           /* outputs lap time */
+	double settime, laptime;
+	double setmore, lapmore; /* paused time and tempo changes */
+	t_outlet *o_lap;         /* outputs lap time */
 } t_chrono;
 
 static inline void chrono_reset(t_chrono *x) {

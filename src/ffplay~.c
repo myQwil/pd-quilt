@@ -11,9 +11,9 @@ typedef const char *err_t;
 static t_class *ffplay_class;
 
 typedef struct {
-	t_symbol **trk; /* m3u list of tracks */
+	t_symbol **arr; /* m3u list of tracks */
 	t_symbol *dir;  /* starting directory */
-	int siz;        /* size of the list */
+	int size;       /* size of the list */
 	int max;        /* size of the memory allocation */
 } t_playlist;
 
@@ -194,7 +194,7 @@ static int playlist_fill(t_playlist *pl, FILE *fp, char *dir, int dlen, int i) {
 				fclose(m3u);
 			}
 		} else {
-			pl->trk[i++] = gensym(dir + oldlen);
+			pl->arr[i++] = gensym(dir + oldlen);
 		}
 	}
 	return i;
@@ -211,11 +211,11 @@ static inline err_t ffplay_m3u(t_ffplay *x, t_symbol *s) {
 	strcpy(dir, pl->dir->s_name);
 	int size = m3u_size(fp, dir, strlen(dir));
 	if (size > pl->max) {
-		pl->trk = (t_symbol **)resizebytes(pl->trk
+		pl->arr = (t_symbol **)resizebytes(pl->arr
 		, pl->max * sizeof(t_symbol *), size * sizeof(t_symbol *));
 		pl->max = size;
 	}
-	pl->siz = size;
+	pl->size = size;
 	rewind(fp);
 
 	playlist_fill(pl, fp, dir, strlen(pl->dir->s_name), 0);
@@ -264,12 +264,12 @@ static err_t ffplay_load(t_ffplay *x, int index) {
 	}
 
 	char url[MAXPDSTRING];
-	const char *trk = x->plist.trk[index]->s_name;
-	if (trk[0] == '/') { // absolute path
-		strcpy(url, trk);
+	const char *fname = x->plist.arr[index]->s_name;
+	if (fname[0] == '/') { // absolute path
+		strcpy(url, fname);
 	} else {
 		strcpy(url, x->plist.dir->s_name);
-		strcat(url, trk);
+		strcat(url, fname);
 	}
 
 	avformat_close_input(&x->ic);
@@ -327,8 +327,8 @@ static void ffplay_open(t_ffplay *x, t_symbol *s) {
 		if (ext && !strcmp(ext + 1, "m3u")) {
 			err_msg = ffplay_m3u(x, s);
 		} else {
-			x->plist.siz = 1;
-			x->plist.trk[0] = gensym(fname);
+			x->plist.size = 1;
+			x->plist.arr[0] = gensym(fname);
 		}
 	}
 
@@ -356,7 +356,7 @@ static t_atom ffplay_meta(void *y, t_symbol *s) {
 	} else if (s == dict[4]) {
 		meta = player_ftime(x->ic->duration / 1000);
 	} else if (s == dict[5]) {
-		SETFLOAT(&meta, x->plist.siz);
+		SETFLOAT(&meta, x->plist.size);
 	} else if (s == dict[6]) {
 		SETSYMBOL(&meta, gensym(av_get_sample_fmt_name(x->a.ctx->sample_fmt)));
 	} else if (s == dict[7]) {
@@ -411,7 +411,7 @@ static void ffplay_print(t_ffplay *x, t_symbol *s, int ac, t_atom *av) {
 static void ffplay_start(t_ffplay *x, t_float f, t_float ms) {
 	int track = f;
 	err_t err_msg = "";
-	if (0 < track && track <= x->plist.siz) {
+	if (0 < track && track <= x->plist.size) {
 		if ( (err_msg = ffplay_load(x, track - 1)) ) {
 			post("Error: %s.", err_msg);
 		} else if (ms > 0) {
@@ -465,9 +465,10 @@ static void *ffplay_new(t_symbol *s, int ac, t_atom *av) {
 		}
 	}
 
-	x->plist.siz = 0;
-	x->plist.max = 1;
-	x->plist.trk = (t_symbol **)getbytes(sizeof(t_symbol *));
+	t_playlist *pl = &x->plist;
+	pl->size = 0;
+	pl->max = 1;
+	pl->arr = (t_symbol **)getbytes(pl->max * sizeof(t_symbol *));
 	return x;
 }
 
@@ -479,7 +480,7 @@ static void ffplay_free(t_ffplay *x) {
 	swr_free(&x->swr);
 
 	t_playlist *pl = &x->plist;
-	freebytes(pl->trk, pl->max * sizeof(t_symbol *));
+	freebytes(pl->arr, pl->max * sizeof(t_symbol *));
 	player_free(&x->z);
 }
 

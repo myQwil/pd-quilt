@@ -44,7 +44,7 @@
 #X obj 240 180 f;
 #X obj 240 90 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400
 #fcfcfc;
-#X obj 60 30 loadbang;
+#X obj 110 30 loadbang;
 #X obj 150 250 outlet;
 #X msg 60 210 speed \$1;
 #X obj 60 60 cupqb;
@@ -52,23 +52,25 @@
 #X obj 280 180 #*;
 #X obj 290 150 @/ 1;
 #X obj 60 150 exp;
-#X obj 60 120 * 0.0577623;
-#X text 110 100 ln(2) / 12;
+#X obj 110 120 expr ln(2) / 12;
+#X obj 60 120 *;
 #X connect 0 0 6 0;
 #X connect 1 0 2 0;
 #X connect 2 0 10 0;
 #X connect 3 0 9 0;
 #X connect 4 0 3 0;
 #X connect 5 0 8 1;
+#X connect 5 0 13 0;
 #X connect 7 0 6 0;
-#X connect 8 0 13 0;
+#X connect 8 0 14 0;
 #X connect 9 0 6 0;
 #X connect 10 0 3 1;
 #X connect 11 0 10 1;
 #X connect 12 0 7 0;
 #X connect 12 0 0 0;
 #X connect 12 0 11 0;
-#X connect 13 0 12 0;
+#X connect 13 0 14 1;
+#X connect 14 0 12 0;
 #X restore 360 250 pd pitch;
 #X obj 130 560 tabwrite~ \$0gme;
 #X obj 570 180 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #551312

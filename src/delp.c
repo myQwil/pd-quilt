@@ -6,11 +6,11 @@ static t_class *delp_class;
 typedef struct {
 	t_thyme z;
 	t_clock *clock;
-	double   deltime;    /* delay time */
-	double   settime;    /* logical clock time */
-	double   remtime;    /* remaining time */
-	unsigned char stop;  /* true if stopped */
-	t_outlet *o_rem;     /* outputs remaining time */
+	double deltime;     /* delay time */
+	double settime;     /* logical clock time */
+	double remtime;     /* remaining time */
+	unsigned char stop; /* true if stopped */
+	t_outlet *o_rem;    /* outputs remaining time */
 } t_delp;
 
 static inline void delp_end(t_delp *x) {
