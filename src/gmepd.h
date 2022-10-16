@@ -152,6 +152,17 @@ static void gmepd_mask(t_gme *x, t_symbol *s, int ac, t_atom *av) {
 	}
 }
 
+static void gmepd_bmask(t_gme *x) {
+	char buf[33], *b = buf;
+	int m = x->mask;
+	int v = x->voices;
+	for (int i = 0; i < v; i++, b++) {
+		*b = ((m >> i) & 1) + '0';
+	}
+	*b = '\0';
+	post("%s", buf);
+}
+
 static gme_err_t gmepd_load(t_gme *x, int index) {
 	if (!x->z.state) {
 		return "SRC has not been initialized";
@@ -226,7 +237,7 @@ static inline t_atom gmepd_ftime(t_gme *x) {
 	return player_ftime(ms);
 }
 
-static const t_symbol *dict[15];
+static const t_symbol *dict[13];
 
 static t_atom gmepd_meta(void *y, t_symbol *s) {
 	t_gme *x = (t_gme *)y;
@@ -242,33 +253,20 @@ static t_atom gmepd_meta(void *y, t_symbol *s) {
 	} else if (s == dict[4]) {
 		SETFLOAT(&meta, gme_track_count(x->emu));
 	} else if (s == dict[5]) {
-		SETFLOAT(&meta, x->mask);
-	} else if (s == dict[6]) {
 		SETFLOAT(&meta, x->voices);
-	} else if (s == dict[7]) {
-		char buf[33], *b = buf;
-		int m = x->mask;
-		int v = x->voices;
-		for (int i = 0; i < v; i++, b++) {
-			*b = ((m >> i) & 1) + '0';
-		}
-		*b = '\0';
-		SETSYMBOL(&meta, gensym(buf));
-	}
-
-	else if (s == dict[8]) {
+	} else if (s == dict[6]) {
 		SETSYMBOL(&meta, gensym(x->info->system));
-	} else if (s == dict[9]) {
+	} else if (s == dict[7]) {
 		SETSYMBOL(&meta, gensym(x->info->game));
-	} else if (s == dict[10]) {
+	} else if (s == dict[8]) {
 		SETSYMBOL(&meta, gensym(x->info->song));
-	} else if (s == dict[11]) {
+	} else if (s == dict[9]) {
 		SETSYMBOL(&meta, gensym(x->info->author));
-	} else if (s == dict[12]) {
+	} else if (s == dict[10]) {
 		SETSYMBOL(&meta, gensym(x->info->copyright));
-	} else if (s == dict[13]) {
+	} else if (s == dict[11]) {
 		SETSYMBOL(&meta, gensym(x->info->comment));
-	} else if (s == dict[14]) {
+	} else if (s == dict[12]) {
 		SETSYMBOL(&meta, gensym(x->info->dumper));
 	} else {
 		meta = (t_atom){ A_NULL, {0} };
@@ -346,16 +344,14 @@ static t_class *gmepd_setup(t_symbol *s, t_newmethod newm) {
 	dict[2] = gensym("ftime");
 	dict[3] = gensym("fade");
 	dict[4] = gensym("tracks");
-	dict[5] = gensym("mask");
-	dict[6] = gensym("voices");
-	dict[7] = gensym("bmask");
-	dict[8] = gensym("system");
-	dict[9] = gensym("game");
-	dict[10] = gensym("song");
-	dict[11] = gensym("author");
-	dict[12] = gensym("copyright");
-	dict[13] = gensym("comment");
-	dict[14] = gensym("dumper");
+	dict[5] = gensym("voices");
+	dict[6] = gensym("system");
+	dict[7] = gensym("game");
+	dict[8] = gensym("song");
+	dict[9] = gensym("author");
+	dict[10] = gensym("copyright");
+	dict[11] = gensym("comment");
+	dict[12] = gensym("dumper");
 
 	s_mask = gensym("mask");
 	fn_meta = gmepd_meta;
@@ -371,6 +367,7 @@ static t_class *gmepd_setup(t_symbol *s, t_newmethod newm) {
 	class_addmethod(cls, (t_method)gmepd_print, gensym("print"), A_GIMME, 0);
 	class_addmethod(cls, (t_method)gmepd_open, gensym("open"), A_SYMBOL, 0);
 	class_addmethod(cls, (t_method)gmepd_stop, gensym("stop"), A_NULL);
+	class_addmethod(cls, (t_method)gmepd_bmask, gensym("bmask"), A_NULL);
 
 	return cls;
 }
