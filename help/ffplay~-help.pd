@@ -11,11 +11,11 @@
 #fcfcfc 0 1;
 #X floatatom 110 470 0 0 0 0 - - - 0;
 #X obj 50 370 cupqb;
-#X obj 70 190 openpanel;
+#X obj 60 190 openpanel;
 #X obj 260 500 *~;
-#X obj 230 170 bng 15 250 50 0 empty empty play/pause 17 7 0 12 #ff8300
+#X obj 260 130 bng 15 250 50 0 empty empty play/pause 17 7 0 12 #ff8300
 #ff0400 #7c7c7c;
-#X msg 240 200 stop;
+#X msg 270 160 stop;
 #X text 100 380 tracks;
 #X obj 110 340 bng 15 250 50 0 empty empty restart 17 7 0 12 #ff8300
 #ff0400 #7c7c7c;
@@ -46,6 +46,7 @@
 #X msg 240 80 0;
 #X connect 0 0 3 1;
 #X connect 0 0 1 1;
+#X connect 0 0 15 0;
 #X connect 1 0 6 0;
 #X connect 2 0 4 0;
 #X connect 3 0 2 0;
@@ -137,8 +138,8 @@
 #X connect 10 0 8 0;
 #X connect 13 0 4 0;
 #X connect 13 0 8 0;
-#X restore 230 230 pd time;
-#X obj 70 130 bng 15 250 50 0 empty empty previous\\\ directory 17
+#X restore 260 190 pd time;
+#X obj 60 130 bng 15 250 50 0 empty empty previous\\\ directory 17
 7 0 12 #ff8300 #ff0400 #7c7c7c;
 #N canvas 980 500 550 300 bounds 0;
 #X obj 40 30 inlet;
@@ -204,9 +205,8 @@
 #X connect 15 8 3 0;
 #X connect 17 0 2 0;
 #X restore 300 430 pd route;
-#X symbolatom 290 260 0 0 0 0 - - - 0;
-#X msg 80 160 symbol ~/Music;
-#X msg 70 220 open \$1;
+#X msg 70 160 symbol ~/Music;
+#X msg 60 220 open \$1;
 #X obj 80 500 metro 40;
 #N canvas 390 610 590 170 trackbar 0;
 #X msg 40 80 seek \$1;
@@ -264,7 +264,6 @@
 #X connect 14 0 16 0;
 #X connect 15 0 16 0;
 #X restore 410 370 pd metadata;
-#X symbolatom 190 260 0 0 0 0 - - - 0;
 #X text 60 60 An implementation of the FFmpeg libraries for the audio
 playback of various media formats. Includes m3u playlist functionality
 and playback speed manipulation.;
@@ -370,7 +369,7 @@ can load the standard version, f 44;
 #X restore 30 30 pd lib;
 #X obj 220 400 ffplay~ 1 2;
 #X obj 220 370 r \$0ffplay;
-#X obj 70 250 s \$0ffplay;
+#X obj 60 250 s \$0ffplay;
 #X obj 80 530 tabwrite~ \$0view;
 #N canvas 980 420 730 380 misc 0;
 #X msg 490 210 0;
@@ -459,31 +458,33 @@ can load the standard version, f 44;
 #X restore 220 340 pd channel_layout;
 #X obj 150 500 *~ 0.5;
 #X obj 310 370 r~ \$0speed;
+#X symbolatom 300 220 0 0 0 0 - - - 0;
+#X symbolatom 300 250 0 0 0 0 - - - 0;
 #X connect 0 0 1 0;
-#X connect 3 0 22 0;
-#X connect 4 0 22 1;
+#X connect 3 0 21 0;
+#X connect 4 0 21 1;
 #X connect 5 0 17 0;
-#X connect 6 0 21 0;
+#X connect 6 0 20 0;
 #X connect 7 0 1 1;
 #X connect 8 0 15 0;
 #X connect 9 0 15 0;
 #X connect 11 0 5 1;
-#X connect 12 0 28 0;
-#X connect 15 0 25 0;
-#X connect 15 1 19 0;
+#X connect 12 0 26 0;
+#X connect 15 0 37 0;
+#X connect 15 1 36 0;
 #X connect 16 0 6 0;
-#X connect 20 0 6 0;
-#X connect 21 0 32 0;
-#X connect 22 0 33 0;
-#X connect 27 0 5 1;
-#X connect 28 0 7 1;
-#X connect 28 0 0 1;
-#X connect 28 1 13 0;
-#X connect 30 0 36 0;
-#X connect 30 0 0 0;
-#X connect 30 1 36 0;
-#X connect 30 1 7 0;
-#X connect 30 2 18 0;
-#X connect 31 0 30 0;
-#X connect 36 0 33 0;
-#X connect 37 0 30 1;
+#X connect 19 0 6 0;
+#X connect 20 0 30 0;
+#X connect 21 0 31 0;
+#X connect 25 0 5 1;
+#X connect 26 0 7 1;
+#X connect 26 0 0 1;
+#X connect 26 1 13 0;
+#X connect 28 0 34 0;
+#X connect 28 0 0 0;
+#X connect 28 1 34 0;
+#X connect 28 1 7 0;
+#X connect 28 2 18 0;
+#X connect 29 0 28 0;
+#X connect 34 0 31 0;
+#X connect 35 0 28 1;
