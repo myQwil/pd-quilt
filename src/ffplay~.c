@@ -1,21 +1,13 @@
 #include "player.h"
+#include "playlist.h"
 #include <libavformat/avformat.h>
 #include <libswresample/swresample.h>
 
 static t_symbol *s_done;
 static t_symbol *s_pos;
 
-typedef const char *err_t;
-
 /* ------------------------- FFmpeg player ------------------------- */
 static t_class *ffplay_class;
-
-typedef struct {
-	t_symbol **arr; /* m3u list of tracks */
-	t_symbol *dir;  /* starting directory */
-	int size;       /* size of the list */
-	int max;        /* size of the memory allocation */
-} t_playlist;
 
 typedef struct {
 	AVCodecContext *ctx;
@@ -148,81 +140,6 @@ static void ffplay_dsp(t_ffplay *y, t_signal **sp) {
 	dsp_add(ffplay_perform, 3, y, sp[0]->s_vec, sp[0]->s_n);
 }
 
-static int m3u_size(FILE *fp, char *dir, int dlen) {
-	int size = 0;
-	char line[MAXPDSTRING];
-	while (fgets(line, MAXPDSTRING, fp) != NULL) {
-		line[strcspn(line, "\r\n")] = '\0';
-		int isabs = (line[0] == '/');
-		if ((isabs ? 0 : dlen) + strlen(line) >= MAXPDSTRING) {
-			continue;
-		}
-		char *ext = strrchr(line, '.');
-		if (ext && !strcmp(ext + 1, "m3u")) {
-			strcpy(dir + dlen, line);
-			char *fname = strrchr(line, '/');
-			int len = (fname) ? ++fname - line : 0;
-			FILE *m3u = fopen(dir, "r");
-			if (m3u) {
-				size += m3u_size(m3u, dir, dlen + len);
-				fclose(m3u);
-			}
-		} else {
-			size++;
-		}
-	}
-	return size;
-}
-
-static int playlist_fill(t_playlist *pl, FILE *fp, char *dir, int dlen, int i) {
-	char line[MAXPDSTRING];
-	int oldlen = strlen(pl->dir->s_name);
-	while (fgets(line, MAXPDSTRING, fp) != NULL) {
-		line[strcspn(line, "\r\n")] = '\0';
-		int isabs = (line[0] == '/');
-		if ((isabs ? 0 : dlen) + strlen(line) >= MAXPDSTRING) {
-			continue;
-		}
-		strcpy(dir + dlen, line);
-		char *ext = strrchr(line, '.');
-		if (ext && !strcmp(ext + 1, "m3u")) {
-			char *fname = strrchr(line, '/');
-			int len = (fname) ? ++fname - line : 0;
-			FILE *m3u = fopen(dir, "r");
-			if (m3u) {
-				i = playlist_fill(pl, m3u, dir, dlen + len, i);
-				fclose(m3u);
-			}
-		} else {
-			pl->arr[i++] = gensym(dir + oldlen);
-		}
-	}
-	return i;
-}
-
-static inline err_t ffplay_m3u(t_ffplay *x, t_symbol *s) {
-	FILE *fp = fopen(s->s_name, "r");
-	if (!fp) {
-		return "Could not open m3u";
-	}
-
-	t_playlist *pl = &x->plist;
-	char dir[MAXPDSTRING];
-	strcpy(dir, pl->dir->s_name);
-	int size = m3u_size(fp, dir, strlen(dir));
-	if (size > pl->max) {
-		pl->arr = (t_symbol **)resizebytes(pl->arr
-		, pl->max * sizeof(t_symbol *), size * sizeof(t_symbol *));
-		pl->max = size;
-	}
-	pl->size = size;
-	rewind(fp);
-
-	playlist_fill(pl, fp, dir, strlen(pl->dir->s_name), 0);
-	fclose(fp);
-	return 0;
-}
-
 static inline err_t ffplay_stream(t_ffplay *x, t_avstream *s, enum AVMediaType type) {
 	int i = -1;
 	for (unsigned j = x->ic->nb_streams; j--;) {
@@ -311,6 +228,7 @@ static void ffplay_open(t_ffplay *x, t_symbol *s) {
 	if (strlen(sym) >= MAXPDSTRING) {
 		err_msg = "File path is too long";
 	} else {
+		t_playlist *pl = &x->plist;
 		char dir[MAXPDSTRING];
 		const char *fname = strrchr(sym, '/');
 		if (fname) {
@@ -321,14 +239,14 @@ static void ffplay_open(t_ffplay *x, t_symbol *s) {
 			fname = sym;
 			strcpy(dir, "./");
 		}
-		x->plist.dir = gensym(dir);
+		pl->dir = gensym(dir);
 
 		char *ext = strrchr(sym, '.');
 		if (ext && !strcmp(ext + 1, "m3u")) {
-			err_msg = ffplay_m3u(x, s);
+			err_msg = playlist_m3u(pl, s);
 		} else {
-			x->plist.size = 1;
-			x->plist.arr[0] = gensym(fname);
+			pl->size = 1;
+			pl->arr[0] = gensym(fname);
 		}
 	}
 
@@ -428,9 +346,7 @@ static void ffplay_start(t_ffplay *x, t_float f, t_float ms) {
 
 static void ffplay_list(t_ffplay *x, t_symbol *s, int ac, t_atom *av) {
 	(void)s;
-	if (ac > 1 && av[0].a_type == A_FLOAT && av[1].a_type == A_FLOAT) {
-		ffplay_start(x, av[0].a_w.w_float, av[1].a_w.w_float);
-	}
+	ffplay_start(x, atom_getfloatarg(0, ac, av), atom_getfloatarg(1, ac, av));
 }
 
 static void ffplay_float(t_ffplay *x, t_float f) {
@@ -444,12 +360,13 @@ static void ffplay_stop(t_ffplay *x) {
 
 static void *ffplay_new(t_symbol *s, int ac, t_atom *av) {
 	(void)s;
-	t_atom defarg[2];
+	t_atom defarg[2] = {
+	  { .a_type = A_FLOAT, .a_w = {.w_float = 1} }
+	, { .a_type = A_FLOAT, .a_w = {.w_float = 2} }
+	};
 	if (!ac) {
 		ac = 2;
 		av = defarg;
-		SETFLOAT(&defarg[0], 1);
-		SETFLOAT(&defarg[1], 2);
 	}
 
 	t_ffplay *x = (t_ffplay *)player_new(ffplay_class, ac);
