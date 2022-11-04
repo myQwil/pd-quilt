@@ -406,7 +406,7 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X msg 480 90 -2.77259 10000;
 #X msg 490 120 2.77259 10000;
 #X msg 540 150 0 \, 1.38629 60000;
-#X obj 470 60 expr ln(2) / 12;
+#X obj 470 60 expr -ln(2) / 12;
 #X obj 380 120 *;
 #X connect 0 0 1 0;
 #X connect 1 0 8 0;

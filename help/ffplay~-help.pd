@@ -408,7 +408,7 @@ can load the standard version, f 44;
 #X msg 530 210 0 \, 1.38629 60000;
 #X obj 450 280 exp;
 #X msg 370 210 \$1 50;
-#X obj 460 120 expr ln(2) / 12;
+#X obj 460 120 expr -ln(2) / 12;
 #X obj 370 180 *;
 #X connect 0 0 24 0;
 #X connect 1 0 32 0;
