@@ -2,11 +2,13 @@
 #include "flin.h"
 #include <stdlib.h> // atoi
 #include <string.h> // memcpy
-#include <math.h>   // trunc, floor
+#include <math.h>   // trunc, floor, fmod
 
-static inline double mod(double x, double y) {
-	return x - y * trunc(x / y);
-}
+#if PD_FLOATSIZE == 32
+# define FMOD fmodf
+#else
+# define FMOD fmod
+#endif
 
 /* -------------------------- rand -------------------------- */
 static t_class *rand_class;
@@ -82,7 +84,7 @@ static void rand_bang(t_rand *x) {
 	double d, next = rng_next(&x->z);
 	unsigned nop = x->nop, reps = x->reps, prev = x->prev;
 	if (nop && reps >= nop) {
-		d = mod(next * (range - 1) + (prev + 1), range ? range : 1);
+		d = FMOD(next * (range - 1) + (prev + 1), range ? range : 1);
 	} else {
 		d = next * range;
 	}
