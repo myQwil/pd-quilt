@@ -5,16 +5,12 @@ typedef union {
 #if PD_FLOATSIZE == 32
 	uint32_t u;
 	struct {
-		uint32_t m : 23, e : 8, s : 1;
-	} fu;
+		uint32_t mt : 23, ex : 8, sg : 1;
+	};
 #else
 	uint64_t u;
 	struct {
-		uint64_t m : 52, e : 11, s : 1;
-	} fu;
+		uint64_t mt : 52, ex : 11, sg : 1;
+	};
 #endif
 } ufloat;
-
-#define mt fu.m
-#define ex fu.e
-#define sg fu.s
