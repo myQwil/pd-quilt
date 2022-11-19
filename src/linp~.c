@@ -17,10 +17,10 @@ typedef struct {
 	unsigned char retarget;
 	unsigned char pause;
 	t_outlet *o_on;
-} t_linp;
+} t_linp_tilde;
 
 #define PERF_MAIN(expr) \
-	t_linp *x = (t_linp*)(w[1]); \
+	t_linp_tilde *x = (t_linp_tilde*)(w[1]); \
 	t_sample *out = (t_sample*)(w[2]); \
 	int n = (int)(w[3]); \
 	t_sample f = x->value, g; \
@@ -70,12 +70,12 @@ static t_int *linp_tilde_perf8(t_int *w) {
 	return (w + 4);
 }
 
-static void linp_tilde_stop(t_linp *x) {
+static void linp_tilde_stop(t_linp_tilde *x) {
 	x->target = x->value;
 	x->ticksleft = x->retarget = 0;
 }
 
-static void linp_tilde_pause(t_linp *x, t_symbol *s, int ac, t_atom *av) {
+static void linp_tilde_pause(t_linp_tilde *x, t_symbol *s, int ac, t_atom *av) {
 	(void)s;
 	if (x->target == x->value || pause_state(&x->pause, ac, av)) {
 		return;
@@ -83,7 +83,7 @@ static void linp_tilde_pause(t_linp *x, t_symbol *s, int ac, t_atom *av) {
 	outlet_float(x->o_on, !x->pause);
 }
 
-static void linp_tilde_float(t_linp *x, t_float f) {
+static void linp_tilde_float(t_linp_tilde *x, t_float f) {
 	if (x->inletvalue <= 0) {
 		x->target = x->value = f;
 		x->ticksleft = x->retarget = 0;
@@ -96,7 +96,7 @@ static void linp_tilde_float(t_linp *x, t_float f) {
 	}
 }
 
-static void linp_tilde_dsp(t_linp *x, t_signal **sp) {
+static void linp_tilde_dsp(t_linp_tilde *x, t_signal **sp) {
 	if (sp[0]->s_n & 7) {
 		dsp_add(linp_tilde_perform, 3, x, sp[0]->s_vec, (t_int)sp[0]->s_n);
 	} else {
@@ -107,7 +107,7 @@ static void linp_tilde_dsp(t_linp *x, t_signal **sp) {
 }
 
 static void *linp_tilde_new(void) {
-	t_linp *x = (t_linp *)pd_new(linp_tilde_class);
+	t_linp_tilde *x = (t_linp_tilde *)pd_new(linp_tilde_class);
 	floatinlet_new(&x->obj, &x->inletvalue);
 	outlet_new(&x->obj, &s_signal);
 	x->o_on = outlet_new(&x->obj, &s_float);
@@ -119,7 +119,7 @@ static void *linp_tilde_new(void) {
 void linp_tilde_setup(void) {
 	linp_tilde_class = class_new(gensym("linp~")
 	, linp_tilde_new, 0
-	, sizeof(t_linp), 0
+	, sizeof(t_linp_tilde), 0
 	, A_NULL);
 	class_addfloat(linp_tilde_class, linp_tilde_float);
 	class_addmethod(linp_tilde_class, (t_method)linp_tilde_dsp, gensym("dsp"), A_CANT, 0);
