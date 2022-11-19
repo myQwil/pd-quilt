@@ -194,7 +194,7 @@ static void gmepd_open(t_gme *x, t_symbol *s) {
 		x->path = s;
 	}
 	if (err_msg) {
-		post("Error: %s", err_msg);
+		pd_error(x, "%s.", err_msg);
 	}
 	x->z.open = !err_msg;
 	t_atom open = { .a_type = A_FLOAT, .a_w = {.w_float = x->z.open} };
@@ -287,7 +287,7 @@ static void gmepd_float(t_gme *x, t_float f) {
 	gme_err_t err_msg = "";
 	if (0 < track && track <= gme_track_count(x->emu)) {
 		if ((err_msg = gmepd_load(x, track - 1))) {
-			post("Error: %s", err_msg);
+			pd_error(x, "%s.", err_msg);
 		}
 		x->z.open = !err_msg;
 	} else {

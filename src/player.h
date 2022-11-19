@@ -149,15 +149,19 @@ static void player_bang(t_player *x) {
 }
 
 static t_player *player_new(t_class *cl, unsigned nch) {
+	int err;
+	SRC_STATE *state;
+	if (!(state = src_new(SRC_LINEAR, nch, &err))) {
+		pd_error(0, "src_new() failed : %s.", src_strerror(err));
+		return NULL;
+	}
+
 	t_player *x = (t_player *)pd_new(cl);
 	x->in = (t_sample *)getbytes(nch * FRAMES * sizeof(t_sample));
 	x->out = (t_sample *)getbytes(nch * FRAMES * sizeof(t_sample));
+	x->state = state;
 	x->nch = nch;
 
-	int err;
-	if (!(x->state = src_new(SRC_LINEAR, nch, &err))) {
-		post("Error : src_new() failed : %s.", src_strerror(err));
-	}
 	x->data.src_ratio = x->ratio = 1.;
 	x->data.output_frames = FRAMES;
 

@@ -1,5 +1,6 @@
 #include "player.h"
 #include "playlist.h"
+#include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libswresample/swresample.h>
 
@@ -21,8 +22,8 @@ typedef struct {
 	AVFrame *frm;
 	SwrContext *swr;
 	AVFormatContext *ic;
+	AVChannelLayout layout;
 	t_playlist plist;
-	int64_t  layout; /* channel layout bit-mask */
 } t_ffplay;
 
 static void ffplay_seek(t_ffplay *x, t_float f) {
@@ -40,7 +41,7 @@ static void ffplay_seek(t_ffplay *x, t_float f) {
 	x->a.ctx = avcodec_alloc_context3(NULL);
 	avcodec_parameters_to_context(x->a.ctx, x->ic->streams[x->a.idx]->codecpar);
 	x->a.ctx->pkt_timebase = x->ic->streams[x->a.idx]->time_base;
-	AVCodec *codec = avcodec_find_decoder(x->a.ctx->codec_id);
+	const AVCodec *codec = avcodec_find_decoder(x->a.ctx->codec_id);
 	avcodec_open2(x->a.ctx, codec, NULL);
 }
 
@@ -164,7 +165,7 @@ static inline err_t ffplay_stream(t_ffplay *x, t_avstream *s, enum AVMediaType t
 	}
 	s->ctx->pkt_timebase = x->ic->streams[i]->time_base;
 
-	AVCodec *codec = avcodec_find_decoder(s->ctx->codec_id);
+	const AVCodec *codec = avcodec_find_decoder(s->ctx->codec_id);
 	if (!codec) {
 		return "Codec not found";
 	}
@@ -205,10 +206,11 @@ static err_t ffplay_load(t_ffplay *x, int index) {
 	}
 
 	swr_free(&x->swr);
-	int64_t layout_in = av_get_default_channel_layout(x->a.ctx->channels);
-	x->swr = swr_alloc_set_opts(x->swr
-	, x->layout, AV_SAMPLE_FMT_FLT, x->a.ctx->sample_rate
-	, layout_in, x->a.ctx->sample_fmt, x->a.ctx->sample_rate
+	AVChannelLayout layout_in;
+	av_channel_layout_from_mask(&layout_in, x->a.ctx->ch_layout.u.mask);
+	swr_alloc_set_opts2(&x->swr
+	, &x->layout, AV_SAMPLE_FMT_FLT   , x->a.ctx->sample_rate
+	, &layout_in, x->a.ctx->sample_fmt, x->a.ctx->sample_rate
 	, 0, NULL);
 	if (swr_init(x->swr) < 0) {
 		return "SWResampler initialization failed";
@@ -251,7 +253,7 @@ static void ffplay_open(t_ffplay *x, t_symbol *s) {
 	}
 
 	if (err_msg || (err_msg = ffplay_load(x, 0))) {
-		post("Error: %s.", err_msg);
+		pd_error(x, "%s.", err_msg);
 	}
 	x->z.open = !err_msg;
 	t_atom open = { .a_type = A_FLOAT, .a_w = {.w_float = x->z.open} };
@@ -331,7 +333,7 @@ static void ffplay_start(t_ffplay *x, t_float f, t_float ms) {
 	err_t err_msg = "";
 	if (0 < track && track <= x->plist.size) {
 		if ( (err_msg = ffplay_load(x, track - 1)) ) {
-			post("Error: %s.", err_msg);
+			pd_error(x, "%s.", err_msg);
 		} else if (ms > 0) {
 			ffplay_seek(x, ms);
 		}
@@ -369,18 +371,24 @@ static void *ffplay_new(t_symbol *s, int ac, t_atom *av) {
 		av = defarg;
 	}
 
-	t_ffplay *x = (t_ffplay *)player_new(ffplay_class, ac);
-	x->pkt = av_packet_alloc();
-	x->frm = av_frame_alloc();
-
 	// channel layout masking details: libavutil/channel_layout.h
-	x->layout = 0;
+	uint64_t mask = 0;
+	AVChannelLayout layout;
 	for (int i = ac; i--;) {
 		int ch = atom_getfloatarg(i, ac, av);
 		if (ch > 0) {
-			x->layout |= 1 << (ch - 1);
+			mask |= 1 << (ch - 1);
 		}
 	}
+	if (av_channel_layout_from_mask(&layout, mask)) {
+		pd_error(0, "ffplay~: invalid channel layout.");
+		return NULL;
+	}
+
+	t_ffplay *x = (t_ffplay *)player_new(ffplay_class, ac);
+	x->pkt = av_packet_alloc();
+	x->frm = av_frame_alloc();
+	x->layout = layout;
 
 	t_playlist *pl = &x->plist;
 	pl->size = 0;
@@ -390,6 +398,7 @@ static void *ffplay_new(t_symbol *s, int ac, t_atom *av) {
 }
 
 static void ffplay_free(t_ffplay *x) {
+	av_channel_layout_uninit(&x->layout);
 	avcodec_free_context(&x->a.ctx);
 	avformat_close_input(&x->ic);
 	av_packet_free(&x->pkt);

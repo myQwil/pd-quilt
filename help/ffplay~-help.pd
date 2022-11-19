@@ -7,23 +7,18 @@
 #X array \$0view 480 float 2;
 #X coords 0 1.0833 480 -1.0833 120 130 1 0 0;
 #X restore 390 150 graph;
-#X obj 80 470 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
-#fcfcfc 0 1;
+#X obj 80 470 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc #fcfcfc 0 1;
 #X floatatom 110 470 0 0 0 0 - - - 0;
 #X obj 50 370 cupqb;
 #X obj 60 190 openpanel;
 #X obj 260 500 *~;
-#X obj 260 130 bng 15 250 50 0 empty empty play/pause 17 7 0 12 #ff8300
-#ff0400 #7c7c7c;
+#X obj 260 130 bng 15 250 50 0 empty empty play/pause 17 7 0 12 #ff8300 #ff0400 #7c7c7c;
 #X msg 270 160 stop;
 #X text 100 380 tracks;
-#X obj 110 340 bng 15 250 50 0 empty empty restart 17 7 0 12 #ff8300
-#ff0400 #7c7c7c;
-#X obj 310 470 hsl 128 20 0.001 1 1 0 empty empty volume 35 10 0 12
-#2f004d #fcfcfc #fcfcfc 0 1;
+#X obj 110 340 bng 15 250 50 0 empty empty restart 17 7 0 12 #ff8300 #ff0400 #7c7c7c;
+#X obj 310 470 hsl 128 20 0.001 1 1 0 empty empty volume 35 10 0 12 #2f004d #fcfcfc #fcfcfc 0 1;
 #X floatatom 370 500 0 0 0 0 - - - 0;
-#X obj 220 30 cnv 15 102 24 empty empty ffplay~ 4 12 0 18 #000000 #fcfcfc
-0;
+#X obj 220 30 cnv 15 102 24 empty empty ffplay~ 4 12 0 18 #000000 #fcfcfc 0;
 #N canvas 650 190 400 300 time 0;
 #X obj 50 30 inlet;
 #X obj 290 220 outlet;
@@ -77,8 +72,7 @@
 #X obj 200 190 snapshot~;
 #X msg 200 120 set 0;
 #X obj 220 150 sig~ 1;
-#X obj 130 50 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400
-#fcfcfc;
+#X obj 130 50 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
 #X obj 200 220 outlet;
 #X obj 110 160 r pd;
 #X obj 110 190 route dsp;
@@ -118,8 +112,7 @@
 #X connect 12 0 7 0;
 #X restore 180 90 pd is-playing;
 #X obj 220 220 outlet;
-#X obj 140 120 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
-#fcfcfc 0 1;
+#X obj 140 120 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc #fcfcfc 0 1;
 #X msg 160 180 pos;
 #X floatatom 200 120 0 0 0 0 - - - 0;
 #X obj 140 150 metro 1000;
@@ -143,8 +136,7 @@
 #X connect 13 0 4 0;
 #X connect 13 0 8 0;
 #X restore 260 190 pd time;
-#X obj 60 130 bng 15 250 50 0 empty empty previous\\\ directory 17
-7 0 12 #ff8300 #ff0400 #7c7c7c;
+#X obj 60 130 bng 15 250 50 0 empty empty previous\ directory 17 7 0 12 #ff8300 #ff0400 #7c7c7c;
 #N canvas 980 500 550 300 bounds 0;
 #X obj 40 30 inlet;
 #X obj 110 60 + 1;
@@ -156,8 +148,7 @@
 #X msg 140 150 symbol bang;
 #X obj 40 240 s \$0ffplay;
 #X obj 140 90 s \$0end;
-#X msg 50 190 \$1 \, print %disc%|%track% - %title% [%ftime%] \, time
-\, bpm \, sytc, f 46;
+#X msg 50 190 \$1 \, print %disc%|%track% - %title% [%ftime%] \, time \, bpm \, sytc, f 46;
 #X connect 0 0 3 0;
 #X connect 1 0 4 1;
 #X connect 2 0 1 0;
@@ -214,11 +205,9 @@
 #X obj 80 500 metro 40;
 #N canvas 390 610 590 170 trackbar 0;
 #X msg 40 80 seek \$1;
-#X obj 60 20 hsl 476 20 0 1 0 0 empty \$0trackbar trackbar 200 10 0
-12 #2f004d #fcfcfc #fcfcfc 0 1;
+#X obj 60 20 hsl 476 20 0 1 0 0 empty \$0trackbar trackbar 200 10 0 12 #2f004d #fcfcfc #fcfcfc 0 1;
 #X obj 80 50 r \$0time;
-#X obj 40 20 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400
-#fcfcfc;
+#X obj 40 20 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
 #X obj 40 50 *;
 #X obj 110 80 s \$0seek;
 #X obj 40 110 s \$0ffplay;
@@ -268,9 +257,7 @@
 #X connect 14 0 16 0;
 #X connect 15 0 16 0;
 #X restore 410 370 pd metadata;
-#X text 60 60 An implementation of the FFmpeg libraries for the audio
-playback of various media formats. Includes m3u playlist functionality
-and playback speed manipulation.;
+#X text 60 60 An implementation of the FFmpeg libraries for the audio playback of various media formats. Includes m3u playlist functionality and playback speed manipulation.;
 #N canvas 980 200 390 280 next 0;
 #X obj 160 220 outlet;
 #X obj 50 100 r \$0done;
@@ -278,14 +265,11 @@ and playback speed manipulation.;
 #X obj 70 130 r \$0nbx;
 #X obj 120 170 %;
 #X obj 50 170 f;
-#X obj 200 70 bng 15 250 50 0 empty empty repeat\\\ track 17 7 0 12
-#ff8300 #ff0400 #7c7c7c;
-#X obj 170 50 bng 15 250 50 0 empty empty repeat\\\ playlist 17 7 0
-12 #ff8300 #ff0400 #7c7c7c;
+#X obj 200 70 bng 15 250 50 0 empty empty repeat\ track 17 7 0 12 #ff8300 #ff0400 #7c7c7c;
+#X obj 170 50 bng 15 250 50 0 empty empty repeat\ playlist 17 7 0 12 #ff8300 #ff0400 #7c7c7c;
 #X obj 220 130 r \$0start;
 #X msg 220 160 set \$1;
-#X obj 140 30 bng 15 250 50 0 empty empty no-repeat\\\ playlist 17
-7 0 12 #ff8300 #ff0400 #7c7c7c;
+#X obj 140 30 bng 15 250 50 0 empty empty no-repeat\ playlist 17 7 0 12 #ff8300 #ff0400 #7c7c7c;
 #N canvas 980 480 390 290 order 0;
 #X obj 260 70 r \$0nbx;
 #X obj 260 160 spigot;
@@ -368,8 +352,7 @@ and playback speed manipulation.;
 #N canvas 400 200 450 300 lib 0;
 #X obj 140 120 declare -lib blunt;
 #X obj 140 170 declare -lib gme~;
-#X text 40 200 let gme~ load the custom version of libgme before FFmpeg
-can load the standard version, f 44;
+#X text 40 200 let gme~ load the custom version of libgme before FFmpeg can load the standard version, f 44;
 #X restore 30 30 pd lib;
 #X obj 220 400 ffplay~ 1 2;
 #X obj 220 370 r \$0ffplay;
@@ -387,8 +370,7 @@ can load the standard version, f 44;
 #X text 110 210 2 = Sinc (Fastest);
 #X text 110 230 3 = Zero-order hold;
 #X text 110 250 4 = Linear (default);
-#X msg 30 50 open https://upload.wikimedia.org/wikipedia/en/1/10/Michael_Jackson_Thriller.ogg
-, f 81;
+#X msg 30 50 open https://upload.wikimedia.org/wikipedia/en/1/10/Michael_Jackson_Thriller.ogg, f 81;
 #X text 30 20 FFmpeg accepts urls;
 #X text 150 280 Interpolation method;
 #X msg 40 100 play 0;
