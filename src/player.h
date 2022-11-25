@@ -167,7 +167,7 @@ static t_player *player_new(t_class *cl, unsigned nch) {
 
 	x->speed_ = 1.;
 	t_inlet *in2 = signalinlet_new(&x->obj, x->speed_);
-	x->speed = &in2->i_un.iu_floatsignalvalue;
+	x->speed = &in2->iu_floatsignalvalue;
 
 	x->outs = (t_sample **)getbytes(nch * sizeof(t_sample *));
 	while (nch--) {

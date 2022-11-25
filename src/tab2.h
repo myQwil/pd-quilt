@@ -38,7 +38,7 @@ static t_tab2 *tab2_new(t_class *cl, t_symbol *s, t_float edge) {
 	x->vec = 0;
 
 	t_inlet *in2 = signalinlet_new(&x->obj, edge);
-	x->edge = &in2->i_un.iu_floatsignalvalue;
+	x->edge = &in2->iu_floatsignalvalue;
 	tab2_edge_(x, edge);
 
 	outlet_new(&x->obj, &s_signal);

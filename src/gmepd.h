@@ -308,7 +308,7 @@ static void *gmepd_new(t_class *gmeclass, int nch, t_symbol *s, int ac, t_atom *
 
 	x->tempo_ = 1.;
 	t_inlet *in3 = signalinlet_new(&x->z.obj, x->tempo_);
-	x->tempo = &in3->i_un.iu_floatsignalvalue;
+	x->tempo = &in3->iu_floatsignalvalue;
 
 	x->mask = 0;
 	x->voices = 16;
