@@ -37,7 +37,7 @@ static int depth;
 		} \
 	}
 
-static inline int m3u_size(FILE *fp, char *dir, int dlen) {
+static int m3u_size(FILE *fp, char *dir, int dlen) {
 	int size = 0;
 	M3U_MAIN (
 	  size += m3u_size(m3u, dir, dlen + len)
@@ -46,7 +46,7 @@ static inline int m3u_size(FILE *fp, char *dir, int dlen) {
 	return size;
 }
 
-static inline int playlist_fill(t_playlist *pl, FILE *fp, char *dir, int dlen, int i) {
+static int playlist_fill(t_playlist *pl, FILE *fp, char *dir, int dlen, int i) {
 	int oldlen = strlen(pl->dir->s_name);
 	M3U_MAIN (
 	  i = playlist_fill(pl, m3u, dir, dlen + len, i)
