@@ -22,8 +22,7 @@ cflags += -I./game-music-emu/gme
 gme~.class.ldlibs  = game-music-emu/build/gme/libgme.$(EXT) -lsamplerate -lz -lunrar
 gmes~.class.ldlibs = $(gme~.class.ldlibs)
 define forDarwin
-  cflags += -I/usr/local/opt/ffmpeg@4/include
-  ldflags = -L/usr/local/opt/ffmpeg@4/lib -L/opt/local/lib
+  ldflags = -L/opt/local/lib
   EXT = dylib
 endef
 define forWindows
