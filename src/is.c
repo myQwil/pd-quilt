@@ -102,6 +102,6 @@ void is_setup(void) {
 	is_proxy = class_new(gensym("_is_pxy")
 	, 0, 0
 	, sizeof(t_is_pxy), CLASS_PD | CLASS_NOINLET
-	, A_NULL);
+	, 0);
 	class_addanything(is_proxy, is_pxy_anything);
 }

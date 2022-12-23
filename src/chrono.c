@@ -88,8 +88,8 @@ void chrono_setup(void) {
 	, A_GIMME, 0);
 	class_addbang(chrono_class, chrono_bang);
 	class_addfloat(chrono_class, chrono_float);
-	class_addmethod(chrono_class, (t_method)chrono_lap, gensym("lap"), A_NULL);
-	class_addmethod(chrono_class, (t_method)chrono_bang2, gensym("bang2"), A_NULL);
+	class_addmethod(chrono_class, (t_method)chrono_lap, gensym("lap"), 0);
+	class_addmethod(chrono_class, (t_method)chrono_bang2, gensym("bang2"), 0);
 	class_addmethod(chrono_class, (t_method)chrono_delay, gensym("del"), A_FLOAT, 0);
 	class_addmethod(chrono_class, (t_method)chrono_delay, gensym("delay"), A_FLOAT, 0);
 	class_addmethod(chrono_class, (t_method)chrono_pause, gensym("pause"), A_GIMME, 0);

@@ -826,9 +826,9 @@ void radix_setup(void) {
 	class_addmethod(radix_class, (t_method)radix_label_font
 	, gensym("label_font"), A_GIMME, 0);
 	class_addmethod(radix_class, (t_method)radix_log
-	, gensym("log"), A_NULL);
+	, gensym("log"), 0);
 	class_addmethod(radix_class, (t_method)radix_lin
-	, gensym("lin"), A_NULL);
+	, gensym("lin"), 0);
 	class_addmethod(radix_class, (t_method)radix_init
 	, gensym("init"), A_FLOAT, 0);
 	class_addmethod(radix_class, (t_method)radix_log_height

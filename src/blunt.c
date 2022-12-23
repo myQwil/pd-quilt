@@ -615,7 +615,7 @@ static t_class *class_hot_pxy(const char *name) {
 	t_class *c = class_new(gensym(alt)
 	, 0, 0
 	, sizeof(t_hot_pxy), CLASS_PD | CLASS_NOINLET
-	, A_NULL);
+	, 0);
 	class_addbang(c, hot_pxy_bang);
 	class_addlist(c, hot_pxy_list);
 	class_addfloat(c, hot_pxy_float);
@@ -903,8 +903,10 @@ void blunt_setup(void) {
 
 	for (; *usym; usym++, uop++) {
 		for (; uop->cls; uop++) {
-			*uop->cls = class_new(gensym(uop->name), (t_newmethod)uop->new, 0
-			, sizeof(t_object), 0, A_NULL);
+			*uop->cls = class_new(gensym(uop->name)
+			, (t_newmethod)uop->new, 0
+			, sizeof(t_object), 0
+			, 0);
 			class_addfloat(*uop->cls, uop_float);
 			class_sethelpsymbol(*uop->cls, *usym);
 		}

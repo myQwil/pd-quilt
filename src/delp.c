@@ -126,6 +126,6 @@ void delp_setup(void) {
 	class_addmethod(delp_class, (t_method)delp_delay, gensym("delay"), A_FLOAT, 0);
 	class_addmethod(delp_class, (t_method)delp_pause, gensym("pause"), A_GIMME, 0);
 	class_addmethod(delp_class, (t_method)delp_tempo, gensym("tempo"), A_GIMME, 0);
-	class_addmethod(delp_class, (t_method)delp_stop, gensym("stop"), A_NULL);
-	class_addmethod(delp_class, (t_method)delp_time, gensym("time"), A_NULL);
+	class_addmethod(delp_class, (t_method)delp_stop, gensym("stop"), 0);
+	class_addmethod(delp_class, (t_method)delp_time, gensym("time"), 0);
 }

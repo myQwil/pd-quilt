@@ -55,7 +55,7 @@ void setup_0x40paq(void) {
 	rpaq_proxy = class_new(gensym("_@paq_proxy")
 	, 0, 0
 	, sizeof(t_paq_pxy), CLASS_PD | CLASS_NOINLET
-	, A_NULL);
+	, 0);
 	class_addpaq(rpaq_class, rpaq_proxy);
 	class_addpointer(rpaq_class, rpaq_pointer);
 	class_addpointer(rpaq_proxy, rpaq_pxy_pointer);

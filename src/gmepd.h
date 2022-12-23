@@ -353,8 +353,8 @@ static t_class *gmepd_setup(t_symbol *s, t_newmethod newm) {
 	class_addmethod(cls, (t_method)gmepd_mask, gensym("mask"), A_GIMME, 0);
 	class_addmethod(cls, (t_method)gmepd_print, gensym("print"), A_GIMME, 0);
 	class_addmethod(cls, (t_method)gmepd_open, gensym("open"), A_SYMBOL, 0);
-	class_addmethod(cls, (t_method)gmepd_stop, gensym("stop"), A_NULL);
-	class_addmethod(cls, (t_method)gmepd_bmask, gensym("bmask"), A_NULL);
+	class_addmethod(cls, (t_method)gmepd_stop, gensym("stop"), 0);
+	class_addmethod(cls, (t_method)gmepd_bmask, gensym("bmask"), 0);
 
 	return cls;
 }

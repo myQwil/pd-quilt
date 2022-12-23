@@ -120,9 +120,9 @@ void linp_tilde_setup(void) {
 	linp_tilde_class = class_new(gensym("linp~")
 	, linp_tilde_new, 0
 	, sizeof(t_linp_tilde), 0
-	, A_NULL);
+	, 0);
 	class_addfloat(linp_tilde_class, linp_tilde_float);
 	class_addmethod(linp_tilde_class, (t_method)linp_tilde_dsp, gensym("dsp"), A_CANT, 0);
 	class_addmethod(linp_tilde_class, (t_method)linp_tilde_pause, gensym("pause"), A_GIMME, 0);
-	class_addmethod(linp_tilde_class, (t_method)linp_tilde_stop, gensym("stop"), A_NULL);
+	class_addmethod(linp_tilde_class, (t_method)linp_tilde_stop, gensym("stop"), 0);
 }

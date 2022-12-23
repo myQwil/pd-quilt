@@ -47,7 +47,7 @@ void paq_setup(void) {
 	paq_proxy = class_new(gensym("_paq_pxy")
 	, 0, 0
 	, sizeof(t_paq_pxy), CLASS_PD | CLASS_NOINLET
-	, A_NULL);
+	, 0);
 	class_addpaq(paq_class, paq_proxy);
 	class_addpointer(paq_class, paq_pointer);
 	class_addpointer(paq_proxy, paq_pxy_pointer);

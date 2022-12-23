@@ -437,6 +437,6 @@ void ffplay_tilde_setup(void) {
 	class_addmethod(ffplay_class, (t_method)ffplay_seek, gensym("seek"), A_FLOAT, 0);
 	class_addmethod(ffplay_class, (t_method)ffplay_print, gensym("print"), A_GIMME, 0);
 	class_addmethod(ffplay_class, (t_method)ffplay_open, gensym("open"), A_SYMBOL, 0);
-	class_addmethod(ffplay_class, (t_method)ffplay_stop, gensym("stop"), A_NULL);
-	class_addmethod(ffplay_class, (t_method)ffplay_position, gensym("pos"), A_NULL);
+	class_addmethod(ffplay_class, (t_method)ffplay_stop, gensym("stop"), 0);
+	class_addmethod(ffplay_class, (t_method)ffplay_position, gensym("pos"), 0);
 }
