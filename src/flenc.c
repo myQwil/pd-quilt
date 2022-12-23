@@ -12,7 +12,7 @@ static void flenc_print(t_flenc *x, t_symbol *s) {
 	ufloat uf = x->uf;
 	post("%s%s0x%x %u %u = %g"
 	, s->s_name, *s->s_name ? ": " : ""
-	, uf.mt, uf.ex, uf.sg, uf.f);
+	, uf.mantissa, uf.exponent, uf.sign, uf.f);
 }
 
 static void flenc_bang(t_flenc *x) {
@@ -20,15 +20,15 @@ static void flenc_bang(t_flenc *x) {
 }
 
 static void flenc_mantissa(t_flenc *x, t_float f) {
-	x->uf.mt = f;
+	x->uf.mantissa = f;
 }
 
 static void flenc_exponent(t_flenc *x, t_float f) {
-	x->uf.ex = f;
+	x->uf.exponent = f;
 }
 
 static void flenc_sign(t_flenc *x, t_float f) {
-	x->uf.sg = f;
+	x->uf.sign = f;
 }
 
 static void flenc_f(t_flenc *x, t_float f) {
@@ -52,17 +52,17 @@ static void flenc_set(t_flenc *x, t_symbol *s, int ac, t_atom *av) {
 	switch (ac) {
 	case 3:
 		if ((av + 2)->a_type == A_FLOAT) {
-			x->uf.sg = (av + 2)->a_w.w_float;
+			x->uf.sign = (av + 2)->a_w.w_float;
 		}
 		// fall through
 	case 2:
 		if ((av + 1)->a_type == A_FLOAT) {
-			x->uf.ex = (av + 1)->a_w.w_float;
+			x->uf.exponent = (av + 1)->a_w.w_float;
 		}
 		// fall through
 	case 1:
 		if (av->a_type == A_FLOAT) {
-			x->uf.mt = av->a_w.w_float;
+			x->uf.mantissa = av->a_w.w_float;
 		}
 	}
 }

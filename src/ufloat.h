@@ -1,16 +1,18 @@
 #include "m_pd.h"
+#include <float.h>
+
+#if   PD_FLOATSIZE == 32
+# define MANT_DIG FLT_MANT_DIG
+#elif PD_FLOATSIZE == 64
+# define MANT_DIG DBL_MANT_DIG
+#endif
 
 typedef union {
 	t_float f;
-#if PD_FLOATSIZE == 32
-	uint32_t u;
+	PD_FLOATUINTTYPE u;
 	struct {
-		uint32_t mt : 23, ex : 8, sg : 1;
+		PD_FLOATUINTTYPE mantissa : MANT_DIG - 1,
+		                 exponent : PD_FLOATSIZE - MANT_DIG,
+		                 sign : 1;
 	};
-#else
-	uint64_t u;
-	struct {
-		uint64_t mt : 52, ex : 11, sg : 1;
-	};
-#endif
 } ufloat;

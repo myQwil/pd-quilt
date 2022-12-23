@@ -6,22 +6,22 @@ static t_class *fldec_class;
 typedef struct {
 	t_object obj;
 	ufloat uf;
-	t_outlet *o_mt;
-	t_outlet *o_ex;
-	t_outlet *o_sg;
+	t_outlet *o_mantissa;
+	t_outlet *o_exponent;
+	t_outlet *o_sign;
 } t_fldec;
 
 static void fldec_print(t_fldec *x, t_symbol *s) {
 	ufloat uf = x->uf;
 	post("%s%s0x%x %u %u = %g"
 	, s->s_name, *s->s_name ? ": " : ""
-	, uf.mt, uf.ex, uf.sg, uf.f);
+	, uf.mantissa, uf.exponent, uf.sign, uf.f);
 }
 
 static void fldec_bang(t_fldec *x) {
-	outlet_float(x->o_sg, x->uf.sg);
-	outlet_float(x->o_ex, x->uf.ex);
-	outlet_float(x->o_mt, x->uf.mt);
+	outlet_float(x->o_sign, x->uf.sign);
+	outlet_float(x->o_exponent, x->uf.exponent);
+	outlet_float(x->o_mantissa, x->uf.mantissa);
 }
 
 static void fldec_set(t_fldec *x, t_float f) {
@@ -35,9 +35,9 @@ static void fldec_float(t_fldec *x, t_float f) {
 
 static void *fldec_new(t_float f) {
 	t_fldec *x = (t_fldec *)pd_new(fldec_class);
-	x->o_mt = outlet_new(&x->obj, &s_float);
-	x->o_ex = outlet_new(&x->obj, &s_float);
-	x->o_sg = outlet_new(&x->obj, &s_float);
+	x->o_mantissa = outlet_new(&x->obj, &s_float);
+	x->o_exponent = outlet_new(&x->obj, &s_float);
+	x->o_sign = outlet_new(&x->obj, &s_float);
 	inlet_new(&x->obj, &x->obj.ob_pd, &s_float, gensym("set"));
 	fldec_set(x, f);
 	return x;
