@@ -12,7 +12,7 @@ cflags = -DBLUNT=1 \
 class.sources = $(wildcard src/*.c)
 
 datafiles  = $(wildcard abstractions/*.pd) $(wildcard help/*.pd)
-datafiles += help/LICENSE-libgme.txt help/README.md
+datafiles += help/libgme-LICENSE.txt help/README.md
 datadirs   = blunt
 
 # Game Music Emu

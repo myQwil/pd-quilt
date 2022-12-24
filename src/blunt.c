@@ -857,7 +857,7 @@ void hotop_setup(void) {
 /* --------------------- blunt setup ------------------------------ */
 void blunt_setup(void) {
 
-	startpost("\nBlunt! version 0.8.2\n");
+	startpost("\nBlunt! version 0.8.3\n");
 #ifdef BLUNT
 	startpost("compiled " DATE " " TIME " UTC\n");
 #endif
