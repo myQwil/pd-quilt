@@ -905,7 +905,7 @@ void blunt_setup(void) {
 		for (; uop->cls; uop++) {
 			*uop->cls = class_new(gensym(uop->name)
 			, (t_newmethod)uop->new, 0
-			, sizeof(t_object), 0
+			, sizeof(t_uop), 0
 			, 0);
 			class_addfloat(*uop->cls, uop_float);
 			class_sethelpsymbol(*uop->cls, *usym);
