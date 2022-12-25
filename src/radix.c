@@ -46,13 +46,48 @@
 # define M_LN2 0.69314718055994530942  /* log_e 2 */
 #endif
 
-#define DGT_MAX 64
-static const char dgt[DGT_MAX] = {
+#define BASE_MAX 64
+static const char dgt[BASE_MAX] = {
 	"0123456789abcdef"
 	"ghijkmnopqrstuvw"
 	"xyzACDEFGHJKLMNP"
 	"QRTUVWXYZ?!@#$%&"
 };
+
+static int dgt_lookup(char c) {
+	switch (c) {
+	case '0': case '1': case '2': case '3': case '4':
+	case '5': case '6': case '7': case '8': case '9':
+		return c - '0';
+	case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
+	case 'g': case 'h': case 'i': case 'j': case 'k':
+		return c - 'a' + 10;
+	case 'm': case 'n': case 'o': case 'p': case 'q': case 'r': case 's':
+	case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
+		return c - 'm' + 21;
+	case 'C': case 'D': case 'E': case 'F': case 'G': case 'H':
+		return c - 'C' + 36;
+	case 'J': case 'K': case 'L': case 'M': case 'N':
+		return c - 'J' + 42;
+	case 'P': case 'Q': case 'R':
+		return c - 'P' + 47;
+	case 'T': case 'U': case 'V': case 'W': case 'X': case 'Y': case 'Z':
+		return c - 'T' + 50;
+	case '#': case '$': case '%': case '&':
+		return c - '#' + 60;
+	case 'A': return 35;
+	case '?': return 57;
+	case '!': return 58;
+	case '@': return 59;
+	default: return -1;
+	}
+}
+
+#if PD_FLOATSIZE == 32
+# define POW powf
+#else
+# define POW pow
+#endif
 
 typedef struct _radix {
 	t_iemgui x_gui;
@@ -124,8 +159,8 @@ static void radix_precision(t_radix *x, t_float f) {
 	x->x_prec = f < 1 ? 1 : (f > m ? m : f);
 }
 
-static unsigned radix_bounds(t_float base) {
-	return base < 2 ? 2 : (base > DGT_MAX ? DGT_MAX : base);
+static inline unsigned int radix_bounds(t_float base) {
+	return base < 2 ? 2 : (base > BASE_MAX ? BASE_MAX : base);
 }
 
 static void radix_dobase(t_radix *x, t_float f) {
@@ -1081,6 +1116,47 @@ static void radix_list(t_radix *x, t_symbol *s, int ac, t_atom *av) {
 		radix_bang(x);
 	}
 }
+	/* string to real number */
+static t_float strtor(const char *s, int base)
+{
+	t_float f;
+	int neg, i;
+	if (*s == '-') {
+		if ( (i = dgt_lookup(s[1])) >= 0) {
+			neg = 1, f = i, s += 2;
+		} else {
+			return 0;
+		}
+	} else {
+		neg = 0, f = 0;
+	}
+	for (; (i = dgt_lookup(*s)) >= 0; ++s) {
+		f = base * f + i;
+	}
+	if (*s++ == '.') {
+		const char *dec = s;
+		for (; (i = dgt_lookup(*s)) >= 0; ++s) {
+			f = base * f + i;
+		}
+		f *= POW(base, dec - s);
+	}
+	return neg ? -f : f;
+}
+
+static void radix_anything(t_radix *x, t_symbol *s, int ac, t_atom *av) {
+	const char *cp = s->s_name;
+	if (*cp == 'b' && ac) {
+		int base = radix_bounds(strtor(cp+1, 10));
+		char res[32];
+		if (av->a_type == A_FLOAT) {
+			sprintf(res, "%f", av->a_w.w_float);
+			cp = res;
+		} else {
+			cp = av->a_w.w_symbol->s_name;
+		}
+		radix_float(x, strtor(cp, base));
+	}
+}
 
 static void *radix_new(t_symbol *s, int argc, t_atom *argv) {
 	(void)s;
@@ -1194,6 +1270,7 @@ void radix_setup(void) {
 	class_addbang(radix_class, radix_bang);
 	class_addfloat(radix_class, radix_float);
 	class_addlist(radix_class, radix_list);
+	class_addanything(radix_class, radix_anything);
 	class_addmethod(radix_class, (t_method)radix_click
 	, gensym("click"), A_FLOAT, A_FLOAT, A_FLOAT, A_FLOAT, A_FLOAT, 0);
 	class_addmethod(radix_class, (t_method)radix_motion
