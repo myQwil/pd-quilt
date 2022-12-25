@@ -70,7 +70,7 @@
 #N canvas 400 200 450 300 lib 0;
 #X obj 140 120 declare -lib blunt;
 #X restore 30 30 pd lib;
-#X obj 200 250 radix 0 20 0 0 0 0 empty empty empty 0 -11 0 14 #000000 #fcfcfc #fcfcfc 2 24 2 0 256;
+#X obj 200 250 radix 0 20 0 0 0 0 empty empty empty 0 -11 0 14 #ffffff #000000 #000000 2 24 2 0 256;
 #X connect 0 0 3 1;
 #X connect 1 0 28 0;
 #X connect 2 0 0 0;

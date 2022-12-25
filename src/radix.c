@@ -21,18 +21,18 @@
 #undef PD_COLOR_SELECT
 
 // dark theme
-#define PD_COLOR_BG           0x000000
-#define PD_COLOR_FG           0xfcfcfc
-#define PD_COLOR_LBL          0xfcfcfc
-#define PD_COLOR_EDIT         0xff9999
-#define PD_COLOR_SELECT       0x00ffff
+// #define PD_COLOR_BG           0x000000
+// #define PD_COLOR_FG           0xfcfcfc
+// #define PD_COLOR_LBL          0xfcfcfc
+// #define PD_COLOR_EDIT         0xff9999
+// #define PD_COLOR_SELECT       0x00ffff
 
 // regular theme
-// #define PD_COLOR_BG           0xffffff
-// #define PD_COLOR_FG           0x000000
-// #define PD_COLOR_LBL          0x000000
-// #define PD_COLOR_EDIT         0xff0000
-// #define PD_COLOR_SELECT       0x0000ff
+#define PD_COLOR_BG           0xffffff
+#define PD_COLOR_FG           0x000000
+#define PD_COLOR_LBL          0x000000
+#define PD_COLOR_EDIT         0xff0000
+#define PD_COLOR_SELECT       0x0000ff
 
 #define MINDIGITS 0
 #define MINFONT   4
@@ -92,27 +92,31 @@ static void radix_clip(t_radix *x) {
 
 static void radix_calc_fontwidth(t_radix *x) {
 	double fwid = x->x_gui.x_fontsize;
-#ifdef _WIN32
 	switch (x->x_gui.x_fsf.x_font_style) {
-	case 2:  fwid *= 0.5;      break; // times
-	case 1:  fwid *= 0.556123; break; // helvetica
-	default: fwid *= 0.6021;          // dejavu
-	}
+#if defined(_WIN32)
+	case 2:  fwid *= 0.8;    break; // times
+	case 1:  fwid *= 0.85;   break; // helvetica
+	default: fwid *= 0.6021;        // dejavu
 #elif defined(__APPLE__)
-	switch (x->x_gui.x_fsf.x_font_style) {
-	case 2:  fwid *= 0.5717;   break; // times
-	case 1:  fwid *= 0.61111;  break; // helvetica
-	default: fwid *= 0.63636;         // dejavu
-	}
-	//fwid *= 0.61;  // monaco
+	case 2:  fwid *= 0.7813; break; // times
+	case 1:  fwid *= 0.85;   break; // helvetica
+	default: fwid *= 0.606;         // menlo
 #else
-	switch (x->x_gui.x_fsf.x_font_style) {
-	case 2:  fwid *= 0.5816;   break; // times
-	case 1:  fwid *= 0.6463;   break; // helvetica
-	default: fwid *= 0.6999;          // dejavu
-	}
+	case 0:  fwid *= 0.6999;        // dejavu
+	default: break;
 #endif
+	}
 	x->x_fontwidth = fwid;
+}
+
+static void radix_borderwidth(t_radix *x, t_float zoom) {
+	int n = x->x_numwidth ? x->x_numwidth : x->x_buflen;
+	if (x->x_gui.x_fsf.x_font_style == 0) {
+		x->x_gui.x_w = n * round(x->x_fontwidth * zoom);
+	} else {
+		x->x_gui.x_w = n * x->x_fontwidth * zoom;
+	}
+	x->x_gui.x_w += (x->x_zh / 2 + 3) * zoom;
 }
 
 static void radix_precision(t_radix *x, t_float f) {
@@ -458,16 +462,6 @@ static t_class *radix_class;
 
 #define radix_draw_io 0
 
-static void radix_borderwidth(t_radix *x, t_float zoom) {
-	int n = x->x_numwidth ? x->x_numwidth : x->x_buflen;
-#ifdef __APPLE__
-	x->x_gui.x_w = n * x->x_fontwidth * zoom;
-#else
-	x->x_gui.x_w = n * round(x->x_fontwidth * zoom);
-#endif
-	x->x_gui.x_w += (x->x_zh / 2 + 3) * zoom;
-}
-
 static void radix_zoom(t_radix *x, t_float zoom) {
 	t_iemgui *gui = &x->x_gui;
 	int oldzoom = gui->x_glist->gl_zoom;
@@ -584,7 +578,7 @@ static void radix_resize(t_radix *x) {
 }
 
 static void radix_fontsize(t_radix *x, t_float f) {
-	if (f <= 0) {
+	if (f < 1) {
 		f = 1;
 	}
 	x->x_gui.x_fontsize = f;
