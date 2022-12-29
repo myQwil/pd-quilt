@@ -9,7 +9,7 @@ cflags = -DBLUNT=1 \
 -DDATE=\"$(shell date -u +%F)\" \
 -DTIME=\"$(shell date -u +%T)\"
 
-class.sources = $(wildcard src/*.c)
+class.sources = $(wildcard $(shell pwd)/src/*.c)
 
 datafiles  = $(wildcard abstractions/*.pd) $(wildcard help/*.pd)
 datafiles += help/libgme-LICENSE.txt help/README.md

@@ -256,7 +256,7 @@
 #X connect 13 0 16 0;
 #X connect 14 0 16 0;
 #X connect 15 0 16 0;
-#X restore 410 370 pd metadata;
+#X restore 440 350 pd metadata;
 #X text 60 60 An implementation of the FFmpeg libraries for the audio playback of various media formats. Includes m3u playlist functionality and playback speed manipulation.;
 #N canvas 980 200 390 280 next 0;
 #X obj 160 220 outlet;
@@ -414,7 +414,7 @@
 #X connect 30 0 24 0;
 #X connect 31 0 32 1;
 #X connect 32 0 30 0;
-#X restore 410 400 pd misc;
+#X restore 440 410 pd misc;
 #N canvas 990 170 470 660 channel_layout 0;
 #X text 30 20 1 = Front Left;
 #X text 30 40 2 = Front Right;
@@ -451,6 +451,19 @@
 #X obj 310 370 r~ \$0speed;
 #X symbolatom 300 220 0 0 0 0 - - - 0;
 #X symbolatom 300 250 0 0 0 0 - - - 0;
+#N canvas 730 350 450 300 streams 0;
+#X obj 90 100 cupqb;
+#X obj 260 100 cupqb;
+#X msg 260 160 subtitle \$1;
+#X obj 180 240 s \$0ffplay;
+#X text 20 30 Some file formats allow for multiple streams of the;
+#X text 20 50 same media type \, such as language dubs for movies.;
+#X msg 90 160 audio \$1;
+#X connect 0 0 6 0;
+#X connect 1 0 2 0;
+#X connect 2 0 3 0;
+#X connect 6 0 3 0;
+#X restore 440 380 pd streams;
 #X connect 0 0 1 0;
 #X connect 3 0 21 0;
 #X connect 4 0 21 1;

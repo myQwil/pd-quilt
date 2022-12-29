@@ -17,7 +17,8 @@ typedef struct {
 
 typedef struct {
 	t_player z;
-	t_avstream a; /* audio stream */
+	t_avstream a;   /* audio stream */
+	t_avstream sub; /* subtitle stream */
 	AVPacket *pkt;
 	AVFrame *frm;
 	SwrContext *swr;
@@ -108,6 +109,13 @@ static t_int *ffplay_perform(t_int *w) {
 						, (const uint8_t **)y->frm->extended_data, y->frm->nb_samples);
 						av_packet_unref(y->pkt);
 						goto resample;
+					} else if (y->pkt->stream_index == y->sub.idx) {
+						int got;
+						AVSubtitle sub;
+						if (avcodec_decode_subtitle2(y->sub.ctx, &sub, &got, y->pkt) >= 0
+						 && got) {
+							post("\n%s", y->pkt->data);
+						}
 					}
 				}
 			}
@@ -141,20 +149,8 @@ static void ffplay_dsp(t_ffplay *y, t_signal **sp) {
 	dsp_add(ffplay_perform, 3, y, sp[0]->s_vec, sp[0]->s_n);
 }
 
-static inline err_t ffplay_stream(t_ffplay *x, t_avstream *s, enum AVMediaType type) {
-	int i = -1;
-	for (unsigned j = x->ic->nb_streams; j--;) {
-		if (x->ic->streams[j]->codecpar->codec_type == type) {
-			i = j;
-			break;
-		}
-	}
-	s->idx = i;
-	if (i < 0) {
-		post("stream type: %s", av_get_media_type_string(type));
-		return "No stream found";
-	}
-
+static inline err_t ffplay_context(t_ffplay *x, t_avstream *s) {
+	int i = s->idx;
 	avcodec_free_context(&s->ctx);
 	s->ctx = avcodec_alloc_context3(NULL);
 	if (!s->ctx) {
@@ -174,6 +170,45 @@ static inline err_t ffplay_stream(t_ffplay *x, t_avstream *s, enum AVMediaType t
 	}
 
 	return 0;
+}
+
+static err_t ffplay_stream(t_ffplay *x, t_avstream *s, int i, enum AVMediaType type) {
+	if (!x->z.open || i == s->idx) {
+		return 0;
+	}
+	if (i >= (int)x->ic->nb_streams) {
+		return "index out of bounds";
+	}
+	if (x->ic->streams[i]->codecpar->codec_type != type) {
+		return "stream type mismatch";
+	}
+	t_avstream stream = { .ctx = NULL, .idx = i };
+	err_t err_msg = ffplay_context(x, &stream);
+	if (err_msg) {
+		return err_msg;
+	}
+	AVCodecContext *ctx = s->ctx;
+	*s = stream;
+	avcodec_free_context(&ctx);
+	return 0;
+}
+
+static void ffplay_audio(t_ffplay *x, t_float f) {
+	err_t err_msg = ffplay_stream(x, &x->a, f, AVMEDIA_TYPE_AUDIO);
+	if (err_msg) {
+		pd_error(x, "ffplay_audio: %s", err_msg);
+	}
+}
+
+static void ffplay_subtitle(t_ffplay *x, t_float f) {
+	if (f < 0) {
+		x->sub.idx = -1;
+		return;
+	}
+	err_t err_msg = ffplay_stream(x, &x->sub, f, AVMEDIA_TYPE_SUBTITLE);
+	if (err_msg) {
+		pd_error(x, "ffplay_subtitle: %s", err_msg);
+	}
 }
 
 static err_t ffplay_load(t_ffplay *x, int index) {
@@ -200,8 +235,19 @@ static err_t ffplay_load(t_ffplay *x, int index) {
 	}
 	x->ic->seek2any = 1;
 
-	err_t err_msg;
-	if ((err_msg = ffplay_stream(x, &x->a, AVMEDIA_TYPE_AUDIO))) {
+	int i = -1;
+	for (unsigned j = x->ic->nb_streams; j--;) {
+		if (x->ic->streams[j]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+			i = j;
+			break;
+		}
+	}
+	x->a.idx = i;
+	if (i < 0) {
+		return "No audio stream found";
+	}
+	err_t err_msg = ffplay_context(x, &x->a);
+	if (err_msg) {
 		return err_msg;
 	}
 
@@ -253,7 +299,7 @@ static void ffplay_open(t_ffplay *x, t_symbol *s) {
 	}
 
 	if (err_msg || (err_msg = ffplay_load(x, 0))) {
-		pd_error(x, "%s.", err_msg);
+		pd_error(x, "ffplay_open: %s.", err_msg);
 	}
 	x->z.open = !err_msg;
 	t_atom open = { .a_type = A_FLOAT, .a_w = {.w_float = x->z.open} };
@@ -333,7 +379,7 @@ static void ffplay_start(t_ffplay *x, t_float f, t_float ms) {
 	err_t err_msg = "";
 	if (0 < track && track <= x->plist.size) {
 		if ( (err_msg = ffplay_load(x, track - 1)) ) {
-			pd_error(x, "%s.", err_msg);
+			pd_error(x, "ffplay_start: %s.", err_msg);
 		} else if (ms > 0) {
 			ffplay_seek(x, ms);
 		}
@@ -356,7 +402,7 @@ static void ffplay_float(t_ffplay *x, t_float f) {
 }
 
 static void ffplay_stop(t_ffplay *x) {
-	ffplay_float(x, 0);
+	ffplay_start(x, 0, 0);
 	x->frm->pts = 0; // reset internal position
 }
 
@@ -380,8 +426,9 @@ static void *ffplay_new(t_symbol *s, int ac, t_atom *av) {
 			mask |= 1 << (ch - 1);
 		}
 	}
-	if (av_channel_layout_from_mask(&layout, mask)) {
-		pd_error(0, "ffplay~: invalid channel layout.");
+	int err = av_channel_layout_from_mask(&layout, mask);
+	if (err) {
+		pd_error(0, "ffplay_new: invalid channel layout (%d).", err);
 		return NULL;
 	}
 
@@ -389,6 +436,7 @@ static void *ffplay_new(t_symbol *s, int ac, t_atom *av) {
 	x->pkt = av_packet_alloc();
 	x->frm = av_frame_alloc();
 	x->layout = layout;
+	x->sub.idx = -1;
 
 	t_playlist *pl = &x->plist;
 	pl->size = 0;
@@ -433,10 +481,20 @@ void ffplay_tilde_setup(void) {
 	class_addfloat(ffplay_class, ffplay_float);
 	class_addlist(ffplay_class, ffplay_list);
 
-	class_addmethod(ffplay_class, (t_method)ffplay_dsp, gensym("dsp"), A_CANT, 0);
-	class_addmethod(ffplay_class, (t_method)ffplay_seek, gensym("seek"), A_FLOAT, 0);
-	class_addmethod(ffplay_class, (t_method)ffplay_print, gensym("print"), A_GIMME, 0);
-	class_addmethod(ffplay_class, (t_method)ffplay_open, gensym("open"), A_SYMBOL, 0);
-	class_addmethod(ffplay_class, (t_method)ffplay_stop, gensym("stop"), 0);
-	class_addmethod(ffplay_class, (t_method)ffplay_position, gensym("pos"), 0);
+	class_addmethod(ffplay_class, (t_method)ffplay_dsp
+	, gensym("dsp"), A_CANT, 0);
+	class_addmethod(ffplay_class, (t_method)ffplay_seek
+	, gensym("seek"), A_FLOAT, 0);
+	class_addmethod(ffplay_class, (t_method)ffplay_audio
+	, gensym("audio"), A_FLOAT, 0);
+	class_addmethod(ffplay_class, (t_method)ffplay_subtitle
+	, gensym("subtitle"), A_FLOAT, 0);
+	class_addmethod(ffplay_class, (t_method)ffplay_print
+	, gensym("print"), A_GIMME, 0);
+	class_addmethod(ffplay_class, (t_method)ffplay_open
+	, gensym("open"), A_SYMBOL, 0);
+	class_addmethod(ffplay_class, (t_method)ffplay_stop
+	, gensym("stop"), 0);
+	class_addmethod(ffplay_class, (t_method)ffplay_position
+	, gensym("pos"), 0);
 }
