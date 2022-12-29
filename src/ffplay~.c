@@ -154,10 +154,10 @@ static inline err_t ffplay_context(t_ffplay *x, t_avstream *s) {
 	avcodec_free_context(&s->ctx);
 	s->ctx = avcodec_alloc_context3(NULL);
 	if (!s->ctx) {
-		return "Out of memory";
+		return "Failed to allocate AVCodecContext";
 	}
 	if (avcodec_parameters_to_context(s->ctx, x->ic->streams[i]->codecpar) < 0) {
-		return "Out of memory";
+		return "Failed to fill codec with parameters";
 	}
 	s->ctx->pkt_timebase = x->ic->streams[i]->time_base;
 
@@ -166,7 +166,7 @@ static inline err_t ffplay_context(t_ffplay *x, t_avstream *s) {
 		return "Codec not found";
 	}
 	if (avcodec_open2(s->ctx, codec, NULL) < 0) {
-		return "Could not open codec";
+		return "Failed to open codec";
 	}
 
 	return 0;
@@ -177,10 +177,10 @@ static err_t ffplay_stream(t_ffplay *x, t_avstream *s, int i, enum AVMediaType t
 		return 0;
 	}
 	if (i >= (int)x->ic->nb_streams) {
-		return "index out of bounds";
+		return "Index out of bounds";
 	}
 	if (x->ic->streams[i]->codecpar->codec_type != type) {
-		return "stream type mismatch";
+		return "Stream type mismatch";
 	}
 	t_avstream stream = { .ctx = NULL, .idx = i };
 	err_t err_msg = ffplay_context(x, &stream);
@@ -196,7 +196,10 @@ static err_t ffplay_stream(t_ffplay *x, t_avstream *s, int i, enum AVMediaType t
 static void ffplay_audio(t_ffplay *x, t_float f) {
 	err_t err_msg = ffplay_stream(x, &x->a, f, AVMEDIA_TYPE_AUDIO);
 	if (err_msg) {
-		pd_error(x, "ffplay_audio: %s", err_msg);
+		logpost(x, PD_DEBUG, "ffplay_audio: %s.", err_msg);
+	} else {
+		x->z.ratio = sys_getsr() / (double)x->a.ctx->sample_rate;
+		player_speed_(&x->z, x->z.speed_);
 	}
 }
 
@@ -207,7 +210,7 @@ static void ffplay_subtitle(t_ffplay *x, t_float f) {
 	}
 	err_t err_msg = ffplay_stream(x, &x->sub, f, AVMEDIA_TYPE_SUBTITLE);
 	if (err_msg) {
-		pd_error(x, "ffplay_subtitle: %s", err_msg);
+		logpost(x, PD_DEBUG, "ffplay_subtitle: %s.", err_msg);
 	}
 }
 
@@ -228,10 +231,10 @@ static err_t ffplay_load(t_ffplay *x, int index) {
 	avformat_close_input(&x->ic);
 	x->ic = avformat_alloc_context();
 	if (avformat_open_input(&x->ic, url, NULL, NULL) != 0) {
-		return "Couldn't open input stream";
+		return "Failed to open input stream";
 	}
 	if (avformat_find_stream_info(x->ic, NULL) < 0) {
-		return "Couldn't find stream information";
+		return "Failed to find stream information";
 	}
 	x->ic->seek2any = 1;
 
