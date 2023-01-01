@@ -5,21 +5,17 @@
 #X array \$0view 120 float 2;
 #X coords 0 1.0833 120 -1.0833 120 130 1 0 0;
 #X restore 370 190 graph;
-#X obj 50 490 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
-#fcfcfc 0 1;
+#X obj 50 490 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc #fcfcfc 0 1;
 #X floatatom 90 490 0 0 0 0 - - - 0;
 #X obj 60 380 cupqb;
 #X obj 40 240 openpanel;
 #X obj 240 520 *~;
-#X obj 240 180 bng 15 250 50 0 empty empty play/pause 17 7 0 12 #ff8300
-#ff0400 #7c7c7c;
+#X obj 240 180 bng 15 250 50 0 empty empty play/pause 17 7 0 12 #ff8300 #ff0400 #7c7c7c;
 #X msg 250 210 stop;
 #X text 110 390 tracks;
 #X obj 210 410 gme~;
-#X obj 120 350 bng 15 250 50 0 empty empty restart 17 7 0 12 #ff8300
-#ff0400 #7c7c7c;
-#X obj 220 30 cnv 15 60 24 empty empty gme~ 4 12 0 18 #000000 #fcfcfc
-0;
+#X obj 120 350 bng 15 250 50 0 empty empty restart 17 7 0 12 #ff8300 #ff0400 #7c7c7c;
+#X obj 220 30 cnv 15 60 24 empty empty gme~ 4 12 0 18 #000000 #fcfcfc 0;
 #X obj 120 520 *~ 0.5;
 #X obj 240 470 *~;
 #X obj 190 470 *~;
@@ -27,16 +23,16 @@
 #X obj 30 40 inlet;
 #X obj 180 230 outlet;
 #N canvas 950 540 460 360 display 0;
-#X obj 180 240 hms;
-#X obj 290 240 hms;
-#X obj 180 270 outlet;
-#X obj 290 270 outlet;
-#X text 270 300 remaining time;
-#X text 160 300 current time;
-#X obj 170 170 delp;
-#X obj 280 60 inlet;
-#X msg 280 100 time;
-#X obj 100 210 s \$0done;
+#X obj 190 250 hms;
+#X obj 290 250 hms;
+#X obj 190 280 outlet;
+#X obj 290 280 outlet;
+#X text 280 310 remaining time;
+#X text 170 310 current time;
+#X obj 180 180 delp;
+#X obj 290 70 inlet;
+#X msg 290 110 time;
+#X obj 110 220 s \$0done;
 #N canvas 950 370 450 300 defaults 0;
 #X obj 100 80 moses;
 #X obj 100 220 outlet;
@@ -67,19 +63,32 @@
 #X connect 12 0 13 0;
 #X connect 13 0 10 0;
 #X connect 13 1 11 0;
-#X restore 150 60 pd defaults;
-#X obj 230 100 +;
-#X obj 50 180 linp~;
-#X obj 120 100 delp;
-#X text 60 300 fade;
-#X msg 70 130 0;
-#X obj 170 100 t f b;
-#X msg 170 130 1 0;
-#X obj 50 60 r \$0pause;
-#X obj 180 210 @-;
-#X text 140 30 time;
-#X text 220 30 fade;
-#X obj 50 270 s~ \$0fade;
+#X restore 160 70 pd defaults;
+#X obj 240 110 +;
+#X obj 60 190 linp~;
+#X obj 130 110 delp;
+#X text 70 310 fade;
+#X msg 80 140 0;
+#X obj 180 110 t f b;
+#X msg 180 140 1 0;
+#X obj 60 70 r \$0pause;
+#X obj 190 220 @-;
+#X text 150 40 time;
+#X text 230 40 fade;
+#X obj 60 280 s~ \$0fade;
+#N canvas 730 350 450 300 forever 0;
+#X obj 150 110 t;
+#X msg 220 150 stop;
+#X msg 150 150 1;
+#X obj 150 80 r \$0forever;
+#X obj 220 180 outlet;
+#X obj 150 180 outlet;
+#X connect 0 0 2 0;
+#X connect 0 1 1 0;
+#X connect 1 0 4 0;
+#X connect 2 0 5 0;
+#X connect 3 0 0 0;
+#X restore 50 40 pd forever;
 #X connect 0 0 2 0;
 #X connect 1 0 3 0;
 #X connect 6 0 9 0;
@@ -103,6 +112,9 @@
 #X connect 18 0 12 0;
 #X connect 18 0 6 0;
 #X connect 19 0 0 0;
+#X connect 23 0 12 0;
+#X connect 23 1 6 0;
+#X connect 23 1 13 0;
 #X restore 180 190 pd display;
 #X obj 120 70 route stop;
 #X msg 160 100 0;
@@ -116,8 +128,7 @@
 #X obj 200 190 snapshot~;
 #X msg 200 120 set 0;
 #X obj 220 150 sig~ 1;
-#X obj 130 50 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400
-#fcfcfc;
+#X obj 130 50 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
 #X obj 200 220 outlet;
 #X obj 110 160 r pd;
 #X obj 110 190 route dsp;
@@ -140,8 +151,7 @@
 #X connect 2 0 1 1;
 #X restore 200 100 pd is-playing;
 #X obj 250 230 outlet;
-#X obj 180 130 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
-#fcfcfc 0 1;
+#X obj 180 130 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc #fcfcfc 0 1;
 #X floatatom 270 160 0 0 0 0 - - - 0;
 #X obj 90 130 !, f 2;
 #X msg 90 160 pause \$1;
@@ -171,12 +181,8 @@
 #X connect 17 0 4 0;
 #X connect 17 0 2 0;
 #X restore 240 240 pd time;
-#X text 50 60 A Pd interface for the Game Music Emu library \, created
-by Shay Green and maintained by Michael Pyne at https://bitbucket.org/mpyne/game-music-emu
-Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
-\, AP \, SPC \, RSN \, VGM/VGZ;
-#X obj 40 180 bng 15 250 50 0 empty empty previous_directory 17 7 0
-12 #ff8300 #ff0400 #7c7c7c;
+#X text 50 60 A Pd interface for the Game Music Emu library \, created by Shay Green and maintained by Michael Pyne at https://bitbucket.org/mpyne/game-music-emu Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE \, AP \, SPC \, RSN \, VGM/VGZ;
+#X obj 40 180 bng 15 250 50 0 empty empty previous_directory 17 7 0 12 #ff8300 #ff0400 #7c7c7c;
 #X msg 50 210 symbol ~/Music/Games;
 #N canvas 860 330 460 340 bounds 0;
 #X obj 40 30 inlet;
@@ -328,8 +334,7 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X connect 15 0 17 0;
 #X connect 16 0 17 0;
 #X restore 380 350 pd metadata;
-#X obj 290 490 hsl 128 20 0.001 1 1 0 empty empty volume 35 10 0 12
-#2f004d #fcfcfc #fcfcfc 0 1;
+#X obj 290 490 hsl 128 20 0.001 1 1 0 empty empty volume 35 10 0 12 #2f004d #fcfcfc #fcfcfc 0 1;
 #X floatatom 350 520 0 0 0 0 - - - 0;
 #N canvas 970 490 450 300 vol 0;
 #X obj 160 190 zp~ 15;
@@ -439,14 +444,11 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X obj 70 130 r \$0nbx;
 #X obj 120 170 %;
 #X obj 50 170 f;
-#X obj 200 70 bng 15 250 50 0 empty empty repeat\\\ track 17 7 0 12
-#ff8300 #ff0400 #7c7c7c;
-#X obj 170 50 bng 15 250 50 0 empty empty repeat\\\ playlist 17 7 0
-12 #ff8300 #ff0400 #7c7c7c;
+#X obj 200 70 bng 15 250 50 0 empty empty repeat\ track 17 7 0 12 #ff8300 #ff0400 #7c7c7c;
+#X obj 170 50 bng 15 250 50 0 empty empty repeat\ playlist 17 7 0 12 #ff8300 #ff0400 #7c7c7c;
 #X obj 220 130 r \$0start;
 #X msg 220 160 set \$1;
-#X obj 140 30 bng 15 250 50 0 empty empty no-repeat\\\ playlist 17
-7 0 12 #ff8300 #ff0400 #7c7c7c;
+#X obj 140 30 bng 15 250 50 0 empty empty no-repeat\ playlist 17 7 0 12 #ff8300 #ff0400 #7c7c7c;
 #N canvas 980 500 390 300 order 0;
 #X obj 260 70 r \$0nbx;
 #X obj 260 160 spigot;
@@ -497,6 +499,7 @@ Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE
 #X connect 19 0 3 0;
 #X connect 20 0 13 0;
 #X restore 140 130 pd order;
+#X obj 220 90 bng 15 250 50 0 \$0forever empty play\ forever 17 7 0 12 #ff8300 #ff0400 #7c7c7c;
 #X connect 1 0 5 0;
 #X connect 2 0 0 0;
 #X connect 3 0 5 1;
