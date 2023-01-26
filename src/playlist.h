@@ -26,10 +26,12 @@ static int depth;
 			char *fname = strrchr(line, '/'); \
 			int len = (fname) ? ++fname - line : 0; \
 			FILE *m3u = fopen(dir, "r"); \
-			if (m3u && depth < 0x100) { \
-				depth++; \
-				(deeper); \
-				depth--; \
+			if (m3u) { \
+				if (depth < 0x100) { \
+					depth++; \
+					(deeper); \
+					depth--; \
+				} \
 				fclose(m3u); \
 			} \
 		} else { \
