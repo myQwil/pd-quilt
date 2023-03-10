@@ -314,34 +314,34 @@ static t_symbol *dict[11];
 static t_atom ffplay_meta(void *y, t_symbol *s) {
 	t_ffplay *x = (t_ffplay *)y;
 	t_atom meta;
-	if (s == dict[0] || s == dict[1]) {
+	if (s == dict[0] || s == dict[1]) { // path || url
 		SETSYMBOL(&meta, gensym(x->ic->url));
-	} else if (s == dict[2]) {
+	} else if (s == dict[2]) { // filename
 		const char *name = strrchr(x->ic->url, '/');
 		name = name ? name + 1 : x->ic->url;
 		SETSYMBOL(&meta, gensym(name));
-	} else if (s == dict[3]) {
+	} else if (s == dict[3]) { // time
 		meta = player_time(x->ic->duration / 1000.);
-	} else if (s == dict[4]) {
+	} else if (s == dict[4]) { // ftime
 		meta = player_ftime(x->ic->duration / 1000);
-	} else if (s == dict[5]) {
+	} else if (s == dict[5]) { // tracks
 		SETFLOAT(&meta, x->plist.size);
-	} else if (s == dict[6]) {
+	} else if (s == dict[6]) { // samplefmt
 		SETSYMBOL(&meta, gensym(av_get_sample_fmt_name(x->a.ctx->sample_fmt)));
-	} else if (s == dict[7]) {
+	} else if (s == dict[7]) { // samplerate
 		SETFLOAT(&meta, x->a.ctx->sample_rate);
-	} else if (s == dict[8]) {
+	} else if (s == dict[8]) { // bitrate
 		SETFLOAT(&meta, x->ic->bit_rate / 1000.);
 	} else {
 		AVDictionaryEntry *entry = av_dict_get(x->ic->metadata, s->s_name, 0, 0);
 		if (!entry) { // try some aliases for common terms
-			if (s == dict[9]) {
+			if (s == dict[9]) { // date
 				if (!(entry = av_dict_get(x->ic->metadata, "time", 0, 0))
 				 && !(entry = av_dict_get(x->ic->metadata, "tyer", 0, 0))
 				 && !(entry = av_dict_get(x->ic->metadata, "tdat", 0, 0))
 				 && !(entry = av_dict_get(x->ic->metadata, "tdrc", 0, 0))) {
 				}
-			} else if (s == dict[10]) {
+			} else if (s == dict[10]) { // bpm
 				entry = av_dict_get(x->ic->metadata, "tbpm", 0, 0);
 			}
 		}

@@ -229,31 +229,31 @@ static const t_symbol *dict[13];
 static t_atom gmepd_meta(void *y, t_symbol *s) {
 	t_gme *x = (t_gme *)y;
 	t_atom meta;
-	if (s == dict[0]) {
+	if (s == dict[0]) { // path
 		SETSYMBOL(&meta, x->path);
-	} else if (s == dict[1]) {
+	} else if (s == dict[1]) { // time
 		meta = player_time(gmepd_length(x));
-	} else if (s == dict[2]) {
+	} else if (s == dict[2]) { // ftime
 		meta = gmepd_ftime(x);
-	} else if (s == dict[3]) {
+	} else if (s == dict[3]) { // fade
 		SETFLOAT(&meta, x->info->fade_length);
-	} else if (s == dict[4]) {
+	} else if (s == dict[4]) { // tracks
 		SETFLOAT(&meta, gme_track_count(x->emu));
-	} else if (s == dict[5]) {
+	} else if (s == dict[5]) { // voices
 		SETFLOAT(&meta, x->voices);
-	} else if (s == dict[6]) {
+	} else if (s == dict[6]) { // system
 		SETSYMBOL(&meta, gensym(x->info->system));
-	} else if (s == dict[7]) {
+	} else if (s == dict[7]) { // game
 		SETSYMBOL(&meta, gensym(x->info->game));
-	} else if (s == dict[8]) {
+	} else if (s == dict[8]) { // song
 		SETSYMBOL(&meta, gensym(x->info->song));
-	} else if (s == dict[9]) {
+	} else if (s == dict[9]) { // author
 		SETSYMBOL(&meta, gensym(x->info->author));
-	} else if (s == dict[10]) {
+	} else if (s == dict[10]) { // copyright
 		SETSYMBOL(&meta, gensym(x->info->copyright));
-	} else if (s == dict[11]) {
+	} else if (s == dict[11]) { // comment
 		SETSYMBOL(&meta, gensym(x->info->comment));
-	} else if (s == dict[12]) {
+	} else if (s == dict[12]) { // dumper
 		SETSYMBOL(&meta, gensym(x->info->dumper));
 	} else {
 		meta = (t_atom){ A_NULL, {0} };
