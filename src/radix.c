@@ -14,23 +14,14 @@
 #include <float.h>
 #include <math.h>
 
-#undef PD_COLOR_BG
-#undef PD_COLOR_FG
-#undef PD_COLOR_LBL
 #undef PD_COLOR_EDIT
 #undef PD_COLOR_SELECT
 
 // dark theme
-// #define PD_COLOR_BG           0x000000
-// #define PD_COLOR_FG           0xfcfcfc
-// #define PD_COLOR_LBL          0xfcfcfc
 // #define PD_COLOR_EDIT         0xff9999
 // #define PD_COLOR_SELECT       0x00ffff
 
 // regular theme
-#define PD_COLOR_BG           0xffffff
-#define PD_COLOR_FG           0x000000
-#define PD_COLOR_LBL          0x000000
 #define PD_COLOR_EDIT         0xff0000
 #define PD_COLOR_SELECT       0x0000ff
 
@@ -550,7 +541,7 @@ static void radix_draw_config(t_radix *x, t_glist *glist) {
 	, xpos, ypos);
 	pdgui_vmess(0, "crs  ri rk rk", canvas, "itemconfigure", tag
 	, "-width", zoom
-	, "-outline", PD_COLOR_FG
+	, "-outline", x->x_gui.x_fcol
 	, "-fill", x->x_gui.x_bcol);
 
 
@@ -656,7 +647,7 @@ static void radix_draw_new(t_radix *x, t_glist *glist) {
 
 static void radix_draw_select(t_radix *x, t_glist *glist) {
 	t_canvas *canvas = glist_getcanvas(glist);
-	int bcol = PD_COLOR_FG, lcol = x->x_gui.x_lcol, fcol = x->x_gui.x_fcol;
+	int lcol = x->x_gui.x_lcol, fcol = x->x_gui.x_fcol;
 	char tag[128];
 
 	if (x->x_gui.x_fsf.x_selected) {
@@ -665,11 +656,11 @@ static void radix_draw_select(t_radix *x, t_glist *glist) {
 			x->x_buf[0] = 0;
 			sys_queuegui(x, x->x_gui.x_glist, radix_draw_update);
 		}
-		bcol = lcol = fcol = PD_COLOR_SELECT;
+		lcol = fcol = PD_COLOR_SELECT;
 	}
 
 	sprintf(tag, "%pBASE1", x);
-	pdgui_vmess(0, "crs rk", canvas, "itemconfigure", tag, "-outline", bcol);
+	pdgui_vmess(0, "crs rk", canvas, "itemconfigure", tag, "-outline", fcol);
 	sprintf(tag, "%pBASE2", x);
 	pdgui_vmess(0, "crs rk", canvas, "itemconfigure", tag, "-outline", fcol);
 	sprintf(tag, "%pLABEL", x);
