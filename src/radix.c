@@ -40,9 +40,9 @@
 #define BASE_MAX 64
 static const char dgt[BASE_MAX] = {
 	"0123456789abcdef"
-	"ghijkmnopqrstuvw"
-	"xyzACDEFGHJKLMNP"
-	"QRTUVWXYZ?!@#$%&"
+	"ghijkmnopqrstuvw" // l looks like 1
+	"xyzABCDEFGHJKLMN" // I looks like 1, O looks like 0
+	"PQRTUVWXYZ?!@#$%" // S looks like 5
 };
 
 static int dgt_lookup(char c) {
@@ -56,20 +56,19 @@ static int dgt_lookup(char c) {
 	case 'm': case 'n': case 'o': case 'p': case 'q': case 'r': case 's':
 	case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
 		return c - 'm' + 21;
-	case 'C': case 'D': case 'E': case 'F': case 'G': case 'H':
-		return c - 'C' + 36;
+	case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'G': case 'H':
+		return c - 'A' + 35;
 	case 'J': case 'K': case 'L': case 'M': case 'N':
-		return c - 'J' + 42;
+		return c - 'J' + 43;
 	case 'P': case 'Q': case 'R':
-		return c - 'P' + 47;
+		return c - 'P' + 48;
 	case 'T': case 'U': case 'V': case 'W': case 'X': case 'Y': case 'Z':
-		return c - 'T' + 50;
-	case '#': case '$': case '%': case '&':
-		return c - '#' + 60;
-	case 'A': return 35;
-	case '?': return 57;
-	case '!': return 58;
-	case '@': return 59;
+		return c - 'T' + 51;
+	case '#': case '$': case '%':
+		return c - '#' + 61;
+	case '?': return 58;
+	case '!': return 59;
+	case '@': return 60;
 	default: return -1;
 	}
 }
