@@ -1,14 +1,12 @@
 #include "m_pd.h"
 #include <math.h>
 
-static const double ln2_69 = M_LN2 * 69.;
-
 #ifndef SEMI
 #define SEMI(x) M_LN2 / (x)->tet
 #endif
 
 #ifndef BASE
-#define BASE(x) exp(-ln2_69 / (x)->tet) * (x)->ref
+#define BASE(x) exp(M_LN2 * -69. / (x)->tet) * (x)->ref
 #endif
 
 typedef struct {
