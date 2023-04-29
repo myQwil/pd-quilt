@@ -13,9 +13,9 @@
 #X msg 230 160 be \$1;
 #X obj 100 470 fldec;
 #N canvas 750 270 450 300 pcalc 0;
-#X obj 190 70 inlet;
-#X obj 190 130 @/ 24;
-#X obj 190 100 log 2;
+#X obj 190 60 inlet;
+#X obj 190 120 @/ 24;
+#X obj 190 90 log 2;
 #X obj 190 180 outlet;
 #X obj 190 150 i;
 #X connect 0 0 2 0;
@@ -28,34 +28,21 @@
 #X text 570 430 ghijkmnopqrstuvw;
 #X text 570 450 xyzACDEFGHJKLMNP;
 #X text 570 470 QRTUVWXYZ?!@#$%&;
-#X obj 100 220 radix 0 22 0 0 0 0 empty empty base10 -52 11 0 11 #b8b8b8
-#fcfcfc #fcfcfc 10 6 10 0 10;
-#X obj 100 250 radix 0 22 0 0 0 0 empty empty base64 -52 11 0 11 #e0c4fc
-#fce8fc #fcfcfc 64 4 64 0 10;
-#X obj 100 280 radix 0 22 0 0 0 0 empty empty base32 -52 11 0 11 #fce0c4
-#fcecd8 #fcfcfc 32 5 32 0 10;
-#X obj 100 310 radix 0 22 0 0 0 0 empty empty base16 -52 11 0 11 #c4fcfc
-#e0fcfc #fcfcfc 16 6 16 0 10;
-#X obj 100 340 radix 0 22 0 0 0 0 empty empty base8 -52 11 0 11 #fce0c4
-#fcf0dc #fcfcfc 8 8 8 0 10;
-#X obj 100 370 radix 0 22 0 0 0 0 empty empty base4 -52 11 0 11 #fcfcc4
-#fcfce4 #fcfcfc 4 12 4 0 10;
-#X obj 100 400 radix 0 22 0 0 0 0 empty empty base2 -52 11 0 11 #c4fcc4
-#d8fcd8 #fcfcfc 2 24 2 0 10;
-#X obj 410 240 radix 0 22 0 0 0 0 empty empty base24 -52 11 0 11 #fc8000
-#c4c4fc #fcfcfc 24 5 24 0 10;
-#X obj 410 270 radix 0 22 0 0 0 0 empty empty base12 -52 11 0 11 #fc8000
-#c4fcc4 #fcfcfc 12 6 12 0 10;
-#X obj 410 300 radix 0 22 0 0 0 0 empty empty base9 -52 11 0 11 #f8fc00
-#00fc04 #fcfcfc 9 6 9 0 10;
-#X obj 410 330 radix 0 22 0 0 0 0 empty empty base6 -52 11 0 11 #00fc04
-#f8fc00 #fcfcfc 6 9 6 0 10;
-#X obj 410 360 radix 0 22 0 0 0 0 empty empty base3 -52 11 0 11 #e098fc
-#c4fcc4 #fcfcfc 3 14 3 0 10;
+#X obj 100 220 radix 0 22 0 0 0 0 empty empty base10 -52 11 0 11 #000000 #fcfcfc #fcfcfc 10 6 10 0 10;
+#X obj 100 250 radix 0 22 0 0 0 0 empty empty base64 -52 11 0 11 #000000 #fce8fc #fcfcfc 64 4 64 0 10;
+#X obj 100 280 radix 0 22 0 0 0 0 empty empty base32 -52 11 0 11 #000000 #fcecd8 #fcfcfc 32 5 32 0 10;
+#X obj 100 310 radix 0 22 0 0 0 0 empty empty base16 -52 11 0 11 #000000 #e0fcfc #fcfcfc 16 6 16 0 10;
+#X obj 100 340 radix 0 22 0 0 0 0 empty empty base8 -52 11 0 11 #000000 #fcf0dc #fcfcfc 8 8 8 0 10;
+#X obj 100 370 radix 0 22 0 0 0 0 empty empty base4 -52 11 0 11 #000000 #fcfce4 #fcfcfc 4 12 4 0 10;
+#X obj 100 400 radix 0 22 0 0 0 0 empty empty base2 -52 11 0 11 #000000 #d8fcd8 #fcfcfc 2 24 2 0 10;
+#X obj 410 240 radix 0 22 0 0 0 0 empty empty base24 -52 11 0 11 #000000 #c4c4fc #fcfcfc 24 5 24 0 10;
+#X obj 410 270 radix 0 22 0 0 0 0 empty empty base12 -52 11 0 11 #000000 #c4fcc4 #fcfcfc 12 6 12 0 10;
+#X obj 410 300 radix 0 22 0 0 0 0 empty empty base9 -52 11 0 11 #000000 #00fc04 #fcfcfc 9 6 9 0 10;
+#X obj 410 330 radix 0 22 0 0 0 0 empty empty base6 -52 11 0 11 #000000 #f8fc00 #fcfcfc 6 9 6 0 10;
+#X obj 410 360 radix 0 22 0 0 0 0 empty empty base3 -52 11 0 11 #000000 #c4fcc4 #fcfcfc 3 14 3 0 10;
 #X obj 270 60 mantissa;
 #X floatatom 550 210 0 0 0 0 - - - 0;
-#X obj 600 120 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
-#fcfcfc 0 1;
+#X obj 600 120 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc #fcfcfc 0 1;
 #X obj 550 180 flenc 0 127;
 #X obj 600 140 t b f;
 #X obj 550 140 t b f;

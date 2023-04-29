@@ -7,7 +7,7 @@
 #X obj 110 290 s dcay;
 #X floatatom 50 230 0 0 0 0 - - - 0;
 #X obj 50 290 s atak;
-#N canvas 1170 250 510 400 chords 0;
+#N canvas 1143 283 510 400 chords 0;
 #X msg 80 40 d 19 22 29;
 #X obj 130 340 outlet;
 #X msg 220 160 41 22 26 29 33;
@@ -20,10 +20,13 @@
 #X msg 220 220 d r 3 f s 8 10 12;
 #X msg 30 220 # d+3;
 #X msg 30 250 # d-3;
-#X msg 180 40 # 40;
 #X msg 190 70 # 38;
 #X msg 200 100 # 36;
-#X msg 210 130 # 33;
+#X msg 210 130 # 35;
+#X msg 302 37 37 16 19 26;
+#X msg 313 68 # 41 15 19 26;
+#X msg 322 97 # 36;
+#X msg 326 127 # 34;
 #X connect 0 0 1 0;
 #X connect 2 0 1 0;
 #X connect 3 0 1 0;
@@ -39,11 +42,13 @@
 #X connect 13 0 1 0;
 #X connect 14 0 1 0;
 #X connect 15 0 1 0;
+#X connect 16 0 1 0;
+#X connect 17 0 1 0;
+#X connect 18 0 1 0;
 #X restore 200 320 pd chords;
 #X floatatom 170 260 0 0 0 0 - - - 0;
 #X obj 170 290 s pmnto;
-#X obj 300 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
+#X obj 300 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
 #X obj 350 520 *~;
 #X msg 330 350 1;
 #X msg 380 350 2;
@@ -58,18 +63,12 @@
 #X obj 280 320 t b f;
 #X msg 290 230 size 5;
 #X obj 360 200 t a b;
-#X obj 350 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
-#X obj 370 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
-#X obj 390 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
-#X obj 410 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
-#X obj 430 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
-#X obj 450 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
+#X obj 350 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
+#X obj 370 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
+#X obj 390 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
+#X obj 410 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
+#X obj 430 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
+#X obj 450 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
 #X obj 240 290 s z;
 #X obj 70 190 unpack 1 2 3 4;
 #X floatatom 240 260 0 0 0 0 - - - 0;
@@ -80,11 +79,9 @@
 #X msg 230 490 size \$1;
 #X text 50 510 use all outlets;
 #X text 80 530 on bang;
-#X obj 60 450 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
-#fcfcfc 0 1;
+#X obj 60 450 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc #fcfcfc 0 1;
 #X msg 60 480 all \$1;
-#X obj 80 360 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
-#fcfcfc 0 1;
+#X obj 80 360 tgl 15 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc #fcfcfc 0 1;
 #X msg 80 380 expl \$1;
 #X msg 70 160 1 10 10 5;
 #N canvas 210 400 550 400 instruments 0;
@@ -101,26 +98,26 @@
 #X obj 270 90 f;
 #X obj 250 90 b, f 1;
 #X obj 120 110 pipe;
-#X obj 320 190 * 3;
 #X obj 210 270 declare -lib cyclone;
 #X obj 220 160 * -1;
-#X obj 120 200 pulse~;
+#X obj 120 200 phasor~;
+#X obj 320 189 * 2;
 #X connect 0 0 3 0;
 #X connect 1 0 0 1;
 #X connect 2 0 10 0;
 #X connect 2 0 11 0;
-#X connect 4 0 12 0;
+#X connect 4 0 15 0;
 #X connect 5 0 1 1;
-#X connect 6 0 15 0;
+#X connect 6 0 14 0;
 #X connect 7 0 6 1;
 #X connect 8 0 9 1;
 #X connect 8 0 11 1;
-#X connect 9 0 14 0;
+#X connect 9 0 13 0;
 #X connect 10 0 9 0;
 #X connect 11 0 6 0;
-#X connect 12 0 1 2;
-#X connect 14 0 1 0;
-#X connect 15 0 0 0;
+#X connect 13 0 1 0;
+#X connect 14 0 0 0;
+#X connect 15 0 1 2;
 #X restore 50 80 pd inst;
 #N canvas 800 400 450 320 inst 0;
 #X obj 110 230 *~;
@@ -285,24 +282,18 @@
 #X obj 400 20 inlet;
 #X obj 50 340 *~ 0.1667;
 #X obj 50 370 outlet~;
-#X obj 400 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
-#fcfcfc #fcfcfc 0 1;
+#X obj 400 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d #fcfcfc #fcfcfc 0 1;
 #X obj 50 300 *~ 1;
 #X obj 90 300 *~ 1;
 #X obj 130 300 *~ 1;
 #X obj 170 300 *~ 1;
 #X obj 210 300 *~ 1;
 #X obj 250 300 *~ 1;
-#X obj 420 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
-#fcfcfc #fcfcfc 0 1;
-#X obj 440 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
-#fcfcfc #fcfcfc 0 1;
-#X obj 460 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
-#fcfcfc #fcfcfc 0 1;
-#X obj 480 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
-#fcfcfc #fcfcfc 0 1;
-#X obj 500 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d
-#fcfcfc #fcfcfc 0 1;
+#X obj 420 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d #fcfcfc #fcfcfc 0 1;
+#X obj 440 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d #fcfcfc #fcfcfc 0 1;
+#X obj 460 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d #fcfcfc #fcfcfc 0 1;
+#X obj 480 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d #fcfcfc #fcfcfc 0 1;
+#X obj 500 150 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 #2f004d #fcfcfc #fcfcfc 0 1;
 #X floatatom 60 50 0 0 0 0 - - - 0;
 #X floatatom 130 50 0 0 0 0 - - - 0;
 #X floatatom 200 50 0 0 0 0 - - - 0;
@@ -351,8 +342,7 @@
 #X connect 33 0 14 0;
 #X restore 350 490 pd instruments;
 #X obj 70 130 loadbang;
-#X obj 520 430 vsl 15 128 0.001 1 1 0 empty empty empty 0 -9 0 10 #2f004d
-#fcfcfc #fcfcfc 0 1;
+#X obj 520 430 vsl 15 128 0.001 1 1 0 empty empty empty 0 -9 0 10 #2f004d #fcfcfc #fcfcfc 0 1;
 #X obj 330 270 cupqb 16;
 #X obj 380 270 cupqb 19;
 #X obj 430 270 cupqb 23;
@@ -361,10 +351,8 @@
 #X obj 280 270 cupqb 40;
 #X msg 360 170 33 29 26 22 42;
 #X msg 80 420 print;
-#X text 90 70 A derivative of [muse] that uses multiple outlets to
-allow for chords and harmonization;
-#X obj 280 40 cnv 15 60 24 empty empty chrd 4 12 0 18 #000000 #fcfcfc
-0;
+#X text 90 70 A derivative of [muse] that uses multiple outlets to allow for chords and harmonization;
+#X obj 280 40 cnv 15 60 24 empty empty chrd 4 12 0 18 #000000 #fcfcfc 0;
 #X msg 280 350 0;
 #X obj 530 270 cupqb 24;
 #X msg 530 320 @5 \$1;
