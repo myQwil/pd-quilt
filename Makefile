@@ -16,7 +16,6 @@ datafiles += help/libgme-LICENSE.txt help/README.md
 datadirs   = blunt
 
 # Game Music Emu
-# for Windows/MSYS2, a manual build of libunrar is required
 EXT = so
 cflags += -I./game-music-emu/gme
 gme~.class.ldlibs  = game-music-emu/build/gme/libgme.$(EXT) -lsamplerate -lz -lunrar
