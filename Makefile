@@ -31,4 +31,6 @@ endef
 # FFplay
 ffplay~.class.ldlibs = -lsamplerate -lavutil -lavcodec -lavformat -lswresample
 
+warn.flags = -Wall -Wextra -Wshadow -Winline -Wstrict-aliasing -Wno-cast-function-type
+
 include pd-lib-builder/Makefile.pdlibbuilder
