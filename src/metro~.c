@@ -72,8 +72,10 @@ static t_int *metro_tilde_perform(t_int *w) {
 			if (f < x->prev) {
 				outlet_bang(x->obj.ob_outlet);
 			}
-		} else if (f > x->prev) {
-			outlet_bang(x->obj.ob_outlet);
+		} else {
+			if (f > x->prev) {
+				outlet_bang(x->obj.ob_outlet);
+			}
 		}
 		x->prev = f;
 		tf.d = dphase;

@@ -14,7 +14,7 @@
 static t_class *rand_class;
 
 typedef enum {
-	M_RANGE
+	  M_RANGE
 	, M_LIST
 } t_mode;
 
