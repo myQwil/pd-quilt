@@ -5,18 +5,19 @@
 #X obj 230 180 + 1;
 #X obj 100 180 +;
 #X obj 140 180 f;
-#X obj 160 220 /;
-#X obj 160 250 outlet;
+#X obj 100 220 /;
+#X obj 100 250 outlet;
 #X obj 190 100 inlet reset;
 #X msg 190 130 0;
-#X obj 150 30 cnv 15 48 24 empty empty avg 4 12 0 18 #000000 #fcfcfc
-0;
+#X obj 150 30 cnv 15 48 24 empty empty avg 4 12 0 18 #000000 #fcfcfc 0;
 #X text 60 60 average of all received values;
+#X obj 190 250 outlet;
 #X connect 0 0 1 0;
 #X connect 1 0 4 0;
 #X connect 1 1 2 0;
 #X connect 2 0 3 0;
 #X connect 2 0 6 1;
+#X connect 2 0 12 0;
 #X connect 3 0 2 1;
 #X connect 4 0 5 0;
 #X connect 4 0 6 0;
