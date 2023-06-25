@@ -1,4 +1,4 @@
-#N canvas 400 200 390 400 14;
+#N canvas 400 200 390 400 16;
 #X obj 180 130 inlet;
 #X obj 240 130 inlet reset;
 #X obj 140 100 loadbang;
@@ -29,8 +29,8 @@
 #X obj 150 240 metro;
 #X obj 140 130 \$1;
 #X obj 200 330 outlet;
-#X obj 210 240 f;
-#X obj 230 270 avg;
+#X obj 220 240 f;
+#X obj 250 270 avg;
 #X obj 40 100 inlet;
 #X obj 270 330 outlet;
 #X obj 40 130 route bang;
@@ -57,4 +57,4 @@
 #X connect 21 0 22 0;
 #X connect 21 1 9 0;
 #X connect 22 0 9 0;
-#X coords 0 -1 1 1 80 60 2 135 165;
+#X coords 0 -1 1 1 90 60 2 135 165;

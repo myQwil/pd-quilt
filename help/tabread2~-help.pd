@@ -1,4 +1,4 @@
-#N canvas 400 200 730 540 14;
+#N canvas 400 200 730 540 16;
 #X declare -lib blunt;
 #X msg 50 230 100;
 #X floatatom 50 260 0 0 0 0 - - - 0;

@@ -1,4 +1,4 @@
-#N canvas 400 200 790 540 14;
+#N canvas 400 200 820 540 16;
 #X declare -lib zexy;
 #X msg 260 100 one 2 3;
 #X msg 340 100 4 five 6;
@@ -14,8 +14,7 @@
 #X msg 120 200 hello;
 #X msg 180 200 12;
 #X msg 140 270 list bang;
-#X obj 250 230 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
+#X obj 250 230 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
 #X msg 290 220 . 6;
 #X msg 350 170 traverse pd-foo \, bang;
 #X obj 350 200 pointer;
@@ -46,13 +45,11 @@
 #X connect 4 2 7 0;
 #X restore 140 390 pd out;
 #X floatatom 140 480 0 0 0 0 - - - 0;
-#X obj 150 420 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
+#X obj 150 420 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
 #X obj 170 450 symbol;
 #X symbolatom 170 480 0 0 0 0 - - - 0;
 #X obj 190 420 pointer;
-#X obj 230 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
+#X obj 230 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
 #N canvas 570 390 350 270 out 0;
 #X obj 70 50 inlet;
 #X obj 70 80 t a a;
@@ -74,13 +71,11 @@
 #X connect 4 2 7 0;
 #X restore 260 390 pd out;
 #X floatatom 260 480 0 0 0 0 - - - 0;
-#X obj 270 420 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
+#X obj 270 420 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
 #X obj 290 450 symbol;
 #X symbolatom 290 480 0 0 0 0 - - - 0;
 #X obj 310 420 pointer;
-#X obj 350 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
+#X obj 350 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
 #N canvas 570 390 350 270 out 0;
 #X obj 70 50 inlet;
 #X obj 70 80 t a a;
@@ -102,28 +97,23 @@
 #X connect 4 2 7 0;
 #X restore 380 390 pd out;
 #X floatatom 380 480 0 0 0 0 - - - 0;
-#X obj 390 420 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
+#X obj 390 420 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
 #X obj 410 450 symbol;
 #X symbolatom 410 480 0 0 0 0 - - - 0;
 #X obj 430 420 pointer;
-#X obj 470 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
-#X text 160 60 lazy pack/unpack objects with 'anything' inlets/outlets
-;
-#X text 50 100 "." skips args;
+#X obj 470 450 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
+#X text 160 60 lazy pack/unpack objects with 'anything' inlets/outlets;
+#X text 40 100 "." skips args;
 #X text 420 130 expect float but got symbol;
 #X text 450 200 error messages are off by default;
 #X text 510 220 print all strict errors;
 #X text 450 240 acts as a bit mask. -1 mutes all;
 #X text 360 270 with paq \, 'b' turns into a lazy 'bang';
 #X text 360 290 and unrecognized types become lazy symbols;
-#X text 330 340 use f(loat) \, s(ymbol) \, or p(ointer) for strict
-type;
+#X text 330 340 use f(loat) \, s(ymbol) \, or p(ointer) for strict type;
 #X text 330 360 'a' \, 'any' \, or a number for 'anything';
-#X text 40 310 type mismatch;
-#X obj 300 30 cnv 15 152 24 empty empty paq\\\ &\\\ unpaq 4 12 0 18
-#000000 #fcfcfc 0;
+#X text 20 310 type mismatch;
+#X obj 300 30 cnv 15 152 24 empty empty paq\ &\ unpaq 4 12 0 18 #000000 #fcfcfc 0;
 #X obj 540 450 declare -lib zexy;
 #X connect 0 0 3 0;
 #X connect 1 0 3 0;

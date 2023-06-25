@@ -1,4 +1,4 @@
-#N canvas 400 200 410 460 14;
+#N canvas 400 200 410 460 16;
 #X obj 160 20 cnv 15 86 24 empty empty metro~ 4 12 0 18 #000000 #fcfcfc
 0;
 #X text 110 50 signal-based metronome;

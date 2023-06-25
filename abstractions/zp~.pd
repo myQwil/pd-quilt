@@ -1,4 +1,4 @@
-#N canvas 400 200 350 270 14;
+#N canvas 400 200 350 270 16;
 #X obj 140 90 inlet;
 #X obj 220 90 inlet;
 #X obj 140 120 route now;
@@ -6,9 +6,8 @@
 #X obj 70 210 sel;
 #X obj 160 180 line~;
 #X obj 160 210 outlet~;
-#X text 30 60 ramp between value changes (signal);
-#X obj 150 30 cnv 15 48 24 empty empty zp~ 4 12 0 18 #000000 #fcfcfc
-0;
+#X text 20 60 ramp between value changes (signal);
+#X obj 150 30 cnv 15 48 24 empty empty zp~ 4 12 0 18 #000000 #fcfcfc 0;
 #X obj 70 180 \$2;
 #X obj 70 150 loadbang;
 #X connect 0 0 2 0;

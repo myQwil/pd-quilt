@@ -1,10 +1,10 @@
-#N canvas 400 200 670 700 14;
+#N canvas 400 200 670 700 16;
 #X declare -lib blunt;
 #N canvas 0 0 450 300 (subpatch) 0;
 #X array \$0adsr 44100 float 0;
 #X coords 0 1.02 44099 -1.02 200 130 1;
 #X restore 400 120 graph;
-#X obj 130 420 r trigger;
+#X obj 140 420 r trigger;
 #X obj 80 450 r graphit;
 #X msg 250 360 bang;
 #X text 290 360 <-- attack and delayed release;
@@ -55,11 +55,9 @@
 #X text 290 330 live sustain;
 #X obj 50 610 *~;
 #X obj 50 640 dac~;
-#X obj 90 610 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10 #2f004d
-#fcfcfc #fcfcfc 0 1;
+#X obj 90 610 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10 #2f004d #fcfcfc #fcfcfc 0 1;
 #X text 200 60 envelope generator abstraction;
-#X obj 290 30 cnv 15 60 24 empty empty adsr 4 12 0 18 #000000 #fcfcfc
-0;
+#X obj 290 30 cnv 15 60 24 empty empty adsr 4 12 0 18 #000000 #fcfcfc 0;
 #X msg 250 160 . 10 s 20 \, 1;
 #X obj 60 480 tabwrite~ \$0adsr;
 #X msg 250 130 . 500 0.33 r \, 1;

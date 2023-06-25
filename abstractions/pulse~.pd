@@ -1,4 +1,4 @@
-#N canvas 400 200 370 310 14;
+#N canvas 400 200 370 310 16;
 #X declare -lib cyclone;
 #X obj 50 100 inlet~;
 #X obj 150 100 inlet;

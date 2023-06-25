@@ -1,4 +1,4 @@
-#N canvas 400 200 580 560 14;
+#N canvas 400 200 580 560 16;
 #X declare -lib blunt;
 #X obj 50 460 *~;
 #X obj 50 490 dac~;
@@ -220,7 +220,7 @@
 #X obj 50 230 r cmd;
 #X floatatom 90 490 0 0 0 0 - - - 0;
 #X obj 50 270 muse 40 2 4 5 7 9 11;
-#N canvas 910 310 740 630 notation 0;
+#N canvas 910 310 780 630 notation 0;
 #X text 310 40 change the root+intervals respectively;
 #X text 520 170 major scale;
 #X text 520 230 change notes relative;
@@ -313,7 +313,7 @@
 #X floatatom 390 400 0 0 0 0 - - - 0;
 #X msg 330 460 \$1+\$2;
 #X obj 170 300 route float;
-#X obj 230 270 print -n;
+#X obj 220 330 print -n;
 #X text 380 460 note + semitone;
 #N canvas 730 350 380 370 ks 0;
 #X obj 50 50 noise~;

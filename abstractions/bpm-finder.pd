@@ -1,4 +1,4 @@
-#N canvas 30 440 370 360 14;
+#N canvas 400 200 370 360 16;
 #X declare -lib blunt;
 #X obj 110 150 @/ 60000;
 #X obj 110 200 tick 60000;

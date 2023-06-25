@@ -1,4 +1,4 @@
-#N canvas 400 200 450 410 14;
+#N canvas 400 200 450 410 16;
 #X msg 90 130 pause;
 #X floatatom 110 350 0 0 0 0 - - - 0;
 #X obj 180 30 cnv 15 72 24 empty empty linp~ 4 12 0 18 #000000 #fcfcfc

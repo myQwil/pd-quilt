@@ -1,10 +1,10 @@
-#N canvas 400 200 560 420 14;
+#N canvas 400 200 620 420 16;
 #X declare -stdpath cyclone;
 #X obj 40 40 inlet peak;
-#X obj 320 70 inlet attack;
-#X obj 430 70 inlet decay;
+#X obj 340 70 inlet attack;
+#X obj 460 70 inlet decay;
 #X obj 40 70 route float bang a d z;
-#X obj 230 70 unpaq f f;
+#X obj 250 70 unpaq f f;
 #X obj 50 100 1;
 #X obj 50 130 moses;
 #X obj 50 160 * -1;
@@ -17,11 +17,11 @@
 #X obj 150 380 outlet~;
 #X text 380 280 attack-decay;
 #X obj 410 250 cnv 15 36 24 empty empty ad 4 12 0 18 #000000 #fcfcfc 0;
-#X obj 440 100 loadbang;
+#X obj 470 100 loadbang;
 #X obj 150 350 curve~;
 #N canvas 400 200 450 300 lib 0;
 #X obj 140 120 declare -stdpath cyclone;
-#X restore 470 40 pd lib;
+#X restore 500 40 pd lib;
 #X msg 160 320 \$1 \$2 -0.5;
 #N canvas 840 300 360 300 attack 0;
 #X obj 160 50 inlet attack;

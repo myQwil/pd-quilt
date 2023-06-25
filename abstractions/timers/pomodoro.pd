@@ -1,4 +1,4 @@
-#N canvas 100 700 380 170 14;
+#N canvas 100 700 380 170 16;
 #X declare -lib cyclone;
 #X declare -lib ggee;
 #N canvas 400 420 420 490 clock 0;

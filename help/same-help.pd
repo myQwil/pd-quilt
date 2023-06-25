@@ -1,21 +1,15 @@
-#N canvas 400 200 510 300 14;
-#X obj 210 140 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
-#X floatatom 210 170 0 0 0 0 - - - 0;
-#X obj 210 200 same;
-#X floatatom 210 230 0 0 0 0 - - - 0;
-#X floatatom 270 230 0 0 0 0 - - - 0;
-#X obj 210 40 cnv 15 60 24 empty empty same 4 12 0 18 #000000 #fcfcfc
-0;
-#X text 40 70 similar to [change] in that it sends different values
-through the left outlet \, but also sends repeat values through the
-right outlet;
-#X obj 190 230 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
-#X obj 250 230 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
-#X msg 250 170 set \$1;
-#X floatatom 250 140 0 0 0 0 - - - 0;
+#N canvas 400 200 480 300 16;
+#X obj 190 140 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
+#X floatatom 190 170 0 0 0 0 - - - 0;
+#X obj 190 200 same;
+#X floatatom 190 230 0 0 0 0 - - - 0;
+#X floatatom 250 230 0 0 0 0 - - - 0;
+#X obj 200 40 cnv 15 60 24 empty empty same 4 12 0 18 #000000 #fcfcfc 0;
+#X text 40 70 similar to [change] in that it sends different values through the left outlet \, but also sends repeat values through the right outlet, f 46;
+#X obj 170 230 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
+#X obj 230 230 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
+#X msg 230 170 set \$1;
+#X floatatom 230 140 0 0 0 0 - - - 0;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 2 0 3 0;

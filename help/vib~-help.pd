@@ -1,4 +1,4 @@
-#N canvas 400 200 450 360 14;
+#N canvas 400 200 450 360 16;
 #X obj 180 30 cnv 15 60 24 empty empty vib~ 4 12 0 18 #000000 #fcfcfc
 0;
 #X floatatom 40 110 0 0 0 2 rate - - 12;

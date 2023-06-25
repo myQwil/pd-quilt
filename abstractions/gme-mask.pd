@@ -1,21 +1,13 @@
-#N canvas 400 200 860 550 14;
+#N canvas 400 200 860 550 16;
 #X obj 40 60 inlet;
-#X obj 290 280 tgl 18 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
-#fcfcfc 0 1;
-#X obj 310 280 tgl 18 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
-#fcfcfc 0 1;
-#X obj 330 280 tgl 18 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
-#fcfcfc 0 1;
-#X obj 350 280 tgl 18 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc
-#fcfcfc 0 1;
-#X obj 370 280 tgl 18 0 empty empty empty 17 7 0 10 #551312 #fcfcfc
-#fcfcfc 0 1;
-#X obj 390 280 tgl 18 0 empty empty empty 17 7 0 10 #551312 #fcfcfc
-#fcfcfc 0 1;
-#X obj 410 280 tgl 18 0 empty empty empty 17 7 0 10 #551312 #fcfcfc
-#fcfcfc 0 1;
-#X obj 430 280 tgl 18 0 empty empty empty 17 7 0 10 #551312 #fcfcfc
-#fcfcfc 0 1;
+#X obj 290 280 tgl 18 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc #fcfcfc 0 1;
+#X obj 310 280 tgl 18 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc #fcfcfc 0 1;
+#X obj 330 280 tgl 18 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc #fcfcfc 0 1;
+#X obj 350 280 tgl 18 0 empty empty empty 17 7 0 10 #0e4345 #fcfcfc #fcfcfc 0 1;
+#X obj 370 280 tgl 18 0 empty empty empty 17 7 0 10 #551312 #fcfcfc #fcfcfc 0 1;
+#X obj 390 280 tgl 18 0 empty empty empty 17 7 0 10 #551312 #fcfcfc #fcfcfc 0 1;
+#X obj 410 280 tgl 18 0 empty empty empty 17 7 0 10 #551312 #fcfcfc #fcfcfc 0 1;
+#X obj 430 280 tgl 18 0 empty empty empty 17 7 0 10 #551312 #fcfcfc #fcfcfc 0 1;
 #X obj 40 200 & 1;
 #X obj 160 420 << 1;
 #X obj 210 420 << 2;
@@ -24,9 +16,8 @@
 #X obj 360 420 << 5;
 #X obj 410 420 << 6;
 #X obj 460 420 << 7;
-#X obj 70 500 outlet;
-#X obj 350 20 cnv 15 112 24 empty empty gme-mask 4 12 0 18 #000000
-#fcfcfc 0;
+#X obj 110 510 outlet;
+#X obj 350 20 cnv 15 112 24 empty empty gme-mask 4 12 0 18 #000000 #fcfcfc 0;
 #X obj 170 330 t b f;
 #X obj 220 330 t b f;
 #X obj 270 330 t b f;
@@ -34,8 +25,8 @@
 #X obj 370 330 t b f;
 #X obj 420 330 t b f;
 #X obj 470 330 t b f;
-#X obj 80 400 b;
-#X obj 70 330 t f;
+#X obj 60 400 b;
+#X obj 110 330 t f;
 #X obj 460 170 & 1;
 #X obj 460 140 >> 7;
 #X obj 400 170 & 1;
@@ -58,16 +49,11 @@
 #X msg 220 200 set \$1;
 #X msg 160 200 set \$1;
 #X msg 100 200 set \$1;
-#X obj 450 280 tgl 18 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
-#fcfcfc 0 1;
-#X obj 470 280 tgl 18 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
-#fcfcfc 0 1;
-#X obj 490 280 tgl 18 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
-#fcfcfc 0 1;
-#X obj 510 280 tgl 18 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
-#fcfcfc 0 1;
-#X obj 530 280 tgl 18 0 empty empty empty 17 7 0 10 #000000 #fcfcfc
-#fcfcfc 0 1;
+#X obj 450 280 tgl 18 0 empty empty empty 17 7 0 10 #000000 #fcfcfc #fcfcfc 0 1;
+#X obj 470 280 tgl 18 0 empty empty empty 17 7 0 10 #000000 #fcfcfc #fcfcfc 0 1;
+#X obj 490 280 tgl 18 0 empty empty empty 17 7 0 10 #000000 #fcfcfc #fcfcfc 0 1;
+#X obj 510 280 tgl 18 0 empty empty empty 17 7 0 10 #000000 #fcfcfc #fcfcfc 0 1;
+#X obj 530 280 tgl 18 0 empty empty empty 17 7 0 10 #000000 #fcfcfc #fcfcfc 0 1;
 #X obj 760 170 & 1;
 #X obj 700 170 & 1;
 #X obj 640 170 & 1;
@@ -78,7 +64,7 @@
 #X msg 640 200 set \$1;
 #X msg 580 200 set \$1;
 #X msg 520 200 set \$1;
-#X obj 40 90 t f f f f f f f f f f f f f, f 90;
+#X obj 40 90 t f f f f f f f f f f f f f, f 81;
 #X obj 520 140 >> 8;
 #X obj 580 140 >> 9;
 #X obj 640 140 >> 10;
@@ -89,8 +75,7 @@
 #X obj 620 330 t b f;
 #X obj 670 330 t b f;
 #X obj 720 330 t b f;
-#X obj 70 460 expr $f1 + $f2 + $f3 + $f4 + $f5 + $f6 + $f7 + $f8 +
-$f9 + $f10 + $f11 + $f12 + $f13, f 85;
+#X obj 110 460 expr $f1 + $f2 + $f3 + $f4 + $f5 + $f6 + $f7 + $f8 + $f9 + $f10 + $f11 + $f12 + $f13, f 67;
 #X obj 510 420 << 8;
 #X obj 560 420 << 9;
 #X obj 610 420 << 10;

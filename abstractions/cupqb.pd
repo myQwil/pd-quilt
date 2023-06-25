@@ -1,11 +1,11 @@
-#N canvas 400 200 530 440 14;
+#N canvas 400 200 530 440 16;
 #X obj 270 40 inlet;
 #X obj 220 210 inlet;
 #X obj 360 210 inlet;
 #X obj 140 80 route set step - +;
 #X obj 140 110 s \$0set;
 #X obj 140 140 s \$0itr;
-#X obj 300 80 s \$0tonbx;
+#X obj 320 80 s \$0tonbx;
 #X obj 50 50 loadbang;
 #X obj 70 120 \$1;
 #X obj 70 150 sel;
@@ -15,10 +15,8 @@
 #X obj 50 230 sel;
 #X obj 80 260 s \$0itr;
 #X floatatom 220 140 5 0 0 0 - \$0tonbx \$0frnbx 0;
-#X obj 220 160 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
-#ff8300 #ff0400 #000000;
-#X obj 240 160 bng 20 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10
-#ff8300 #ff0400 #000000;
+#X obj 220 160 bng 25 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10 #ff8300 #ff0400 #000000;
+#X obj 245 160 bng 25 250 50 0 \$0-sdummy \$0-rdummy empty 17 7 0 10 #ff8300 #ff0400 #000000;
 #X obj 220 240 route set;
 #X obj 190 280 1;
 #X obj 190 310 * -1;
@@ -32,8 +30,7 @@
 #X obj 400 310 r \$0frnbx;
 #X obj 400 370 outlet;
 #X text 300 150 number box with cup;
-#X obj 340 120 cnv 15 74 24 empty empty cupqb 4 12 0 18 #000000 #fcfcfc
-0;
+#X obj 340 120 cnv 15 74 24 empty empty cupqb 4 12 0 18 #000000 #fcfcfc 0;
 #X connect 0 0 3 0;
 #X connect 1 0 18 0;
 #X connect 2 0 21 0;
@@ -65,4 +62,4 @@
 #X connect 27 0 25 1;
 #X connect 28 0 25 1;
 #X connect 28 0 29 0;
-#X coords 0 -1 1 1 42 46 2 220 137;
+#X coords 0 -1 1 1 50 50 2 220 137;

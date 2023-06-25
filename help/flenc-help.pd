@@ -1,4 +1,4 @@
-#N canvas 400 200 570 540 14;
+#N canvas 400 200 600 540 16;
 #X declare -lib blunt;
 #X obj 120 140 cupqb;
 #X obj 180 140 cupqb;
@@ -7,8 +7,7 @@
 #X obj 360 140 cupqb;
 #X obj 120 200 #/;
 #X floatatom 120 230 0 0 0 0 - - - 0;
-#X obj 240 200 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
+#X obj 240 200 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
 #X obj 330 200 #pow;
 #X floatatom 330 230 0 0 0 0 - - - 0;
 #X obj 210 230 fldec -0.25;
@@ -22,15 +21,12 @@
 #X msg 220 350 m 2000 \, e 131 \, s 0;
 #X msg 230 380 set . 125 1;
 #X obj 220 410 flenc 0 125 1;
-#X obj 180 380 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
+#X obj 180 380 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
 #X floatatom 220 440 0 0 0 0 - - - 0;
 #X obj 50 370 cupqb;
-#X text 180 70 float-encode & float-decode;
-#X text 40 90 splits and joins the sign \, exponent \, and mantissa
-of a float;
-#X obj 180 40 cnv 15 178 24 empty empty flenc\\\ &\\\ fldec 4 12 0
-18 #000000 #fcfcfc 0;
+#X text 170 70 float-encode & float-decode;
+#X text 30 90 splits and joins the sign \, exponent \, and mantissa of a float;
+#X obj 200 40 cnv 15 178 24 empty empty flenc\ &\ fldec 4 12 0 18 #000000 #fcfcfc 0;
 #X obj 50 470 mantissa;
 #N canvas 400 200 450 300 lib 0;
 #X obj 140 120 declare -lib blunt;

@@ -1,4 +1,4 @@
-#N canvas 400 200 370 280 14;
+#N canvas 400 200 370 280 16;
 #X obj 40 190 +~ 1;
 #X obj 40 100 inlet~ rate;
 #X obj 160 100 inlet~ depth;

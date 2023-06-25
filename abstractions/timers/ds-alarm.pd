@@ -1,4 +1,4 @@
-#N canvas 100 600 360 300 14;
+#N canvas 100 600 360 300 16;
 #X declare -lib zexy;
 #X declare -lib blunt;
 #N canvas 720 240 500 410 alarm 0;
