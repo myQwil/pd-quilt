@@ -256,7 +256,11 @@ static err_t ffplay_load(t_ffplay *x, int index) {
 
 	swr_free(&x->swr);
 	AVChannelLayout layout_in;
-	av_channel_layout_from_mask(&layout_in, x->a.ctx->ch_layout.u.mask);
+	if (x->a.ctx->ch_layout.u.mask) {
+		av_channel_layout_from_mask(&layout_in, x->a.ctx->ch_layout.u.mask);
+	} else {
+		av_channel_layout_default(&layout_in, x->a.ctx->ch_layout.nb_channels);
+	}
 	swr_alloc_set_opts2(&x->swr
 	, &x->layout, AV_SAMPLE_FMT_FLT   , x->a.ctx->sample_rate
 	, &layout_in, x->a.ctx->sample_fmt, x->a.ctx->sample_rate
