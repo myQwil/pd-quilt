@@ -198,7 +198,7 @@ static void ffplay_audio(t_ffplay *x, t_float f) {
 	if (err_msg) {
 		logpost(x, PD_DEBUG, "ffplay_audio: %s.", err_msg);
 	} else {
-		x->z.ratio = sys_getsr() / (double)x->a.ctx->sample_rate;
+		x->z.ratio = (double)x->a.ctx->sample_rate / sys_getsr();
 		player_speed_(&x->z, x->z.speed_);
 	}
 }
@@ -269,7 +269,7 @@ static err_t ffplay_load(t_ffplay *x, int index) {
 		return "SWResampler initialization failed";
 	}
 
-	x->z.ratio = sys_getsr() / (double)x->a.ctx->sample_rate;
+	x->z.ratio = (double)x->a.ctx->sample_rate / sys_getsr();
 	player_speed_(&x->z, x->z.speed_);
 	player_reset(&x->z);
 	x->frm->pts = 0;

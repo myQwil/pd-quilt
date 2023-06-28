@@ -33,14 +33,14 @@ static inline void player_reset(t_player *x) {
 }
 
 // SRC can get stuck if it's too close to the fastest possible speed
-static const t_float fastest = 1. / (FRAMES - (1. / 128.));
-static const t_float slowest = FRAMES;
+static const t_float fastest = FRAMES - (1. / 128.);
+static const t_float slowest = 1. / FRAMES;
 
 static inline void player_speed_(t_player *x, t_float f) {
 	x->speed_ = f;
 	f *= x->ratio;
-	f = f < fastest ? fastest : (f > slowest ? slowest : f);
-	x->data.src_ratio = f;
+	f = f > fastest ? fastest : (f < slowest ? slowest : f);
+	x->data.src_ratio = 1. / f;
 }
 
 static void player_speed(t_player *x, t_float f) {
