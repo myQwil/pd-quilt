@@ -357,13 +357,13 @@
 #X obj 260 440 r~ \$0fade;
 #X obj 40 300 s \$0gme;
 #N canvas 950 480 780 350 misc 0;
-#X obj 70 190 cupqb 4;
+#X obj 70 190 cupqb 2;
 #X msg 70 250 interp \$1;
 #X text 130 140 0 = Sinc (Best Quality);
 #X text 130 160 1 = Sinc (Medium Quality);
-#X text 130 180 2 = Sinc (Fastest);
+#X text 130 180 2 = Sinc (Fastest) (default);
 #X text 130 200 3 = Zero-order hold;
-#X text 130 220 4 = Linear (default);
+#X text 130 220 4 = Linear;
 #X text 170 250 Interpolation method;
 #X obj 50 290 s \$0gme;
 #N canvas 1000 610 450 300 pitch 0;

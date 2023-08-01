@@ -151,7 +151,7 @@ static void player_bang(t_player *x) {
 static t_player *player_new(t_class *cl, unsigned nch) {
 	int err;
 	SRC_STATE *state;
-	if (!(state = src_new(SRC_LINEAR, nch, &err))) {
+	if (!(state = src_new(SRC_SINC_FASTEST, nch, &err))) {
 		pd_error(0, "src_new() failed : %s.", src_strerror(err));
 		return NULL;
 	}

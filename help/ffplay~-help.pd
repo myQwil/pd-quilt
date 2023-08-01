@@ -370,14 +370,14 @@
 #X msg 490 220 0;
 #X obj 370 130 cupqb;
 #X text 500 310 Playback speed factor;
-#X obj 50 220 cupqb 4;
+#X obj 50 220 cupqb 2;
 #X msg 50 280 interp \$1;
 #X obj 30 310 s \$0ffplay;
 #X text 110 170 0 = Sinc (Best Quality);
 #X text 110 190 1 = Sinc (Medium Quality);
-#X text 110 210 2 = Sinc (Fastest);
+#X text 110 210 2 = Sinc (Fastest) (default);
 #X text 110 230 3 = Zero-order hold;
-#X text 110 250 4 = Linear (default);
+#X text 110 250 4 = Linear;
 #X msg 30 50 open https://upload.wikimedia.org/wikipedia/en/1/10/Michael_Jackson_Thriller.ogg, f 81;
 #X text 30 20 FFmpeg accepts urls;
 #X text 150 280 Interpolation method;
