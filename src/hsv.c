@@ -12,7 +12,7 @@
 /* ------------------- hsv (hue-saturation-value) ------------------- */
 static t_class *hsv_class;
 
-typedef struct {
+typedef struct _hsv {
 	t_object obj;
 	t_float h, s, v;
 } t_hsv;

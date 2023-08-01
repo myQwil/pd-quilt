@@ -18,7 +18,7 @@ typedef enum {
 	, M_LIST
 } t_mode;
 
-typedef struct {
+typedef struct _rand {
 	t_rng z;
 	t_flin flin;
 	unsigned siz;  /* list size */

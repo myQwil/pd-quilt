@@ -12,7 +12,7 @@ struct _obj { // we'll use this in setup functions for convenience
 
 typedef t_float(*t_uopfn)(t_float);
 
-typedef struct {
+typedef struct _num {
 	t_blunt bl;
 	t_uopfn fn;
 	t_float f;
@@ -99,7 +99,7 @@ static void *f_new(t_symbol *s, int ac, t_atom *av) {
 /* --------------------- bang ------------------------------------- */
 static t_class *bng_class;
 
-typedef struct {
+typedef struct _bng {
 	t_blunt bl;
 } t_bng;
 
@@ -133,7 +133,7 @@ static void bng_setup(void) {
 /* --------------------- symbol ----------------------------------- */
 static t_class *sym_class;
 
-typedef struct {
+typedef struct _sym {
 	t_blunt bl;
 	t_symbol *sym;
 } t_sym;
@@ -203,7 +203,7 @@ void sym_setup(void) {
 /* ---------------------------------------------------------------- */
 
 /* ------------- unop:  !  ~  floor  ceil  factorial  ------------- */
-typedef struct {
+typedef struct _uop {
 	t_object obj;
 	t_uopfn fn;
 } t_uop;
@@ -469,7 +469,7 @@ static void *rdivm_new(t_symbol *s, int ac, t_atom *av) {
 /* --------------------- reverse moses ---------------------------- */
 static t_class *rmoses_class;
 
-typedef struct {
+typedef struct _rmoses {
 	t_object obj;
 	t_outlet *out2;
 	t_float y;
@@ -537,12 +537,12 @@ void revop_setup(void) {
 /*                      hot-inlet arithmetics                       */
 /* ---------------------------------------------------------------- */
 
-typedef struct {
+typedef struct _hot_pxy {
 	t_object obj;
 	t_bop *x;
 } t_hot_pxy;
 
-typedef struct {
+typedef struct _hot {
 	t_bop x;
 	t_hot_pxy *p;
 } t_hot;

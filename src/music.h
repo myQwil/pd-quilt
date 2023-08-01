@@ -7,7 +7,7 @@ static inline int isoperator(char c) {
 	return (c == '^' || c == 'v' || c == '+' || c == '-' || c == '*' || c == '/');
 }
 
-typedef struct {
+typedef struct _music {
 	t_object obj;
 	t_flin flin;
 	t_note note;

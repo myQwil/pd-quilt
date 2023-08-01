@@ -5,7 +5,7 @@
 
 static unsigned seed;
 
-typedef struct {
+typedef struct _rng {
 	t_object obj;
 	unsigned state;
 } t_rng;

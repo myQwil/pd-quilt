@@ -10,12 +10,12 @@ static t_symbol *s_pos;
 /* ------------------------- FFmpeg player ------------------------- */
 static t_class *ffplay_class;
 
-typedef struct {
+typedef struct _avstream {
 	AVCodecContext *ctx;
 	int idx; /* stream index */
 } t_avstream;
 
-typedef struct {
+typedef struct _ffplay {
 	t_player z;
 	t_avstream a;   /* audio stream */
 	t_avstream sub; /* subtitle stream */

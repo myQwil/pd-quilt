@@ -3,7 +3,7 @@
 /* -------------------------- chrono ------------------------------ */
 static t_class *chrono_class;
 
-typedef struct {
+typedef struct _chrono {
 	t_thyme z;
 	double settime, laptime;
 	double setmore, lapmore; /* paused time and tempo changes */

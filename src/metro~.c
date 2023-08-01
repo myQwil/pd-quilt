@@ -43,7 +43,7 @@ union tabfudge {
 /* -------------------------- metro~ ------------------------------ */
 static t_class *metro_tilde_class;
 
-typedef struct {
+typedef struct _metro_tilde {
 	t_object obj;
 	t_sample prev;
 	double phase;

@@ -2,7 +2,7 @@
 
 typedef const char *err_t;
 
-typedef struct {
+typedef struct _playlist {
 	t_symbol **arr; /* m3u list of tracks */
 	t_symbol *dir;  /* starting directory */
 	int size;       /* size of the list */

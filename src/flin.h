@@ -2,7 +2,7 @@
 
 static const unsigned max = 0x400;
 
-typedef struct {
+typedef struct _flin {
 	t_float *fp;  /* array pointer */
 	unsigned siz; /* array size */
 } t_flin;

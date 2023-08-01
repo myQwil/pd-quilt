@@ -3,7 +3,7 @@
 /* -------------------------- has -------------------------- */
 static t_class *has_class;
 
-typedef struct {
+typedef struct _has {
 	t_object obj;
 	t_atom a;
 } t_has;

@@ -5,7 +5,7 @@ static const float short_frac = 1.f / 0x8000;
 static t_symbol *s_mask;
 
 /* ------------------------- Game Music Emu player ------------------------- */
-typedef struct {
+typedef struct _gme {
 	t_player z;
 	Music_Emu *emu;
 	gme_info_t *info; /* current track info */

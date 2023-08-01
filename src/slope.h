@@ -2,7 +2,7 @@
 #include <math.h>
 #include <string.h>
 
-typedef struct {
+typedef struct _slope {
 	t_object obj;
 	double min;
 	double max;

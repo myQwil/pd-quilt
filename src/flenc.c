@@ -3,7 +3,7 @@
 /* -------------------------- flenc -------------------------- */
 static t_class *flenc_class;
 
-typedef struct {
+typedef struct _flenc {
 	t_object obj;
 	ufloat uf;
 } t_flenc;

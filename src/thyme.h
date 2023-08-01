@@ -3,7 +3,7 @@
 EXTERN void parsetimeunits(void *x, t_float amount, t_symbol *unitname
 , t_float *unit, int *samps);
 
-typedef struct {
+typedef struct _thyme {
 	t_object obj;
 	t_symbol *unitname;
 	t_float unit;

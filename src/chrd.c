@@ -3,7 +3,7 @@
 /* -------------------------- chrd -------------------------- */
 static t_class *chrd_class;
 
-typedef struct {
+typedef struct _chrd {
 	t_music z;
 	unsigned ins;       /* number of inlets */
 	unsigned char all;  /* all-outlets toggle */

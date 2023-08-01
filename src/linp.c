@@ -4,7 +4,7 @@
 #define DEFAULTGRAIN 20
 static t_class *linp_class;
 
-typedef struct {
+typedef struct _linp {
 	t_object obj;
 	t_clock *clock;
 	t_float  grain;

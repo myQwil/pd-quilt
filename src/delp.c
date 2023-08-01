@@ -3,7 +3,7 @@
 /* -------------------------- delp ------------------------------ */
 static t_class *delp_class;
 
-typedef struct {
+typedef struct _delp {
 	t_thyme z;
 	t_clock *clock;
 	double deltime;     /* delay time */

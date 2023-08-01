@@ -3,7 +3,7 @@
 /* -------------------------- same -------------------------- */
 static t_class *same_class;
 
-typedef struct {
+typedef struct _same {
 	t_object obj;
 	t_float f;
 	t_outlet *o_same;

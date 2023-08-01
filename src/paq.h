@@ -11,7 +11,7 @@
 
 typedef struct _paq t_paq;
 
-typedef struct {
+typedef struct _paq_pxy {
 	t_object obj;
 	t_paq *x;
 	t_gpointer *ptr;   /* inlet's associated pointer */

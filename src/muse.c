@@ -3,7 +3,7 @@
 /* -------------------------- muse -------------------------- */
 static t_class *muse_class;
 
-typedef struct {
+typedef struct _muse {
 	t_music z;
 	t_outlet *o_freq;    /* frequency outlet */
 	t_outlet *o_midi;    /* midi outlet */

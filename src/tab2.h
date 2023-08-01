@@ -1,6 +1,6 @@
 #include "inlet.h"
 
-typedef struct {
+typedef struct _tab2 {
 	t_object obj;
 	t_float *edge;
 	t_float  edge_;

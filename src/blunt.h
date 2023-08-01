@@ -185,7 +185,7 @@ typedef enum {
 	, LB_CLOSE = 2  // about to close
 } t_lbtype;
 
-typedef struct {
+typedef struct _blunt {
 	t_object obj;
 	t_lbtype action;
 } t_blunt;
@@ -219,7 +219,7 @@ static inline void blunt_addmethod(t_class *c) {
 /* --------------------- blunt binops ----------------------------- */
 typedef t_float(*t_bopfn)(t_float, t_float);
 
-typedef struct {
+typedef struct _bop {
 	t_blunt bl;
 	t_bopfn fn;
 	t_float f1;

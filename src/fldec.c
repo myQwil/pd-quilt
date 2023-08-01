@@ -3,7 +3,7 @@
 /* -------------------------- fldec -------------------------- */
 static t_class *fldec_class;
 
-typedef struct {
+typedef struct _fldec {
 	t_object obj;
 	ufloat uf;
 	t_outlet *o_mantissa;

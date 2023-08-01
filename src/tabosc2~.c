@@ -44,7 +44,7 @@ union tabfudge {
 
 static t_class *tabosc2_class;
 
-typedef struct {
+typedef struct _tabosc2 {
 	t_tab2 z;
 	t_float conv;
 	t_float fnpoints;

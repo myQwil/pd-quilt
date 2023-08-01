@@ -9,7 +9,7 @@
 #define BASE(x) exp(M_LN2 * -69. / (x)->tet) * (x)->ref
 #endif
 
-typedef struct {
+typedef struct _note {
 	t_float ref;   /* reference pitch */
 	t_float tet;   /* number of tones */
 	double bt;     /* lowest note frequency */

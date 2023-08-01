@@ -3,7 +3,7 @@
 /* -------------------------- rind -------------------------- */
 static t_class *rind_class;
 
-typedef struct {
+typedef struct _rind {
 	t_rng z;
 	t_float min;
 	t_float max;

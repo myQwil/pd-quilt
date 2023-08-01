@@ -10,7 +10,7 @@ static t_symbol *s_play;
 
 static t_atom(*fn_meta)(void *, t_symbol *);
 
-typedef struct {
+typedef struct _player {
 	t_object obj;
 	float *in;
 	float *out;

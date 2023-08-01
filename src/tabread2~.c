@@ -4,7 +4,7 @@
 
 static t_class *tabread2_class;
 
-typedef struct {
+typedef struct _tabread2 {
 	t_tab2 z;
 	t_float onset;
 	int npoints;
