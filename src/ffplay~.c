@@ -86,16 +86,17 @@ static t_int *ffplay_perform(t_int *w) {
 		t_rabbit *r = &y->r;
 		SRC_DATA *data = &r->data;
 		for (; n--; in2++) {
+			perform:
 			if (data->output_frames_gen > 0) {
-				perform:
 				for (int i = nch; i--;) {
 					*outs[i]++ = data->data_out[i];
 				}
 				data->data_out += nch;
 				data->output_frames_gen--;
 				continue;
-			} else if (data->input_frames > 0) {
-				resample:
+			}
+			resample:
+			if (data->input_frames > 0) {
 				if (r->speed != *in2) {
 					rabbit_speed(r, *in2);
 				}
@@ -111,26 +112,25 @@ static t_int *ffplay_perform(t_int *w) {
 					data->data_in += data->input_frames_used * nch;
 				}
 				goto perform;
-			} else {	// receive
-				data->data_in = x->in;
-				for (; av_read_frame(y->ic, y->pkt) >= 0; av_packet_unref(y->pkt)) {
-					if (y->pkt->stream_index == y->a.idx) {
-						if (avcodec_send_packet(y->a.ctx, y->pkt) < 0
-						 || avcodec_receive_frame(y->a.ctx, y->frm) < 0) {
-							continue;
-						}
-						data->input_frames = swr_convert(y->swr
-						, (uint8_t **)&x->in, FRAMES
-						, (const uint8_t **)y->frm->extended_data, y->frm->nb_samples);
-						av_packet_unref(y->pkt);
-						goto resample;
-					} else if (y->pkt->stream_index == y->sub.idx) {
-						int got;
-						AVSubtitle sub;
-						if (avcodec_decode_subtitle2(y->sub.ctx, &sub, &got, y->pkt) >= 0
-						 && got) {
-							post("\n%s", y->pkt->data);
-						}
+			}
+			// receive
+			data->data_in = x->in;
+			for (; av_read_frame(y->ic, y->pkt) >= 0; av_packet_unref(y->pkt)) {
+				if (y->pkt->stream_index == y->a.idx) {
+					if (avcodec_send_packet(y->a.ctx, y->pkt) < 0
+					 || avcodec_receive_frame(y->a.ctx, y->frm) < 0) {
+						continue;
+					}
+					data->input_frames = swr_convert(y->swr
+					, (uint8_t **)&x->in, FRAMES
+					, (const uint8_t **)y->frm->extended_data, y->frm->nb_samples);
+					av_packet_unref(y->pkt);
+					goto resample;
+				} else if (y->pkt->stream_index == y->sub.idx) {
+					int got;
+					AVSubtitle sub;
+					if (avcodec_decode_subtitle2(y->sub.ctx, &sub, &got, y->pkt) >= 0 && got) {
+						post("\n%s", y->pkt->data);
 					}
 				}
 			}
