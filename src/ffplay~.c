@@ -208,13 +208,33 @@ static err_t ffplay_stream(t_ffplay *x, t_avstream *s, int i, enum AVMediaType t
 	return 0;
 }
 
+static err_t ffplay_swr(t_ffplay *x) {
+	swr_free(&x->swr);
+	AVChannelLayout layout_in;
+	if (x->a.ctx->ch_layout.u.mask) {
+		av_channel_layout_from_mask(&layout_in, x->a.ctx->ch_layout.u.mask);
+	} else {
+		av_channel_layout_default(&layout_in, x->a.ctx->ch_layout.nb_channels);
+	}
+	swr_alloc_set_opts2(&x->swr
+	, &x->layout, AV_SAMPLE_FMT_FLT   , x->a.ctx->sample_rate
+	, &layout_in, x->a.ctx->sample_fmt, x->a.ctx->sample_rate
+	, 0, NULL);
+	if (swr_init(x->swr) < 0) {
+		return "SWResampler initialization failed";
+	}
+	x->r.ratio = (double)x->a.ctx->sample_rate / sys_getsr();
+	rabbit_speed(&x->r, x->r.speed);
+	return 0;
+}
+
 static void ffplay_audio(t_ffplay *x, t_float f) {
 	err_t err_msg = ffplay_stream(x, &x->a, f, AVMEDIA_TYPE_AUDIO);
 	if (err_msg) {
 		logpost(x, PD_DEBUG, "ffplay_audio: %s.", err_msg);
-	} else {
-		x->r.ratio = (double)x->a.ctx->sample_rate / sys_getsr();
-		rabbit_speed(&x->r, x->r.speed);
+	} else if ( (err_msg = ffplay_swr(x)) ) {
+		logpost(x, PD_DEBUG, "ffplay_audio: %s.", err_msg);
+		x->z.open = x->z.play = 0;
 	}
 }
 
@@ -268,27 +288,9 @@ static err_t ffplay_load(t_ffplay *x, int index) {
 	if (err_msg) {
 		return err_msg;
 	}
-
-	swr_free(&x->swr);
-	AVChannelLayout layout_in;
-	if (x->a.ctx->ch_layout.u.mask) {
-		av_channel_layout_from_mask(&layout_in, x->a.ctx->ch_layout.u.mask);
-	} else {
-		av_channel_layout_default(&layout_in, x->a.ctx->ch_layout.nb_channels);
-	}
-	swr_alloc_set_opts2(&x->swr
-	, &x->layout, AV_SAMPLE_FMT_FLT   , x->a.ctx->sample_rate
-	, &layout_in, x->a.ctx->sample_fmt, x->a.ctx->sample_rate
-	, 0, NULL);
-	if (swr_init(x->swr) < 0) {
-		return "SWResampler initialization failed";
-	}
-
-	x->r.ratio = (double)x->a.ctx->sample_rate / sys_getsr();
-	rabbit_speed(&x->r, x->r.speed);
 	rabbit_reset(&x->r);
 	x->frm->pts = 0;
-	return 0;
+	return ffplay_swr(x);
 }
 
 static void ffplay_open(t_ffplay *x, t_symbol *s) {
