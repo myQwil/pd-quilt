@@ -1,4 +1,5 @@
 #include "player.h"
+#include "rabbit.h"
 #include <gme.h>
 
 static const float short_frac = 1.f / 0x8000;
@@ -7,9 +8,11 @@ static t_symbol *s_mask;
 /* ------------------------- Game Music Emu player ------------------------- */
 typedef struct _gme {
 	t_player z;
+	t_rabbit r;
 	Music_Emu *emu;
 	gme_info_t *info; /* current track info */
 	t_symbol *path;   /* path to the most recently read file */
+	t_float *speed;   /* rate of playback (inlet pointer) */
 	t_float *tempo;   /* rate of emulation (inlet pointer) */
 	t_float  tempo_;  /* rate of emulation (private value) */
 	int voices;       /* number of voices */
@@ -22,7 +25,15 @@ static void gmepd_seek(t_gme *x, t_float f) {
 	}
 	gme_seek(x->emu, f);
 	gme_set_fade(x->emu, -1, 0);
-	player_reset(&x->z);
+	rabbit_reset(&x->r);
+}
+
+static void gmepd_speed(t_gme *x, t_float f) {
+	*x->speed = f;
+}
+
+static void gmepd_tempo(t_gme *x, t_float f) {
+	*x->tempo = f;
 }
 
 static inline void gmepd_tempo_(t_gme *x, t_float f) {
@@ -30,8 +41,11 @@ static inline void gmepd_tempo_(t_gme *x, t_float f) {
 	gme_set_tempo(x->emu, x->tempo_);
 }
 
-static void gmepd_tempo(t_gme *x, t_float f) {
-	*x->tempo = f;
+static void gmepd_interp(t_gme *x, t_float f) {
+	int err = rabbit_interp(&x->r, x->z.nch, f);
+	if (err) {
+		x->z.open = x->z.play = 0;
+	}
 }
 
 static t_int *gmepd_perform(t_int *w) {
@@ -48,8 +62,9 @@ static t_int *gmepd_perform(t_int *w) {
 	if (x->play) {
 		t_sample *in2 = (t_sample *)(w[2]);
 		t_sample *in3 = (t_sample *)(w[3]);
+		t_rabbit *r = &y->r;
+		SRC_DATA *data = &r->data;
 		int buf_size = nch * FRAMES;
-		SRC_DATA *data = &x->data;
 		for (; n--; in2++, in3++) {
 			if (data->output_frames_gen > 0) {
 				perform:
@@ -61,11 +76,11 @@ static t_int *gmepd_perform(t_int *w) {
 				continue;
 			} else if (data->input_frames > 0) {
 				resample:
-				if (x->speed_ != *in2) {
-					player_speed_(x, *in2);
+				if (r->speed != *in2) {
+					rabbit_speed(r, *in2);
 				}
 				data->data_out = x->out;
-				src_process(x->state, data);
+				src_process(r->state, data);
 				data->input_frames -= data->input_frames_used;
 				data->data_in += data->input_frames_used * nch;
 				goto perform;
@@ -151,7 +166,7 @@ static void gmepd_bmask(t_gme *x) {
 }
 
 static gme_err_t gmepd_load(t_gme *x, int index) {
-	if (!x->z.state) {
+	if (!x->r.state) {
 		return "SRC has not been initialized";
 	}
 
@@ -166,7 +181,7 @@ static gme_err_t gmepd_load(t_gme *x, int index) {
 	}
 
 	gme_set_fade(x->emu, -1, 0);
-	player_reset(&x->z);
+	rabbit_reset(&x->r);
 	return 0;
 }
 
@@ -305,6 +320,15 @@ static void gmepd_stop(t_gme *x) {
 static void *gmepd_new(t_class *gmeclass, int nch, t_symbol *s, int ac, t_atom *av) {
 	(void)s;
 	t_gme *x = (t_gme *)player_new(gmeclass, nch);
+	int err = rabbit_init(&x->r, nch);
+	if (err) {
+		player_free(&x->z);
+		pd_free((t_pd *)x);
+		return NULL;
+	}
+
+	t_inlet *in2 = signalinlet_new(&x->z.obj, x->r.speed);
+	x->speed = &in2->iu_floatsignalvalue;
 
 	x->tempo_ = 1.;
 	t_inlet *in3 = signalinlet_new(&x->z.obj, x->tempo_);
@@ -324,6 +348,7 @@ static void gmepd_free(t_gme *x) {
 	gme_free_info(x->info);
 	gme_delete(x->emu);
 	player_free(&x->z);
+	src_delete(x->r.state);
 }
 
 static t_class *gmepd_setup(t_symbol *s, t_newmethod newm) {
@@ -348,13 +373,15 @@ static t_class *gmepd_setup(t_symbol *s, t_newmethod newm) {
 	class_addfloat(cls, gmepd_float);
 
 	class_addmethod(cls, (t_method)gmepd_seek, gensym("seek"), A_FLOAT, 0);
+	class_addmethod(cls, (t_method)gmepd_speed, gensym("speed"), A_FLOAT, 0);
 	class_addmethod(cls, (t_method)gmepd_tempo, gensym("tempo"), A_FLOAT, 0);
+	class_addmethod(cls, (t_method)gmepd_interp, gensym("interp"), A_FLOAT, 0);
 	class_addmethod(cls, (t_method)gmepd_mute, gensym("mute"), A_GIMME, 0);
 	class_addmethod(cls, (t_method)gmepd_mask, gensym("mask"), A_GIMME, 0);
 	class_addmethod(cls, (t_method)gmepd_print, gensym("print"), A_GIMME, 0);
 	class_addmethod(cls, (t_method)gmepd_open, gensym("open"), A_SYMBOL, 0);
-	class_addmethod(cls, (t_method)gmepd_stop, gensym("stop"), 0);
-	class_addmethod(cls, (t_method)gmepd_bmask, gensym("bmask"), 0);
+	class_addmethod(cls, (t_method)gmepd_stop, gensym("stop"), A_NULL);
+	class_addmethod(cls, (t_method)gmepd_bmask, gensym("bmask"), A_NULL);
 
 	return cls;
 }

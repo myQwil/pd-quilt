@@ -1,4 +1,5 @@
 #include "player.h"
+#include "rabbit.h"
 #include "playlist.h"
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
@@ -17,6 +18,8 @@ typedef struct _avstream {
 
 typedef struct _ffplay {
 	t_player z;
+	t_rabbit r;
+	t_float *speed; /* rate of playback (inlet pointer) */
 	t_avstream a;   /* audio stream */
 	t_avstream sub; /* subtitle stream */
 	AVPacket *pkt;
@@ -34,7 +37,7 @@ static void ffplay_seek(t_ffplay *x, t_float f) {
 	avformat_seek_file(x->ic, -1, 0, f * 1000, x->ic->duration, 0);
 	AVRational ratio = x->ic->streams[x->a.idx]->time_base;
 	x->frm->pts = f * ratio.den / (ratio.num * 1000);
-	player_reset(&x->z);
+	rabbit_reset(&x->r);
 	swr_init(x->swr);
 
 	// avcodec_flush_buffers(x->a.ctx); // doesn't always flush properly
@@ -56,6 +59,17 @@ static void ffplay_position(t_ffplay *x) {
 	outlet_anything(x->z.o_meta, s_pos, 1, &pos);
 }
 
+static void ffplay_speed(t_ffplay *x, t_float f) {
+	*x->speed = f;
+}
+
+static void ffplay_interp(t_ffplay *x, t_float f) {
+	int err = rabbit_interp(&x->r, x->z.nch, f);
+	if (err) {
+		x->z.open = x->z.play = 0;
+	}
+}
+
 static t_int *ffplay_perform(t_int *w) {
 	t_ffplay *y = (t_ffplay *)(w[1]);
 	int n = (int)w[3];
@@ -69,7 +83,8 @@ static t_int *ffplay_perform(t_int *w) {
 
 	if (x->play) {
 		t_sample *in2 = (t_sample *)(w[2]);
-		SRC_DATA *data = &x->data;
+		t_rabbit *r = &y->r;
+		SRC_DATA *data = &r->data;
 		for (; n--; in2++) {
 			if (data->output_frames_gen > 0) {
 				perform:
@@ -81,11 +96,11 @@ static t_int *ffplay_perform(t_int *w) {
 				continue;
 			} else if (data->input_frames > 0) {
 				resample:
-				if (x->speed_ != *in2) {
-					player_speed_(x, *in2);
+				if (r->speed != *in2) {
+					rabbit_speed(r, *in2);
 				}
 				data->data_out = x->out;
-				src_process(x->state, data);
+				src_process(r->state, data);
 				data->input_frames -= data->input_frames_used;
 				if (data->input_frames <= 0) {
 					data->data_in = x->in;
@@ -198,8 +213,8 @@ static void ffplay_audio(t_ffplay *x, t_float f) {
 	if (err_msg) {
 		logpost(x, PD_DEBUG, "ffplay_audio: %s.", err_msg);
 	} else {
-		x->z.ratio = (double)x->a.ctx->sample_rate / sys_getsr();
-		player_speed_(&x->z, x->z.speed_);
+		x->r.ratio = (double)x->a.ctx->sample_rate / sys_getsr();
+		rabbit_speed(&x->r, x->r.speed);
 	}
 }
 
@@ -215,7 +230,7 @@ static void ffplay_subtitle(t_ffplay *x, t_float f) {
 }
 
 static err_t ffplay_load(t_ffplay *x, int index) {
-	if (!x->z.state) {
+	if (!x->r.state) {
 		return "SRC has not been initialized";
 	}
 
@@ -269,9 +284,9 @@ static err_t ffplay_load(t_ffplay *x, int index) {
 		return "SWResampler initialization failed";
 	}
 
-	x->z.ratio = (double)x->a.ctx->sample_rate / sys_getsr();
-	player_speed_(&x->z, x->z.speed_);
-	player_reset(&x->z);
+	x->r.ratio = (double)x->a.ctx->sample_rate / sys_getsr();
+	rabbit_speed(&x->r, x->r.speed);
+	rabbit_reset(&x->r);
 	x->frm->pts = 0;
 	return 0;
 }
@@ -440,6 +455,15 @@ static void *ffplay_new(t_symbol *s, int ac, t_atom *av) {
 	}
 
 	t_ffplay *x = (t_ffplay *)player_new(ffplay_class, ac);
+	if ((err = rabbit_init(&x->r, ac)) != 0) {
+		player_free(&x->z);
+		pd_free((t_pd *)x);
+		return NULL;
+	}
+
+	t_inlet *in2 = signalinlet_new(&x->z.obj, x->r.speed);
+	x->speed = &in2->iu_floatsignalvalue;
+
 	x->pkt = av_packet_alloc();
 	x->frm = av_frame_alloc();
 	x->layout = layout;
@@ -463,6 +487,7 @@ static void ffplay_free(t_ffplay *x) {
 	t_playlist *pl = &x->plist;
 	freebytes(pl->arr, pl->max * sizeof(t_symbol *));
 	player_free(&x->z);
+	src_delete(x->r.state);
 }
 
 void ffplay_tilde_setup(void) {
@@ -492,8 +517,12 @@ void ffplay_tilde_setup(void) {
 	, gensym("dsp"), A_CANT, 0);
 	class_addmethod(ffplay_class, (t_method)ffplay_seek
 	, gensym("seek"), A_FLOAT, 0);
+	class_addmethod(ffplay_class, (t_method)ffplay_speed
+	, gensym("speed"), A_FLOAT, 0);
 	class_addmethod(ffplay_class, (t_method)ffplay_audio
 	, gensym("audio"), A_FLOAT, 0);
+	class_addmethod(ffplay_class, (t_method)ffplay_interp
+	, gensym("interp"), A_FLOAT, 0);
 	class_addmethod(ffplay_class, (t_method)ffplay_subtitle
 	, gensym("subtitle"), A_FLOAT, 0);
 	class_addmethod(ffplay_class, (t_method)ffplay_print

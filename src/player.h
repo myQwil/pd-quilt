@@ -1,65 +1,23 @@
 #include "inlet.h"
 #include "pause.h"
 #include <string.h>
-#include <samplerate.h>
 
 #define FRAMES 0x10
 
 static t_symbol *s_open;
 static t_symbol *s_play;
-
 static t_atom(*fn_meta)(void *, t_symbol *);
 
 typedef struct _player {
 	t_object obj;
 	float *in;
 	float *out;
-	SRC_DATA   data;
-	SRC_STATE *state;
 	t_sample **outs;
-	t_float *speed;     /* playback speed (inlet pointer) */
-	t_float  speed_;    /* playback speed (private value) */
-	double ratio;       /* resampling ratio */
 	unsigned char play; /* play/pause toggle */
 	unsigned char open; /* true when a file has been successfully opened */
 	unsigned nch;       /* number of channels */
 	t_outlet *o_meta;   /* outputs track metadata */
 } t_player;
-
-static inline void player_reset(t_player *x) {
-	src_reset(x->state);
-	x->data.output_frames_gen = 0;
-	x->data.input_frames = 0;
-}
-
-// SRC can get stuck if it's too close to the fastest possible speed
-static const t_float fastest = FRAMES - (1. / 128.);
-static const t_float slowest = 1. / FRAMES;
-
-static inline void player_speed_(t_player *x, t_float f) {
-	x->speed_ = f;
-	f *= x->ratio;
-	f = f > fastest ? fastest : (f < slowest ? slowest : f);
-	x->data.src_ratio = 1. / f;
-}
-
-static void player_speed(t_player *x, t_float f) {
-	*x->speed = f;
-}
-
-static void player_interp(t_player *x, t_float f) {
-	int d = f;
-	if (d < SRC_SINC_BEST_QUALITY || d > SRC_LINEAR) {
-		return;
-	}
-
-	int err;
-	src_delete(x->state);
-	if ((x->state = src_new(d, x->nch, &err)) == NULL) {
-		post("Error : src_new() failed : %s.", src_strerror(err));
-		x->open = x->play = 0;
-	}
-}
 
 static inline t_atom player_time(t_float ms) {
 	return (t_atom) {
@@ -149,25 +107,10 @@ static void player_bang(t_player *x) {
 }
 
 static t_player *player_new(t_class *cl, unsigned nch) {
-	int err;
-	SRC_STATE *state;
-	if (!(state = src_new(SRC_SINC_FASTEST, nch, &err))) {
-		pd_error(0, "src_new() failed : %s.", src_strerror(err));
-		return NULL;
-	}
-
 	t_player *x = (t_player *)pd_new(cl);
 	x->in = (t_sample *)getbytes(nch * FRAMES * sizeof(t_sample));
 	x->out = (t_sample *)getbytes(nch * FRAMES * sizeof(t_sample));
-	x->state = state;
 	x->nch = nch;
-
-	x->data.src_ratio = x->ratio = 1.;
-	x->data.output_frames = FRAMES;
-
-	x->speed_ = 1.;
-	t_inlet *in2 = signalinlet_new(&x->obj, x->speed_);
-	x->speed = &in2->iu_floatsignalvalue;
 
 	x->outs = (t_sample **)getbytes(nch * sizeof(t_sample *));
 	while (nch--) {
@@ -180,7 +123,6 @@ static t_player *player_new(t_class *cl, unsigned nch) {
 }
 
 static void player_free(t_player *x) {
-	src_delete(x->state);
 	freebytes(x->in, x->nch * sizeof(t_sample) * FRAMES);
 	freebytes(x->out, x->nch * sizeof(t_sample) * FRAMES);
 	freebytes(x->outs, x->nch * sizeof(t_sample *));
@@ -194,11 +136,7 @@ static t_class *class_player
 	t_class *cls = class_new(s, newm, free, size, 0, A_GIMME, 0);
 	class_addbang(cls, player_bang);
 	class_addanything(cls, player_anything);
-
-	class_addmethod(cls, (t_method)player_interp, gensym("interp"), A_FLOAT, 0);
-	class_addmethod(cls, (t_method)player_speed, gensym("speed"), A_FLOAT, 0);
 	class_addmethod(cls, (t_method)player_send, gensym("send"), A_SYMBOL, 0);
 	class_addmethod(cls, (t_method)player_play, gensym("play"), A_GIMME, 0);
-
 	return cls;
 }
