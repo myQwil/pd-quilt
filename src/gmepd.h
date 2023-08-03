@@ -9,6 +9,8 @@ static t_symbol *s_mask;
 typedef struct _gme {
 	t_player z;
 	t_rabbit r;
+	t_sample *in;
+	t_sample *out;
 	Music_Emu *emu;
 	gme_info_t *info; /* current track info */
 	t_symbol *path;   /* path to the most recently read file */
@@ -79,7 +81,7 @@ static t_int *gmepd_perform(t_int *w) {
 				if (r->speed != *in2) {
 					rabbit_speed(r, *in2);
 				}
-				data->data_out = x->out;
+				data->data_out = y->out;
 				src_process(r->state, data);
 				data->input_frames -= data->input_frames_used;
 				data->data_in += data->input_frames_used * nch;
@@ -88,8 +90,8 @@ static t_int *gmepd_perform(t_int *w) {
 				if (y->tempo_ != *in3) {
 					gmepd_tempo_(y, *in3);
 				}
-				data->data_in = x->in;
-				float *in = x->in;
+				data->data_in = y->in;
+				float *in = y->in;
 				short arr[buf_size], *buf = arr;
 				gme_play(y->emu, buf_size, buf);
 				for (int i = buf_size; i--; in++, buf++) {
@@ -334,6 +336,9 @@ static void *gmepd_new(t_class *gmeclass, int nch, t_symbol *s, int ac, t_atom *
 	t_inlet *in3 = signalinlet_new(&x->z.obj, x->tempo_);
 	x->tempo = &in3->iu_floatsignalvalue;
 
+	x->in = (t_sample *)getbytes(nch * FRAMES * sizeof(t_sample));
+	x->out = (t_sample *)getbytes(nch * FRAMES * sizeof(t_sample));
+
 	x->mask = 0;
 	x->voices = 16;
 	x->path = gensym("no track loaded");
@@ -349,6 +354,8 @@ static void gmepd_free(t_gme *x) {
 	gme_delete(x->emu);
 	player_free(&x->z);
 	src_delete(x->r.state);
+	freebytes(x->in, x->z.nch * sizeof(t_sample) * FRAMES);
+	freebytes(x->out, x->z.nch * sizeof(t_sample) * FRAMES);
 }
 
 static t_class *gmepd_setup(t_symbol *s, t_newmethod newm) {

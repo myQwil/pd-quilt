@@ -19,6 +19,8 @@ typedef struct _avstream {
 typedef struct _ffplay {
 	t_player z;
 	t_rabbit r;
+	t_sample *in;
+	t_sample *out;
 	t_float *speed; /* rate of playback (inlet pointer) */
 	t_avstream a;   /* audio stream */
 	t_avstream sub; /* subtitle stream */
@@ -100,13 +102,13 @@ static t_int *ffplay_perform(t_int *w) {
 				if (r->speed != *in2) {
 					rabbit_speed(r, *in2);
 				}
-				data->data_out = x->out;
+				data->data_out = y->out;
 				src_process(r->state, data);
 				data->input_frames -= data->input_frames_used;
 				if (data->input_frames <= 0) {
-					data->data_in = x->in;
+					data->data_in = y->in;
 					data->input_frames = swr_convert(y->swr
-					, (uint8_t **)&x->in, FRAMES
+					, (uint8_t **)&y->in, FRAMES
 					, 0, 0);
 				} else {
 					data->data_in += data->input_frames_used * nch;
@@ -114,7 +116,7 @@ static t_int *ffplay_perform(t_int *w) {
 				goto perform;
 			}
 			// receive
-			data->data_in = x->in;
+			data->data_in = y->in;
 			for (; av_read_frame(y->ic, y->pkt) >= 0; av_packet_unref(y->pkt)) {
 				if (y->pkt->stream_index == y->a.idx) {
 					if (avcodec_send_packet(y->a.ctx, y->pkt) < 0
@@ -122,7 +124,7 @@ static t_int *ffplay_perform(t_int *w) {
 						continue;
 					}
 					data->input_frames = swr_convert(y->swr
-					, (uint8_t **)&x->in, FRAMES
+					, (uint8_t **)&y->in, FRAMES
 					, (const uint8_t **)y->frm->extended_data, y->frm->nb_samples);
 					av_packet_unref(y->pkt);
 					goto resample;
@@ -466,6 +468,9 @@ static void *ffplay_new(t_symbol *s, int ac, t_atom *av) {
 	t_inlet *in2 = signalinlet_new(&x->z.obj, x->r.speed);
 	x->speed = &in2->iu_floatsignalvalue;
 
+	x->in = (t_sample *)getbytes(ac * FRAMES * sizeof(t_sample));
+	x->out = (t_sample *)getbytes(ac * FRAMES * sizeof(t_sample));
+
 	x->pkt = av_packet_alloc();
 	x->frm = av_frame_alloc();
 	x->layout = layout;
@@ -490,6 +495,8 @@ static void ffplay_free(t_ffplay *x) {
 	freebytes(pl->arr, pl->max * sizeof(t_symbol *));
 	player_free(&x->z);
 	src_delete(x->r.state);
+	freebytes(x->in, x->z.nch * sizeof(t_sample) * FRAMES);
+	freebytes(x->out, x->z.nch * sizeof(t_sample) * FRAMES);
 }
 
 void ffplay_tilde_setup(void) {

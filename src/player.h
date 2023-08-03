@@ -2,16 +2,12 @@
 #include "pause.h"
 #include <string.h>
 
-#define FRAMES 0x10
-
 static t_symbol *s_open;
 static t_symbol *s_play;
 static t_atom(*fn_meta)(void *, t_symbol *);
 
 typedef struct _player {
 	t_object obj;
-	float *in;
-	float *out;
 	t_sample **outs;
 	unsigned char play; /* play/pause toggle */
 	unsigned char open; /* true when a file has been successfully opened */
@@ -108,23 +104,17 @@ static void player_bang(t_player *x) {
 
 static t_player *player_new(t_class *cl, unsigned nch) {
 	t_player *x = (t_player *)pd_new(cl);
-	x->in = (t_sample *)getbytes(nch * FRAMES * sizeof(t_sample));
-	x->out = (t_sample *)getbytes(nch * FRAMES * sizeof(t_sample));
 	x->nch = nch;
-
 	x->outs = (t_sample **)getbytes(nch * sizeof(t_sample *));
 	while (nch--) {
 		outlet_new(&x->obj, &s_signal);
 	}
 	x->o_meta = outlet_new(&x->obj, 0);
-
 	x->open = x->play = 0;
 	return x;
 }
 
 static void player_free(t_player *x) {
-	freebytes(x->in, x->nch * sizeof(t_sample) * FRAMES);
-	freebytes(x->out, x->nch * sizeof(t_sample) * FRAMES);
 	freebytes(x->outs, x->nch * sizeof(t_sample *));
 }
 

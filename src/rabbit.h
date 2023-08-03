@@ -1,9 +1,7 @@
 #include "m_pd.h"
 #include <samplerate.h>
 
-#ifndef FRAMES
-# define FRAMES 0x10
-#endif
+#define FRAMES 0x10
 
 typedef struct _rabbit {
 	SRC_STATE *state;
