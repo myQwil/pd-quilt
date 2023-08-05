@@ -372,7 +372,7 @@ static t_atom ffplay_meta(void *y, t_symbol *s) {
 		if (entry) {
 			SETSYMBOL(&meta, gensym(entry->value));
 		} else {
-			meta = (t_atom){ A_NULL, {0} };
+			meta = (t_atom){ A_SYMBOL, {.w_symbol = &s_bang} };
 		}
 	}
 	return meta;

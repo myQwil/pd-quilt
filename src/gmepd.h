@@ -273,7 +273,7 @@ static t_atom gmepd_meta(void *y, t_symbol *s) {
 	} else if (s == dict[12]) { // dumper
 		SETSYMBOL(&meta, gensym(x->info->dumper));
 	} else {
-		meta = (t_atom){ A_NULL, {0} };
+		meta = (t_atom){ A_SYMBOL, {.w_symbol = &s_bang} };
 	}
 	return meta;
 }

@@ -55,9 +55,10 @@ static void player_info_custom(t_player *x, int ac, t_atom *av) {
 				strncpy(buf, pct, len);
 				buf[len] = 0;
 				t_atom meta = fn_meta(x, gensym(buf));
+				t_symbol *s = meta.a_w.w_symbol;
 				switch (meta.a_type) {
 				case A_FLOAT: startpost("%g", meta.a_w.w_float); break;
-				case A_SYMBOL: startpost("%s", meta.a_w.w_symbol->s_name); break;
+				case A_SYMBOL: startpost("%s", s == &s_bang ? "" : s->s_name); break;
 				default: startpost("");
 				}
 				sym += len + 2;
@@ -75,9 +76,7 @@ static void player_send(t_player *x, t_symbol *s) {
 		return post("No file opened.");
 	}
 	t_atom meta = fn_meta(x, s);
-	if (meta.a_type) {
-		outlet_anything(x->o_meta, s, 1, &meta);
-	}
+	outlet_anything(x->o_meta, s, 1, &meta);
 }
 
 static void player_anything(t_player *x, t_symbol *s, int ac, t_atom *av) {
