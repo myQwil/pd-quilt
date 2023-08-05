@@ -30,9 +30,8 @@ static void is_bang(t_is *x) {
 }
 
 static void is_anything(t_is *x, t_symbol *s, int ac, t_atom *av) {
-	(void)ac;
 	(void)av;
-	int result = (x->type == s);
+	int result = (x->type == (ac ? s : &s_symbol));
 	outlet_float(x->obj.ob_outlet, result);
 }
 
