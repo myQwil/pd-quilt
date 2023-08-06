@@ -23,10 +23,10 @@
 #X msg 190 70 # 38;
 #X msg 200 100 # 36;
 #X msg 210 130 # 35;
-#X msg 302 37 37 16 19 26;
-#X msg 313 68 # 41 15 19 26;
-#X msg 322 97 # 36;
-#X msg 326 127 # 34;
+#X msg 300 30 37 16 19 26;
+#X msg 310 60 # 41 15 19 26;
+#X msg 320 90 # 36;
+#X msg 320 120 # 34;
 #X connect 0 0 1 0;
 #X connect 2 0 1 0;
 #X connect 3 0 1 0;
@@ -101,7 +101,7 @@
 #X obj 210 270 declare -lib cyclone;
 #X obj 220 160 * -1;
 #X obj 120 200 phasor~;
-#X obj 320 189 * 2;
+#X obj 320 180 * 2;
 #X connect 0 0 3 0;
 #X connect 1 0 0 1;
 #X connect 2 0 10 0;

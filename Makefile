@@ -30,6 +30,7 @@ endef
 
 # FFplay
 ffplay~.class.ldlibs = -lsamplerate -lavutil -lavcodec -lavformat -lswresample
+ffband~.class.ldlibs = -lrubberband -lavutil -lavcodec -lavformat -lswresample
 
 warn.flags = -Wall -Wextra -Wshadow -Winline -Wstrict-aliasing -Wno-cast-function-type
 

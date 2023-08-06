@@ -1,4 +1,7 @@
 *.zip
+*.wav
+*.jpg
+*.png
 *.*~
 
 # Builds
