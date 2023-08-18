@@ -1,14 +1,12 @@
-#N canvas 400 200 450 360 16;
-#X obj 180 30 cnv 15 60 24 empty empty vib~ 4 12 0 18 #000000 #fcfcfc
-0;
-#X floatatom 40 110 0 0 0 2 rate - - 12;
-#X obj 40 200 *~ 440;
-#X obj 40 230 phasor~;
-#X obj 40 260 *~;
-#X obj 100 260 hsl 128 20 0.001 1 1 0 empty empty empty -2 -8 0 10
-#2f004d #fcfcfc #fcfcfc 0 1;
-#X obj 40 290 dac~;
-#X floatatom 160 290 0 0 0 0 - - - 0;
+#N canvas 400 200 480 360 16;
+#X obj 200 30 cnv 15 60 24 empty empty vib~ 4 12 0 18 #000000 #fcfcfc 0;
+#X floatatom 140 110 0 0 0 2 rate - - 0;
+#X obj 140 210 *~ 440;
+#X obj 140 240 phasor~;
+#X obj 140 270 *~;
+#X obj 200 270 hsl 128 20 0.001 1 1 0 empty empty empty -2 -8 0 10 #2f004d #fcfcfc #fcfcfc 0 1;
+#X obj 140 300 dac~;
+#X floatatom 260 300 0 0 0 0 - - - 0;
 #N canvas 970 490 450 300 vol 0;
 #X obj 160 190 zp~ 15;
 #X msg 160 120 0;
@@ -24,14 +22,14 @@
 #X connect 5 0 4 0;
 #X connect 6 0 1 0;
 #X connect 6 1 5 0;
-#X restore 100 290 pd vol;
-#X floatatom 110 200 0 0 0 0 - - - 0;
-#X floatatom 90 110 0 0 0 2 depth - - 12;
-#X msg 150 140 0;
-#X text 150 120 reset phase;
-#X obj 90 140 / 100;
-#X obj 40 140 / 10;
-#X obj 40 170 vib~ 6 0.01;
+#X restore 200 300 pd vol;
+#X floatatom 210 210 0 0 0 0 - - - 0;
+#X floatatom 200 110 0 0 0 2 depth - - 0;
+#X msg 270 140 0;
+#X text 270 120 reset phase;
+#X obj 200 140 / 100;
+#X obj 140 140 / 10;
+#X obj 140 180 vib~ 6 0.01;
 #X text 40 60 multiply with pitch to create vibrato effect;
 #X connect 1 0 14 0;
 #X connect 2 0 3 0;
