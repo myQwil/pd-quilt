@@ -43,7 +43,7 @@
 #X connect 13 0 11 0;
 #X connect 14 0 12 0;
 #X connect 14 1 13 1;
-#X coords 0 -1 1 1 46 50 2 118 118;
+#X coords 0 -1 1 1 54 54 2 118 118;
 #X restore 330 360 pd scaler;
 #X obj 40 60 cupqb;
 #N canvas 880 200 720 560 commands 0;
@@ -222,13 +222,13 @@
 #X obj 50 270 muse 40 2 4 5 7 9 11;
 #N canvas 910 310 780 630 notation 0;
 #X text 310 40 change the root+intervals respectively;
-#X text 520 170 major scale;
+#X text 530 170 major scale;
 #X text 520 230 change notes relative;
 #X text 520 250 to their current value;
 #X obj 140 110 s cmd;
 #X obj 350 320 s cmd;
 #X msg 370 140 foo bar 10;
-#X text 550 200 major to minor;
+#X text 570 200 major to minor;
 #X msg 380 170 do 2 4 5 7 9 11;
 #X msg 220 70 --;
 #X msg 260 70 ++;
@@ -243,7 +243,7 @@
 #X msg 90 260 . + .;
 #X msg 100 290 . . -;
 #X msg 390 200 do re 3 fa so 8 10;
-#X text 460 140 unrecognized terms are skipped;
+#X text 470 140 unrecognized terms are skipped;
 #X msg 220 130 ^12 --12;
 #X text 310 360 inversion;
 #X msg 230 390 <;
@@ -314,7 +314,7 @@
 #X msg 330 460 \$1+\$2;
 #X obj 170 300 route float;
 #X obj 220 330 print -n;
-#X text 380 460 note + semitone;
+#X text 390 460 note + semitone;
 #N canvas 730 350 380 370 ks 0;
 #X obj 50 50 noise~;
 #X obj 50 220 *~;
@@ -360,7 +360,7 @@
 #X connect 15 0 3 1;
 #X restore 50 380 pd ks;
 #X obj 40 110 muse 69 7;
-#X text 120 110 default args;
+#X text 130 110 default args;
 #N canvas 400 200 450 300 lib 0;
 #X obj 140 120 declare -lib blunt;
 #X restore 40 20 pd lib;

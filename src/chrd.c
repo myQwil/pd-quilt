@@ -30,7 +30,7 @@ static inline t_float chrd_step(t_music *x, int d) {
 	return (x->oct * ((d - !neg) / n - neg) + x->flin.fp[0] + step);
 }
 
-static void music_f(t_music *x, t_float f, char c, t_float g) {
+static void music_f(t_music *x, t_float f, op_func op, t_float g) {
 	t_chrd *y = (t_chrd *)x;
 	int d = f;
 	t_float nte = chrd_step(x, d);
@@ -39,8 +39,8 @@ static void music_f(t_music *x, t_float f, char c, t_float g) {
 		t_float nxt = chrd_step(x, d + dir);
 		nte += dir * (f - d) * (nxt - nte);
 	}
-	if (c) {
-		music_operate(&nte, c, g);
+	if (op) {
+		op(&nte, g);
 	}
 	int n = y->ins - 1, i = (d - (d > 0)) % n;
 	i += (i < 0) * n + 1;

@@ -3,8 +3,21 @@
 #include <stdlib.h> // strtof
 #include <string.h> // memcpy
 
-static inline int isoperator(char c) {
-	return (c == '^' || c == 'v' || c == '+' || c == '-' || c == '*' || c == '/');
+#define REF 440
+#define TET 12
+
+typedef void (*op_func)(t_float *, t_float);
+void add      (t_float *fp, t_float f) { *fp += f; }
+void subtract (t_float *fp, t_float f) { *fp -= f; }
+void multiply (t_float *fp, t_float f) { *fp *= f; }
+void divide   (t_float *fp, t_float f) { *fp /= f; }
+
+op_func ops[256] = {0}; // Initialize all to NULL
+void op_init() {
+    ops['+'] = ops['^'] = add;
+    ops['-'] = ops['v'] = subtract;
+    ops['*'] = multiply;
+    ops['/'] = divide;
 }
 
 typedef struct _music {
@@ -37,7 +50,7 @@ static inline t_float music_interval(t_music *x, t_float *fp, t_float f) {
 	return step;
 }
 
-static inline t_float music_getfloat(t_music *x, t_float *temp, const char *cp) {
+static inline t_float music_get(t_music *x, t_float *temp, const char *cp) {
 	// ampersand before the number means it's a reference to the scale by index
 	int ref = (*cp == '&');
 	t_float f = cp[ref] ? strtof(cp + ref, 0) : 1;
@@ -45,20 +58,6 @@ static inline t_float music_getfloat(t_music *x, t_float *temp, const char *cp) 
 		f = music_interval(x, temp, f);
 	}
 	return f;
-}
-
-static inline void music_operate(t_float *fp, char c, t_float f) {
-	switch (c) {
-	case '+':
-	case '^': *fp += f; break;
-
-	case '-':
-	case 'v': *fp -= f; break;
-
-	case '*': *fp *= f; break;
-
-	case '/': *fp /= f; break;
-	}
 }
 
 static void music_ptr(t_music *x, t_symbol *s) {
@@ -127,19 +126,20 @@ static int music_scale(t_music *x, t_flin *flin, int n, int ac, t_atom *av) {
 				}
 			}
 
-			char c = cp[0];
+			op_func op;
+			unsigned char c = cp[0];
 			if (c == '&') {
 				*fp = music_interval(x, temp, (cp[1] ? strtof(cp + 1, 0) : 1));
-			} else if (isoperator(c)) {
+			} else if ( (op = ops[c]) ) {
 				if (cp[0] == cp[1]) { // ++, --, etc.
 					// do the same shift for all intervals that follow
-					t_float f = music_getfloat(x, temp, cp + 2);
+					t_float f = music_get(x, temp, cp + 2);
 					for (; z--; n++, fp++) {
-						music_operate(fp, c, f);
+						op(fp, f);
 					}
 					continue;
 				} else {
-					music_operate(fp, c, music_getfloat(x, temp, cp + 1));
+					op(fp, music_get(x, temp, cp + 1));
 				}
 			} else if (c == '<' || c == '>') { // scale inversion
 				int mvrt = cp[0] == cp[1]; // << or >> moves the root
@@ -205,8 +205,8 @@ static int music_scale(t_music *x, t_flin *flin, int n, int ac, t_atom *av) {
 				tp[0] = root;
 				n += z;
 				continue;
-			} else if (isoperator(cp[1])) { // current value ± semitones
-				music_operate(fp, cp[1], music_getfloat(x, temp, cp + 2));
+			} else if ( (op = ops[(unsigned char)cp[1]]) ) { // current value ± semitones
+				op(fp, music_get(x, temp, cp + 2));
 			}
 			n++;
 		}
@@ -239,10 +239,10 @@ static void music_list(t_music *x, t_symbol *s, int ac, t_atom *av) {
 	}
 }
 
-static void music_f(t_music *x, t_float f, char c, t_float g);
+static void music_f(t_music *x, t_float f, op_func op, t_float g);
 
 static void music_float(t_music *x, t_float f) {
-	music_f(x, f, 0, 0);
+	music_f(x, f, NULL, 0);
 }
 
 static int music_any(t_music *x, t_flin *flin, t_symbol *s, int ac, t_atom *av) {
@@ -251,8 +251,9 @@ static int music_any(t_music *x, t_flin *flin, t_symbol *s, int ac, t_atom *av) 
 	if (!ac) {
 		char *p;
 		t_float f = strtof(cp, &p);
-		if (cp != p && p[0] != p[1] && isoperator(*p)) { // interval ± semitones
-			music_f(x, f, *p, strtof(p + 1, 0));
+		op_func op = ops[(unsigned char)*p];
+		if (cp != p && p[0] != p[1] && op) { // interval ± semitones
+			music_f(x, f, op, strtof(p + 1, 0));
 		} else {
 			t_atom atom = { .a_type = A_SYMBOL, .a_w = {.w_symbol = s} };
 			n = music_z(x, flin, 0, 1, &atom);
@@ -332,8 +333,8 @@ static t_music *music_new(t_class *mclass, int n) {
 	flin_alloc(&x->flin, n);
 
 	t_atom atms[] = {
-	  {.a_type = A_FLOAT, .a_w = {.w_float = 440}}
-	, {.a_type = A_FLOAT, .a_w = {.w_float = 12 }}
+	  {.a_type = A_FLOAT, .a_w = {.w_float = REF}}
+	, {.a_type = A_FLOAT, .a_w = {.w_float = TET}}
 	};
 	note_set(&x->note, 2, atms);
 	x->oct = x->note.tet;
@@ -344,6 +345,7 @@ static t_music *music_new(t_class *mclass, int n) {
 
 static t_class *class_music
 (t_symbol *s, t_newmethod newm, t_method free, size_t size) {
+	op_init();
 	t_class *mclass = class_new(s, newm, free, size, 0, A_GIMME, 0);
 	class_addfloat(mclass, music_float);
 	class_addsymbol(mclass, music_symbol);

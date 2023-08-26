@@ -9,10 +9,10 @@ typedef struct _muse {
 	t_outlet *o_midi;    /* midi outlet */
 } t_muse;
 
-static void music_f(t_music *x, t_float f, char c, t_float g) {
+static void music_f(t_music *x, t_float f, op_func op, t_float g) {
 	t_float note = x->flin.fp[0] + music_interval(x, x->flin.fp, f);
-	if (c) {
-		music_operate(&note, c, g);
+	if (op) {
+		op(&note, g);
 	}
 
 	t_muse *y = (t_muse *)x;
