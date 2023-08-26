@@ -2,7 +2,6 @@
 #include "rabbit.h"
 #include <gme.h>
 
-static const float short_frac = 1.f / 0x8000;
 static t_symbol *s_mask;
 
 /* ------------------------- Game Music Emu player ------------------------- */
@@ -95,7 +94,7 @@ static t_int *gmepd_perform(t_int *w) {
 				short arr[buf_size], *buf = arr;
 				gme_play(y->emu, buf_size, buf);
 				for (int i = buf_size; i--; in++, buf++) {
-					*in = *buf * short_frac;
+					*in = *buf * 0x1p-15;
 				}
 				data->input_frames = FRAMES;
 				goto resample;
