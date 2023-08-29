@@ -69,8 +69,8 @@ static void tabread2_dsp(t_tabread2 *x, t_signal **sp) {
 	, sp[0]->s_vec, sp[1]->s_vec);
 }
 
-static void *tabread2_new(t_symbol *s, t_float edge) {
-	t_tabread2 *y = (t_tabread2 *)tab2_new(tabread2_class, s, edge);
+static void *tabread2_new(t_symbol *s, t_float hold) {
+	t_tabread2 *y = (t_tabread2 *)tab2_new(tabread2_class, s, hold);
 	t_tab2 *x = &y->z;
 	floatinlet_new(&x->obj, &y->onset);
 

@@ -129,8 +129,8 @@ static void tabosc2_ft1(t_tabosc2 *x, t_float f) {
 	x->phase = f;
 }
 
-static void *tabosc2_new(t_symbol *s, t_float edge) {
-	t_tabosc2 *y = (t_tabosc2 *)tab2_new(tabosc2_class, s, edge);
+static void *tabosc2_new(t_symbol *s, t_float hold) {
+	t_tabosc2 *y = (t_tabosc2 *)tab2_new(tabosc2_class, s, hold);
 	t_tab2 *x = &y->z;
 	inlet_new(&x->obj, &x->obj.ob_pd, &s_float, gensym("ft1"));
 
