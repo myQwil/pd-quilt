@@ -3,34 +3,24 @@
 typedef struct _tab2 {
 	t_object obj;
 	t_float *edge;
-	t_float  edge_;
-	t_float k;
 	t_word *vec;
 	t_symbol *arrayname;
 	t_float f;
 } t_tab2;
 
-static inline void tab2_edge_(t_tab2 *x, t_float f) {
-	x->edge_ = f;
-	x->k = 1. / (1. - f);
-}
-
 static void tab2_edge(t_tab2 *x, t_float f) {
 	*x->edge = f;
 }
 
-#define TAB2_INTERPOLATE(m, n) \
-	edge = *in2; \
-	if (frac <= edge) { \
-		*out++ = m.w_float; \
-	} else { \
-		if (x->edge_ != edge) { \
-			tab2_edge_(x, edge); \
-		} \
-		a = m.w_float; \
-		b = n.w_float; \
-		*out++ = a + (b - a) * (frac - edge) * x->k; \
+static inline t_sample tab2_sample(t_word *w, t_sample frac, t_sample edge) {
+	if (frac <= edge) {
+		return w[0].w_float;
+	} else {
+		t_float a = w[0].w_float;
+		t_float b = w[1].w_float;
+		return (a + (b - a) * (frac - edge) / (1.f - edge));
 	}
+}
 
 static t_tab2 *tab2_new(t_class *cl, t_symbol *s, t_float edge) {
 	t_tab2 *x = (t_tab2 *)pd_new(cl);
@@ -39,7 +29,6 @@ static t_tab2 *tab2_new(t_class *cl, t_symbol *s, t_float edge) {
 
 	t_inlet *in2 = signalinlet_new(&x->obj, edge);
 	x->edge = &in2->iu_floatsignalvalue;
-	tab2_edge_(x, edge);
 
 	outlet_new(&x->obj, &s_signal);
 	x->f = 0;

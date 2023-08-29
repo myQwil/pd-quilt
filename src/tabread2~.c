@@ -13,31 +13,32 @@ typedef struct _tabread2 {
 static t_int *tabread2_perform(t_int *w) {
 	t_tabread2 *y = (t_tabread2 *)(w[1]);
 	t_tab2 *x = &y->z;
-	t_sample *in1 = (t_sample *)(w[2]);
-	t_sample *in2 = (t_sample *)(w[3]);
-	t_sample *out = (t_sample *)(w[4]);
-	int n = (int)(w[5]);
-	int maxindex;
-	t_word *buf = x->vec, *wp;
-	double onset = y->onset;
 
-	maxindex = y->npoints - 3;
+	int n = (int)(w[2]);
+	t_sample *out = (t_sample *)(w[3]);
+	int maxindex = y->npoints - 3;
+	t_word *buf = x->vec;
 	if (maxindex < 0 || !buf) {
 		while (n--) {
 			*out++ = 0;
 		}
-	} else for (t_sample frac, edge, a, b; n--; in1++, in2++) {
-		double findex = *in1 + onset;
-		int index = findex;
-		if (index < 1) {
-			index = 1, frac = 0;
-		} else if (index > maxindex) {
-			index = maxindex, frac = 1;
-		} else {
-			frac = findex - index;
+	} else {
+		t_sample *in1 = (t_sample *)(w[4]);
+		t_sample *in2 = (t_sample *)(w[5]);
+		double onset = y->onset;
+		for (; n--; in1++, in2++) {
+			double findex = *in1 + onset;
+			int index = findex;
+			t_sample frac;
+			if (index < 1) {
+				index = 1, frac = 0;
+			} else if (index > maxindex) {
+				index = maxindex, frac = 1;
+			} else {
+				frac = findex - index;
+			}
+			*out++ = tab2_sample(buf + index, frac, *in2);
 		}
-		wp = buf + index;
-		TAB2_INTERPOLATE(wp[0], wp[1])
 	}
 
 	return (w + 6);
@@ -64,8 +65,8 @@ static void tabread2_set(t_tabread2 *y, t_symbol *s) {
 static void tabread2_dsp(t_tabread2 *x, t_signal **sp) {
 	tabread2_set(x, x->z.arrayname);
 
-	dsp_add(tabread2_perform, 5, x
-	, sp[0]->s_vec, sp[1]->s_vec, sp[2]->s_vec, (t_int)sp[0]->s_n);
+	dsp_add(tabread2_perform, 5, x, sp[0]->s_n, sp[2]->s_vec
+	, sp[0]->s_vec, sp[1]->s_vec);
 }
 
 static void *tabread2_new(t_symbol *s, t_float edge) {

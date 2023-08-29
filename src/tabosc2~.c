@@ -1,7 +1,5 @@
 #include "tab2.h"
 
-/******************** tabosc2~ ***********************/
-
 /* this is all copied from d_osc.c... what include file could this go in? */
 #define UNITBIT32 1572864.  /* 3*2^19; bit 32 has place value 1 */
 
@@ -42,6 +40,8 @@ union tabfudge {
 	int32_t i[2];
 };
 
+/******************** tabosc2~ ***********************/
+
 static t_class *tabosc2_class;
 
 typedef struct _tabosc2 {
@@ -55,33 +55,30 @@ typedef struct _tabosc2 {
 static t_int *tabosc2_perform(t_int *w) {
 	t_tabosc2 *y = (t_tabosc2 *)(w[1]);
 	t_tab2 *x = &y->z;
-	t_sample *in1 = (t_sample *)(w[2]);
-	t_sample *in2 = (t_sample *)(w[3]);
-	t_sample *out = (t_sample *)(w[4]);
-	int n = (int)(w[5]);
-	int normhipart;
-	union tabfudge tf;
-	t_float fnpoints = y->fnpoints;
-	int mask = fnpoints - 1;
-	t_float conv = fnpoints * y->conv;
-	t_word *tab = x->vec, *addr;
-	double dphase = fnpoints * y->phase + UNITBIT32;
 
+	int n = (int)(w[2]);
+	t_sample *out = (t_sample *)(w[3]);
+	t_word *tab = x->vec;
 	if (!tab) {
 		while (n--) {
 			*out++ = 0;
 		}
 	} else {
-		tf.d = UNITBIT32;
-		normhipart = tf.i[HIOFFSET];
+		t_sample *in1 = (t_sample *)(w[4]);
+		t_sample *in2 = (t_sample *)(w[5]);
+		union tabfudge tf = {.d = UNITBIT32};
+		int normhipart = tf.i[HIOFFSET];
+		t_float fnpoints = y->fnpoints;
+		t_float conv = fnpoints * y->conv;
+		double dphase = fnpoints * y->phase + UNITBIT32;
+		int mask = fnpoints - 1;
 
-		for (t_sample frac, edge, a, b; n--; in1++, in2++) {
+		for (; n--; in1++, in2++) {
 			tf.d = dphase;
 			dphase += *in1 * conv;
-			addr = tab + (tf.i[HIOFFSET] & mask);
+			t_word *addr = tab + (tf.i[HIOFFSET] & mask);
 			tf.i[HIOFFSET] = normhipart;
-			frac = tf.d - UNITBIT32;
-			TAB2_INTERPOLATE(addr[1], addr[2])
+			*out++ = tab2_sample(addr + 1, tf.d - UNITBIT32, *in2);
 		}
 
 		tf.d = UNITBIT32 * fnpoints;
@@ -124,8 +121,8 @@ static void tabosc2_dsp(t_tabosc2 *x, t_signal **sp) {
 	x->conv = 1. / sp[0]->s_sr;
 	tabosc2_set(x, x->z.arrayname);
 
-	dsp_add(tabosc2_perform, 5, x
-	, sp[0]->s_vec, sp[1]->s_vec, sp[2]->s_vec, (t_int)sp[0]->s_n);
+	dsp_add(tabosc2_perform, 5, x, sp[0]->s_n, sp[2]->s_vec
+	, sp[0]->s_vec, sp[1]->s_vec);
 }
 
 static void tabosc2_ft1(t_tabosc2 *x, t_float f) {
