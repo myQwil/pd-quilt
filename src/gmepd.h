@@ -6,22 +6,21 @@ static t_symbol *s_mask;
 
 /* ------------------------- Game Music Emu player ------------------------- */
 typedef struct _gme {
-	t_player z;
+	t_player p;
 	t_rabbit r;
 	t_sample *in;
 	t_sample *out;
 	Music_Emu *emu;
 	gme_info_t *info; /* current track info */
 	t_symbol *path;   /* path to the most recently read file */
-	t_float *speed;   /* rate of playback (inlet pointer) */
-	t_float *tempo;   /* rate of emulation (inlet pointer) */
-	t_float  tempo_;  /* rate of emulation (private value) */
+	t_vinlet speed;   /* rate of playback */
+	t_vinlet tempo;   /* rate of emulation */
 	int voices;       /* number of voices */
 	int mask;         /* muting mask */
 } t_gme;
 
 static void gmepd_seek(t_gme *x, t_float f) {
-	if (!x->z.open) {
+	if (!x->p.open) {
 		return;
 	}
 	gme_seek(x->emu, f);
@@ -30,42 +29,39 @@ static void gmepd_seek(t_gme *x, t_float f) {
 }
 
 static void gmepd_speed(t_gme *x, t_float f) {
-	*x->speed = f;
+	*x->speed.p = f;
 }
 
 static void gmepd_tempo(t_gme *x, t_float f) {
-	*x->tempo = f;
-}
-
-static inline void gmepd_tempo_(t_gme *x, t_float f) {
-	x->tempo_ = f;
-	gme_set_tempo(x->emu, x->tempo_);
+	*x->tempo.p = f;
 }
 
 static void gmepd_interp(t_gme *x, t_float f) {
-	int err = rabbit_interp(&x->r, x->z.nch, f);
+	int err = rabbit_interp(&x->r, x->p.nch, f);
 	if (err) {
-		x->z.open = x->z.play = 0;
+		x->p.open = x->p.play = 0;
 	}
 }
 
 static t_int *gmepd_perform(t_int *w) {
-	t_gme *y = (t_gme *)(w[1]);
-	int n = (int)(w[4]);
-
-	t_player *x = &y->z;
-	unsigned nch = x->nch;
+	t_gme *x = (t_gme *)(w[1]);
+	t_player *p = &x->p;
+	unsigned nch = p->nch;
 	t_sample *outs[nch];
 	for (int i = nch; i--;) {
-		outs[i] = x->outs[i];
+		outs[i] = p->outs[i];
 	}
 
-	if (x->play) {
-		t_sample *in2 = (t_sample *)(w[2]);
-		t_sample *in3 = (t_sample *)(w[3]);
-		t_rabbit *r = &y->r;
+	int n = (int)(w[2]);
+	if (p->play) {
+		t_sample *in2 = (t_sample *)(w[3]);
+		t_sample *in3 = (t_sample *)(w[4]);
+		t_rabbit *r = &x->r;
 		SRC_DATA *data = &r->data;
+		Music_Emu *emu = x->emu;
 		int buf_size = nch * FRAMES;
+		short arr[buf_size];
+
 		for (; n--; in2++, in3++) {
 			if (data->output_frames_gen > 0) {
 				perform:
@@ -75,30 +71,35 @@ static t_int *gmepd_perform(t_int *w) {
 				data->data_out += nch;
 				data->output_frames_gen--;
 				continue;
-			} else if (data->input_frames > 0) {
-				resample:
-				if (r->speed != *in2) {
-					rabbit_speed(r, *in2);
-				}
-				data->data_out = y->out;
+			}
+			x->speed.v = *in2;
+			rabbit_speed(r, *in2);
+
+			if (data->input_frames > 0) {
+				process:
+				data->data_out = x->out;
 				src_process(r->state, data);
 				data->input_frames -= data->input_frames_used;
 				data->data_in += data->input_frames_used * nch;
-				goto perform;
-			} else {	// receive
-				if (y->tempo_ != *in3) {
-					gmepd_tempo_(y, *in3);
+				if (data->output_frames_gen > 0) {
+					goto perform;
+				} else if (data->input_frames > 0) {
+					goto process;
 				}
-				data->data_in = y->in;
-				float *in = y->in;
-				short arr[buf_size], *buf = arr;
-				gme_play(y->emu, buf_size, buf);
-				for (int i = buf_size; i--; in++, buf++) {
-					*in = *buf * 0x1p-15;
-				}
-				data->input_frames = FRAMES;
-				goto resample;
 			}
+			x->tempo.v = *in3;
+			gme_set_tempo(emu, *in3);
+
+			// receive
+			data->data_in = x->in;
+			float *in = x->in;
+			short *buf = arr;
+			gme_play(emu, buf_size, buf);
+			for (int i = buf_size; i--; in++, buf++) {
+				*in = *buf * 0x1p-15;
+			}
+			data->input_frames = FRAMES;
+			goto process;
 		}
 	} else while (n--) {
 		for (int i = nch; i--;) {
@@ -108,12 +109,12 @@ static t_int *gmepd_perform(t_int *w) {
 	return (w + 5);
 }
 
-static void gmepd_dsp(t_gme *y, t_signal **sp) {
-	t_player *x = &y->z;
-	for (int i = x->nch; i--;) {
-		x->outs[i] = sp[i + 2]->s_vec;
+static void gmepd_dsp(t_gme *x, t_signal **sp) {
+	t_player *p = &x->p;
+	for (int i = p->nch; i--;) {
+		p->outs[i] = sp[i + 2]->s_vec;
 	}
-	dsp_add(gmepd_perform, 4, y, sp[0]->s_vec, sp[1]->s_vec, sp[0]->s_n);
+	dsp_add(gmepd_perform, 4, x, sp[0]->s_n, sp[0]->s_vec, sp[1]->s_vec);
 }
 
 static void gmepd_mute(t_gme *x, t_symbol *s, int ac, t_atom *av) {
@@ -151,7 +152,7 @@ static void gmepd_mask(t_gme *x, t_symbol *s, int ac, t_atom *av) {
 		}
 	} else {
 		t_atom flt = { .a_type = A_FLOAT, .a_w = {.w_float = x->mask} };
-		outlet_anything(x->z.o_meta, s_mask, 1, &flt);
+		outlet_anything(x->p.o_meta, s_mask, 1, &flt);
 	}
 }
 
@@ -187,10 +188,10 @@ static gme_err_t gmepd_load(t_gme *x, int index) {
 }
 
 static void gmepd_open(t_gme *x, t_symbol *s) {
-	x->z.play = 0;
+	x->p.play = 0;
 	gme_err_t err_msg;
 	gme_delete(x->emu); x->emu = NULL;
-	if (!(err_msg = gme_open_file(s->s_name, &x->emu, sys_getsr(), x->z.nch > 2))) {
+	if (!(err_msg = gme_open_file(s->s_name, &x->emu, sys_getsr(), x->p.nch > 2))) {
 		// check for a .m3u file of the same name
 		char m3u_path[256 + 5];
 		strncpy(m3u_path, s->s_name, 256);
@@ -204,7 +205,7 @@ static void gmepd_open(t_gme *x, t_symbol *s) {
 
 		gme_ignore_silence(x->emu, 1);
 		gme_mute_voices(x->emu, x->mask);
-		gme_set_tempo(x->emu, x->tempo_);
+		gme_set_tempo(x->emu, x->tempo.v);
 		x->voices = gme_voice_count(x->emu);
 		err_msg = gmepd_load(x, 0);
 		x->path = s;
@@ -212,9 +213,9 @@ static void gmepd_open(t_gme *x, t_symbol *s) {
 	if (err_msg) {
 		pd_error(x, "%s.", err_msg);
 	}
-	x->z.open = !err_msg;
-	t_atom open = { .a_type = A_FLOAT, .a_w = {.w_float = x->z.open} };
-	outlet_anything(x->z.o_meta, s_open, 1, &open);
+	x->p.open = !err_msg;
+	t_atom open = { .a_type = A_FLOAT, .a_w = {.w_float = x->p.open} };
+	outlet_anything(x->p.o_meta, s_open, 1, &open);
 }
 
 static inline t_float gmepd_length(t_gme *x) {
@@ -279,11 +280,11 @@ static t_atom gmepd_meta(void *y, t_symbol *s) {
 
 static void gmepd_print(t_gme *x, t_symbol *s, int ac, t_atom *av) {
 	(void)s;
-	if (!x->z.open) {
+	if (!x->p.open) {
 		return post("No file opened.");
 	}
 	if (ac) {
-		return player_info_custom(&x->z, ac, av);
+		return player_info_custom(&x->p, ac, av);
 	}
 
 	if (x->info->game || x->info->song) {
@@ -305,13 +306,13 @@ static void gmepd_float(t_gme *x, t_float f) {
 		if ((err_msg = gmepd_load(x, track - 1))) {
 			pd_error(x, "%s.", err_msg);
 		}
-		x->z.open = !err_msg;
+		x->p.open = !err_msg;
 	} else {
 		gmepd_seek(x, 0);
 	}
-	x->z.play = !err_msg;
-	t_atom play = { .a_type = A_FLOAT, .a_w = {.w_float = x->z.play} };
-	outlet_anything(x->z.o_meta, s_play, 1, &play);
+	x->p.play = !err_msg;
+	t_atom play = { .a_type = A_FLOAT, .a_w = {.w_float = x->p.play} };
+	outlet_anything(x->p.o_meta, s_play, 1, &play);
 }
 
 static void gmepd_stop(t_gme *x) {
@@ -323,19 +324,17 @@ static void *gmepd_new(t_class *gmeclass, int nch, t_symbol *s, int ac, t_atom *
 	t_gme *x = (t_gme *)player_new(gmeclass, nch);
 	int err = rabbit_init(&x->r, nch);
 	if (err) {
-		player_free(&x->z);
+		player_free(&x->p);
 		pd_free((t_pd *)x);
 		return NULL;
 	}
 
-	t_inlet *in2 = signalinlet_new(&x->z.obj, x->r.speed);
-	x->speed = &in2->iu_floatsignalvalue;
+	t_inlet *in2 = signalinlet_new(&x->p.obj, (x->speed.v = 1.0));
+	x->speed.p = &in2->iu_floatsignalvalue;
+	t_inlet *in3 = signalinlet_new(&x->p.obj, (x->tempo.v = 1.0));
+	x->tempo.p = &in3->iu_floatsignalvalue;
 
-	x->tempo_ = 1.;
-	t_inlet *in3 = signalinlet_new(&x->z.obj, x->tempo_);
-	x->tempo = &in3->iu_floatsignalvalue;
-
-	x->in = (t_sample *)getbytes(nch * FRAMES * sizeof(t_sample));
+	x->in  = (t_sample *)getbytes(nch * FRAMES * sizeof(t_sample));
 	x->out = (t_sample *)getbytes(nch * FRAMES * sizeof(t_sample));
 
 	x->mask = 0;
@@ -351,10 +350,10 @@ static void *gmepd_new(t_class *gmeclass, int nch, t_symbol *s, int ac, t_atom *
 static void gmepd_free(t_gme *x) {
 	gme_free_info(x->info);
 	gme_delete(x->emu);
-	player_free(&x->z);
+	player_free(&x->p);
 	src_delete(x->r.state);
-	freebytes(x->in, x->z.nch * sizeof(t_sample) * FRAMES);
-	freebytes(x->out, x->z.nch * sizeof(t_sample) * FRAMES);
+	freebytes(x->in, x->p.nch * sizeof(t_sample) * FRAMES);
+	freebytes(x->out, x->p.nch * sizeof(t_sample) * FRAMES);
 }
 
 static t_class *gmepd_setup(t_symbol *s, t_newmethod newm) {

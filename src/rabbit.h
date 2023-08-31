@@ -6,7 +6,6 @@
 typedef struct _rabbit {
 	SRC_STATE *state;
 	SRC_DATA data;
-	t_float speed; /* playback speed */
 	double ratio;  /* resampling ratio */
 } t_rabbit;
 
@@ -15,7 +14,6 @@ static const t_float fastest = FRAMES - (1. / 128.);
 static const t_float slowest = 1. / FRAMES;
 
 static inline void rabbit_speed(t_rabbit *x, t_float f) {
-	x->speed = f;
 	f *= x->ratio;
 	f = f > fastest ? fastest : (f < slowest ? slowest : f);
 	x->data.src_ratio = 1. / f;
@@ -50,6 +48,5 @@ static int rabbit_init(t_rabbit *x, unsigned nch) {
 	x->state = state;
 	x->data.src_ratio = x->ratio = 1.0;
 	x->data.output_frames = FRAMES;
-	x->speed = 1.0;
 	return err;
 }

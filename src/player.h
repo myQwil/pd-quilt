@@ -6,6 +6,11 @@ static t_symbol *s_open;
 static t_symbol *s_play;
 static t_atom(*fn_meta)(void *, t_symbol *);
 
+typedef struct _vinlet {
+	t_float *p; // inlet pointer
+	t_float v; // internal value
+} t_vinlet;
+
 typedef struct _player {
 	t_object obj;
 	t_sample **outs;

@@ -9,7 +9,7 @@ typedef struct _ffplay {
 	t_rabbit r;
 	t_sample *in;
 	t_sample *out;
-	t_float *speed; /* rate of playback (inlet pointer) */
+	t_vinlet speed; /* rate of playback */
 } t_ffplay;
 
 static void ffplay_seek(t_ffplay *x, t_float f) {
@@ -18,7 +18,7 @@ static void ffplay_seek(t_ffplay *x, t_float f) {
 }
 
 static void ffplay_speed(t_ffplay *x, t_float f) {
-	*x->speed = f;
+	*x->speed.p = f;
 }
 
 static void ffplay_interp(t_ffplay *x, t_float f) {
@@ -32,21 +32,20 @@ static t_int *ffplay_perform(t_int *w) {
 	t_ffplay *x = (t_ffplay *)(w[1]);
 	t_ffbase *b = &x->b;
 	t_player *p = &b->p;
-
-	int n = (int)(w[2]);
 	unsigned nch = p->nch;
 	t_sample *outs[nch];
 	for (int i = nch; i--;) {
 		outs[i] = p->outs[i];
 	}
 
+	int n = (int)(w[2]);
 	if (p->play) {
 		t_sample *in2 = (t_sample *)(w[3]);
 		t_rabbit *r = &x->r;
 		SRC_DATA *data = &r->data;
 		for (; n--; in2++) {
-			perform:
 			if (data->output_frames_gen > 0) {
+				perform:
 				for (int i = nch; i--;) {
 					*outs[i]++ = data->data_out[i];
 				}
@@ -54,11 +53,11 @@ static t_int *ffplay_perform(t_int *w) {
 				data->output_frames_gen--;
 				continue;
 			}
-			resample:
+			x->speed.v = *in2;
+			rabbit_speed(r, *in2);
+
+			process:
 			if (data->input_frames > 0) {
-				if (r->speed != *in2) {
-					rabbit_speed(r, *in2);
-				}
 				data->data_out = x->out;
 				src_process(r->state, data);
 				data->input_frames -= data->input_frames_used;
@@ -70,7 +69,11 @@ static t_int *ffplay_perform(t_int *w) {
 				} else {
 					data->data_in += data->input_frames_used * nch;
 				}
-				goto perform;
+				if (data->output_frames_gen > 0) {
+					goto perform;
+				} else {
+					goto process;
+				}
 			}
 			// receive
 			data->data_in = x->in;
@@ -84,7 +87,7 @@ static t_int *ffplay_perform(t_int *w) {
 					, (uint8_t **)&x->in, FRAMES
 					, (const uint8_t **)b->frm->extended_data, b->frm->nb_samples);
 					av_packet_unref(b->pkt);
-					goto resample;
+					goto process;
 				} else if (b->pkt->stream_index == b->sub.idx) {
 					int got;
 					AVSubtitle sub;
@@ -141,7 +144,7 @@ static err_t ffplay_reset(void *y) {
 	}
 	rabbit_reset(&x->r);
 	x->r.ratio = (double)x->b.a.ctx->sample_rate / sys_getsr();
-	rabbit_speed(&x->r, x->r.speed);
+	rabbit_speed(&x->r, x->speed.v);
 	return 0;
 }
 
@@ -154,9 +157,9 @@ static void *ffplay_new(t_symbol *s, int ac, t_atom *av) {
 		pd_free((t_pd *)x);
 		return NULL;
 	}
-	t_inlet *in2 = signalinlet_new(&x->b.p.obj, x->r.speed);
-	x->speed = &in2->iu_floatsignalvalue;
-	x->in = (t_sample *)getbytes(ac * FRAMES * sizeof(t_sample));
+	t_inlet *in2 = signalinlet_new(&x->b.p.obj, (x->speed.v = 1.0));
+	x->speed.p = &in2->iu_floatsignalvalue;
+	x->in  = (t_sample *)getbytes(ac * FRAMES * sizeof(t_sample));
 	x->out = (t_sample *)getbytes(ac * FRAMES * sizeof(t_sample));
 	return x;
 }

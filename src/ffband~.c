@@ -15,16 +15,11 @@ typedef struct _buffer {
 	unsigned size;
 } t_buffer;
 
-typedef struct _vinlet {
-	t_float *p; // inlet pointer
-	t_float v; // internal value
-} t_vinlet;
-
 typedef struct _ffband {
 	t_ffbase b;
 	t_buffer in;
-	t_vinlet tempo;
-	t_vinlet pitch;
+	t_float *tempo;
+	t_float *pitch;
 	RubberBandState state;
 } t_ffband;
 
@@ -34,34 +29,33 @@ static void ffband_seek(t_ffband *x, t_float f) {
 }
 
 static void ffband_tempo(t_ffband *x, t_float f) {
-	*x->tempo.p = f;
+	*x->tempo = f;
 }
 
 static void ffband_pitch(t_ffband *x, t_float f) {
-	*x->pitch.p = f;
+	*x->pitch = f;
 }
 
 static t_int *ffband_perform(t_int *w) {
 	t_ffband *x = (t_ffband *)(w[1]);
 	t_ffbase *b = &x->b;
 	t_player *p = &b->p;
-
-	int n = (int)(w[2]);
 	unsigned nch = p->nch;
 	t_sample *outs[nch];
 	for (int i = nch; i--;) {
 		outs[i] = p->outs[i];
 	}
 
+	int n = (int)(w[2]);
 	if (p->play) {
 		t_sample *in2 = (t_sample *)(w[3]);
 		t_sample *in3 = (t_sample *)(w[4]);
 		RubberBandState state = x->state;
 		t_buffer *in = &x->in;
 
-		perform:
 		int m = rubberband_available(state);
 		if (m > 0) {
+			perform:
 			m = rubberband_retrieve(state, outs, m < n ? m : n);
 			if (m >= n) {
 				return (w + 5);
@@ -71,15 +65,19 @@ static t_int *ffband_perform(t_int *w) {
 				outs[i] += m;
 			}
 		}
-		x->tempo.v = *in2 > fastest ? fastest : (*in2 < slowest ? slowest : *in2);
-		x->pitch.v = *in3 > fastest ? fastest : (*in3 < slowest ? slowest : *in3);
-		rubberband_set_time_ratio(state, 1.0 / x->tempo.v);
-		rubberband_set_pitch_scale(state, x->pitch.v);
+		rubberband_set_time_ratio(state, 1.0 /
+			(*in2 > fastest ? fastest : (*in2 < slowest ? slowest : *in2)) );
+		rubberband_set_pitch_scale(state,
+			(*in3 > fastest ? fastest : (*in3 < slowest ? slowest : *in3)) );
 		process:
 		if (in->size > 0) {
 			rubberband_process(state, (const float *const *)in->buf, in->size, 0);
 			in->size = swr_convert(b->swr, (uint8_t **)in->buf, BUFSIZE, 0, 0);
-			goto perform;
+			if ((m = rubberband_available(state)) > 0) {
+				goto perform;
+			} else {
+				goto process;
+			}
 		}
 		receive:
 		for (; av_read_frame(b->ic, b->pkt) >= 0; av_packet_unref(b->pkt)) {
@@ -163,14 +161,14 @@ static err_t ffband_reset(void *y) {
 static void *ffband_new(t_symbol *s, int ac, t_atom *av) {
 	(void)s;
 	t_ffband *x = (t_ffband *)ffbase_new(ffband_class, ac, av);
-	t_inlet *in2 = signalinlet_new(&x->b.p.obj, (x->tempo.v = 1.0));
-	x->tempo.p = &in2->iu_floatsignalvalue;
-	t_inlet *in3 = signalinlet_new(&x->b.p.obj, (x->pitch.v = 1.0));
-	x->pitch.p = &in3->iu_floatsignalvalue;
+	t_inlet *in2 = signalinlet_new(&x->b.p.obj, 1.0);
+	x->tempo = &in2->iu_floatsignalvalue;
+	t_inlet *in3 = signalinlet_new(&x->b.p.obj, 1.0);
+	x->pitch = &in3->iu_floatsignalvalue;
 
 	RubberBandOptions options = RubberBandOptionProcessRealTime
 	| RubberBandOptionEngineFiner;
-	x->state = rubberband_new(sys_getsr(), ac, options, x->tempo.v, x->pitch.v);
+	x->state = rubberband_new(sys_getsr(), ac, options, 1.0, 1.0);
 
 	x->in.buf = (t_sample **)getbytes(ac * sizeof(t_sample *));
 	for (int i = ac; i--;) {
