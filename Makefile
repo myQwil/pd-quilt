@@ -19,6 +19,7 @@ datadirs   = blunt
 EXT = so
 cflags += -I./game-music-emu/gme
 gme~.class.ldlibs  = game-music-emu/build/gme/libgme.$(EXT) -lsamplerate -lz -lunrar
+gmer~.class.ldlibs = game-music-emu/build/gme/libgme.$(EXT) -lrubberband -lz -lunrar
 gmes~.class.ldlibs = $(gme~.class.ldlibs)
 define forDarwin
   ldflags = -L/opt/local/lib
