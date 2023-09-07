@@ -2,11 +2,10 @@
 #include <rubberband/rubberband-c.h>
 #include <gme.h>
 
-#define BUFSIZE  0x01
-#define SPEED    0x10
+#define FRAMES 0x10
 
-static const t_float fastest = 1.0 * SPEED;
-static const t_float slowest = 1.0 / SPEED;
+static const t_float fastest = 1.0 * FRAMES;
+static const t_float slowest = 1.0 / FRAMES;
 
 static t_symbol *s_mask;
 
@@ -59,7 +58,7 @@ static t_int *gmepd_perform(t_int *w) {
 		RubberBandState state = x->state;
 		t_sample **buf = x->buf;
 		Music_Emu *emu = x->emu;
-		int buf_size = nch * BUFSIZE;
+		int buf_size = nch * FRAMES;
 		short arr[buf_size];
 
 		int m = rubberband_available(state);
@@ -82,13 +81,13 @@ static t_int *gmepd_perform(t_int *w) {
 		process:
 		short *a = arr;
 		gme_play(emu, buf_size, a);
-		for (unsigned i = 0; i < BUFSIZE; i++) {
+		for (unsigned i = 0; i < FRAMES; i++) {
 			for (unsigned j = 0; j < nch; j++, a++) {
 				buf[j][i] = *a * 0x1p-15;
 			}
 		}
 
-		rubberband_process(state, (const float *const *)buf, BUFSIZE, 0);
+		rubberband_process(state, (const float *const *)buf, FRAMES, 0);
 		if ((m = rubberband_available(state)) > 0) {
 			goto perform;
 		}
@@ -335,7 +334,7 @@ static void *gmepd_new(t_class *gmeclass, int nch, t_symbol *s, int ac, t_atom *
 
 	x->buf = (t_sample **)getbytes(ac * sizeof(t_sample *));
 	for (int i = nch; i--;) {
-		x->buf[i] = (t_sample *)getbytes(BUFSIZE * sizeof(t_sample));
+		x->buf[i] = (t_sample *)getbytes(FRAMES * sizeof(t_sample));
 	}
 
 	x->mask = 0;
@@ -354,7 +353,7 @@ static void gmepd_free(t_gme *x) {
 	player_free(&x->p);
 	rubberband_delete(x->state);
 	for (int i = x->p.nch; i--;) {
-		freebytes(x->buf[i], BUFSIZE * sizeof(t_sample));
+		freebytes(x->buf[i], FRAMES * sizeof(t_sample));
 	}
 	freebytes(x->buf, x->p.nch * sizeof(t_sample *));
 }

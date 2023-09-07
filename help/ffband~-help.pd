@@ -486,6 +486,8 @@
 #X msg 110 60 0.393;
 #X obj 200 280 r stop;
 #X msg 120 90 0.5;
+#X floatatom 310 210 0 0 0 0 - - - 0;
+#X obj 260 210 / 18;
 #X connect 0 0 19 0;
 #X connect 0 0 1 1;
 #X connect 1 0 18 0;
@@ -517,6 +519,8 @@
 #X connect 26 0 3 0;
 #X connect 27 0 13 0;
 #X connect 28 0 3 0;
+#X connect 29 0 30 0;
+#X connect 30 0 4 0;
 #X restore 570 270 pd swing;
 #X connect 0 0 21 0;
 #X connect 1 0 28 0;

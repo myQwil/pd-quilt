@@ -1,11 +1,10 @@
 #include "ffbase.h"
 #include <rubberband/rubberband-c.h>
 
-#define BUFSIZE  0x01
-#define SPEED    0x10
+#define FRAMES 0x10
 
-static const t_float fastest = 1.0 * SPEED;
-static const t_float slowest = 1.0 / SPEED;
+static const t_float fastest = 1.0 * FRAMES;
+static const t_float slowest = 1.0 / FRAMES;
 
 /* -------------------- FFmpeg player (with rubberband) --------------------- */
 static t_class *ffband_class;
@@ -72,7 +71,7 @@ static t_int *ffband_perform(t_int *w) {
 		process:
 		if (in->size > 0) {
 			rubberband_process(state, (const float *const *)in->buf, in->size, 0);
-			in->size = swr_convert(b->swr, (uint8_t **)in->buf, BUFSIZE, 0, 0);
+			in->size = swr_convert(b->swr, (uint8_t **)in->buf, FRAMES, 0, 0);
 			if ((m = rubberband_available(state)) > 0) {
 				goto perform;
 			} else {
@@ -86,7 +85,7 @@ static t_int *ffband_perform(t_int *w) {
 				 || avcodec_receive_frame(b->a.ctx, b->frm) < 0) {
 					continue;
 				}
-				in->size = swr_convert(b->swr, (uint8_t **)in->buf, BUFSIZE
+				in->size = swr_convert(b->swr, (uint8_t **)in->buf, FRAMES
 				, (const uint8_t **)b->frm->extended_data, b->frm->nb_samples);
 				av_packet_unref(b->pkt);
 				goto process;
@@ -172,7 +171,7 @@ static void *ffband_new(t_symbol *s, int ac, t_atom *av) {
 
 	x->in.buf = (t_sample **)getbytes(ac * sizeof(t_sample *));
 	for (int i = ac; i--;) {
-		x->in.buf[i] = (t_sample *)getbytes(BUFSIZE * sizeof(t_sample));
+		x->in.buf[i] = (t_sample *)getbytes(FRAMES * sizeof(t_sample));
 	}
 	x->in.size = 0;
 
@@ -183,7 +182,7 @@ static void ffband_free(t_ffband *x) {
 	ffbase_free(&x->b);
 	rubberband_delete(x->state);
 	for (int i = x->b.p.nch; i--;) {
-		freebytes(x->in.buf[i], BUFSIZE * sizeof(t_sample));
+		freebytes(x->in.buf[i], FRAMES * sizeof(t_sample));
 	}
 	freebytes(x->in.buf, x->b.p.nch * sizeof(t_sample *));
 }

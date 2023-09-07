@@ -1,4 +1,4 @@
-#N canvas 400 200 648 630 16;
+#N canvas 400 200 650 600 16;
 #X declare -lib blunt;
 #X obj 190 520 *~;
 #N canvas 710 770 450 300 (subpatch) 0;
@@ -376,7 +376,7 @@
 #X obj 200 350 r \$0gme;
 #X obj 260 440 r~ \$0fade;
 #X obj 40 300 s \$0gme;
-#N canvas 950 480 780 350 misc 0;
+#N canvas 950 450 780 350 misc 0;
 #X obj 70 190 cupqb 2;
 #X msg 70 250 interp \$1;
 #X text 130 140 0 = Sinc (Best Quality);
@@ -404,7 +404,7 @@
 #X obj 400 250 s pow;
 #X obj 460 250 *~;
 #X obj 460 220 exp;
-#N canvas 1048 460 420 370 swing 1;
+#N canvas 1050 430 420 370 swing 1;
 #X obj 300 150 #/;
 #X obj 40 120 #*;
 #X floatatom 40 180 5 0 0 1 rate - - 0;
