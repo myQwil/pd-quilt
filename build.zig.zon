@@ -1,0 +1,29 @@
+.{
+	.name = "quilt",
+	.version = "0.9.0",
+	.minimum_zig_version = "0.12.0",
+	.dependencies = .{
+		.ffmpeg = .{
+			.url = "https://github.com/andrewrk/ffmpeg/archive/refs/tags/7.0.1-4.tar.gz",
+			.hash = "1220b5d387335cb76a0eda4ab3e3c9ed153cbc3d1b5bb63c4899b5dfab3f826f4413",
+		},
+		.gme = .{
+			.url = "https://github.com/myQwil/game-music-emu/archive/de9f7725eee11344f717702941d72f86bd1160e9.tar.gz",
+			.hash = "1220517069453aec7c6deee26ae6778a5e99b9e67e39c4a5971530294145d350e96a",
+		},
+		.rabbit = .{
+			.url = "https://github.com/libsndfile/libsamplerate/archive/4858fb016550d677de2356486bcceda5aed85a72.tar.gz",
+			.hash = "1220d1694984140d3542423c223a168b88790bc6920da33fc9d42173338fda29504e",
+		},
+	},
+	.paths = .{
+		"abstractions",
+		"help",
+		"lib",
+		"src",
+		"build.zig",
+		"build.zig.zon",
+		"LICENSE.md",
+		"README.md",
+	},
+}
