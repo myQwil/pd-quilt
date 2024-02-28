@@ -1,0 +1,22 @@
+.{
+	.name = .quilt,
+	.version = "0.9.0",
+	.fingerprint = 0x87570fed07d14de5,
+	.minimum_zig_version = "0.15.1",
+	.dependencies = .{
+		.pd = .{
+			.url = "git+https://github.com/myQwil/pd#v0.56.2-3",
+			.hash = "pd-0.56.2-DC007WBXAgCummN6L4Cr4sZF6coJbV8zNt90bVUBm6pF",
+		},
+	},
+	.paths = .{
+		"abstractions",
+		"help",
+		"src",
+		"build.zig",
+		"build.zig.zon",
+		"InstallLink.zig",
+		"LICENSE.md",
+		"README.md",
+	},
+}
