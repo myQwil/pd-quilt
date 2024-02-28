@@ -25,7 +25,11 @@ hours.txt
 .DS_Store
 
 # VSCode folder
-.vscode
+.vscode/
+
+# Zig folders
+zig-cache/
+zig-out/
 
 # Installation files and folders
-/quilt*
+quilt/
