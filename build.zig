@@ -8,11 +8,16 @@ pub fn build(b: *std.Build) !void {
 		const optimize = b.standardOptimizeOption(.{});
 
 		const externals = [_][]const u8 {
+			"fldec",
+			"flenc",
 			"has",
 			"is",
 			"rind",
 			"same",
+			"slx",
+			"sly",
 			"tabosc2~",
+			"tabread2~",
 		};
 		for (externals) |e| {
 			var s = try std.fmt.bufPrint(&buf, "src/{s}.zig", .{e});
