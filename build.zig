@@ -1,10 +1,16 @@
 const std = @import("std");
 
 const externals = [_][]const u8{
+	"chrono",
+	"delp",
 	"fldec",
 	"flenc",
+	"fton",
 	"has",
 	"is",
+	"linp",
+	"linp~",
+	"ntof",
 	"rand",
 	"rind",
 	"same",
