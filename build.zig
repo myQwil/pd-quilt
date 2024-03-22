@@ -8,12 +8,14 @@ pub fn build(b: *std.Build) !void {
 		const optimize = b.standardOptimizeOption(.{});
 
 		const externals = [_][]const u8 {
+			"blunt",
 			"chrono",
 			"delp",
 			"fldec",
 			"flenc",
 			"fton",
 			"has",
+			"hsv",
 			"is",
 			"linp",
 			"linp~",
