@@ -15,6 +15,7 @@ const externals = [_][]const u8{
 	"linp~",
 	"metro~",
 	"ntof",
+	"paq",
 	"rand",
 	"rind",
 	"same",
@@ -22,6 +23,7 @@ const externals = [_][]const u8{
 	"sly",
 	"tabosc2~",
 	"tabread2~",
+	"unpaq",
 };
 
 fn installFolder(b: *std.Build, dir_name: []const u8, symlink: bool) !void {
