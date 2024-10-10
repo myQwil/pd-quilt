@@ -7,13 +7,17 @@
 			.url = "https://github.com/andrewrk/ffmpeg/archive/refs/tags/7.0.1-4.tar.gz",
 			.hash = "1220b5d387335cb76a0eda4ab3e3c9ed153cbc3d1b5bb63c4899b5dfab3f826f4413",
 		},
-		.gme = .{
-			.url = "https://github.com/myQwil/game-music-emu/archive/de9f7725eee11344f717702941d72f86bd1160e9.tar.gz",
-			.hash = "1220517069453aec7c6deee26ae6778a5e99b9e67e39c4a5971530294145d350e96a",
-		},
 		.rabbit = .{
 			.url = "https://github.com/libsndfile/libsamplerate/archive/4858fb016550d677de2356486bcceda5aed85a72.tar.gz",
 			.hash = "1220d1694984140d3542423c223a168b88790bc6920da33fc9d42173338fda29504e",
+		},
+		.gme = .{
+			.url = "https://github.com/myQwil/game-music-emu/archive/5316b6c1df98ee3391ae48a90e8e723457a3ee23.tar.gz",
+			.hash = "12202bcd6d6b0763c1fb577d1bc06af71e2e57630123f25aa109006cb042f075ae76",
+		},
+		.unrar = .{
+			.url = "https://github.com/myQwil/unrar/archive/1aed25ac3935322cf61d231ecbfd3cf8bec5f806.tar.gz",
+			.hash = "122089fb891011f7d5c62602a787e2f515705a0c6f1d4961997045ec0c856d2deba5",
 		},
 	},
 	.paths = .{
