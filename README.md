@@ -562,16 +562,16 @@ x = (y - min) / m
 ### Inlets
 
 1. float
-	- \[ **sly** \] receives x 
-	- \[ **slx** \] receives y 
+	- \[ **sly** \] receives x
+	- \[ **slx** \] receives y
 
 - The inlets that follow are the same as the creation args.
 
 ### Outlets
 
 1. float
-	- \[ **sly** \] outputs the solution for y 
-	- \[ **slx** \] outputs the solution for x 
+	- \[ **sly** \] outputs the solution for y
+	- \[ **slx** \] outputs the solution for x
 
 ### Messages
 
@@ -681,7 +681,7 @@ Much like \[ **tabread4\~** \] and \[ **tabosc4\~** \], these objects work best 
 
 2. float - Threshold
 	- The percentage of each point that should remain as the original value.
-	
+
 	- If the threshold is 0.9, that means that only the last 10% of the point will be dedicated to interpolation.
 
 ### Inlets

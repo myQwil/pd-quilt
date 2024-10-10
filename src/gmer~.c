@@ -73,7 +73,7 @@ static t_int *gmepd_perform(t_int *w) {
 				outs[i] += m;
 			}
 		}
-		rubberband_set_time_ratio(state, 1.0 / 
+		rubberband_set_time_ratio(state, 1.0 /
 			(*in2 > fastest ? fastest : (*in2 < slowest ? slowest : *in2)) );
 		rubberband_set_pitch_scale(state,
 			(*in3 > fastest ? fastest : (*in3 < slowest ? slowest : *in3)) );
