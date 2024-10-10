@@ -1009,7 +1009,7 @@ static void radix_receive(t_radix *x, t_symbol *s) {
 	iemgui_receive(x, &x->x_gui, s);
 }
 
-static void radix_label(t_radix *x, t_symbol *s) {    
+static void radix_label(t_radix *x, t_symbol *s) {
 iemgui_label((void *)x, &x->x_gui, s);
 }
 
