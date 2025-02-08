@@ -11,7 +11,7 @@
 #X obj 120 200 inlet;
 #X obj 80 200 *~;
 #X obj 80 30 inlet;
-#X obj 80 170 ad 1 10;
+#X obj 80 170 ad~ 1 10;
 #X obj 80 230 *~;
 #X obj 80 290 dac~;
 #X obj 120 230 noise~;

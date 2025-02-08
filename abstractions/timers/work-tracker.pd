@@ -1,8 +1,7 @@
-#N canvas 20 500 370 210 16;
+#N canvas 400 200 370 210 16;
 #X declare -lib blunt;
 #X declare -path ggee;
-#X obj 20 30 cnv 15 100 24 empty \$0clock 0:00:00 4 12 0 18 #000000
-#fcfcfc 0;
+#X obj 20 30 cnv 15 100 24 empty \$0clock 0:00:00 4 12 0 18 #000000 #fcfcfc 0;
 #N canvas 400 500 430 420 guts 0;
 #N canvas 300 500 380 350 hms 0;
 #X obj 110 30 inlet;
@@ -44,7 +43,7 @@
 #X obj 170 60 % 4;
 #X msg 110 130 1;
 #X msg 150 130 0.32;
-#X obj 110 170 ad 2 10;
+#X obj 110 170 ad~ 2 10;
 #X obj 150 230 r~ \$0vol;
 #X obj 110 230 *~;
 #X obj 110 60 mod 60;
@@ -74,14 +73,11 @@
 #X msg 300 180 tempo \$1;
 #X msg 100 210 del \$1;
 #X obj 120 180 f;
-#X obj 150 110 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300
-#ff0400 #fcfcfc;
+#X obj 150 110 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
 #X obj 170 210 f;
-#X obj 60 60 bng 20 250 50 0 \$0reset empty reset -4 -10 0 12 #ff8300
-#ff0400 #fcfcfc;
+#X obj 60 60 bng 20 250 50 0 \$0reset empty reset -4 -10 0 12 #ff8300 #ff0400 #fcfcfc;
 #X floatatom 110 60 0 0 0 2 hours - - 12;
-#X obj 60 110 bng 20 250 50 0 empty empty pause -4 -10 0 12 #ff8300
-#ff0400 #fcfcfc;
+#X obj 60 110 bng 20 250 50 0 empty empty pause -4 -10 0 12 #ff8300 #ff0400 #fcfcfc;
 #X floatatom 110 110 0 0 0 2 delay - - 12;
 #X obj 300 150 / 600;
 #X msg 300 120 1;
@@ -139,8 +135,7 @@
 #X restore 200 180 pd recall;
 #X obj 190 90 s \$0new;
 #X msg 70 260 0;
-#X obj 150 60 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400
-#fcfcfc;
+#X obj 150 60 bng 15 250 50 0 empty empty empty 17 7 0 10 #ff8300 #ff0400 #fcfcfc;
 #X connect 0 0 2 0;
 #X connect 1 0 6 1;
 #X connect 2 0 3 0;
@@ -170,26 +165,10 @@
 #X connect 28 0 14 0;
 #X coords 0 -1 1 1 120 100 2 50 40;
 #X restore 40 70 pd guts;
-#X floatatom 260 100 0 0 0 0 - - - 0;
-#X obj 200 70 hsl 128 20 0.001 1 1 0 empty empty volume 35 10 0 12
-#2f004d #fcfcfc #fcfcfc 0 1;
-#N canvas 970 490 450 300 vol 0;
-#X obj 160 190 zp~ 15;
-#X msg 160 120 0;
-#X obj 160 60 inlet;
-#X obj 160 220 outlet~;
-#X obj 230 190 outlet;
-#X obj 160 150 f;
-#X obj 160 90 moses 0.00101;
-#X connect 0 0 3 0;
-#X connect 1 0 5 0;
-#X connect 2 0 6 0;
-#X connect 5 0 0 0;
-#X connect 5 0 4 0;
-#X connect 6 0 1 0;
-#X connect 6 1 5 0;
-#X restore 200 100 pd vol;
 #X obj 200 130 s~ \$0vol;
+#X obj 200 70 hsl 81 24 -80 0 0 0 empty empty volume 10 12 0 16 #2f004d #ff8300 #fcfcfc 0 1;
+#X obj 200 100 dB~;
+#X floatatom 250 100 0 0 0 0 - - - 0;
 #X connect 3 0 4 0;
-#X connect 4 0 5 0;
-#X connect 4 1 2 0;
+#X connect 4 0 2 0;
+#X connect 4 1 5 0;
