@@ -10,7 +10,7 @@
 #N canvas 400 200 450 300 lib 0;
 #X obj 140 120 declare -lib blunt;
 #X restore 30 30 pd lib;
-#N canvas 780 200 450 300 kpress 0;
+#N canvas 780 100 450 300 kpress 0;
 #X obj 50 20 keyname;
 #X obj 50 110 spigot;
 #X obj 60 80 symbol;
