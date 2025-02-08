@@ -4,7 +4,7 @@
 #X obj 120 90 inlet;
 #X obj 60 90 \$1;
 #X msg 120 130 1 \, 0 \$1;
-#X obj 120 160 vline~;
+#X obj 120 160 line~;
 #X obj 60 130 / \$2;
 #X obj 60 190 *~;
 #X obj 60 220 *~;
