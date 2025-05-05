@@ -1,0 +1,13 @@
+baz
+../fizz
+# skipped, reading a parent playlist would cause an infinite recursion
+../a.m3u
+# skipped, the current playlist is considered a parent playlist
+b.m3u
+
+# skipped, doesn't exist
+d.m3u
+# a playlist stops being a parent upon completion,
+# which allows for multiple read-throughs
+c.m3u
+c.m3u

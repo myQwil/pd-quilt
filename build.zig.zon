@@ -8,6 +8,26 @@
 			.url = "git+https://github.com/myQwil/pd#v0.56.2-3",
 			.hash = "pd-0.56.2-DC007WBXAgCummN6L4Cr4sZF6coJbV8zNt90bVUBm6pF",
 		},
+		.gme = .{
+			.url = "git+https://github.com/myQwil/game-music-emu#c6b70bf66fc681f9450eec64fc4d6e19d753662a",
+			.hash = "game_music_emu-0.6.4-YdNlAAI8EABd9mFPCu9NMv5T-7wEPvpb_MPF5944OST7",
+		},
+		.unrar = .{
+			.url = "git+https://github.com/myQwil/unrar#912585fd2137bc4e844865cad929bd2cd38e3383",
+			.hash = "unrar-7.1.10-zNpgmUNeDgAieHSwsJBaxZm8rSwjy26Uyf5Ytlco1Qdc",
+		},
+		.samplerate = .{
+			.url = "git+https://github.com/myQwil/libsamplerate#2b938917e0e55122980993a5526bc646770f3306",
+			.hash = "libsamplerate-0.2.3-f8m6bkQxAABWxAD_itM4ybmWa1B732yuGHNJaYHqGTvV",
+		},
+		.rubberband = .{
+			.url = "git+https://github.com/myQwil/rubberband#edc6e9805383163a353b4887e41bd893dd304097",
+			.hash = "rubberband-4.0.0-RbnorBsTAQClmT-SehVkkuxsnC9SaDLMSeb_Qb8QyErY",
+		},
+		.ffmpeg = .{
+			.url = "git+https://github.com/myQwil/ffmpeg#4779df5719f2401f9bb13271cd376e85fd3b5b96",
+			.hash = "ffmpeg-7.0.1-8-zT7QA197AwAAAgP6XVDqyTLArWznbBEfWLcPUabp58ec",
+		}
 	},
 	.paths = .{
 		"abstractions",

@@ -37,6 +37,10 @@ const Options = struct {
 
 const Dependency = enum {
 	libc,
+	gme,
+	rabbit,
+	rubber,
+	ffmpeg,
 };
 
 const External = struct {
@@ -46,12 +50,17 @@ const External = struct {
 
 const externals = [_]External{
 	.{ .name = "arp" },
+	.{ .name = "av~", .deps = &.{ .libc, .ffmpeg, .rabbit } },
+	.{ .name = "avr~", .deps = &.{ .libc, .ffmpeg, .rabbit, .rubber } },
 	.{ .name = "blunt" },
 	.{ .name = "chrono" },
 	.{ .name = "delp" },
 	.{ .name = "fldec" },
 	.{ .name = "flenc" },
 	.{ .name = "fton" },
+	.{ .name = "gmer~", .deps = &.{ .libc, .gme, .rabbit, .rubber } },
+	.{ .name = "gmes~", .deps = &.{ .libc, .gme, .rabbit } },
+	.{ .name = "gme~", .deps = &.{ .libc, .gme, .rabbit } },
 	.{ .name = "has" },
 	.{ .name = "hsv" },
 	.{ .name = "is" },
@@ -60,6 +69,7 @@ const externals = [_]External{
 	.{ .name = "metro~" },
 	.{ .name = "ntof" },
 	.{ .name = "paq" },
+	.{ .name = "plist" },
 	.{ .name = "pulse~" },
 	.{ .name = "rand" },
 	.{ .name = "rind" },
@@ -72,6 +82,25 @@ const externals = [_]External{
 	.{ .name = "unpaq" },
 };
 
+fn getModule(
+	b: *std.Build,
+	name: []const u8,
+	args: anytype,
+) *std.Build.Module {
+	const dep = b.dependency(name, args);
+	const linkage: LinkMode = args.linkage;
+	const target: std.Build.ResolvedTarget = args.target;
+
+	if (linkage == .dynamic) {
+		const lib = dep.artifact(name);
+		const install = b.addInstallFile(lib.getEmittedBin(),
+			b.fmt("lib{s}{s}", .{ name, target.result.dynamicLibSuffix() }));
+		install.step.dependOn(&lib.step);
+		b.getInstallStep().dependOn(&install.step);
+	}
+	return dep.module(name);
+}
+
 pub fn build(b: *std.Build) !void {
 	const target = b.standardTargetOptions(.{});
 	const optimize = b.standardOptimizeOption(.{});
@@ -80,6 +109,29 @@ pub fn build(b: *std.Build) !void {
 	//---------------------------------------------------------------------------
 	// Dependencies and modules
 	const pd_mod = b.dependency("pd", .{ .float_size = opt.float_size }).module("pd");
+
+	const gme = getModule(b, "gme", .{
+		.target = target,
+		.optimize = .ReleaseFast,
+		.linkage = opt.linkage,
+		.ym2612_emu = .mame,
+	});
+	const unrar = getModule(b, "unrar", .{
+		.target = target,
+		.optimize = .ReleaseFast,
+		.linkage = opt.linkage,
+	});
+	const rabbit = getModule(b, "samplerate", .{
+		.target = target,
+		.optimize = .ReleaseFast,
+		.linkage = opt.linkage,
+	});
+	const rubber = getModule(b, "rubberband", .{
+		.target = target,
+		.optimize = .ReleaseFast,
+		.linkage = opt.linkage,
+	});
+	const av = b.dependency("ffmpeg", .{}).module("av");
 
 	//---------------------------------------------------------------------------
 	// Install externals
@@ -106,6 +158,19 @@ pub fn build(b: *std.Build) !void {
 
 		for (x.deps) |dep| switch (dep) {
 			.libc => mod.link_libc = true,
+			.gme => {
+				mod.addImport("gme", gme);
+				mod.addImport("unrar", unrar);
+			},
+			.rabbit => mod.addImport("rabbit", rabbit),
+			.rubber => mod.addImport("rubber", rubber),
+			.ffmpeg => {
+				mod.linkSystemLibrary("avutil", .{});
+				mod.linkSystemLibrary("avcodec", .{});
+				mod.linkSystemLibrary("avformat", .{});
+				mod.linkSystemLibrary("swresample", .{});
+				mod.addImport("av", av);
+			}
 		};
 		if (opt.linkage == .dynamic and x.deps.len > 0) {
 			mod.addRPathSpecial("$ORIGIN");
