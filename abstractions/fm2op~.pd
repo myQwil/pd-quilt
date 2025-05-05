@@ -1,7 +1,7 @@
 #N canvas 400 200 410 430 16;
 #X obj 60 240 phasor~;
 #X obj 150 240 osc~;
-#X obj 40 160 inlet~ carrier;
+#X obj 40 160 inlet~ freq;
 #X obj 60 200 *~;
 #X obj 150 200 *~;
 #X obj 170 280 *~;
