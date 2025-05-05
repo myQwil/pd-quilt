@@ -85,7 +85,7 @@
 #N canvas 900 660 370 240 save-on-close 0;
 #X obj 70 50 inlet;
 #X obj 30 170 textfile;
-#X obj 30 50 b &;
+#X obj 30 50 b #;
 #X obj 30 110 spigot;
 #X msg 100 110 1;
 #X obj 100 80 r \$0reset;
@@ -103,7 +103,7 @@
 #X obj 50 110 declare -lib blunt;
 #X obj 50 150 declare -path ggee;
 #X text 210 150 shell;
-#X text 210 110 chrono \, b &;
+#X text 210 110 chrono \, b #;
 #X restore 300 50 pd lib;
 #X obj 170 150 r \$0reset;
 #X obj 110 150 * 60;

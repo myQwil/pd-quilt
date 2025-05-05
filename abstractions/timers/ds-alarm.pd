@@ -19,7 +19,7 @@
 #X obj 140 40 inlet;
 #X obj 140 240 pulse~ 0.5 1050;
 #X obj 140 210 * 1050;
-#X obj 140 180 @pow 2;
+#X obj 140 180 exp2;
 #X obj 140 70 b;
 #X floatatom 210 180 0 0 0 0 - - - 0;
 #X obj 140 150 rind -0.05 0.05;
@@ -170,7 +170,7 @@
 #X obj 170 100 symbol;
 #X msg 170 130 cancelled at \$1;
 #X obj 310 100 symbol;
-#X obj 310 70 b &;
+#X obj 310 70 b #;
 #X msg 310 130 closed at \$1;
 #X connect 0 0 4 0;
 #X connect 1 0 6 0;
