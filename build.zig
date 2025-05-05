@@ -45,10 +45,16 @@ const External = struct {
 };
 
 const externals = [_]External{
+	.{ .name = "chrono" },
+	.{ .name = "delp" },
 	.{ .name = "fldec" },
 	.{ .name = "flenc" },
+	.{ .name = "fton" },
 	.{ .name = "has" },
 	.{ .name = "is" },
+	.{ .name = "linp" },
+	.{ .name = "linp~" },
+	.{ .name = "ntof" },
 	.{ .name = "pulse~" },
 	.{ .name = "rand" },
 	.{ .name = "rind" },
