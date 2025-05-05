@@ -45,16 +45,21 @@ const External = struct {
 };
 
 const externals = [_]External{
+	.{ .name = "arp" },
+	.{ .name = "blunt" },
 	.{ .name = "chrono" },
 	.{ .name = "delp" },
 	.{ .name = "fldec" },
 	.{ .name = "flenc" },
 	.{ .name = "fton" },
 	.{ .name = "has" },
+	.{ .name = "hsv" },
 	.{ .name = "is" },
 	.{ .name = "linp" },
 	.{ .name = "linp~" },
+	.{ .name = "metro~" },
 	.{ .name = "ntof" },
+	.{ .name = "paq" },
 	.{ .name = "pulse~" },
 	.{ .name = "rand" },
 	.{ .name = "rind" },
@@ -64,6 +69,7 @@ const externals = [_]External{
 	.{ .name = "sly" },
 	.{ .name = "tabosc2~" },
 	.{ .name = "tabread2~" },
+	.{ .name = "unpaq" },
 };
 
 pub fn build(b: *std.Build) !void {
