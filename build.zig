@@ -71,6 +71,7 @@ const externals = [_]External{
 	.{ .name = "paq" },
 	.{ .name = "plist" },
 	.{ .name = "pulse~" },
+	.{ .name = "radix" },
 	.{ .name = "rand" },
 	.{ .name = "rind" },
 	.{ .name = "same" },
