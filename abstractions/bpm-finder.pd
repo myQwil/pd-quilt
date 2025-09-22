@@ -123,7 +123,7 @@
 #X obj 120 130 t;
 #N canvas 730 350 450 300 bpm 0;
 #X obj 180 190 @/ 60000;
-#X obj 180 150 @moses;
+#X obj 180 150 sesom;
 #X obj 180 120 #* 1;
 #X obj 180 90 #* 1;
 #X text 260 190 ms;
