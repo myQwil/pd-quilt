@@ -12,7 +12,7 @@
 #X text 90 50 simple dB volume;
 #X obj 70 80 inlet;
 #X obj 160 270 outlet;
-#X obj 70 120 @moses -80;
+#X obj 70 120 sesom -80;
 #X msg 160 210 symbol -inf;
 #X obj 160 240 f;
 #N canvas 760 200 360 180 arg 0;

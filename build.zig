@@ -45,11 +45,17 @@ const External = struct {
 };
 
 const externals = [_]External{
+	.{ .name = "fldec" },
+	.{ .name = "flenc" },
 	.{ .name = "has" },
 	.{ .name = "is" },
+	.{ .name = "pulse~" },
 	.{ .name = "rand" },
 	.{ .name = "rind" },
 	.{ .name = "same" },
+	.{ .name = "sesom" },
+	.{ .name = "slx" },
+	.{ .name = "sly" },
 	.{ .name = "tabosc2~" },
 	.{ .name = "tabread2~" },
 };
