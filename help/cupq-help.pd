@@ -6,7 +6,7 @@
 #X msg 140 200 1, f 2;
 #X msg 230 200 1, f 2;
 #X obj 150 290 cupq 42 2;
-#X obj 180 30 cnv 15 56 27 empty empty cupq 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 180 30 cnv 15 56 27 empty empty cupq 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X text 40 60 the left-most and right-most inlets will subtract and add to the current value respectively \, while the middle inlet will output the current value and allow for it to be set to a different value., f 34;
 #X msg 300 200 set 24;
 #X obj 60 200 bng 24 250 50 0 empty empty empty 0 -12 0 16 #ff8300 #551312 #fcfcfc;

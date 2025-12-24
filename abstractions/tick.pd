@@ -6,7 +6,7 @@
 #X obj 60 240 noise~;
 #X obj 90 280 *~;
 #X obj 90 310 outlet~;
-#X obj 170 20 cnv 15 56 27 empty empty tick 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 170 20 cnv 15 56 27 empty empty tick 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X text 110 50 ticking metronome;
 #X obj 130 160 tgl 24 0 empty empty empty 0 -12 0 16 #0e4345 #fcfcfc #fcfcfc 0 1;
 #X floatatom 160 160 6 0 0 0 - - - 0;

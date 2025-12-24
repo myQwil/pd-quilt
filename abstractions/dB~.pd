@@ -8,7 +8,7 @@
 #X obj 230 170 / 20;
 #X obj 230 140 log;
 #X msg 230 110 10;
-#X obj 150 20 cnv 15 42 27 empty empty dB~ 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 150 20 cnv 15 42 27 empty empty dB~ 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X text 90 50 simple dB volume;
 #X obj 70 80 inlet;
 #X obj 160 270 outlet;

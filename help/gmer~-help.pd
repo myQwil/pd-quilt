@@ -40,7 +40,7 @@
 #X connect 9 0 7 0;
 #X restore 50 370 pd record;
 #X obj 150 370 tgl 24 0 empty empty empty 0 -12 0 16 #0e4345 #fcfcfc #fcfcfc 0 1;
-#X obj 190 30 cnv 15 70 27 empty empty gmer~ 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 190 30 cnv 15 70 27 empty empty gmer~ 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X text 70 60 Variant of [gme~] that uses Rubber Band library for tempo, f 29;
 #X obj 30 280 gmer~ channels=together, f 17;
 #N canvas 830 560 360 120 docs 0;

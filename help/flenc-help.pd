@@ -21,7 +21,7 @@
 #X obj 220 410 bng 24 250 50 0 empty empty empty 0 -12 0 16 #ff8300 #551312 #fcfcfc;
 #X floatatom 260 440 0 0 0 0 - - - 0;
 #X obj 40 360 cupqb;
-#X obj 240 40 cnv 15 182 27 empty empty flenc\ &\ fldec 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 240 40 cnv 15 182 27 empty empty flenc\ &\ fldec 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X obj 40 470 mantissa;
 #N canvas 400 200 450 300 lib 0;
 #X obj 140 120 declare -lib blunt;

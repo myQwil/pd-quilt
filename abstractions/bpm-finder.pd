@@ -167,7 +167,7 @@
 #X connect 11 0 7 0;
 #X restore 130 140 pd offset;
 #X obj 130 300 *~;
-#X obj 110 10 cnv 15 140 27 empty empty bpm-finder 0 12 0 24 #535512 #ffffff 0;
+#X obj 110 10 cnv 15 140 27 empty empty bpm-finder 0 12 0 24 #7c7c7c #ffffff 0;
 #X text 20 40 helper patch for determining bpm and start time of audio files., f 32;
 #X obj 180 330 dB~;
 #X floatatom 230 330 0 0 0 0 - - - 0;

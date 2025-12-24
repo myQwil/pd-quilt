@@ -1,7 +1,7 @@
 #N canvas 400 200 700 360 16;
 #X declare -lib blunt;
 #X obj 70 300 outlet;
-#X obj 290 30 cnv 15 126 27 empty empty mant-calc 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 290 30 cnv 15 126 27 empty empty mant-calc 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X text 260 60 mantissa calculator;
 #X obj 30 140 b;
 #X obj 70 220 expr $f1 + $f2 + $f3 + $f4 + $f5 + $f6 + $f7 + $f8 + $f9 + $f10 + $f11 + $f12 + $f13 + $f14 + $f15 + $f16 + $f17 + $f18 + $f19 + $f20 + $f21 + $f22 + $f23, f 55;

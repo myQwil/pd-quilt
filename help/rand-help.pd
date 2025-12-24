@@ -4,7 +4,7 @@
 #X obj 40 270 random 4;
 #X msg 40 210 seed 123;
 #X floatatom 40 300 0 0 0 0 - - - 0;
-#X obj 220 30 cnv 15 56 27 empty empty rand 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 220 30 cnv 15 56 27 empty empty rand 0 12 0 24 #7c7c7c #fcfcfc 0;
 #N canvas 920 200 470 330 no-repeats 0;
 #X obj 60 140 bng 24 250 50 0 empty empty empty 0 -12 0 16 #ff8300 #551312 #fcfcfc;
 #X obj 240 100 loadbang;

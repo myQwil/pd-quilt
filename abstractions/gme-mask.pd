@@ -1,7 +1,7 @@
 #N canvas 400 200 480 310 16;
 #X obj 50 60 inlet;
 #X obj 70 240 outlet;
-#X obj 190 30 cnv 15 112 27 empty empty gme-mask 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 190 30 cnv 15 112 27 empty empty gme-mask 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X obj 30 160 b;
 #X text 120 60 channel mute helper for gme~;
 #X obj 50 90 t f f f f f f f f f f f f f, f 31;

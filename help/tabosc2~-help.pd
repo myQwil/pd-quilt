@@ -5,7 +5,7 @@
 #X obj 40 210 tabosc2~ \$0wave 0.9;
 #X obj 40 280 *~;
 #X obj 40 310 dac~;
-#X obj 140 20 cnv 15 112 27 empty empty tabosc2~ 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 140 20 cnv 15 112 27 empty empty tabosc2~ 0 12 0 24 #7c7c7c #fcfcfc 0;
 #N canvas 800 200 360 80 lib 0;
 #X obj 80 30 declare -lib blunt;
 #X restore 30 20 pd lib;

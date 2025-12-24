@@ -1,5 +1,5 @@
 #N canvas 400 200 360 300 16;
-#X obj 140 20 cnv 15 70 27 empty empty sesom 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 140 20 cnv 15 70 27 empty empty sesom 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X floatatom 60 250 0 0 0 0 - - - 0;
 #X floatatom 120 250 0 0 0 0 - - - 0;
 #X floatatom 190 250 0 0 0 0 - - - 0;
