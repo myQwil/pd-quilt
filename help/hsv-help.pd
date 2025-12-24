@@ -1,6 +1,6 @@
 #N canvas 400 200 510 440 16;
 #X declare -lib blunt;
-#X obj 280 30 cnv 15 42 27 empty empty hsv 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 280 30 cnv 15 42 27 empty empty hsv 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X obj 60 280 hsv 0 1 1;
 #X text 150 60 translate hue-saturation-value to a 24-bit rgb int, f 30;
 #X obj 70 230 t b f;

@@ -1,6 +1,6 @@
 #N canvas 400 200 430 400 16;
 #X floatatom 170 350 0 0 0 0 - - - 0;
-#X obj 160 30 cnv 15 70 27 empty empty cupqb 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 160 30 cnv 15 70 27 empty empty cupqb 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X text 40 60 the left-most and right-most inlets will subtract and add to the current value respectively \, while the middle inlet will output the current value and allow for it to be set to a different value., f 34;
 #X obj 170 290 cupqb 42 2;
 #X msg 300 250 25;

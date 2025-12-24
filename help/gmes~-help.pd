@@ -7,7 +7,7 @@
 #X msg 270 220 \$1 \, print \$1 - %song%;
 #X obj 50 260 gmes~, f 41;
 #X msg 50 90 symbol ~/Music/Games;
-#X obj 250 20 cnv 15 70 27 empty empty gmes~ 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 250 20 cnv 15 70 27 empty empty gmes~ 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X text 120 50 Multi-channel variant of [gme~];
 #N canvas 970 200 360 240 (subpatch) 0;
 #X obj 40 30 inlet~ l;

@@ -3,7 +3,7 @@
 #X obj 170 230 same;
 #X floatatom 160 270 0 0 0 0 - - - 0;
 #X floatatom 250 270 0 0 0 0 - - - 0;
-#X obj 170 30 cnv 15 56 27 empty empty same 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 170 30 cnv 15 56 27 empty empty same 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X text 30 60 similar to [change] in that it sends different values through the left outlet \, but also sends repeat values through the right outlet, f 34;
 #X msg 210 200 set \$1;
 #X floatatom 210 170 0 0 0 0 - - - 0;

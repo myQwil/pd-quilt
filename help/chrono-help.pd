@@ -20,7 +20,7 @@
 #X obj 120 330 hms;
 #X symbolatom 120 360 0 0 0 0 - - - 0;
 #X text 100 50 timer with pause and lap features;
-#X obj 230 20 cnv 15 84 27 empty empty chrono 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 230 20 cnv 15 84 27 empty empty chrono 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X obj 270 300 tgl 24 0 empty empty paused 30 6 0 16 #0e4345 #fcfcfc #7c7c7c 0 1;
 #X floatatom 300 230 0 0 0 0 - - - 0;
 #X text 30 170 toggle;

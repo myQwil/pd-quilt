@@ -37,7 +37,7 @@
 #X text 30 30 1st inlet: frequency;
 #X text 30 50 2nd inlet: threshold;
 #X text 30 70 3rd inlet: phase index;
-#X obj 390 40 cnv 15 84 27 empty empty pulse~ 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 390 40 cnv 15 84 27 empty empty pulse~ 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X obj 40 230 pulse~ 0.25;
 #X obj 280 130 s \$0met;
 #X obj 160 230 r \$0met;

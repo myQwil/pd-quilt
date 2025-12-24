@@ -57,7 +57,7 @@
 #X obj 50 610 *~;
 #X obj 50 640 dac~;
 #X obj 90 610 hsl 128 15 0.001 1 1 0 empty empty empty -2 -8 0 10 #2f004d #fcfcfc #fcfcfc 0 1;
-#X obj 330 30 cnv 15 70 27 empty empty adsr~ 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 330 30 cnv 15 70 27 empty empty adsr~ 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X msg 230 160 . 10 s 20 \, 1;
 #X obj 60 480 tabwrite~ \$0adsr;
 #X msg 230 130 . 500 0.33 r \, 1;

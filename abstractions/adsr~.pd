@@ -21,7 +21,7 @@
 #X msg 230 230 stop;
 #X obj 250 470 outlet~;
 #X text 340 50 list/anything;
-#X obj 510 370 cnv 15 70 27 empty empty adsr~ 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 510 370 cnv 15 70 27 empty empty adsr~ 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X obj 540 190 loadbang;
 #X obj 250 440 curve~;
 #N canvas 400 200 450 300 lib 0;

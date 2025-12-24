@@ -10,7 +10,7 @@
 #X msg 50 250 0;
 #X obj 100 320 outlet~;
 #X text 200 280 attack-decay;
-#X obj 250 250 cnv 15 42 27 empty empty ad~ 0 12 0 24 #535512 #fcfcfc 0;
+#X obj 250 250 cnv 15 42 27 empty empty ad~ 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X obj 220 140 loadbang;
 #X obj 100 290 curve~;
 #N canvas 760 470 360 100 lib 0;
