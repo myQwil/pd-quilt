@@ -6,7 +6,7 @@
 	.dependencies = .{
 		.pd = .{
 			.url = "git+https://github.com/myQwil/pd#v0.56.2-4",
-			.hash = "pd-0.56.2-DC007ZxUAgBKPT6wDA2josnL89lDsqE9VmRNq9a6YF38",
+			.hash = "pd-0.56.2-DC007WxUAgCuzWkKc1JSWZlT-pBDxMXz-g5zG2xhRChF",
 		},
 		.gme = .{
 			.url = "git+https://github.com/myQwil/game-music-emu#c6b70bf66fc681f9450eec64fc4d6e19d753662a",
