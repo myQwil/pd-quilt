@@ -73,11 +73,11 @@ const Radix = extern struct {
 	/// last character in the tag (indicates type)
 	tag_type: *TagType,
 	/// min-max range of possible values
-	range: FVec2,
+	range: [2]Float,
 	/// position at the start of a grab
-	grab: FVec2 = .{ 0, 0 },
+	grab: [2]Float = .{ 0, 0 },
 	/// number of pixels per motion step
-	step: FVec2,
+	step: [2]Float,
 	/// value at the start of a grab, or the toggle value
 	alt: Float = 0,
 	/// radix context
@@ -204,9 +204,7 @@ const Radix = extern struct {
 		const obj: *Object = &self.obj;
 		const canvas = glist.getCanvas();
 		const dvec: IVec2 = .{ dx, dy };
-		const pix = SVec2{ obj.xpix, obj.ypix } + @as(SVec2, @intCast(dvec));
-		obj.xpix = pix[0];
-		obj.ypix = pix[1];
+		obj.pix = obj.pix + @as(SVec2, @intCast(dvec));
 		if (!glist.isVisible()) {
 			return;
 		}
@@ -362,7 +360,7 @@ const Radix = extern struct {
 		const bn2: Float = 1.0 / @as(Float, @floatFromInt(self.rad.base * self.rad.base));
 		const bn4: Float = bn2 * bn2;
 
-		const pos = FVec2{ dx, dy } + @as(FVec2, @floatFromInt(IVec2{ e.xwas, e.ywas }));
+		const pos = FVec2{ dx, dy } + @as(FVec2, @floatFromInt(@as(IVec2, e.was)));
 		const dif = pos - self.grab;
 		const sum =
 			(if (self.step[0] == 0) 0.25 else dif[0] / self.step[0]) +
@@ -594,7 +592,7 @@ const Radix = extern struct {
 
 		try b.addV("ssiis" ++ "iissff" ++ "iisssi;", .{
 			Symbol.gen("#X"), Symbol.gen("obj"),
-			self.obj.xpix, self.obj.ypix,
+			self.obj.pix[0], self.obj.pix[1],
 			Symbol.gen("radix"),
 
 			self.rad.base, self.rad.prec,
