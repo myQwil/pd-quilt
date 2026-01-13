@@ -13,7 +13,7 @@
 #X obj 70 80 inlet;
 #X obj 160 270 outlet;
 #X obj 70 120 sesom -80;
-#X msg 160 210 symbol -inf;
+#X msg 160 200 symbol -inf;
 #X obj 160 240 f;
 #N canvas 760 200 360 180 arg 0;
 #X msg 130 50 args 0;
