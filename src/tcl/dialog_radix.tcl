@@ -42,10 +42,10 @@ proc ::dialog_radix::apply {toplvl} {
 	pdsend "$toplvl param \
 		[::dialog_radix::escape [$toplvl.digits.base.entry get]] \
 		[::dialog_radix::escape [$toplvl.digits.prec.entry get]] \
-		[::dialog_radix::escape [$toplvl.limits.lower.entry get]] \
-		[::dialog_radix::escape [$toplvl.limits.upper.entry get]] \
 		[::dialog_radix::escape [$toplvl.step.axisx.entry get]] \
 		[::dialog_radix::escape [$toplvl.step.axisy.entry get]] \
+		[::dialog_radix::escape [$toplvl.limits.lower.entry get]] \
+		[::dialog_radix::escape [$toplvl.limits.upper.entry get]] \
 		[::dialog_radix::escape [$toplvl.width.entry get]] \
 		$::dialog_radix::fontsize \
 		[::dialog_radix::escape [$toplvl.s_r.recv.entry get]] \
@@ -68,8 +68,8 @@ proc ::dialog_radix::ok {toplvl} {
 proc ::dialog_radix::setup { \
 	toplvl \
 	base prec \
-	lower upper \
 	axisx axisy \
+	lower upper \
 	wid fontsize \
 	rcv snd \
 	label where \
@@ -203,23 +203,6 @@ proc ::dialog_radix::create_dialog {toplvl} {
 	pack $toplvl.digits.prec.label $toplvl.digits.prec.entry -side left
 
 	#############################################################################
-	# Limits
-	labelframe $toplvl.limits -text [_ "Limits"] -padx 15 -pady 4 -borderwidth 1
-	pack $toplvl.limits -side top -fill x
-
-	frame $toplvl.limits.lower
-	pack $toplvl.limits.lower -side left
-	label $toplvl.limits.lower.label -text [_ "Lower:"]
-	entry $toplvl.limits.lower.entry -width 7
-	pack $toplvl.limits.lower.label $toplvl.limits.lower.entry -side left
-
-	frame $toplvl.limits.upper
-	pack $toplvl.limits.upper -side left
-	label $toplvl.limits.upper.label -text [_ "Upper:"]
-	entry $toplvl.limits.upper.entry -width 7
-	pack $toplvl.limits.upper.label $toplvl.limits.upper.entry -side left
-
-	#############################################################################
 	# Pixels per step
 	labelframe $toplvl.step -text [_ "Pixels per step"] -padx 15 -pady 4 -borderwidth 1
 	pack $toplvl.step -side top -fill x
@@ -235,6 +218,23 @@ proc ::dialog_radix::create_dialog {toplvl} {
 	label $toplvl.step.axisy.label -text [_ "Axis y:"]
 	entry $toplvl.step.axisy.entry -width 7
 	pack $toplvl.step.axisy.label $toplvl.step.axisy.entry -side left
+
+	#############################################################################
+	# Limits
+	labelframe $toplvl.limits -text [_ "Limits"] -padx 15 -pady 4 -borderwidth 1
+	pack $toplvl.limits -side top -fill x
+
+	frame $toplvl.limits.lower
+	pack $toplvl.limits.lower -side left
+	label $toplvl.limits.lower.label -text [_ "Lower:"]
+	entry $toplvl.limits.lower.entry -width 7
+	pack $toplvl.limits.lower.label $toplvl.limits.lower.entry -side left
+
+	frame $toplvl.limits.upper
+	pack $toplvl.limits.upper -side left
+	label $toplvl.limits.upper.label -text [_ "Upper:"]
+	entry $toplvl.limits.upper.entry -width 7
+	pack $toplvl.limits.upper.label $toplvl.limits.upper.entry -side left
 
 	#############################################################################
 	# Label

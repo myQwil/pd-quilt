@@ -72,12 +72,12 @@ const Radix = extern struct {
 	sndx: *Symbol,
 	/// last character in the tag (indicates type)
 	tag_type: *TagType,
+	/// number of pixels per motion step
+	step: [2]Float,
 	/// min-max range of possible values
 	range: [2]Float,
 	/// position at the start of a grab
 	grab: [2]Float = .{ 0, 0 },
-	/// number of pixels per motion step
-	step: [2]Float,
 	/// value at the start of a grab, or the toggle value
 	alt: Float = 0,
 	/// radix context
@@ -89,12 +89,12 @@ const Radix = extern struct {
 	/// bit field
 	b: packed struct(u8) {
 		where: WhereLabel,
+		/// null states for the min-max range
+		range: @Vector(2, bool),
 		/// true if we've grabbed the keyboard and want a thicker border
 		grabbed: bool = false,
 		/// whether shift key was down when drag started
 		shift: bool = false,
-		/// null states for the min-max range
-		range: @Vector(2, bool),
 		_unused: u2 = 0,
 	},
 
@@ -438,6 +438,32 @@ const Radix = extern struct {
 		};
 	}
 
+	fn saveC(self: *Radix, b: *pd.BinBuf) callconv(.c) void {
+		save(self, b) catch |e| self.err(e);
+	}
+	inline fn save(self: *Radix, b: *pd.BinBuf) !void {
+		var buf_min: [16:0]u8 = undefined;
+		var buf_max: [16:0]u8 = undefined;
+		const none: Atom = .symbol(.gen("_"));
+		(if (self.b.range[0]) Atom.float(self.range[0]) else none).bufPrint(&buf_min);
+		(if (self.b.range[1]) Atom.float(self.range[1]) else none).bufPrint(&buf_max);
+		const rsl = try self.getRSL();
+
+		try b.addV("ssiis" ++ "iiffss" ++ "iisssi;", .{
+			Symbol.gen("#X"), Symbol.gen("obj"),
+			self.obj.pix[0], self.obj.pix[1],
+			Symbol.gen("radix"),
+
+			self.rad.base, self.rad.prec,
+			self.step[0], -self.step[1],
+			Symbol.gen(&buf_min), Symbol.gen(&buf_max),
+
+			self.rad.width, self.font_size,
+			rsl[0], rsl[1],
+			rsl[2], @as(u8, @intFromEnum(self.b.where)),
+		});
+	}
+
 	fn propertiesC(self: *Radix, _: *GList) callconv(.c) void {
 		properties(self) catch |e| self.err(e);
 	}
@@ -449,10 +475,10 @@ const Radix = extern struct {
 		(if (self.b.range[1]) Atom.float(self.range[1]) else none).bufPrint(&buf_max);
 		const rsl = try self.getRSL();
 
-		self.obj.g.pd.stub("dialog_radix::setup", self, "ii ss ff ii ss si", .{
+		self.obj.g.pd.stub("dialog_radix::setup", self, "ii ff ss ii ss si", .{
 			self.rad.base, self.rad.prec,
-			&buf_min, &buf_max,
 			self.step[0], -self.step[1],
+			&buf_min, &buf_max,
 			self.rad.width, self.font_size,
 			rsl[0].name, rsl[1].name,
 			rsl[2].name, @as(u8, @intFromEnum(self.b.where)),
@@ -477,10 +503,10 @@ const Radix = extern struct {
 		self.gl.setUndoState(&obj.g.pd, .gen("param"), &.{
 			.float(@floatFromInt(self.rad.base)),
 			.float(@floatFromInt(self.rad.prec)),
-			if (self.b.range[0]) .float(self.range[0]) else none,
-			if (self.b.range[1]) .float(self.range[1]) else none,
 			.float(self.step[0]),
 			.float(-self.step[1]),
+			if (self.b.range[0]) .float(self.range[0]) else none,
+			if (self.b.range[1]) .float(self.range[1]) else none,
 			.float(@floatFromInt(self.rad.width)),
 			.float(@floatFromInt(self.font_size)),
 			.symbol(rsl[0]),
@@ -499,17 +525,17 @@ const Radix = extern struct {
 		self.rad.width = @min(width, 1000);
 		try self.rad.write();
 
+		self.step = .{
+			av[2].getFloat() orelse self.step[0],
+			if (av[3].getFloat()) |f| -f else self.step[1],
+		};
+
 		var rstate: @Vector(2, bool) = .{ true, true };
 		self.range = .{
-			av[2].getFloat() orelse blk: { rstate[0] = false; break :blk 0; },
-			av[3].getFloat() orelse blk: { rstate[1] = false; break :blk 0; },
+			av[4].getFloat() orelse blk: { rstate[0] = false; break :blk 0; },
+			av[5].getFloat() orelse blk: { rstate[1] = false; break :blk 0; },
 		};
 		self.b.range = rstate;
-
-		self.step = .{
-			av[4].getFloat() orelse self.step[0],
-			if (av[5].getFloat()) |f| -f else self.step[1],
-		};
 
 		const fs: u16 = @intFromFloat(av[7].getFloat() orelse 0);
 		self.font_size = @min(fs, 36);
@@ -577,32 +603,6 @@ const Radix = extern struct {
 			self.gl.fixLinesFor(obj);
 		}
 		self.gl.setDirty(true);
-	}
-
-	fn saveC(self: *Radix, b: *pd.BinBuf) callconv(.c) void {
-		save(self, b) catch |e| self.err(e);
-	}
-	inline fn save(self: *Radix, b: *pd.BinBuf) !void {
-		var buf_min: [16:0]u8 = undefined;
-		var buf_max: [16:0]u8 = undefined;
-		const none: Atom = .symbol(.gen("_"));
-		(if (self.b.range[0]) Atom.float(self.range[0]) else none).bufPrint(&buf_min);
-		(if (self.b.range[1]) Atom.float(self.range[1]) else none).bufPrint(&buf_max);
-		const rsl = try self.getRSL();
-
-		try b.addV("ssiis" ++ "iissff" ++ "iisssi;", .{
-			Symbol.gen("#X"), Symbol.gen("obj"),
-			self.obj.pix[0], self.obj.pix[1],
-			Symbol.gen("radix"),
-
-			self.rad.base, self.rad.prec,
-			Symbol.gen(&buf_min), Symbol.gen(&buf_max),
-			self.step[0], -self.step[1],
-
-			self.rad.width, self.font_size,
-			rsl[0], rsl[1],
-			rsl[2], @as(u8, @intFromEnum(self.b.where)),
-		});
 	}
 
 	fn stepC(
@@ -714,13 +714,13 @@ const Radix = extern struct {
 		self.* = .{
 			.gl = gl,
 			.rad = rad,
-			.range = .{
-				pd.floatArg(2, av) catch blk: { rstate[0] = false; break :blk 0; },
-				pd.floatArg(3, av) catch blk: { rstate[1] = false; break :blk 0; },
-			},
 			.step = .{
-				pd.floatArg(4, av) catch 0,
-				if (pd.floatArg(5, av)) |f| -f else |_| -3,
+				pd.floatArg(2, av) catch 0,
+				if (pd.floatArg(3, av)) |f| -f else |_| -3,
+			},
+			.range = .{
+				pd.floatArg(4, av) catch blk: { rstate[0] = false; break :blk 0; },
+				pd.floatArg(5, av) catch blk: { rstate[1] = false; break :blk 0; },
 			},
 			.font_size = @intFromFloat(@min(pd.floatArg(7, av) catch 0, 36)),
 			.rcv = rcv,
