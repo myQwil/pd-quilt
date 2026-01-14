@@ -94,7 +94,8 @@ const Chrono = extern struct {
 			self.lapmore += self.timer.timeSince(self.laptime);
 			self.setTime();
 		}
-		self.timer.parseUnits(av[0..ac]);
+		self.timer.parseUnits(av[0..ac])
+			catch |e| pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
 	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Chrono {

@@ -73,8 +73,9 @@ const DelP = extern struct {
 			self.setmore += self.tmr.timeSince(self.settime);
 			self.settime = pd.time();
 		}
-		self.tmr.parseUnits(av[0..ac]);
-		self.clock.setUnit(self.tmr.unit, self.tmr.in_samples);
+		self.tmr.parseUnits(av[0..ac])
+			catch |e| pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
+		self.clock.setUnit(self.tmr.unit);
 	}
 
 	fn ft1C(self: *DelP, f: pd.Float) callconv(.c) void {
@@ -142,7 +143,7 @@ const DelP = extern struct {
 		} else 0;
 
 		const tmr: tm.Timer = try .init(obj, a);
-		clock.setUnit(tmr.unit, tmr.in_samples);
+		clock.setUnit(tmr.unit);
 
 		self.* = .{
 			.out_b = out_b,
