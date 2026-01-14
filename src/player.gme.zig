@@ -107,7 +107,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		var srate: Float = undefined;
 		const emu: *gm.Emu = blk: { if (arc_reader) |*ar| {
 			defer ar.close();
-			const sizes = try pd.mem.alloc(usize, ar.count);
+			const sizes = try pd.mem.alloc(c_ulong, ar.count);
 			defer pd.mem.free(sizes);
 			const buf = try pd.mem.alloc(u8, ar.size);
 			defer pd.mem.free(buf);
@@ -121,7 +121,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 					emu_type = t;
 				}
 				if (emu_type == t) {
-					sizes[n] = entry.size;
+					sizes[n] = @intCast(entry.size);
 					bp = bp[sizes[n]..];
 					n += 1;
 				}
