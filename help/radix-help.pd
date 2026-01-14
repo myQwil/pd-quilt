@@ -49,13 +49,13 @@
 #X obj 320 190 radix 10 6 0 3 _ _ 0 0 _ _ _ 0;
 #X obj 320 220 @pow 2;
 #X obj 320 250 s \$0msg;
-#X obj 400 220 log;
 #X obj 400 190 radix 10 6 0 3 _ _ 0 0 _ _ _ 0;
 #N canvas 950 200 360 80 lib 0;
 #X obj 90 30 declare -lib blunt;
 #X restore 20 20 pd lib;
+#X obj 400 220 `log;
 #X connect 0 0 2 0;
 #X connect 8 0 9 0;
 #X connect 9 0 10 0;
-#X connect 11 0 10 0;
-#X connect 12 0 11 0;
+#X connect 11 0 13 0;
+#X connect 13 0 10 0;

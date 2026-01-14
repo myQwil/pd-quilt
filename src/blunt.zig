@@ -187,52 +187,52 @@ const BinOp = extern struct {
 		BluntImpl.extend(class);
 	}
 
-	const ImplType = enum {
-		/// overrides any pre-existing object with the same name
-		bare,
-		/// avoid overriding pre-existing object with the same name
-		aka,
+	const Type = enum {
+		/// will override any pre-existing object with the same name
+		none,
+		/// prevents overriding pre-existing object
+		alias,
 		/// reverse operands
-		rev,
-		/// both inlets are hot
-		hot,
+		reverse_op,
+		/// both inlets will trigger an output
+		hot_inlets,
 	};
 
-	const Type = struct {
+	const Obj = struct {
 		name: [:0]const u8,
 		op: fn(Float, Float) callconv(.@"inline") Float,
 	};
 
-	fn Impl(comptime t: Type, comptime it: ImplType) type { return struct {
+	fn Impl(comptime ob: Obj, comptime t: Type) type { return struct {
 		var class: *Class = undefined;
 
 		fn sendC(self: *BinOp, s: *Symbol) callconv(.c) void {
 			const thing = s.thing
 				orelse return pd.post.err(self, "%s: no such object", .{ s.name });
-			thing.float(if (it == .rev)
-				t.op(self.f2, self.f1) else
-				t.op(self.f1, self.f2));
+			thing.float(if (t == .reverse_op)
+				ob.op(self.f2, self.f1) else
+				ob.op(self.f1, self.f2));
 		}
 
 		fn bangC(self: *const BinOp) callconv(.c) void {
-			self.out.float(if (it == .rev)
-				t.op(self.f2, self.f1) else
-				t.op(self.f1, self.f2));
+			self.out.float(if (t == .reverse_op)
+				ob.op(self.f2, self.f1) else
+				ob.op(self.f1, self.f2));
 		}
 
 		fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*BinOp {
-			const init: Init = if (it == .hot) initHot else initCold;
-			return pd.wrap(*BinOp, init(class, av[0..ac]), t.name);
+			const init: Init = if (t == .hot_inlets) initHot else initCold;
+			return pd.wrap(*BinOp, init(class, av[0..ac]), ob.name);
 		}
 
 		fn setup() !void {
-			const pre = switch (it) {
-				.rev => "@",
-				.hot => "#",
-				.aka => "`",
-				else => "",
+			const pre = switch (t) {
+				.reverse_op => "@",
+				.hot_inlets => "#",
+				.alias      => "`",
+				.none       => "",
 			};
-			class = try .init(BinOp, pre ++ t.name, &.{ .gimme }, &initC, null, .{});
+			class = try .init(BinOp, pre ++ ob.name, &.{ .gimme }, &initC, null, .{});
 			class.addBang(@ptrCast(&bangC));
 			class.addMethod(@ptrCast(&sendC), .gen("send"), &.{ .symbol });
 			extend(class);
@@ -611,50 +611,47 @@ export fn blunt_setup() void {
 inline fn setup() !void {
 	s_blunt = .gen(Blunt.name);
 
-	const BinOpObj = struct {
-		name: [:0]const u8,
-		op: fn(Float, Float) callconv(.@"inline") Float,
+	// Describes the object and which variants to make
+	const BinOpPlan = struct {
+		ob: BinOp.Obj,
 		rev: bool = false,
 		/// true if there is no pre-existing object with the same name
-		new: bool = false,
+		uniq: bool = false,
 	};
 
-	inline for ([_]BinOpObj{
-		.{ .name = "+",     .op = plus },
-		.{ .name = "*",     .op = times },
-		.{ .name = "min",   .op = min },
-		.{ .name = "max",   .op = max },
-		.{ .name = "<",     .op = lt },
-		.{ .name = ">",     .op = gt },
-		.{ .name = "<=",    .op = le },
-		.{ .name = ">=",    .op = ge },
-		.{ .name = "==",    .op = ee },
-		.{ .name = "!=",    .op = ne },
-		.{ .name = "&&",    .op = la },
-		.{ .name = "||",    .op = lo },
-		.{ .name = "&",     .op = ba },
-		.{ .name = "|",     .op = bo },
-		.{ .name = "^",     .op = bx, .new = true },
-		.{ .name = "-",     .op = minus, .rev = true },
-		.{ .name = "/",     .op = over,  .rev = true },
-		.{ .name = "log",   .op = log,   .rev = true },
-		.{ .name = "pow",   .op = pow,   .rev = true },
-		.{ .name = "<<",    .op = ls,    .rev = true },
-		.{ .name = ">>",    .op = rs,    .rev = true },
-		.{ .name = "%",     .op = rem,   .rev = true },
-		.{ .name = "mod",   .op = mod,   .rev = true },
-		.{ .name = "div",   .op = div,   .rev = true },
-		.{ .name = "atan2", .op = atan2, .rev = true },
-		.{ .name = "f%",    .op = frem,  .rev = true, .new = true },
-		.{ .name = "fmod",  .op = fmod,  .rev = true, .new = true },
-	}) |t| {
-		try BinOp.Impl(.{ .name = t.name, .op = t.op }, .bare).setup();
-		try BinOp.Impl(.{ .name = t.name, .op = t.op }, .hot).setup();
-		if (t.rev) {
-			try BinOp.Impl(.{ .name = t.name, .op = t.op }, .rev).setup();
-		}
-		if (!t.new) {
-			try BinOp.Impl(.{ .name = t.name, .op = t.op }, .aka).setup();
+	inline for ([_]BinOpPlan{
+		.{ .ob = .{ .name = "+",     .op = plus } },
+		.{ .ob = .{ .name = "*",     .op = times } },
+		.{ .ob = .{ .name = "min",   .op = min } },
+		.{ .ob = .{ .name = "max",   .op = max } },
+		.{ .ob = .{ .name = "<",     .op = lt } },
+		.{ .ob = .{ .name = ">",     .op = gt } },
+		.{ .ob = .{ .name = "<=",    .op = le } },
+		.{ .ob = .{ .name = ">=",    .op = ge } },
+		.{ .ob = .{ .name = "==",    .op = ee } },
+		.{ .ob = .{ .name = "!=",    .op = ne } },
+		.{ .ob = .{ .name = "&&",    .op = la } },
+		.{ .ob = .{ .name = "||",    .op = lo } },
+		.{ .ob = .{ .name = "&",     .op = ba } },
+		.{ .ob = .{ .name = "|",     .op = bo } },
+		.{ .ob = .{ .name = "^",     .op = bx }, .uniq = true },
+		.{ .ob = .{ .name = "-",     .op = minus }, .rev = true },
+		.{ .ob = .{ .name = "/",     .op = over },  .rev = true },
+		.{ .ob = .{ .name = "log",   .op = log },   .rev = true },
+		.{ .ob = .{ .name = "pow",   .op = pow },   .rev = true },
+		.{ .ob = .{ .name = "<<",    .op = ls },    .rev = true },
+		.{ .ob = .{ .name = ">>",    .op = rs },    .rev = true },
+		.{ .ob = .{ .name = "%",     .op = rem },   .rev = true },
+		.{ .ob = .{ .name = "mod",   .op = mod },   .rev = true },
+		.{ .ob = .{ .name = "div",   .op = div },   .rev = true },
+		.{ .ob = .{ .name = "atan2", .op = atan2 }, .rev = true },
+		.{ .ob = .{ .name = "f%",    .op = frem },  .rev = true, .uniq = true },
+		.{ .ob = .{ .name = "fmod",  .op = fmod },  .rev = true, .uniq = true },
+	}) |p| {
+		try BinOp.Impl(p.ob, if (p.uniq) .none else .alias).setup();
+		try BinOp.Impl(p.ob, .hot_inlets).setup();
+		if (p.rev) {
+			try BinOp.Impl(p.ob, .reverse_op).setup();
 		}
 	}
 
