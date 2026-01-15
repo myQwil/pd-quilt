@@ -27,7 +27,7 @@
 #X obj 110 20 t;
 #X obj 120 140 s \$0pow;
 #X obj 160 50 bpm-finder \$0;
-#X obj 80 70 radix 12 6 20 20 _ _ 0 0 _ _ _ 0;
+#X obj 80 70 radix 12 6 0 3 _ _ 0 0 _ _ _ 0;
 #X connect 1 0 2 0;
 #X connect 2 0 0 0;
 #X connect 2 0 6 0;

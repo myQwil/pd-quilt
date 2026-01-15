@@ -24,11 +24,11 @@
 #X text 100 70 float-encode & float-decode. Splits and joins the sign \, exponent \, and mantissa of a float., f 45;
 #X obj 320 170 bng 24 250 50 0 empty empty empty 0 -12 0 16 #ff8300 #551312 #fcfcfc;
 #X obj 360 170 exp2;
-#X obj 120 140 radix 10 6 20 20 _ _ 0 0 _ _ _ 0;
-#X obj 140 170 radix 10 6 20 20 _ _ 0 0 _ _ _ 0;
-#X obj 280 140 radix 10 6 20 20 _ _ 0 0 _ _ _ 0;
-#X obj 360 140 radix 10 6 20 20 _ _ 0 0 _ _ _ 0;
-#X obj 40 410 radix 10 6 20 20 _ _ 0 0 _ _ _ 0;
+#X obj 120 140 radix 10 6 0 3 _ _ 0 0 _ _ _ 0;
+#X obj 140 170 radix 10 6 0 3 _ _ 0 0 _ _ _ 0;
+#X obj 280 140 radix 10 6 0 3 _ _ 0 0 _ _ _ 0;
+#X obj 360 140 radix 10 6 0 3 _ _ 0 0 _ _ _ 0;
+#X obj 40 410 radix 10 6 0 3 _ _ 0 0 _ _ _ 0;
 #X obj 210 440 radix 2 24 0 3 _ _ 0 0 _ _ _ 0;
 #X connect 0 0 1 0;
 #X connect 0 0 3 0;
