@@ -98,11 +98,11 @@ const TabOsc2 = extern struct {
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
-		_ = try obj.inlet(&obj.g.pd, &pd.s_float, .gen("ft1"));
 		const arrayname = try pd.symbolArg(0, av);
-		self.* = .{
-			.tab2 = try .init(obj, arrayname, pd.floatArg(1, av) catch 0),
-		};
+		const tab2: tb.Tab2 = try .init(obj, arrayname, pd.floatArg(1, av) catch 0);
+
+		_ = try obj.inlet(&obj.g.pd, &pd.s_float, .gen("ft1"));
+		self.* = .{ .tab2 = tab2 };
 		return self;
 	}
 

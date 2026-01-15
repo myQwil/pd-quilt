@@ -81,10 +81,10 @@ const TabRead2 = extern struct {
 		errdefer self.obj.g.pd.deinit();
 
 		const arrayname = try pd.symbolArg(0, av);
+		const tab2: tb.Tab2 = try .init(obj, arrayname, pd.floatArg(1, av) catch 0);
+
 		_ = try obj.inletFloat(&self.onset);
-		self.* = .{
-			.tab2 = try .init(obj, arrayname, pd.floatArg(1, av) catch 0),
-		};
+		self.* = .{ .tab2 = tab2 };
 		return self;
 	}
 
