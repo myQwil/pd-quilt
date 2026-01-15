@@ -45,6 +45,29 @@ pub inline fn dlrSymArg(idx: usize, av: []const Atom) pd.ArgError!*Symbol {
 	else error.IndexOutOfBounds;
 }
 
+fn deleteLine(gl: *GList, oc: *pd.OutConnect) void {
+	if (!gl.isVisible()) {
+		return;
+	}
+	var tag: [@sizeOf(usize) * 2 + 3 :0]u8 = undefined;
+	var w: Writer = .fixed(&tag);
+	w.print("l0x{x}", .{ @intFromPtr(oc) }) catch unreachable;
+	tag[w.end] = 0;
+	pd.vMess(null, "crs", .{ gl.getCanvas(), "delete", &tag });
+}
+
+/// Kill all lines for one inlet or outlet
+fn deleteLinesForIo(x: *GList, text: *Object, inp: ?*pd.Inlet, outp: ?*pd.Outlet) void {
+	var t: cnv.LineTraverser = .init(x);
+	var oconn: ?*pd.OutConnect = t.next();
+	while (oconn) |oc| : (oconn = t.next()) {
+		if ((t.ob == text and t.outlet == outp) or (t.ob2 == text and t.inlet == inp)) {
+			deleteLine(x, oc);
+			t.ob.disconnect(t.outno, t.ob2, t.inno);
+		}
+	}
+}
+
 const WhereLabel = enum(u2) {
 	left = 0,
 	right = 1,
@@ -555,7 +578,7 @@ const Radix = extern struct {
 			}
 		} else if (rcv_new != &pd.s_) { // inlet to symbol
 			if (obj.inlets) |inlet| {
-				self.gl.deleteLinesForIo(obj, inlet, null);
+				deleteLinesForIo(self.gl, obj, inlet, null);
 				inlet.deinit();
 			}
 			obj.g.pd.bind(self.gl.realizeDollar(rcv_new));
@@ -571,7 +594,7 @@ const Radix = extern struct {
 			}
 		} else if (snd_new != &pd.s_) { // outlet to symbol
 			if (obj.outlets) |outlet| {
-				self.gl.deleteLinesForIo(obj, null, outlet);
+				deleteLinesForIo(self.gl, obj, null, outlet);
 				outlet.deinit();
 			}
 		}
