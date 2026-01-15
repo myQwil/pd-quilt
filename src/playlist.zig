@@ -2,7 +2,7 @@ const std = @import("std");
 const pd = @import("pd");
 const path = std.fs.path;
 
-const SymList = std.ArrayList(*pd.Symbol);
+const ArrayList = std.ArrayList(*pd.Symbol);
 const StringHashMap = std.StringHashMap(void);
 
 const mem = pd.mem;
@@ -29,7 +29,7 @@ fn resolveZ(paths: []const []const u8) ![:0]u8 {
 }
 
 fn traverse(
-	list: *SymList,
+	list: *ArrayList,
 	parents: *StringHashMap,
 	file_path: []const u8,
 ) !void {
@@ -75,14 +75,14 @@ pub const Playlist = extern struct {
 	/// size of the allocation
 	cap: usize = 0,
 
-	inline fn toSymList(self: *const Playlist) SymList {
+	inline fn asArrayList(self: *const Playlist) ArrayList {
 		return .{
 			.items = self.ptr[0..0],
 			.capacity = self.cap,
 		};
 	}
 
-	inline fn fromSymList(list: *const SymList) Playlist {
+	inline fn fromArrayList(list: *const ArrayList) Playlist {
 		return .{
 			.ptr = list.items.ptr,
 			.len = list.items.len,
@@ -91,12 +91,12 @@ pub const Playlist = extern struct {
 	}
 
 	pub fn deinit(self: *Playlist) void {
-		var symlist = self.toSymList();
-		symlist.deinit(mem);
+		var list = self.asArrayList();
+		list.deinit(mem);
 	}
 
 	pub fn fromArgs(av: []const pd.Atom) !Playlist {
-		var list: SymList = .{};
+		var list: ArrayList = .{};
 		errdefer list.deinit(mem);
 
 		var parents: StringHashMap = .init(mem);
@@ -113,7 +113,7 @@ pub const Playlist = extern struct {
 				try list.append(mem, .gen(name));
 			}
 		}
-		return .fromSymList(&list);
+		return .fromArrayList(&list);
 	}
 
 	pub fn readArgs(self: *Playlist, av: []const pd.Atom) !void {

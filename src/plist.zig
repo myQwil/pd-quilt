@@ -14,8 +14,8 @@ const PList = extern struct {
 		self: *PList,
 		_: *pd.Symbol, ac: c_uint, av: [*]const pd.Atom,
 	) callconv(.c) void {
-		self.plist.readArgs(av[0..ac]) catch |e|
-			pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
+		self.plist.readArgs(av[0..ac])
+			catch |e| pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
 	fn bangC(self: *PList) callconv(.c) void {
