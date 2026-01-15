@@ -13,7 +13,7 @@ var s_blunt: *Symbol = undefined;
 // ----------------------------------- Blunt -----------------------------------
 // -----------------------------------------------------------------------------
 const Blunt = extern struct {
-	mask: u8,
+	mask: u8 = 0,
 
 	const name = "blunt";
 	var class: *Class = undefined;
@@ -27,17 +27,17 @@ const Blunt = extern struct {
 	};
 
 	fn init(av: []const Atom) Blunt {
+		if (av.len == 0 or av[av.len - 1].type != .symbol) {
+			return .{};
+		}
 		var mask: u8 = 0;
-		if (av.len >= 1 and av[av.len - 1].type == .symbol) {
-			const str = av[av.len - 1].w.symbol.name;
-			var i: usize = 0;
-			while (str[i] != 0) : (i += 1) {
-				switch (@as(LBChar, @enumFromInt(str[i]))) {
-					.load => mask |= 1 << @intFromEnum(LB.load),
-					.init => mask |= 1 << @intFromEnum(LB.init),
-					.close => mask |= 1 << @intFromEnum(LB.close),
-					_ => continue,
-				}
+		const str = av[av.len - 1].w.symbol;
+		for (std.mem.sliceTo(str.name, 0)) |c| {
+			switch (@as(LBChar, @enumFromInt(c))) {
+				.load => mask |= 1 << @intFromEnum(LB.load),
+				.init => mask |= 1 << @intFromEnum(LB.init),
+				.close => mask |= 1 << @intFromEnum(LB.close),
+				_ => continue,
 			}
 		}
 		return .{ .mask = mask };
