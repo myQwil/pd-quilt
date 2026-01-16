@@ -1,5 +1,5 @@
 #N canvas 400 200 430 260 16;
-#X obj 50 20 hsl 338 24 0 1 0 0 empty \$1trackbar trackbar 140 12 0 16 #2f004d #ff8300 #fcfcfc 0 1;
+#X obj 50 20 hsl 338 24 0 1 0 0 empty \$1trackbar trackbar 140 12 0 16 #2f004d #ff8300 #fcfcfc 0 0;
 #X obj 20 20 bng 24 250 50 0 empty empty empty 28 12 0 16 #ff8300 #ff0400 #7c7c7c;
 #X msg 100 190 seek \$1;
 #X obj 100 150 *;
