@@ -9,7 +9,7 @@
 #X obj 130 200 outlet;
 #N canvas 800 200 390 300 display 0;
 #X obj 50 30 r \$1time;
-#X obj 50 150 @-;
+#X obj 50 150 -;
 #X msg 140 180 set \$1;
 #X obj 140 150 /;
 #X obj 140 210 s \$1trackbar;
