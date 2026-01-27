@@ -11,6 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup FFmpeg
+        uses: federicocarboni/setup-ffmpeg@v3.1
+
       - name: Setup Zig
         uses: mlugg/setup-zig@v2
 
