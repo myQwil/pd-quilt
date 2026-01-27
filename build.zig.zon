@@ -21,8 +21,8 @@
 			.hash = "libsamplerate-0.2.3-f8m6bkQxAABWxAD_itM4ybmWa1B732yuGHNJaYHqGTvV",
 		},
 		.rubberband = .{
-			.url = "git+https://github.com/myQwil/rubberband#edc6e9805383163a353b4887e41bd893dd304097",
-			.hash = "rubberband-4.0.0-RbnorBsTAQClmT-SehVkkuxsnC9SaDLMSeb_Qb8QyErY",
+			.url = "git+https://github.com/myQwil/rubberband#5f8aa7c3bf5164cb3e9af01e37b97c41e656772e",
+			.hash = "rubberband-4.0.0-RbnorDAVAQDWchsPyhfD9CRlXCtgBAUg3hENKmMRTmKE",
 		},
 		.ffmpeg = .{
 			.url = "git+https://github.com/myQwil/ffmpeg#4779df5719f2401f9bb13271cd376e85fd3b5b96",
