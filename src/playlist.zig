@@ -6,6 +6,7 @@ const ArrayList = std.ArrayList(*pd.Symbol);
 const StringHashMap = std.StringHashMap(void);
 
 const mem = pd.mem;
+const io = std.Io.Threaded.global_single_threaded.ioBasic();
 
 inline fn isM3u(filename: []const u8) bool {
 	return std.mem.endsWith(u8, filename, ".m3u");
@@ -39,12 +40,12 @@ fn traverse(
 	try parents.put(file_path, {});
 	defer _ = parents.remove(file_path);
 
-	const file = std.fs.cwd().openFile(file_path, .{ .mode = .read_only })
+	const file = std.Io.Dir.cwd().openFile(io, file_path, .{ .mode = .read_only })
 		catch |e| return err(list.items.len, e, file_path.ptr);
-	defer file.close();
+	defer file.close(io);
 
 	var buf: [std.fs.max_path_bytes]u8 = undefined;
-	var r = file.reader(&buf);
+	var r = file.reader(io, &buf);
 	const base_dir = path.dirname(file_path) orelse ".";
 	while (r.interface.takeDelimiterExclusive('\n')) |line| {
 		defer _ = r.interface.take(1) catch {};

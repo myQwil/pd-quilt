@@ -188,6 +188,7 @@ pub fn build(b: *std.Build) !void {
 
 	//---------------------------------------------------------------------------
 	// Install help patches and abstractions
+	const io = b.graph.io;
 	const InstallFunc = fn(*std.Build, []const u8, []const u8) void;
 	const installFile: *const InstallFunc = switch (opt.patches) {
 		.symbolic => &pd.InstallLink.install,
@@ -196,11 +197,11 @@ pub fn build(b: *std.Build) !void {
 	};
 
 	for ([_][]const u8{ "help", "abstractions" }) |dir_name| {
-		var dir = try std.fs.cwd().openDir(dir_name, .{ .iterate = true });
-		defer dir.close();
+		var dir = try std.Io.Dir.cwd().openDir(io, dir_name, .{ .iterate = true });
+		defer dir.close(io);
 
 		var iter = dir.iterate();
-		while (try iter.next()) |file| {
+		while (try iter.next(io)) |file| {
 			if (file.kind != .file) {
 				continue;
 			}

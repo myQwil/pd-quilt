@@ -1,6 +1,8 @@
 const std = @import("std");
 const Allocator = std.mem.Allocator;
 
+const io = std.Io.Threaded.global_single_threaded.ioBasic();
+
 const Entry = struct {
 	name: [:0]const u8,
 	size: usize,
@@ -108,7 +110,7 @@ const RarReader = struct {
 };
 
 const ZipReader = struct {
-	reader: std.fs.File.Reader,
+	reader: std.Io.File.Reader,
 	iterator: std.zip.Iterator,
 	filename: [std.fs.max_path_bytes:0]u8 = undefined,
 	allocator: Allocator,
@@ -127,13 +129,13 @@ const ZipReader = struct {
 	};
 
 	pub fn init(allocator: Allocator, path: [:0]const u8) !ArcReader {
-		const file = try std.fs.cwd().openFile(path, .{ .mode = .read_only });
-		errdefer file.close();
+		const file = try std.Io.Dir.cwd().openFile(io, path, .{ .mode = .read_only });
+		errdefer file.close(io);
 
 		const self = try allocator.create(ZipReader);
 		errdefer allocator.destroy(self);
 		self.* = .{
-			.reader = .init(file, &buf_read),
+			.reader = .init(file, io, &buf_read),
 			.iterator = try .init(&self.reader),
 			.allocator = allocator,
 		};
@@ -250,7 +252,7 @@ const ZipReader = struct {
 	}
 
 	fn close(self: *ZipReader, allocator: Allocator) void {
-		self.reader.file.close();
+		self.reader.file.close(io);
 		allocator.destroy(self);
 	}
 };

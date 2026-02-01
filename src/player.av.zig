@@ -11,6 +11,8 @@ const Float = pd.Float;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
 
+const io = std.Io.Threaded.global_single_threaded.ioBasic();
+
 var s_pos: *Symbol = undefined;
 var s_bpm: *Symbol = undefined;
 var s_date: *Symbol = undefined;
@@ -197,12 +199,12 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 		@memcpy(ext_path[0..i], path[0..i]);
 		@memcpy(ext_path[i..][0..ext.len], ext);
-		const file = std.fs.cwd().openFile(ext_path, .{ .mode = .read_only })
+		const file = std.Io.Dir.cwd().openFile(io, ext_path, .{ .mode = .read_only })
 			catch return;
-		defer file.close();
+		defer file.close(io);
 
 		var buf: [std.fs.max_path_bytes:0]u8 = undefined;
-		var r = file.reader(&buf);
+		var r = file.reader(io, &buf);
 		const dct = &self.format.metadata;
 		while (r.interface.takeDelimiterExclusive('\n')) |line| {
 			defer _ = r.interface.take(1) catch {};

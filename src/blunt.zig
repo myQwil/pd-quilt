@@ -450,7 +450,7 @@ const Sym = extern struct {
 
 // -------------------------------- Operations ---------------------------------
 // -----------------------------------------------------------------------------
-const Int = @Type(.{ .int = .{ .signedness = .signed, .bits = @bitSizeOf(Float) } });
+const Int = std.meta.Int(.signed, @bitSizeOf(Float));
 
 // binop1:  +  -  *  /  min  max  log  pow
 inline fn plus(f1: Float, f2: Float) Float {

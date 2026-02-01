@@ -2,31 +2,31 @@
 	.name = .quilt,
 	.version = "0.9.0",
 	.fingerprint = 0x87570fed07d14de5,
-	.minimum_zig_version = "0.15.1",
+	.minimum_zig_version = "0.16.0-dev.2368+380ea6fb5",
 	.dependencies = .{
 		.pd = .{
-			.url = "git+https://github.com/myQwil/pd#v0.56.2-6",
-			.hash = "pd-0.56.2-DC007QhcAgAck1E75b2_J3nwz-Exg5yt9TFItHxWzRTG",
+			.url = "git+https://github.com/myQwil/pd#218278b1766a17f04597577b032895e4d1cbdc75",
+			.hash = "pd-0.56.2-DC007XRlAgCWwwejicdHo8rogtygAhFvtF-duu4yPP4s",
 		},
 		.gme = .{
-			.url = "git+https://github.com/myQwil/game-music-emu#c6b70bf66fc681f9450eec64fc4d6e19d753662a",
-			.hash = "game_music_emu-0.6.4-YdNlAAI8EABd9mFPCu9NMv5T-7wEPvpb_MPF5944OST7",
+			.url = "git+https://github.com/myQwil/game-music-emu#292977da683864d6f6d92b8081af07249d799a70",
+			.hash = "game_music_emu-0.6.4-YdNlADQ_EABl55hsc-xUE-MA2NVhEZSJQebSx7F_CXQx",
 		},
 		.unrar = .{
-			.url = "git+https://github.com/myQwil/unrar#912585fd2137bc4e844865cad929bd2cd38e3383",
-			.hash = "unrar-7.1.10-zNpgmUNeDgAieHSwsJBaxZm8rSwjy26Uyf5Ytlco1Qdc",
+			.url = "git+https://github.com/myQwil/unrar#97beafb2195be68cce3252326b62dd2c0db94903",
+			.hash = "unrar-7.2.3-zNpgmTEyAABH7ugdcGTb0voozFoF0ZAz94ujHZH2eVCW",
 		},
 		.samplerate = .{
 			.url = "git+https://github.com/myQwil/libsamplerate#2b938917e0e55122980993a5526bc646770f3306",
 			.hash = "libsamplerate-0.2.3-f8m6bkQxAABWxAD_itM4ybmWa1B732yuGHNJaYHqGTvV",
 		},
 		.rubberband = .{
-			.url = "git+https://github.com/myQwil/rubberband#5f8aa7c3bf5164cb3e9af01e37b97c41e656772e",
-			.hash = "rubberband-4.0.0-RbnorDAVAQDWchsPyhfD9CRlXCtgBAUg3hENKmMRTmKE",
+			.url = "git+https://github.com/myQwil/rubberband#282594aa7cd4eb94f00b276cf330f5d51cb67f28",
+			.hash = "rubberband-4.0.0-RbnorC0VAQCQTed1hYA6r7Q1JlWlwyyFuFUdiZrfevn-",
 		},
 		.ffmpeg = .{
-			.url = "git+https://github.com/myQwil/ffmpeg#4779df5719f2401f9bb13271cd376e85fd3b5b96",
-			.hash = "ffmpeg-7.0.1-8-zT7QA197AwAAAgP6XVDqyTLArWznbBEfWLcPUabp58ec",
+			.url = "git+https://github.com/myQwil/ffmpeg#3a1bf8acd52f311e7600704356303305e3ce7f4d",
+			.hash = "ffmpeg-7.0.1-8-zT7QA_96AwDleaqGQxQ9L3YljHpbKGVKoUvOSwnqrzuG",
 		}
 	},
 	.paths = .{

@@ -81,6 +81,11 @@ const TagType = enum(u8) {
 	text = 't',
 };
 
+const LimitState = packed struct(u2) {
+	lo: bool,
+	hi: bool,
+};
+
 const Radix = extern struct {
 	obj: Object = undefined,
 	/// owning glist
@@ -113,7 +118,7 @@ const Radix = extern struct {
 	b: packed struct(u8) {
 		where: WhereLabel,
 		/// null states for the min-max range
-		range: @Vector(2, bool),
+		range: LimitState,
 		/// true if we've grabbed the keyboard and want a thicker border
 		grabbed: bool = false,
 		/// whether shift key was down when drag started
@@ -394,13 +399,13 @@ const Radix = extern struct {
 		if (trunc < nval + bn4 and trunc > nval - bn4) {
 			nval = trunc;
 		}
-		if (self.b.range[0] and nval < self.range[0]) {
+		if (self.b.range.lo and nval < self.range[0]) {
 			nval = self.range[0];
 			// prevent having to drag all the way back to where limit was reached
 			self.grab = pos - self.step / FVec2{ 4, 4 };
 			self.alt = nval;
 		}
-		if (self.b.range[1] and nval > self.range[1]) {
+		if (self.b.range.hi and nval > self.range[1]) {
 			nval = self.range[1];
 			self.grab = pos - self.step / FVec2{ 4, 4 };
 			self.alt = nval;
@@ -468,8 +473,8 @@ const Radix = extern struct {
 		var buf_min: [16:0]u8 = undefined;
 		var buf_max: [16:0]u8 = undefined;
 		const none: Atom = .symbol(.gen("_"));
-		(if (self.b.range[0]) Atom.float(self.range[0]) else none).bufPrint(&buf_min);
-		(if (self.b.range[1]) Atom.float(self.range[1]) else none).bufPrint(&buf_max);
+		(if (self.b.range.lo) Atom.float(self.range[0]) else none).bufPrint(&buf_min);
+		(if (self.b.range.hi) Atom.float(self.range[1]) else none).bufPrint(&buf_max);
 		const rsl = try self.getRSL();
 
 		try b.addV("ssiis" ++ "iiffss" ++ "iisssi;", .{
@@ -494,8 +499,8 @@ const Radix = extern struct {
 		var buf_min: [16:0]u8 = undefined;
 		var buf_max: [16:0]u8 = undefined;
 		const none: Atom = .symbol(.gen("_"));
-		(if (self.b.range[0]) Atom.float(self.range[0]) else none).bufPrint(&buf_min);
-		(if (self.b.range[1]) Atom.float(self.range[1]) else none).bufPrint(&buf_max);
+		(if (self.b.range.lo) Atom.float(self.range[0]) else none).bufPrint(&buf_min);
+		(if (self.b.range.hi) Atom.float(self.range[1]) else none).bufPrint(&buf_max);
 		const rsl = try self.getRSL();
 
 		self.obj.g.pd.stub("dialog_radix::setup", self, "ii ff ss ii ss si", .{
@@ -528,8 +533,8 @@ const Radix = extern struct {
 			.float(@floatFromInt(self.rad.prec)),
 			.float(self.step[0]),
 			.float(-self.step[1]),
-			if (self.b.range[0]) .float(self.range[0]) else none,
-			if (self.b.range[1]) .float(self.range[1]) else none,
+			if (self.b.range.lo) .float(self.range[0]) else none,
+			if (self.b.range.hi) .float(self.range[1]) else none,
 			.float(@floatFromInt(self.rad.width)),
 			.float(@floatFromInt(self.font_size)),
 			.symbol(rsl[0]),
@@ -553,10 +558,10 @@ const Radix = extern struct {
 			if (av[3].getFloat()) |f| -f else self.step[1],
 		};
 
-		var rstate: @Vector(2, bool) = .{ true, true };
+		var rstate: LimitState = .{ .lo = true, .hi = true };
 		self.range = .{
-			av[4].getFloat() orelse blk: { rstate[0] = false; break :blk 0; },
-			av[5].getFloat() orelse blk: { rstate[1] = false; break :blk 0; },
+			av[4].getFloat() orelse blk: { rstate.lo = false; break :blk 0; },
+			av[5].getFloat() orelse blk: { rstate.hi = false; break :blk 0; },
 		};
 		self.b.range = rstate;
 
@@ -721,7 +726,7 @@ const Radix = extern struct {
 		);
 		rad.width = @intFromFloat(@min(pd.floatArg(6, av) catch 0, 500));
 
-		var rstate: @Vector(2, bool) = .{ true, true };
+		var rstate: LimitState = .{ .lo = true, .hi = true };
 		const rcv: *Symbol = unescape(pd.symbolArg(8, av) catch &pd.s_);
 		const snd: *Symbol = unescape(pd.symbolArg(9, av) catch &pd.s_);
 
@@ -742,8 +747,8 @@ const Radix = extern struct {
 				if (pd.floatArg(3, av)) |f| -f else |_| -3,
 			},
 			.range = .{
-				pd.floatArg(4, av) catch blk: { rstate[0] = false; break :blk 0; },
-				pd.floatArg(5, av) catch blk: { rstate[1] = false; break :blk 0; },
+				pd.floatArg(4, av) catch blk: { rstate.lo = false; break :blk 0; },
+				pd.floatArg(5, av) catch blk: { rstate.hi = false; break :blk 0; },
 			},
 			.font_size = @intFromFloat(@min(pd.floatArg(7, av) catch 0, 36)),
 			.rcv = rcv,

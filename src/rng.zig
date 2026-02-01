@@ -4,6 +4,7 @@ const pd = @import("pd");
 const Float = pd.Float;
 
 var seed: u32 = undefined;
+const io = std.Io.Threaded.global_single_threaded.ioBasic();
 
 pub const Rng = extern struct {
 	state: u32,
@@ -31,7 +32,7 @@ pub fn Impl(Self: type) type { return struct {
 	}
 
 	pub inline fn extend() !void {
-		try std.posix.getrandom(std.mem.asBytes(&seed));
+		io.random(std.mem.asBytes(&seed));
 		seed |= 1; // odd numbers only
 
 		const class: *pd.Class = Self.class;

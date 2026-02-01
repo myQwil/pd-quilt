@@ -10,6 +10,7 @@ const Sample = pd.Sample;
 const Symbol = pd.Symbol;
 
 var s_mask: *Symbol = undefined;
+const io = std.Io.Threaded.global_single_threaded.ioBasic();
 
 const GmeInit = fn(*const gm.Type, c_uint) anyerror!*gm.Emu;
 const ArcInit = fn (std.mem.Allocator, [:0]const u8) anyerror!arc.ArcReader;
@@ -88,10 +89,10 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		const s = try pd.symbolArg(0, av);
 		const path = std.mem.sliceTo(s.name, 0);
 		const signature: u32 = blk: {
-			var file = try std.fs.cwd().openFile(path, .{});
-			defer file.close();
+			var file = try std.Io.Dir.cwd().openFile(io, path, .{});
+			defer file.close(io);
 			var sig_buf: [4]u8 = undefined;
-			var reader = file.reader(&sig_buf);
+			var reader = file.reader(io, &sig_buf);
 			break :blk @bitCast((try reader.interface.take(4))[0..4].*);
 		};
 
