@@ -473,7 +473,7 @@ inline fn max(f1: Float, f2: Float) Float {
 }
 
 inline fn log(f1: Float, f2: Float) Float {
-	return if (f2 <= 1)
+	return if (f2 <= 0)
 		@log(f1)
 	else std.math.log(Float, f2, f1);
 }
