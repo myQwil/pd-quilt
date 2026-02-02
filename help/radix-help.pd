@@ -28,8 +28,8 @@
 #X connect 2 0 0 0;
 #X restore 200 220 pd read;
 #N canvas 950 200 360 230 limits 0;
-#X obj 30 120 radix 10 6 0 3 _ 0 0 0 _ _ upper\ limit\ of\ 0 2;
-#X obj 30 180 radix 10 6 0 3 0 _ 0 0 _ _ lower\ limit\ of\ 0 2;
+#X obj 30 120 radix 10 6 0 3 0 _ 0 0 _ _ lower\ limit\ of\ 0 2;
+#X obj 30 180 radix 10 6 0 3 _ 0 0 0 _ _ upper\ limit\ of\ 0 2;
 #X text 30 20 A limit can be null \, in which case \, its check will be skipped over., f 29;
 #X restore 200 250 pd limits;
 #N canvas 950 200 360 240 steps 0;
