@@ -25,9 +25,9 @@
 			.hash = "rubberband-4.0.0-RbnorC0VAQCQTed1hYA6r7Q1JlWlwyyFuFUdiZrfevn-",
 		},
 		.ffmpeg = .{
-			.url = "git+https://github.com/myQwil/ffmpeg#29a758b90235b99b6524c2640e492832e2cd1e6c",
-			.hash = "ffmpeg-8.0.1-1kurkxsYAgC5rYBKgfYpIx_cVdl7esCNoYcNy0OYdKM1",
-		}
+			.url = "git+https://github.com/myQwil/ffmpeg#24834f4b4cb3fc21d8a194252782ce231f4dd9fc",
+			.hash = "ffmpeg-8.0.1-1kurkxwYAgB49fEBosY-unMC7i8YireP6FD_OQ6SIF4v",
+		},
 	},
 	.paths = .{
 		"abstractions",
