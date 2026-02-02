@@ -13,6 +13,8 @@ jobs:
 
       - name: Setup FFmpeg
         uses: federicocarboni/setup-ffmpeg@v3.1
+        with:
+          linking-type: shared
 
       - name: Setup Zig
         uses: mlugg/setup-zig@v2
