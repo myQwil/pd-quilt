@@ -45,22 +45,22 @@ const Dependency = enum {
 
 const External = struct {
 	name: []const u8,
-	deps: []const Dependency = &.{ .libc },
+	deps: []const Dependency = &.{},
 };
 
 const externals = [_]External{
 	.{ .name = "arp" },
-	.{ .name = "av~", .deps = &.{ .libc, .ffmpeg, .rabbit } },
-	.{ .name = "avr~", .deps = &.{ .libc, .ffmpeg, .rabbit, .rubber } },
+	.{ .name = "av~", .deps = &.{ .ffmpeg, .rabbit } },
+	.{ .name = "avr~", .deps = &.{ .ffmpeg, .rabbit, .rubber } },
 	.{ .name = "blunt" },
 	.{ .name = "chrono" },
 	.{ .name = "delp" },
 	.{ .name = "fldec" },
 	.{ .name = "flenc" },
 	.{ .name = "fton" },
-	.{ .name = "gmer~", .deps = &.{ .libc, .gme, .rabbit, .rubber } },
-	.{ .name = "gmes~", .deps = &.{ .libc, .gme, .rabbit } },
-	.{ .name = "gme~", .deps = &.{ .libc, .gme, .rabbit } },
+	.{ .name = "gmer~", .deps = &.{ .gme, .rabbit, .rubber } },
+	.{ .name = "gmes~", .deps = &.{ .gme, .rabbit } },
+	.{ .name = "gme~", .deps = &.{ .gme, .rabbit } },
 	.{ .name = "has" },
 	.{ .name = "hsv" },
 	.{ .name = "is" },
