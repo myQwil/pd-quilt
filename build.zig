@@ -136,7 +136,7 @@ pub fn build(b: *std.Build) !void {
 
 	//---------------------------------------------------------------------------
 	// Install externals
-	const extension = pd.extension(b, target);
+	const extension = pd.extension(b, target, opt.float_size);
 	for (externals) |x| {
 		const mod = b.createModule(.{
 			.target = target,
