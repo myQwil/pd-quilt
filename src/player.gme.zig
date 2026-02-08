@@ -161,7 +161,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 	/// Load a .m3u file with the same name as current file if it exists
 	inline fn loadM3u(self: *Gme, path: []const u8) !void {
 		const ext = ".m3u";
-		const end = std.mem.lastIndexOf(u8, path, ".") orelse path.len;
+		const end = std.mem.findScalarLast(u8, path, '.') orelse path.len;
 		var ext_path = try pd.mem.allocSentinel(u8, end + ext.len, 0);
 		defer pd.mem.free(ext_path);
 

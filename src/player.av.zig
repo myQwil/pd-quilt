@@ -23,10 +23,10 @@ pub fn trimRange(
 ) struct { usize, usize } {
 	var begin: usize = 0;
 	var end: usize = slice.len;
-	while (begin < end and std.mem.indexOfScalar(T, exclude, slice[begin]) != null) {
+	while (begin < end and std.mem.findScalar(T, exclude, slice[begin]) != null) {
 		begin += 1;
 	}
-	while (end > begin and std.mem.indexOfScalar(T, exclude, slice[end - 1]) != null) {
+	while (end > begin and std.mem.findScalar(T, exclude, slice[end - 1]) != null) {
 		end -= 1;
 	}
 	return .{ begin, end };
@@ -193,7 +193,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 	inline fn loadMetadata(self: *Av, path: [:0]const u8) !void {
 		const ext = ".txt";
-		const i = std.mem.lastIndexOf(u8, path, ".") orelse path.len;
+		const i = std.mem.findScalarLast(u8, path, '.') orelse path.len;
 		var ext_path = try pd.mem.alloc(u8, i + ext.len);
 		defer pd.mem.free(ext_path);
 
@@ -214,7 +214,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			if (begin > end or buf[begin] == '#') {
 				continue;
 			}
-			const eql = std.mem.indexOfScalar(u8, buf[begin..end], '=') orelse continue;
+			const eql = std.mem.findScalar(u8, buf[begin..end], '=') orelse continue;
 			buf[end] = 0;
 			buf[begin + eql] = 0;
 

@@ -9,7 +9,7 @@ const Symbol = pd.Symbol;
 const Writer = std.Io.Writer;
 
 const toggle = @import("toggle.zig").toggle;
-const indexOf = std.mem.indexOfScalar;
+const indexOf = std.mem.findScalar;
 
 var buffer: [pd.max_string:0]u8 = undefined;
 var s_open: *Symbol = undefined;

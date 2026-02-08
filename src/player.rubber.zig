@@ -60,7 +60,7 @@ fn parseOptions(av: []const Atom) !ru.Options {
 	for (av) |a| {
 		if (a.getSymbol()) |s| {
 			const name = std.mem.sliceTo(s.name, 0);
-			const eql = std.mem.indexOfScalar(u8, name, '=') orelse continue;
+			const eql = std.mem.findScalar(u8, name, '=') orelse continue;
 			const str = try pd.mem.dupeZ(u8, name);
 			defer pd.mem.free(str);
 
