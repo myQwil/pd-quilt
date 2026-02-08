@@ -3,7 +3,7 @@ const pd = @import("pd");
 const av = @import("av");
 const arc = @import("player.arc.zig");
 const pr = @import("player.zig");
-const Playlist = @import("playlist.zig").Playlist;
+const pl = @import("playlist.zig");
 pub const Subtitle = av.Subtitle;
 
 const Atom = pd.Atom;
@@ -17,20 +17,6 @@ var s_pos: *Symbol = undefined;
 var s_bpm: *Symbol = undefined;
 var s_date: *Symbol = undefined;
 pub var s_done: *Symbol = undefined;
-
-pub fn trimRange(
-	comptime T: type, slice: []const T, exclude: []const T,
-) struct { usize, usize } {
-	var begin: usize = 0;
-	var end: usize = slice.len;
-	while (begin < end and std.mem.findScalar(T, exclude, slice[begin]) != null) {
-		begin += 1;
-	}
-	while (end > begin and std.mem.findScalar(T, exclude, slice[end - 1]) != null) {
-		end -= 1;
-	}
-	return .{ begin, end };
-}
 
 const Stream = extern struct {
 	ctx: *av.Codec.Context = undefined,
@@ -65,7 +51,7 @@ const Stream = extern struct {
 
 pub fn Base(frames: comptime_int) type { return extern struct {
 	layout: av.ChannelLayout,
-	playlist: Playlist = .{},
+	playlist: pl.Playlist = .{},
 	player: pr.Player,
 	audio: Stream = .{},
 	subtitle: Stream = .{},
@@ -160,7 +146,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			return error.IndexOutOfBounds;
 		}
 		const format: *av.FormatContext = try .init(
-			self.playlist.ptr[idx].name, null, null, null);
+			self.playlist.ptr[idx].file.name, null, null, null);
 		errdefer format.deinit();
 
 		try format.findStreamInfo(null);
@@ -187,12 +173,12 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		self.swr = swr;
 		self.ratio = @as(f64, @floatFromInt(audio.ctx.sample_rate)) / pd.sampleRate();
 		self.frame.pts = 0;
-		self.loadMetadata(std.mem.sliceTo(self.playlist.ptr[idx].name, 0))
+		self.loadMetadata(std.mem.sliceTo(self.playlist.ptr[idx].file.name, 0))
 			catch |e| pd.post.err(null, "Av.loadMetadata: %s", .{ @errorName(e).ptr });
 	}
 
 	inline fn loadMetadata(self: *Av, path: [:0]const u8) !void {
-		const ext = ".txt";
+		const ext = ".plist";
 		const i = std.mem.findScalarLast(u8, path, '.') orelse path.len;
 		var ext_path = try pd.mem.alloc(u8, i + ext.len);
 		defer pd.mem.free(ext_path);
@@ -208,17 +194,18 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		const dct = &self.format.metadata;
 		while (r.interface.takeDelimiterExclusive('\n')) |line| {
 			defer _ = r.interface.take(1) catch {};
-			const trim = trimRange(u8, line, " \r");
-			const begin = r.interface.seek - line.len + trim[0];
-			const end = r.interface.seek - line.len + trim[1];
-			if (begin > end or buf[begin] == '#') {
+			const line_start = r.interface.seek - line.len;
+			const trim = pl.trimRange(line, " \t", "\r");
+			const begin = line_start + trim[0];
+			const end = line_start + trim[1];
+			if (begin >= end or buf[begin] == '#') {
 				continue;
 			}
 			const eql = std.mem.findScalar(u8, buf[begin..end], '=') orelse continue;
+			const kend = pl.trimEnd(buf[begin..][0..eql], " \t");
 			buf[end] = 0;
-			buf[begin + eql] = 0;
-
-			const key = buf[begin..][0..eql :0];
+			buf[begin + kend] = 0;
+			const key = buf[begin..][0..kend :0];
 			const val = buf[begin + eql + 1 .. end :0];
 			dct.set(key.ptr, val.ptr, .{})
 				catch |e| pd.post.err(null, "dct.set: %s", .{ @errorName(e).ptr });

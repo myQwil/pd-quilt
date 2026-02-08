@@ -21,7 +21,7 @@ const PList = extern struct {
 	fn bangC(self: *PList) callconv(.c) void {
 		for (0..self.plist.len) |i| {
 			self.out_idx.float(@floatFromInt(i));
-			self.out_val.symbol(self.plist.ptr[i]);
+			self.out_val.symbol(self.plist.ptr[i].file);
 		}
 	}
 
@@ -31,7 +31,7 @@ const PList = extern struct {
 			return;
 		}
 		self.out_idx.float(@floatFromInt(i));
-		self.out_val.symbol(self.plist.ptr[@intCast(i)]);
+		self.out_val.symbol(self.plist.ptr[@intCast(i)].file);
 	}
 
 	fn initC() callconv(.c) ?*PList {

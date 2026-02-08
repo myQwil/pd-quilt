@@ -1,13 +1,19 @@
-baz
-../fizz
+artist =foobar
+disc   =1
+
+@baz
+@../fizz
+
 # skipped, reading a parent playlist would cause an infinite recursion
-../a.m3u
+@../a.plist
+
 # skipped, the current playlist is considered a parent playlist
-b.m3u
+@b.plist
 
 # skipped, doesn't exist
-d.m3u
+@d.plist
+
 # a playlist stops being a parent upon completion,
 # which allows for multiple read-throughs
-c.m3u
-c.m3u
+@c.plist
+@c.plist

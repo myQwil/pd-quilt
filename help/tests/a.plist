@@ -1,0 +1,26 @@
+# A comment has # as its first non-whitespace character.
+# There are no inline comments.
+
+# Metadata specified before any tracks is global and applied to all tracks.
+# Whitespace surrounding the key is ignored,
+# but any whitespace after the equal sign is part of the value.
+artist  =foobar
+album   =Hello World
+
+# Track listing
+
+# A file path has @ as its first non-whitespace character.
+# Any metadata that comes after a file path is specific to that file.
+@foo
+	title   =foo lorem
+	bpm     =123
+
+@bar
+	title   =bar ipsum
+	bpm     =456
+
+# A file path can point to another plist file.
+@plist/b.plist
+	# Child plist metadata takes precedence over parent plist metadata,
+	# but file-specific metadata like this takes precedence over child plist metadata.
+	artist  =barfoo

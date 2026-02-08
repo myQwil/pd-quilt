@@ -1,4 +1,4 @@
-#N canvas 400 200 370 370 16;
+#N canvas 400 200 390 370 16;
 #X obj 40 220 plist;
 #X obj 150 20 cnv 15 70 27 empty empty plist 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X obj 100 120 openpanel;
@@ -17,7 +17,7 @@
 #X connect 3 0 2 0;
 #X connect 4 0 1 0;
 #X restore 240 290 pd cwd;
-#X msg 110 150 symbol help/tests/a.m3u;
+#X msg 110 150 symbol help/tests/a.plist;
 #X obj 40 260 pack s f;
 #X msg 40 290 \$2: \$1;
 #X obj 40 320 print -n;
