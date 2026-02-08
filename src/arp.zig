@@ -1,7 +1,6 @@
 const pd = @import("pd");
 const std = @import("std");
 const wr = @import("write.zig");
-const libc = @cImport({ @cInclude("stdlib.h"); });
 
 const Atom = pd.Atom;
 const Float = pd.Float;
@@ -12,22 +11,73 @@ const Writer = std.Io.Writer;
 var buffer: [pd.max_string:0]u8 = undefined;
 const epsilon = std.math.floatEps(Float);
 
-fn fParse(s: [*:0]const u8, end_ptr: ?*[*:0]u8) ?Float {
-	var end: [*c]u8 = undefined;
-	const f = libc.strtof(s, &end);
-	if (end_ptr) |ep| {
-		ep.* = end;
-	}
-	return if (end != s) f else null;
+inline fn getDigit(c: u8) ?u8 {
+	return if ('0' <= c and c <= '9') c - '0' else null;
 }
 
-fn iParse(s: [*:0]const u8, end_ptr: ?*[*:0]u8) ?i32 {
-	var end: [*c]u8 = undefined;
-	const i: i32 = @intCast(libc.strtol(s, &end, 10));
-	if (end_ptr) |ep| {
-		ep.* = end;
+/// Simple string-to-float converter
+pub fn fParse(s: [*:0]const u8, end_index: ?*usize) ?Float {
+	var i: usize = 0;
+	var no_digits: bool = true;
+	if (s[0] == '-' or s[0] == '+') {
+		i += 1;
 	}
-	return if (end != s) i else null;
+
+	// integer digits
+	var acc: u64 = 0;
+	while (getDigit(s[i])) |d| : (i += 1) {
+		acc = acc *| 10 +| d;
+		no_digits = false;
+	}
+
+	// fractional digits
+	const exp_offset: usize = if (s[i] == '.') blk: {
+		i += 1;
+		const start: usize = i;
+		while (getDigit(s[i])) |d| : (i += 1) {
+			acc = acc *| 10 +| d;
+			no_digits = false;
+		}
+		break :blk i - start;
+	} else 0;
+
+	if (no_digits) {
+		return null;
+	}
+
+	const f: f64 = blk: {
+		const a: f64 = @floatFromInt(acc);
+		const scale: f64 = @floatFromInt(
+			std.math.powi(usize, 10, exp_offset) catch return null);
+		break :blk a / scale;
+	};
+	if (end_index) |end| {
+		end.* = i;
+	}
+	return @floatCast(if (s[0] == '-') -f else f);
+}
+
+/// Simple string-to-int converter
+pub fn iParse(s: [*:0]const u8, end_index: ?*usize) ?i32 {
+	var i: usize = 0;
+	var no_digits: bool = true;
+	if (s[0] == '-' or s[0] == '+') {
+		i += 1;
+	}
+
+	var acc: i32 = 0;
+	while (getDigit(s[i])) |d| : (i += 1) {
+		acc = acc *| 10 +| d;
+		no_digits = false;
+	}
+
+	if (no_digits) {
+		return null;
+	}
+	if (end_index) |end| {
+		end.* = i;
+	}
+	return if (s[0] == '-') -acc else acc;
 }
 
 fn onset(i: i32, len: usize) usize {
@@ -87,7 +137,7 @@ const Arp = extern struct {
 
 	inline fn refParse(self: *const Arp, vec: []const Word, s: [*:0]const u8) ?Float {
 		return if (s[0] == '&')
-			(if (fParse(s+1, null)) |f| self.interval(vec, f) else null)
+			(if (fParse(s + 1, null)) |f| self.interval(vec, f) else null)
 		else fParse(s, null);
 	}
 
@@ -104,9 +154,9 @@ const Arp = extern struct {
 				var s = atom.w.symbol.name;
 				const n = blk: { // inner arg count
 					var rem = vec.len - i;
-					var end: [*:0]u8 = undefined;
+					var end: usize = undefined;
 					if (iParse(s, &end)) |j| {
-						s = end;
+						s += end;
 						rem = onset(j, rem);
 					}
 					break :blk rem;
@@ -206,13 +256,11 @@ const Arp = extern struct {
 		const s = sym.name;
 		if (av.len == 0) {
 			// check if it's `interval+semitone` syntax
-			var end: [*:0]u8 = undefined;
+			var end: usize = undefined;
 			if (fParse(s, &end)) |f| {
-				if (ops.get(end[0])) |op| {
-					if (end[0] != end[1]) {
-						const g = fParse(end+1, null) orelse 1;
-						return self.out_f.float(op(vec[0].float + self.interval(vec, f), g));
-					}
+				if (ops.get(s[end])) |op| {
+					const g = fParse(s + end + 1, null) orelse 1;
+					return self.out_f.float(op(vec[0].float + self.interval(vec, f), g));
 				}
 			}
 			return self.list(vec, &.{ .symbol(sym) }, 0);
