@@ -12,6 +12,7 @@ const int_bits = @bitSizeOf(UInt);
 const mant_digits = std.math.floatMantissaBits(Float) + 1;
 const ldbl_mant_dig = std.math.floatMantissaBits(FBig) + 1;
 const ldbl_max_exp = std.math.floatExponentMax(FBig) + 1;
+const inf_exp = (1 << std.math.floatExponentBits(Float)) - 1;
 
 const dgt = struct {
 	/// Character for exponent notation.
@@ -228,10 +229,10 @@ pub const Rad = extern struct {
 	pub fn write(self: *Rad) !void {
 		var w: std.Io.Writer = .fixed(&self.buf);
 		const uf: UnFloat = .{ .f = self.value };
-		if (uf.b.exponent == 0xFF) {
+		if (uf.b.exponent == inf_exp) {
 			try w.print("{s}{s}", .{
-				if (uf.b.sign == 0) "" else "-",
-				if (uf.b.mantissa == 0) "inf" else "nan",
+				if (uf.b.sign != 0) "-" else "",
+				if (uf.b.mantissa != 0) "nan" else "inf",
 			});
 			self.buf[w.end] = 0;
 			self.resize = if (self.end == w.end) false else blk: {
