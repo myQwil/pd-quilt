@@ -39,9 +39,9 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 
 	const Gme = @This();
 
-	var dict: std.AutoHashMap(*Symbol, *const fn(*const Gme) Atom) = undefined;
+	var dict: std.AutoHashMapUnmanaged(*Symbol, *const fn(*const Gme) Atom) = .{};
 	pub fn freeDict() void {
-		dict.deinit();
+		dict.deinit(gpa);
 	}
 
 	pub fn get(self: *const Gme, s: *Symbol) ?Atom {
@@ -313,13 +313,12 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		pub inline fn extend() !void {
 			s_mask = .gen("mask");
 
-			dict = .init(gpa);
-			errdefer dict.deinit();
+			errdefer dict.deinit(gpa);
 			inline for ([_][:0]const u8{
 				"path", "time", "ftime", "fade", "tracks", "voices",
 				"system", "game", "song", "author", "copyright", "comment", "dumper",
 			}) |field_name| {
-				try dict.put(.gen(field_name.ptr), @field(meta, field_name));
+				try dict.put(gpa, .gen(field_name.ptr), @field(meta, field_name));
 			}
 
 			const class: *pd.Class = Self.class;

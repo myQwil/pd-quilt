@@ -70,9 +70,9 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 	const Av = @This();
 
-	var dict: std.AutoHashMap(*Symbol, *const fn(*const Av) Atom) = undefined;
+	var dict: std.AutoHashMapUnmanaged(*Symbol, *const fn(*const Av) Atom) = .{};
 	pub fn freeDict() void {
-		dict.deinit();
+		dict.deinit(gpa);
 	}
 
 	pub inline fn init(obj: *pd.Object, args: []const Atom) !Av {
@@ -340,13 +340,12 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			s_done = .gen("done");
 			s_pos = .gen("pos");
 
-			dict = .init(gpa);
-			errdefer dict.deinit();
+			errdefer dict.deinit(gpa);
 			inline for ([_][:0]const u8{
 				"path", "time", "ftime", "tracks",
 				"samplefmt", "samplerate", "bitrate", "codec",
 			}) |field_name| {
-				try dict.put(.gen(field_name), @field(meta, field_name));
+				try dict.put(gpa, .gen(field_name), @field(meta, field_name));
 			}
 
 			const class: *pd.Class = Self.class;

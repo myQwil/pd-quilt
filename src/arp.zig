@@ -86,7 +86,7 @@ fn onset(i: i32, len: usize) usize {
 	return if (i < 0) len - j else j;
 }
 
-var ops: std.AutoHashMap(u8, *const fn(Float, Float) Float) = undefined;
+var ops: std.AutoHashMapUnmanaged(u8, *const fn(Float, Float) Float) = .{};
 
 fn opPlus(f1: Float, f2: Float) Float {
 	return f1 + f2;
@@ -307,14 +307,13 @@ const Arp = extern struct {
 	}
 
 	inline fn setup() !void {
-		ops = .init(gpa);
-		errdefer ops.deinit();
-		try ops.put('+', opPlus);
-		try ops.put('^', opPlus);
-		try ops.put('-', opMinus);
-		try ops.put('v', opMinus);
-		try ops.put('*', opTimes);
-		try ops.put('/', opOver);
+		errdefer ops.deinit(gpa);
+		try ops.put(gpa, '+', opPlus);
+		try ops.put(gpa, '^', opPlus);
+		try ops.put(gpa, '-', opMinus);
+		try ops.put(gpa, 'v', opMinus);
+		try ops.put(gpa, '*', opTimes);
+		try ops.put(gpa, '/', opOver);
 
 		pd.addCreator(anyopaque, name, &.{ .gimme }, &initC);
 		try InArray.setup();
@@ -508,6 +507,10 @@ const ExArray = extern struct {
 		return self;
 	}
 
+	fn classFreeC(_: *pd.Class) callconv(.c) void {
+		ops.deinit(gpa);
+	}
+
 	inline fn setup() !void {
 		class = try .init(ExArray, name, &.{}, null, null, .{});
 		Arp.Impl(ExArray).extend();
@@ -517,6 +520,7 @@ const ExArray = extern struct {
 		class.addMethod(@ptrCast(&printC), .gen("print"), &.{});
 		class.addMethod(@ptrCast(&resizeC), .gen("n"), &.{ .float });
 		class.addMethod(@ptrCast(&sendC), .gen("send"), &.{ .gimme });
+		class.setFreeFn(&classFreeC);
 	}
 };
 

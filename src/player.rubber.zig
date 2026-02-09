@@ -51,9 +51,9 @@ pub const Rubber = extern struct {
 };
 
 const FieldSetFunc = fn(*ru.Options, *Symbol) void;
-var dict: std.AutoHashMap(*Symbol, *const FieldSetFunc) = undefined;
+var dict: std.AutoHashMapUnmanaged(*Symbol, *const FieldSetFunc) = .{};
 pub fn freeDict() void {
-	dict.deinit();
+	dict.deinit(gpa);
 }
 
 fn parseOptions(av: []const Atom) !ru.Options {
@@ -153,14 +153,13 @@ pub fn Impl(Self: type) type { return struct {
 
 	pub inline fn extend() !void {
 		s_delay = .gen("delay");
-		dict = .init(gpa);
-		errdefer dict.deinit();
 
+		errdefer dict.deinit(gpa);
 		inline for ([_][:0]const u8{
 			"transients", "detector", "phase", "threading", "window",
 			"smoothing", "formant", "pitch", "channels", "engine",
 		}) |name| {
-			try dict.put(.gen(name), &FieldSetter(name).set);
+			try dict.put(gpa, .gen(name), &FieldSetter(name).set);
 		}
 
 		const class: *pd.Class = Self.class;
