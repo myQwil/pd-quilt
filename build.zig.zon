@@ -5,28 +5,28 @@
 	.minimum_zig_version = "0.16.0-dev.2368+380ea6fb5",
 	.dependencies = .{
 		.pd = .{
-			.url = "git+https://github.com/myQwil/pd#218278b1766a17f04597577b032895e4d1cbdc75",
-			.hash = "pd-0.56.2-DC007XRlAgCWwwejicdHo8rogtygAhFvtF-duu4yPP4s",
+			.url = "git+https://github.com/myQwil/pd#f7a8454b13ef3274901e36648f758a747b8727c5",
+			.hash = "pd-0.56.2-DC007WllAgAsr9i5BoEIEWJf9b6BIWJ7VlSe0bEBYyUG",
 		},
 		.gme = .{
-			.url = "git+https://github.com/myQwil/game-music-emu#292977da683864d6f6d92b8081af07249d799a70",
-			.hash = "game_music_emu-0.6.4-YdNlADQ_EABl55hsc-xUE-MA2NVhEZSJQebSx7F_CXQx",
+			.url = "git+https://github.com/myQwil/game-music-emu#8079e370d3db85348566d428df2b0f01bcd0d292",
+			.hash = "game_music_emu-0.6.4-YdNlAD0_EAB1q9zaEYaitlN06IGSRkleZze274_GTadV",
 		},
 		.unrar = .{
-			.url = "git+https://github.com/myQwil/unrar#97beafb2195be68cce3252326b62dd2c0db94903",
-			.hash = "unrar-7.2.3-zNpgmTEyAABH7ugdcGTb0voozFoF0ZAz94ujHZH2eVCW",
+			.url = "git+https://github.com/myQwil/unrar#982411e5b06e07b70abd772ae9c0945dea2e5b55",
+			.hash = "unrar-7.2.3-zNpgmV8xAABKyGjync_Q11svESFcC8dmoq1mFjlqsQiv",
 		},
 		.samplerate = .{
 			.url = "git+https://github.com/myQwil/libsamplerate#2b938917e0e55122980993a5526bc646770f3306",
 			.hash = "libsamplerate-0.2.3-f8m6bkQxAABWxAD_itM4ybmWa1B732yuGHNJaYHqGTvV",
 		},
 		.rubberband = .{
-			.url = "git+https://github.com/myQwil/rubberband#282594aa7cd4eb94f00b276cf330f5d51cb67f28",
-			.hash = "rubberband-4.0.0-RbnorC0VAQCQTed1hYA6r7Q1JlWlwyyFuFUdiZrfevn-",
+			.url = "git+https://github.com/myQwil/rubberband#ae168ec185bd7d5a27635f7fe51e68819fc8f702",
+			.hash = "rubberband-4.0.0-RbnorAgVAQAM3glRQUIOfa_3caorW_MLaSiXMRgfCDoy",
 		},
 		.ffmpeg = .{
-			.url = "git+https://github.com/myQwil/ffmpeg#24834f4b4cb3fc21d8a194252782ce231f4dd9fc",
-			.hash = "ffmpeg-8.0.1-1kurkxwYAgB49fEBosY-unMC7i8YireP6FD_OQ6SIF4v",
+			.url = "git+https://github.com/myQwil/ffmpeg#51f24bd7e625e27edf86acb0f6ed5d022fec03c4",
+			.hash = "ffmpeg-8.0.1-1kurkwQYAgDrxhBoR2-1ailhf79mQfczESxPwNLxRYgJ",
 		},
 	},
 	.paths = .{
