@@ -8,6 +8,8 @@ const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
 
+const gpa = pd.gpa;
+
 pub fn Impl(Root: type) type { return extern struct {
 	obj: pd.Object = undefined,
 	base: Base,
@@ -182,9 +184,9 @@ pub fn Impl(Root: type) type { return extern struct {
 		var rubber: ru.Rubber = try .init(obj, nch, args);
 		errdefer rubber.deinit();
 
-		const pslice = try pd.mem.alloc([*]Sample, nch);
+		const pslice = try gpa.alloc([*]Sample, nch);
 		for (0..nch) |ch| {
-			const slice = try pd.mem.alloc(Sample, ra.frames);
+			const slice = try gpa.alloc(Sample, ra.frames);
 			pslice[ch] = slice.ptr;
 		}
 		self.* = .{
@@ -199,9 +201,9 @@ pub fn Impl(Root: type) type { return extern struct {
 	fn deinitC(self: *Self) callconv(.c) void {
 		const nch = self.base.nch;
 		for (0..nch) |ch| {
-			pd.mem.free(self.planar[ch][0..ra.frames]);
+			gpa.free(self.planar[ch][0..ra.frames]);
 		}
-		pd.mem.free(self.planar[0..nch]);
+		gpa.free(self.planar[0..nch]);
 
 		self.rubber.deinit();
 		self.rabbit.deinit();

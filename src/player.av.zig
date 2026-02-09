@@ -11,6 +11,7 @@ const Float = pd.Float;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
 
+const gpa = pd.gpa;
 const io = std.Io.Threaded.global_single_threaded.ioBasic();
 
 var s_pos: *Symbol = undefined;
@@ -95,14 +96,14 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		const frame: *av.Frame = try .init();
 		errdefer frame.deinit();
 
-		const ibuf = try pd.mem.alloc(Sample, nch * frames);
-		errdefer pd.mem.free(ibuf);
+		const ibuf = try gpa.alloc(Sample, nch * frames);
+		errdefer gpa.free(ibuf);
 
-		const obuf = try pd.mem.alloc(Sample, nch * frames);
-		errdefer pd.mem.free(obuf);
+		const obuf = try gpa.alloc(Sample, nch * frames);
+		errdefer gpa.free(obuf);
 
-		const outs = try pd.mem.alloc([*]Sample, nch);
-		errdefer pd.mem.free(outs);
+		const outs = try gpa.alloc([*]Sample, nch);
+		errdefer gpa.free(outs);
 
 		return .{
 			.player = try .init(obj),
@@ -117,9 +118,9 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 	}
 
 	pub inline fn deinit(self: *Av) void {
-		pd.mem.free(self.ibuf[0 .. self.nch * frames]);
-		pd.mem.free(self.obuf[0 .. self.nch * frames]);
-		pd.mem.free(self.outs[0 .. self.nch]);
+		gpa.free(self.ibuf[0 .. self.nch * frames]);
+		gpa.free(self.obuf[0 .. self.nch * frames]);
+		gpa.free(self.outs[0 .. self.nch]);
 		self.playlist.deinit();
 		self.packet.deinit();
 		self.frame.deinit();
@@ -180,8 +181,8 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 	inline fn loadMetadata(self: *Av, path: [:0]const u8) !void {
 		const ext = ".plist";
 		const i = std.mem.findScalarLast(u8, path, '.') orelse path.len;
-		var ext_path = try pd.mem.alloc(u8, i + ext.len);
-		defer pd.mem.free(ext_path);
+		var ext_path = try gpa.alloc(u8, i + ext.len);
+		defer gpa.free(ext_path);
 
 		@memcpy(ext_path[0..i], path[0..i]);
 		@memcpy(ext_path[i..][0..ext.len], ext);
@@ -339,7 +340,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			s_done = .gen("done");
 			s_pos = .gen("pos");
 
-			dict = .init(pd.mem);
+			dict = .init(gpa);
 			errdefer dict.deinit();
 			inline for ([_][:0]const u8{
 				"path", "time", "ftime", "tracks",

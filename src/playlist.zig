@@ -10,7 +10,7 @@ const Entry = extern struct {
 const EntryList = std.ArrayList(Entry);
 const StringHashMap = std.StringHashMapUnmanaged(void);
 
-const mem = pd.mem;
+const gpa = pd.gpa;
 const io = std.Io.Threaded.global_single_threaded.ioBasic();
 
 inline fn isPList(filename: []const u8) bool {
@@ -41,12 +41,12 @@ pub fn trimEnd(s: []const u8, exclude: []const u8) usize {
 }
 
 fn resolveZ(paths: []const []const u8) ![:0]u8 {
-	var res = try std.fs.path.resolve(mem, paths);
-	errdefer mem.free(res);
-	if (mem.resize(res, res.len + 1)) {
+	var res = try std.fs.path.resolve(gpa, paths);
+	errdefer gpa.free(res);
+	if (gpa.resize(res, res.len + 1)) {
 		res.len += 1;
 	} else {
-		res = try mem.realloc(res, res.len + 1);
+		res = try gpa.realloc(res, res.len + 1);
 	}
 	res[res.len - 1] = 0;
 	return res[0..res.len - 1 :0];
@@ -60,7 +60,7 @@ fn traverse(
 	if (parents.contains(file_path)) {
 		return err(list.items.len, error.InfiniteRecursion, file_path.ptr);
 	}
-	try parents.put(mem, file_path, {});
+	try parents.put(gpa, file_path, {});
 	defer _ = parents.remove(file_path);
 
 	const file = std.Io.Dir.cwd().openFile(io, file_path, .{ .mode = .read_only })
@@ -89,12 +89,12 @@ fn traverse(
 		const resolved = if (std.fs.path.isAbsolute(trimmed))
 			try resolveZ(&.{ trimmed })
 		else try resolveZ(&.{ base_dir, trimmed });
-		defer mem.free(resolved);
+		defer gpa.free(resolved);
 
 		if (isPList(resolved)) {
 			try traverse(list, parents, resolved);
 		} else {
-			try list.append(mem, .{ .file = .gen(resolved.ptr) });
+			try list.append(gpa, .{ .file = .gen(resolved.ptr) });
 		}
 	} else |e| if (e != error.EndOfStream) {
 		return e;
@@ -108,15 +108,15 @@ pub const Playlist = extern struct {
 	len: usize = 0,
 
 	pub fn deinit(self: *Playlist) void {
-		mem.free(self.ptr[0..self.len]);
+		gpa.free(self.ptr[0..self.len]);
 	}
 
 	pub fn fromArgs(av: []const pd.Atom) !Playlist {
 		var list: EntryList = .{};
-		errdefer list.deinit(mem);
+		errdefer list.deinit(gpa);
 
 		var parents: StringHashMap = .{};
-		defer parents.deinit(mem);
+		defer parents.deinit(gpa);
 
 		for (av) |arg| {
 			const sym = arg.getSymbol() orelse return error.NotASymbol;
@@ -124,10 +124,10 @@ pub const Playlist = extern struct {
 			if (isPList(name)) {
 				try traverse(&list, &parents, name);
 			} else {
-				try list.append(mem, .{ .file = .gen(name) });
+				try list.append(gpa, .{ .file = .gen(name) });
 			}
 		}
-		list.shrinkAndFree(mem, list.items.len);
+		list.shrinkAndFree(gpa, list.items.len);
 		return .{
 			.ptr = list.items.ptr,
 			.len = list.capacity,

@@ -11,6 +11,7 @@ const Symbol = pd.Symbol;
 
 var s_mask: *Symbol = undefined;
 const io = std.Io.Threaded.global_single_threaded.ioBasic();
+const gpa = pd.gpa;
 
 const GmeInit = fn(*const gm.Type, c_uint) anyerror!*gm.Emu;
 const ArcInit = fn (std.mem.Allocator, [:0]const u8) anyerror!arc.ArcReader;
@@ -101,17 +102,17 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 			const sig: u32 = t.signature;
 			if (signature == sig) {
 				const initArc: ArcInit = t.init;
-				break try initArc(pd.mem, path);
+				break try initArc(gpa, path);
 			}
 		} else null;
 
 		var srate: Float = undefined;
 		const emu: *gm.Emu = blk: { if (arc_reader) |*ar| {
 			defer ar.close();
-			const sizes = try pd.mem.alloc(c_ulong, ar.count);
-			defer pd.mem.free(sizes);
-			const buf = try pd.mem.alloc(u8, ar.size);
-			defer pd.mem.free(buf);
+			const sizes = try gpa.alloc(c_ulong, ar.count);
+			defer gpa.free(sizes);
+			const buf = try gpa.alloc(u8, ar.size);
+			defer gpa.free(buf);
 
 			var bp = buf;
 			var n: u32 = 0;
@@ -162,8 +163,8 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 	inline fn loadM3u(self: *Gme, path: []const u8) !void {
 		const ext = ".m3u";
 		const end = std.mem.findScalarLast(u8, path, '.') orelse path.len;
-		var ext_path = try pd.mem.allocSentinel(u8, end + ext.len, 0);
-		defer pd.mem.free(ext_path);
+		var ext_path = try gpa.allocSentinel(u8, end + ext.len, 0);
+		defer gpa.free(ext_path);
 
 		@memcpy(ext_path[0..end], path[0..end]);
 		@memcpy(ext_path[end..][0..ext.len], ext);
@@ -312,7 +313,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		pub inline fn extend() !void {
 			s_mask = .gen("mask");
 
-			dict = .init(pd.mem);
+			dict = .init(gpa);
 			errdefer dict.deinit();
 			inline for ([_][:0]const u8{
 				"path", "time", "ftime", "fade", "tracks", "voices",

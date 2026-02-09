@@ -3,6 +3,8 @@ const pd = @import("pd");
 const Atom = pd.Atom;
 const Symbol = pd.Symbol;
 
+const gpa = pd.gpa;
+
 const Unpaq = extern struct {
 	obj: pd.Object = undefined,
 	ptr: [*]Outlet,
@@ -53,8 +55,8 @@ const Unpaq = extern struct {
 		errdefer obj.g.pd.deinit();
 
 		const av: []const Atom = if (argv.len > 0) argv else &.{ .float(0), .float(0) };
-		const vec = try pd.mem.alloc(Outlet, av.len);
-		errdefer pd.mem.free(vec);
+		const vec = try gpa.alloc(Outlet, av.len);
+		errdefer gpa.free(vec);
 
 		for (vec, av) |*v, *a| {
 			v.* = if (a.getSymbol()) |s| switch (s.name[0]) {
@@ -72,7 +74,7 @@ const Unpaq = extern struct {
 	}
 
 	fn deinitC(self: *const Unpaq) callconv(.c) void {
-		pd.mem.free(self.ptr[0..self.len]);
+		gpa.free(self.ptr[0..self.len]);
 	}
 
 	inline fn setup() !void {

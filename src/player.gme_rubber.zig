@@ -8,6 +8,8 @@ const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
 
+const gpa = pd.gpa;
+
 pub fn Impl(Root: type) type { return extern struct {
 	obj: pd.Object = undefined,
 	base: Base,
@@ -110,7 +112,7 @@ pub fn Impl(Root: type) type { return extern struct {
 
 		var planar: [Root.nch][*]Sample = undefined;
 		inline for (0..Root.nch) |ch| {
-			const slice = try pd.mem.alloc(Sample, ra.frames);
+			const slice = try gpa.alloc(Sample, ra.frames);
 			planar[ch] = slice.ptr;
 		}
 		self.* = .{
@@ -127,7 +129,7 @@ pub fn Impl(Root: type) type { return extern struct {
 		self.rabbit.deinit();
 		self.rubber.deinit();
 		inline for (0..Root.nch) |ch| {
-			pd.mem.free(self.planar[ch][0..ra.frames]);
+			gpa.free(self.planar[ch][0..ra.frames]);
 		}
 	}
 

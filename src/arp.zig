@@ -10,6 +10,7 @@ const Writer = std.Io.Writer;
 
 var buffer: [pd.max_string:0]u8 = undefined;
 const epsilon = std.math.floatEps(Float);
+const gpa = pd.gpa;
 
 inline fn getDigit(c: u8) ?u8 {
 	return if ('0' <= c and c <= '9') c - '0' else null;
@@ -142,8 +143,8 @@ const Arp = extern struct {
 	}
 
 	fn list(self: *const Arp, vec: []Word, av: []const Atom, on: i32) !void {
-		const temp = try pd.mem.dupe(Word, vec); // vec in its initial state
-		defer pd.mem.free(temp);
+		const temp = try gpa.dupe(Word, vec); // vec in its initial state
+		defer gpa.free(temp);
 
 		var i = onset(on, vec.len);
 		for (av[0..@min(vec.len - i, av.len)]) |*atom| {
@@ -268,16 +269,16 @@ const Arp = extern struct {
 		if (s[0] == '#') {
 			return self.list(vec, av, iParse(s+1, null) orelse 0);
 		}
-		const argv = try pd.mem.alloc(Atom, av.len + 1);
-		defer pd.mem.free(argv);
+		const argv = try gpa.alloc(Atom, av.len + 1);
+		defer gpa.free(argv);
 		argv[0] = .symbol(sym);
 		@memcpy(argv[1..], av);
 		try self.list(vec, argv, 0);
 	}
 
 	fn send(self: *const Arp, vec: []const Word, av: []const Atom) !void {
-		const temp = try pd.mem.alloc(Word, vec.len);
-		defer pd.mem.free(temp);
+		const temp = try gpa.alloc(Word, vec.len);
+		defer gpa.free(temp);
 		@memcpy(temp, vec);
 
 		if (av.len >= 2 and av[0].type == .symbol and av[0].w.symbol.name[0] == '#') {
@@ -286,8 +287,8 @@ const Arp = extern struct {
 			try self.list(temp, av, 0);
 		}
 
-		const atoms = try pd.mem.alloc(Atom, vec.len);
-		defer pd.mem.free(atoms);
+		const atoms = try gpa.alloc(Atom, vec.len);
+		defer gpa.free(atoms);
 		for (atoms, temp) |*a, t| {
 			a.* = .float(t.float);
 		}
@@ -306,7 +307,7 @@ const Arp = extern struct {
 	}
 
 	inline fn setup() !void {
-		ops = .init(pd.mem);
+		ops = .init(gpa);
 		errdefer ops.deinit();
 		try ops.put('+', opPlus);
 		try ops.put('^', opPlus);

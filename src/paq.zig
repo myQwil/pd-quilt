@@ -4,6 +4,7 @@ const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
 
+const gpa = pd.gpa;
 var dot: *Symbol = undefined; // skips args
 
 const Proxy = extern struct {
@@ -72,9 +73,9 @@ const Paq = extern struct {
 	var class: *pd.Class = undefined;
 
 	fn bangC(self: *const Paq) callconv(.c) void {
-		const vec = pd.mem.dupe(Atom, self.proxy.ptr[0..self.proxy.len]) catch
+		const vec = gpa.dupe(Atom, self.proxy.ptr[0..self.proxy.len]) catch
 			return pd.post.err(self, name ++ ": Out of memory", .{});
-		defer pd.mem.free(vec);
+		defer gpa.free(vec);
 		self.out.list(&pd.s_list, vec);
 	}
 
@@ -104,16 +105,16 @@ const Paq = extern struct {
 	inline fn init(argv: []const Atom) !*Paq {
 		const av: []const Atom = if (argv.len > 0)
 			argv else &.{ .float(0), .float(0) };
-		const vec = try pd.mem.alloc(Atom, av.len);
-		errdefer pd.mem.free(vec);
+		const vec = try gpa.alloc(Atom, av.len);
+		errdefer gpa.free(vec);
 		vec[0] = av[0];
 
 		const self: *Paq = @ptrCast(try Proxy.init(class, vec));
 		const obj: *pd.Object = &self.proxy.obj;
 		errdefer obj.g.pd.deinit();
 
-		const ins = try pd.mem.alloc(*Proxy, av.len - 1);
-		errdefer pd.mem.free(ins);
+		const ins = try gpa.alloc(*Proxy, av.len - 1);
+		errdefer gpa.free(ins);
 
 		var n: u32 = 0; // proxies allocated
 		errdefer for (ins[0..n]) |pxy| {
@@ -139,8 +140,8 @@ const Paq = extern struct {
 		for (self.ins[0..n]) |pxy| {
 			pxy.obj.g.pd.deinit();
 		}
-		pd.mem.free(self.ins[0..n]);
-		pd.mem.free(paq.ptr[0..paq.len]);
+		gpa.free(self.ins[0..n]);
+		gpa.free(paq.ptr[0..paq.len]);
 	}
 
 	inline fn setup() !void {

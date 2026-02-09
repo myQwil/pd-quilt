@@ -8,6 +8,7 @@ const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
 
+const gpa = pd.gpa;
 var s_delay: *Symbol = undefined;
 
 pub const Rubber = extern struct {
@@ -61,8 +62,8 @@ fn parseOptions(av: []const Atom) !ru.Options {
 		if (a.getSymbol()) |s| {
 			const name = std.mem.sliceTo(s.name, 0);
 			const eql = std.mem.findScalar(u8, name, '=') orelse continue;
-			const str = try pd.mem.dupeZ(u8, name);
-			defer pd.mem.free(str);
+			const str = try gpa.dupeZ(u8, name);
+			defer gpa.free(str);
 
 			str[eql] = 0;
 			const key: *Symbol = .gen(str[0..eql :0]);
@@ -152,7 +153,7 @@ pub fn Impl(Self: type) type { return struct {
 
 	pub inline fn extend() !void {
 		s_delay = .gen("delay");
-		dict = .init(pd.mem);
+		dict = .init(gpa);
 		errdefer dict.deinit();
 
 		inline for ([_][:0]const u8{
