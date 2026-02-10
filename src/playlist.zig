@@ -13,8 +13,8 @@ const StringHashMap = std.StringHashMapUnmanaged(void);
 const gpa = pd.gpa;
 const io = std.Io.Threaded.global_single_threaded.ioBasic();
 
-inline fn isPList(filename: []const u8) bool {
-	return std.mem.endsWith(u8, filename, ".plist");
+inline fn isTrax(filename: []const u8) bool {
+	return std.mem.endsWith(u8, filename, ".trax");
 }
 
 /// Print message and skip, do not fail completely by returning error.
@@ -91,7 +91,7 @@ fn traverse(
 		else try resolveZ(&.{ base_dir, trimmed });
 		defer gpa.free(resolved);
 
-		if (isPList(resolved)) {
+		if (isTrax(resolved)) {
 			try traverse(list, parents, resolved);
 		} else {
 			try list.append(gpa, .{ .file = .gen(resolved.ptr) });
@@ -121,7 +121,7 @@ pub const Playlist = extern struct {
 		for (av) |arg| {
 			const sym = arg.getSymbol() orelse return error.NotASymbol;
 			const name = std.mem.sliceTo(sym.name, 0);
-			if (isPList(name)) {
+			if (isTrax(name)) {
 				try traverse(&list, &parents, name);
 			} else {
 				try list.append(gpa, .{ .file = .gen(name) });

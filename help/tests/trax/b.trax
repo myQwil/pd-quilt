@@ -5,15 +5,15 @@ disc   =1
 @../fizz
 
 # skipped, reading a parent playlist would cause an infinite recursion
-@../a.plist
+@../a.trax
 
 # skipped, the current playlist is considered a parent playlist
-@b.plist
+@b.trax
 
 # skipped, doesn't exist
-@d.plist
+@d.trax
 
 # a playlist stops being a parent upon completion,
 # which allows for multiple read-throughs
-@c.plist
-@c.plist
+@c.trax
+@c.trax

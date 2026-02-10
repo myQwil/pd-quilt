@@ -19,8 +19,8 @@ album   =Hello World
 	title   =bar ipsum
 	bpm     =456
 
-# A file path can point to another plist file.
-@plist/b.plist
-	# Child plist metadata takes precedence over parent plist metadata,
-	# but file-specific metadata like this takes precedence over child plist metadata.
+# A file path can point to another trax file.
+@trax/b.trax
+	# Child trax metadata takes precedence over parent trax metadata,
+	# but file-specific metadata like this takes precedence over child trax metadata.
 	artist  =barfoo
