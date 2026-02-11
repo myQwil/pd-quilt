@@ -1,51 +1,21 @@
 const std = @import("std");
 const pd = @import("pd");
-
-const gpa = pd.gpa;
-const io = std.Io.Threaded.global_single_threaded.ioBasic();
+const Trax = @import("Trax.zig");
 
 const Symbol = pd.Symbol;
-const StringHashMap = std.StringHashMapUnmanaged(void);
-const MetaHashMap = std.AutoArrayHashMapUnmanaged(*Symbol, *Symbol);
+const MetaHashMap = Trax.MetaHashMap;
+const StringHashMap = Trax.StringHashMap;
+const EntryList = std.ArrayListUnmanaged(Entry);
 
-inline fn isTrax(filename: []const u8) bool {
-	return std.mem.endsWith(u8, filename, ".trax");
-}
+const gpa = pd.gpa;
+const isTrax = Trax.isTrax;
 
-/// Print message and skip, do not fail completely by returning error.
-inline fn err(len: usize, e: anyerror, s: [*]const u8) void {
-	pd.post.err(null, "%u:%s: \"%s\"", .{ len, @errorName(e).ptr, s });
-}
-
-pub fn trimRange(
-	s: []const u8,
-	exclude_begin: []const u8,
-	exclude_end: []const u8,
-) struct { usize, usize } {
-	var a: usize = 0;
-	var z: usize = s.len;
-	while (a < z and std.mem.findScalar(u8, exclude_begin, s[a]) != null) : (a += 1) {}
-	while (z > a and std.mem.findScalar(u8, exclude_end, s[z - 1]) != null) : (z -= 1) {}
-	return .{ a, z };
-}
-
-pub fn trimEnd(s: []const u8, exclude: []const u8) usize {
-	var z: usize = s.len;
-	while (z > 0 and std.mem.findScalar(u8, exclude, s[z - 1]) != null) : (z -= 1) {}
-	return z;
-}
-
-fn resolveZ(paths: []const []const u8) ![:0]u8 {
-	var res = try std.fs.path.resolve(gpa, paths);
-	errdefer gpa.free(res);
-	if (gpa.resize(res, res.len + 1)) {
-		res.len += 1;
-	} else {
-		res = try gpa.realloc(res, res.len + 1);
-	}
-	res[res.len - 1] = 0;
-	return res[0..res.len - 1 :0];
-}
+const Entry = extern struct {
+	/// path to the file
+	file: *Symbol,
+	/// file metadata
+	meta: Metadata = .{},
+};
 
 fn putAll(old: *MetaHashMap, new: MetaHashMap) !void {
 	var it = new.iterator();
@@ -89,125 +59,23 @@ const Metadata = extern struct {
 	}
 };
 
-const Entry = extern struct {
-	/// path to the file
-	file: *Symbol,
-	/// file metadata
-	meta: Metadata = .{},
-};
-const EntryList = std.ArrayList(Entry);
-
-pub const Trax = struct {
-	/// list of entries/traxs
-	list: std.ArrayListUnmanaged(Union) = .{},
-	/// global metadata
-	meta: MetaHashMap = .{},
-
-	const Union = union(enum) {
-		media: Media,
-		trax: Trax,
-	};
-
-	const Media = struct {
-		/// path to the file
-		file: *Symbol,
-		/// file metadata
-		meta: MetaHashMap = .{},
-	};
-
-	fn deinit(self: *Trax) void {
-		for (self.list.items) |*un| switch (un.*) {
-			.media => |*m| m.meta.deinit(gpa),
-			.trax  => |*t| t.deinit(),
-		};
-		self.list.deinit(gpa);
-		self.meta.deinit(gpa);
-	}
-
-	fn traverse(
-		self: *Trax,
-		parents: *StringHashMap,
-		file_path: []const u8,
-	) !void {
-		if (parents.contains(file_path)) {
-			return err(self.list.items.len, error.InfiniteRecursion, file_path.ptr);
-		}
-		try parents.put(gpa, file_path, {});
-		defer _ = parents.remove(file_path);
-
-		const file = std.Io.Dir.cwd().openFile(io, file_path, .{ .mode = .read_only })
-			catch |e| return err(self.list.items.len, e, file_path.ptr);
-		defer file.close(io);
-
-		var buf: [std.fs.max_path_bytes:0]u8 = undefined;
-		var r = file.reader(io, &buf);
-		const base_dir = std.fs.path.dirname(file_path) orelse ".";
-		while (r.interface.takeDelimiterExclusive('\n')) |line| {
-			defer _ = r.interface.take(1) catch {};
-
-			const line_start = r.interface.seek - line.len;
-			const trim = trimRange(line, " \t", "\r");
-			const begin = line_start + trim[0];
-			const end = line_start + trim[1];
-
-			// empty or comment
-			if (begin >= end or buf[begin] == '#') {
-				continue;
-			}
-
-			// file path
-			if (buf[begin] == '@') {
-				const trimmed = buf[begin + 1 .. end];
-				const resolved = if (std.fs.path.isAbsolute(trimmed))
-					try resolveZ(&.{ trimmed })
-				else try resolveZ(&.{ base_dir, trimmed });
-				defer gpa.free(resolved);
-
-				if (isTrax(resolved)) {
-					var trax: Trax = .{};
-					try trax.traverse(parents, resolved);
-					try self.list.append(gpa, .{ .trax = trax });
-				} else {
-					try self.list.append(gpa, .{ .media = .{ .file = .gen(resolved.ptr) } });
-				}
-				continue;
-			}
-
-			// key=value
-			const eql = std.mem.findScalar(u8, buf[begin..end], '=') orelse continue;
-			const kend = trimEnd(buf[begin..][0..eql], " \t");
-			buf[end] = 0;
-			buf[begin + kend] = 0;
-			const key = buf[begin..][0..kend :0];
-			const val = buf[begin + eql + 1 .. end :0];
-			if (self.list.items.len == 0) {
-				try self.meta.put(gpa, .gen(key), .gen(val));
-			} else switch (self.list.items[self.list.items.len - 1]) {
-				inline else => |*v| try v.meta.put(gpa, .gen(key), .gen(val)),
-			}
-		} else |e| if (e != error.EndOfStream) {
-			return e;
-		}
-	}
-
-	fn flatten(self: *const Trax, meta: *const MetaHashMap, list: *EntryList) !void {
-		for (self.list.items) |*item| {
-			var map: MetaHashMap = try meta.clone(gpa);
-			switch (item.*) {
-				.media => |*m| {
-					errdefer map.deinit(gpa);
-					try putAll(&map, m.meta);
-					try list.append(gpa, .{ .file = m.file, .meta = .fromHashMap(map) });
-				},
-				.trax => |*t| {
-					defer map.deinit(gpa);
-					try putAll(&map, t.meta);
-					try t.flatten(&map, list);
-				}
+fn flatten(self: *const Trax, meta: *const MetaHashMap, list: *EntryList) !void {
+	for (self.list.items) |*item| {
+		var map: MetaHashMap = try meta.clone(gpa);
+		switch (item.*) {
+			.media => |*m| {
+				errdefer map.deinit(gpa);
+				try putAll(&map, m.meta);
+				try list.append(gpa, .{ .file = m.file, .meta = .fromHashMap(map) });
+			},
+			.trax => |*t| {
+				defer map.deinit(gpa);
+				try putAll(&map, t.meta);
+				try flatten(t, &map, list);
 			}
 		}
 	}
-};
+}
 
 pub const Playlist = extern struct {
 	/// list of tracks
@@ -241,7 +109,7 @@ pub const Playlist = extern struct {
 
 		var list: EntryList = .{};
 		errdefer list.deinit(gpa);
-		try trax.flatten(&trax.meta, &list);
+		try flatten(&trax, &trax.meta, &list);
 		const owned = try list.toOwnedSlice(gpa);
 		return .{
 			.ptr = owned.ptr,
