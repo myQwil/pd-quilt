@@ -174,12 +174,20 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		self.swr = swr;
 		self.ratio = @as(f64, @floatFromInt(audio.ctx.sample_rate)) / pd.sampleRate();
 		self.frame.pts = 0;
-		self.loadMetadata(std.mem.sliceTo(self.playlist.ptr[idx].file.name, 0))
+		self.loadMetadata(idx)
 			catch |e| pd.post.err(null, "Av.loadMetadata: %s", .{ @errorName(e).ptr });
 	}
 
-	inline fn loadMetadata(self: *Av, path: [:0]const u8) !void {
-		const ext = ".plist";
+	inline fn loadMetadata(self: *Av, idx: usize) !void {
+		const dct = &self.format.metadata;
+		var it = self.playlist.ptr[idx].meta.iterator();
+		while (it.next()) |kv| {
+			dct.set(kv.key_ptr.*.name, kv.value_ptr.*.name, .{})
+				catch |e| pd.post.err(null, "dct.set: %s", .{ @errorName(e).ptr });
+		}
+
+		const ext = ".trax";
+		const path = std.mem.sliceTo(self.playlist.ptr[idx].file.name, 0);
 		const i = std.mem.findScalarLast(u8, path, '.') orelse path.len;
 		var ext_path = try gpa.alloc(u8, i + ext.len);
 		defer gpa.free(ext_path);
@@ -192,14 +200,13 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 		var buf: [std.fs.max_path_bytes:0]u8 = undefined;
 		var r = file.reader(io, &buf);
-		const dct = &self.format.metadata;
 		while (r.interface.takeDelimiterExclusive('\n')) |line| {
 			defer _ = r.interface.take(1) catch {};
 			const line_start = r.interface.seek - line.len;
 			const trim = pl.trimRange(line, " \t", "\r");
 			const begin = line_start + trim[0];
 			const end = line_start + trim[1];
-			if (begin >= end or buf[begin] == '#') {
+			if (begin >= end or buf[begin] == '#' or buf[begin] == '@') {
 				continue;
 			}
 			const eql = std.mem.findScalar(u8, buf[begin..end], '=') orelse continue;

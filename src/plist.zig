@@ -1,6 +1,9 @@
 const pd = @import("pd");
 const Playlist = @import("playlist.zig").Playlist;
 
+const Float = pd.Float;
+const Symbol = pd.Symbol;
+
 const PList = extern struct {
 	obj: pd.Object = undefined,
 	out_val: *pd.Outlet,
@@ -12,7 +15,7 @@ const PList = extern struct {
 
 	fn readC(
 		self: *PList,
-		_: *pd.Symbol, ac: c_uint, av: [*]const pd.Atom,
+		_: *Symbol, ac: c_uint, av: [*]const pd.Atom,
 	) callconv(.c) void {
 		self.plist.readArgs(av[0..ac])
 			catch |e| pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
@@ -25,13 +28,36 @@ const PList = extern struct {
 		}
 	}
 
-	fn floatC(self: *PList, f: pd.Float) callconv(.c) void {
+	fn floatC(self: *PList, f: Float) callconv(.c) void {
 		const i: i32 = @intFromFloat(f);
 		if (i < 0 or self.plist.len <= i) {
 			return;
 		}
 		self.out_idx.float(@floatFromInt(i));
 		self.out_val.symbol(self.plist.ptr[@intCast(i)].file);
+	}
+
+	fn getC(self: *PList, f: Float, s: *Symbol) callconv(.c) void {
+		const i: i32 = @intFromFloat(f);
+		if (i < 0 or self.plist.len <= i) {
+			return;
+		}
+		if (self.plist.ptr[@intCast(i)].meta.get(s)) |val| {
+			self.out_idx.float(@floatFromInt(i));
+			self.out_val.symbol(val);
+		}
+	}
+
+	fn printC(self: *PList, f: Float) callconv(.c) void {
+		const i: i32 = @intFromFloat(f);
+		if (i < 0 or self.plist.len <= i) {
+			return;
+		}
+		pd.post.do("\n%d", .{ i });
+		var iter = self.plist.ptr[@intCast(i)].meta.iterator();
+		while (iter.next()) |kv| {
+			pd.post.do("%s: %s", .{ kv.key_ptr.*.name, kv.value_ptr.*.name });
+		}
 	}
 
 	fn initC() callconv(.c) ?*PList {
@@ -57,7 +83,9 @@ const PList = extern struct {
 		class = try .init(PList, name, &.{}, &initC, &deinitC, .{});
 		class.addBang(@ptrCast(&bangC));
 		class.addFloat(@ptrCast(&floatC));
+		class.addMethod(@ptrCast(&printC), .gen("print"), &.{ .float });
 		class.addMethod(@ptrCast(&readC), .gen("read"), &.{ .gimme });
+		class.addMethod(@ptrCast(&getC), .gen("get"), &.{ .float, .symbol });
 	}
 };
 
