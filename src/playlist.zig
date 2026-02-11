@@ -241,10 +241,10 @@ pub const Playlist = extern struct {
 		var list: EntryList = .{};
 		errdefer list.deinit(gpa);
 		try trax.flatten(&list);
-		list.shrinkAndFree(gpa, list.items.len);
+		const owned = try list.toOwnedSlice(gpa);
 		return .{
-			.ptr = list.items.ptr,
-			.len = list.items.len,
+			.ptr = owned.ptr,
+			.len = owned.len,
 		};
 	}
 
