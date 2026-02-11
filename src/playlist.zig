@@ -190,19 +190,19 @@ pub const Trax = struct {
 		}
 	}
 
-	fn flatten(self: *const Trax, list: *EntryList) !void {
+	fn flatten(self: *const Trax, meta: *const MetaHashMap, list: *EntryList) !void {
 		for (self.list.items) |*item| {
-			var meta: MetaHashMap = try self.meta.clone(gpa);
+			var map: MetaHashMap = try meta.clone(gpa);
 			switch (item.*) {
 				.media => |*m| {
-					try putAll(&meta, m.meta);
-					try list.append(gpa, .{ .file = m.file, .meta = .fromHashMap(meta) });
+					errdefer map.deinit(gpa);
+					try putAll(&map, m.meta);
+					try list.append(gpa, .{ .file = m.file, .meta = .fromHashMap(map) });
 				},
 				.trax => |*t| {
-					try putAll(&meta, t.meta);
-					t.meta.deinit(gpa);
-					t.meta = meta;
-					try t.flatten(list);
+					defer map.deinit(gpa);
+					try putAll(&map, t.meta);
+					try t.flatten(&map, list);
 				}
 			}
 		}
@@ -241,7 +241,7 @@ pub const Playlist = extern struct {
 
 		var list: EntryList = .{};
 		errdefer list.deinit(gpa);
-		try trax.flatten(&list);
+		try trax.flatten(&trax.meta, &list);
 		const owned = try list.toOwnedSlice(gpa);
 		return .{
 			.ptr = owned.ptr,
