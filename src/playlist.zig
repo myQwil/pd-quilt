@@ -116,9 +116,9 @@ pub const Trax = struct {
 	};
 
 	fn deinit(self: *Trax) void {
-		for (self.list.items) |un| switch (un) {
-			.media => |m| { var v = m; v.meta.deinit(gpa); },
-			.trax  => |t| { var v = t; v.deinit(); },
+		for (self.list.items) |*un| switch (un.*) {
+			.media => |*m| m.meta.deinit(gpa),
+			.trax  => |*t| t.deinit(),
 		};
 		self.list.deinit(gpa);
 		self.meta.deinit(gpa);
@@ -144,6 +144,7 @@ pub const Trax = struct {
 		const base_dir = std.fs.path.dirname(file_path) orelse ".";
 		while (r.interface.takeDelimiterExclusive('\n')) |line| {
 			defer _ = r.interface.take(1) catch {};
+
 			const line_start = r.interface.seek - line.len;
 			const trim = trimRange(line, " \t", "\r");
 			const begin = line_start + trim[0];
@@ -189,19 +190,19 @@ pub const Trax = struct {
 		}
 	}
 
-	fn flatten(self: Trax, list: *EntryList) !void {
+	fn flatten(self: *const Trax, list: *EntryList) !void {
 		for (self.list.items) |*item| {
 			var meta: MetaHashMap = try self.meta.clone(gpa);
 			switch (item.*) {
-				.media => |m| {
+				.media => |*m| {
 					try putAll(&meta, m.meta);
 					try list.append(gpa, .{ .file = m.file, .meta = .fromHashMap(meta) });
 				},
-				.trax => |t| {
+				.trax => |*t| {
 					try putAll(&meta, t.meta);
-					item.*.trax.meta.deinit(gpa);
-					item.*.trax.meta = meta;
-					try item.*.trax.flatten(list);
+					t.meta.deinit(gpa);
+					t.meta = meta;
+					try t.flatten(list);
 				}
 			}
 		}
