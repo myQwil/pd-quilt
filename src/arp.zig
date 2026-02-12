@@ -386,6 +386,10 @@ const InArray = extern struct {
 		self.arp.anything(self.win.items(), s, av[0..ac]) catch |e| self.err(e);
 	}
 
+	fn symbolC(self: *InArray, s: *Symbol) callconv(.c) void {
+		self.anythingC(s, 0, &.{});
+	}
+
 	inline fn init(av: []const Atom) !*InArray {
 		const self: *InArray = @ptrCast(try class.pd());
 		const obj: *pd.Object = &self.obj;
@@ -405,8 +409,9 @@ const InArray = extern struct {
 	inline fn setup() !void {
 		class = try .init(InArray, name, &.{}, null, &deinitC, .{});
 		Arp.Impl(InArray).extend();
-		class.addFloat(@ptrCast(&floatC));
 		class.addList(@ptrCast(&listC));
+		class.addFloat(@ptrCast(&floatC));
+		class.addSymbol(@ptrCast(&symbolC));
 		class.addAnything(@ptrCast(&anythingC));
 		class.addMethod(@ptrCast(&printC), .gen("print"), &.{});
 		class.addMethod(@ptrCast(&resizeC), .gen("n"), &.{ .float });
@@ -495,6 +500,10 @@ const ExArray = extern struct {
 		try self.arp.anything(try garr.floatWords(), s, av);
 	}
 
+	fn symbolC(self: *ExArray, s: *Symbol) callconv(.c) void {
+		self.anythingC(s, 0, &.{});
+	}
+
 	inline fn init(s: *Symbol) !*ExArray {
 		const self: *ExArray = @ptrCast(try class.pd());
 		const obj: *pd.Object = &self.obj;
@@ -515,8 +524,9 @@ const ExArray = extern struct {
 	inline fn setup() !void {
 		class = try .init(ExArray, name, &.{}, null, null, .{});
 		Arp.Impl(ExArray).extend();
-		class.addFloat(@ptrCast(&floatC));
 		class.addList(@ptrCast(&listC));
+		class.addFloat(@ptrCast(&floatC));
+		class.addSymbol(@ptrCast(&symbolC));
 		class.addAnything(@ptrCast(&anythingC));
 		class.addMethod(@ptrCast(&printC), .gen("print"), &.{});
 		class.addMethod(@ptrCast(&resizeC), .gen("n"), &.{ .float });
