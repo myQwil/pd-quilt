@@ -410,6 +410,7 @@ const InArray = extern struct {
 		class.addAnything(@ptrCast(&anythingC));
 		class.addMethod(@ptrCast(&printC), .gen("print"), &.{});
 		class.addMethod(@ptrCast(&resizeC), .gen("n"), &.{ .float });
+		class.addMethod(@ptrCast(&resizeC), .gen("size"), &.{ .float });
 		class.addMethod(@ptrCast(&sendC), .gen("send"), &.{ .gimme });
 	}
 };
@@ -519,6 +520,7 @@ const ExArray = extern struct {
 		class.addAnything(@ptrCast(&anythingC));
 		class.addMethod(@ptrCast(&printC), .gen("print"), &.{});
 		class.addMethod(@ptrCast(&resizeC), .gen("n"), &.{ .float });
+		class.addMethod(@ptrCast(&resizeC), .gen("size"), &.{ .float });
 		class.addMethod(@ptrCast(&sendC), .gen("send"), &.{ .gimme });
 		class.setFreeFn(&classFreeC);
 	}
