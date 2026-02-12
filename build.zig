@@ -52,6 +52,7 @@ const externals = [_]External{
 	.{ .name = "arp" },
 	.{ .name = "av~", .deps = &.{ .ffmpeg, .rabbit } },
 	.{ .name = "avr~", .deps = &.{ .ffmpeg, .rabbit, .rubber } },
+	.{ .name = "blocksize" },
 	.{ .name = "blunt" },
 	.{ .name = "chrono" },
 	.{ .name = "delp" },
