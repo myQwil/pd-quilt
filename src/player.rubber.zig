@@ -51,7 +51,7 @@ pub const Rubber = extern struct {
 };
 
 const FieldSetFunc = fn(*ru.Options, *Symbol) void;
-var dict: std.AutoHashMapUnmanaged(*Symbol, *const FieldSetFunc) = .{};
+var dict: std.AutoHashMapUnmanaged(*Symbol, *const FieldSetFunc) = .empty;
 pub fn freeDict() void {
 	dict.deinit(gpa);
 }

@@ -75,7 +75,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 	const Av = @This();
 
-	var dict: std.AutoHashMapUnmanaged(*Symbol, *const fn(*const Av) Atom) = .{};
+	var dict: std.AutoHashMapUnmanaged(*Symbol, *const fn(*const Av) Atom) = .empty;
 	pub fn freeDict() void {
 		dict.deinit(gpa);
 	}

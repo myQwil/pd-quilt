@@ -5,7 +5,7 @@ const Trax = @import("Trax.zig");
 const Symbol = pd.Symbol;
 const MetaHashMap = Trax.MetaHashMap;
 const StringHashMap = Trax.StringHashMap;
-const EntryList = std.ArrayListUnmanaged(Entry);
+const EntryList = std.array_list.Aligned(Entry, null);
 
 const gpa = pd.gpa;
 const isTrax = Trax.isTrax;
@@ -94,7 +94,7 @@ pub const Playlist = extern struct {
 	pub fn fromArgs(av: []const pd.Atom) !Playlist {
 		var trax: Trax = .{};
 		defer trax.deinit();
-		var parents: StringHashMap = .{};
+		var parents: StringHashMap = .empty;
 		defer parents.deinit(gpa);
 
 		for (av) |arg| {
@@ -107,7 +107,7 @@ pub const Playlist = extern struct {
 			}
 		}
 
-		var list: EntryList = .{};
+		var list: EntryList = .empty;
 		errdefer list.deinit(gpa);
 		try flatten(&trax, &trax.meta, &list);
 		const owned = try list.toOwnedSlice(gpa);

@@ -86,7 +86,7 @@ fn onset(i: i32, len: usize) usize {
 	return if (i < 0) len - j else j;
 }
 
-var ops: std.AutoHashMapUnmanaged(u8, *const fn(Float, Float) Float) = .{};
+var ops: std.AutoHashMapUnmanaged(u8, *const fn(Float, Float) Float) = .empty;
 
 fn opPlus(f1: Float, f2: Float) Float {
 	return f1 + f2;

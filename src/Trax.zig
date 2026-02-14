@@ -3,9 +3,9 @@ const std = @import("std");
 const pd = @import("pd");
 
 /// list of entries/traxs
-list: std.ArrayListUnmanaged(Union) = .{},
+list: std.array_list.Aligned(Union, null) = .empty,
 /// global metadata
-meta: MetaHashMap = .{},
+meta: MetaHashMap = .empty,
 
 const Symbol = pd.Symbol;
 pub const StringHashMap = std.StringHashMapUnmanaged(void);
@@ -20,7 +20,7 @@ const Media = struct {
 	/// path to the file
 	file: *Symbol,
 	/// file metadata
-	meta: MetaHashMap = .{},
+	meta: MetaHashMap = .empty,
 };
 
 const gpa = pd.gpa;
