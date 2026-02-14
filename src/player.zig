@@ -9,7 +9,7 @@ const Symbol = pd.Symbol;
 const Writer = std.Io.Writer;
 
 const toggle = @import("toggle.zig").toggle;
-const indexOf = std.mem.findScalar;
+const find = std.mem.findScalar;
 
 var buffer: [pd.max_string:0]u8 = undefined;
 var s_open: *Symbol = undefined;
@@ -151,20 +151,41 @@ pub fn Impl(Self: type) type { return struct {
 			} else {
 				var str: [:0]const u8 = std.mem.sliceTo(a.w.symbol.name, 0);
 				while (true) {
-					const pos: usize = (indexOf(u8, str, '%') orelse break) + 1;
-					const end: usize = (indexOf(u8, str[pos..], '%') orelse break) + pos;
+					const pos: usize = (find(u8, str, '%') orelse break) + 1;
+					const pctend: usize = (find(u8, str[pos..], '%') orelse break) + pos;
+					const cons: ?usize = find(u8, str[pos..pctend], ':');
+					const end = if (cons) |c| c + pos else pctend;
+					defer str = str[pctend + 1 ..];
+
 					const len = end - pos;
 					try w.writeAll(str[0..end]);
 					buffer[w.end] = 0;
 					const name = buffer[w.end - len..][0..len :0].ptr;
 					const meta: Atom = bGet(base, .gen(name)) orelse .symbol(&pd.s_);
 					w.end -= len + 1;
+
+					if (cons != null) {
+						var mbuf: [31]u8 = undefined;
+						var mw: Writer = .fixed(&mbuf);
+						const mstr: []const u8 = if (meta.type == .float) blk: {
+							try wr.fmtG(&mw, meta.w.float);
+							break :blk mw.buffered();
+						} else std.mem.sliceTo(meta.w.symbol.name, 0);
+
+						const lead = str[end + 1];
+						const width = try std.fmt.parseInt(u5, str[end + 2 .. pctend], 10);
+						for (0 .. width - mstr.len) |_| {
+							try w.writeByte(lead);
+						}
+						try w.writeAll(mstr);
+						continue;
+					}
+
 					if (meta.type == .float) {
 						try wr.fmtG(w, meta.w.float);
 					} else {
 						try w.writeAll(std.mem.sliceTo(meta.w.symbol.name, 0));
 					}
-					str = str[end+1..];
 				}
 				try w.writeAll(str);
 			}

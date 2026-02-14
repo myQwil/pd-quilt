@@ -137,7 +137,7 @@
 #X obj 50 290 s \$1msg;
 #X obj 150 90 s \$0end;
 #X obj 140 200 s \$1reset;
-#X msg 60 240 \$1 \, print %disc%|%track% [%ftime%] - %title% \, time \, bpm \, sytc, f 34;
+#X msg 60 240 \$1 \, print %disc%|%track:02% [%ftime%] - %title% \, time \, bpm \, sytc, f 36;
 #X obj 60 170 t b a;
 #X msg 240 130 symbol bang;
 #X msg 140 170 0;
