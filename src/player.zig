@@ -136,41 +136,40 @@ pub fn Impl(Self: type) type { return struct {
 			pd.post.log(self, .normal, "%s", .{ &buffer });
 		}
 	}
-	inline fn print(self: *const Self, writer: *Writer, av: []const Atom) !void {
+	inline fn print(self: *const Self, w: *Writer, av: []const Atom) !void {
 		const base: *const Base = &self.base;
 		const player: *const Player = &base.player;
 		player.assertFileOpened() catch |e| return err(self, e);
 		if (av.len == 0) {
-			return bPrint(base, writer);
+			return bPrint(base, w);
 		}
 
 		const ilast = av.len - 1;
-		const buf = writer.buffer;
 		for (av, 0..av.len) |*a, i| {
 			if (a.type == .float) {
-				try wr.fmtG(writer, a.w.float);
+				try wr.fmtG(w, a.w.float);
 			} else {
 				var str: [:0]const u8 = std.mem.sliceTo(a.w.symbol.name, 0);
 				while (true) {
 					const pos: usize = (indexOf(u8, str, '%') orelse break) + 1;
 					const end: usize = (indexOf(u8, str[pos..], '%') orelse break) + pos;
 					const len = end - pos;
-					try writer.writeAll(str[0..end]);
-					buf[writer.end] = 0;
-					const name = buf[writer.end - len..][0..len :0].ptr;
+					try w.writeAll(str[0..end]);
+					buffer[w.end] = 0;
+					const name = buffer[w.end - len..][0..len :0].ptr;
 					const meta: Atom = bGet(base, .gen(name)) orelse .symbol(&pd.s_);
-					writer.end -= len + 1;
+					w.end -= len + 1;
 					if (meta.type == .float) {
-						try wr.fmtG(writer, meta.w.float);
+						try wr.fmtG(w, meta.w.float);
 					} else {
-						try writer.writeAll(std.mem.sliceTo(meta.w.symbol.name, 0));
+						try w.writeAll(std.mem.sliceTo(meta.w.symbol.name, 0));
 					}
 					str = str[end+1..];
 				}
-				try writer.writeAll(str);
+				try w.writeAll(str);
 			}
 			if (i < ilast) {
-				try writer.writeByte(' ');
+				try w.writeByte(' ');
 			}
 		}
 	}
