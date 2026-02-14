@@ -1,13 +1,17 @@
 const pd = @import("pd");
 const std = @import("std");
+
+const Float = pd.Float;
 const Writer = std.Io.Writer;
 
-pub fn fmtG(stream: *Writer, f: pd.Float) !void {
-	const gmin = @exp(@log(10.0) * -4);
-	const gmax = @exp(@log(10.0) * 6);
+const prec = if (@bitSizeOf(Float) == 64) 14 else 6;
+
+pub fn fmtG(stream: *Writer, f: Float) !void {
+	const gmin = @exp(@log(10.0) * (2 - prec));
+	const gmax = @exp(@log(10.0) * prec);
 
 	const g = @abs(f);
-	if (g != 0 and (g < gmin or gmax <= g)) {
+	if (g < gmin and g != 0 or gmax <= g) {
 		try stream.print("{e}", .{ f });
 	} else {
 		try stream.print("{d}", .{ f });
