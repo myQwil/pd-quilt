@@ -3,7 +3,9 @@ const pd = @import("pd");
 const av = @import("av");
 const arc = @import("player.arc.zig");
 const pr = @import("player.zig");
-const pl = @import("playlist.zig");
+
+const Trax = @import("Trax.zig");
+const Playlist = @import("playlist.zig").Playlist;
 pub const Subtitle = av.Subtitle;
 
 const Atom = pd.Atom;
@@ -18,6 +20,9 @@ var s_pos: *Symbol = undefined;
 var s_bpm: *Symbol = undefined;
 var s_date: *Symbol = undefined;
 pub var s_done: *Symbol = undefined;
+
+const trimRange = Trax.trimRange;
+const trimEnd = Trax.trimEnd;
 
 const Stream = extern struct {
 	ctx: *av.Codec.Context = undefined,
@@ -52,7 +57,7 @@ const Stream = extern struct {
 
 pub fn Base(frames: comptime_int) type { return extern struct {
 	layout: av.ChannelLayout,
-	playlist: pl.Playlist = .{},
+	playlist: Playlist = .{},
 	player: pr.Player,
 	audio: Stream = .{},
 	subtitle: Stream = .{},
@@ -203,14 +208,14 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		while (r.interface.takeDelimiterExclusive('\n')) |line| {
 			defer _ = r.interface.take(1) catch {};
 			const line_start = r.interface.seek - line.len;
-			const trim = pl.trimRange(line, " \t", "\r");
+			const trim = trimRange(line, " \t", "\r");
 			const begin = line_start + trim[0];
 			const end = line_start + trim[1];
 			if (begin >= end or buf[begin] == '#' or buf[begin] == '@') {
 				continue;
 			}
 			const eql = std.mem.findScalar(u8, buf[begin..end], '=') orelse continue;
-			const kend = pl.trimEnd(buf[begin..][0..eql], " \t");
+			const kend = trimEnd(buf[begin..][0..eql], " \t");
 			buf[end] = 0;
 			buf[begin + kend] = 0;
 			const key = buf[begin..][0..kend :0];
