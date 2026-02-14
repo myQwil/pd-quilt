@@ -46,6 +46,11 @@ pub fn trimRange(
 	while (z > a and std.mem.findScalar(u8, exclude_end, s[z - 1]) != null) : (z -= 1) {}
 	return .{ a, z };
 }
+pub fn trimStart(s: []const u8, exclude: []const u8) usize {
+    var a: usize = 0;
+    while (a < s.len and std.mem.findScalar(u8, exclude, s[a]) != null) : (a += 1) {}
+    return a;
+}
 
 pub fn trimEnd(s: []const u8, exclude: []const u8) usize {
 	var z: usize = s.len;
@@ -74,13 +79,22 @@ pub fn deinit(self: *Trax) void {
 	self.meta.deinit(gpa);
 }
 
+const TraverseMode = enum {
+	normal,
+	include,
+};
+
 pub fn traverse(
 	self: *Trax,
 	parents: *StringHashMap,
 	file_path: []const u8,
+	mode: TraverseMode,
 ) !void {
 	if (parents.contains(file_path)) {
-		return err(self.list.items.len, error.InfiniteRecursion, file_path.ptr);
+		if (mode == .normal) {
+			err(self.list.items.len, error.InfiniteRecursion, file_path.ptr);
+		}
+		return;
 	}
 	try parents.put(gpa, file_path, {});
 	defer _ = parents.remove(file_path);
@@ -97,7 +111,7 @@ pub fn traverse(
 
 		const line_start = r.interface.seek - line.len;
 		const trim = trimRange(line, " \t", "\r");
-		const begin = line_start + trim[0];
+		var begin = line_start + trim[0];
 		const end = line_start + trim[1];
 
 		// empty or comment
@@ -105,8 +119,31 @@ pub fn traverse(
 			continue;
 		}
 
+		// command
+		if (buf[begin] == '!') {
+			begin += 1;
+			if (std.mem.startsWith(u8, buf[begin..end], "include")) {
+				begin += 7;
+				begin += trimStart(buf[begin..end], " \t");
+				if (begin >= end or buf[begin] != '@') {
+					err(self.list.items.len, error.IncludeSyntaxError, file_path.ptr);
+					continue;
+				}
+				const trimmed = buf[begin + 1 .. end];
+				const resolved = if (std.fs.path.isAbsolute(trimmed))
+					try resolveZ(&.{ trimmed })
+				else try resolveZ(&.{ base_dir, trimmed });
+				defer gpa.free(resolved);
+				try self.traverse(parents, resolved, .include);
+			}
+			continue;
+		}
+
 		// file path
 		if (buf[begin] == '@') {
+			if (mode == .include) {
+				break;
+			}
 			const trimmed = buf[begin + 1 .. end];
 			const resolved = if (std.fs.path.isAbsolute(trimmed))
 				try resolveZ(&.{ trimmed })
@@ -115,7 +152,7 @@ pub fn traverse(
 
 			if (isTrax(resolved)) {
 				var trax: Trax = .{};
-				try trax.traverse(parents, resolved);
+				try trax.traverse(parents, resolved, .normal);
 				try self.list.append(gpa, .{ .trax = trax });
 			} else {
 				try self.list.append(gpa, .{ .media = .{ .file = .gen(resolved.ptr) } });

@@ -101,7 +101,7 @@ pub const Playlist = extern struct {
 			const sym = arg.getSymbol() orelse return error.NotASymbol;
 			const name = std.mem.sliceTo(sym.name, 0);
 			if (isTrax(name)) {
-				try trax.traverse(&parents, name);
+				try trax.traverse(&parents, name, .normal);
 			} else {
 				try trax.list.append(gpa, .{ .media = .{ .file = .gen(name) } });
 			}
