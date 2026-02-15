@@ -188,7 +188,7 @@ pub fn Impl(Self: type) type { return struct {
 						else => .right,
 					} else .right;
 					const wpos = end + @as(usize, if (has_al) 3 else 2);
-					const width = std.fmt.parseInt(u32, str[wpos..pctend], 10) catch 0;
+					const width = std.fmt.parseInt(usize, str[wpos..pctend], 10) catch 0;
 					try w.alignBuffer(mstr, width, alignment, fill);
 				}
 				try w.writeAll(str);
