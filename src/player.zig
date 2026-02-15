@@ -100,6 +100,10 @@ pub inline fn leavedToPlanar(
 	return l - leaved;
 }
 
+inline fn isDigit(c: u8) bool {
+	return ('0' <= c and c <= '9');
+}
+
 pub fn Impl(Self: type) type { return struct {
 	/// Perform this after seeking. Resets internal buffers.
 	const reset: fn(*Self) void = Self.reset;
@@ -172,14 +176,20 @@ pub fn Impl(Self: type) type { return struct {
 						break :blk mw.buffered();
 					} else std.mem.sliceTo(meta.w.symbol.name, 0);
 
-					if (cons != null) {
-						const lead = str[end + 1];
-						const width = try std.fmt.parseInt(u32, str[end + 2 .. pctend], 10);
-						for (0 .. width - mstr.len) |_| {
-							try w.writeByte(lead);
-						}
+					if (cons == null or pctend < end + 3) {
+						try w.writeAll(mstr);
+						continue;
 					}
-					try w.writeAll(mstr);
+					const fill = str[end + 1];
+					const has_al = !isDigit(str[end + 2]);
+					const alignment: std.fmt.Alignment = if (has_al) switch (str[end + 2]) {
+						'<' => .left,
+						'^' => .center,
+						else => .right,
+					} else .right;
+					const wpos = end + @as(usize, if (has_al) 3 else 2);
+					const width = std.fmt.parseInt(u32, str[wpos..pctend], 10) catch 0;
+					try w.alignBuffer(mstr, width, alignment, fill);
 				}
 				try w.writeAll(str);
 			}
