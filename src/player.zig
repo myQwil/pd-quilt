@@ -174,7 +174,7 @@ pub fn Impl(Self: type) type { return struct {
 
 					if (cons != null) {
 						const lead = str[end + 1];
-						const width = try std.fmt.parseInt(u5, str[end + 2 .. pctend], 10);
+						const width = try std.fmt.parseInt(u32, str[end + 2 .. pctend], 10);
 						for (0 .. width - mstr.len) |_| {
 							try w.writeByte(lead);
 						}
