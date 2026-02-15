@@ -15,7 +15,7 @@ var s_open: *Symbol = undefined;
 pub var s_play: *Symbol = undefined;
 
 pub const Player = extern struct {
-	// outlet for sending metadata and open/play states
+	/// outlet for sending metadata and open/play states
 	outlet: *pd.Outlet,
 	/// Whether a track has been opened
 	open: bool = false,
