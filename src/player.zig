@@ -165,7 +165,7 @@ pub fn Impl(Self: type) type { return struct {
 					const meta: Atom = bGet(base, .gen(key.ptr)) orelse .symbol(&pd.s_);
 					w.end -= len + 2;
 
-					var mbuf: [31]u8 = undefined;
+					var mbuf: [std.fmt.float.bufferSize(.decimal, Float)]u8 = undefined;
 					const mstr: []const u8 = if (meta.type == .float) blk: {
 						var mw: Writer = .fixed(&mbuf);
 						try wr.fmtG(&mw, meta.w.float);

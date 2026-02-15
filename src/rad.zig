@@ -171,10 +171,9 @@ pub const Rad = extern struct {
 	prec: u16,
 	/// character limit. zero means auto.
 	width: u16 = 0,
-	/// base-2: sign(1) + mantissa(24) + decimal-point(1)
-	/// + e-notation(1) + e-sign(1) + exponent(7)
-	buf: [@bitSizeOf(Float) + 3 :0]u8 = blk: {
-		var tmp: [@bitSizeOf(Float) + 3 :0]u8 = undefined;
+	/// number buffer
+	buf: [std.fmt.float.bufferSize(.decimal, Float) :0]u8 = blk: {
+		var tmp: [std.fmt.float.bufferSize(.decimal, Float) :0]u8 = undefined;
 		@memcpy(tmp[0..2], "0\x00");
 		break :blk tmp;
 	},
