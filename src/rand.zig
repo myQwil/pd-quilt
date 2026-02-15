@@ -8,8 +8,6 @@ const Float = pd.Float;
 const Symbol = pd.Symbol;
 const Writer = std.Io.Writer;
 
-var buffer: [pd.max_string:0]u8 = undefined;
-
 fn setWords(vec: []pd.Word, av: []const Atom) !void {
 	if (av.len < 2) {
 		return error.NotEnoughArgs;
@@ -202,6 +200,7 @@ const InArray = extern struct {
 	}
 
 	fn printC(self: *const InArray) callconv(.c) void {
+		var buffer: [pd.max_string:0]u8 = undefined;
 		var writer: Writer = .fixed(&buffer);
 		self.win.print(&writer) catch unreachable;
 		wr.writeVec(&writer, self.win.items()) catch wr.ellipsis(&writer);
@@ -283,6 +282,7 @@ const ExArray = extern struct {
 	}
 	inline fn print(self: *const ExArray) !void {
 		const vec = try (try self.garray()).floatWords();
+		var buffer: [pd.max_string:0]u8 = undefined;
 		var writer: Writer = .fixed(&buffer);
 		writer.print("{s} ({*}) ", .{ self.sym.name, self.sym.thing }) catch unreachable;
 		wr.writeVec(&writer, vec) catch wr.ellipsis(&writer);

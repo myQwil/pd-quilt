@@ -11,7 +11,6 @@ const Writer = std.Io.Writer;
 const toggle = @import("toggle.zig").toggle;
 const find = std.mem.findScalar;
 
-var buffer: [pd.max_string:0]u8 = undefined;
 var s_open: *Symbol = undefined;
 pub var s_play: *Symbol = undefined;
 
@@ -129,6 +128,7 @@ pub fn Impl(Self: type) type { return struct {
 		self: *const Self,
 		_: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
+		var buffer: [pd.max_string:0]u8 = undefined;
 		var writer: Writer = .fixed(&buffer);
 		print(self, &writer, av[0..ac]) catch wr.ellipsis(&writer);
 		if (writer.end > 0) {
@@ -158,34 +158,28 @@ pub fn Impl(Self: type) type { return struct {
 					defer str = str[pctend + 1 ..];
 
 					const len = end - pos;
+					const kpos = w.end + pos;
 					try w.writeAll(str[0..end]);
-					buffer[w.end] = 0;
-					const name = buffer[w.end - len..][0..len :0].ptr;
-					const meta: Atom = bGet(base, .gen(name)) orelse .symbol(&pd.s_);
-					w.end -= len + 1;
+					try w.writeByte(0);
+					const key = w.buffer[kpos..][0..len :0];
+					const meta: Atom = bGet(base, .gen(key.ptr)) orelse .symbol(&pd.s_);
+					w.end -= len + 2;
+
+					var mbuf: [31]u8 = undefined;
+					const mstr: []const u8 = if (meta.type == .float) blk: {
+						var mw: Writer = .fixed(&mbuf);
+						try wr.fmtG(&mw, meta.w.float);
+						break :blk mw.buffered();
+					} else std.mem.sliceTo(meta.w.symbol.name, 0);
 
 					if (cons != null) {
-						var mbuf: [31]u8 = undefined;
-						var mw: Writer = .fixed(&mbuf);
-						const mstr: []const u8 = if (meta.type == .float) blk: {
-							try wr.fmtG(&mw, meta.w.float);
-							break :blk mw.buffered();
-						} else std.mem.sliceTo(meta.w.symbol.name, 0);
-
 						const lead = str[end + 1];
 						const width = try std.fmt.parseInt(u5, str[end + 2 .. pctend], 10);
 						for (0 .. width - mstr.len) |_| {
 							try w.writeByte(lead);
 						}
-						try w.writeAll(mstr);
-						continue;
 					}
-
-					if (meta.type == .float) {
-						try wr.fmtG(w, meta.w.float);
-					} else {
-						try w.writeAll(std.mem.sliceTo(meta.w.symbol.name, 0));
-					}
+					try w.writeAll(mstr);
 				}
 				try w.writeAll(str);
 			}
