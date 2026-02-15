@@ -5,8 +5,8 @@
 	.minimum_zig_version = "0.16.0-dev.2368+380ea6fb5",
 	.dependencies = .{
 		.pd = .{
-			.url = "git+https://github.com/myQwil/pd#fa5af9a7e7892476e83d2e832b89964df685c34a",
-			.hash = "pd-0.56.2-DC007WllAgAa_nAyPHLKMJ2jBNKNsVxxwB_ipHgW4srb",
+			.url = "git+https://github.com/myQwil/pd#0beeef43dddd95f8ca9300c5806290e401d47ebb",
+			.hash = "pd-0.56.2-DC007WtmAgDFeRrPLxjV7w7rgqyZMs8bI9C5jIBuEq1Z",
 		},
 		.gme = .{
 			.url = "git+https://github.com/myQwil/game-music-emu#8079e370d3db85348566d428df2b0f01bcd0d292",
