@@ -32,8 +32,7 @@ pub fn writeVec(writer: *Writer, vec: []const pd.Word) !void {
 	try writer.writeByte(']');
 }
 
-pub fn ellipsis(writer: *Writer) void {
-	const buf = writer.buffer;
-	@memcpy(buf[buf.len - 4 ..][0..3], "...");
-	writer.end = buf.len - 1;
+pub fn ellipsis(w: *Writer) void {
+	w.end = w.buffer.len - 3;
+	w.writeAll("...") catch unreachable;
 }
