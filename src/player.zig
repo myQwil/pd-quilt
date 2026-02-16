@@ -199,10 +199,10 @@ pub fn Impl(Self: type) type { return struct {
 		}
 	}
 
-	fn sendC(self: *const Self, s: *Symbol) callconv(.c) void {
-		send(self, s) catch |e| err(self, e);
+	fn getC(self: *const Self, s: *Symbol) callconv(.c) void {
+		get(self, s) catch |e| err(self, e);
 	}
-	fn send(self: *const Self, s: *Symbol) !void {
+	fn get(self: *const Self, s: *Symbol) !void {
 		const base: *const Base = &self.base;
 		const player: *const Player = &base.player;
 		try player.assertFileOpened();
@@ -217,7 +217,7 @@ pub fn Impl(Self: type) type { return struct {
 		self: *const Self,
 		s: *Symbol, _: c_uint, _: [*]const Atom,
 	) callconv(.c) void {
-		send(self, s) catch |e| err(self, e);
+		get(self, s) catch |e| err(self, e);
 	}
 
 	fn seekC(self: *Self, f: Float) callconv(.c) void {
@@ -316,7 +316,7 @@ pub fn Impl(Self: type) type { return struct {
 		class.addAnything(@ptrCast(&anythingC));
 		class.addMethod(@ptrCast(&stopC), .gen("stop"), &.{});
 		class.addMethod(@ptrCast(&seekC), .gen("seek"), &.{ .float });
-		class.addMethod(@ptrCast(&sendC), .gen("send"), &.{ .symbol });
+		class.addMethod(@ptrCast(&getC), .gen("get"), &.{ .symbol });
 		class.addMethod(@ptrCast(&printC), .gen("print"), &.{ .gimme });
 		class.addMethod(@ptrCast(&openC), s_open, &.{ .gimme });
 		class.addMethod(@ptrCast(&playC), s_play, &.{ .gimme });
