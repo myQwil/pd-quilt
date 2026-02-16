@@ -14,7 +14,7 @@
 #X msg 180 190 copyright;
 #X msg 130 220 comment;
 #X msg 220 220 dumper;
-#X text 200 160 send metadata via last outlet;
+#X text 220 140 get metadata from last outlet;
 #X msg 150 300 print ©%copyright%\\\, for the %system%;
 #X msg 150 330 print %author% - %song% (%comment%);
 #X obj 50 360 s \$1msg;

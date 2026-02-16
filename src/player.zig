@@ -83,6 +83,19 @@ pub fn timeSym(ms: i64) *Symbol {
 	return .gen(buf[0..w.end :0]);
 }
 
+fn alignBuffer(w: *Writer, buf: []const u8, fmt: []const u8) !void {
+	const fill = fmt[1];
+	const has_al = !isDigit(fmt[2]);
+	const alignment: std.fmt.Alignment = if (has_al) switch (fmt[2]) {
+		'<' => .left,
+		'^' => .center,
+		else => .right,
+	} else .right;
+	const wpos: usize = if (has_al) 3 else 2;
+	const width = std.fmt.parseInt(usize, fmt[wpos..], 10) catch 0;
+	try w.alignBuffer(buf, width, alignment, fill);
+}
+
 /// Returns the number of samples consumed
 pub inline fn leavedToPlanar(
 	leaved: [*]const Sample,
@@ -113,8 +126,9 @@ pub fn Impl(Self: type) type { return struct {
 	const err: fn(*const Self, anyerror) callconv(.@"inline") void = Self.err;
 
 	const Base = Self.Base;
+	const GetMetaFn = fn(*const Base, *Symbol) ?Atom;
 	/// Returns the value of a given metadata field if available.
-	const bGet: fn(*const Base, *Symbol) ?Atom = Base.get;
+	const bGet: GetMetaFn = Base.get;
 	/// Seek to a time in milliseconds.
 	const bSeek: fn(*Base, Float) anyerror!void = Base.seek;
 	/// Load a track in the playlist by index.
@@ -127,6 +141,10 @@ pub fn Impl(Self: type) type { return struct {
 	/// Returns the number of tracks in the current playlist.
 	const bTrackCount: fn(*const Base) callconv(.@"inline") usize = Base.trackCount;
 
+
+	fn getNone(_: *const Base, _: *Symbol) ?Atom {
+		return null;
+	}
 
 	fn printC(
 		self: *const Self,
@@ -143,7 +161,7 @@ pub fn Impl(Self: type) type { return struct {
 	inline fn print(self: *const Self, w: *Writer, av: []const Atom) !void {
 		const base: *const Base = &self.base;
 		const player: *const Player = &base.player;
-		player.assertFileOpened() catch |e| return err(self, e);
+		const getfn: *const GetMetaFn = if (player.open) &bGet else &getNone;
 		if (av.len == 0) {
 			return bPrint(base, w);
 		}
@@ -155,18 +173,32 @@ pub fn Impl(Self: type) type { return struct {
 			} else {
 				var str: [:0]const u8 = std.mem.sliceTo(a.w.symbol.name, 0);
 				while (true) {
-					const pos: usize = (find(u8, str, '%') orelse break) + 1;
+					const pctpos: usize = (find(u8, str, '%') orelse break);
+					const exclm: bool = str[pctpos + 1] == '!';
+					const pos: usize = pctpos + @as(usize, if (exclm) 2 else 1);
+
 					const pctend: usize = (find(u8, str[pos..], '%') orelse break) + pos;
 					const cons: ?usize = find(u8, str[pos..pctend], ':');
 					const end = if (cons) |c| c + pos else pctend;
 					defer str = str[pctend + 1 ..];
 
+					if (exclm) {
+						// skip metadata search and just format the string
+						try w.writeAll(str[0..pctpos]);
+						if (cons != null) {
+							try alignBuffer(w, str[pos..end], str[end..pctend]);
+						} else {
+							try w.writeAll(str[pos..end]);
+						}
+						continue;
+					}
+
 					const len = end - pos;
 					const kpos = w.end + pos;
 					try w.writeAll(str[0..end]);
 					try w.writeByte(0);
-					const key = w.buffer[kpos..][0..len :0];
-					const meta: Atom = bGet(base, .gen(key.ptr)) orelse .symbol(&pd.s_);
+					const key: *Symbol = .gen(w.buffer[kpos..][0..len :0].ptr);
+					const meta: Atom = getfn(base, key) orelse .symbol(&pd.s_);
 					w.end -= len + 2;
 
 					var mbuf: [std.fmt.float.bufferSize(.decimal, Float)]u8 = undefined;
@@ -178,18 +210,9 @@ pub fn Impl(Self: type) type { return struct {
 
 					if (cons == null or pctend < end + 3) {
 						try w.writeAll(mstr);
-						continue;
+					} else {
+						try alignBuffer(w, mstr, str[end..pctend]);
 					}
-					const fill = str[end + 1];
-					const has_al = !isDigit(str[end + 2]);
-					const alignment: std.fmt.Alignment = if (has_al) switch (str[end + 2]) {
-						'<' => .left,
-						'^' => .center,
-						else => .right,
-					} else .right;
-					const wpos = end + @as(usize, if (has_al) 3 else 2);
-					const width = std.fmt.parseInt(usize, str[wpos..pctend], 10) catch 0;
-					try w.alignBuffer(mstr, width, alignment, fill);
 				}
 				try w.writeAll(str);
 			}
@@ -205,8 +228,8 @@ pub fn Impl(Self: type) type { return struct {
 	fn get(self: *const Self, s: *Symbol) !void {
 		const base: *const Base = &self.base;
 		const player: *const Player = &base.player;
-		try player.assertFileOpened();
-		if (bGet(base, s)) |a| {
+		const getfn: *const GetMetaFn = if (player.open) &bGet else &getNone;
+		if (getfn(base, s)) |a| {
 			player.outlet.anything(s, &.{ a });
 		} else {
 			player.outlet.anything(s, &.{});

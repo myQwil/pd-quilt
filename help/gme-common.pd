@@ -229,7 +229,7 @@
 #X obj 240 90 r \$1start;
 #X obj 50 290 s \$1msg;
 #X obj 150 90 s \$0end;
-#X msg 60 240 \$1 \, print \$2 [%ftime%] - %song% \, fade \, time \, sytc, f 32;
+#X msg 60 240 \$1 \, print %!\$2:02% [%ftime%] - %song% \, fade \, time \, sytc, f 32;
 #X msg 240 130 list bang 1;
 #X obj 60 170 t b l;
 #X msg 60 130 \$1 \$1;

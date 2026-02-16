@@ -7,7 +7,7 @@
 #X msg 50 70 path;
 #X text 270 250 custom track info;
 #X msg 60 100 tracks;
-#X text 200 140 send metadata via last outlet;
+#X text 200 140 get metadata from last outlet;
 #X msg 140 140 album;
 #X msg 210 170 artist;
 #X msg 140 170 title;
@@ -16,11 +16,11 @@
 #X msg 80 170 date;
 #X msg 70 140 track;
 #N canvas 970 230 450 300 specs 0;
-#X obj 40 170 outlet;
-#X msg 40 60 print Bit Rate: %bitrate% kb/s;
-#X msg 50 90 print Sample Rate: %samplerate% Hz;
-#X msg 170 120 codec;
-#X msg 60 120 samplefmt;
+#X obj 30 170 outlet;
+#X msg 30 60 print Bit Rate: %bitrate:\ 8% kb/s;
+#X msg 40 90 print Sample Rate: %samplerate:\ 8% Hz;
+#X msg 160 120 codec;
+#X msg 50 120 samplefmt;
 #X connect 1 0 0 0;
 #X connect 2 0 0 0;
 #X connect 3 0 0 0;
@@ -107,5 +107,6 @@
 #N canvas 760 200 660 130 url-test 0;
 #X msg 30 20 open https://upload.wikimedia.org/wikipedia/en/1/10/Michael_Jackson_Thriller.ogg;
 #X obj 30 90 s \$1msg;
+#X text 120 90 not very stable. use at your own risk;
 #X connect 0 0 1 0;
 #X restore 100 150 pd url-test;
