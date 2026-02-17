@@ -182,9 +182,9 @@ pub fn Impl(Self: type) type { return struct {
 					const end = if (cons) |c| c + pos else pctend;
 					defer str = str[pctend + 1 ..];
 
+					try w.writeAll(str[0..pctpos]);
 					if (exclm) {
 						// skip metadata search and just format the string
-						try w.writeAll(str[0..pctpos]);
 						if (cons != null) {
 							try alignBuffer(w, str[pos..end], str[end..pctend]);
 						} else {
@@ -193,13 +193,12 @@ pub fn Impl(Self: type) type { return struct {
 						continue;
 					}
 
-					const len = end - pos;
-					const kpos = w.end + pos;
-					try w.writeAll(str[0..end]);
+					const kpos = w.end;
+					try w.writeAll(str[pos..end]);
 					try w.writeByte(0);
-					const key: *Symbol = .gen(w.buffer[kpos..][0..len :0].ptr);
+					const key: *Symbol = .gen(w.buffer[kpos..][0 .. end - pos :0].ptr);
 					const meta: Atom = getfn(base, key) orelse .symbol(&pd.s_);
-					w.end -= len + 2;
+					w.end = kpos;
 
 					var mbuf: [std.fmt.float.bufferSize(.decimal, Float)]u8 = undefined;
 					const mstr: []const u8 = if (meta.type == .float) blk: {
