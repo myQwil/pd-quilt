@@ -19,5 +19,6 @@ hours.txt
 # Zig folders
 *zig-cache/
 zig-out/
+zig-pkg/
 /build
 /build-*
