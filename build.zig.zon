@@ -5,7 +5,7 @@
 	.minimum_zig_version = "0.16.0-dev.2368+380ea6fb5",
 	.dependencies = .{
 		.pd = .{
-			.url = "git+https://github.com/myQwil/pd#0beeef43dddd95f8ca9300c5806290e401d47ebb",
+			.url = "git+https://github.com/myQwil/pd#525cf3c5e7e8e5c469404a61da7168b760744683",
 			.hash = "pd-0.56.2-DC007WtmAgDFeRrPLxjV7w7rgqyZMs8bI9C5jIBuEq1Z",
 		},
 		.gme = .{
