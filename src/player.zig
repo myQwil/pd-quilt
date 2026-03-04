@@ -118,10 +118,10 @@ inline fn isDigit(c: u8) bool {
 }
 
 pub fn Impl(Self: type) type { return struct {
-	/// Perform this after seeking. Resets internal buffers.
-	const reset: fn(*Self) void = Self.reset;
-	/// Perform this after loading a new track. Buffer reset and track preparation.
-	const restart: fn(*Self) void = Self.restart;
+	/// Perform this after seeking or loading a new track.
+	const resetBuffers: fn(*Self) void = Self.resetBuffers;
+	/// Perform this after loading a new track.
+	const prepNewTrack: fn(*Self) void = Self.prepNewTrack;
 	/// Print error to Pd console
 	const err: fn(*const Self, anyerror) callconv(.@"inline") void = Self.err;
 
@@ -250,7 +250,7 @@ pub fn Impl(Self: type) type { return struct {
 		const player: *Player = &base.player;
 		try player.assertFileOpened();
 		try bSeek(base, msec);
-		reset(self);
+		resetBuffers(self);
 	}
 
 	fn openC(
@@ -262,7 +262,8 @@ pub fn Impl(Self: type) type { return struct {
 		const result: bool = blk: { if (open(base, av[0..ac])) {
 			player.open = true;
 			player.play = false;
-			restart(self);
+			resetBuffers(self);
+			prepNewTrack(self);
 			break :blk true;
 		} else |e| {
 			// previous track is only replaced on a successful open,
@@ -305,7 +306,8 @@ pub fn Impl(Self: type) type { return struct {
 			try bSeek(base, 0);
 			break :blk false;
 		}};
-		restart(self);
+		resetBuffers(self);
+		prepNewTrack(self);
 		return result;
 	}
 

@@ -35,13 +35,12 @@ pub fn Impl(Root: type) type { return extern struct {
 		self.rabbit.conv(i, Root.nch) catch |e| self.err(e);
 	}
 
-	pub fn reset(self: *Self) void {
+	pub fn resetBuffers(self: *Self) void {
 		self.rabbit.reset() catch |e| self.err(e);
 		self.rubber.reset();
 	}
 
-	pub fn restart(self: *Self) void {
-		self.reset();
+	pub fn prepNewTrack(self: *Self) void {
 		self.rubber.processStartPad(&self.planar, Root.nch, ra.frames);
 	}
 

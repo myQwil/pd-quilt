@@ -35,12 +35,12 @@ pub fn Impl(Root: type) type { return extern struct {
 		self.tempo.* = f;
 	}
 
-	pub fn reset(self: *Self) void {
+	pub fn resetBuffers(self: *Self) void {
 		self.rabbit.reset() catch |e| self.err(e);
 	}
 
-	pub fn restart(self: *Self) void {
-		self.reset();
+	pub fn prepNewTrack(_: *Self) void {
+		return;
 	}
 
 	pub inline fn perform(self: *Self, w: [*]usize, ip: *u32) !void {

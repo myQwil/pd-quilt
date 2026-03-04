@@ -29,13 +29,12 @@ pub fn Impl(Root: type) type { return extern struct {
 		self.rabbit.conv(i, self.base.nch) catch |e| self.err(e);
 	}
 
-	pub fn reset(self: *Self) void {
+	pub fn resetBuffers(self: *Self) void {
 		self.base.reset();
 		self.rabbit.reset() catch |e| self.err(e);
 	}
 
-	pub fn restart(self: *Self) void {
-		self.reset();
+	pub fn prepNewTrack(self: *Self) void {
 		self.base.frame.pts = 0;
 	}
 
