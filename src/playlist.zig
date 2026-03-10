@@ -4,7 +4,6 @@ const Trax = @import("Trax.zig");
 
 const Symbol = pd.Symbol;
 const MetaHashMap = Trax.MetaHashMap;
-const StringHashMap = Trax.StringHashMap;
 const EntryList = std.array_list.Aligned(Entry, null);
 
 const gpa = pd.gpa;
@@ -94,7 +93,7 @@ pub const Playlist = extern struct {
 	pub fn fromArgs(av: []const pd.Atom) !Playlist {
 		var trax: Trax = .{};
 		defer trax.deinit();
-		var parents: StringHashMap = .empty;
+		var parents: Trax.StringHashMap = .empty;
 		defer parents.deinit(gpa);
 
 		for (av) |arg| {

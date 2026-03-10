@@ -21,9 +21,6 @@ var s_bpm: *Symbol = undefined;
 var s_date: *Symbol = undefined;
 pub var s_done: *Symbol = undefined;
 
-const trimRange = Trax.trimRange;
-const trimEnd = Trax.trimEnd;
-
 const Stream = extern struct {
 	ctx: *av.Codec.Context = undefined,
 	idx: usize = 0,
@@ -199,31 +196,18 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 		@memcpy(ext_path[0..i], path[0..i]);
 		@memcpy(ext_path[i..][0..ext.len], ext);
-		const file = std.Io.Dir.cwd().openFile(io, ext_path, .{ .mode = .read_only })
-			catch return;
-		defer file.close(io);
+		std.Io.Dir.cwd().access(io, ext_path, .{ .read = true }) catch return;
 
-		var buf: [std.fs.max_path_bytes:0]u8 = undefined;
-		var r = file.reader(io, &buf);
-		while (r.interface.takeDelimiterExclusive('\n')) |line| {
-			defer _ = r.interface.take(1) catch {};
-			const line_start = r.interface.seek - line.len;
-			const trim = trimRange(line, " \t", "\r");
-			const begin = line_start + trim[0];
-			const end = line_start + trim[1];
-			if (begin >= end or buf[begin] == '#' or buf[begin] == '@') {
-				continue;
-			}
-			const eql = std.mem.findScalar(u8, buf[begin..end], '=') orelse continue;
-			const kend = trimEnd(buf[begin..][0..eql], " \t");
-			buf[end] = 0;
-			buf[begin + kend] = 0;
-			const key = buf[begin..][0..kend :0];
-			const val = buf[begin + eql + 1 .. end :0];
-			dct.set(key.ptr, val.ptr, .{})
+		var trax: Trax = .{};
+		defer trax.deinit();
+		var parents: Trax.StringHashMap = .empty;
+		defer parents.deinit(gpa);
+
+		try trax.traverse(&parents, ext_path, .include);
+		it = trax.meta.iterator();
+		while (it.next()) |kv| {
+			dct.set(kv.key_ptr.*.name, kv.value_ptr.*.name, .{})
 				catch |e| pd.post.err(null, "dct.set: %s", .{ @errorName(e).ptr });
-		} else |e| if (e != error.EndOfStream) {
-			return e;
 		}
 	}
 

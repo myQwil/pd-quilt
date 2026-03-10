@@ -35,17 +35,6 @@ inline fn err(len: usize, e: anyerror, s: [*]const u8) void {
 	pd.post.err(null, "%u:%s: \"%s\"", .{ len, @errorName(e).ptr, s });
 }
 
-pub fn trimRange(
-	s: []const u8,
-	exclude_begin: []const u8,
-	exclude_end: []const u8,
-) struct { usize, usize } {
-	var a: usize = 0;
-	var z: usize = s.len;
-	while (a < z and std.mem.findScalar(u8, exclude_begin, s[a]) != null) : (a += 1) {}
-	while (z > a and std.mem.findScalar(u8, exclude_end, s[z - 1]) != null) : (z -= 1) {}
-	return .{ a, z };
-}
 pub fn trimStart(s: []const u8, exclude: []const u8) usize {
     var a: usize = 0;
     while (a < s.len and std.mem.findScalar(u8, exclude, s[a]) != null) : (a += 1) {}
@@ -110,9 +99,10 @@ pub fn traverse(
 		defer _ = r.interface.take(1) catch {};
 
 		const line_start = r.interface.seek - line.len;
-		const trim = trimRange(line, " \t", "\r");
-		var begin = line_start + trim[0];
-		const end = line_start + trim[1];
+		const tstart: usize = trimStart(line, " \t");
+		const tend: usize = tstart + trimEnd(line[tstart..], "\r");
+		var begin = line_start + tstart;
+		const end = line_start + tend;
 
 		// empty or comment
 		if (begin >= end or buf[begin] == '#') {
