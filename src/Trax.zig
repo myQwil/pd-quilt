@@ -101,7 +101,7 @@ pub fn traverse(
 		const line_start = r.interface.seek - line.len;
 		const tstart: usize = trimStart(line, " \t");
 		const tend: usize = tstart + trimEnd(line[tstart..], "\r");
-		var begin = line_start + tstart;
+		const begin = line_start + tstart;
 		const end = line_start + tend;
 
 		// empty or comment
@@ -111,15 +111,15 @@ pub fn traverse(
 
 		// command
 		if (buf[begin] == '!') {
-			begin += 1;
-			if (std.mem.startsWith(u8, buf[begin..end], "include")) {
-				begin += 7;
-				begin += trimStart(buf[begin..end], " \t");
-				if (begin >= end or buf[begin] != '@') {
+			var cmd = begin + 1;
+			if (std.mem.startsWith(u8, buf[cmd..end], "include")) {
+				cmd += 7;
+				cmd += trimStart(buf[cmd..end], " \t");
+				if (cmd >= end or buf[cmd] != '@') {
 					err(self.list.items.len, error.IncludeSyntaxError, file_path.ptr);
 					continue;
 				}
-				const trimmed = buf[begin + 1 .. end];
+				const trimmed = buf[cmd + 1 .. end];
 				const resolved = if (std.fs.path.isAbsolute(trimmed))
 					try resolveZ(&.{ trimmed })
 				else try resolveZ(&.{ base_dir, trimmed });
