@@ -59,6 +59,13 @@ fn resolveZ(paths: []const []const u8) ![:0]u8 {
 	return res[0..res.len - 1 :0];
 }
 
+inline fn getResolved(trimmed: []const u8, base_dir: []const u8) ![:0]u8 {
+	return if (std.fs.path.isAbsolute(trimmed))
+		try resolveZ(&.{ trimmed })
+	else
+		try resolveZ(&.{ base_dir, trimmed });
+}
+
 pub fn deinit(self: *Trax) void {
 	for (self.list.items) |*item| switch (item.*) {
 		.media => |*m| m.meta.deinit(gpa),
@@ -121,10 +128,7 @@ pub fn traverse(
 					err(self.list.items.len, error.IncludeSyntaxError, file_path.ptr);
 					continue;
 				}
-				const trimmed = buf[cmd + 1 .. end];
-				const resolved = if (std.fs.path.isAbsolute(trimmed))
-					try resolveZ(&.{ trimmed })
-				else try resolveZ(&.{ base_dir, trimmed });
+				const resolved = try getResolved(buf[cmd + 1 .. end], base_dir);
 				defer gpa.free(resolved);
 				try self.traverse(parents, resolved, .include);
 			}
@@ -136,12 +140,8 @@ pub fn traverse(
 			if (mode == .include) {
 				break;
 			}
-			const trimmed = buf[begin + 1 .. end];
-			const resolved = if (std.fs.path.isAbsolute(trimmed))
-				try resolveZ(&.{ trimmed })
-			else try resolveZ(&.{ base_dir, trimmed });
+			const resolved = try getResolved(buf[begin + 1 .. end], base_dir);
 			defer gpa.free(resolved);
-
 			if (isTrax(resolved)) {
 				var trax: Trax = .{};
 				try trax.traverse(parents, resolved, .normal);
