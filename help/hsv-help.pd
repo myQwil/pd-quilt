@@ -5,10 +5,10 @@
 #X text 150 60 translate hue-saturation-value to a 24-bit rgb int, f 30;
 #X obj 70 230 t b f;
 #X obj 130 230 t b f;
-#X obj 70 130 hsl 181 22 0 360 0 0 empty empty empty -2 -11 0 14 #2f004d #fcfcfc #fcfcfc 0 1;
-#X obj 90 160 hsl 181 22 0 1 0 0 empty empty empty -2 -11 0 14 #2f004d #fcfcfc #fcfcfc 0 1;
-#X obj 110 190 hsl 181 22 0 1 0 0 empty empty empty -2 -11 0 14 #2f004d #fcfcfc #fcfcfc 0 1;
-#X obj 250 280 cnv 22 146 88 empty \$0cnv empty 20 12 0 14 #ff0000 #404040 0;
+#X obj 70 130 hsl 181 22 0 360 0 0 empty empty empty -2 -11 0 14 #2f004d #fcfcfc #fcfcfc 0 0;
+#X obj 90 160 hsl 181 22 0 1 0 0 empty empty empty -2 -11 0 14 #2f004d #fcfcfc #fcfcfc 0 0;
+#X obj 110 190 hsl 181 22 0 1 0 0 empty empty empty -2 -11 0 14 #2f004d #fcfcfc #fcfcfc 0 0;
+#X obj 250 280 cnv 22 146 88 empty \$0cnv empty 20 12 0 14 #ab2a2a #404040 0;
 #X msg 60 340 color \$1;
 #X obj 60 370 s \$0cnv;
 #X text 270 130 hue: 0 - 360;

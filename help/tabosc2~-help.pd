@@ -17,7 +17,7 @@
 #X obj 190 240 tgl 24 0 empty empty empty 0 -12 0 16 #0e4345 #fcfcfc #fcfcfc 0 1;
 #X obj 90 170 r \$0msg;
 #X obj 170 170 r~ \$0hold;
-#X text 60 50 Linear interpolating table oscillator. Uses the largest power of 2 + 1 points in an array and ignores leftovers., f 29;
+#X text 60 50 Linear interpolating table oscillator. Uses the largest power of 2 + 1 points in an array and ignores leftovers., f 28;
 #X obj 270 170 r \$0phase;
 #X obj 40 170 radix 10 6 0 3 _ _ 0 0 _ _ _ 0;
 #X connect 0 0 17 0;

@@ -1,3 +1,7 @@
+//! An implementation of the FFmpeg libraries for the audio playback
+//! of various media formats. Includes playlist functionality and
+//! playback speed manipulation.
+
 const std = @import("std");
 const pd = @import("pd");
 const av = @import("av");

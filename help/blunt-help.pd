@@ -1,8 +1,8 @@
 #N canvas 400 200 410 350 16;
 #X declare -lib blunt;
-#X floatatom 50 160 0 0 0 0 - - - 0;
-#X floatatom 150 190 0 0 0 0 - - - 0;
-#X symbolatom 230 160 10 0 0 0 - - - 0;
+#X floatatom 50 170 0 0 0 0 - - - 0;
+#X floatatom 150 200 0 0 0 0 - - - 0;
+#X symbolatom 230 170 10 0 0 0 - - - 0;
 #X obj 160 20 cnv 15 84 27 empty empty Blunt! 0 12 0 24 #7c7c7c #fcfcfc 0;
 #N canvas 1000 200 360 90 lib 0;
 #X obj 80 30 declare -lib blunt;
@@ -46,10 +46,10 @@
 #X obj 200 200 `abs;
 #X connect 4 0 1 0;
 #X restore 50 290 pd unary-ops;
-#X obj 50 130 `f 5.4 !;
-#X obj 150 160 `- 9 6;
-#X obj 230 130 `s hello !;
-#X obj 150 130 `b !;
+#X obj 50 140 `f 5.4 !;
+#X obj 150 170 `- 9 6;
+#X obj 230 140 `s hello !;
+#X obj 150 140 `b !;
 #N canvas 810 200 360 390 binary-ops 0;
 #X obj 230 190 `+;
 #X obj 270 190 `-;
@@ -106,7 +106,6 @@
 #X connect 41 0 26 0;
 #X connect 42 0 36 0;
 #X restore 50 260 pd binary-ops;
-#X text 40 50 Exclamation point loadbangs the result. Objects based on pre-existing ones start with '`', f 32;
 #N canvas 810 200 390 250 hot-inlets 0;
 #X obj 100 160 #+;
 #X floatatom 90 110 0 0 0 0 - - - 0;
@@ -141,6 +140,7 @@
 #X connect 6 0 0 0;
 #X connect 7 0 5 0;
 #X restore 210 260 pd reverse-ops;
+#X text 40 50 Objects that can be triggered by load/init/close bang events. Objects based on pre-existing ones start with '`', f 32;
 #X connect 7 0 0 0;
 #X connect 8 0 1 0;
 #X connect 9 0 2 0;

@@ -1,3 +1,5 @@
+//! `[delay]` with pause/resume functionality.
+
 const pd = @import("pd");
 const tm = @import("timer.zig");
 

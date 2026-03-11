@@ -8,7 +8,7 @@
 #X obj 210 30 cnv 15 56 27 empty empty linp 0 12 0 24 #7c7c7c #fcfcfc 0;
 #X obj 130 230 unpack;
 #X obj 200 200 t a;
-#X text 60 60 line with the ability to pause/resume;
+#X text 40 60 [line] with pause/resume functionality;
 #X obj 90 290 bng 24 250 50 0 empty empty empty 0 -12 0 16 #ff8300 #551312 #fcfcfc;
 #X obj 100 230 b, f 2;
 #X obj 130 290 tgl 24 0 empty empty empty 0 -12 0 16 #0e4345 #fcfcfc #fcfcfc 0 1;

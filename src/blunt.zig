@@ -1,3 +1,6 @@
+//! Objects that can be triggered by load/init/close bang events.
+//! Objects based on pre-existing ones start with '`'
+
 const std = @import("std");
 const pd = @import("pd");
 

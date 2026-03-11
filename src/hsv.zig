@@ -1,3 +1,5 @@
+//! Translate hue-saturation-value to a 24-bit rgb integer.
+
 const pd = @import("pd");
 
 const Float = pd.Float;

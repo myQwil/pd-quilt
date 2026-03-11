@@ -5,7 +5,7 @@
 #X obj 140 250 unpack;
 #X obj 210 190 t a;
 #X obj 140 280 b, f 2;
-#X text 30 60 line~ with the ability to pause/resume;
+#X text 30 60 [line~] with pause/resume functionality;
 #X obj 210 220 linp~;
 #X obj 210 320 *~;
 #X obj 210 350 dac~;

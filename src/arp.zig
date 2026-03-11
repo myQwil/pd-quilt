@@ -1,3 +1,5 @@
+//! Arpeggiator and music scale constructor.
+
 const pd = @import("pd");
 const std = @import("std");
 const wr = @import("write.zig");

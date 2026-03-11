@@ -1,3 +1,5 @@
+//! Float-encode. Creates floats out of sign, exponent, and mantissa integers.
+
 const std = @import("std");
 const pd = @import("pd");
 const bf = @import("bitfloat.zig");

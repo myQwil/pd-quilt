@@ -4,6 +4,8 @@ const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
 
+/// Similar to `[mtof]` and `[ftom]`
+/// but with adjustable reference pitch and number of tones in an octave.
 pub fn Tet(T: type) type { return extern struct {
 	obj: pd.Object = undefined,
 	out: *pd.Outlet,

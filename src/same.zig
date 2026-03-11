@@ -1,3 +1,6 @@
+//! Similar to `[change]` in that it sends different values through the left outlet,
+//! but also sends repeat values through the right outlet.
+
 const pd = @import("pd");
 
 const Float = pd.Float;

@@ -18,7 +18,7 @@
 #X obj 140 330 r~ \$0fade;
 #X obj 140 270 r~ \$0speed;
 #X obj 140 300 r~ \$0tempo;
-#X text 30 60 A Pd interface for the Game Music Emu library. Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE \, AP \, SPC \, RSN \, VGM/VGZ, f 38;
+#X text 30 60 An implementation of the Game Music Emu library. Compatible formats include: AY \, GBS \, GYM \, HES \, KSS \, NSF/NSFE \, AP \, SPC \, RSN \, VGM/VGZ, f 38;
 #X obj 140 370 s \$0route;
 #X obj 270 150 gme-common \$0;
 #N canvas 840 550 360 150 docs 0;

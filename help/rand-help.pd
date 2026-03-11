@@ -46,7 +46,7 @@
 #X floatatom 220 300 0 0 0 0 - - - 0;
 #X obj 220 270 rand 4 8;
 #X floatatom 320 300 0 0 0 0 - - - 0;
-#X text 30 60 Similar to [random] but with the current time worked into the seed to produce different results with each restart of pd., f 45;
+#X text 80 60 Similar to [random] but the seed is initialized with Zig's io.random(), f 35;
 #N canvas 920 200 420 390 arrays 0;
 #X floatatom 40 110 0 0 0 0 - - - 0;
 #X obj 40 80 rand 22 or 333;

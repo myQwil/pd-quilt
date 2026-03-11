@@ -1,3 +1,6 @@
+//! Signal-based metronome.
+//! Works by generating a sawtooth wave and sending a bang on each new ramp.
+
 const pd = @import("pd");
 
 const tb = @import("tabfudge.zig");

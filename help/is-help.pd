@@ -1,5 +1,5 @@
 #N canvas 400 200 360 460 16;
-#X text 60 50 checks an atom's type.;
+#X text 60 50 Checks an atom's type;
 #X floatatom 80 390 0 0 0 0 - - - 0;
 #X msg 60 90 print;
 #X msg 70 120 5;

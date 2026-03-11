@@ -1,3 +1,5 @@
+//! Playlist reader.
+
 const pd = @import("pd");
 const Playlist = @import("playlist.zig").Playlist;
 

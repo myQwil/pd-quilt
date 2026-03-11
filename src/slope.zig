@@ -4,6 +4,7 @@ const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
 
+/// Non-gui slider objects.
 pub fn Slope(T: type) type { return extern struct {
 	obj: pd.Object = undefined,
 	out: *pd.Outlet,

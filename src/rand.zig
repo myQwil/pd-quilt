@@ -1,3 +1,5 @@
+//! Similar to `[random]` but the seed is initialized with Zig's `io.random()`.
+
 const pd = @import("pd");
 const std = @import("std");
 const rn = @import("rng.zig");

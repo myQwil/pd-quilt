@@ -1,3 +1,6 @@
+//! An implementation of the Game Music Emu library.
+//! Compatible formats include: AY, GBS, GYM, HES, KSS, NSF/NSFE, AP, SPC, RSN, VGM/VGZ.
+
 const std = @import("std");
 const pd = @import("pd");
 const gm = @import("gme");

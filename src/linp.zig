@@ -1,3 +1,5 @@
+//! `[line]` with pause/resume functionality.
+
 const pd = @import("pd");
 const tg = @import("toggle.zig");
 

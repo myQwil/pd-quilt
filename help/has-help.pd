@@ -16,7 +16,7 @@
 #X obj 110 210 t a;
 #X obj 340 170 t s s;
 #X obj 180 220 bng 24 250 50 0 empty empty empty 0 -12 0 16 #ff8300 #551312 #fcfcfc;
-#X text 110 60 checks if a list contains a specific atom value, f 25;
+#X text 110 60 Checks if a list contains a specific atom value, f 25;
 #X obj 110 280 tgl 24 0 empty empty empty 0 -12 0 16 #0e4345 #fcfcfc #fcfcfc 0 1;
 #X obj 30 280 tgl 24 0 empty empty empty 0 -12 0 16 #0e4345 #fcfcfc #fcfcfc 0 1;
 #X connect 0 0 14 0;

@@ -1,3 +1,5 @@
+//! `[pack]` with `anything` inlets and passive mismatch error handling.
+
 const pd = @import("pd");
 
 const Atom = pd.Atom;

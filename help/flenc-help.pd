@@ -21,7 +21,7 @@
 #X obj 140 120 declare -lib blunt;
 #X restore 30 30 pd lib;
 #X msg 120 300 print;
-#X text 100 70 float-encode & float-decode. Splits and joins the sign \, exponent \, and mantissa of a float., f 45;
+#X text 100 70 Float-encode & float-decode. Splits and joins the sign \, exponent \, and mantissa of a float., f 45;
 #X obj 320 170 bng 24 250 50 0 empty empty empty 0 -12 0 16 #ff8300 #551312 #fcfcfc;
 #X obj 360 170 exp2;
 #X obj 120 140 radix 10 6 0 3 _ _ 0 0 _ _ _ 0;

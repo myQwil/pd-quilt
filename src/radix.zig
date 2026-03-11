@@ -1,3 +1,5 @@
+//! A number box with options for specifying base, precision, and dragging sensitivity.
+
 const std = @import("std");
 const pd = @import("pd");
 const rx = @import("rad.zig");

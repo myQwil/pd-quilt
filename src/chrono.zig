@@ -1,3 +1,5 @@
+//! Timer with pause and lap features.
+
 const pd = @import("pd");
 const tm = @import("timer.zig");
 

@@ -1,3 +1,6 @@
+//! Linear interpolating table oscillator.
+//! Uses the largest power of 2 + 1 points in an array and ignores leftovers.
+
 const pd = @import("pd");
 const tb = @import("tab2.zig");
 const tf = @import("tabfudge.zig");

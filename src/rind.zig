@@ -1,3 +1,5 @@
+//! Float random number generator. Seed is initialized with Zig's `io.random()`.
+
 const pd = @import("pd");
 const rn = @import("rng.zig");
 

@@ -1,3 +1,5 @@
+//! Pulse wave generator.
+
 const pd = @import("pd");
 const Inlet = @import("inlet.zig").Inlet;
 

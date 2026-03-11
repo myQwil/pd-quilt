@@ -1,3 +1,5 @@
+//! Checks if a list contains a specific atom value.
+
 const pd = @import("pd");
 
 const Atom = pd.Atom;
