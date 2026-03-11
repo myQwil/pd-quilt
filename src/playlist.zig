@@ -16,10 +16,10 @@ const Entry = extern struct {
 	meta: Metadata = .{},
 };
 
-fn putAll(old: *MetaHashMap, new: MetaHashMap) !void {
-	var it = new.iterator();
+fn putAll(target: *MetaHashMap, source: MetaHashMap) !void {
+	var it = source.iterator();
 	while (it.next()) |kv| {
-		try old.put(gpa, kv.key_ptr.*, kv.value_ptr.*);
+		try target.put(gpa, kv.key_ptr.*, kv.value_ptr.*);
 	}
 }
 
