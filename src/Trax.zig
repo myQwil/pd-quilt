@@ -4,7 +4,7 @@ const pd = @import("pd");
 
 /// list of entries/traxs
 list: std.array_list.Aligned(Union, null) = .empty,
-/// global metadata
+/// top-level metadata
 meta: MetaHashMap = .empty,
 
 const Symbol = pd.Symbol;
@@ -69,7 +69,9 @@ pub fn deinit(self: *Trax) void {
 }
 
 const TraverseMode = enum {
+	/// read the entire playlist
 	normal,
+	/// read only the top-level metadata
 	include,
 };
 

@@ -1,7 +1,7 @@
 # A comment has # as its first non-whitespace character.
 # There are no inline comments.
 
-# Metadata specified before any tracks is global and applied to all tracks.
+# Metadata specified before any tracks is top-level and applied to all tracks.
 # Whitespace surrounding the key is ignored,
 # but any whitespace after the equal sign is part of the value.
 artist  =foobar

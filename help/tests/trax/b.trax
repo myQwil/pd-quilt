@@ -1,5 +1,5 @@
 # A command has ! as its first non-whitespace character.
-# `!include` inherits the global metadata of the trax file specified.
+# `!include` inherits the top-level metadata of the trax file specified.
 # If `a.trax` was the file originally opened, this line gets ignored.
 !include @../a.trax
 
