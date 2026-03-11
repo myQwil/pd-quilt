@@ -197,7 +197,7 @@ const Radix = extern struct {
 		const p1 = rect.p1 + IVec2{ grabbed, grabbed };
 		const p2 = rect.p2;
 		const corner = @divTrunc(rect.size()[1], 4);
-		const shape: std.meta.Tuple(&(.{c_int} ** 12)) = .{
+		const shape: @Tuple(&(.{c_int} ** 12)) = .{
 			p1[0], p1[1],
 			p2[0], p1[1],
 			p2[0], p2[1] - corner,
