@@ -91,24 +91,25 @@ pub const Playlist = extern struct {
 	}
 
 	pub fn fromArgs(av: []const pd.Atom) !Playlist {
-		var trax: Trax = .{};
-		defer trax.deinit();
-		var parents: Trax.StringHashMap = .empty;
-		defer parents.deinit(gpa);
+		var list: EntryList = .empty;
+		errdefer list.deinit(gpa);
 
 		for (av) |arg| {
 			const sym = arg.getSymbol() orelse return error.NotASymbol;
 			const name = std.mem.sliceTo(sym.name, 0);
 			if (isTrax(name)) {
+				var trax: Trax = .{};
+				defer trax.deinit();
+				var parents: Trax.StringHashMap = .empty;
+				defer parents.deinit(gpa);
+
 				try trax.traverse(&parents, name, .normal);
+				try flatten(&trax, &trax.meta, &list);
 			} else {
-				try trax.list.append(gpa, .{ .media = .{ .file = .gen(name) } });
+				try list.append(gpa, .{ .file = .gen(name) });
 			}
 		}
 
-		var list: EntryList = .empty;
-		errdefer list.deinit(gpa);
-		try flatten(&trax, &trax.meta, &list);
 		const owned = try list.toOwnedSlice(gpa);
 		return .{
 			.ptr = owned.ptr,
