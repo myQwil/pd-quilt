@@ -36,9 +36,9 @@ inline fn err(len: usize, e: anyerror, s: [*]const u8) void {
 }
 
 pub fn trimStart(s: []const u8, exclude: []const u8) usize {
-    var a: usize = 0;
-    while (a < s.len and std.mem.findScalar(u8, exclude, s[a]) != null) : (a += 1) {}
-    return a;
+	var a: usize = 0;
+	while (a < s.len and std.mem.findScalar(u8, exclude, s[a]) != null) : (a += 1) {}
+	return a;
 }
 
 pub fn trimEnd(s: []const u8, exclude: []const u8) usize {
@@ -119,7 +119,7 @@ pub fn traverse(
 			continue;
 		}
 
-		// !include statement
+		// !include @path
 		if (std.mem.startsWith(u8, buf[trim[0]..trim[1]], "!include")) {
 			const arg = blk: {
 				const arg = trim[0] + 8;
@@ -135,7 +135,7 @@ pub fn traverse(
 			continue;
 		}
 
-		// file path
+		// @path
 		if (buf[trim[0]] == '@') {
 			if (mode == .include) {
 				break;
