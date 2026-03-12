@@ -107,40 +107,40 @@ pub fn traverse(
 	while (r.interface.takeDelimiterExclusive('\n')) |line| {
 		defer _ = r.interface.take(1) catch {};
 
-		const line_start = r.interface.seek - line.len;
-		const tstart: usize = trimStart(line, " \t");
-		const tend: usize = tstart + trimEnd(line[tstart..], "\r");
-		const begin = line_start + tstart;
-		const end = line_start + tend;
+		const trim: [2]usize = blk: {
+			const line_start = r.interface.seek - line.len;
+			const tstart: usize = trimStart(line, " \t");
+			const tend: usize = tstart + trimEnd(line[tstart..], "\r");
+			break :blk .{ line_start + tstart, line_start + tend };
+		};
 
 		// empty or comment
-		if (begin >= end or buf[begin] == '#') {
+		if (trim[0] >= trim[1] or buf[trim[0]] == '#') {
 			continue;
 		}
 
-		// command
-		if (buf[begin] == '!') {
-			var cmd = begin + 1;
-			if (std.mem.startsWith(u8, buf[cmd..end], "include")) {
-				cmd += 7;
-				cmd += trimStart(buf[cmd..end], " \t");
-				if (cmd >= end or buf[cmd] != '@') {
-					err(self.list.items.len, error.IncludeSyntaxError, file_path.ptr);
-					continue;
-				}
-				const resolved = try getResolved(buf[cmd + 1 .. end], base_dir);
-				defer gpa.free(resolved);
-				try self.traverse(parents, resolved, .include);
+		// !include statement
+		if (std.mem.startsWith(u8, buf[trim[0]..trim[1]], "!include")) {
+			const arg = blk: {
+				const arg = trim[0] + 8;
+				break :blk arg + trimStart(buf[arg..trim[1]], " \t");
+			};
+			if (arg >= trim[1] or buf[arg] != '@') {
+				err(self.list.items.len, error.IncludeSyntaxError, file_path.ptr);
+				continue;
 			}
+			const resolved = try getResolved(buf[arg + 1 .. trim[1]], base_dir);
+			defer gpa.free(resolved);
+			try self.traverse(parents, resolved, .include);
 			continue;
 		}
 
 		// file path
-		if (buf[begin] == '@') {
+		if (buf[trim[0]] == '@') {
 			if (mode == .include) {
 				break;
 			}
-			const resolved = try getResolved(buf[begin + 1 .. end], base_dir);
+			const resolved = try getResolved(buf[trim[0] + 1 .. trim[1]], base_dir);
 			defer gpa.free(resolved);
 			if (isTrax(resolved)) {
 				var trax: Trax = .{};
@@ -153,12 +153,12 @@ pub fn traverse(
 		}
 
 		// key=value
-		const eql = std.mem.findScalar(u8, buf[begin..end], '=') orelse continue;
-		const kend = trimEnd(buf[begin..][0..eql], " \t");
-		buf[end] = 0;
-		buf[begin + kend] = 0;
-		const key = buf[begin..][0..kend :0];
-		const val = buf[begin + eql + 1 .. end :0];
+		const eql = std.mem.findScalar(u8, buf[trim[0]..trim[1]], '=') orelse continue;
+		const kend = trimEnd(buf[trim[0]..][0..eql], " \t");
+		buf[trim[1]] = 0;
+		buf[trim[0] + kend] = 0;
+		const key = buf[trim[0]..][0..kend :0];
+		const val = buf[trim[0] + eql + 1 .. trim[1] :0];
 		if (self.list.items.len == 0) {
 			try self.meta.put(gpa, .gen(key), .gen(val));
 		} else switch (self.list.items[self.list.items.len - 1]) {
