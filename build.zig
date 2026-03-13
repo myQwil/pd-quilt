@@ -1,6 +1,7 @@
 const std = @import("std");
 const pd = @import("pd");
 const LinkMode = std.builtin.LinkMode;
+const Build = std.Build;
 
 const PatchMode = enum {
 	/// Install copies of patches.
@@ -17,7 +18,7 @@ const Options = struct {
 	patches: PatchMode = .copy,
 	linkage: LinkMode = .dynamic,
 
-	fn init(b: *std.Build) Options {
+	fn init(b: *Build) Options {
 		const default: Options = .{};
 		return .{
 			.float_size = b.option(u8, "float_size",
@@ -85,13 +86,13 @@ const externals = [_]External{
 };
 
 fn getModule(
-	b: *std.Build,
+	b: *Build,
 	name: []const u8,
 	args: anytype,
-) *std.Build.Module {
+) *Build.Module {
 	const dep = b.dependency(name, args);
 	const linkage: LinkMode = args.linkage;
-	const target: std.Build.ResolvedTarget = args.target;
+	const target: Build.ResolvedTarget = args.target;
 
 	if (linkage == .dynamic) {
 		const lib = dep.artifact(name);
@@ -103,7 +104,7 @@ fn getModule(
 	return dep.module(name);
 }
 
-pub fn build(b: *std.Build) !void {
+pub fn build(b: *Build) !void {
 	const target = b.standardTargetOptions(.{});
 	const optimize = b.standardOptimizeOption(.{});
 	const opt: Options = .init(b);
@@ -190,10 +191,10 @@ pub fn build(b: *std.Build) !void {
 	//---------------------------------------------------------------------------
 	// Install help patches and abstractions
 	const io = b.graph.io;
-	const InstallFunc = fn(*std.Build, []const u8, []const u8) void;
+	const InstallFunc = fn(*Build, []const u8, []const u8) void;
 	const installFile: *const InstallFunc = switch (opt.patches) {
 		.symbolic => &pd.InstallLink.install,
-		.copy => &std.Build.installFile,
+		.copy => &Build.installFile,
 		.skip => return,
 	};
 
