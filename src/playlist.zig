@@ -4,7 +4,7 @@ const Trax = @import("Trax.zig");
 
 const Symbol = pd.Symbol;
 const MetaHashMap = Trax.MetaHashMap;
-const EntryList = std.array_list.Aligned(Entry, null);
+const EntryList = std.ArrayList(Entry);
 
 const gpa = pd.gpa;
 const isTrax = Trax.isTrax;
@@ -16,10 +16,10 @@ const Entry = extern struct {
 	meta: Metadata = .{},
 };
 
-fn putAll(target: *MetaHashMap, source: MetaHashMap) !void {
+fn update(target: *MetaHashMap, source: MetaHashMap) !void {
 	var it = source.iterator();
 	while (it.next()) |kv| {
-		try target.put(gpa, kv.key_ptr.*, kv.value_ptr.*);
+		try target.put(kv.key_ptr.*, kv.value_ptr.*);
 	}
 }
 
@@ -29,47 +29,43 @@ const Metadata = extern struct {
 	capacity: usize = 0,
 	bit_index: ?*align(@alignOf(u32)) anyopaque = null,
 
-	fn asHashMap(self: Metadata) MetaHashMap {
+	pub fn asHashMap(self: Metadata) MetaHashMap {
 		return .{
-			.entries = .{
-				.bytes = self.bytes,
-				.len = self.len,
-				.capacity = self.capacity,
+			.allocator = gpa,
+			.ctx = undefined,
+			.unmanaged = .{
+				.entries = .{
+					.bytes = self.bytes,
+					.len = self.len,
+					.capacity = self.capacity,
+				},
+				.index_header = @ptrCast(self.bit_index),
 			},
-			.index_header = @ptrCast(self.bit_index),
 		};
 	}
 
 	fn fromHashMap(map: MetaHashMap) Metadata {
 		return .{
-			.bytes = map.entries.bytes,
-			.len = map.entries.len,
-			.capacity = map.entries.capacity,
-			.bit_index = map.index_header,
+			.bytes = map.unmanaged.entries.bytes,
+			.len = map.unmanaged.entries.len,
+			.capacity = map.unmanaged.entries.capacity,
+			.bit_index = map.unmanaged.index_header,
 		};
-	}
-
-	pub fn get(self: Metadata, key: *Symbol) ?*Symbol {
-		return self.asHashMap().get(key);
-	}
-
-	pub fn iterator(self: Metadata) MetaHashMap.Iterator {
-		return self.asHashMap().iterator();
 	}
 };
 
 fn flatten(self: *const Trax, meta: *const MetaHashMap, list: *EntryList) !void {
 	for (self.list.items) |*item| {
-		var map: MetaHashMap = try meta.clone(gpa);
+		var map: MetaHashMap = try meta.clone();
 		switch (item.*) {
 			.media => |*m| {
-				errdefer map.deinit(gpa);
-				try putAll(&map, m.meta);
+				errdefer map.deinit();
+				try update(&map, m.meta);
 				try list.append(gpa, .{ .file = m.file, .meta = .fromHashMap(map) });
 			},
 			.trax => |*t| {
-				defer map.deinit(gpa);
-				try putAll(&map, t.meta);
+				defer map.deinit();
+				try update(&map, t.meta);
 				try flatten(t, &map, list);
 			}
 		}
@@ -85,7 +81,7 @@ pub const Playlist = extern struct {
 	pub fn deinit(self: *Playlist) void {
 		for (self.ptr[0..self.len]) |entry| {
 			var map = entry.meta.asHashMap();
-			map.deinit(gpa);
+			map.deinit();
 		}
 		gpa.free(self.ptr[0..self.len]);
 	}
@@ -100,13 +96,13 @@ pub const Playlist = extern struct {
 			if (isTrax(name)) {
 				var trax: Trax = .{};
 				defer trax.deinit();
-				var parents: Trax.StringHashMap = .empty;
-				defer parents.deinit(gpa);
+				var parents: Trax.StringHashMap = .init(gpa);
+				defer parents.deinit();
 
 				try trax.traverse(&parents, name, .normal);
 				try flatten(&trax, &trax.meta, &list);
 			} else {
-				try list.append(gpa, .{ .file = .gen(name) });
+				try list.append(gpa, .{ .file = sym });
 			}
 		}
 

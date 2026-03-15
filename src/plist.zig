@@ -44,7 +44,8 @@ const PList = extern struct {
 		if (i < 0 or self.plist.len <= i) {
 			return;
 		}
-		if (self.plist.ptr[@intCast(i)].meta.get(s)) |val| {
+		const meta = self.plist.ptr[@intCast(i)].meta.asHashMap();
+		if (meta.get(s)) |val| {
 			self.out_idx.float(@floatFromInt(i));
 			self.out_val.symbol(val);
 		}
@@ -56,7 +57,8 @@ const PList = extern struct {
 			return;
 		}
 		pd.post.do("\n%d", .{ i });
-		var iter = self.plist.ptr[@intCast(i)].meta.iterator();
+		const meta = self.plist.ptr[@intCast(i)].meta.asHashMap();
+		var iter = meta.iterator();
 		while (iter.next()) |kv| {
 			pd.post.do("%s: %s", .{ kv.key_ptr.*.name, kv.value_ptr.*.name });
 		}

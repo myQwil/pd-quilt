@@ -76,9 +76,9 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 	const Av = @This();
 
-	var dict: std.AutoHashMapUnmanaged(*Symbol, *const fn(*const Av) Atom) = .empty;
+	var dict: std.AutoHashMap(*Symbol, *const fn(*const Av) Atom) = .init(gpa);
 	pub fn freeDict() void {
-		dict.deinit(gpa);
+		dict.deinit();
 	}
 
 	pub inline fn init(obj: *pd.Object, args: []const Atom) !Av {
@@ -186,7 +186,8 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 	inline fn loadMetadata(self: *Av, idx: usize) !void {
 		const dct = &self.format.metadata;
-		var it = self.playlist.ptr[idx].meta.iterator();
+		const hm = self.playlist.ptr[idx].meta.asHashMap();
+		var it = hm.iterator();
 		while (it.next()) |kv| {
 			dct.set(kv.key_ptr.*.name, kv.value_ptr.*.name, .{})
 				catch |e| pd.post.err(null, "dct.set: %s", .{ @errorName(e).ptr });
@@ -196,7 +197,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		const txdir = ext ++ "/";
 		const path = std.mem.sliceTo(self.playlist.ptr[idx].file.name, 0);
 		const dot = std.mem.findScalarLast(u8, path, '.') orelse path.len;
-		var trx_path = try gpa.alloc(u8, dot + txdir.len + ext.len);
+		var trx_path = try gpa.alloc(u8, dot + txdir.len + ext.len + 1);
 		defer gpa.free(trx_path);
 
 		// first try `dir/.trax/file.trax`, then `dir/file.trax`
@@ -223,10 +224,11 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 		var trax: Trax = .{};
 		defer trax.deinit();
-		var parents: Trax.StringHashMap = .empty;
-		defer parents.deinit(gpa);
+		var parents: Trax.StringHashMap = .init(gpa);
+		defer parents.deinit();
 
-		try trax.traverse(&parents, trx_path[0..i], .include);
+		trx_path[i] = 0;
+		try trax.traverse(&parents, trx_path[0..i :0], .include);
 		it = trax.meta.iterator();
 		while (it.next()) |kv| {
 			dct.set(kv.key_ptr.*.name, kv.value_ptr.*.name, .{})
@@ -359,12 +361,12 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			s_done = .gen("done");
 			s_pos = .gen("pos");
 
-			errdefer dict.deinit(gpa);
+			errdefer dict.deinit();
 			inline for ([_][:0]const u8{
 				"path", "time", "ftime", "tracks",
 				"samplefmt", "samplerate", "bitrate", "codec",
 			}) |field_name| {
-				try dict.put(gpa, .gen(field_name), @field(meta, field_name));
+				try dict.put(.gen(field_name), @field(meta, field_name));
 			}
 
 			const class: *pd.Class = Self.class;

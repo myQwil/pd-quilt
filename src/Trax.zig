@@ -3,13 +3,13 @@ const std = @import("std");
 const pd = @import("pd");
 
 /// list of entries/traxs
-list: std.array_list.Aligned(Union, null) = .empty,
+list: std.ArrayList(Union) = .empty,
 /// top-level metadata
-meta: MetaHashMap = .empty,
+meta: MetaHashMap = .init(gpa),
 
 const Symbol = pd.Symbol;
-pub const StringHashMap = std.StringHashMapUnmanaged(void);
-pub const MetaHashMap = std.AutoArrayHashMapUnmanaged(*Symbol, *Symbol);
+pub const StringHashMap = std.StringHashMap(void);
+pub const MetaHashMap = std.AutoArrayHashMap(*Symbol, *Symbol);
 
 const Union = union(enum) {
 	media: Media,
@@ -20,7 +20,7 @@ const Media = struct {
 	/// path to the file
 	file: *Symbol,
 	/// file metadata
-	meta: MetaHashMap = .empty,
+	meta: MetaHashMap = .init(gpa),
 };
 
 const gpa = pd.gpa;
@@ -31,7 +31,7 @@ pub inline fn isTrax(filename: []const u8) bool {
 }
 
 /// Print message and skip, do not fail completely by returning error.
-inline fn err(len: usize, e: anyerror, s: [*]const u8) void {
+inline fn err(len: usize, e: anyerror, s: [*:0]const u8) void {
 	pd.post.err(null, "%u:%s: \"%s\"", .{ len, @errorName(e).ptr, s });
 }
 
@@ -68,11 +68,11 @@ inline fn getResolved(trimmed: []const u8, base_dir: []const u8) ![:0]u8 {
 
 pub fn deinit(self: *Trax) void {
 	for (self.list.items) |*item| switch (item.*) {
-		.media => |*m| m.meta.deinit(gpa),
+		.media => |*m| m.meta.deinit(),
 		.trax  => |*t| t.deinit(),
 	};
 	self.list.deinit(gpa);
-	self.meta.deinit(gpa);
+	self.meta.deinit();
 }
 
 const TraverseMode = enum {
@@ -85,7 +85,7 @@ const TraverseMode = enum {
 pub fn traverse(
 	self: *Trax,
 	parents: *StringHashMap,
-	file_path: []const u8,
+	file_path: [:0]const u8,
 	mode: TraverseMode,
 ) !void {
 	if (parents.contains(file_path)) {
@@ -94,7 +94,7 @@ pub fn traverse(
 		}
 		return;
 	}
-	try parents.put(gpa, file_path, {});
+	try parents.put(file_path, {});
 	defer _ = parents.remove(file_path);
 
 	const file = std.Io.Dir.cwd().openFile(io, file_path, .{ .mode = .read_only })
@@ -160,9 +160,9 @@ pub fn traverse(
 		const key = buf[trim[0]..][0..kend :0];
 		const val = buf[trim[0] + eql + 1 .. trim[1] :0];
 		if (self.list.items.len == 0) {
-			try self.meta.put(gpa, .gen(key), .gen(val));
+			try self.meta.put(.gen(key), .gen(val));
 		} else switch (self.list.items[self.list.items.len - 1]) {
-			inline else => |*v| try v.meta.put(gpa, .gen(key), .gen(val)),
+			inline else => |*v| try v.meta.put(.gen(key), .gen(val)),
 		}
 	} else |e| if (e != error.EndOfStream) {
 		return e;
