@@ -1,1 +1,5 @@
-comment =.trax/file.trax single-track update
+!include @../b.trax
+
+track   =5
+title   =Howdy
+comment =.trax/file.trax sidecar

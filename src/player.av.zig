@@ -8,7 +8,6 @@ const av = @import("av");
 const arc = @import("player.arc.zig");
 const pr = @import("player.zig");
 
-const Trax = @import("Trax.zig");
 const Playlist = @import("playlist.zig").Playlist;
 pub const Subtitle = av.Subtitle;
 
@@ -18,8 +17,6 @@ const Sample = pd.Sample;
 const Symbol = pd.Symbol;
 
 const gpa = pd.gpa;
-const io = std.Io.Threaded.global_single_threaded.ioBasic();
-
 var s_pos: *Symbol = undefined;
 var s_bpm: *Symbol = undefined;
 var s_date: *Symbol = undefined;
@@ -153,7 +150,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			return error.IndexOutOfBounds;
 		}
 		const format: *av.FormatContext = try .init(
-			self.playlist.ptr[idx].file.name, null, null, null);
+			self.playlist.ptr[idx].name, null, null, null);
 		errdefer format.deinit();
 
 		try format.findStreamInfo(null);
@@ -186,17 +183,9 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 	inline fn loadMetadata(self: *Av, idx: usize) !void {
 		const dct = &self.format.metadata;
-		const hm = self.playlist.ptr[idx].meta.asHashMap();
+		var hm = try self.playlist.getMetadata(idx) orelse return;
+		defer hm.deinit();
 		var it = hm.iterator();
-		while (it.next()) |kv| {
-			dct.set(kv.key_ptr.*.name, kv.value_ptr.*.name, .{})
-				catch |e| pd.post.err(null, "dct.set: %s", .{ @errorName(e).ptr });
-		}
-
-		var trax = try self.playlist.ptr[idx].getMetadata() orelse return;
-		defer trax.deinit();
-
-		it = trax.meta.iterator();
 		while (it.next()) |kv| {
 			dct.set(kv.key_ptr.*.name, kv.value_ptr.*.name, .{})
 				catch |e| pd.post.err(null, "dct.set: %s", .{ @errorName(e).ptr });

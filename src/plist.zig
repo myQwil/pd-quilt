@@ -29,7 +29,7 @@ const PList = extern struct {
 	fn bangC(self: *PList) callconv(.c) void {
 		for (0..self.plist.len) |i| {
 			self.out_idx.float(@floatFromInt(i));
-			self.out_val.symbol(self.plist.ptr[i].file);
+			self.out_val.symbol(self.plist.ptr[i]);
 		}
 	}
 
@@ -38,21 +38,8 @@ const PList = extern struct {
 		if (i < 0 or self.plist.len <= i) {
 			return;
 		}
-		const entry: *pl.Entry = &self.plist.ptr[@intCast(i)];
-		defer {
-			self.out_idx.float(@floatFromInt(i));
-			self.out_val.symbol(entry.file);
-		}
-
-		var trax = (entry.getMetadata() catch |e| return self.err(e)) orelse return;
-		defer trax.deinit();
-		var meta = entry.meta.asHashMap();
-		defer entry.meta = .fromHashMap(meta);
-
-		var it = trax.meta.iterator();
-		while (it.next()) |kv| {
-			meta.put(kv.key_ptr.*, kv.value_ptr.*) catch |e| return self.err(e);
-		}
+		self.out_idx.float(@floatFromInt(i));
+		self.out_val.symbol(self.plist.ptr[@intCast(i)]);
 	}
 
 	fn getC(self: *PList, f: Float, s: *Symbol) callconv(.c) void {
@@ -60,8 +47,11 @@ const PList = extern struct {
 		if (i < 0 or self.plist.len <= i) {
 			return;
 		}
-		const meta = self.plist.ptr[@intCast(i)].meta.asHashMap();
-		if (meta.get(s)) |val| {
+		var hm = (self.plist.getMetadata(@intCast(i))
+			catch |e| return self.err(e)) orelse return;
+		defer hm.deinit();
+
+		if (hm.get(s)) |val| {
 			self.out_idx.float(@floatFromInt(i));
 			self.out_val.symbol(val);
 		}
@@ -72,12 +62,15 @@ const PList = extern struct {
 		if (i < 0 or self.plist.len <= i) {
 			return;
 		}
-		const meta = self.plist.ptr[@intCast(i)].meta.asHashMap();
-		var iter = meta.iterator();
+		defer pd.post.do("", .{});
+		var hm = (self.plist.getMetadata(@intCast(i))
+			catch |e| return self.err(e)) orelse return;
+		defer hm.deinit();
+
+		var iter = hm.iterator();
 		while (iter.next()) |kv| {
 			pd.post.do("%s: %s", .{ kv.key_ptr.*.name, kv.value_ptr.*.name });
 		}
-		pd.post.do("", .{});
 	}
 
 	fn initC() callconv(.c) ?*PList {

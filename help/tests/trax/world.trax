@@ -1,1 +1,5 @@
-comment =file.trax single-track update
+!include @b.trax
+
+track   =6
+title   =Earth
+comment =file.trax sidecar

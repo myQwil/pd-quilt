@@ -1,12 +1,12 @@
 # A command has ! as its first non-whitespace character.
-# `!include` inherits the top-level metadata of the trax file specified.
-# If `a.trax` was the file originally opened, this line gets ignored.
+# `!include` inherits the metadata of the trax file specified.
 !include @../a.trax
 
-disc =1
+album   =Hello World
+date    =2026-03-16
 
 @baz
-@../fizz
+@fizz
 
 # skipped, reading a parent playlist would cause an infinite recursion
 @../a.trax

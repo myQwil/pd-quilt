@@ -1,26 +1,21 @@
 # A comment has # as its first non-whitespace character.
 # There are no inline comments.
 
-# Metadata specified before any tracks is top-level and applied to all tracks.
+# Trax uses two types of traversal: one for building a list of file paths,
+# and one for collecting metadata for the track that is currently playing.
+
+# Metadata is specified before any tracks. These values are ignored during
+# list traversal to be read later during metadata traversal.
+
 # Whitespace surrounding the key is ignored,
 # but any whitespace after the equal sign is part of the value.
 artist  =foobar
-album   =Hello World
 
 # Track listing
 
 # A file path has @ as its first non-whitespace character.
-# Any metadata that comes after a file path is specific to that file.
-@foo
-	title   =foo lorem
-	bpm     =123
-
-@bar
-	title   =bar ipsum
-	bpm     =456
+@trax/foo
+@trax/bar
 
 # A file path can point to another trax file.
 @trax/b.trax
-	# Child trax metadata takes precedence over parent trax metadata,
-	# but file-specific metadata like this takes precedence over child trax metadata.
-	artist  =barfoo

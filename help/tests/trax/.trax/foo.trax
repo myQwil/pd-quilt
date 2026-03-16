@@ -1,0 +1,8 @@
+# When a track is loaded, Trax looks for sidecars that hold track metadata,
+# first checking `.trax/file.trax`, then `file.trax`.
+
+# It is at this time that metadata traversal occurs.
+!include @../b.trax
+
+track =1
+title =Foo (bar)

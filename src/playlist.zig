@@ -1,122 +1,219 @@
 const std = @import("std");
 const pd = @import("pd");
-const Trax = @import("Trax.zig");
 
 const Symbol = pd.Symbol;
-const MetaHashMap = Trax.MetaHashMap;
-const EntryList = std.ArrayList(Entry);
+const StringHashMap = std.StringHashMap(void);
+const MetaHashMap = std.AutoArrayHashMap(*Symbol, *Symbol);
+const ArrayList = std.ArrayList(*Symbol);
 
+const trext = ".trax";
 const gpa = pd.gpa;
-const isTrax = Trax.isTrax;
+const io = std.Io.Threaded.global_single_threaded.ioBasic();
 
-pub const Entry = extern struct {
-	/// path to the file
-	file: *Symbol,
-	/// file metadata
-	meta: Metadata = .{},
+inline fn isTrax(filename: []const u8) bool {
+	return std.mem.endsWith(u8, filename, trext);
+}
 
-	pub fn getMetadata(self: *Entry) !?Trax {
-		const path = try Trax.trackPath(std.mem.sliceTo(self.file.name, 0))
-			orelse return null;
-		defer gpa.free(path);
+/// Print message and skip, do not fail completely by returning error.
+inline fn err(len: usize, e: anyerror, s: [*:0]const u8) void {
+	pd.post.err(null, "%u:%s: \"%s\"", .{ len, @errorName(e).ptr, s });
+}
 
-		var trax: Trax = .{};
-		errdefer trax.deinit();
-		var parents: Trax.StringHashMap = .init(gpa);
-		defer parents.deinit();
+fn trimStart(s: []const u8, exclude: []const u8) usize {
+	var a: usize = 0;
+	while (a < s.len and std.mem.findScalar(u8, exclude, s[a]) != null) : (a += 1) {}
+	return a;
+}
 
-		try trax.traverse(&parents, path, .include);
-		return trax;
+fn trimEnd(s: []const u8, exclude: []const u8) usize {
+	var z: usize = s.len;
+	while (z > 0 and std.mem.findScalar(u8, exclude, s[z - 1]) != null) : (z -= 1) {}
+	return z;
+}
+
+fn trimRange(line: []const u8, offset: usize) [2]usize {
+	const tstart: usize = trimStart(line, " \t");
+	const tend: usize = tstart + trimEnd(line[tstart..], "\r");
+	return .{ offset + tstart, offset + tend };
+}
+
+fn resolveZ(paths: []const []const u8) ![:0]u8 {
+	var res = try std.fs.path.resolve(gpa, paths);
+	errdefer gpa.free(res);
+	if (gpa.resize(res, res.len + 1)) {
+		res.len += 1;
+	} else {
+		res = try gpa.realloc(res, res.len + 1);
 	}
-};
+	res[res.len - 1] = 0;
+	return res[0..res.len - 1 :0];
+}
 
-fn update(target: *MetaHashMap, source: MetaHashMap) !void {
-	var it = source.iterator();
-	while (it.next()) |kv| {
-		try target.put(kv.key_ptr.*, kv.value_ptr.*);
+inline fn getResolved(trimmed: []const u8, base_dir: []const u8) ![:0]u8 {
+	return if (std.fs.path.isAbsolute(trimmed))
+		try resolveZ(&.{ trimmed })
+	else
+		try resolveZ(&.{ base_dir, trimmed });
+}
+
+fn traverseList(
+	list: *ArrayList,
+	parents: *StringHashMap,
+	file_path: [:0]const u8,
+) !void {
+	if (parents.contains(file_path)) {
+		return err(list.items.len, error.InfiniteRecursion, file_path.ptr);
+	}
+	try parents.put(file_path, {});
+	defer _ = parents.remove(file_path);
+
+	const file = std.Io.Dir.cwd().openFile(io, file_path, .{ .mode = .read_only })
+		catch |e| return err(list.items.len, e, file_path.ptr);
+	defer file.close(io);
+
+	var buf: [std.fs.max_path_bytes:0]u8 = undefined;
+	var r = file.reader(io, &buf);
+	const base_dir = std.fs.path.dirname(file_path) orelse ".";
+	while (r.interface.takeDelimiterExclusive('\n')) |line| {
+		defer _ = r.interface.take(1) catch {};
+		const trim = trimRange(line, r.interface.seek - line.len);
+
+		// empty or @path
+		if (trim[0] >= trim[1] or buf[trim[0]] != '@') {
+			continue;
+		}
+
+		const resolved = try getResolved(buf[trim[0] + 1 .. trim[1]], base_dir);
+		defer gpa.free(resolved);
+		if (isTrax(resolved)) {
+			try traverseList(list, parents, resolved);
+		} else {
+			try list.append(gpa, .gen(resolved.ptr));
+		}
+	} else |e| if (e != error.EndOfStream) {
+		return e;
 	}
 }
 
-const Metadata = extern struct {
-	bytes: [*]align(@alignOf(MetaHashMap.Data)) u8 = undefined,
-	len: usize = 0,
-	capacity: usize = 0,
-	bit_index: ?*align(@alignOf(u32)) anyopaque = null,
-
-	pub fn asHashMap(self: Metadata) MetaHashMap {
-		return .{
-			.allocator = gpa,
-			.ctx = undefined,
-			.unmanaged = .{
-				.entries = .{
-					.bytes = self.bytes,
-					.len = self.len,
-					.capacity = self.capacity,
-				},
-				.index_header = @ptrCast(self.bit_index),
-			},
-		};
+fn traverseMeta(
+	meta: *MetaHashMap,
+	parents: *StringHashMap,
+	file_path: [:0]const u8,
+) !void {
+	if (parents.contains(file_path)) {
+		return err(meta.count(), error.InfiniteRecursion, file_path.ptr);
 	}
+	try parents.put(file_path, {});
+	defer _ = parents.remove(file_path);
 
-	pub fn fromHashMap(map: MetaHashMap) Metadata {
-		return .{
-			.bytes = map.unmanaged.entries.bytes,
-			.len = map.unmanaged.entries.len,
-			.capacity = map.unmanaged.entries.capacity,
-			.bit_index = map.unmanaged.index_header,
-		};
-	}
-};
+	const file = std.Io.Dir.cwd().openFile(io, file_path, .{ .mode = .read_only })
+		catch |e| return err(meta.count(), e, file_path.ptr);
+	defer file.close(io);
 
-fn flatten(self: *const Trax, meta: *const MetaHashMap, list: *EntryList) !void {
-	for (self.list.items) |*item| {
-		var map: MetaHashMap = try meta.clone();
-		switch (item.*) {
-			.media => |*m| {
-				errdefer map.deinit();
-				try update(&map, m.meta);
-				try list.append(gpa, .{ .file = m.file, .meta = .fromHashMap(map) });
-			},
-			.trax => |*t| {
-				defer map.deinit();
-				try update(&map, t.meta);
-				try flatten(t, &map, list);
-			}
+	var buf: [std.fs.max_path_bytes:0]u8 = undefined;
+	var r = file.reader(io, &buf);
+	const base_dir = std.fs.path.dirname(file_path) orelse ".";
+	while (r.interface.takeDelimiterExclusive('\n')) |line| {
+		defer _ = r.interface.take(1) catch {};
+		const trim = trimRange(line, r.interface.seek - line.len);
+
+		// empty or comment
+		if (trim[0] >= trim[1] or buf[trim[0]] == '#') {
+			continue;
 		}
+
+		// @path
+		if (buf[trim[0]] == '@') {
+			break;
+		}
+
+		// !include @path
+		if (std.mem.startsWith(u8, buf[trim[0]..trim[1]], "!include")) {
+			const arg = blk: {
+				const arg = trim[0] + 8;
+				break :blk arg + trimStart(buf[arg..trim[1]], " \t");
+			};
+			if (arg >= trim[1] or buf[arg] != '@') {
+				err(meta.count(), error.IncludeSyntaxError, file_path.ptr);
+				continue;
+			}
+			const resolved = try getResolved(buf[arg + 1 .. trim[1]], base_dir);
+			defer gpa.free(resolved);
+			try traverseMeta(meta, parents, resolved);
+			continue;
+		}
+
+		// key=value
+		const eql = std.mem.findScalar(u8, buf[trim[0]..trim[1]], '=') orelse continue;
+		const kend = trimEnd(buf[trim[0]..][0..eql], " \t");
+		buf[trim[1]] = 0;
+		buf[trim[0] + kend] = 0;
+		const key = buf[trim[0]..][0..kend :0];
+		const val = buf[trim[0] + eql + 1 .. trim[1] :0];
+		try meta.put(.gen(key), .gen(val));
+	} else |e| if (e != error.EndOfStream) {
+		return e;
 	}
+}
+
+inline fn trackPath(path: []const u8) !?[:0]const u8 {
+	const txdir = trext ++ "/";
+	const dot = std.mem.findScalarLast(u8, path, '.') orelse path.len;
+	var trx_path = try gpa.alloc(u8, dot + txdir.len + trext.len + 1);
+
+	// first try `dir/.trax/file.trax`, then `dir/file.trax`
+	var i: usize = 0;
+	if (std.fs.path.dirname(path)) |dir| {
+		@memcpy(trx_path[0..dir.len], dir);
+		trx_path[dir.len] = '/';
+		i += dir.len + 1;
+	}
+	const base = path[i..dot];
+	@memcpy(trx_path[i..][0..txdir.len], txdir);
+	i += txdir.len;
+	@memcpy(trx_path[i..][0..base.len], base);
+	i += base.len;
+	@memcpy(trx_path[i..][0..trext.len], trext);
+	i += trext.len;
+	std.Io.Dir.cwd().access(io, trx_path[0..i], .{ .read = true }) catch {
+		@memcpy(trx_path[0..dot], path[0..dot]);
+		@memcpy(trx_path[dot..][0..trext.len], trext);
+		i = dot + trext.len;
+		std.Io.Dir.cwd().access(io, trx_path[0..i], .{ .read = true }) catch {
+			gpa.free(trx_path);
+			return null;
+		};
+	};
+	trx_path[i] = 0;
+
+	std.debug.assert(i + 1 <= trx_path.len);
+	trx_path = gpa.realloc(trx_path, i + 1) catch unreachable;
+	return trx_path[0..i :0];
 }
 
 pub const Playlist = extern struct {
 	/// list of tracks
-	ptr: [*]Entry = &.{},
+	ptr: [*]*Symbol = &.{},
 	/// length of the list
 	len: usize = 0,
 
 	pub fn deinit(self: *Playlist) void {
-		for (self.ptr[0..self.len]) |entry| {
-			var map = entry.meta.asHashMap();
-			map.deinit();
-		}
 		gpa.free(self.ptr[0..self.len]);
 	}
 
 	pub fn fromArgs(av: []const pd.Atom) !Playlist {
-		var list: EntryList = .empty;
+		var list: ArrayList = .empty;
 		errdefer list.deinit(gpa);
+		var parents: StringHashMap = .init(gpa);
+		defer parents.deinit();
 
 		for (av) |arg| {
 			const sym = arg.getSymbol() orelse return error.NotASymbol;
 			const name = std.mem.sliceTo(sym.name, 0);
 			if (isTrax(name)) {
-				var trax: Trax = .{};
-				defer trax.deinit();
-				var parents: Trax.StringHashMap = .init(gpa);
-				defer parents.deinit();
-
-				try trax.traverse(&parents, name, .normal);
-				try flatten(&trax, &trax.meta, &list);
+				try traverseList(&list, &parents, name);
 			} else {
-				try list.append(gpa, .{ .file = sym });
+				try list.append(gpa, sym);
 			}
 		}
 
@@ -132,5 +229,19 @@ pub const Playlist = extern struct {
 		// on success, replace old list with new one
 		self.deinit();
 		self.* = playlist;
+	}
+
+	pub fn getMetadata(self: *const Playlist, idx: usize) !?MetaHashMap {
+		const path = try trackPath(std.mem.sliceTo(self.ptr[idx].name, 0))
+			orelse return null;
+		defer gpa.free(path);
+
+		var meta: MetaHashMap = .init(gpa);
+		errdefer meta.deinit();
+		var parents: StringHashMap = .init(gpa);
+		defer parents.deinit();
+
+		try traverseMeta(&meta, &parents, path);
+		return meta;
 	}
 };
