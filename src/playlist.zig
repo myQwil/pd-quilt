@@ -46,7 +46,7 @@ fn resolveZ(paths: []const []const u8) ![:0]u8 {
 		res = try gpa.realloc(res, res.len + 1);
 	}
 	res[res.len - 1] = 0;
-	return res[0..res.len - 1 :0];
+	return res[0 .. res.len - 1 :0];
 }
 
 inline fn getResolved(trimmed: []const u8, base_dir: []const u8) ![:0]u8 {
@@ -78,7 +78,7 @@ fn traverseList(
 		defer _ = r.interface.take(1) catch {};
 		const trim = trimRange(line, r.interface.seek - line.len);
 
-		// empty or @path
+		// empty or not @path
 		if (trim[0] >= trim[1] or buf[trim[0]] != '@') {
 			continue;
 		}
@@ -156,7 +156,7 @@ fn traverseMeta(
 	}
 }
 
-inline fn trackPath(path: []const u8) !?[:0]const u8 {
+inline fn sidecar(path: []const u8) !?[:0]const u8 {
 	const txdir = trext ++ "/";
 	const dot = std.mem.findScalarLast(u8, path, '.') orelse path.len;
 	var trx_path = try gpa.alloc(u8, dot + txdir.len + trext.len + 1);
@@ -232,7 +232,7 @@ pub const Playlist = extern struct {
 	}
 
 	pub fn getMetadata(self: *const Playlist, idx: usize) !?MetaHashMap {
-		const path = try trackPath(std.mem.sliceTo(self.ptr[idx].name, 0))
+		const path = try sidecar(std.mem.sliceTo(self.ptr[idx].name, 0))
 			orelse return null;
 		defer gpa.free(path);
 
