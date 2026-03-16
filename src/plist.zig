@@ -1,7 +1,7 @@
 //! Playlist reader.
 
 const pd = @import("pd");
-const Playlist = @import("playlist.zig").Playlist;
+const pl = @import("playlist.zig");
 
 const Float = pd.Float;
 const Symbol = pd.Symbol;
@@ -10,17 +10,20 @@ const PList = extern struct {
 	obj: pd.Object = undefined,
 	out_val: *pd.Outlet,
 	out_idx: *pd.Outlet,
-	plist: Playlist = .{},
+	plist: pl.Playlist = .{},
 
 	const name = "plist";
 	var class: *pd.Class = undefined;
+
+	inline fn err(self: *const PList, e: anyerror) void {
+		pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
+	}
 
 	fn readC(
 		self: *PList,
 		_: *Symbol, ac: c_uint, av: [*]const pd.Atom,
 	) callconv(.c) void {
-		self.plist.readArgs(av[0..ac])
-			catch |e| pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
+		self.plist.readArgs(av[0..ac]) catch |e| self.err(e);
 	}
 
 	fn bangC(self: *PList) callconv(.c) void {
@@ -35,8 +38,21 @@ const PList = extern struct {
 		if (i < 0 or self.plist.len <= i) {
 			return;
 		}
-		self.out_idx.float(@floatFromInt(i));
-		self.out_val.symbol(self.plist.ptr[@intCast(i)].file);
+		const entry: *pl.Entry = &self.plist.ptr[@intCast(i)];
+		defer {
+			self.out_idx.float(@floatFromInt(i));
+			self.out_val.symbol(entry.file);
+		}
+
+		var trax = (entry.getMetadata() catch |e| return self.err(e)) orelse return;
+		defer trax.deinit();
+		var meta = entry.meta.asHashMap();
+		defer entry.meta = .fromHashMap(meta);
+
+		var it = trax.meta.iterator();
+		while (it.next()) |kv| {
+			meta.put(kv.key_ptr.*, kv.value_ptr.*) catch |e| return self.err(e);
+		}
 	}
 
 	fn getC(self: *PList, f: Float, s: *Symbol) callconv(.c) void {
@@ -56,12 +72,12 @@ const PList = extern struct {
 		if (i < 0 or self.plist.len <= i) {
 			return;
 		}
-		pd.post.do("\n%d", .{ i });
 		const meta = self.plist.ptr[@intCast(i)].meta.asHashMap();
 		var iter = meta.iterator();
 		while (iter.next()) |kv| {
 			pd.post.do("%s: %s", .{ kv.key_ptr.*.name, kv.value_ptr.*.name });
 		}
+		pd.post.do("", .{});
 	}
 
 	fn initC() callconv(.c) ?*PList {

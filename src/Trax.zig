@@ -23,11 +23,13 @@ const Media = struct {
 	meta: MetaHashMap = .init(gpa),
 };
 
+pub const ext = ".trax";
+
 const gpa = pd.gpa;
 const io = std.Io.Threaded.global_single_threaded.ioBasic();
 
 pub inline fn isTrax(filename: []const u8) bool {
-	return std.mem.endsWith(u8, filename, ".trax");
+	return std.mem.endsWith(u8, filename, ext);
 }
 
 /// Print message and skip, do not fail completely by returning error.
@@ -167,4 +169,39 @@ pub fn traverse(
 	} else |e| if (e != error.EndOfStream) {
 		return e;
 	}
+}
+
+pub fn trackPath(path: []const u8) !?[:0]const u8 {
+	const txdir = ext ++ "/";
+	const dot = std.mem.findScalarLast(u8, path, '.') orelse path.len;
+	var trx_path = try gpa.alloc(u8, dot + txdir.len + ext.len + 1);
+
+	// first try `dir/.trax/file.trax`, then `dir/file.trax`
+	var i: usize = 0;
+	if (std.fs.path.dirname(path)) |dir| {
+		@memcpy(trx_path[0..dir.len], dir);
+		trx_path[dir.len] = '/';
+		i += dir.len + 1;
+	}
+	const base = path[i..dot];
+	@memcpy(trx_path[i..][0..txdir.len], txdir);
+	i += txdir.len;
+	@memcpy(trx_path[i..][0..base.len], base);
+	i += base.len;
+	@memcpy(trx_path[i..][0..ext.len], ext);
+	i += ext.len;
+	std.Io.Dir.cwd().access(io, trx_path[0..i], .{ .read = true }) catch {
+		@memcpy(trx_path[0..dot], path[0..dot]);
+		@memcpy(trx_path[dot..][0..ext.len], ext);
+		i = dot + ext.len;
+		std.Io.Dir.cwd().access(io, trx_path[0..i], .{ .read = true }) catch {
+			gpa.free(trx_path);
+			return null;
+		};
+	};
+	trx_path[i] = 0;
+
+	std.debug.assert(i + 1 <= trx_path.len);
+	trx_path = gpa.realloc(trx_path, i + 1) catch unreachable;
+	return trx_path[0..i :0];
 }

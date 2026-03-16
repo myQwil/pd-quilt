@@ -9,11 +9,25 @@ const EntryList = std.ArrayList(Entry);
 const gpa = pd.gpa;
 const isTrax = Trax.isTrax;
 
-const Entry = extern struct {
+pub const Entry = extern struct {
 	/// path to the file
 	file: *Symbol,
 	/// file metadata
 	meta: Metadata = .{},
+
+	pub fn getMetadata(self: *Entry) !?Trax {
+		const path = try Trax.trackPath(std.mem.sliceTo(self.file.name, 0))
+			orelse return null;
+		defer gpa.free(path);
+
+		var trax: Trax = .{};
+		errdefer trax.deinit();
+		var parents: Trax.StringHashMap = .init(gpa);
+		defer parents.deinit();
+
+		try trax.traverse(&parents, path, .include);
+		return trax;
+	}
 };
 
 fn update(target: *MetaHashMap, source: MetaHashMap) !void {
@@ -44,7 +58,7 @@ const Metadata = extern struct {
 		};
 	}
 
-	fn fromHashMap(map: MetaHashMap) Metadata {
+	pub fn fromHashMap(map: MetaHashMap) Metadata {
 		return .{
 			.bytes = map.unmanaged.entries.bytes,
 			.len = map.unmanaged.entries.len,

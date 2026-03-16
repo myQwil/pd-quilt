@@ -23,13 +23,13 @@
 #N canvas 830 200 360 190 metadata 0;
 #X floatatom 180 60 0 0 0 0 - - - 0;
 #X msg 180 90 get \$1 title;
-#X obj 70 30 cupqb;
-#X msg 70 90 print \$1;
+#X obj 40 30 cupqb;
 #X obj 120 150 s \$0msg;
+#X msg 40 90 \$1 \, print \$1;
 #X connect 0 0 1 0;
-#X connect 1 0 4 0;
-#X connect 2 0 3 0;
-#X connect 3 0 4 0;
+#X connect 1 0 3 0;
+#X connect 2 0 4 0;
+#X connect 4 0 3 0;
 #X restore 230 290 pd metadata;
 #X obj 50 190 r \$0msg;
 #X obj 150 220 s \$0msg;

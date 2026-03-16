@@ -193,42 +193,9 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 				catch |e| pd.post.err(null, "dct.set: %s", .{ @errorName(e).ptr });
 		}
 
-		const ext = ".trax";
-		const txdir = ext ++ "/";
-		const path = std.mem.sliceTo(self.playlist.ptr[idx].file.name, 0);
-		const dot = std.mem.findScalarLast(u8, path, '.') orelse path.len;
-		var trx_path = try gpa.alloc(u8, dot + txdir.len + ext.len + 1);
-		defer gpa.free(trx_path);
-
-		// first try `dir/.trax/file.trax`, then `dir/file.trax`
-		var i: usize = 0;
-		if (std.fs.path.dirname(path)) |dir| {
-			@memcpy(trx_path[0..dir.len], dir);
-			trx_path[dir.len] = '/';
-			i += dir.len + 1;
-		}
-		const base = path[i..dot];
-		@memcpy(trx_path[i..][0..txdir.len], txdir);
-		i += txdir.len;
-		@memcpy(trx_path[i..][0..base.len], base);
-		i += base.len;
-		@memcpy(trx_path[i..][0..ext.len], ext);
-		i += ext.len;
-		std.Io.Dir.cwd().access(io, trx_path[0..i], .{ .read = true }) catch {
-			@memcpy(trx_path[0..dot], path[0..dot]);
-			@memcpy(trx_path[dot..][0..ext.len], ext);
-			i = dot + ext.len;
-			std.Io.Dir.cwd().access(io, trx_path[0..i], .{ .read = true })
-				catch return;
-		};
-
-		var trax: Trax = .{};
+		var trax = try self.playlist.ptr[idx].getMetadata() orelse return;
 		defer trax.deinit();
-		var parents: Trax.StringHashMap = .init(gpa);
-		defer parents.deinit();
 
-		trx_path[i] = 0;
-		try trax.traverse(&parents, trx_path[0..i :0], .include);
 		it = trax.meta.iterator();
 		while (it.next()) |kv| {
 			dct.set(kv.key_ptr.*.name, kv.value_ptr.*.name, .{})
