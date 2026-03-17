@@ -1,7 +1,7 @@
 //! Playlist reader.
 
 const pd = @import("pd");
-const pl = @import("playlist.zig");
+const tx = @import("trax.zig");
 
 const Float = pd.Float;
 const Symbol = pd.Symbol;
@@ -10,7 +10,7 @@ const PList = extern struct {
 	obj: pd.Object = undefined,
 	out_val: *pd.Outlet,
 	out_idx: *pd.Outlet,
-	plist: pl.Playlist = .{},
+	plist: tx.Playlist = .{},
 
 	const name = "plist";
 	var class: *pd.Class = undefined;
@@ -47,7 +47,7 @@ const PList = extern struct {
 		if (i < 0 or self.plist.len <= i) {
 			return;
 		}
-		var hm = (self.plist.getMetadata(@intCast(i))
+		var hm = (tx.metadata(self.plist.ptr[@intCast(i)].name)
 			catch |e| return self.err(e)) orelse return;
 		defer hm.deinit();
 
@@ -63,7 +63,7 @@ const PList = extern struct {
 			return;
 		}
 		defer pd.post.do("", .{});
-		var hm = (self.plist.getMetadata(@intCast(i))
+		var hm = (tx.metadata(self.plist.ptr[@intCast(i)].name)
 			catch |e| return self.err(e)) orelse return;
 		defer hm.deinit();
 

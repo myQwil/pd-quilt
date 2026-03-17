@@ -161,7 +161,7 @@ fn traverseMeta(
 	}
 }
 
-inline fn sidecar(path: []const u8) !?[:0]const u8 {
+inline fn getSidecar(path: []const u8) !?[:0]const u8 {
 	const txdir = trext ++ "/";
 	const dot = std.mem.findScalarLast(u8, path, '.') orelse path.len;
 	var trx_path = try gpa.alloc(u8, dot + txdir.len + trext.len + 1);
@@ -194,6 +194,18 @@ inline fn sidecar(path: []const u8) !?[:0]const u8 {
 	std.debug.assert(i + 1 <= trx_path.len);
 	trx_path = gpa.realloc(trx_path, i + 1) catch unreachable;
 	return trx_path[0..i :0];
+}
+
+pub fn metadata(path: [*:0]const u8) !?MetaHashMap {
+	const sidecar = try getSidecar(std.mem.sliceTo(path, 0)) orelse return null;
+	defer gpa.free(sidecar);
+	var meta: MetaHashMap = .init(gpa);
+	errdefer meta.deinit();
+	var parents: StringHashMap = .init(gpa);
+	defer parents.deinit();
+
+	try traverseMeta(&meta, &parents, sidecar);
+	return meta;
 }
 
 pub const Playlist = extern struct {
@@ -234,19 +246,5 @@ pub const Playlist = extern struct {
 		// on success, replace old list with new one
 		self.deinit();
 		self.* = playlist;
-	}
-
-	pub fn getMetadata(self: *const Playlist, idx: usize) !?MetaHashMap {
-		const path = try sidecar(std.mem.sliceTo(self.ptr[idx].name, 0))
-			orelse return null;
-		defer gpa.free(path);
-
-		var meta: MetaHashMap = .init(gpa);
-		errdefer meta.deinit();
-		var parents: StringHashMap = .init(gpa);
-		defer parents.deinit();
-
-		try traverseMeta(&meta, &parents, path);
-		return meta;
 	}
 };

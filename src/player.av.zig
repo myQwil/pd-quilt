@@ -7,14 +7,13 @@ const pd = @import("pd");
 const av = @import("av");
 const arc = @import("player.arc.zig");
 const pr = @import("player.zig");
-
-const Playlist = @import("playlist.zig").Playlist;
-pub const Subtitle = av.Subtitle;
+const tx = @import("trax.zig");
 
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
+pub const Subtitle = av.Subtitle;
 
 const gpa = pd.gpa;
 var s_pos: *Symbol = undefined;
@@ -55,7 +54,7 @@ const Stream = extern struct {
 
 pub fn Base(frames: comptime_int) type { return extern struct {
 	layout: av.ChannelLayout,
-	playlist: Playlist = .{},
+	playlist: tx.Playlist = .{},
 	player: pr.Player,
 	audio: Stream = .{},
 	subtitle: Stream = .{},
@@ -183,7 +182,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 	inline fn loadMetadata(self: *Av, idx: usize) !void {
 		const dct = &self.format.metadata;
-		var hm = try self.playlist.getMetadata(idx) orelse return;
+		var hm = try tx.metadata(self.playlist.ptr[idx].name) orelse return;
 		defer hm.deinit();
 		var it = hm.iterator();
 		while (it.next()) |kv| {
