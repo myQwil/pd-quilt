@@ -76,14 +76,17 @@ fn traverseList(
 	const base_dir = std.fs.path.dirname(file_path) orelse ".";
 	while (r.interface.takeDelimiterExclusive('\n')) |line| {
 		defer _ = r.interface.take(1) catch {};
-		const trim = trimRange(line, r.interface.seek - line.len);
+		const trimmed = blk: {
+			const trim = trimRange(line, 0);
+			break :blk line[trim[0]..trim[1]];
+		};
 
 		// empty or not @path
-		if (trim[0] >= trim[1] or buf[trim[0]] != '@') {
+		if (trimmed.len == 0 or trimmed[0] != '@') {
 			continue;
 		}
 
-		const resolved = try getResolved(buf[trim[0] + 1 .. trim[1]], base_dir);
+		const resolved = try getResolved(trimmed[1..], base_dir);
 		defer gpa.free(resolved);
 		if (isTrax(resolved)) {
 			try traverseList(list, parents, resolved);
@@ -116,36 +119,38 @@ fn traverseMeta(
 	while (r.interface.takeDelimiterExclusive('\n')) |line| {
 		defer _ = r.interface.take(1) catch {};
 		const trim = trimRange(line, r.interface.seek - line.len);
+		const trimmed = buf[trim[0]..trim[1]];
 
 		// empty or comment
-		if (trim[0] >= trim[1] or buf[trim[0]] == '#') {
+		if (trimmed.len == 0 or trimmed[0] == '#') {
 			continue;
 		}
 
 		// @path
-		if (buf[trim[0]] == '@') {
+		if (trimmed[0] == '@') {
 			break;
 		}
 
 		// !include @path
-		if (std.mem.startsWith(u8, buf[trim[0]..trim[1]], "!include")) {
+		const inc = "!include";
+		if (std.mem.startsWith(u8, trimmed, inc)) {
 			const arg = blk: {
-				const arg = trim[0] + 8;
-				break :blk arg + trimStart(buf[arg..trim[1]], " \t");
+				const arg = trimmed[inc.len..];
+				break :blk arg[trimStart(arg, " \t")..];
 			};
-			if (arg >= trim[1] or buf[arg] != '@') {
+			if (arg.len == 0 or arg[0] != '@') {
 				err(meta.count(), error.IncludeSyntaxError, file_path.ptr);
 				continue;
 			}
-			const resolved = try getResolved(buf[arg + 1 .. trim[1]], base_dir);
+			const resolved = try getResolved(arg[1..], base_dir);
 			defer gpa.free(resolved);
 			try traverseMeta(meta, parents, resolved);
 			continue;
 		}
 
 		// key=value
-		const eql = std.mem.findScalar(u8, buf[trim[0]..trim[1]], '=') orelse continue;
-		const kend = trimEnd(buf[trim[0]..][0..eql], " \t");
+		const eql = std.mem.findScalar(u8, trimmed, '=') orelse continue;
+		const kend = trimEnd(trimmed[0..eql], " \t");
 		buf[trim[1]] = 0;
 		buf[trim[0] + kend] = 0;
 		const key = buf[trim[0]..][0..kend :0];
