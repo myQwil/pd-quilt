@@ -49,11 +49,11 @@ fn resolveZ(paths: []const []const u8) ![:0]u8 {
 	return res[0 .. res.len - 1 :0];
 }
 
-inline fn getResolved(trimmed: []const u8, base_dir: []const u8) ![:0]u8 {
-	return if (std.fs.path.isAbsolute(trimmed))
-		try resolveZ(&.{ trimmed })
+inline fn getResolved(path: []const u8, base_dir: []const u8) ![:0]u8 {
+	return if (std.fs.path.isAbsolute(path))
+		try resolveZ(&.{ path })
 	else
-		try resolveZ(&.{ base_dir, trimmed });
+		try resolveZ(&.{ base_dir, path });
 }
 
 fn traverseList(
