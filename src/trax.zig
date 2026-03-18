@@ -213,14 +213,24 @@ pub const Playlist = extern struct {
 	ptr: [*]*Symbol = &.{},
 	/// length of the list
 	len: usize = 0,
+	/// allocated length
+	cap: usize = 0,
 
 	pub fn deinit(self: *Playlist) void {
-		gpa.free(self.ptr[0..self.len]);
+		gpa.free(self.ptr[0..self.cap]);
+		self.* = undefined;
 	}
 
-	pub fn fromArgs(av: []const pd.Atom) !Playlist {
-		var list: ArrayList = .empty;
-		errdefer list.deinit(gpa);
+	pub fn append(self: *Playlist, av: []const pd.Atom) !void {
+		var list: ArrayList = .{
+			.items = self.ptr[0..self.len],
+			.capacity = self.cap,
+		};
+		defer self.* = .{
+			.ptr = list.items.ptr,
+			.len = list.items.len,
+			.cap = list.capacity,
+		};
 		var parents: StringHashMap = .init(gpa);
 		defer parents.deinit();
 
@@ -233,16 +243,12 @@ pub const Playlist = extern struct {
 				try list.append(gpa, sym);
 			}
 		}
-
-		const owned = try list.toOwnedSlice(gpa);
-		return .{
-			.ptr = owned.ptr,
-			.len = owned.len,
-		};
 	}
 
-	pub fn readArgs(self: *Playlist, av: []const pd.Atom) !void {
-		const playlist: Playlist = try .fromArgs(av);
+	pub fn replaceWith(self: *Playlist, av: []const pd.Atom) !void {
+		var playlist: Playlist = .{};
+		errdefer playlist.deinit();
+		try playlist.append(av);
 		// on success, replace old list with new one
 		self.deinit();
 		self.* = playlist;

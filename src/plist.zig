@@ -23,7 +23,14 @@ const PList = extern struct {
 		self: *PList,
 		_: *Symbol, ac: c_uint, av: [*]const pd.Atom,
 	) callconv(.c) void {
-		self.plist.readArgs(av[0..ac]) catch |e| self.err(e);
+		self.plist.replaceWith(av[0..ac]) catch |e| self.err(e);
+	}
+
+	fn appendC(
+		self: *PList,
+		_: *Symbol, ac: c_uint, av: [*]const pd.Atom,
+	) callconv(.c) void {
+		self.plist.append(av[0..ac]) catch |e| self.err(e);
 	}
 
 	fn bangC(self: *PList) callconv(.c) void {
@@ -97,6 +104,7 @@ const PList = extern struct {
 		class.addBang(@ptrCast(&bangC));
 		class.addFloat(@ptrCast(&floatC));
 		class.addMethod(@ptrCast(&printC), .gen("print"), &.{ .float });
+		class.addMethod(@ptrCast(&appendC), .gen("append"), &.{ .gimme });
 		class.addMethod(@ptrCast(&readC), .gen("read"), &.{ .gimme });
 		class.addMethod(@ptrCast(&getC), .gen("get"), &.{ .float, .symbol });
 	}

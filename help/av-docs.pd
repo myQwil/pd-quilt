@@ -1,4 +1,4 @@
-#N canvas 400 200 360 200 16;
+#N canvas 400 200 360 230 16;
 #N canvas 760 200 580 420 metadata 0;
 #X msg 40 40 print;
 #X text 100 40 general track info;
@@ -110,3 +110,14 @@
 #X text 120 90 not very stable. use at your own risk;
 #X connect 0 0 1 0;
 #X restore 100 150 pd url-test;
+#N canvas 760 200 370 200 playlist 0;
+#X obj 90 90 openpanel;
+#X obj 90 30 bng 24 250 50 0 empty empty previous_directory 28 12 0 16 #ff8300 #ff0400 #7c7c7c;
+#X msg 100 60 symbol ~/Music;
+#X msg 90 120 append \$1;
+#X obj 90 150 s \$1msg;
+#X connect 0 0 3 0;
+#X connect 1 0 0 0;
+#X connect 2 0 0 0;
+#X connect 3 0 4 0;
+#X restore 100 180 pd playlist;

@@ -192,7 +192,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 	}
 
 	pub inline fn open(self: *Av, args: []const Atom) !void {
-		try self.playlist.readArgs(args);
+		try self.playlist.replaceWith(args);
 	}
 
 	pub inline fn reset(self: *Av) void {
@@ -270,6 +270,14 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			base.pos() catch |e| err(self, e);
 		}
 
+		fn appendC(
+			self: *Self,
+			_: *Symbol, ac: c_uint, args: [*]const pd.Atom,
+		) callconv(.c) void {
+			const base: *Av = &self.base;
+			base.playlist.append(args[0..ac]) catch |e| err(self, e);
+		}
+
 		fn audioC(self: *Self, f: Float) callconv(.c) void {
 			audio(self, f) catch |e| err(self, e);
 		}
@@ -328,6 +336,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			class.addMethod(@ptrCast(&posC), s_pos, &.{});
 			class.addMethod(@ptrCast(&audioC), .gen("audio"), &.{ .float });
 			class.addMethod(@ptrCast(&subtitleC), .gen("subtitle"), &.{ .float });
+			class.addMethod(@ptrCast(&appendC), .gen("append"), &.{ .gimme });
 		}
 	};}
 
