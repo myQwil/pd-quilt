@@ -110,9 +110,14 @@ pub fn Impl(Root: type) type { return extern struct {
 		errdefer rubber.deinit();
 
 		var planar: [Root.nch][*]Sample = undefined;
+
+		var n: u32 = 0; // planar channels allocated
+		errdefer for (0..n) |ch| {
+			gpa.free(planar[ch][0..ra.frames]);
+		};
 		inline for (0..Root.nch) |ch| {
-			const slice = try gpa.alloc(Sample, ra.frames);
-			planar[ch] = slice.ptr;
+			planar[ch] = (try gpa.alloc(Sample, ra.frames)).ptr;
+			n += 1;
 		}
 		self.* = .{
 			.base = base,
@@ -124,12 +129,12 @@ pub fn Impl(Root: type) type { return extern struct {
 	}
 
 	fn deinitC(self: *Self) callconv(.c) void {
-		self.base.deinit();
-		self.rabbit.deinit();
-		self.rubber.deinit();
 		inline for (0..Root.nch) |ch| {
 			gpa.free(self.planar[ch][0..ra.frames]);
 		}
+		self.rubber.deinit();
+		self.rabbit.deinit();
+		self.base.deinit();
 	}
 
 	fn classFreeC(_: *pd.Class) callconv(.c) void {

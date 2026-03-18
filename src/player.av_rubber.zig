@@ -184,9 +184,15 @@ pub fn Impl(Root: type) type { return extern struct {
 		errdefer rubber.deinit();
 
 		const pslice = try gpa.alloc([*]Sample, nch);
+		errdefer gpa.free(pslice);
+
+		var n: u32 = 0; // planar channels allocated
+		errdefer for (0..n) |ch| {
+			gpa.free(pslice[ch][0..ra.frames]);
+		};
 		for (0..nch) |ch| {
-			const slice = try gpa.alloc(Sample, ra.frames);
-			pslice[ch] = slice.ptr;
+			pslice[ch] = (try gpa.alloc(Sample, ra.frames)).ptr;
+			n += 1;
 		}
 		self.* = .{
 			.base = base,
@@ -203,7 +209,6 @@ pub fn Impl(Root: type) type { return extern struct {
 			gpa.free(self.planar[ch][0..ra.frames]);
 		}
 		gpa.free(self.planar[0..nch]);
-
 		self.rubber.deinit();
 		self.rabbit.deinit();
 		self.base.deinit();

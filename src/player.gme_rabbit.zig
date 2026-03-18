@@ -108,8 +108,8 @@ pub fn Impl(Root: type) type { return extern struct {
 	}
 
 	fn deinitC(self: *Self) callconv(.c) void {
-		self.base.deinit();
 		self.rabbit.deinit();
+		self.base.deinit();
 	}
 
 	fn classFreeC(_: *pd.Class) callconv(.c) void {
