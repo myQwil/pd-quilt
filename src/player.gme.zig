@@ -13,7 +13,7 @@ const Sample = pd.Sample;
 const Symbol = pd.Symbol;
 
 var s_mask: *Symbol = undefined;
-const io = std.Io.Threaded.global_single_threaded.ioBasic();
+const io = std.Io.Threaded.global_single_threaded.io();
 const gpa = pd.gpa;
 
 const GmeInit = fn(*const gm.Type, c_uint) anyerror!*gm.Emu;

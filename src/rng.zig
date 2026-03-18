@@ -4,7 +4,7 @@ const pd = @import("pd");
 const Float = pd.Float;
 
 var seed: u32 = undefined;
-const io = std.Io.Threaded.global_single_threaded.ioBasic();
+const io = std.Io.Threaded.global_single_threaded.io();
 
 pub const Rng = extern struct {
 	state: u32,

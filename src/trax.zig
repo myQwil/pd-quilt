@@ -8,7 +8,7 @@ const ArrayList = std.ArrayList(*Symbol);
 
 const trext = ".trax";
 const gpa = pd.gpa;
-const io = std.Io.Threaded.global_single_threaded.ioBasic();
+const io = std.Io.Threaded.global_single_threaded.io();
 
 inline fn isTrax(filename: []const u8) bool {
 	return std.mem.endsWith(u8, filename, trext);
