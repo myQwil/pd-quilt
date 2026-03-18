@@ -5,24 +5,24 @@
 	.minimum_zig_version = "0.16.0-dev.2736+3b515fbed",
 	.dependencies = .{
 		.pd = .{
-			.url = "git+https://github.com/myQwil/pd#525cf3c5e7e8e5c469404a61da7168b760744683",
-			.hash = "pd-0.56.2-DC007WtmAgDFeRrPLxjV7w7rgqyZMs8bI9C5jIBuEq1Z",
+			.url = "git+https://github.com/myQwil/pd#22b2a70019f042dd107047c16fbb50b83a8b1d4d",
+			.hash = "pd-0.56.2-DC007ShmAgBqGeG5kmTr3zqu-xI1nmsBGjtRW1cReXzy",
 		},
 		.gme = .{
-			.url = "git+https://github.com/myQwil/game-music-emu#8079e370d3db85348566d428df2b0f01bcd0d292",
-			.hash = "game_music_emu-0.6.4-YdNlAD0_EAB1q9zaEYaitlN06IGSRkleZze274_GTadV",
+			.url = "git+https://github.com/myQwil/game-music-emu#63ea2f3e9b85b3780042aaf173ae112380d82170",
+			.hash = "game_music_emu-0.6.4-YdNlANgwEAADfJ0jphUrEdGttvFOcKBDPrg-MN97XMIP",
 		},
 		.unrar = .{
-			.url = "git+https://github.com/myQwil/unrar#982411e5b06e07b70abd772ae9c0945dea2e5b55",
-			.hash = "unrar-7.2.3-zNpgmV8xAABKyGjync_Q11svESFcC8dmoq1mFjlqsQiv",
+			.url = "git+https://github.com/myQwil/unrar#ba0c48b8cbbdf8ee9bbc72f1f2899f77aafc20da",
+			.hash = "unrar-7.2.4-zNpgmUwxAAA_4Vr5UUL43qG8NNaK_qSozHbh_PH530H1",
 		},
 		.samplerate = .{
 			.url = "git+https://github.com/myQwil/libsamplerate#2b938917e0e55122980993a5526bc646770f3306",
 			.hash = "libsamplerate-0.2.3-f8m6bkQxAABWxAD_itM4ybmWa1B732yuGHNJaYHqGTvV",
 		},
 		.rubberband = .{
-			.url = "git+https://github.com/myQwil/rubberband#ae168ec185bd7d5a27635f7fe51e68819fc8f702",
-			.hash = "rubberband-4.0.0-RbnorAgVAQAM3glRQUIOfa_3caorW_MLaSiXMRgfCDoy",
+			.url = "git+https://github.com/myQwil/rubberband#ee586f5d5bf81f2a0c49e8658801e546f9165739",
+			.hash = "rubberband-4.0.0-RbnorAsVAQASZoLA2MJIboAm6VvNI8vA8viQCQzGDepj",
 		},
 		.ffmpeg = .{
 			.url = "git+https://github.com/myQwil/ffmpeg#51f24bd7e625e27edf86acb0f6ed5d022fec03c4",
