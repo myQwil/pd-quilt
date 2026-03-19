@@ -157,13 +157,13 @@
 #X connect 12 0 11 0;
 #X connect 13 0 9 0;
 #X restore 130 270 pd bounds;
-#N canvas 800 200 620 290 route 0;
+#N canvas 800 200 640 290 route 0;
 #X obj 30 30 inlet;
-#X obj 460 130 s \$1n;
+#X obj 450 130 s \$1n;
 #X obj 30 200 sel;
 #X obj 30 240 s \$1start;
 #X obj 80 130 s \$0play;
-#X msg 450 100 tracks \$1;
+#X msg 510 130 tracks \$1;
 #X obj 70 210 t f b;
 #X obj 130 240 s \$1msg;
 #X obj 30 160 pipe 10;
@@ -187,7 +187,7 @@
 #X connect 6 0 2 0;
 #X connect 7 0 8 0;
 #X connect 8 0 6 1;
-#X restore 450 160 pd fmt;
+#X restore 510 160 pd fmt;
 #X obj 100 100 s \$1done;
 #X obj 200 130 s \$1time;
 #X obj 220 100 s \$0pos;
@@ -195,7 +195,7 @@
 #X obj 310 160 s \$1pad;
 #X obj 370 100 s \$1bpm;
 #X obj 340 130 s \$1sync;
-#X obj 30 60 route open play done time pos delay sytc bpm tracks;
+#X obj 30 60 route open play done time pos delay sytc bpm append tracks;
 #X connect 0 0 18 0;
 #X connect 2 1 6 0;
 #X connect 5 0 10 0;
@@ -212,9 +212,10 @@
 #X connect 18 5 15 0;
 #X connect 18 6 17 0;
 #X connect 18 7 16 0;
-#X connect 18 8 5 0;
 #X connect 18 8 1 0;
-#X connect 18 9 10 0;
+#X connect 18 9 1 0;
+#X connect 18 9 5 0;
+#X connect 18 10 10 0;
 #X restore 30 260 pd route;
 #X symbolatom 150 110 10 0 0 0 - - - 0;
 #X symbolatom 140 140 11 0 0 0 - - - 0;

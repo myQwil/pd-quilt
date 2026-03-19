@@ -19,6 +19,7 @@ const gpa = pd.gpa;
 var s_pos: *Symbol = undefined;
 var s_bpm: *Symbol = undefined;
 var s_date: *Symbol = undefined;
+var s_append: *Symbol = undefined;
 pub var s_done: *Symbol = undefined;
 
 const Stream = extern struct {
@@ -145,7 +146,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 	}
 
 	pub fn loadTrack(self: *Av, idx: usize) !void {
-		if (idx >= self.playlist.len) {
+		if (idx >= self.trackCount()) {
 			return error.IndexOutOfBounds;
 		}
 		const format: *av.FormatContext = try .init(
@@ -276,6 +277,8 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		) callconv(.c) void {
 			const base: *Av = &self.base;
 			base.playlist.append(args[0..ac]) catch |e| err(self, e);
+			const count: Float = @floatFromInt(base.trackCount());
+			base.player.outlet.anything(s_append, &.{ .float(count) });
 		}
 
 		fn audioC(self: *Self, f: Float) callconv(.c) void {
@@ -323,6 +326,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			s_date = .gen("date");
 			s_done = .gen("done");
 			s_pos = .gen("pos");
+			s_append = .gen("append");
 
 			errdefer dict.deinit();
 			inline for ([_][:0]const u8{
@@ -351,7 +355,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			return .symbol(pr.timeSym(@divTrunc(self.format.duration, 1000)));
 		}
 		fn tracks(self: *const Av) Atom {
-			return .float(@floatFromInt(self.playlist.len));
+			return .float(@floatFromInt(self.trackCount()));
 		}
 		fn samplefmt(self: *const Av) Atom {
 			return .symbol(.gen(self.audio.ctx.sample_fmt.getName() orelse "unknown"));

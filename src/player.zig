@@ -83,6 +83,10 @@ pub fn timeSym(ms: i64) *Symbol {
 	return .gen(buf[0..w.end :0]);
 }
 
+inline fn isDigit(c: u8) bool {
+	return ('0' <= c and c <= '9');
+}
+
 fn alignBuffer(w: *Writer, buf: []const u8, fmt: []const u8) !void {
 	const fill = fmt[1];
 	const has_al = !isDigit(fmt[2]);
@@ -111,10 +115,6 @@ pub inline fn leavedToPlanar(
 		}
 	}
 	return l - leaved;
-}
-
-inline fn isDigit(c: u8) bool {
-	return ('0' <= c and c <= '9');
 }
 
 pub fn Impl(Self: type) type { return struct {
