@@ -130,11 +130,25 @@ fn traverseMeta(
 			break;
 		}
 
+		// key=value
+		if (trimmed[0] != '!') {
+			const eql = std.mem.findScalar(u8, trimmed, '=') orelse continue;
+			const kend = trimEnd(trimmed[0..eql], " \t");
+			buf[trim[1]] = 0;
+			buf[trim[0] + kend] = 0;
+			const key = buf[trim[0]..][0..kend :0];
+			const val = buf[trim[0] + eql + 1 .. trim[1] :0];
+			try meta.put(.gen(key), .gen(val));
+			continue;
+		}
+
+		const command = trimmed[1..];
+
 		// !include @path
-		const inc = "!include";
-		if (std.mem.startsWith(u8, trimmed, inc)) {
+		const inc = "include";
+		if (std.mem.startsWith(u8, command, inc)) {
 			const arg = blk: {
-				const arg = trimmed[inc.len..];
+				const arg = command[inc.len..];
 				break :blk arg[trimStart(arg, " \t")..];
 			};
 			if (arg.len == 0 or arg[0] != '@') {
@@ -146,15 +160,6 @@ fn traverseMeta(
 			try traverseMeta(meta, parents, resolved);
 			continue;
 		}
-
-		// key=value
-		const eql = std.mem.findScalar(u8, trimmed, '=') orelse continue;
-		const kend = trimEnd(trimmed[0..eql], " \t");
-		buf[trim[1]] = 0;
-		buf[trim[0] + kend] = 0;
-		const key = buf[trim[0]..][0..kend :0];
-		const val = buf[trim[0] + eql + 1 .. trim[1] :0];
-		try meta.put(.gen(key), .gen(val));
 	} else |e| if (e != error.EndOfStream) {
 		return e;
 	}

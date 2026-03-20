@@ -70,7 +70,7 @@
 #X text 20 310 channels=[apart \, together];
 #X text 20 340 engine=[finer \, faster];
 #X restore 90 90 pd creation-args;
-#N canvas 840 200 360 280 speed-&-tempo 0;
+#N canvas 820 200 360 280 speed-&-tempo 0;
 #X obj 30 140 *;
 #X obj 170 140 *;
 #X obj 210 140 r \$0st;
@@ -102,7 +102,7 @@
 #X connect 2 0 5 0;
 #X connect 3 0 4 0;
 #X restore 70 200 pd scale;
-#N canvas 760 200 360 320 swing 0;
+#N canvas 1180 200 360 320 swing 0;
 #X obj 220 220 #/;
 #X floatatom 30 150 5 0 0 3 rate - - 0;
 #X floatatom 90 150 5 0 0 3 depth - - 0;
