@@ -250,6 +250,13 @@ const Radix = extern struct {
 		glist.fixLinesFor(obj);
 	}
 
+	fn write(self: *Radix) void {
+		self.rad.write() catch |e| {
+			self.err(e);
+			@memcpy(self.rad.buf[0..4], "err\x00");
+		};
+	}
+
 	fn visC(self: *Radix, glist: *GList, visible: c_int) callconv(.c) void {
 		const obj: *Object = &self.obj;
 		if (!obj.g.shouldVis(glist)) {
@@ -270,6 +277,9 @@ const Radix = extern struct {
 			pd.vMess(null, "crs", .{ canvas, "delete", &self.tag });
 			return;
 		}
+
+		// update the buffer
+		self.write();
 
 		// draw the border
 		const rect = self.getRect(glist);
@@ -330,10 +340,7 @@ const Radix = extern struct {
 	}
 
 	fn redrawC(self: *Radix, glist: *GList) callconv(.c) void {
-		self.rad.write() catch |e| {
-			self.err(e);
-			@memcpy(self.rad.buf[0..4], "err\x00");
-		};
+		self.write();
 		self.tag_type.* = .text;
 		pd.vMess("pdtk_text_set", "cs s", .{
 			glist, &self.tag,
@@ -553,7 +560,6 @@ const Radix = extern struct {
 		self.rad.reset();
 		const width: u16 = @intFromFloat(av[6].getFloat() orelse 0);
 		self.rad.width = @min(width, 1000);
-		try self.rad.write();
 
 		self.step = .{
 			av[2].getFloat() orelse self.step[0],

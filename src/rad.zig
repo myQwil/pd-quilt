@@ -203,6 +203,7 @@ pub const Rad = extern struct {
 
 	pub fn reset(self: *Rad) void {
 		const rad: Rad = .init(self.base, self.prec);
+		// don't reset everything
 		self.base = rad.base;
 		self.prec = rad.prec;
 		self.dps = rad.dps;

@@ -1,0 +1,6 @@
+#N canvas 760 200 360 140 16;
+#X obj 120 30 loadbang;
+#X obj 120 90 radix 10 6 0 3 _ _ 0 0 _ _ _ 0;
+#X msg 120 60 123456 \, prec 4;
+#X connect 0 0 2 0;
+#X connect 2 0 1 0;
