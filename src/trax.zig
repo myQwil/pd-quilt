@@ -52,8 +52,7 @@ fn resolveZ(paths: []const []const u8) ![:0]u8 {
 inline fn getResolved(base_dir: []const u8, path: []const u8) ![:0]u8 {
 	return if (std.fs.path.isAbsolute(path))
 		try resolveZ(&.{ path })
-	else
-		try resolveZ(&.{ base_dir, path });
+	else try resolveZ(&.{ base_dir, path });
 }
 
 fn traverseList(
@@ -231,13 +230,13 @@ pub const Playlist = extern struct {
 			.len = list.items.len,
 			.cap = list.capacity,
 		};
-		var parents: StringHashMap = .init(gpa);
-		defer parents.deinit();
 
 		for (av) |arg| {
 			const sym = arg.getSymbol() orelse return error.NotASymbol;
 			const name = std.mem.sliceTo(sym.name, 0);
 			if (isTrax(name)) {
+				var parents: StringHashMap = .init(gpa);
+				defer parents.deinit();
 				try traverseList(&list, &parents, name);
 			} else {
 				try list.append(gpa, sym);
