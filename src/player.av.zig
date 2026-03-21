@@ -281,6 +281,15 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			base.player.outlet.anything(s_append, &.{ .float(count) });
 		}
 
+		fn dumpC(self: *Self) callconv(.c) void {
+			const base: *Av = &self.base;
+			const dct = &base.format.metadata;
+			var prev: ?*const av.Dictionary.Entry = null;
+			while (dct.iterate(prev)) |entry| : (prev = entry) {
+				pd.post.do("%s: %s", .{ entry.key, entry.value });
+			}
+		}
+
 		fn audioC(self: *Self, f: Float) callconv(.c) void {
 			audio(self, f) catch |e| err(self, e);
 		}
@@ -338,6 +347,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 			const class: *pd.Class = Self.class;
 			class.addMethod(@ptrCast(&posC), s_pos, &.{});
+			class.addMethod(@ptrCast(&dumpC), .gen("dump"), &.{});
 			class.addMethod(@ptrCast(&audioC), .gen("audio"), &.{ .float });
 			class.addMethod(@ptrCast(&subtitleC), .gen("subtitle"), &.{ .float });
 			class.addMethod(@ptrCast(&appendC), .gen("append"), &.{ .gimme });
