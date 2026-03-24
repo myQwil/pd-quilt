@@ -78,15 +78,13 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		dict.deinit();
 	}
 
-	pub inline fn init(obj: *pd.Object, args: []const Atom) !Av {
+	pub inline fn init(obj: *pd.Object, arg: Atom) !Av {
 		const stereo =
 			(1 << @intFromEnum(av.Channel.front_left)) |
 			(1 << @intFromEnum(av.Channel.front_right));
-		const layout: av.ChannelLayout = try .fromMask(for (args) |a| {
-			if (a.type == .float) {
-				break @intFromFloat(a.w.float);
-			}
-		} else stereo);
+		const layout: av.ChannelLayout = try .fromMask(if (arg.getSymbol()) |s|
+			std.fmt.parseInt(u64, std.mem.sliceTo(s.name, 0), 0) catch stereo
+		else @as(u64, @intFromFloat(arg.w.float)));
 
 		const nch: u8 = @intCast(layout.nb_channels);
 		for (0..nch) |_| {
