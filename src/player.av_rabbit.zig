@@ -155,7 +155,8 @@ pub fn Impl(Root: type) type { return extern struct {
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
-		var base: Base = try .init(obj, args[0]);
+		const arg: Atom = if (args.len > 0) args[0] else .float(av.stereo);
+		var base: Base = try .init(obj, arg);
 		errdefer base.deinit();
 
 		const rabbit: ra.Rabbit = try .init(obj, base.nch);

@@ -173,14 +173,15 @@ pub fn Impl(Root: type) type { return extern struct {
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
-		var base: Base = try .init(obj, args[0]);
+		const arg: Atom = if (args.len > 0) args[0] else .float(av.stereo);
+		var base: Base = try .init(obj, arg);
 		errdefer base.deinit();
 
 		const nch = base.nch;
 		var rabbit: ra.Rabbit = try .init(obj, nch);
 		errdefer rabbit.deinit();
 
-		var rubber: ru.Rubber = try .init(obj, nch, args[1..]);
+		var rubber: ru.Rubber = try .init(obj, nch, if (args.len > 1) args[1..] else &.{});
 		errdefer rubber.deinit();
 
 		const pslice = try gpa.alloc([*]Sample, nch);
