@@ -37,22 +37,22 @@ fn trimRange(line: []const u8, offset: usize) [2]usize {
 	return .{ offset + tstart, offset + tend };
 }
 
-fn resolveZ(paths: []const []const u8) ![:0]u8 {
-	var res = try std.fs.path.resolve(gpa, paths);
-	errdefer gpa.free(res);
-	if (gpa.resize(res, res.len + 1)) {
+fn resolveZ(allocator: std.mem.Allocator, paths: []const []const u8) ![:0]u8 {
+	var res = try std.fs.path.resolve(allocator, paths);
+	errdefer allocator.free(res);
+	if (allocator.resize(res, res.len + 1)) {
 		res.len += 1;
 	} else {
-		res = try gpa.realloc(res, res.len + 1);
+		res = try allocator.realloc(res, res.len + 1);
 	}
 	res[res.len - 1] = 0;
 	return res[0 .. res.len - 1 :0];
 }
 
-inline fn getResolved(base_dir: []const u8, path: []const u8) ![:0]u8 {
-	return if (std.fs.path.isAbsolute(path))
-		try resolveZ(&.{ path })
-	else try resolveZ(&.{ base_dir, path });
+test resolveZ {
+	const actual = try resolveZ(std.testing.allocator, &.{"/a/b/c", "/d/e/f"});
+	defer std.testing.allocator.free(actual);
+	try std.testing.expectEqualStrings("/d/e/f", actual);
 }
 
 fn traverseList(
@@ -85,7 +85,7 @@ fn traverseList(
 			continue;
 		}
 
-		const resolved = try getResolved(base_dir, trimmed[1..]);
+		const resolved = try resolveZ(gpa, &.{ base_dir, trimmed[1..] });
 		defer gpa.free(resolved);
 		if (isTrax(resolved)) {
 			try traverseList(list, parents, resolved);
@@ -155,7 +155,7 @@ fn traverseMeta(
 				err(meta.count(), error.IncludeSyntaxError, file_path.ptr);
 				continue;
 			}
-			const resolved = try getResolved(base_dir, arg[1..]);
+			const resolved = try resolveZ(gpa, &.{ base_dir, arg[1..] });
 			defer gpa.free(resolved);
 			try traverseMeta(meta, parents, resolved);
 			continue;
