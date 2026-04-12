@@ -173,8 +173,7 @@ pub fn Impl(Root: type) type { return extern struct {
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
-		const arg: Atom = if (args.len > 0) args[0] else .float(av.stereo);
-		var base: Base = try .init(obj, arg);
+		var base: Base = try .init(obj, if (args.len > 0) args[0] else .float(av.stereo));
 		errdefer base.deinit();
 
 		const nch = base.nch;
@@ -189,7 +188,7 @@ pub fn Impl(Root: type) type { return extern struct {
 
 		var n: u32 = 0; // planar channels allocated
 		errdefer for (0..n) |ch| {
-			gpa.free(pslice[ch][0..ra.frames]);
+			gpa.free(@as([]Sample, pslice[ch][0..ra.frames]));
 		};
 		for (0..nch) |ch| {
 			pslice[ch] = (try gpa.alloc(Sample, ra.frames)).ptr;
@@ -207,7 +206,7 @@ pub fn Impl(Root: type) type { return extern struct {
 	fn deinitC(self: *Self) callconv(.c) void {
 		const nch = self.base.nch;
 		for (0..nch) |ch| {
-			gpa.free(self.planar[ch][0..ra.frames]);
+			gpa.free(@as([]Sample, self.planar[ch][0..ra.frames]));
 		}
 		gpa.free(self.planar[0..nch]);
 		self.rubber.deinit();

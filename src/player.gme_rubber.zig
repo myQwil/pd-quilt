@@ -113,7 +113,7 @@ pub fn Impl(Root: type) type { return extern struct {
 
 		var n: u32 = 0; // planar channels allocated
 		errdefer for (0..n) |ch| {
-			gpa.free(planar[ch][0..ra.frames]);
+			gpa.free(@as([]Sample, planar[ch][0..ra.frames]));
 		};
 		inline for (0..Root.nch) |ch| {
 			planar[ch] = (try gpa.alloc(Sample, ra.frames)).ptr;
@@ -130,7 +130,7 @@ pub fn Impl(Root: type) type { return extern struct {
 
 	fn deinitC(self: *Self) callconv(.c) void {
 		inline for (0..Root.nch) |ch| {
-			gpa.free(self.planar[ch][0..ra.frames]);
+			gpa.free(@as([]Sample, self.planar[ch][0..ra.frames]));
 		}
 		self.rubber.deinit();
 		self.rabbit.deinit();
