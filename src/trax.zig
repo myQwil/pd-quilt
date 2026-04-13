@@ -3,8 +3,66 @@ const pd = @import("pd");
 
 const Symbol = pd.Symbol;
 const StringHashMap = std.StringHashMap(void);
-const MetaHashMap = std.AutoArrayHashMap(*Symbol, *Symbol);
 const ArrayList = std.ArrayList(*Symbol);
+
+const LangDict = struct {
+	dict: Dict,
+	default: *Symbol,
+
+	const Dict = std.AutoArrayHashMap(*Symbol, *Symbol);
+
+	fn init(lang: *Symbol, value: *Symbol) !LangDict {
+		var dict: Dict = .init(gpa);
+		try dict.put(lang, value);
+		return .{ .dict = dict, .default = lang };
+	}
+
+	fn add(self: *LangDict, lang: *Symbol, value: *Symbol) !void {
+		try self.dict.put(lang, value);
+		if (lang == &pd.s_) {
+			self.default = &pd.s_;
+		}
+	}
+
+	pub fn get(self: *const LangDict, pref_langs: []*Symbol) *Symbol {
+		for (pref_langs) |s| {
+			// exact match
+			if (self.dict.get(s)) |value| {
+				return value;
+			}
+			// prefix match (fuzzy)
+			const pref = std.mem.sliceTo(s.name, 0);
+			var iter = self.dict.iterator();
+			while (iter.next()) |kv| {
+				const lang = std.mem.sliceTo(kv.key_ptr.*.name, 0);
+				if (std.mem.startsWith(u8, lang, pref)) {
+					return kv.value_ptr.*;
+				}
+			}
+		}
+		return self.dict.get(self.default).?;
+	}
+};
+
+const MetaHashMap = struct {
+	map: std.AutoArrayHashMap(*Symbol, LangDict),
+
+	pub fn deinit(self: *MetaHashMap) void {
+		var iter = self.map.iterator();
+		while (iter.next()) |kv| {
+			kv.value_ptr.dict.deinit();
+		}
+		self.map.deinit();
+	}
+
+	fn add(self: *MetaHashMap, key: *Symbol, lang: *Symbol, value: *Symbol) !void {
+		if (self.map.getPtr(key)) |ld| {
+			try ld.add(lang, value);
+		} else {
+			try self.map.put(key, try .init(lang, value));
+		}
+	}
+};
 
 const trext = ".trax";
 const gpa = pd.gpa;
@@ -111,13 +169,13 @@ fn traverseMeta(
 	file_path: [:0]const u8,
 ) !void {
 	if (parents.contains(file_path)) {
-		return err(meta.count(), error.InfiniteRecursion, file_path.ptr);
+		return err(meta.map.count(), error.InfiniteRecursion, file_path.ptr);
 	}
 	try parents.put(file_path, {});
 	defer _ = parents.remove(file_path);
 
 	const file = std.Io.Dir.cwd().openFile(io, file_path, .{ .mode = .read_only })
-		catch |e| return err(meta.count(), e, file_path.ptr);
+		catch |e| return err(meta.map.count(), e, file_path.ptr);
 	defer file.close(io);
 
 	var buf: [std.fs.max_path_bytes:0]u8 = undefined;
@@ -138,15 +196,24 @@ fn traverseMeta(
 			break;
 		}
 
-		// key=value
+		// key[lang]=value
 		if (trimmed[0] != '!') {
 			const eql = find(trimmed, '=') orelse continue;
-			const kend = trimEnd(trimmed[0..eql], " \t");
+			const end = trimEnd(trimmed[0..eql], " \t");
+			var lang: [:0]const u8 = "";
+			const kend = if (find(trimmed[0..end], '[')) |brac| blk: {
+				const lbeg = brac + 1;
+				const lend = if (find(trimmed[lbeg..end], ']')) |b| lbeg + b else end;
+				trimmed[lend] = 0;
+				lang = trimmed[lbeg..lend :0];
+				break :blk brac;
+			} else end;
+			trimmed[kend] = 0;
+			const key = trimmed[0..kend :0];
+
 			buf[trim[1]] = 0;
-			buf[trim[0] + kend] = 0;
-			const key = buf[trim[0]..][0..kend :0];
-			const val = buf[trim[0] + eql + 1 .. trim[1] :0];
-			try meta.put(.gen(key), .gen(val));
+			const val: [:0]const u8 = buf[trim[0] + eql + 1 .. trim[1] :0];
+			try meta.add(.gen(key), .gen(lang), .gen(val));
 			continue;
 		}
 
@@ -160,7 +227,7 @@ fn traverseMeta(
 				break :blk arg[trimStart(arg, " \t")..];
 			};
 			if (arg.len == 0 or arg[0] != '@') {
-				err(meta.count(), error.IncludeSyntaxError, file_path.ptr);
+				err(meta.map.count(), error.IncludeSyntaxError, file_path.ptr);
 				continue;
 			}
 			const resolved = try resolveZ(gpa, &.{ base_dir, arg[1..] });
@@ -211,7 +278,7 @@ inline fn getSidecar(path: []const u8) !?[:0]const u8 {
 pub fn metadata(path: [*:0]const u8) !?MetaHashMap {
 	const sidecar = try getSidecar(std.mem.sliceTo(path, 0)) orelse return null;
 	defer gpa.free(sidecar);
-	var meta: MetaHashMap = .init(gpa);
+	var meta: MetaHashMap = .{ .map = .init(gpa) };
 	errdefer meta.deinit();
 	var parents: StringHashMap = .init(gpa);
 	defer parents.deinit();
@@ -264,5 +331,29 @@ pub const Playlist = extern struct {
 		// on success, replace old list with new one
 		self.deinit();
 		self.* = playlist;
+	}
+};
+
+pub const Langs = extern struct {
+	/// list of preferred language codes
+	ptr: [*]*Symbol = &.{},
+	/// length of the list
+	len: usize = 0,
+
+	pub fn deinit(self: *Langs) void {
+		gpa.free(self.ptr[0..self.len]);
+	}
+
+	pub fn set(self: *Langs, args: []const pd.Atom) !void {
+		var arr: ArrayList = .empty;
+		errdefer arr.deinit(gpa);
+		for (args) |arg| {
+			if (arg.type == .symbol) {
+				try arr.append(gpa, arg.w.symbol);
+			}
+		}
+		const slice = try arr.toOwnedSlice(gpa);
+		self.ptr = slice.ptr;
+		self.len = slice.len;
 	}
 };

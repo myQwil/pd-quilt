@@ -9,7 +9,7 @@
 
 # Whitespace surrounding the key is ignored,
 # but any whitespace after the equal sign is part of the value.
-artist  =foobar
+artist         =foobar
 
 # Track listing
 

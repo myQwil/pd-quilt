@@ -71,6 +71,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 	frame: *av.Frame,
 	format: *av.FormatContext = undefined,
 	swr: *av.SwrContext = undefined,
+	langs: tx.Langs = .{},
 	/// ratio between file samplerate and pd samplerate
 	ratio: f64 = 1,
 	nch: u8,
@@ -125,6 +126,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		gpa.free(self.obuf[0 .. self.nch * frames]);
 		gpa.free(self.outs[0 .. self.nch]);
 		self.playlist.deinit();
+		self.langs.deinit();
 		self.packet.deinit();
 		self.frame.deinit();
 		if (self.player.open) {
@@ -185,9 +187,11 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		const dct = &self.format.metadata;
 		var hm = try tx.metadata(self.playlist.ptr[idx].name) orelse return;
 		defer hm.deinit();
-		var it = hm.iterator();
+
+		const langs: []*Symbol = self.langs.ptr[0..self.langs.len];
+		var it = hm.map.iterator();
 		while (it.next()) |kv| {
-			dct.set(kv.key_ptr.*.name, kv.value_ptr.*.name, .{})
+			dct.set(kv.key_ptr.*.name, kv.value_ptr.get(langs).name, .{})
 				catch |e| pd.post.err(null, "dct.set: %s", .{ @errorName(e).ptr });
 		}
 	}
@@ -290,6 +294,14 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			}
 		}
 
+		fn langsC(
+			self: *Self,
+			_: *Symbol, ac: c_uint, args: [*]const pd.Atom,
+		) callconv(.c) void {
+			const base: *Av = &self.base;
+			base.langs.set(args[0..ac]) catch |e| err(self, e);
+		}
+
 		fn audioC(self: *Self, f: Float) callconv(.c) void {
 			audio(self, f) catch |e| err(self, e);
 		}
@@ -351,6 +363,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			class.addMethod(@ptrCast(&audioC), .gen("audio"), &.{ .float });
 			class.addMethod(@ptrCast(&subtitleC), .gen("subtitle"), &.{ .float });
 			class.addMethod(@ptrCast(&appendC), .gen("append"), &.{ .gimme });
+			class.addMethod(@ptrCast(&langsC), .gen("langs"), &.{ .gimme });
 		}
 	};}
 

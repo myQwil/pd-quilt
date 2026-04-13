@@ -11,6 +11,7 @@ const PList = extern struct {
 	out_val: *pd.Outlet,
 	out_idx: *pd.Outlet,
 	plist: tx.Playlist = .{},
+	langs: tx.Langs = .{},
 
 	const name = "plist";
 	var class: *pd.Class = undefined;
@@ -58,9 +59,9 @@ const PList = extern struct {
 			catch |e| return self.err(e)) orelse return;
 		defer hm.deinit();
 
-		if (hm.get(s)) |val| {
+		if (hm.map.get(s)) |ldict| {
 			self.out_idx.float(@floatFromInt(i));
-			self.out_val.symbol(val);
+			self.out_val.symbol(ldict.get(self.langs.ptr[0..self.langs.len]));
 		}
 	}
 
@@ -74,10 +75,18 @@ const PList = extern struct {
 			catch |e| return self.err(e)) orelse return;
 		defer hm.deinit();
 
-		var iter = hm.iterator();
+		const langs: []*Symbol = self.langs.ptr[0..self.langs.len];
+		var iter = hm.map.iterator();
 		while (iter.next()) |kv| {
-			pd.post.do("%s: %s", .{ kv.key_ptr.*.name, kv.value_ptr.*.name });
+			pd.post.do("%s: %s", .{ kv.key_ptr.*.name, kv.value_ptr.*.get(langs).name });
 		}
+	}
+
+	fn langsC(
+		self: *PList,
+		_: *Symbol, ac: c_uint, args: [*]const pd.Atom,
+	) callconv(.c) void {
+		self.langs.set(args[0..ac]) catch |e| self.err(e);
 	}
 
 	fn initC() callconv(.c) ?*PList {
@@ -97,6 +106,7 @@ const PList = extern struct {
 
 	fn deinitC(self: *PList) callconv(.c) void {
 		self.plist.deinit();
+		self.langs.deinit();
 	}
 
 	inline fn setup() !void {
@@ -105,6 +115,7 @@ const PList = extern struct {
 		class.addFloat(@ptrCast(&floatC));
 		class.addMethod(@ptrCast(&printC), .gen("print"), &.{ .float });
 		class.addMethod(@ptrCast(&appendC), .gen("append"), &.{ .gimme });
+		class.addMethod(@ptrCast(&langsC), .gen("langs"), &.{ .gimme });
 		class.addMethod(@ptrCast(&readC), .gen("read"), &.{ .gimme });
 		class.addMethod(@ptrCast(&getC), .gen("get"), &.{ .float, .symbol });
 	}

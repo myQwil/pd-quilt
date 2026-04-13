@@ -22,10 +22,12 @@
 #X connect 2 0 0 0;
 #X connect 3 0 0 0;
 #X connect 4 0 0 0;
-#X restore 140 210 pd specs;
+#X restore 140 190 pd specs;
 #X obj 40 340 s \$1msg;
-#X msg 140 170 dump;
-#X text 190 170 print all metadata;
+#X msg 140 160 dump;
+#X text 190 160 print all metadata;
+#X text 270 220 language preferences;
+#X msg 150 220 langs en ja;
 #X connect 0 0 13 0;
 #X connect 4 0 13 0;
 #X connect 6 0 13 0;
@@ -35,6 +37,7 @@
 #X connect 11 0 13 0;
 #X connect 12 0 13 0;
 #X connect 14 0 13 0;
+#X connect 17 0 13 0;
 #X restore 100 60 pd metadata;
 #N canvas 760 200 360 190 seeking 0;
 #X obj 100 80 f;
