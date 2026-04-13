@@ -10,6 +10,14 @@ const trext = ".trax";
 const gpa = pd.gpa;
 const io = std.Io.Threaded.global_single_threaded.io();
 
+inline fn find(slice: []const u8, value: u8) ?usize {
+	return std.mem.findScalar(u8, slice, value);
+}
+
+inline fn findLast(slice: []const u8, value: u8) ?usize {
+	return std.mem.findScalarLast(u8, slice, value);
+}
+
 inline fn isTrax(filename: []const u8) bool {
 	return std.mem.endsWith(u8, filename, trext);
 }
@@ -21,13 +29,13 @@ inline fn err(len: usize, e: anyerror, s: [*:0]const u8) void {
 
 fn trimStart(s: []const u8, exclude: []const u8) usize {
 	var a: usize = 0;
-	while (a < s.len and std.mem.findScalar(u8, exclude, s[a]) != null) : (a += 1) {}
+	while (a < s.len and find(exclude, s[a]) != null) : (a += 1) {}
 	return a;
 }
 
 fn trimEnd(s: []const u8, exclude: []const u8) usize {
 	var z: usize = s.len;
-	while (z > 0 and std.mem.findScalar(u8, exclude, s[z - 1]) != null) : (z -= 1) {}
+	while (z > 0 and find(exclude, s[z - 1]) != null) : (z -= 1) {}
 	return z;
 }
 
@@ -132,7 +140,7 @@ fn traverseMeta(
 
 		// key=value
 		if (trimmed[0] != '!') {
-			const eql = std.mem.findScalar(u8, trimmed, '=') orelse continue;
+			const eql = find(trimmed, '=') orelse continue;
 			const kend = trimEnd(trimmed[0..eql], " \t");
 			buf[trim[1]] = 0;
 			buf[trim[0] + kend] = 0;
@@ -167,7 +175,7 @@ fn traverseMeta(
 
 inline fn getSidecar(path: []const u8) !?[:0]const u8 {
 	const txdir = trext ++ "/";
-	const dot = std.mem.findScalarLast(u8, path, '.') orelse path.len;
+	const dot = findLast(path, '.') orelse path.len;
 	var trx_path = try gpa.alloc(u8, dot + txdir.len + trext.len + 1);
 
 	// first try `dir/.trax/file.trax`, then `dir/file.trax`
