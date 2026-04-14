@@ -71,7 +71,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 	frame: *av.Frame,
 	format: *av.FormatContext = undefined,
 	swr: *av.SwrContext = undefined,
-	langs: tx.Langs = .{},
+	langs: tx.LangSet = .{},
 	/// ratio between file samplerate and pd samplerate
 	ratio: f64 = 1,
 	nch: u8,
@@ -299,7 +299,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			_: *Symbol, ac: c_uint, args: [*]const pd.Atom,
 		) callconv(.c) void {
 			const base: *Av = &self.base;
-			base.langs.set(args[0..ac]) catch |e| err(self, e);
+			base.langs.replaceWith(args[0..ac]) catch |e| err(self, e);
 		}
 
 		fn audioC(self: *Self, f: Float) callconv(.c) void {

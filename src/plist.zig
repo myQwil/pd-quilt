@@ -11,7 +11,7 @@ const PList = extern struct {
 	out_val: *pd.Outlet,
 	out_idx: *pd.Outlet,
 	plist: tx.Playlist = .{},
-	langs: tx.Langs = .{},
+	langs: tx.LangSet = .{},
 
 	const name = "plist";
 	var class: *pd.Class = undefined;
@@ -86,7 +86,7 @@ const PList = extern struct {
 		self: *PList,
 		_: *Symbol, ac: c_uint, args: [*]const pd.Atom,
 	) callconv(.c) void {
-		self.langs.set(args[0..ac]) catch |e| self.err(e);
+		self.langs.replaceWith(args[0..ac]) catch |e| self.err(e);
 	}
 
 	fn initC() callconv(.c) ?*PList {

@@ -334,22 +334,28 @@ pub const Playlist = extern struct {
 	}
 };
 
-pub const Langs = extern struct {
+pub const LangSet = extern struct {
 	/// list of preferred language codes
 	ptr: [*]*Symbol = &.{},
 	/// length of the list
 	len: usize = 0,
 
-	pub fn deinit(self: *Langs) void {
+	pub fn deinit(self: *LangSet) void {
 		gpa.free(self.ptr[0..self.len]);
 	}
 
-	pub fn set(self: *Langs, args: []const pd.Atom) !void {
+	pub fn replaceWith(self: *LangSet, args: []const pd.Atom) !void {
 		var arr: ArrayList = .empty;
 		errdefer arr.deinit(gpa);
+		var set: std.AutoHashMap(*Symbol, void) = .init(gpa);
+		defer set.deinit();
+
 		for (args) |arg| {
-			if (arg.type == .symbol) {
-				try arr.append(gpa, arg.w.symbol);
+			if (arg.getSymbol()) |s| {
+				if (set.get(s) == null) {
+					try arr.append(gpa, s);
+					try set.put(s, {});
+				}
 			}
 		}
 		const slice = try arr.toOwnedSlice(gpa);
