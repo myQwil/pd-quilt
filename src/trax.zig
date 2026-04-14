@@ -5,6 +5,10 @@ const Symbol = pd.Symbol;
 const StringHashMap = std.StringHashMap(void);
 const ArrayList = std.ArrayList(*Symbol);
 
+const trext = ".trax";
+const gpa = pd.gpa;
+const io = std.Io.Threaded.global_single_threaded.io();
+
 const LangDict = struct {
 	dict: Dict,
 	default: *Symbol,
@@ -63,10 +67,6 @@ const MetaHashMap = struct {
 		}
 	}
 };
-
-const trext = ".trax";
-const gpa = pd.gpa;
-const io = std.Io.Threaded.global_single_threaded.io();
 
 inline fn find(slice: []const u8, value: u8) ?usize {
 	return std.mem.findScalar(u8, slice, value);
@@ -353,6 +353,8 @@ pub const Langs = extern struct {
 			}
 		}
 		const slice = try arr.toOwnedSlice(gpa);
+		// on success, replace old list with new one
+		self.deinit();
 		self.ptr = slice.ptr;
 		self.len = slice.len;
 	}
