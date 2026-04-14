@@ -216,6 +216,7 @@ pub fn Impl(Root: type) type { return extern struct {
 
 	fn classFreeC(_: *pd.Class) callconv(.c) void {
 		Base.freeDict();
+		ru.freeDict();
 	}
 
 	pub inline fn setup() !void {
