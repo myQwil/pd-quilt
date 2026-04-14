@@ -132,7 +132,7 @@
 #X floatatom 250 190 0 0 0 0 - - - 0;
 #X obj 80 160 @- 100;
 #X obj 250 160 @/ 1;
-#X text 30 20 A binop that starts with '@' indicates that its operands are in reverse order. Only some binops have this variant., f 34;
+#X text 30 20 Non-commutative binops have a variant starting with '@' to indicate that its operands are in reverse order., f 34;
 #X connect 1 0 6 0;
 #X connect 2 0 6 1;
 #X connect 3 0 7 0;
