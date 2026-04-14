@@ -2,15 +2,15 @@
 	.name = .quilt,
 	.version = "0.9.0",
 	.fingerprint = 0x87570fed07d14de5,
-	.minimum_zig_version = "0.16.0-dev.2736+3b515fbed",
+	.minimum_zig_version = "0.16.0-dev.3133+5ec8e45f3",
 	.dependencies = .{
 		.pd = .{
 			.url = "git+https://github.com/myQwil/pd#22b2a70019f042dd107047c16fbb50b83a8b1d4d",
 			.hash = "pd-0.56.2-DC007ShmAgBqGeG5kmTr3zqu-xI1nmsBGjtRW1cReXzy",
 		},
 		.gme = .{
-			.url = "git+https://github.com/myQwil/game-music-emu#63ea2f3e9b85b3780042aaf173ae112380d82170",
-			.hash = "game_music_emu-0.6.4-YdNlANgwEAADfJ0jphUrEdGttvFOcKBDPrg-MN97XMIP",
+			.url = "git+https://github.com/myQwil/game-music-emu#7b6c9c141c5ed75def34cf21eae1cad059994e8a",
+			.hash = "game_music_emu-0.6.4-YdNlABBYEABCZssgDQXTAyKXu88jbJUZUjQLnT-HTkVd",
 		},
 		.unrar = .{
 			.url = "git+https://github.com/myQwil/unrar#ba0c48b8cbbdf8ee9bbc72f1f2899f77aafc20da",
