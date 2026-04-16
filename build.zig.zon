@@ -2,7 +2,7 @@
 	.name = .quilt,
 	.version = "0.9.0",
 	.fingerprint = 0x87570fed07d14de5,
-	.minimum_zig_version = "0.16.0-dev.3133+5ec8e45f3",
+	.minimum_zig_version = "0.16.0",
 	.dependencies = .{
 		.pd = .{
 			.url = "git+https://github.com/myQwil/pd#565a77ce6c6f309395c07e6b65bb4a7696dabeef",
