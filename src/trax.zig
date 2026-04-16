@@ -13,16 +13,16 @@ const LangDict = struct {
 	dict: Dict,
 	default: *Symbol,
 
-	const Dict = std.AutoArrayHashMap(*Symbol, *Symbol);
+	const Dict = std.array_hash_map.Auto(*Symbol, *Symbol);
 
 	fn init(lang: *Symbol, value: *Symbol) !LangDict {
-		var dict: Dict = .init(gpa);
-		try dict.put(lang, value);
+		var dict: Dict = .empty;
+		try dict.put(gpa, lang, value);
 		return .{ .dict = dict, .default = lang };
 	}
 
 	fn add(self: *LangDict, lang: *Symbol, value: *Symbol) !void {
-		try self.dict.put(lang, value);
+		try self.dict.put(gpa, lang, value);
 		if (lang == pd.s.empty()) {
 			self.default = pd.s.empty();
 		}
@@ -49,21 +49,21 @@ const LangDict = struct {
 };
 
 const MetaHashMap = struct {
-	map: std.AutoArrayHashMap(*Symbol, LangDict),
+	map: std.array_hash_map.Auto(*Symbol, LangDict) = .empty,
 
 	pub fn deinit(self: *MetaHashMap) void {
 		var iter = self.map.iterator();
 		while (iter.next()) |kv| {
-			kv.value_ptr.dict.deinit();
+			kv.value_ptr.dict.deinit(gpa);
 		}
-		self.map.deinit();
+		self.map.deinit(gpa);
 	}
 
 	fn add(self: *MetaHashMap, key: *Symbol, lang: *Symbol, value: *Symbol) !void {
 		if (self.map.getPtr(key)) |ld| {
 			try ld.add(lang, value);
 		} else {
-			try self.map.put(key, try .init(lang, value));
+			try self.map.put(gpa, key, try .init(lang, value));
 		}
 	}
 };
@@ -278,7 +278,7 @@ inline fn getSidecar(path: []const u8) !?[:0]const u8 {
 pub fn metadata(path: [*:0]const u8) !?MetaHashMap {
 	const sidecar = try getSidecar(std.mem.sliceTo(path, 0)) orelse return null;
 	defer gpa.free(sidecar);
-	var meta: MetaHashMap = .{ .map = .init(gpa) };
+	var meta: MetaHashMap = .{};
 	errdefer meta.deinit();
 	var parents: StringHashMap = .init(gpa);
 	defer parents.deinit();
