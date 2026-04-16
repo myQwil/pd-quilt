@@ -109,10 +109,10 @@ const Chrono = extern struct {
 		errdefer obj.g.pd.deinit();
 
 		const settime = pd.time();
-		_ = try obj.inlet(&obj.g.pd, &pd.s_bang, .gen("bang2"));
+		_ = try obj.inlet(&obj.g.pd, pd.s.bang(), .gen("bang2"));
 		self.* = .{
-			.out_total = try .init(obj, &pd.s_float),
-			.out_lap = try .init(obj, &pd.s_float),
+			.out_total = try .init(obj, pd.s.float()),
+			.out_lap = try .init(obj, pd.s.float()),
 			.timer = try .init(obj, av),
 			.settime = settime,
 			.laptime = settime,

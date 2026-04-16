@@ -27,7 +27,7 @@ const atom_rmargin = margin.left + margin.right - 2;
 const atom_bmargin = margin.top + margin.bottom - 1;
 
 fn escape(s: *Symbol) !*Symbol {
-	return if (s == &pd.s_) .gen("_") else if (s.name[0] != '_') s else blk: {
+	return if (s == pd.s.empty()) .gen("_") else if (s.name[0] != '_') s else blk: {
 		var shmo: [100]u8 = undefined;
 		const str = try std.fmt.bufPrintZ(&shmo, "_{s}", .{ s.name });
 		break :blk .gen(str.ptr);
@@ -264,7 +264,7 @@ const Radix = extern struct {
 		}
 		const canvas = glist.getCanvas();
 		if (visible == 0) {
-			if (self.lbl != &pd.s_) {
+			if (self.lbl != pd.s.empty()) {
 				self.tag_type.* = .label;
 				pd.vMess(null, "crs", .{ canvas, "delete", &self.tag });
 			}
@@ -306,7 +306,7 @@ const Radix = extern struct {
 				else pd.this().gui.foregroundcolor,
 			});
 		}
-		if (self.lbl == &pd.s_) {
+		if (self.lbl == pd.s.empty()) {
 			return;
 		}
 
@@ -577,10 +577,10 @@ const Radix = extern struct {
 		self.font_size = @min(fs, 36);
 
 		const rcv_old = self.rcv;
-		const rcv_raw = av[8].getSymbol() orelse &pd.s_;
+		const rcv_raw = av[8].getSymbol() orelse pd.s.empty();
 		const rcv_new = unescape(rcv_raw);
-		if (rcv_old != &pd.s_) {
-			if (rcv_new != &pd.s_) {
+		if (rcv_old != pd.s.empty()) {
+			if (rcv_new != pd.s.empty()) {
 				if (rcv_old != rcv_new) { // symbol to symbol
 					obj.g.pd.unbind(self.gl.realizeDollar(rcv_old));
 					obj.g.pd.bind(self.gl.realizeDollar(rcv_new));
@@ -589,7 +589,7 @@ const Radix = extern struct {
 				obj.g.pd.unbind(self.gl.realizeDollar(rcv_old));
 				_ = try obj.inlet(&obj.g.pd, null, null);
 			}
-		} else if (rcv_new != &pd.s_) { // inlet to symbol
+		} else if (rcv_new != pd.s.empty()) { // inlet to symbol
 			if (obj.inlets) |inlet| {
 				deleteLinesForIo(self.gl, obj, inlet, null);
 				inlet.deinit();
@@ -599,13 +599,13 @@ const Radix = extern struct {
 		self.rcv = rcv_new;
 
 		const snd_old = self.snd;
-		const snd_raw = av[9].getSymbol() orelse &pd.s_;
+		const snd_raw = av[9].getSymbol() orelse pd.s.empty();
 		const snd_new = unescape(snd_raw);
-		if (snd_old != &pd.s_) {
-			if (snd_new == &pd.s_) { // symbol to outlet
+		if (snd_old != pd.s.empty()) {
+			if (snd_new == pd.s.empty()) { // symbol to outlet
 				_ = try obj.outlet(null);
 			}
-		} else if (snd_new != &pd.s_) { // outlet to symbol
+		} else if (snd_new != pd.s.empty()) { // outlet to symbol
 			if (obj.outlets) |outlet| {
 				deleteLinesForIo(self.gl, obj, null, outlet);
 				outlet.deinit();
@@ -614,7 +614,7 @@ const Radix = extern struct {
 		self.snd = snd_new;
 		self.sndx = self.gl.realizeDollar(snd_new);
 
-		const lbl_raw = av[10].getSymbol() orelse &pd.s_;
+		const lbl_raw = av[10].getSymbol() orelse pd.s.empty();
 		self.lbl = unescape(lbl_raw);
 		const where: u2 = @intFromFloat(av[11].getFloat() orelse 0);
 		self.b.where = @enumFromInt(where);
@@ -735,16 +735,16 @@ const Radix = extern struct {
 		rad.width = @intFromFloat(@min(pd.floatArg(6, av) catch 0, 500));
 
 		var rstate: LimitState = .{ .lo = true, .hi = true };
-		const rcv: *Symbol = unescape(pd.symbolArg(8, av) catch &pd.s_);
-		const snd: *Symbol = unescape(pd.symbolArg(9, av) catch &pd.s_);
+		const rcv: *Symbol = unescape(pd.symbolArg(8, av) catch pd.s.empty());
+		const snd: *Symbol = unescape(pd.symbolArg(9, av) catch pd.s.empty());
 
-		if (rcv == &pd.s_) {
+		if (rcv == pd.s.empty()) {
 			_ = try obj.inlet(&obj.g.pd, null, null);
 		} else {
 			obj.g.pd.bind(gl.realizeDollar(rcv));
 		}
-		if (snd == &pd.s_) {
-			_ = try obj.outlet(&pd.s_float);
+		if (snd == pd.s.empty()) {
+			_ = try obj.outlet(pd.s.float());
 		}
 
 		self.* = .{
@@ -762,7 +762,7 @@ const Radix = extern struct {
 			.rcv = rcv,
 			.snd = snd,
 			.sndx = gl.realizeDollar(snd),
-			.lbl = unescape(pd.symbolArg(10, av) catch &pd.s_),
+			.lbl = unescape(pd.symbolArg(10, av) catch pd.s.empty()),
 			.b = .{
 				.where = @enumFromInt(@as(u2, @intFromFloat(pd.floatArg(11, av) catch 0))),
 				.range = rstate,
@@ -774,7 +774,7 @@ const Radix = extern struct {
 	}
 
 	fn freeC(self: *Radix) callconv(.c) void {
-		if (self.rcv != &pd.s_) {
+		if (self.rcv != pd.s.empty()) {
 			self.obj.g.pd.unbind(self.gl.realizeDollar(self.rcv));
 		}
 		pd.deleteStubForKey(self);

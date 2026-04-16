@@ -65,10 +65,10 @@ const Pulse = extern struct {
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
-		_ = try obj.outlet(&pd.s_signal);
+		_ = try obj.outlet(pd.s.signal());
 		const inlet: *Inlet = @ptrCast(@alignCast(
 			try obj.inletSignal(pd.floatArg(0, av) catch 0.5)));
-		_ = try obj.inlet(&obj.g.pd, &pd.s_float, .gen("ft1"));
+		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("ft1"));
 
 		self.* = .{
 			.edge = &inlet.un.floatsignalvalue,

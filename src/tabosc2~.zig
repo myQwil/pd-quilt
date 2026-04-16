@@ -104,7 +104,7 @@ const TabOsc2 = extern struct {
 		const arrayname = try pd.symbolArg(0, av);
 		const tab2: tb.Tab2 = try .init(obj, arrayname, pd.floatArg(1, av) catch 0);
 
-		_ = try obj.inlet(&obj.g.pd, &pd.s_float, .gen("ft1"));
+		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("ft1"));
 		self.* = .{ .tab2 = tab2 };
 		return self;
 	}

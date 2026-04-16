@@ -113,10 +113,10 @@ const LinPSignal = extern struct {
 		errdefer obj.g.pd.deinit();
 
 		_ = try obj.inletFloat(&self.inletvalue);
-		_ = try obj.outlet(&pd.s_signal);
+		_ = try obj.outlet(pd.s.signal());
 
 		self.* = .{
-			.o_pause = try .init(obj, &pd.s_float),
+			.o_pause = try .init(obj, pd.s.float()),
 		};
 		return self;
 	}

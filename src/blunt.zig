@@ -151,7 +151,7 @@ const BinOp = extern struct {
 			else => {},
 		}
 		self.* = .{
-			.out = try .init(&self.obj, &pd.s_float),
+			.out = try .init(&self.obj, pd.s.float()),
 			.blunt = blunt,
 			.f1 = f1,
 			.f2 = f2,
@@ -173,7 +173,7 @@ const BinOp = extern struct {
 		const obj: *Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
-		_ = try obj.inlet(&obj.g.pd, &pd.s_float, &pd.s_anything);
+		_ = try obj.inlet(&obj.g.pd, pd.s.float(), pd.s.anything());
 		try self.initBase(av);
 		return self;
 	}
@@ -283,7 +283,7 @@ const UnOp = extern struct {
 		const blunt: Blunt = .init(av);
 		const n: usize = av.len - @intFromBool(blunt.mask != 0);
 		self.* = .{
-			.out = try .init(obj, &pd.s_float),
+			.out = try .init(obj, pd.s.float()),
 			.f = pd.floatArg(0, av[0..n]) catch 0,
 			.blunt = blunt,
 		};
@@ -365,7 +365,7 @@ const Bang = extern struct {
 		errdefer obj.g.pd.deinit();
 
 		self.* = .{
-			.out = try .init(obj, &pd.s_bang),
+			.out = try .init(obj, pd.s.bang()),
 			.blunt = .init(av),
 		};
 		return self;
@@ -432,8 +432,8 @@ const Sym = extern struct {
 
 		_ = try obj.inletSymbol(&self.sym);
 		self.* = .{
-			.out = try .init(obj, &pd.s_symbol),
-			.sym = pd.symbolArg(0, av[0..n]) catch &pd.s_,
+			.out = try .init(obj, pd.s.symbol()),
+			.sym = pd.symbolArg(0, av[0..n]) catch pd.s.empty(),
 			.blunt = blunt,
 		};
 		return self;

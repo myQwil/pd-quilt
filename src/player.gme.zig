@@ -49,16 +49,16 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 
 	pub fn get(self: *const Gme, s: *Symbol) ?Atom {
 		const a = (dict.get(s) orelse return null)(self);
-		return if (a.type == .symbol and a.w.symbol == &pd.s_) null else a;
+		return if (a.type == .symbol and a.w.symbol == pd.s.empty()) null else a;
 	}
 
 	pub inline fn init(obj: *pd.Object, av: []const Atom) !Gme {
 		inline for (0..nch) |_| {
-			_ = try obj.outlet(&pd.s_signal);
+			_ = try obj.outlet(pd.s.signal());
 		}
 		return .{
 			.player = try .init(obj),
-			.path = &pd.s_,
+			.path = pd.s.empty(),
 			.mask = for (av) |a| {
 				if (a.type == .float) {
 					break @intFromFloat(a.w.float);

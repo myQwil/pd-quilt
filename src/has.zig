@@ -15,7 +15,7 @@ const Has = extern struct {
 
 	fn bangC(self: *const Has) callconv(.c) void {
 		const a = self.atom;
-		self.out.float(if (a.type == .symbol and a.w.symbol == &pd.s_bang) 1 else 0);
+		self.out.float(if (a.type == .symbol and a.w.symbol == pd.s.bang()) 1 else 0);
 	}
 
 	fn listC(
@@ -47,9 +47,9 @@ const Has = extern struct {
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
-		_ = try obj.inlet(&obj.g.pd, &pd.s_list, .gen("set"));
+		_ = try obj.inlet(&obj.g.pd, pd.s.list(), .gen("set"));
 		self.* = .{
-			.out = try .init(obj, &pd.s_float),
+			.out = try .init(obj, pd.s.float()),
 			.atom = if (av.len > 0) av[0] else .float(0),
 		};
 		return self;

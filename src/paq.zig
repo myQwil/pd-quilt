@@ -31,7 +31,7 @@ const Proxy = extern struct {
 		self: *Proxy,
 		s: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
-		const firstarg = (s != &pd.s_list);
+		const firstarg = (s != pd.s.list());
 		if (firstarg and s != dot) {
 			self.ptr[0] = .symbol(s);
 		}
@@ -78,7 +78,7 @@ const Paq = extern struct {
 		const vec = gpa.dupe(Atom, self.proxy.ptr[0..self.proxy.len]) catch
 			return pd.post.err(self, name ++ ": Out of memory", .{});
 		defer gpa.free(vec);
-		self.out.list(&pd.s_list, vec);
+		self.out.list(pd.s.list(), vec);
 	}
 
 	fn floatC(self: *Paq, f: Float) callconv(.c) void {
@@ -130,7 +130,7 @@ const Paq = extern struct {
 			n = i;
 		}
 		self.* = .{
-			.out = try .init(obj, &pd.s_list),
+			.out = try .init(obj, pd.s.list()),
 			.ins = ins.ptr,
 		};
 		return self;

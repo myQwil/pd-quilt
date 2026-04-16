@@ -151,14 +151,14 @@ const LinP = extern struct {
 		var clock: *pd.Clock = try .init(self, @ptrCast(&tickC));
 		errdefer clock.deinit();
 
-		_ = try obj.inlet(&obj.g.pd, &pd.s_float, .gen("ft1"));
+		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("ft1"));
 		_ = try obj.inletFloat(&self.grain);
 
 		const targettime = pd.time();
 		self.* = .{
 			.clock = clock,
-			.out_f = try .init(obj, &pd.s_float),
-			.out_p = try .init(obj, &pd.s_float),
+			.out_f = try .init(obj, pd.s.float()),
+			.out_p = try .init(obj, pd.s.float()),
 			.targettime = targettime,
 			.prevtime = targettime,
 			.grain = grain,

@@ -42,8 +42,8 @@ const Same = extern struct {
 		errdefer obj.g.pd.deinit();
 
 		self.* = .{
-			.out_diff = try .init(obj, &pd.s_float),
-			.out_same = try .init(obj, &pd.s_float),
+			.out_diff = try .init(obj, pd.s.float()),
+			.out_same = try .init(obj, pd.s.float()),
 			.f = f,
 		};
 		return self;

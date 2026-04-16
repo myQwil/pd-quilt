@@ -91,7 +91,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 		const nch: u8 = @intCast(layout.nb_channels);
 		for (0..nch) |_| {
-			_ = try obj.outlet(&pd.s_signal);
+			_ = try obj.outlet(pd.s.signal());
 		}
 
 		const packet: *av.Packet = try .init();

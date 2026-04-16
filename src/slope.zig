@@ -83,9 +83,9 @@ pub fn Slope(T: type) type { return extern struct {
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
-		_ = try obj.inlet(&obj.g.pd, &pd.s_float, .gen("min"));
-		_ = try obj.inlet(&obj.g.pd, &pd.s_float, .gen("max"));
-		_ = try obj.inlet(&obj.g.pd, &pd.s_float, .gen("run"));
+		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("min"));
+		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("max"));
+		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("run"));
 
 		// defaults
 		var min: f64 = 0;
@@ -107,7 +107,7 @@ pub fn Slope(T: type) type { return extern struct {
 			else => {},
 		}
 		self.* = .{
-			.out = try .init(obj, &pd.s_float),
+			.out = try .init(obj, pd.s.float()),
 			.min = min,
 			.max = max,
 			.run = run,

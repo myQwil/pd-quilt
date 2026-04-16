@@ -98,8 +98,8 @@ const PList = extern struct {
 		errdefer obj.g.pd.deinit();
 
 		self.* = .{
-			.out_val = try .init(obj, &pd.s_symbol),
-			.out_idx = try .init(obj, &pd.s_float),
+			.out_val = try .init(obj, pd.s.symbol()),
+			.out_idx = try .init(obj, pd.s.float()),
 		};
 		return self;
 	}

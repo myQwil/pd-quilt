@@ -43,11 +43,11 @@ const FlDec = extern struct {
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
-		_ = try obj.inlet(&obj.g.pd, &pd.s_float, .gen("set"));
+		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("set"));
 		self.* = .{
-			.out_m = try .init(obj, &pd.s_float),
-			.out_e = try .init(obj, &pd.s_float),
-			.out_s = try .init(obj, &pd.s_float),
+			.out_m = try .init(obj, pd.s.float()),
+			.out_e = try .init(obj, pd.s.float()),
+			.out_s = try .init(obj, pd.s.float()),
 			.f = f,
 		};
 		return self;

@@ -27,7 +27,7 @@ pub const Timer = extern struct {
 
 	pub fn init(obj: *pd.Object, av: []const Atom) !Timer {
 		return .{
-			.outlet = try .init(obj, &pd.s_float),
+			.outlet = try .init(obj, pd.s.float()),
 			.unit = if (av.len > 0) try unitFromArgs(av) else .{},
 		};
 	}

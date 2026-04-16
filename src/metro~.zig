@@ -69,9 +69,9 @@ const MetroSignal = extern struct {
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
-		_ = try obj.inlet(&obj.g.pd, &pd.s_float, .gen("ft1"));
+		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("ft1"));
 		self.* = .{
-			.out = try .init(obj, &pd.s_bang),
+			.out = try .init(obj, pd.s.bang()),
 			.f = f,
 		};
 		return self;

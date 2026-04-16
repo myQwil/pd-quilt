@@ -64,7 +64,7 @@ const DelP = extern struct {
 	}
 
 	fn stopC(self: *DelP) callconv(.c) void {
-		self.pauseC(&pd.s_, 1, &.{ .float(1) });
+		self.pauseC(pd.s.empty(), 1, &.{ .float(1) });
 	}
 
 	fn tempoC(
@@ -130,9 +130,9 @@ const DelP = extern struct {
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
-		_ = try obj.inlet(&obj.g.pd, &pd.s_float, .gen("ft1"));
-		const out_b: *Outlet = try .init(obj, &pd.s_bang);
-		const out_f: *Outlet = try .init(obj, &pd.s_float);
+		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("ft1"));
+		const out_b: *Outlet = try .init(obj, pd.s.bang());
+		const out_f: *Outlet = try .init(obj, pd.s.float());
 
 		var clock: *pd.Clock = try .init(self, @ptrCast(&timeoutC));
 		errdefer clock.deinit();

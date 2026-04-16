@@ -126,10 +126,10 @@ const FlEnc = extern struct {
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
-		_ = try obj.inlet(&obj.g.pd, &pd.s_float, .gen("e"));
-		_ = try obj.inlet(&obj.g.pd, &pd.s_float, .gen("s"));
+		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("e"));
+		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("s"));
 		self.* = .{
-			.out = try .init(obj, &pd.s_float),
+			.out = try .init(obj, pd.s.float()),
 			.uf = getUf(.{ .u = 0 }, 0, av),
 		};
 		return self;

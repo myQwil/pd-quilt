@@ -41,7 +41,7 @@ const Rand = extern struct {
 	var s_rep: *Symbol = undefined;
 
 	fn init(obj: *pd.Object) !Rand {
-		return .{ .out = try .init(obj, &pd.s_float) };
+		return .{ .out = try .init(obj, pd.s.float()) };
 	}
 
 	fn initC(_: *Symbol, ac: c_uint, av: [*]Atom) callconv(.c) ?*anyopaque {

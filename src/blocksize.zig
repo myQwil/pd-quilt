@@ -21,7 +21,7 @@ const BlockSize = extern struct {
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
-		self.* = .{ .out = try .init(obj, &pd.s_float) };
+		self.* = .{ .out = try .init(obj, pd.s.float()) };
 		return self;
 	}
 

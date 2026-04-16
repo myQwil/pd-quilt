@@ -27,8 +27,8 @@ const Sesom = extern struct {
 
 		_ = try obj.inletFloat(&self.f);
 		self.* = .{
-			.out_l = try .init(obj, &pd.s_float),
-			.out_r = try .init(obj, &pd.s_float),
+			.out_l = try .init(obj, pd.s.float()),
+			.out_r = try .init(obj, pd.s.float()),
 			.f = f,
 		};
 		return self;

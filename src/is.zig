@@ -48,14 +48,14 @@ const Is = extern struct {
 	}
 
 	fn bangC(self: *const Is) callconv(.c) void {
-		self.out.float(if (self.type == &pd.s_bang) 1.0 else 0.0);
+		self.out.float(if (self.type == pd.s.bang()) 1.0 else 0.0);
 	}
 
 	fn anythingC(
 		self: *const Is,
 		s: *Symbol, ac: c_uint, _: [*]const Atom,
 	) callconv(.c) void {
-		const t: *Symbol = if (ac > 0) s else &pd.s_symbol;
+		const t: *Symbol = if (ac > 0) s else pd.s.symbol();
 		self.out.float(if (self.type == t) 1 else 0);
 	}
 
@@ -76,8 +76,8 @@ const Is = extern struct {
 
 		_ = try obj.inlet(@ptrCast(proxy), null, null);
 		self.* = .{
-			.out = try .init(obj, &pd.s_float),
-			.type = if (s != &pd.s_) s else &pd.s_float,
+			.out = try .init(obj, pd.s.float()),
+			.type = if (s != pd.s.empty()) s else pd.s.float(),
 			.proxy = proxy,
 		};
 		return self;

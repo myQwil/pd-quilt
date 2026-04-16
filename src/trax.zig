@@ -23,8 +23,8 @@ const LangDict = struct {
 
 	fn add(self: *LangDict, lang: *Symbol, value: *Symbol) !void {
 		try self.dict.put(lang, value);
-		if (lang == &pd.s_) {
-			self.default = &pd.s_;
+		if (lang == pd.s.empty()) {
+			self.default = pd.s.empty();
 		}
 	}
 

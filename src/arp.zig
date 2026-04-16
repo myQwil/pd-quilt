@@ -114,8 +114,8 @@ const Arp = extern struct {
 
 	fn init(obj: *pd.Object) !Arp {
 		return .{
-			.out_f = try .init(obj, &pd.s_float),
-			.out_l = try .init(obj, &pd.s_list),
+			.out_f = try .init(obj, pd.s.float()),
+			.out_l = try .init(obj, pd.s.list()),
 		};
 	}
 

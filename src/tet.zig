@@ -87,10 +87,10 @@ pub fn Tet(T: type) type { return extern struct {
 		const tet = pd.floatArg(1, av) catch 12;
 		const k = getK(tet);
 
-		_ = try obj.inlet(&obj.g.pd, &pd.s_float, .gen("ref"));
-		_ = try obj.inlet(&obj.g.pd, &pd.s_float, .gen("tet"));
+		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("ref"));
+		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("tet"));
 		self.* = .{
-			.out = try .init(obj, &pd.s_float),
+			.out = try .init(obj, pd.s.float()),
 			.ref = ref,
 			.tet = tet,
 			.k = k,

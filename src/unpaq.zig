@@ -25,7 +25,7 @@ const Unpaq = extern struct {
 		self: *const Unpaq,
 		s: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
-		const firstarg = (s != &pd.s_list);
+		const firstarg = (s != pd.s.list());
 		const j = @intFromBool(firstarg);
 		var i = @min(ac, self.len - j);
 		while (i > 0) {
@@ -62,9 +62,9 @@ const Unpaq = extern struct {
 
 		for (vec, av) |*v, *a| {
 			v.* = if (a.getSymbol()) |s| switch (s.name[0]) {
-				'f' => .{ .out = try .init(obj, &pd.s_float), .type = .float },
-				's' => .{ .out = try .init(obj, &pd.s_symbol), .type = .symbol },
-				'p' => .{ .out = try .init(obj, &pd.s_pointer), .type = .pointer },
+				'f' => .{ .out = try .init(obj, pd.s.float()), .type = .float },
+				's' => .{ .out = try .init(obj, pd.s.symbol()), .type = .symbol },
+				'p' => .{ .out = try .init(obj, pd.s.pointer()), .type = .pointer },
 				else => .{ .out = try .init(obj, null), .type = .gimme },
 			} else .{ .out = try .init(obj, null), .type = .gimme };
 		}

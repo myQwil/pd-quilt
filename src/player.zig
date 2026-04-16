@@ -78,7 +78,7 @@ test printTime {
 pub fn timeSym(ms: i64) *Symbol {
 	var buf: [32:0]u8 = undefined;
 	var w: Writer = .fixed(&buf);
-	printTime(&w, ms) catch return &pd.s_;
+	printTime(&w, ms) catch return pd.s.empty();
 	buf[w.end] = 0;
 	return .gen(buf[0..w.end :0]);
 }
@@ -197,7 +197,7 @@ pub fn Impl(Self: type) type { return struct {
 					try w.writeAll(str[pos..end]);
 					try w.writeByte(0);
 					const key: *Symbol = .gen(w.buffer[kpos..][0 .. end - pos :0].ptr);
-					const meta: Atom = getfn(base, key) orelse .symbol(&pd.s_);
+					const meta: Atom = getfn(base, key) orelse .symbol(pd.s.empty());
 					w.end = kpos;
 
 					var mbuf: [std.fmt.float.bufferSize(.decimal, Float)]u8 = undefined;
@@ -312,7 +312,7 @@ pub fn Impl(Self: type) type { return struct {
 	}
 
 	fn stopC(self: *Self) callconv(.c) void {
-		listC(self, &pd.s_, 1, &.{ .float(0) });
+		listC(self, pd.s.empty(), 1, &.{ .float(0) });
 	}
 
 	/// toggle the play/pause state, or set to arg if one is given

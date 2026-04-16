@@ -85,7 +85,7 @@ pub const Rind = extern struct {
 			else => unreachable,
 		}
 		self.* = .{
-			.out = try .init(obj, &pd.s_float),
+			.out = try .init(obj, pd.s.float()),
 			.rng = .init(),
 			.min = min,
 			.max = max,
