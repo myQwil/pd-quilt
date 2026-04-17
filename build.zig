@@ -91,16 +91,20 @@ fn getModule(
 	args: anytype,
 ) *Build.Module {
 	const dep = b.dependency(name, args);
-	const linkage: LinkMode = args.linkage;
-	const target: Build.ResolvedTarget = args.target;
 
+	const linkage: LinkMode = args.linkage;
 	if (linkage == .dynamic) {
 		const lib = dep.artifact(name);
-		const install = b.addInstallFile(lib.getEmittedBin(),
-			b.fmt("lib{s}{s}", .{ name, target.result.dynamicLibSuffix() }));
+		const target: Build.ResolvedTarget = args.target;
+		const install = b.addInstallFile(lib.getEmittedBin(), b.fmt("{s}{s}{s}", .{
+			target.result.os.tag.libPrefix(target.result.abi),
+			name,
+			target.result.dynamicLibSuffix(),
+		}));
 		install.step.dependOn(&lib.step);
 		b.getInstallStep().dependOn(&install.step);
 	}
+
 	return dep.module(name);
 }
 
@@ -138,6 +142,7 @@ pub fn build(b: *Build) !void {
 
 	//---------------------------------------------------------------------------
 	// Install externals
+	const os = target.result.os.tag;
 	const extension = pd.extension(b, target, opt.float_size);
 	for (externals) |x| {
 		const mod = b.createModule(.{
@@ -168,13 +173,23 @@ pub fn build(b: *Build) !void {
 			.rabbit => mod.addImport("rabbit", rabbit),
 			.rubber => mod.addImport("rubber", rubber),
 			.ffmpeg => {
-				mod.linkSystemLibrary("avutil", .{});
-				mod.linkSystemLibrary("avcodec", .{});
-				mod.linkSystemLibrary("avformat", .{});
-				mod.linkSystemLibrary("swresample", .{});
+				if (os == .windows) {
+					mod.addObjectFile(b.path("build-av/avutil-60.dll"));
+					mod.addObjectFile(b.path("build-av/avcodec-62.dll"));
+					mod.addObjectFile(b.path("build-av/avformat-62.dll"));
+					mod.addObjectFile(b.path("build-av/swresample-6.dll"));
+				} else {
+					mod.linkSystemLibrary("avutil", .{});
+					mod.linkSystemLibrary("avcodec", .{});
+					mod.linkSystemLibrary("avformat", .{});
+					mod.linkSystemLibrary("swresample", .{});
+				}
 				mod.addImport("av", av);
 			}
 		};
+		if (os == .windows) {
+			mod.addObjectFile(b.path("build-pd/bin/pd.dll"));
+		}
 		if (opt.linkage == .dynamic and x.deps.len > 0) {
 			mod.addRPathSpecial("$ORIGIN");
 		}
