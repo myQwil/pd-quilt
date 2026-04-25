@@ -1,28 +1,28 @@
 .{
 	.name = .quilt,
-	.version = "0.9.0",
+	.version = "0.9.1",
 	.fingerprint = 0x87570fed07d14de5,
 	.minimum_zig_version = "0.16.0",
 	.dependencies = .{
 		.pd = .{
-			.url = "git+https://github.com/myQwil/pd#2cc8ec7796635745611d49a1758046c01eeb4c72",
-			.hash = "pd-0.56.2-DC007dFxAgCg2_Rbi4dA57jJeNNLbx_xa28U3K-kgnCq",
+			.url = "git+https://github.com/myQwil/pd#ac2f257d42574c47e24d4427758184f3dcda1374",
+			.hash = "pd-0.56.2-DC007atgAgA-CUHA21DAnDMMjdjyEEmChKBJXuJ0YbL_",
 		},
 		.gme = .{
-			.url = "git+https://github.com/myQwil/game-music-emu#7b6c9c141c5ed75def34cf21eae1cad059994e8a",
-			.hash = "game_music_emu-0.6.4-YdNlABBYEABCZssgDQXTAyKXu88jbJUZUjQLnT-HTkVd",
+			.url = "git+https://codeberg.org/myQwil/gme#7df7599152b9cf2e1e33791c973ba9e5bce79bf9",
+			.hash = "game_music_emu-0.6.6-YdNlAG9zAADUZm7dVI-0jWpR1fTVj7JwheT0Z4tp_tmj",
 		},
 		.unrar = .{
-			.url = "git+https://github.com/myQwil/unrar#ba0c48b8cbbdf8ee9bbc72f1f2899f77aafc20da",
-			.hash = "unrar-7.2.4-zNpgmUwxAAA_4Vr5UUL43qG8NNaK_qSozHbh_PH530H1",
+			.url = "git+https://github.com/myQwil/unrar#cd11629c7a603a001697d2dd80ef995840184052",
+			.hash = "unrar-7.2.5-zNpgmWA2AABcBM_CjB26Eevgqj1dnluBF6u6lPS1_4W2",
 		},
 		.samplerate = .{
-			.url = "git+https://github.com/myQwil/libsamplerate#2b938917e0e55122980993a5526bc646770f3306",
-			.hash = "libsamplerate-0.2.3-f8m6bkQxAABWxAD_itM4ybmWa1B732yuGHNJaYHqGTvV",
+			.url = "git+https://github.com/myQwil/libsamplerate#21ff352945847639aeb26a9221785b936c83935a",
+			.hash = "libsamplerate-0.2.3-f8m6boM1AAAeASoBIsxyoYln4wmS6HfuzlUGioZ-9k1Y",
 		},
 		.rubberband = .{
-			.url = "git+https://github.com/myQwil/rubberband#ee586f5d5bf81f2a0c49e8658801e546f9165739",
-			.hash = "rubberband-4.0.0-RbnorAsVAQASZoLA2MJIboAm6VvNI8vA8viQCQzGDepj",
+			.url = "git+https://github.com/myQwil/rubberband#1bf7c3a00cfe26fdc683ec0289edd33eefa2e87a",
+			.hash = "rubberband-4.0.0-RbnorIwaAQD2vQx76Kz4621lEa7pm7gkB0CG5hw3dY96",
 		},
 		.ffmpeg = .{
 			.url = "git+https://github.com/myQwil/ffmpeg#51f24bd7e625e27edf86acb0f6ed5d022fec03c4",

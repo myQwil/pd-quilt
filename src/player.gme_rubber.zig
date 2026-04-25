@@ -31,13 +31,16 @@ pub fn Impl(Root: type) type { return extern struct {
 		pd.post.err(self, Root.name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
-	pub inline fn conv(self: *Self, i: c_uint) void {
+	pub inline fn conv(self: *Self, i: ra.uint) void {
 		self.rabbit.conv(i, Root.nch) catch |e| self.err(e);
 	}
 
 	pub fn resetBuffers(self: *Self) void {
 		self.rabbit.reset() catch |e| self.err(e);
 		self.rubber.reset();
+		// gme resets the fade-out start time on seeks and track changes.
+		// we want to play tracks forever and handle fade-out at the patch level.
+		self.base.emu.neverFade();
 	}
 
 	pub fn prepNewTrack(self: *Self) void {
@@ -58,7 +61,6 @@ pub fn Impl(Root: type) type { return extern struct {
 		const rbt = self.rabbit.state;
 		const rbr = self.rubber.state;
 		const data = &self.rabbit.data;
-		const raw: []i16 = &b.raw;
 		var outs: [Root.nch][*]Sample = b.outs;
 
 		while (i < n) {
@@ -66,8 +68,8 @@ pub fn Impl(Root: type) type { return extern struct {
 			while (m <= 0) {
 				while (data.output_frames_gen <= 0) {
 					if (data.input_frames <= 0) {
-						try emu.play(raw);
-						for (raw, in) |*from, *to| {
+						try emu.play(&b.raw, b.raw.len);
+						for (&b.raw, in) |*from, *to| {
 							to.* = @as(Sample, @floatFromInt(from.*)) * 0x1p-15;
 						}
 						data.data_in = in;
@@ -86,7 +88,7 @@ pub fn Impl(Root: type) type { return extern struct {
 				data.output_frames_gen = 0;
 				m = rbr.available();
 			}
-			const used = rbr.retrieve(&outs, @min(@as(u32, @intCast(m)), n - i));
+			const used = rbr.retrieve(&outs, @min(@as(u31, @intCast(m)), n - i));
 			inline for (0..Root.nch) |ch| {
 				outs[ch] += used;
 			}

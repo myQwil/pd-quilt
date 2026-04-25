@@ -19,8 +19,8 @@ pub const Rubber = extern struct {
 		const in3: *Inlet = @ptrCast(@alignCast(try obj.inletSignal(1.0)));
 		return .{
 			.tempo = &in3.un.floatsignalvalue,
-			.state = try .init(@intFromFloat(pd.sampleRate()), channels,
-				try parseOptions(av), 1, 1),
+			.state = try .init(
+				@intFromFloat(pd.sampleRate()), channels, 1, 1, try parseOptions(av)),
 		};
 	}
 

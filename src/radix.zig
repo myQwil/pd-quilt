@@ -6,6 +6,7 @@ const rx = @import("rad.zig");
 const bf = @import("bitfloat.zig");
 const cnv = pd.cnv;
 
+const uint = pd.uint;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const GList = pd.GList;
@@ -65,7 +66,9 @@ fn deleteLinesForIo(x: *GList, text: *Object, inp: ?*pd.Inlet, outp: ?*pd.Outlet
 	while (oconn) |oc| : (oconn = t.next()) {
 		if ((t.ob == text and t.outlet == outp) or (t.ob2 == text and t.inlet == inp)) {
 			deleteLine(x, oc);
-			t.ob.disconnect(t.outno, t.ob2, t.inno);
+			if (t.ob) |ob| {
+				ob.disconnect(t.outno, t.ob2, t.inno);
+			}
 		}
 	}
 }
@@ -137,19 +140,19 @@ const Radix = extern struct {
 
 	fn getRect(self: *Radix, glist: *GList) pd.Rect(c_int) {
 		const obj: *Object = &self.obj;
-		const fontsize: c_uint = if (self.font_size != 0)
+		const fontsize: uint = if (self.font_size != 0)
 			@intCast(self.font_size)
 		else glist.getFont();
-		const len: c_uint = if (self.rad.width == 0)
+		const len: uint = if (self.rad.width == 0)
 			@max(3, self.rad.end) else self.rad.width;
 		const size: IVec2 = blk: {
 			const uz = glist.getZoom();
-			const iz: c_int = @intCast(uz);
+			const iz: c_int = uz;
 			const amargin = IVec2{ atom_rmargin, atom_bmargin } * IVec2{ iz, iz };
-			break :blk amargin + @as(IVec2, @intCast(@Vector(2, c_uint){
+			break :blk amargin + @as(IVec2, @Vector(2, uint){
 				len * pd.zoomFontWidth(fontsize, uz, false),
 				pd.zoomFontHeight(fontsize, uz, false),
-			}));
+			});
 		};
 		const p1 = obj.pos(glist);
 		return .{ .p1 = p1, .p2 = p1 + size };
@@ -286,11 +289,11 @@ const Radix = extern struct {
 		self.drawBorder(glist, rect, true);
 
 		// draw the text
-		const fontsize: c_uint = if (self.font_size != 0)
+		const fontsize: uint = if (self.font_size != 0)
 			@intCast(self.font_size)
 		else glist.getFont();
 		const uz = glist.getZoom();
-		const iz: c_int = @intCast(uz);
+		const iz: c_int = uz;
 		{
 			self.tag_type.* = .text;
 			const tags = [_][*]const u8{ &self.tag, "text" };
@@ -300,7 +303,7 @@ const Radix = extern struct {
 				tags.len, &tags,
 				pos[0], pos[1],
 				&self.rad.buf,
-				pd.hostFontSize(fontsize, uz),
+				@as(c_uint, pd.hostFontSize(fontsize, uz)),
 				if (glist.isSelected(&obj.g))
 					pd.this().gui.selectcolor
 				else pd.this().gui.foregroundcolor,
@@ -335,7 +338,7 @@ const Radix = extern struct {
 			canvas, tags.len, &tags,
 			p1[0], p1[1],
 			label,
-			fontsize * uz, pd.this().gui.foregroundcolor,
+			@as(c_uint, fontsize * uz), pd.this().gui.foregroundcolor,
 		});
 	}
 

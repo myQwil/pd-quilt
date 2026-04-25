@@ -43,17 +43,22 @@ const RarReader = struct {
 		.close = @ptrCast(&close),
 	};
 
-	fn cb(_: rar.CallbackMsg, udata: usize, p1: usize, p2: usize) callconv(.c) c_uint {
+	fn cb(
+		_: rar.CallbackMsg,
+		udata: usize,
+		ptr: usize,
+		len: usize,
+	) callconv(.c) rar.ErrorCode {
 		const self: *RarReader = @ptrFromInt(udata);
-		if (self.buf_len < p2) {
-			return @intFromEnum(rar.ErrorCode.small_buf);
+		if (self.buf_len < len) {
+			return .small_buf;
 		}
 
-		const addr: [*]u8 = @ptrFromInt(p1);
-		@memcpy(self.buf_ptr[0..p2], addr[0..p2]);
-		self.buf_ptr += p2;
-		self.buf_len -= p2;
-		return 0;
+		const addr: [*]u8 = @ptrFromInt(ptr);
+		@memcpy(self.buf_ptr[0..len], addr[0..len]);
+		self.buf_ptr += len;
+		self.buf_len -= len;
+		return .success;
 	}
 
 	pub fn init(allocator: Allocator, path: [:0]const u8) !ArcReader {

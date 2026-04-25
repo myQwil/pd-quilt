@@ -436,7 +436,9 @@ const ExArray = extern struct {
 	}
 
 	inline fn garray(self: *const ExArray) error{GArrayNotFound}!*pd.GArray {
-		return @ptrCast(pd.garray_class.find(self.sym) orelse return error.GArrayNotFound);
+		return if (pd.garray_class.find(self.sym)) |ga|
+			@ptrCast(ga)
+		else error.GArrayNotFound;
 	}
 
 	fn printC(self: *const ExArray) callconv(.c) void {
@@ -456,7 +458,8 @@ const ExArray = extern struct {
 		self.resize(f) catch |e| self.err(e);
 	}
 	inline fn resize(self: *ExArray, f: Float) !void {
-		(try self.garray()).resize(@intFromFloat(f));
+		const arr = try self.garray();
+		try arr.resize(@intFromFloat(f));
 	}
 
 	fn floatC(self: *ExArray, f: Float) callconv(.c) void {

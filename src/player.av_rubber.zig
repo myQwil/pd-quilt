@@ -31,7 +31,7 @@ pub fn Impl(Root: type) type { return extern struct {
 		pd.post.err(self, Root.name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
-	pub inline fn conv(self: *Self, i: c_uint) void {
+	pub inline fn conv(self: *Self, i: ra.uint) void {
 		self.rabbit.conv(i, self.base.nch) catch |e| self.err(e);
 	}
 
@@ -149,7 +149,7 @@ pub fn Impl(Root: type) type { return extern struct {
 				data.output_frames_gen = 0;
 				m = rbr.available();
 			}
-			const used = rbr.retrieve(&outs, @min(@as(u32, @intCast(m)), n - i));
+			const used = rbr.retrieve(&outs, @min(@as(u31, @intCast(m)), n - i));
 			for (0..b.nch) |ch| {
 				outs[ch] += used;
 			}

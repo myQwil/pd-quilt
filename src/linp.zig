@@ -86,7 +86,7 @@ const LinP = extern struct {
 		} else {
 			const timenow = pd.time();
 			const msectogo = self.targettime;
-			self.targettime = pd.sysTimeAfter(msectogo);
+			self.targettime = pd.timeAfter(msectogo);
 			self.invtime = 1 / (self.targettime - timenow);
 			self.prevtime = timenow;
 			if (self.grain <= 0) {
@@ -121,7 +121,7 @@ const LinP = extern struct {
 					* (self.targetval - self.setval));
 			}
 			self.prevtime = timenow;
-			self.targettime = pd.sysTimeAfter(self.in1val);
+			self.targettime = pd.timeAfter(self.in1val);
 			self.targetval = f;
 			self.tickC();
 			self.gotinlet = false;

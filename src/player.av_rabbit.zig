@@ -25,7 +25,7 @@ pub fn Impl(Root: type) type { return extern struct {
 		pd.post.err(self, Root.name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
-	pub inline fn conv(self: *Self, i: c_uint) void {
+	pub inline fn conv(self: *Self, i: ra.uint) void {
 		self.rabbit.conv(i, self.base.nch) catch |e| self.err(e);
 	}
 

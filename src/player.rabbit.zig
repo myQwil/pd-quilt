@@ -1,6 +1,7 @@
 const pd = @import("pd");
 const ra = @import("rabbit");
 const Inlet = @import("inlet.zig").Inlet;
+pub const uint = ra.uint;
 
 const Float = pd.Float;
 
@@ -32,7 +33,7 @@ pub const Rabbit = extern struct {
 		self.state.deinit();
 	}
 
-	pub inline fn conv(self: *Rabbit, i: c_uint, nch: c_uint) ra.Error!void {
+	pub inline fn conv(self: *Rabbit, i: uint, nch: uint) ra.Error!void {
 		try ra.Converter.expectValid(i);
 		const new_state: *ra.State = try .init(@enumFromInt(i), nch);
 		self.state.deinit();
@@ -51,7 +52,7 @@ pub const Rabbit = extern struct {
 };
 
 pub fn Impl(Self: type) type { return struct {
-	const conv: fn(*Self, c_uint) callconv(.@"inline") void = Self.conv;
+	const conv: fn(*Self, uint) callconv(.@"inline") void = Self.conv;
 
 	fn convC(self: *Self, f: Float) callconv(.c) void {
 		conv(self, @intFromFloat(f));

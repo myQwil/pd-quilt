@@ -296,7 +296,8 @@ const ExArray = extern struct {
 		self.resize(f) catch |e| self.err(e);
 	}
 	inline fn resize(self: *ExArray, f: Float) !void {
-		(try self.garray()).resize(@intFromFloat(f));
+		const arr = try self.garray();
+		try arr.resize(@intFromFloat(f));
 	}
 
 	fn listC(

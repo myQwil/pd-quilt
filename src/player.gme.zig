@@ -7,6 +7,7 @@ const gm = @import("gme");
 const arc = @import("player.arc.zig");
 const pr = @import("player.zig");
 
+const uint = gm.uint;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
@@ -16,7 +17,7 @@ var s_mask: *Symbol = undefined;
 const io = std.Io.Threaded.global_single_threaded.io();
 const gpa = pd.gpa;
 
-const GmeInit = fn(*const gm.Type, c_uint) anyerror!*gm.Emu;
+const GmeInit = fn(*const gm.Type, uint) anyerror!*gm.Emu;
 const ArcInit = fn (std.mem.Allocator, [:0]const u8) anyerror!arc.ArcReader;
 
 inline fn sampleRate(t: *const gm.Type) Float {
@@ -36,6 +37,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 	ibuf: [nch * frames]Sample = undefined,
 	/// resampler output
 	obuf: [nch * frames]Sample = undefined,
+	/// bit mask for muting channels
 	mask: c_uint,
 	/// samples directly from the emulator
 	raw: [nch * frames]i16 = undefined,
@@ -74,16 +76,9 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		}
 	}
 
-	/// Gme often sets a new fade-out on seeks and track changes.
-	/// We want to play tracks forever and handle fade-out at the patch level.
-	inline fn playForever(emu: *gm.Emu) void {
-		emu.setFade(-1, 0);
-	}
-
 	pub fn loadTrack(self: *Gme, index: usize) !void {
-		const idx: c_uint = @intCast(index);
+		const idx: uint = @intCast(index);
 		try self.emu.startTrack(idx);
-		playForever(self.emu);
 		const info = try self.emu.trackInfo(idx);
 		self.info.deinit();
 		self.info = info;
