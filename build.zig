@@ -151,18 +151,16 @@ pub fn build(b: *Build) !void {
 			.root_source_file = b.path(b.fmt("src/{s}.zig", .{ x.name })),
 			.imports = &.{.{ .name = "pd", .module = pd_mod }},
 		});
-		const lib = blk: {
-			var l = b.addLibrary(.{
-				.name = x.name,
-				.linkage = .dynamic,
-				.root_module = mod,
-			});
+		const lib = b.addLibrary(.{
+			.name = x.name,
+			.linkage = .dynamic,
+			.root_module = mod,
 			// use llvm until self-hosted backend has better debugger support
-			if (optimize == .Debug) {
-				l.use_llvm = true;
-			}
-			break :blk l;
-		};
+			.use_llvm = if (optimize == .Debug) true else null,
+		});
+		if (os.isDarwin()) {
+			lib.linker_allow_shlib_undefined = true;
+		}
 
 		for (x.deps) |dep| switch (dep) {
 			.libc => mod.link_libc = true,
@@ -206,7 +204,7 @@ pub fn build(b: *Build) !void {
 	//---------------------------------------------------------------------------
 	// Install help patches and abstractions
 	const io = b.graph.io;
-	const InstallFunc = fn(*Build, []const u8, []const u8) void;
+	const InstallFunc = fn(*Build, src_path: []const u8, dest_rel_path: []const u8) void;
 	const installFile: *const InstallFunc = switch (opt.patches) {
 		.symbolic => &pd.InstallLink.install,
 		.copy => &Build.installFile,
