@@ -172,10 +172,15 @@ pub fn build(b: *Build) !void {
 			.rubber => mod.addImport("rubber", rubber),
 			.ffmpeg => {
 				if (os == .windows) {
-					mod.addObjectFile(b.path("build-av/avutil-60.dll"));
-					mod.addObjectFile(b.path("build-av/avcodec-62.dll"));
-					mod.addObjectFile(b.path("build-av/avformat-62.dll"));
-					mod.addObjectFile(b.path("build-av/swresample-6.dll"));
+					mod.addObjectFile(b.path("build-win-av/avutil-60.dll"));
+					mod.addObjectFile(b.path("build-win-av/avcodec-62.dll"));
+					mod.addObjectFile(b.path("build-win-av/avformat-62.dll"));
+					mod.addObjectFile(b.path("build-win-av/swresample-6.dll"));
+				} else if (os.isDarwin()) {
+					mod.addObjectFile(b.path("build-mac-av/libavutil.60.dylib"));
+					mod.addObjectFile(b.path("build-mac-av/libavcodec.62.dylib"));
+					mod.addObjectFile(b.path("build-mac-av/libavformat.62.dylib"));
+					mod.addObjectFile(b.path("build-mac-av/libswresample.6.dylib"));
 				} else {
 					mod.linkSystemLibrary("avutil", .{});
 					mod.linkSystemLibrary("avcodec", .{});
@@ -186,7 +191,7 @@ pub fn build(b: *Build) !void {
 			}
 		};
 		if (os == .windows) {
-			mod.addObjectFile(b.path("build-pd/bin/pd.dll"));
+			mod.addObjectFile(b.path("build-win-pd/bin/pd.dll"));
 		}
 		if (opt.linkage == .dynamic and x.deps.len > 0) {
 			mod.addRPathSpecial("$ORIGIN");
