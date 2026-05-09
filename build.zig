@@ -151,17 +151,6 @@ pub fn build(b: *Build) !void {
 			.root_source_file = b.path(b.fmt("src/{s}.zig", .{ x.name })),
 			.imports = &.{.{ .name = "pd", .module = pd_mod }},
 		});
-		const lib = b.addLibrary(.{
-			.name = x.name,
-			.linkage = .dynamic,
-			.root_module = mod,
-			// use llvm until self-hosted backend has better debugger support
-			.use_llvm = if (optimize == .Debug) true else null,
-		});
-		if (os.isDarwin()) {
-			lib.linker_allow_shlib_undefined = true;
-		}
-
 		for (x.deps) |dep| switch (dep) {
 			.libc => mod.link_libc = true,
 			.gme => {
@@ -197,6 +186,16 @@ pub fn build(b: *Build) !void {
 			mod.addRPathSpecial("$ORIGIN");
 		}
 
+		const lib = b.addLibrary(.{
+			.name = x.name,
+			.linkage = .dynamic,
+			.root_module = mod,
+			// use llvm until self-hosted backend has better debugger support
+			.use_llvm = if (optimize == .Debug) true else null,
+		});
+		if (os.isDarwin()) {
+			lib.linker_allow_shlib_undefined = true;
+		}
 		const install = b.addInstallFile(lib.getEmittedBin(),
 			b.fmt("{s}{s}", .{ x.name, extension }));
 		install.step.dependOn(&lib.step);
