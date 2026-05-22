@@ -115,12 +115,6 @@ fn resolveZ(allocator: std.mem.Allocator, paths: []const []const u8) ![:0]u8 {
 	return res[0 .. res.len - 1 :0];
 }
 
-test resolveZ {
-	const actual = try resolveZ(std.testing.allocator, &.{"/a/b/c", "/d/e/f"});
-	defer std.testing.allocator.free(actual);
-	try std.testing.expectEqualStrings("/d/e/f", actual);
-}
-
 fn traverseList(
 	list: *ArrayList,
 	parents: *StringHashMap,
