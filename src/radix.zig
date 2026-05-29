@@ -200,7 +200,7 @@ const Radix = extern struct {
 		const p1 = rect.p1 + IVec2{ grabbed, grabbed };
 		const p2 = rect.p2;
 		const corner = @divTrunc(rect.size()[1], 4);
-		const shape: @Tuple(&(.{c_int} ** 12)) = .{
+		const shape: @Tuple(&@as([12]type, @splat(c_int))) = .{
 			p1[0], p1[1],
 			p2[0], p1[1],
 			p2[0], p2[1] - corner,
@@ -212,7 +212,7 @@ const Radix = extern struct {
 		const canvas = glist.getCanvas();
 		const tags = [_][*:0]const u8{ &self.tag, "obj" };
 		if (firsttime) {
-			pd.vMess(null, "crr" ++ ("i" ** shape.len) ++ "ri rk rr rS", .{
+			pd.vMess(null, "crr" ++ @as([shape.len]u8, @splat('i')) ++ "ri rk rr rS", .{
 				canvas, "create", "line",
 			} ++ shape ++ .{
 				"-width", zoom + grabbed,
@@ -222,7 +222,7 @@ const Radix = extern struct {
 			});
 			pd.vMess(null, "crr", .{ canvas, "raise", "cord" });
 		} else {
-			pd.vMess(null, "crs" ++ ("i" ** shape.len), .{
+			pd.vMess(null, "crs" ++ @as([shape.len]u8, @splat('i')), .{
 				canvas, "coords", &self.tag,
 			} ++ shape);
 			pd.vMess(null, "crs ri", .{

@@ -24,7 +24,7 @@ const dgt = struct {
 	/// character-to-index table
 	const idx = blk: {
 		const largest = 'z';
-		var arr = [_]?u6{null} ** (largest + 1);
+		var arr: [largest + 1]?u6 = @splat(null);
 		for (0..char.len) |i| {
 			arr[char[i]] = i;
 		}
@@ -37,7 +37,7 @@ const dgt = struct {
 		4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 4, 3, 4, 4, 4,
 		4, 4, 4, 4, 4, 4, 3, 3, 3, 4, 3, 3, 3, 3, 3, 4,
 	// I haven't yet worked out what the 64-bit defaults should be
-	} else [_]u16{0} ** (char.len + 1);
+	} else @as([char.len + 1]u16, @splat(0));
 };
 
 pub fn getBase(s: []const u8) u16 {

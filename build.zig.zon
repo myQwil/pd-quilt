@@ -17,8 +17,8 @@
 			.hash = "unrar-7.2.5-zNpgmWA2AABcBM_CjB26Eevgqj1dnluBF6u6lPS1_4W2",
 		},
 		.samplerate = .{
-			.url = "git+https://github.com/myQwil/libsamplerate#21ff352945847639aeb26a9221785b936c83935a",
-			.hash = "libsamplerate-0.2.3-f8m6boM1AAAeASoBIsxyoYln4wmS6HfuzlUGioZ-9k1Y",
+			.url = "git+https://github.com/myQwil/libsamplerate#50c39808b60547886d9bb39add0203c2b08db1a8",
+			.hash = "libsamplerate-0.2.3-f8m6boU1AACMcGs_74VBrwQhNdGpeGU0TjQ-Rn0n0ugh",
 		},
 		.rubberband = .{
 			.url = "git+https://github.com/myQwil/rubberband#1bf7c3a00cfe26fdc683ec0289edd33eefa2e87a",
