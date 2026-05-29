@@ -61,7 +61,8 @@ const FlEnc = extern struct {
 	inline fn print(self: *const FlEnc) !void {
 		var buf: [@bitSizeOf(Float) + 3]u8 = undefined;
 		const b = self.uf.b;
-		const s = try std.fmt.bufPrintZ(&buf, &fmt, .{ b.sign, b.exponent, b.mantissa });
+		const s = try std.fmt.bufPrintSentinel(
+			&buf, &fmt, .{ b.sign, b.exponent, b.mantissa }, 0);
 		pd.post.log(self, .normal, "%s", .{ s.ptr });
 	}
 

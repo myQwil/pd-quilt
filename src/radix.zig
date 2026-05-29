@@ -30,7 +30,7 @@ const atom_bmargin = margin.top + margin.bottom - 1;
 fn escape(s: *Symbol) !*Symbol {
 	return if (s == pd.s.empty()) .gen("_") else if (s.name[0] != '_') s else blk: {
 		var shmo: [100]u8 = undefined;
-		const str = try std.fmt.bufPrintZ(&shmo, "_{s}", .{ s.name });
+		const str = try std.fmt.bufPrintSentinel(&shmo, "_{s}", .{ s.name }, 0);
 		break :blk .gen(str.ptr);
 	};
 }
@@ -671,7 +671,7 @@ const Radix = extern struct {
 		}
 		var res: [32]u8 = undefined;
 		const cp: [*:0]const u8 = if (av[0].type == .float)
-			try std.fmt.bufPrintZ(&res, "{}", .{ av[0].w.float })
+			try std.fmt.bufPrintSentinel(&res, "{}", .{ av[0].w.float }, 0)
 		else av[0].w.symbol.name;
 		self.floatC(try rx.parseFloat(cp, base));
 	}

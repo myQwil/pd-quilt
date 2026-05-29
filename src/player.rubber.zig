@@ -62,7 +62,7 @@ fn parseOptions(av: []const Atom) !ru.Options {
 		if (a.getSymbol()) |s| {
 			const name = std.mem.sliceTo(s.name, 0);
 			const eql = std.mem.findScalar(u8, name, '=') orelse continue;
-			const str = try gpa.dupeZ(u8, name);
+			const str = try gpa.dupeSentinel(u8, name, 0);
 			defer gpa.free(str);
 
 			str[eql] = 0;
