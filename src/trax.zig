@@ -48,7 +48,7 @@ const LangDict = struct {
 	}
 };
 
-const MetaHashMap = struct {
+pub const MetaHashMap = struct {
 	map: std.array_hash_map.Auto(*Symbol, LangDict) = .empty,
 
 	pub fn deinit(self: *MetaHashMap) void {
@@ -98,9 +98,30 @@ fn trimEnd(s: []const u8, exclude: []const u8) usize {
 }
 
 fn trimRange(line: []const u8, offset: usize) [2]usize {
-	const tstart: usize = trimStart(line, " \t");
-	const tend: usize = tstart + trimEnd(line[tstart..], "\r");
-	return .{ offset + tstart, offset + tend };
+	const a: usize = trimStart(line, " \t");
+	const r: usize = if (line.len > 0 and line[line.len - 1] == '\r') 1 else 0;
+	return .{ offset + a, offset + (line.len - r) };
+}
+
+fn makeLowerCase(s: []u8) void {
+	for (s, 0..) |c, i| {
+		s[i] = std.ascii.toLower(c);
+	}
+}
+
+fn keyLang(line: []u8, end: usize) struct { key: *Symbol, lang: *Symbol } {
+	var lang: [:0]const u8 = "";
+	const kend = if (find(line[0..end], '[')) |brac| blk: {
+		const lbeg = brac + 1;
+		const lend = if (find(line[lbeg..end], ']')) |b| lbeg + b else end;
+		makeLowerCase(line[lbeg..lend]);
+		line[lend] = 0;
+		lang = line[lbeg..lend :0];
+		break :blk brac;
+	} else end;
+	makeLowerCase(line[0..kend]);
+	line[kend] = 0;
+	return .{ .key = .gen(line[0..kend :0]), .lang = .gen(lang) };
 }
 
 fn resolveZ(allocator: std.mem.Allocator, paths: []const []const u8) ![:0]u8 {
@@ -133,19 +154,19 @@ fn traverseList(
 	var buf: [std.fs.max_path_bytes:0]u8 = undefined;
 	var r = file.reader(io, &buf);
 	const base_dir = std.fs.path.dirname(file_path) orelse ".";
-	while (r.interface.takeDelimiterExclusive('\n')) |line| {
+	while (r.interface.takeDelimiterExclusive('\n')) |slice| {
 		defer _ = r.interface.take(1) catch {};
-		const trimmed = blk: {
-			const trim = trimRange(line, 0);
-			break :blk line[trim[0]..trim[1]];
+		const line = blk: {
+			const trim = trimRange(slice, 0);
+			break :blk slice[trim[0]..trim[1]];
 		};
 
 		// empty or not @path
-		if (trimmed.len == 0 or trimmed[0] != '@') {
+		if (line.len == 0 or line[0] != '@') {
 			continue;
 		}
 
-		const resolved = try resolveZ(gpa, &.{ base_dir, trimmed[1..] });
+		const resolved = try resolveZ(gpa, &.{ base_dir, line[1..] });
 		defer gpa.free(resolved);
 		if (isTrax(resolved)) {
 			try traverseList(list, parents, resolved);
@@ -172,52 +193,67 @@ fn traverseMeta(
 		catch |e| return err(meta.map.count(), e, file_path.ptr);
 	defer file.close(io);
 
+	var vpos: usize = 0;
+	var multiline: std.ArrayList(u8) = .empty;
+	defer multiline.deinit(gpa);
+
 	var buf: [std.fs.max_path_bytes:0]u8 = undefined;
 	var r = file.reader(io, &buf);
 	const base_dir = std.fs.path.dirname(file_path) orelse ".";
-	while (r.interface.takeDelimiterExclusive('\n')) |line| {
+	while (r.interface.takeDelimiterExclusive('\n')) |slice| {
 		defer _ = r.interface.take(1) catch {};
-		const trim = trimRange(line, r.interface.seek - line.len);
-		const trimmed = buf[trim[0]..trim[1]];
+		const line: [:0]u8 = blk: {
+			const trim = trimRange(slice, r.interface.seek - slice.len);
+			buf[trim[1]] = 0;
+			break :blk buf[trim[0]..trim[1] :0];
+		};
 
-		// empty or comment
-		if (trimmed.len == 0 or trimmed[0] == '#') {
+		// empty or #comment
+		if (line.len == 0 or line[0] == '#') {
 			continue;
 		}
 
+		// :multiline
+		if (multiline.items.len > 0) {
+			if (line[0] == ':') {
+				if (multiline.items.len > vpos) {
+					try multiline.append(gpa, '\n');
+				}
+				try multiline.appendSlice(gpa, line[1..]);
+				continue;
+			} else {
+				const kl = keyLang(multiline.items, vpos - 1);
+				try multiline.append(gpa, 0);
+				const value = multiline.items[vpos .. multiline.items.len - 1 :0];
+				try meta.add(kl.key, kl.lang, .gen(value));
+				multiline.items.len = 0;
+			}
+		}
+
 		// @path
-		if (trimmed[0] == '@') {
+		if (line[0] == '@') {
 			break;
 		}
 
 		// key[lang]=value
-		if (trimmed[0] != '!') {
-			const eql = find(trimmed, '=') orelse continue;
-			const end = trimEnd(trimmed[0..eql], " \t");
-			var lang: [:0]const u8 = "";
-			const kend = if (find(trimmed[0..end], '[')) |brac| blk: {
-				const lbeg = brac + 1;
-				const lend = if (find(trimmed[lbeg..end], ']')) |b| lbeg + b else end;
-				trimmed[lend] = 0;
-				lang = trimmed[lbeg..lend :0];
-				break :blk brac;
-			} else end;
-			trimmed[kend] = 0;
-			const key = trimmed[0..kend :0];
-
-			buf[trim[1]] = 0;
-			const val: [:0]const u8 = buf[trim[0] + eql + 1 .. trim[1] :0];
-			try meta.add(.gen(key), .gen(lang), .gen(val));
+		if (line[0] != '!') {
+			const eql = find(line, '=') orelse continue;
+			vpos = trimEnd(line[0..eql], " \t") + 1;
+			try multiline.appendSlice(gpa, line[0 .. vpos - 1]);
+			try multiline.append(gpa, 0);
+			const value = line[eql + 1 ..];
+			if (value.len > 0) {
+				try multiline.appendSlice(gpa, value);
+			}
 			continue;
 		}
 
-		const command = trimmed[1..];
-
 		// !include @path
+		const cmd = line[1..];
 		const inc = "include";
-		if (std.mem.startsWith(u8, command, inc)) {
+		if (std.mem.startsWith(u8, cmd, inc)) {
 			const arg = blk: {
-				const arg = command[inc.len..];
+				const arg = cmd[inc.len..];
 				break :blk arg[trimStart(arg, " \t")..];
 			};
 			if (arg.len == 0 or arg[0] != '@') {
@@ -231,6 +267,13 @@ fn traverseMeta(
 		}
 	} else |e| if (e != error.EndOfStream) {
 		return e;
+	}
+
+	if (multiline.items.len > 0) {
+		const kl = keyLang(multiline.items, vpos - 1);
+		try multiline.append(gpa, 0);
+		const value = multiline.items[vpos .. multiline.items.len - 1 :0];
+		try meta.add(kl.key, kl.lang, .gen(value));
 	}
 }
 
@@ -289,16 +332,20 @@ pub const Playlist = extern struct {
 	/// allocated length
 	cap: usize = 0,
 
-	pub fn deinit(self: *Playlist) void {
-		gpa.free(self.ptr[0..self.cap]);
-		self.* = undefined;
-	}
-
-	pub fn append(self: *Playlist, av: []const pd.Atom) !void {
-		var list: ArrayList = .{
+	fn asArrayList(self: Playlist) ArrayList {
+		return ArrayList{
 			.items = self.ptr[0..self.len],
 			.capacity = self.cap,
 		};
+	}
+
+	pub fn deinit(self: *Playlist) void {
+		var list = self.asArrayList();
+		list.deinit(gpa);
+	}
+
+	pub fn append(self: *Playlist, av: []const pd.Atom) !void {
+		var list = self.asArrayList();
 		defer self.* = .{
 			.ptr = list.items.ptr,
 			.len = list.items.len,

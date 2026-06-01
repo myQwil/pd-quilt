@@ -9,7 +9,10 @@
 
 # Whitespace surrounding the key is ignored,
 # but any whitespace after the equal sign is part of the value.
-artist         =foobar
+artist         =
+ # The first line break before a multiline value is ignored
+ :foobar
+ :barbaz
 
 # Track listing
 

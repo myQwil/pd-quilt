@@ -2,6 +2,7 @@
 
 const pd = @import("pd");
 const tx = @import("trax.zig");
+const std = @import("std");
 
 const Float = pd.Float;
 const Symbol = pd.Symbol;
@@ -76,9 +77,28 @@ const PList = extern struct {
 		defer hm.deinit();
 
 		const langs: []*Symbol = self.langs.ptr[0..self.langs.len];
+		var buf: [std.fs.max_path_bytes:0]u8 = undefined;
 		var iter = hm.map.iterator();
 		while (iter.next()) |kv| {
-			pd.post.do("%s: %s", .{ kv.key_ptr.*.name, kv.value_ptr.*.get(langs).name });
+			const value = std.mem.sliceTo(kv.value_ptr.*.get(langs).name, 0);
+			if (std.mem.findScalar(u8, value, '\n')) |_| {
+				pd.post.start("%s:", .{ kv.key_ptr.*.name });
+				var r: std.Io.Reader = .fixed(value);
+				while (r.takeDelimiterExclusive('\n')) |slice| {
+					defer _ = r.take(1) catch {};
+					pd.post.start("\n  ", .{});
+
+					const min = @min(buf.len, slice.len);
+					@memcpy(buf[0..min], slice[0..min]);
+					buf[min] = 0;
+					pd.post.start("%s", .{ &buf });
+				} else |e| if (e != error.EndOfStream) {
+					self.err(e);
+				}
+				pd.post.end();
+			} else {
+				pd.post.do("%s: %s", .{ kv.key_ptr.*.name, value.ptr });
+			}
 		}
 	}
 
