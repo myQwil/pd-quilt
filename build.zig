@@ -161,21 +161,17 @@ pub fn build(b: *Build) !void {
 			.rubber => mod.addImport("rubber", rubber),
 			.ffmpeg => {
 				if (os == .windows) {
-					mod.addObjectFile(b.path("build-win-av/avutil-60.dll"));
-					mod.addObjectFile(b.path("build-win-av/avcodec-62.dll"));
-					mod.addObjectFile(b.path("build-win-av/avformat-62.dll"));
-					mod.addObjectFile(b.path("build-win-av/swresample-6.dll"));
+					mod.addLibraryPath(b.path("build-win-av"));
 				} else if (os.isDarwin()) {
-					mod.addObjectFile(b.path("build-mac-av/libavutil.60.dylib"));
-					mod.addObjectFile(b.path("build-mac-av/libavcodec.62.dylib"));
-					mod.addObjectFile(b.path("build-mac-av/libavformat.62.dylib"));
-					mod.addObjectFile(b.path("build-mac-av/libswresample.6.dylib"));
-				} else {
-					mod.linkSystemLibrary("avutil", .{});
-					mod.linkSystemLibrary("avcodec", .{});
-					mod.linkSystemLibrary("avformat", .{});
-					mod.linkSystemLibrary("swresample", .{});
+					mod.addLibraryPath(b.path("build-mac-av"));
 				}
+				const linkopt: std.Build.Module.LinkSystemLibraryOptions = .{
+					.preferred_link_mode = opt.linkage
+				};
+				mod.linkSystemLibrary("avutil", linkopt);
+				mod.linkSystemLibrary("avcodec", linkopt);
+				mod.linkSystemLibrary("avformat", linkopt);
+				mod.linkSystemLibrary("swresample", linkopt);
 				mod.addImport("av", av);
 			}
 		};
