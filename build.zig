@@ -160,11 +160,12 @@ pub fn build(b: *Build) !void {
 			.rabbit => mod.addImport("rabbit", rabbit),
 			.rubber => mod.addImport("rubber", rubber),
 			.ffmpeg => {
-				if (os == .windows) {
-					mod.addLibraryPath(b.path("build-win-av"));
-				} else if (os.isDarwin()) {
-					mod.addLibraryPath(b.path("build-mac-av"));
-				}
+				// un-comment this to help with cross-compilation
+				// if (os == .windows) {
+					// mod.addLibraryPath(b.path("build-win-av"));
+				// } else if (os.isDarwin()) {
+					// mod.addLibraryPath(b.path("build-mac-av"));
+				// }
 				const linkopt: std.Build.Module.LinkSystemLibraryOptions = .{
 					.preferred_link_mode = opt.linkage
 				};
@@ -179,7 +180,7 @@ pub fn build(b: *Build) !void {
 			mod.addObjectFile(b.path("build-win-pd/bin/pd.dll"));
 		}
 		if (opt.linkage == .dynamic and x.deps.len > 0) {
-			mod.addRPathSpecial("$ORIGIN");
+			mod.addRPathSpecial(if (os.isDarwin()) "@loader_path" else "$ORIGIN");
 		}
 
 		const lib = b.addLibrary(.{
