@@ -10,7 +10,7 @@ const gpa = pd.gpa;
 var dot: *Symbol = undefined; // skips args
 
 const Proxy = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	ptr: [*]Atom,
 	len: usize,
 
@@ -47,6 +47,7 @@ const Proxy = extern struct {
 	fn init(cls: *pd.Class, vec: []Atom) !*Proxy {
 		const self: *Proxy = @ptrCast(try cls.pd());
 		self.* = .{
+			.obj = self.obj,
 			.ptr = vec.ptr,
 			.len = vec.len,
 		};
@@ -67,7 +68,7 @@ const Proxy = extern struct {
 };
 
 const Paq = extern struct {
-	proxy: Proxy = undefined,
+	proxy: Proxy,
 	out: *pd.Outlet,
 	ins: [*]*Proxy,
 
@@ -130,6 +131,7 @@ const Paq = extern struct {
 			n = i;
 		}
 		self.* = .{
+			.proxy = self.proxy,
 			.out = try .init(obj, pd.s.list()),
 			.ins = ins.ptr,
 		};

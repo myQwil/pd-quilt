@@ -8,7 +8,7 @@ const Outlet = pd.Outlet;
 const Symbol = pd.Symbol;
 
 const DelP = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	tmr: tm.Timer,
 	/// sends bang when delay time has passed
 	out_b: *Outlet,
@@ -148,6 +148,7 @@ const DelP = extern struct {
 		clock.setUnit(tmr.unit);
 
 		self.* = .{
+			.obj = self.obj,
 			.out_b = out_b,
 			.out_f = out_f,
 			.clock = clock,

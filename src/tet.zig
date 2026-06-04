@@ -7,7 +7,7 @@ const Symbol = pd.Symbol;
 /// Similar to `[mtof]` and `[ftom]`
 /// but with adjustable reference pitch and number of tones in an octave.
 pub fn Tet(T: type) type { return extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	out: *pd.Outlet,
 	/// slope
 	k: f64,
@@ -90,6 +90,7 @@ pub fn Tet(T: type) type { return extern struct {
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("ref"));
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("tet"));
 		self.* = .{
+			.obj = self.obj,
 			.out = try .init(obj, pd.s.float()),
 			.ref = ref,
 			.tet = tet,

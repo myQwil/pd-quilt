@@ -44,7 +44,7 @@ fn getUf(uf: bf.UnFloat, onset: u2, av: []const Atom) bf.UnFloat {
 }
 
 const FlEnc = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	out: *pd.Outlet,
 	uf: bf.UnFloat,
 
@@ -130,6 +130,7 @@ const FlEnc = extern struct {
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("e"));
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("s"));
 		self.* = .{
+			.obj = self.obj,
 			.out = try .init(obj, pd.s.float()),
 			.uf = getUf(.{ .u = 0 }, 0, av),
 		};

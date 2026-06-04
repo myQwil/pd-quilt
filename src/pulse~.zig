@@ -11,7 +11,7 @@ const unitbit32 = tb.unitbit32;
 const hioffset = tb.hioffset;
 
 const Pulse = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	phase: f64 = 0,
 	edge: *Float,
 	conv: Float = 0,
@@ -71,6 +71,7 @@ const Pulse = extern struct {
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("ft1"));
 
 		self.* = .{
+			.obj = self.obj,
 			.edge = &inlet.un.floatsignalvalue,
 			.f = pd.floatArg(1, av) catch 0,
 		};

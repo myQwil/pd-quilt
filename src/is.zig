@@ -6,7 +6,7 @@ const Atom = pd.Atom;
 const Symbol = pd.Symbol;
 
 const Proxy = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	owner: *Is,
 
 	const name = "_is_pxy";
@@ -21,7 +21,10 @@ const Proxy = extern struct {
 
 	inline fn init(owner: *Is) !*Proxy {
 		const self: *Proxy = @ptrCast(try class.pd());
-		self.* = .{ .owner = owner };
+		self.* = .{
+			.obj = self.obj,
+			.owner = owner,
+		};
 		return self;
 	}
 
@@ -35,7 +38,7 @@ const Proxy = extern struct {
 };
 
 const Is = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	out: *pd.Outlet,
 	type: *Symbol,
 	proxy: *Proxy,
@@ -76,6 +79,7 @@ const Is = extern struct {
 
 		_ = try obj.inlet(@ptrCast(proxy), null, null);
 		self.* = .{
+			.obj = self.obj,
 			.out = try .init(obj, pd.s.float()),
 			.type = if (s != pd.s.empty()) s else pd.s.float(),
 			.proxy = proxy,

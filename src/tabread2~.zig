@@ -10,7 +10,7 @@ const Sample = pd.Sample;
 const Symbol = pd.Symbol;
 
 const TabRead2 = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	tab2: tb.Tab2,
 	onset: Float = 0,
 	len: usize = 0,
@@ -87,7 +87,10 @@ const TabRead2 = extern struct {
 		const tab2: tb.Tab2 = try .init(obj, arrayname, pd.floatArg(1, av) catch 0);
 
 		_ = try obj.inletFloat(&self.onset);
-		self.* = .{ .tab2 = tab2 };
+		self.* = .{
+			.obj = self.obj,
+			.tab2 = tab2,
+		};
 		return self;
 	}
 

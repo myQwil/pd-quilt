@@ -11,7 +11,7 @@ const Rgb = struct {
 };
 
 const Hsv = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	out: *pd.Outlet,
 	h: Float,
 	s: Float,
@@ -65,6 +65,7 @@ const Hsv = extern struct {
 		_ = try obj.inletFloat(&self.s);
 		_ = try obj.inletFloat(&self.v);
 		self.* = .{
+			.obj = self.obj,
 			.out = try .init(obj, pd.s.float()),
 			.h = h,
 			.s = s,

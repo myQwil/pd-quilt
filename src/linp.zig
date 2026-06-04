@@ -10,7 +10,7 @@ const Symbol = pd.Symbol;
 const default_grain = 20;
 
 const LinP = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	/// sends ramp value
 	out_f: *pd.Outlet,
 	/// sends pause state
@@ -156,6 +156,7 @@ const LinP = extern struct {
 
 		const targettime = pd.time();
 		self.* = .{
+			.obj = self.obj,
 			.clock = clock,
 			.out_f = try .init(obj, pd.s.float()),
 			.out_p = try .init(obj, pd.s.float()),

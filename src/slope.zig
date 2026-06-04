@@ -6,7 +6,7 @@ const Symbol = pd.Symbol;
 
 /// Non-gui slider objects.
 pub fn Slope(T: type) type { return extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	out: *pd.Outlet,
 	min: f64,
 	max: f64,
@@ -107,6 +107,7 @@ pub fn Slope(T: type) type { return extern struct {
 			else => {},
 		}
 		self.* = .{
+			.obj = self.obj,
 			.out = try .init(obj, pd.s.float()),
 			.min = min,
 			.max = max,

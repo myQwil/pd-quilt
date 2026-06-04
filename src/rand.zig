@@ -98,7 +98,7 @@ const Rand = extern struct {
 };
 
 const Range = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	rand: Rand,
 	min: Float,
 	max: Float,
@@ -166,6 +166,7 @@ const Range = extern struct {
 			else => unreachable,
 		}
 		self.* = .{
+			.obj = self.obj,
 			.rand = try .init(obj),
 			.rng = .init(),
 			.min = min,
@@ -187,7 +188,7 @@ const Range = extern struct {
 
 /// manages its own array
 const InArray = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	rand: Rand,
 	win: wi.WordInlets,
 	rng: rn.Rng,
@@ -238,6 +239,7 @@ const InArray = extern struct {
 		} else av.len;
 
 		self.* = .{
+			.obj = self.obj,
 			.win = try .init(obj, av[0..n]),
 			.rand = try .init(obj),
 			.rng = .init(),
@@ -262,7 +264,7 @@ const InArray = extern struct {
 
 /// uses an array that exists separately
 const ExArray = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	rand: Rand,
 	sym: *Symbol,
 	rng: rn.Rng,
@@ -328,6 +330,7 @@ const ExArray = extern struct {
 
 		_ = try obj.inletSymbol(&self.sym);
 		self.* = .{
+			.obj = self.obj,
 			.rand = try .init(obj),
 			.rng = .init(),
 			.sym = s,

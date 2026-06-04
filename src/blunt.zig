@@ -78,7 +78,7 @@ const Blunt = extern struct {
 // ------------------------------ Binary operator ------------------------------
 // -----------------------------------------------------------------------------
 const BinOp = extern struct {
-	obj: Object = undefined,
+	obj: Object,
 	out: *Outlet,
 	f1: Float,
 	f2: Float,
@@ -151,6 +151,7 @@ const BinOp = extern struct {
 			else => {},
 		}
 		self.* = .{
+			.obj = self.obj,
 			.out = try .init(&self.obj, pd.s.float()),
 			.blunt = blunt,
 			.f1 = f1,
@@ -247,7 +248,7 @@ const BinOp = extern struct {
 // ------------------------------ Unary operator -------------------------------
 // -----------------------------------------------------------------------------
 const UnOp = extern struct {
-	obj: Object = undefined,
+	obj: Object,
 	out: *Outlet,
 	f: Float,
 	blunt: Blunt,
@@ -283,6 +284,7 @@ const UnOp = extern struct {
 		const blunt: Blunt = .init(av);
 		const n: usize = av.len - @intFromBool(blunt.mask != 0);
 		self.* = .{
+			.obj = self.obj,
 			.out = try .init(obj, pd.s.float()),
 			.f = pd.floatArg(0, av[0..n]) catch 0,
 			.blunt = blunt,
@@ -344,7 +346,7 @@ const UnOp = extern struct {
 // ----------------------------------- Bang ------------------------------------
 // -----------------------------------------------------------------------------
 const Bang = extern struct {
-	obj: Object = undefined,
+	obj: Object,
 	out: *Outlet,
 	blunt: Blunt,
 
@@ -365,6 +367,7 @@ const Bang = extern struct {
 		errdefer obj.g.pd.deinit();
 
 		self.* = .{
+			.obj = self.obj,
 			.out = try .init(obj, pd.s.bang()),
 			.blunt = .init(av),
 		};
@@ -386,7 +389,7 @@ const Bang = extern struct {
 // ---------------------------------- Symbol -----------------------------------
 // -----------------------------------------------------------------------------
 const Sym = extern struct {
-	obj: Object = undefined,
+	obj: Object,
 	out: *Outlet,
 	sym: *Symbol,
 	blunt: Blunt,
@@ -432,6 +435,7 @@ const Sym = extern struct {
 
 		_ = try obj.inletSymbol(&self.sym);
 		self.* = .{
+			.obj = self.obj,
 			.out = try .init(obj, pd.s.symbol()),
 			.sym = pd.symbolArg(0, av[0..n]) catch pd.s.empty(),
 			.blunt = blunt,

@@ -11,7 +11,7 @@ const Sample = pd.Sample;
 const gpa = pd.gpa;
 
 pub fn Impl(Root: type) type { return extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	base: Base,
 	rabbit: ra.Rabbit,
 	rubber: ru.Rubber,
@@ -122,6 +122,7 @@ pub fn Impl(Root: type) type { return extern struct {
 			n += 1;
 		}
 		self.* = .{
+			.obj = self.obj,
 			.base = base,
 			.rabbit = rabbit,
 			.rubber = rubber,

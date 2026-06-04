@@ -5,7 +5,7 @@ const pd = @import("pd");
 const Float = pd.Float;
 
 const Sesom = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	out_l: *pd.Outlet,
 	out_r: *pd.Outlet,
 	f: Float,
@@ -27,6 +27,7 @@ const Sesom = extern struct {
 
 		_ = try obj.inletFloat(&self.f);
 		self.* = .{
+			.obj = self.obj,
 			.out_l = try .init(obj, pd.s.float()),
 			.out_r = try .init(obj, pd.s.float()),
 			.f = f,

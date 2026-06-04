@@ -8,7 +8,7 @@ const Float = pd.Float;
 const Symbol = pd.Symbol;
 
 const PList = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	out_val: *pd.Outlet,
 	out_idx: *pd.Outlet,
 	plist: tx.Playlist = .{},
@@ -118,6 +118,7 @@ const PList = extern struct {
 		errdefer obj.g.pd.deinit();
 
 		self.* = .{
+			.obj = self.obj,
 			.out_val = try .init(obj, pd.s.symbol()),
 			.out_idx = try .init(obj, pd.s.float()),
 		};

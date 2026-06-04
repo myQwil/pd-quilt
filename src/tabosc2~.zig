@@ -14,7 +14,7 @@ const unitbit32 = tf.unitbit32;
 const hioffset = tf.hioffset;
 
 const TabOsc2 = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	tab2: tb.Tab2,
 	phase: f64 = 0,
 	conv: Float = 0,
@@ -105,7 +105,10 @@ const TabOsc2 = extern struct {
 		const tab2: tb.Tab2 = try .init(obj, arrayname, pd.floatArg(1, av) catch 0);
 
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("ft1"));
-		self.* = .{ .tab2 = tab2 };
+		self.* = .{
+			.obj = self.obj,
+			.tab2 = tab2,
+		};
 		return self;
 	}
 

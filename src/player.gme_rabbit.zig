@@ -9,7 +9,7 @@ const Float = pd.Float;
 const Sample = pd.Sample;
 
 pub fn Impl(Root: type) type { return extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	base: Base,
 	rabbit: ra.Rabbit,
 	tempo: *Float,
@@ -102,6 +102,7 @@ pub fn Impl(Root: type) type { return extern struct {
 
 		const in3: *Inlet = @ptrCast(@alignCast(try obj.inletSignal(1.0)));
 		self.* = .{
+			.obj = self.obj,
 			.base = base,
 			.rabbit = rabbit,
 			.tempo = &in3.un.floatsignalvalue,

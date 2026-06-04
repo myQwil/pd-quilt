@@ -7,7 +7,7 @@ const Atom = pd.Atom;
 const Symbol = pd.Symbol;
 
 const Chrono = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	timer: tm.Timer,
 	/// outputs total duration
 	out_total: *pd.Outlet,
@@ -111,6 +111,7 @@ const Chrono = extern struct {
 		const settime = pd.time();
 		_ = try obj.inlet(&obj.g.pd, pd.s.bang(), .gen("bang2"));
 		self.* = .{
+			.obj = self.obj,
 			.out_total = try .init(obj, pd.s.float()),
 			.out_lap = try .init(obj, pd.s.float()),
 			.timer = try .init(obj, av),

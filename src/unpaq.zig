@@ -8,7 +8,7 @@ const Symbol = pd.Symbol;
 const gpa = pd.gpa;
 
 const Unpaq = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	ptr: [*]Outlet,
 	len: usize,
 
@@ -69,6 +69,7 @@ const Unpaq = extern struct {
 			} else .{ .out = try .init(obj, null), .type = .gimme };
 		}
 		self.* = .{
+			.obj = self.obj,
 			.ptr = vec.ptr,
 			.len = vec.len,
 		};

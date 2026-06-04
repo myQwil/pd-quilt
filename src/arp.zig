@@ -337,7 +337,7 @@ const Arp = extern struct {
 
 /// uses an internal array
 const InArray = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	arp: Arp,
 	win: WordInlets,
 
@@ -398,6 +398,7 @@ const InArray = extern struct {
 		errdefer obj.g.pd.deinit();
 
 		self.* = .{
+			.obj = self.obj,
 			.win = try .init(obj, if (av.len > 0) av else &.{ .float(69), .float(7) }),
 			.arp = try .init(obj),
 		};
@@ -424,7 +425,7 @@ const InArray = extern struct {
 
 /// uses an external array
 const ExArray = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	arp: Arp,
 	sym: *Symbol,
 
@@ -517,6 +518,7 @@ const ExArray = extern struct {
 
 		_ = try obj.inletSymbol(&self.sym);
 		self.* = .{
+			.obj = self.obj,
 			.arp = try .init(obj),
 			.sym = s,
 		};

@@ -6,7 +6,7 @@ const Atom = pd.Atom;
 const Symbol = pd.Symbol;
 
 const Has = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	out: *pd.Outlet,
 	atom: Atom,
 
@@ -49,6 +49,7 @@ const Has = extern struct {
 
 		_ = try obj.inlet(&obj.g.pd, pd.s.list(), .gen("set"));
 		self.* = .{
+			.obj = self.obj,
 			.out = try .init(obj, pd.s.float()),
 			.atom = if (av.len > 0) av[0] else .float(0),
 		};

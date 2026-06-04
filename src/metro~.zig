@@ -11,7 +11,7 @@ const Float = pd.Float;
 const Sample = pd.Sample;
 
 const MetroSignal = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	out: *pd.Outlet,
 	phase: f64 = 0,
 	prev: Sample = 0,
@@ -71,6 +71,7 @@ const MetroSignal = extern struct {
 
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("ft1"));
 		self.* = .{
+			.obj = self.obj,
 			.out = try .init(obj, pd.s.bang()),
 			.f = f,
 		};

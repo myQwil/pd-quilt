@@ -92,7 +92,7 @@ const LimitState = packed struct(u2) {
 };
 
 const Radix = extern struct {
-	obj: Object = undefined,
+	obj: Object,
 	/// owning glist
 	gl: *GList,
 	/// label text
@@ -751,6 +751,7 @@ const Radix = extern struct {
 		}
 
 		self.* = .{
+			.obj = self.obj,
 			.gl = gl,
 			.rad = rad,
 			.step = .{

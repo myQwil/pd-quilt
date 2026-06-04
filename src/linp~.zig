@@ -7,7 +7,7 @@ const Sample = pd.Sample;
 const Float = pd.Float;
 
 const LinPSignal = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	o_pause: *pd.Outlet,
 	target: Sample = 0,
 	value: Sample = 0,
@@ -116,6 +116,7 @@ const LinPSignal = extern struct {
 		_ = try obj.outlet(pd.s.signal());
 
 		self.* = .{
+			.obj = self.obj,
 			.o_pause = try .init(obj, pd.s.float()),
 		};
 		return self;

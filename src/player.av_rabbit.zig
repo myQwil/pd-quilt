@@ -8,7 +8,7 @@ const Float = pd.Float;
 const Sample = pd.Sample;
 
 pub fn Impl(Root: type) type { return extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	base: Base,
 	rabbit: ra.Rabbit,
 
@@ -161,6 +161,7 @@ pub fn Impl(Root: type) type { return extern struct {
 
 		const rabbit: ra.Rabbit = try .init(obj, base.nch);
 		self.* = .{
+			.obj = self.obj,
 			.base = base,
 			.rabbit = rabbit,
 		};

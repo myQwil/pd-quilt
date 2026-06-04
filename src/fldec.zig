@@ -6,7 +6,7 @@ const UnFloat = @import("bitfloat.zig").UnFloat;
 const Float = pd.Float;
 
 const FlDec = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	out_m: *pd.Outlet,
 	out_e: *pd.Outlet,
 	out_s: *pd.Outlet,
@@ -45,6 +45,7 @@ const FlDec = extern struct {
 
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("set"));
 		self.* = .{
+			.obj = self.obj,
 			.out_m = try .init(obj, pd.s.float()),
 			.out_e = try .init(obj, pd.s.float()),
 			.out_s = try .init(obj, pd.s.float()),

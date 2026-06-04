@@ -8,7 +8,7 @@ const Float = pd.Float;
 const Symbol = pd.Symbol;
 
 pub const Rind = extern struct {
-	obj: pd.Object = undefined,
+	obj: pd.Object,
 	out: *pd.Outlet,
 	min: Float,
 	max: Float,
@@ -85,6 +85,7 @@ pub const Rind = extern struct {
 			else => unreachable,
 		}
 		self.* = .{
+			.obj = self.obj,
 			.out = try .init(obj, pd.s.float()),
 			.rng = .init(),
 			.min = min,
