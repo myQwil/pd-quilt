@@ -16,7 +16,7 @@ artist         =
 
 # Track listing
 
-# A file path has @ as its first non-whitespace character.
+# A file path has `@` as its first non-whitespace character.
 @trax/foo
 @trax/bar
 

@@ -203,6 +203,15 @@ pub fn build(b: *Build) !void {
 
 	//---------------------------------------------------------------------------
 	// Install help patches and abstractions
+	switch (opt.patches) {
+		.copy => b.installDirectory(.{
+			.source_dir = b.path("help/plist"),
+			.install_dir = .prefix,
+			.install_subdir = "plist",
+		}),
+		.symbolic => pd.InstallLink.install(b, "help/plist", "plist"),
+		.skip => {},
+	}
 	const io = b.graph.io;
 	const InstallFunc = fn(*Build, src_path: []const u8, dest_rel_path: []const u8) void;
 	const installFile: *const InstallFunc = switch (opt.patches) {
