@@ -1,0 +1,171 @@
+//! Attack/decay envelope generator.
+
+const pd = @import("pd");
+
+const Atom = pd.Atom;
+const Sample = pd.Sample;
+const Symbol = pd.Symbol;
+const Float = pd.Float;
+
+const AttackDecay = extern struct {
+	obj: pd.Object,
+	/// ramp periods
+	ramps: [3]Ramp = @splat(.{}),
+	/// per-sample increment
+	inc: Sample = 0,
+	/// current value
+	value: Sample = 0,
+	/// attack target value
+	peak: Sample = 1,
+	/// attack duration
+	attack: Float,
+	/// decay duration
+	decay: Float,
+	/// release duration
+	release: Float = 10,
+	/// samples per millisecond
+	ratio: Float = 0,
+	bf: packed struct(u8) {
+		/// restart envelope
+		retarget: bool = false,
+		/// jump to zero before next attack
+		delay: bool = false,
+		/// release an attack/decay in progress
+		release: bool = false,
+		/// ramp index
+		index: u5 = 0,
+	} = .{},
+
+	const Ramp = @import("ramp.zig").Ramp(@This());
+
+	const name = "ad~";
+	var class: *pd.Class = undefined;
+
+	fn performC(w: [*]usize) callconv(.c) [*]usize {
+		const self: *AttackDecay = @ptrFromInt(w[1]);
+		const out = @as([*]Sample, @ptrFromInt(w[3]))[0..w[2]];
+
+		if (self.bf.retarget) {
+			if (self.bf.release) {
+				self.bf.index = 2;
+				self.ramps[2].reset(self.ratio * self.release, 0);
+				self.ramps[2].setInc(self);
+				self.bf.release = false;
+			} else {
+				if (self.bf.delay) {
+					self.ramps[0].reset(self.ratio * self.release, 0);
+					self.bf.index = 0;
+				} else {
+					self.bf.index = 1;
+				}
+				self.ramps[1].reset(self.ratio * self.attack, self.peak);
+				self.ramps[2].reset(self.ratio * self.decay, 0);
+				self.ramps[self.bf.index].setInc(self);
+			}
+			self.bf.retarget = false;
+		}
+		self.ramps[self.bf.index].process(self, out);
+		return w + 4;
+	}
+
+	fn dspC(self: *AttackDecay, sp: [*]*pd.Signal) callconv(.c) void {
+		pd.dsp.add(&performC, .{ self, sp[0].len, sp[0].vec });
+		self.ratio = sp[0].srate / 1000;
+	}
+
+	fn bangC(self: *AttackDecay) callconv(.c) void {
+		self.bf.retarget = true;
+	}
+
+	fn floatC(self: *AttackDecay, f: Float) callconv(.c) void {
+		if (f == 0) {
+			self.bf.release = true;
+		} else if (f < 0) {
+			self.bf.delay = true;
+			self.peak = -f;
+		} else {
+			self.bf.delay = false;
+			self.peak = f;
+		}
+		self.bf.retarget = true;
+	}
+
+	fn list(self: *AttackDecay, av: []const Atom) void {
+		sw: switch (@min(av.len, 2)) {
+			2 => {
+				self.decay = av[1].getFloat() orelse self.decay;
+				continue :sw 1;
+			},
+			1 => self.attack = av[0].getFloat() orelse self.attack,
+			else => {},
+		}
+	}
+
+	fn listC(
+		self: *AttackDecay,
+		_: *Symbol, ac: c_uint, av: [*]const Atom,
+	) callconv(.c) void {
+		self.list(av[0..ac]);
+	}
+
+	fn anythingC(
+		self: *AttackDecay,
+		s: *Symbol, ac: c_uint, av: [*]const Atom,
+	) callconv(.c) void {
+		if (ac > 0) {
+			self.list(&.{ .symbol(s), av[0] });
+		}
+	}
+
+	fn attackC(self: *AttackDecay, f: Float) callconv(.c) void {
+		self.attack = f;
+	}
+
+	fn decayC(self: *AttackDecay, f: Float) callconv(.c) void {
+		self.decay = f;
+	}
+
+	fn releaseC(self: *AttackDecay, f: Float) callconv(.c) void {
+		self.release = f;
+	}
+
+	fn initC(a: Float, d: Float) callconv(.c) ?*AttackDecay {
+		return pd.wrap(*AttackDecay, init(a, d), name);
+	}
+	inline fn init(a: Float, d: Float) !*AttackDecay {
+		const self: *AttackDecay = @ptrCast(try class.pd());
+		const obj: *pd.Object = &self.obj;
+		errdefer obj.g.pd.deinit();
+
+		_ = try obj.inletFloat(&self.attack);
+		_ = try obj.inletFloat(&self.decay);
+		_ = try obj.outlet(pd.s.signal());
+
+		self.* = .{
+			.obj = self.obj,
+			.attack = a,
+			.decay = d,
+		};
+		return self;
+	}
+
+	inline fn setup() !void {
+		const args: []const Atom.Type = &.{
+			.deffloat,
+			.deffloat,
+		};
+		class = try .init(AttackDecay, name, args, &initC, null, .{});
+		class.addBang(@ptrCast(&bangC));
+		class.addFloat(@ptrCast(&floatC));
+		class.addList(@ptrCast(&listC));
+		class.addAnything(@ptrCast(&anythingC));
+		class.addMethod(@ptrCast(&dspC), .gen("dsp"), &.{ .cant });
+		class.addMethod(@ptrCast(&attackC), .gen("a"), &.{ .float });
+		class.addMethod(@ptrCast(&decayC), .gen("d"), &.{ .float });
+		class.addMethod(@ptrCast(&releaseC), .gen("r"), &.{ .float });
+	}
+};
+
+export fn ad_tilde_setup() void {
+	_ = pd.wrap(void, AttackDecay.setup(), @src().fn_name);
+}

@@ -50,6 +50,8 @@ const External = struct {
 };
 
 const externals = [_]External{
+	.{ .name = "ad~" },
+	.{ .name = "adsr~" },
 	.{ .name = "arp" },
 	.{ .name = "av~", .deps = &.{ .ffmpeg, .rabbit } },
 	.{ .name = "avr~", .deps = &.{ .ffmpeg, .rabbit, .rubber } },
