@@ -482,25 +482,22 @@ const Radix = extern struct {
 		save(self, b) catch |e| self.err(e);
 	}
 	inline fn save(self: *Radix, b: *pd.BinBuf) !void {
-		var buf_min: [16:0]u8 = undefined;
-		var buf_max: [16:0]u8 = undefined;
 		const none: Atom = .symbol(.gen("_"));
-		(if (self.b.range.lo) Atom.float(self.range[0]) else none).bufPrint(&buf_min);
-		(if (self.b.range.hi) Atom.float(self.range[1]) else none).bufPrint(&buf_max);
 		const rsl = try self.getRSL();
+		try b.add(&.{
+			.symbol(.gen("#X")), .symbol(.gen("obj")),
+			.float(self.obj.pix[0]), .float(self.obj.pix[1]),
+			.symbol(.gen("radix")),
 
-		try b.addV("ssiis" ++ "iiffss" ++ "iisssi;", .{
-			Symbol.gen("#X"), Symbol.gen("obj"),
-			self.obj.pix[0], self.obj.pix[1],
-			Symbol.gen("radix"),
+			.float(self.rad.base), .float(self.rad.prec),
+			.float(self.step[0]), .float(-self.step[1]),
+			if (self.b.range.lo) .float(self.range[0]) else none,
+			if (self.b.range.hi) .float(self.range[1]) else none,
 
-			self.rad.base, self.rad.prec,
-			self.step[0], -self.step[1],
-			Symbol.gen(&buf_min), Symbol.gen(&buf_max),
-
-			self.rad.width, self.font_size,
-			rsl[0], rsl[1],
-			rsl[2], @as(u8, @intFromEnum(self.b.where)),
+			.float(self.rad.width), .float(self.font_size),
+			.symbol(rsl[0]), .symbol(rsl[1]), .symbol(rsl[2]),
+			.float(@floatFromInt(@intFromEnum(self.b.where))),
+			.semi,
 		});
 	}
 
