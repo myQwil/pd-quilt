@@ -38,10 +38,10 @@ pub fn Ramp(Owner: type) type { return extern struct {
 					f += owner.inc;
 				}
 				owner.value = ramp.target;
-				if (owner.bf.index < owner.ramps.len - 1) {
-					owner.bf.index += 1;
+				if (owner.b.index < owner.ramps.len - 1) {
+					owner.b.index += 1;
 					out = out[ramp.remain..];
-					ramp = &owner.ramps[owner.bf.index];
+					ramp = &owner.ramps[owner.b.index];
 					ramp.setInc(owner);
 					continue;
 				} else {

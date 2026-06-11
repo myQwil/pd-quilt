@@ -1,7 +1,7 @@
 #N canvas 760 200 400 300 16;
 #X declare -lib blunt;
-#X obj 140 30 radix 10 6 0 3 1 _ 0 0 _ _ _ 0;
-#X obj 70 30 radix 10 6 0 3 1 _ 0 0 _ _ _ 0;
+#X obj 140 30 radix 10 6 3 3 1 _ 0 0 _ _ _ 0;
+#X obj 70 30 radix 10 6 3 3 1 _ 0 0 _ _ _ 0;
 #N canvas 0 50 450 250 (subpatch) 0;
 #X array \$0view 6 float 2;
 #A color 1.65798e+07;
@@ -69,7 +69,7 @@
 #X connect 7 0 12 0;
 #X connect 11 0 12 0;
 #X restore 240 50 pd args;
-#N canvas 800 200 360 340 methods 0;
+#N canvas 800 200 360 380 methods 0;
 #X text 90 50 set attack duration;
 #X floatatom 40 20 0 0 0 0 - - - 0;
 #X msg 40 50 a \$1;
@@ -82,7 +82,9 @@
 #X floatatom 60 160 0 0 0 0 - - - 0;
 #X msg 60 190 s \$1;
 #X text 110 190 set sustain target;
-#X obj 40 300 s \$1msg;
+#X obj 40 340 s \$1msg;
+#X msg 80 300 stop;
+#X text 130 300 perform a release;
 #X connect 1 0 2 0;
 #X connect 2 0 12 0;
 #X connect 3 0 4 0;
@@ -91,6 +93,7 @@
 #X connect 7 0 12 0;
 #X connect 9 0 10 0;
 #X connect 10 0 12 0;
+#X connect 13 0 12 0;
 #X restore 240 80 pd methods;
 #X obj 70 190 s \$1msg;
 #X connect 0 0 4 1;
