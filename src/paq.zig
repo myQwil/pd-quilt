@@ -107,7 +107,8 @@ const Paq = extern struct {
 	}
 	inline fn init(argv: []const Atom) !*Paq {
 		const av: []const Atom = if (argv.len > 0)
-			argv else &.{ .float(0), .float(0) };
+			argv
+		else &.{ .float(0), .float(0) };
 		const vec = try gpa.alloc(Atom, av.len);
 		errdefer gpa.free(vec);
 		vec[0] = av[0];

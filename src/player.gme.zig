@@ -192,8 +192,9 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		return if (ms >= 0) ms else blk: { // try intro + 2 loops
 			const intro = self.info.intro_length;
 			const loop = self.info.loop_length;
-			break :blk if (intro < 0 and loop < 0) ms
-				else @max(0, intro) + @max(0, 2 * loop);
+			break :blk if (intro < 0 and loop < 0)
+				ms
+			else @max(0, intro) + @max(0, 2 * loop);
 		};
 	}
 
