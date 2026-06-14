@@ -44,8 +44,8 @@ proc ::dialog_radix::apply {toplvl} {
 		[::dialog_radix::escape [$toplvl.digits.prec.entry get]] \
 		[::dialog_radix::escape [$toplvl.step.axisx.entry get]] \
 		[::dialog_radix::escape [$toplvl.step.axisy.entry get]] \
-		[::dialog_radix::escape [$toplvl.limits.lower.entry get]] \
-		[::dialog_radix::escape [$toplvl.limits.upper.entry get]] \
+		[::dialog_radix::escape [$toplvl.range.lower.entry get]] \
+		[::dialog_radix::escape [$toplvl.range.upper.entry get]] \
 		[::dialog_radix::escape [$toplvl.width.entry get]] \
 		$::dialog_radix::fontsize \
 		[::dialog_radix::escape [$toplvl.s_r.recv.entry get]] \
@@ -96,10 +96,10 @@ proc ::dialog_radix::setup { \
 	$toplvl.step.axisy.entry insert 0 $axisy
 
 	if {$lower ne "_"} {
-		$toplvl.limits.lower.entry insert 0 [::dialog_radix::unescape $lower]
+		$toplvl.range.lower.entry insert 0 [::dialog_radix::unescape $lower]
 	}
 	if {$upper ne "_"} {
-		$toplvl.limits.upper.entry insert 0 [::dialog_radix::unescape $upper]
+		$toplvl.range.upper.entry insert 0 [::dialog_radix::unescape $upper]
 	}
 
 	if {$snd ne "_"} {
@@ -220,21 +220,21 @@ proc ::dialog_radix::create_dialog {toplvl} {
 	pack $toplvl.step.axisy.label $toplvl.step.axisy.entry -side left
 
 	#############################################################################
-	# Limits
-	labelframe $toplvl.limits -text [_ "Limits"] -padx 15 -pady 4 -borderwidth 1
-	pack $toplvl.limits -side top -fill x
+	# Output Range
+	labelframe $toplvl.range -text [_ "Output Range"] -padx 15 -pady 4 -borderwidth 1
+	pack $toplvl.range -side top -fill x
 
-	frame $toplvl.limits.lower
-	pack $toplvl.limits.lower -side left
-	label $toplvl.limits.lower.label -text [_ "Lower:"]
-	entry $toplvl.limits.lower.entry -width 7
-	pack $toplvl.limits.lower.label $toplvl.limits.lower.entry -side left
+	frame $toplvl.range.lower
+	pack $toplvl.range.lower -side left
+	label $toplvl.range.lower.label -text [_ "Lower:"]
+	entry $toplvl.range.lower.entry -width 7
+	pack $toplvl.range.lower.label $toplvl.range.lower.entry -side left
 
-	frame $toplvl.limits.upper
-	pack $toplvl.limits.upper -side left
-	label $toplvl.limits.upper.label -text [_ "Upper:"]
-	entry $toplvl.limits.upper.entry -width 7
-	pack $toplvl.limits.upper.label $toplvl.limits.upper.entry -side left
+	frame $toplvl.range.upper
+	pack $toplvl.range.upper -side left
+	label $toplvl.range.upper.label -text [_ "Upper:"]
+	entry $toplvl.range.upper.entry -width 7
+	pack $toplvl.range.upper.label $toplvl.range.upper.entry -side left
 
 	#############################################################################
 	# Label
@@ -280,8 +280,8 @@ proc ::dialog_radix::create_dialog {toplvl} {
 		bind $toplvl.s_r.recv.entry <KeyPress-Return> "::dialog_radix::apply_and_rebind_return $toplvl"
 		bind $toplvl.digits.base.entry <KeyPress-Return> "::dialog_radix::apply_and_rebind_return $toplvl"
 		bind $toplvl.digits.prec.entry <KeyPress-Return> "::dialog_radix::apply_and_rebind_return $toplvl"
-		bind $toplvl.limits.lower.entry <KeyPress-Return> "::dialog_radix::apply_and_rebind_return $toplvl"
-		bind $toplvl.limits.upper.entry <KeyPress-Return> "::dialog_radix::apply_and_rebind_return $toplvl"
+		bind $toplvl.range.lower.entry <KeyPress-Return> "::dialog_radix::apply_and_rebind_return $toplvl"
+		bind $toplvl.range.upper.entry <KeyPress-Return> "::dialog_radix::apply_and_rebind_return $toplvl"
 		bind $toplvl.width.entry <KeyPress-Return> "::dialog_radix::apply_and_rebind_return $toplvl"
 
 		# unbind Return from ok button when an entry takes focus
@@ -290,8 +290,8 @@ proc ::dialog_radix::create_dialog {toplvl} {
 		$toplvl.s_r.recv.entry config -validate focusin -vcmd "::dialog_radix::unbind_return $toplvl"
 		$toplvl.digits.base.entry config -validate focusin -vcmd "::dialog_radix::unbind_return $toplvl"
 		$toplvl.digits.prec.entry config -validate focusin -vcmd "::dialog_radix::unbind_return $toplvl"
-		$toplvl.limits.lower.entry config -validate focusin -vcmd "::dialog_radix::unbind_return $toplvl"
-		$toplvl.limits.upper.entry config -validate focusin -vcmd "::dialog_radix::unbind_return $toplvl"
+		$toplvl.range.lower.entry config -validate focusin -vcmd "::dialog_radix::unbind_return $toplvl"
+		$toplvl.range.upper.entry config -validate focusin -vcmd "::dialog_radix::unbind_return $toplvl"
 		$toplvl.width.entry config -validate focusin -vcmd "::dialog_radix::unbind_return $toplvl"
 
 		# remove cancel button from focus list since it's not activated on Return
