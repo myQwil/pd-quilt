@@ -87,8 +87,8 @@ const TagType = enum(u8) {
 };
 
 const MaybeFloat = extern struct {
-	val: Float,
-	set: bool,
+	val: Float = 0,
+	set: bool = false,
 
 	inline fn from(value: ?Float) MaybeFloat {
 		return if (value) |v|
@@ -101,13 +101,26 @@ const MaybeFloat = extern struct {
 	}
 };
 
-inline fn baseline(range: [2]MaybeFloat) Float {
-	return if (range[0].set and range[0].val > 0)
-		range[0].val
-	else if (range[1].set and range[1].val < 0)
-		range[1].val
-	else 0;
-}
+const Range = extern struct {
+	lo: MaybeFloat = .{},
+	hi: MaybeFloat = .{},
+
+	inline fn baseline(self: Range) Float {
+		return if (self.lo.set and self.lo.val > 0)
+			self.lo.val
+		else if (self.hi.set and self.hi.val < 0)
+			self.hi.val
+		else 0;
+	}
+
+	inline fn sort(self: *Range) void {
+		if (self.lo.set and self.hi.set and self.lo.val > self.hi.val) {
+			const temp: Float = self.lo.val;
+			self.lo.val = self.hi.val;
+			self.hi.val = temp;
+		}
+	}
+};
 
 const Radix = extern struct {
 	obj: Object,
@@ -124,7 +137,7 @@ const Radix = extern struct {
 	/// last character in the tag (indicates type)
 	tag_type: *TagType,
 	/// min-max range of possible values
-	range: [2]MaybeFloat,
+	range: Range,
 	/// number of pixels per motion step
 	step: [2]Float,
 	/// position at the start of a grab
@@ -428,14 +441,14 @@ const Radix = extern struct {
 		if (trunc < nval + bn4 and trunc > nval - bn4) {
 			nval = trunc;
 		}
-		if (self.range[0].set and self.range[0].val > nval) {
-			nval = self.range[0].val;
+		if (self.range.lo.set and self.range.lo.val > nval) {
+			nval = self.range.lo.val;
 			// prevent having to drag all the way back to where limit was reached
 			self.grab = pos - self.step * FVec2{ 0.25, 0.25 };
 			self.alt = nval;
 		}
-		if (self.range[1].set and self.range[1].val < nval) {
-			nval = self.range[1].val;
+		if (self.range.hi.set and self.range.hi.val < nval) {
+			nval = self.range.hi.val;
 			self.grab = pos - self.step * FVec2{ 0.25, 0.25 };
 			self.alt = nval;
 		}
@@ -456,7 +469,7 @@ const Radix = extern struct {
 			return 1;
 		}
 		if (alt != 0) {
-			const zero: Float = baseline(self.range);
+			const zero: Float = self.range.baseline();
 			if (self.rad.value != zero) {
 				self.alt = self.rad.value;
 				self.floatC(zero);
@@ -508,7 +521,7 @@ const Radix = extern struct {
 
 			.float(self.rad.base), .float(self.rad.prec),
 			.float(self.step[0]), .float(-self.step[1]),
-			self.range[0].atom(), self.range[1].atom(),
+			self.range.lo.atom(), self.range.hi.atom(),
 
 			.float(self.rad.width), .float(self.font_size),
 			.symbol(rsl[0]), .symbol(rsl[1]), .symbol(rsl[2]),
@@ -523,8 +536,8 @@ const Radix = extern struct {
 	inline fn properties(self: *Radix) !void {
 		var buf_min: [16:0]u8 = undefined;
 		var buf_max: [16:0]u8 = undefined;
-		self.range[0].atom().bufPrint(&buf_min);
-		self.range[1].atom().bufPrint(&buf_max);
+		self.range.lo.atom().bufPrint(&buf_min);
+		self.range.hi.atom().bufPrint(&buf_max);
 		const rsl = try self.getRSL();
 
 		self.obj.g.pd.stub("dialog_radix::setup", self, "ii ff ss ii ss si", .{
@@ -556,8 +569,8 @@ const Radix = extern struct {
 			.float(@floatFromInt(self.rad.prec)),
 			.float(self.step[0]),
 			.float(-self.step[1]),
-			self.range[0].atom(),
-			self.range[1].atom(),
+			self.range.lo.atom(),
+			self.range.hi.atom(),
 			.float(@floatFromInt(self.rad.width)),
 			.float(@floatFromInt(self.font_size)),
 			.symbol(rsl[0]),
@@ -580,7 +593,8 @@ const Radix = extern struct {
 			if (av[3].getFloat()) |f| -f else self.step[1],
 		};
 
-		self.range = .{ .from(av[4].getFloat()), .from(av[5].getFloat()) };
+		self.range = .{ .lo = .from(av[4].getFloat()), .hi = .from(av[5].getFloat()) };
+		self.range.sort();
 
 		const fs: u16 = @intFromFloat(av[7].getFloat() orelse 0);
 		self.font_size = @min(fs, 36);
@@ -737,29 +751,53 @@ const Radix = extern struct {
 		try w.print("{x}._", .{ @intFromPtr(obj) });
 		tag[w.end] = 0;
 
-		const range: [2]MaybeFloat = .{
-			.from(pd.floatArg(4, av) catch null),
-			.from(pd.floatArg(5, av) catch null),
-		};
-		const rad: rx.Rad = blk: {
-			var rad: rx.Rad = .init(
-				@intFromFloat(pd.floatArg(0, av) catch 10),
-				@intFromFloat(pd.floatArg(1, av) catch 0),
-			);
-			rad.width = @intFromFloat(@min(pd.floatArg(6, av) catch 0, 500));
-			rad.value = baseline(range);
-			break :blk rad;
-		};
+		var base: u16 = 10;
+		var prec: u16 = 0;
+		var step: [2]Float = .{ 0, -3 };
+		var range: Range = .{};
+		var width: u16 = 0;
+		var font_size: u16 = 0;
+		var rsl: [3]*Symbol = @splat(pd.s.empty());
+		var where: WhereLabel = .left;
+		sw: switch (@min(av.len, 12)) {
+			12 => {
+				if (av[11].getFloat()) |f| where = @enumFromInt(@as(u2, @intFromFloat(f)));
+			continue :sw 11; }, 11 => {
+				if (av[10].getSymbol()) |s| rsl[2] = unescape(s);
+			continue :sw 10; }, 10 => {
+				if (av[9].getSymbol()) |s| rsl[1] = unescape(s);
+			continue :sw 9; }, 9 => {
+				if (av[8].getSymbol()) |s| rsl[0] = unescape(s);
+			continue :sw 8; }, 8 => {
+				if (av[7].getFloat()) |f| font_size = @intFromFloat(@min(f, 36));
+			continue :sw 7; }, 7 => {
+				if (av[6].getFloat()) |f| width = @intFromFloat(@min(f, 500));
+			continue :sw 6; }, 6 => {
+				if (av[5].getFloat()) |f| range.hi = .{ .set = true, .val = f };
+			continue :sw 5; }, 5 => {
+				if (av[4].getFloat()) |f| range.lo = .{ .set = true, .val = f };
+			continue :sw 4; }, 4 => {
+				if (av[3].getFloat()) |f| step[1] = -f;
+			continue :sw 3; }, 3 => {
+				if (av[2].getFloat()) |f| step[0] = f;
+			continue :sw 2; }, 2 => {
+				if (av[1].getFloat()) |f| prec = @intFromFloat(f);
+			continue :sw 1; }, 1 => {
+				if (av[0].getFloat()) |f| base = @intFromFloat(f);
+			}, else => {},
+		}
 
-		const rcv: *Symbol = unescape(pd.symbolArg(8, av) catch pd.s.empty());
-		const snd: *Symbol = unescape(pd.symbolArg(9, av) catch pd.s.empty());
+		range.sort();
+		var rad: rx.Rad = .init(base, prec);
+		rad.width = width;
+		rad.value = range.baseline();
 
-		if (rcv == pd.s.empty()) {
+		if (rsl[0] == pd.s.empty()) {
 			_ = try obj.inlet(&obj.g.pd, null, null);
 		} else {
-			obj.g.pd.bind(gl.realizeDollar(rcv));
+			obj.g.pd.bind(gl.realizeDollar(rsl[0]));
 		}
-		if (snd == pd.s.empty()) {
+		if (rsl[1] == pd.s.empty()) {
 			_ = try obj.outlet(pd.s.float());
 		}
 
@@ -767,19 +805,14 @@ const Radix = extern struct {
 			.obj = self.obj,
 			.gl = gl,
 			.rad = rad,
-			.step = .{
-				pd.floatArg(2, av) catch 0,
-				if (pd.floatArg(3, av)) |f| -f else |_| -3,
-			},
+			.step = step,
 			.range = range,
-			.font_size = @intFromFloat(@min(pd.floatArg(7, av) catch 0, 36)),
-			.rcv = rcv,
-			.snd = snd,
-			.sndx = gl.realizeDollar(snd),
-			.lbl = unescape(pd.symbolArg(10, av) catch pd.s.empty()),
-			.b = .{
-				.where = @enumFromInt(@as(u2, @intFromFloat(pd.floatArg(11, av) catch 0))),
-			},
+			.font_size = font_size,
+			.rcv = rsl[0],
+			.snd = rsl[1],
+			.sndx = gl.realizeDollar(rsl[1]),
+			.lbl = rsl[2],
+			.b = .{ .where = where },
 			.tag = tag,
 			.tag_type = @ptrCast(&self.tag[w.end - 1]),
 		};
