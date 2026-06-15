@@ -86,10 +86,28 @@ const TagType = enum(u8) {
 	text = 't',
 };
 
-const LimitState = packed struct(u2) {
-	lo: bool,
-	hi: bool,
+const MaybeFloat = extern struct {
+	val: Float,
+	set: bool,
+
+	inline fn from(value: ?Float) MaybeFloat {
+		return if (value) |v|
+			.{ .val = v, .set = true }
+		else .{ .val = 0, .set = false };
+	}
+
+	inline fn atom(self: MaybeFloat) Atom {
+		return if (self.set) .float(self.val) else .symbol(.gen("_"));
+	}
 };
+
+inline fn baseline(range: [2]MaybeFloat) Float {
+	return if (range[0].set and range[0].val > 0)
+		range[0].val
+	else if (range[1].set and range[1].val < 0)
+		range[1].val
+	else 0;
+}
 
 const Radix = extern struct {
 	obj: Object,
@@ -105,10 +123,10 @@ const Radix = extern struct {
 	sndx: *Symbol,
 	/// last character in the tag (indicates type)
 	tag_type: *TagType,
+	/// min-max range of possible values
+	range: [2]MaybeFloat,
 	/// number of pixels per motion step
 	step: [2]Float,
-	/// min-max range of possible values
-	range: [2]Float,
 	/// position at the start of a grab
 	grab: [2]Float = .{ 0, 0 },
 	/// value at the start of a grab, or the toggle value
@@ -122,13 +140,11 @@ const Radix = extern struct {
 	/// bit field
 	b: packed struct(u8) {
 		where: WhereLabel,
-		/// null states for the min-max range
-		range: LimitState,
 		/// true if we've grabbed the keyboard and want a thicker border
 		grabbed: bool = false,
 		/// whether shift key was down when drag started
 		shift: bool = false,
-		_unused: u2 = 0,
+		_unused: u4 = 0,
 	},
 
 	const name = "radix";
@@ -412,14 +428,14 @@ const Radix = extern struct {
 		if (trunc < nval + bn4 and trunc > nval - bn4) {
 			nval = trunc;
 		}
-		if (self.b.range.lo and nval < self.range[0]) {
-			nval = self.range[0];
+		if (self.range[0].set and self.range[0].val > nval) {
+			nval = self.range[0].val;
 			// prevent having to drag all the way back to where limit was reached
 			self.grab = pos - self.step / FVec2{ 4, 4 };
 			self.alt = nval;
 		}
-		if (self.b.range.hi and nval > self.range[1]) {
-			nval = self.range[1];
+		if (self.range[1].set and self.range[1].val < nval) {
+			nval = self.range[1].val;
 			self.grab = pos - self.step / FVec2{ 4, 4 };
 			self.alt = nval;
 		}
@@ -440,11 +456,7 @@ const Radix = extern struct {
 			return 1;
 		}
 		if (alt != 0) {
-			const zero: Float = if (self.b.range.lo and self.range[0] > 0)
-				self.range[0]
-			else if (self.b.range.hi and self.range[1] < 0)
-				self.range[1]
-			else 0;
+			const zero: Float = baseline(self.range);
 			if (self.rad.value != zero) {
 				self.alt = self.rad.value;
 				self.floatC(zero);
@@ -488,7 +500,6 @@ const Radix = extern struct {
 		save(self, b) catch |e| self.err(e);
 	}
 	inline fn save(self: *Radix, b: *pd.BinBuf) !void {
-		const none: Atom = .symbol(.gen("_"));
 		const rsl = try self.getRSL();
 		try b.add(&.{
 			.symbol(.gen("#X")), .symbol(.gen("obj")),
@@ -497,8 +508,7 @@ const Radix = extern struct {
 
 			.float(self.rad.base), .float(self.rad.prec),
 			.float(self.step[0]), .float(-self.step[1]),
-			if (self.b.range.lo) .float(self.range[0]) else none,
-			if (self.b.range.hi) .float(self.range[1]) else none,
+			self.range[0].atom(), self.range[1].atom(),
 
 			.float(self.rad.width), .float(self.font_size),
 			.symbol(rsl[0]), .symbol(rsl[1]), .symbol(rsl[2]),
@@ -513,9 +523,8 @@ const Radix = extern struct {
 	inline fn properties(self: *Radix) !void {
 		var buf_min: [16:0]u8 = undefined;
 		var buf_max: [16:0]u8 = undefined;
-		const none: Atom = .symbol(.gen("_"));
-		(if (self.b.range.lo) Atom.float(self.range[0]) else none).bufPrint(&buf_min);
-		(if (self.b.range.hi) Atom.float(self.range[1]) else none).bufPrint(&buf_max);
+		self.range[0].atom().bufPrint(&buf_min);
+		self.range[1].atom().bufPrint(&buf_max);
 		const rsl = try self.getRSL();
 
 		self.obj.g.pd.stub("dialog_radix::setup", self, "ii ff ss ii ss si", .{
@@ -540,7 +549,6 @@ const Radix = extern struct {
 		}
 		const obj: *Object = &self.obj;
 		const visible = self.gl.isVisible();
-		const none: Atom = .symbol(.gen("_"));
 		const rsl = try self.getRSL();
 
 		self.gl.setUndoState(&obj.g.pd, .gen("param"), &.{
@@ -548,8 +556,8 @@ const Radix = extern struct {
 			.float(@floatFromInt(self.rad.prec)),
 			.float(self.step[0]),
 			.float(-self.step[1]),
-			if (self.b.range.lo) .float(self.range[0]) else none,
-			if (self.b.range.hi) .float(self.range[1]) else none,
+			self.range[0].atom(),
+			self.range[1].atom(),
 			.float(@floatFromInt(self.rad.width)),
 			.float(@floatFromInt(self.font_size)),
 			.symbol(rsl[0]),
@@ -572,12 +580,7 @@ const Radix = extern struct {
 			if (av[3].getFloat()) |f| -f else self.step[1],
 		};
 
-		var rstate: LimitState = .{ .lo = true, .hi = true };
-		self.range = .{
-			av[4].getFloat() orelse blk: { rstate.lo = false; break :blk 0; },
-			av[5].getFloat() orelse blk: { rstate.hi = false; break :blk 0; },
-		};
-		self.b.range = rstate;
+		self.range = .{ .from(av[4].getFloat()), .from(av[5].getFloat()) };
 
 		const fs: u16 = @intFromFloat(av[7].getFloat() orelse 0);
 		self.font_size = @min(fs, 36);
@@ -734,13 +737,20 @@ const Radix = extern struct {
 		try w.print("{x}._", .{ @intFromPtr(obj) });
 		tag[w.end] = 0;
 
-		var rad: rx.Rad = .init(
-			@intFromFloat(pd.floatArg(0, av) catch 10),
-			@intFromFloat(pd.floatArg(1, av) catch 0),
-		);
-		rad.width = @intFromFloat(@min(pd.floatArg(6, av) catch 0, 500));
+		const range: [2]MaybeFloat = .{
+			.from(pd.floatArg(4, av) catch null),
+			.from(pd.floatArg(5, av) catch null),
+		};
+		const rad: rx.Rad = blk: {
+			var rad: rx.Rad = .init(
+				@intFromFloat(pd.floatArg(0, av) catch 10),
+				@intFromFloat(pd.floatArg(1, av) catch 0),
+			);
+			rad.width = @intFromFloat(@min(pd.floatArg(6, av) catch 0, 500));
+			rad.value = baseline(range);
+			break :blk rad;
+		};
 
-		var rstate: LimitState = .{ .lo = true, .hi = true };
 		const rcv: *Symbol = unescape(pd.symbolArg(8, av) catch pd.s.empty());
 		const snd: *Symbol = unescape(pd.symbolArg(9, av) catch pd.s.empty());
 
@@ -761,10 +771,7 @@ const Radix = extern struct {
 				pd.floatArg(2, av) catch 0,
 				if (pd.floatArg(3, av)) |f| -f else |_| -3,
 			},
-			.range = .{
-				pd.floatArg(4, av) catch blk: { rstate.lo = false; break :blk 0; },
-				pd.floatArg(5, av) catch blk: { rstate.hi = false; break :blk 0; },
-			},
+			.range = range,
 			.font_size = @intFromFloat(@min(pd.floatArg(7, av) catch 0, 36)),
 			.rcv = rcv,
 			.snd = snd,
@@ -772,7 +779,6 @@ const Radix = extern struct {
 			.lbl = unescape(pd.symbolArg(10, av) catch pd.s.empty()),
 			.b = .{
 				.where = @enumFromInt(@as(u2, @intFromFloat(pd.floatArg(11, av) catch 0))),
-				.range = rstate,
 			},
 			.tag = tag,
 			.tag_type = @ptrCast(&self.tag[w.end - 1]),
