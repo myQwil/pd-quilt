@@ -117,11 +117,8 @@ const Range = extern struct {
 		_: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
 		sw: switch (@min(ac, 2)) {
-			2 => {
-				self.max = av[1].getFloat() orelse self.max;
-				continue :sw 1;
-			},
-			1 => self.min = av[0].getFloat() orelse self.min,
+			2 => { if (av[1].getFloat()) |f| self.max = f; continue :sw 1; },
+			1 => { if (av[0].getFloat()) |f| self.min = f; },
 			else => {},
 		}
 	}
@@ -151,12 +148,12 @@ const Range = extern struct {
 		// av.len must be <= 2 at this point
 		sw: switch (av.len) {
 			2 => {
-				min = av[0].getFloat() orelse min;
-				max = av[1].getFloat() orelse max;
+				if (av[0].getFloat()) |f| min = f;
+				if (av[1].getFloat()) |f| max = f;
 				continue :sw 0;
 			},
 			1 => {
-				max = av[0].getFloat() orelse max;
+				if (av[0].getFloat()) |f| max = f;
 				_ = try obj.inletFloat(&self.max);
 			},
 			0 => {

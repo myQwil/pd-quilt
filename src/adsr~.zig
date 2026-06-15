@@ -98,19 +98,10 @@ const Adsr = extern struct {
 
 	fn list(self: *Adsr, av: []const Atom) void {
 		sw: switch (@min(av.len, 4)) {
-			4 => {
-				self.release = av[3].getFloat() orelse self.release;
-				continue :sw 3;
-			},
-			3 => {
-				self.sustain = av[2].getFloat() orelse self.sustain;
-				continue :sw 2;
-			},
-			2 => {
-				self.decay = av[1].getFloat() orelse self.decay;
-				continue :sw 1;
-			},
-			1 => self.attack = av[0].getFloat() orelse self.attack,
+			4 => { if (av[3].getFloat()) |f| self.release = f; continue :sw 3; },
+			3 => { if (av[2].getFloat()) |f| self.sustain = f; continue :sw 2; },
+			2 => { if (av[1].getFloat()) |f| self.decay = f; continue :sw 1; },
+			1 => { if (av[0].getFloat()) |f| self.attack = f; },
 			else => {},
 		}
 	}

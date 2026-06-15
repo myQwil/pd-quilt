@@ -32,17 +32,8 @@ pub const Rind = extern struct {
 		_: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
 		sw: switch (@min(ac, 2)) {
-			2 => {
-				if (av[1].type == .float) {
-					self.min = av[1].w.float;
-				}
-				continue :sw 1;
-			},
-			1 => {
-				if (av[0].type == .float) {
-					self.max = av[0].w.float;
-				}
-			},
+			2 => { if (av[1].getFloat()) |f| self.min = f; continue :sw 1; },
+			1 => { if (av[0].getFloat()) |f| self.max = f; },
 			else => {},
 		}
 	}
@@ -70,12 +61,12 @@ pub const Rind = extern struct {
 
 		sw: switch (@min(av.len, 2)) {
 			2 => {
-				min = av[0].getFloat() orelse min;
-				max = av[1].getFloat() orelse max;
+				if (av[0].getFloat()) |f| min = f;
+				if (av[1].getFloat()) |f| max = f;
 				continue :sw 0;
 			},
 			1 => {
-				max = av[0].getFloat() orelse max;
+				if (av[0].getFloat()) |f| max = f;
 				_ = try obj.inletFloat(&self.max);
 			},
 			0 => {

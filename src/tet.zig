@@ -46,7 +46,7 @@ pub fn Tet(T: type) type { return extern struct {
 			},
 			1 => {
 				if (onset == 0) {
-					self.ref = av[0].getFloat() orelse self.ref;
+					if (av[0].getFloat()) |f| self.ref = f;
 				}
 				self.min = getMin(self.k, self.ref);
 			},

@@ -22,23 +22,12 @@ fn getUf(uf: bf.UnFloat, onset: u2, av: []const Atom) bf.UnFloat {
 	var u: bf.UnFloat = uf;
 	sw: switch (@min(av.len + onset, 3)) {
 		3 => {
-			if (av[2 - onset].getFloat()) |f| {
-				u.b.sign = @intFromFloat(f);
-			}
-			continue :sw 2;
-		},
-		2 => {
-			if (av[1 - onset].getFloat()) |f| {
-				u.b.exponent = @intFromFloat(f);
-			}
-			continue :sw 1;
-		},
-		1 => if (onset == 0) {
-			if (av[0].getFloat()) |f| {
-				u.b.mantissa = @intFromFloat(f);
-			}
-		},
-		else => {},
+			if (av[2 - onset].getFloat()) |f| u.b.sign = @intFromFloat(f);
+		continue :sw 2; }, 2 => {
+			if (av[1 - onset].getFloat()) |f| u.b.exponent = @intFromFloat(f);
+		continue :sw 1; }, 1 => if (onset == 0) {
+			if (av[0].getFloat()) |f| u.b.mantissa = @intFromFloat(f);
+		}, else => {},
 	}
 	return u;
 }

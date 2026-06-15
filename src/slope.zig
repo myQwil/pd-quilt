@@ -36,19 +36,12 @@ pub fn Slope(T: type) type { return extern struct {
 	fn set(self: *Self, onset: u32, av: []const Atom) void {
 		sw: switch (@min(av.len + onset, 3)) {
 			3 => {
-				self.run = av[2 - onset].getFloat() orelse self.run;
-				continue :sw 2;
-			},
-			2 => {
-				self.max = av[1 - onset].getFloat() orelse self.max;
-				continue :sw 1;
-			},
-			1 => {
-				if (onset == 0) {
-					self.min = av[0].getFloat() orelse self.min;
-				}
-			},
-			else => {},
+				if (av[2 - onset].getFloat()) |f| self.run = f;
+			continue :sw 2; }, 2 => {
+				if (av[1 - onset].getFloat()) |f| self.max = f;
+			continue :sw 1; }, 1 => if (onset == 0) {
+				if (av[0].getFloat()) |f| self.min = f;
+			}, else => {},
 		}
 		self.k = getK(self.min, self.max, self.run);
 	}
@@ -93,17 +86,12 @@ pub fn Slope(T: type) type { return extern struct {
 		var run: f64 = 1;
 
 		sw: switch (@min(av.len, 3)) {
-			3 => {
-				run = av[2].getFloat() orelse run;
-				continue :sw 2;
-			},
+			3 => { if (av[2].getFloat()) |f| run = f; continue :sw 2; },
 			2 => {
-				max = av[1].getFloat() orelse max;
-				min = av[0].getFloat() orelse min;
+				if (av[1].getFloat()) |f| max = f;
+				if (av[0].getFloat()) |f| min = f;
 			},
-			1 => {
-				max = av[0].getFloat() orelse max;
-			},
+			1 => { if (av[0].getFloat()) |f| max = f; },
 			else => {},
 		}
 		self.* = .{

@@ -644,14 +644,11 @@ const Radix = extern struct {
 
 		if (self.obj.binbuf) |binbuf| {
 			const slc = binbuf.getSlice();
-			if (slc.len > 9) {
-				slc[9] = .{ .type = .dollsym, .w = .{ .symbol = rcv_raw } };
-			}
-			if (slc.len > 10) {
-				slc[10] = .{ .type = .dollsym, .w = .{ .symbol = snd_raw } };
-			}
-			if (slc.len > 11) {
-				slc[11] = .{ .type = .dollsym, .w = .{ .symbol = lbl_raw } };
+			sw: switch (@min(slc.len, 12)) {
+				12 => { slc[11] = .dollsym(lbl_raw); continue :sw 11; },
+				11 => { slc[10] = .dollsym(snd_raw); continue :sw 10; },
+				10 => { slc[9] = .dollsym(rcv_raw); },
+				else => {},
 			}
 		}
 

@@ -96,11 +96,8 @@ const AttackDecay = extern struct {
 
 	fn list(self: *AttackDecay, av: []const Atom) void {
 		sw: switch (@min(av.len, 2)) {
-			2 => {
-				self.decay = av[1].getFloat() orelse self.decay;
-				continue :sw 1;
-			},
-			1 => self.attack = av[0].getFloat() orelse self.attack,
+			2 => { if (av[1].getFloat()) |f| self.decay = f; continue :sw 1; },
+			1 => { if (av[0].getFloat()) |f| self.attack = f; },
 			else => {},
 		}
 	}

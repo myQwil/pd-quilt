@@ -104,11 +104,8 @@ const BinOp = extern struct {
 		_: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
 		sw: switch (@min(ac, 2)) {
-			2 => {
-				self.f2 = av[1].getFloat() orelse self.f2;
-				continue :sw 1;
-			},
-			1 => self.f1 = av[0].getFloat() orelse self.f1,
+			2 => { if (av[1].getFloat()) |f| self.f2 = f; continue :sw 1; },
+			1 => { if (av[0].getFloat()) |f| self.f1 = f; },
 			else => {},
 		}
 	}
@@ -144,10 +141,10 @@ const BinOp = extern struct {
 		var f2: Float = 0;
 		switch (n) {
 			2 => {
-				f1 = av[0].getFloat() orelse f1;
-				f2 = av[1].getFloat() orelse f2;
+				if (av[0].getFloat()) |f| f1 = f;
+				if (av[1].getFloat()) |f| f2 = f;
 			},
-			1 => f2 = av[0].getFloat() orelse f2,
+			1 => { if (av[0].getFloat()) |f| f2 = f; },
 			else => {},
 		}
 		self.* = .{
