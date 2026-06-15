@@ -431,12 +431,12 @@ const Radix = extern struct {
 		if (self.range[0].set and self.range[0].val > nval) {
 			nval = self.range[0].val;
 			// prevent having to drag all the way back to where limit was reached
-			self.grab = pos - self.step / FVec2{ 4, 4 };
+			self.grab = pos - self.step * FVec2{ 0.25, 0.25 };
 			self.alt = nval;
 		}
 		if (self.range[1].set and self.range[1].val < nval) {
 			nval = self.range[1].val;
-			self.grab = pos - self.step / FVec2{ 4, 4 };
+			self.grab = pos - self.step * FVec2{ 0.25, 0.25 };
 			self.alt = nval;
 		}
 		if (@as(bf.Uf, @bitCast(self.rad.value)) != @as(bf.Uf, @bitCast(nval))) {
@@ -467,7 +467,7 @@ const Radix = extern struct {
 		} else {
 			const pos: FVec2 = @floatFromInt(IVec2{ xpos, ypos });
 			// start in the middle of a step rather than at the beginning of one
-			self.grab = pos - self.step / FVec2{ 4, 4 };
+			self.grab = pos - self.step * FVec2{ 0.25, 0.25 };
 			self.b.shift = (shift != 0);
 			self.alt = self.rad.value;
 			gl.grab(&self.obj.g, @ptrCast(&motionC), @ptrCast(&keyC), xpos, ypos);
@@ -794,15 +794,6 @@ const Radix = extern struct {
 		pd.unqueueGui(self);
 	}
 
-	const widget_behavior: cnv.WidgetBehavior = .{
-		.getrect = @ptrCast(&getRectC),
-		.displace = @ptrCast(&displaceC),
-		.select = @ptrCast(&selectC),
-		.delete = @ptrCast(&deleteC),
-		.vis = @ptrCast(&visC),
-		.click = @ptrCast(&clickC),
-	};
-
 	inline fn setup() !void {
 		class = try .init(Radix, name, &.{ .gimme }, &initC, &freeC, .{
 			.no_inlet = true,
@@ -818,7 +809,14 @@ const Radix = extern struct {
 		class.addMethod(@ptrCast(&precC), .gen("prec"), &.{ .gimme });
 		class.addMethod(@ptrCast(&paramC), .gen("param"), &.{ .gimme });
 
-		class.setWidget(&widget_behavior);
+		class.setWidget(&.{
+			.getrect = @ptrCast(&getRectC),
+			.displace = @ptrCast(&displaceC),
+			.select = @ptrCast(&selectC),
+			.delete = @ptrCast(&deleteC),
+			.vis = @ptrCast(&visC),
+			.click = @ptrCast(&clickC),
+		});
 		class.setSaveFn(@ptrCast(&saveC));
 		class.setPropertiesFn(@ptrCast(&propertiesC));
 		pd.vMess(null, "r", .{ @embedFile("tcl/dialog_radix.tcl") });
