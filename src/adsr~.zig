@@ -32,7 +32,7 @@ const Adsr = extern struct {
 		retarget: bool = false,
 		/// jump to zero before next attack
 		delay: bool = false,
-		/// release sustain or an attack/decay in progress
+		/// release a sustain or an attack/decay in progress
 		release: bool = false,
 		/// ramp index
 		index: u5 = 0,
@@ -51,7 +51,6 @@ const Adsr = extern struct {
 			if (self.b.release) {
 				self.b.index = 2;
 				self.ramps[2].reset(self.ratio * self.release, 0);
-				self.ramps[2].setInc(self);
 				self.b.release = false;
 			} else {
 				if (self.b.delay) {
@@ -62,8 +61,8 @@ const Adsr = extern struct {
 				}
 				self.ramps[1].reset(self.ratio * self.attack, self.peak);
 				self.ramps[2].reset(self.ratio * self.decay, self.sustain * self.peak);
-				self.ramps[self.b.index].setInc(self);
 			}
+			self.ramps[self.b.index].setInc(self);
 			self.b.retarget = false;
 		}
 		self.ramps[self.b.index].process(self, out);

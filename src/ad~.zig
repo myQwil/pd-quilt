@@ -49,7 +49,6 @@ const AttackDecay = extern struct {
 			if (self.b.release) {
 				self.b.index = 2;
 				self.ramps[2].reset(self.ratio * self.release, 0);
-				self.ramps[2].setInc(self);
 				self.b.release = false;
 			} else {
 				if (self.b.delay) {
@@ -60,8 +59,8 @@ const AttackDecay = extern struct {
 				}
 				self.ramps[1].reset(self.ratio * self.attack, self.peak);
 				self.ramps[2].reset(self.ratio * self.decay, 0);
-				self.ramps[self.b.index].setInc(self);
 			}
+			self.ramps[self.b.index].setInc(self);
 			self.b.retarget = false;
 		}
 		self.ramps[self.b.index].process(self, out);
