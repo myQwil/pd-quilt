@@ -386,7 +386,8 @@ const Radix = extern struct {
 	}
 
 	fn keyC(self: *Radix, _: *Symbol, f: Float) callconv(.c) void {
-		if (f == 0) {
+		const char: u8 = @intFromFloat(f);
+		if (char == 0) {
 			self.b.grabbed = false;
 			self.drawBorder(self.gl, self.getRect(self.gl), false);
 		}
@@ -439,9 +440,14 @@ const Radix = extern struct {
 			return 1;
 		}
 		if (alt != 0) {
-			if (self.rad.value != 0) {
+			const zero: Float = if (self.b.range.lo and self.range[0] > 0)
+				self.range[0]
+			else if (self.b.range.hi and self.range[1] < 0)
+				self.range[1]
+			else 0;
+			if (self.rad.value != zero) {
 				self.alt = self.rad.value;
-				self.floatC(0);
+				self.floatC(zero);
 			} else {
 				self.floatC(self.alt);
 			}
