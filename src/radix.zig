@@ -90,7 +90,7 @@ const MaybeFloat = extern struct {
 	val: Float = 0,
 	set: bool = false,
 
-	inline fn from(value: ?Float) MaybeFloat {
+	inline fn init(value: ?Float) MaybeFloat {
 		return if (value) |v|
 			.{ .val = v, .set = true }
 		else .{ .val = 0, .set = false };
@@ -105,12 +105,12 @@ const Range = extern struct {
 	lo: MaybeFloat = .{},
 	hi: MaybeFloat = .{},
 
-	inline fn baseline(self: Range) Float {
-		return if (self.lo.set and self.lo.val > 0)
+	inline fn sanitized(self: Range, val: Float) Float {
+		return if (self.lo.set and self.lo.val > val)
 			self.lo.val
-		else if (self.hi.set and self.hi.val < 0)
+		else if (self.hi.set and self.hi.val < val)
 			self.hi.val
-		else 0;
+		else val;
 	}
 
 	inline fn sort(self: *Range) void {
@@ -414,6 +414,14 @@ const Radix = extern struct {
 		self.bangC();
 	}
 
+	fn checkRange(self: *Radix) void {
+		self.range.sort();
+		const f = self.range.sanitized(self.rad.value);
+		if (f != self.rad.value) {
+			self.setC(f);
+		}
+	}
+
 	fn keyC(self: *Radix, _: *Symbol, f: Float) callconv(.c) void {
 		const char: u8 = @intFromFloat(f);
 		if (char == 0) {
@@ -469,7 +477,7 @@ const Radix = extern struct {
 			return 1;
 		}
 		if (alt != 0) {
-			const zero: Float = self.range.baseline();
+			const zero: Float = self.range.sanitized(0);
 			if (self.rad.value != zero) {
 				self.alt = self.rad.value;
 				self.floatC(zero);
@@ -593,8 +601,8 @@ const Radix = extern struct {
 			if (av[3].getFloat()) |f| -f else self.step[1],
 		};
 
-		self.range = .{ .lo = .from(av[4].getFloat()), .hi = .from(av[5].getFloat()) };
-		self.range.sort();
+		self.range = .{ .lo = .init(av[4].getFloat()), .hi = .init(av[5].getFloat()) };
+		self.checkRange();
 
 		const fs: u16 = @intFromFloat(av[7].getFloat() orelse 0);
 		self.font_size = @min(fs, 36);
@@ -729,8 +737,40 @@ const Radix = extern struct {
 		if (pd.floatArg(0, av[0..ac])) |f| { // set
 			self.rad.setPrecision(f);
 			self.sendItUp();
-		} else |_| { // get
+		} else |_| { // print
 			pd.post.log(self, .normal, "precision: %u", .{ self.rad.prec });
+		}
+	}
+
+	fn minC(
+		self: *Radix,
+		_: *Symbol, ac: c_uint, av: [*]const Atom,
+	) callconv(.c) void {
+		if (ac > 0) {
+			self.range.lo = .init(av[0].getFloat());
+			self.checkRange();
+		}
+	}
+
+	fn maxC(
+		self: *Radix,
+		_: *Symbol, ac: c_uint, av: [*]const Atom,
+	) callconv(.c) void {
+		if (ac > 0) {
+			self.range.hi = .init(av[0].getFloat());
+			self.checkRange();
+		}
+	}
+
+	fn rangeC(
+		self: *Radix,
+		_: *Symbol, ac: c_uint, av: [*]const Atom,
+	) callconv(.c) void {
+		const a = av[0..ac];
+		if (a.len > 0) {
+			self.range.lo = .init(a[0].getFloat());
+			self.range.hi = .init(pd.floatArg(1, a) catch null);
+			self.checkRange();
 		}
 	}
 
@@ -787,7 +827,7 @@ const Radix = extern struct {
 		range.sort();
 		var rad: rx.Rad = .init(base, prec);
 		rad.width = width;
-		rad.value = range.baseline();
+		rad.value = range.sanitized(rad.value);
 
 		if (rsl[0] == pd.s.empty()) {
 			_ = try obj.inlet(&obj.g.pd, null, null);
@@ -833,10 +873,13 @@ const Radix = extern struct {
 		class.addFloat(@ptrCast(&floatC));
 		class.addAnything(@ptrCast(&anythingC));
 		class.addMethod(@ptrCast(&setC), .gen("set"), &.{ .float });
+		class.addMethod(@ptrCast(&minC), .gen("min"), &.{ .gimme });
+		class.addMethod(@ptrCast(&maxC), .gen("max"), &.{ .gimme });
 		class.addMethod(@ptrCast(&readC), .gen("read"), &.{ .gimme });
-		class.addMethod(@ptrCast(&stepC), .gen("step"), &.{ .gimme });
 		class.addMethod(@ptrCast(&baseC), .gen("base"), &.{ .gimme });
 		class.addMethod(@ptrCast(&precC), .gen("prec"), &.{ .gimme });
+		class.addMethod(@ptrCast(&stepC), .gen("step"), &.{ .gimme });
+		class.addMethod(@ptrCast(&rangeC), .gen("range"), &.{ .gimme });
 		class.addMethod(@ptrCast(&paramC), .gen("param"), &.{ .gimme });
 
 		class.setWidget(&.{
