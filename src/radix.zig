@@ -99,6 +99,14 @@ const MaybeFloat = extern struct {
 	inline fn atom(self: MaybeFloat) Atom {
 		return if (self.set) .float(self.val) else .symbol(.gen("_"));
 	}
+
+	fn print(self: MaybeFloat) void {
+		if (self.set) {
+			pd.post.start("%g", .{ self.val });
+		} else {
+			pd.post.start("null", .{});
+		}
+	}
 };
 
 const Range = extern struct {
@@ -749,6 +757,10 @@ const Radix = extern struct {
 		if (ac > 0) {
 			self.range.lo = .init(av[0].getFloat());
 			self.checkRange();
+		} else { // print
+			pd.post.start("min: ", .{});
+			self.range.lo.print();
+			pd.post.end();
 		}
 	}
 
@@ -759,6 +771,10 @@ const Radix = extern struct {
 		if (ac > 0) {
 			self.range.hi = .init(av[0].getFloat());
 			self.checkRange();
+		} else { // print
+			pd.post.start("max: ", .{});
+			self.range.hi.print();
+			pd.post.end();
 		}
 	}
 
@@ -771,6 +787,12 @@ const Radix = extern struct {
 			self.range.lo = .init(a[0].getFloat());
 			self.range.hi = .init(pd.floatArg(1, a) catch null);
 			self.checkRange();
+		} else { // print
+			pd.post.start("range: ", .{});
+			self.range.lo.print();
+			pd.post.start("..", .{});
+			self.range.hi.print();
+			pd.post.end();
 		}
 	}
 
