@@ -760,7 +760,7 @@ const Radix = extern struct {
 		} else { // print
 			pd.post.start("min: ", .{});
 			self.range.lo.print();
-			pd.post.end();
+			pd.post.log(self, .normal, "", .{});
 		}
 	}
 
@@ -774,7 +774,7 @@ const Radix = extern struct {
 		} else { // print
 			pd.post.start("max: ", .{});
 			self.range.hi.print();
-			pd.post.end();
+			pd.post.log(self, .normal, "", .{});
 		}
 	}
 
@@ -792,7 +792,7 @@ const Radix = extern struct {
 			self.range.lo.print();
 			pd.post.start("..", .{});
 			self.range.hi.print();
-			pd.post.end();
+			pd.post.log(self, .normal, "", .{});
 		}
 	}
 

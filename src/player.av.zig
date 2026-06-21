@@ -290,7 +290,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			const dct = &base.format.metadata;
 			var prev: ?*const av.Dictionary.Entry = null;
 			while (dct.iterate(prev)) |entry| : (prev = entry) {
-				pd.post.do("%s: %s", .{ entry.key, entry.value });
+				pd.post.log(self, .normal, "%s: %s", .{ entry.key, entry.value });
 			}
 		}
 

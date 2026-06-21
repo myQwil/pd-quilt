@@ -97,7 +97,7 @@ pub fn Impl(Root: type) type { return extern struct {
 						} else if (b.sub_open and pkt.stream_index == b.subtitle.idx) {
 							var sub: av.Subtitle = undefined;
 							if (try b.subtitle.ctx.decodeSubtitle(&sub, pkt)) {
-								pd.post.do("\n%s", .{ pkt.data });
+								pd.post.log(self, .normal, "\n%s", .{ pkt.data });
 							}
 						}
 					} else |e| {

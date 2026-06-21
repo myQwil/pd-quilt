@@ -71,7 +71,7 @@ const PList = extern struct {
 		if (i < 0 or self.plist.len <= i) {
 			return;
 		}
-		defer pd.post.do("", .{});
+		defer pd.post.log(self, .normal, "", .{});
 		var hm = (tx.metadata(self.plist.ptr[@intCast(i)].name)
 			catch |e| return self.err(e)) orelse return;
 		defer hm.deinit();
@@ -95,9 +95,9 @@ const PList = extern struct {
 				} else |e| if (e != error.EndOfStream) {
 					self.err(e);
 				}
-				pd.post.end();
+				pd.post.log(self, .normal, "", .{});
 			} else {
-				pd.post.do("%s: %s", .{ kv.key_ptr.*.name, value.ptr });
+				pd.post.log(self, .normal, "%s: %s", .{ kv.key_ptr.*.name, value.ptr });
 			}
 		}
 	}
