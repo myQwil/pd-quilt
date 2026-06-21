@@ -51,7 +51,7 @@ const Chrono = extern struct {
 		_: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
 		const a = av[0..ac];
-		self.reset((pd.floatArg(1, a) catch 0) == 1);
+		self.reset((pd.floatArg(1, a) catch 0) != 0);
 		if (pd.floatArg(0, a)) |f| {
 			self.delayC(f);
 		} else |_| {}

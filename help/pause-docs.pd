@@ -1,0 +1,12 @@
+#N canvas 810 200 360 220 16;
+#X msg 50 70 pause;
+#X text 140 70 toggle;
+#X msg 60 100 pause 1;
+#X text 150 100 force paused;
+#X text 160 130 force unpaused;
+#X msg 70 130 pause 0;
+#X obj 50 180 s \$1msg;
+#X text 70 20 pause state gets sent via the last outlet, f 21;
+#X connect 0 0 6 0;
+#X connect 2 0 6 0;
+#X connect 5 0 6 0;
