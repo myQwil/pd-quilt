@@ -66,7 +66,7 @@ const PList = extern struct {
 		}
 	}
 
-	fn printC(self: *PList, f: Float) callconv(.c) void {
+	fn dumpC(self: *PList, f: Float) callconv(.c) void {
 		const i: i32 = @intFromFloat(f);
 		if (i < 0 or self.plist.len <= i) {
 			return;
@@ -134,7 +134,7 @@ const PList = extern struct {
 		class = try .init(PList, name, &.{}, &initC, &deinitC, .{});
 		class.addBang(@ptrCast(&bangC));
 		class.addFloat(@ptrCast(&floatC));
-		class.addMethod(@ptrCast(&printC), .gen("print"), &.{ .float });
+		class.addMethod(@ptrCast(&dumpC), .gen("dump"), &.{ .float });
 		class.addMethod(@ptrCast(&appendC), .gen("append"), &.{ .gimme });
 		class.addMethod(@ptrCast(&langsC), .gen("langs"), &.{ .gimme });
 		class.addMethod(@ptrCast(&readC), .gen("read"), &.{ .gimme });
