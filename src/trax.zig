@@ -134,7 +134,8 @@ fn makeLowerCase(s: []u8) void {
 	}
 }
 
-fn keyLang(line: []u8, end: usize) struct { key: *Symbol, lang: *Symbol } {
+fn keyLang(line: []u8) struct { key: *Symbol, lang: *Symbol } {
+	const end = line.len - 1;
 	var lang: [:0]const u8 = "";
 	const kend = if (find(line[0..end], '[')) |brac| blk: {
 		const lbeg = brac + 1;
@@ -247,7 +248,7 @@ fn traverseMeta(
 				try multiline.appendSlice(gpa, line[1..]);
 				continue;
 			} else {
-				const kl = keyLang(multiline.items, vpos - 1);
+				const kl = keyLang(multiline.items[0..vpos]);
 				try multiline.append(gpa, 0);
 				const value = multiline.items[vpos .. multiline.items.len - 1 :0];
 				try meta.add(kl.key, kl.lang, .gen(value));
@@ -295,7 +296,7 @@ fn traverseMeta(
 	}
 
 	if (multiline.items.len > 0) {
-		const kl = keyLang(multiline.items, vpos - 1);
+		const kl = keyLang(multiline.items[0..vpos]);
 		try multiline.append(gpa, 0);
 		const value = multiline.items[vpos .. multiline.items.len - 1 :0];
 		try meta.add(kl.key, kl.lang, .gen(value));
