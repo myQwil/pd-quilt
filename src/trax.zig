@@ -107,8 +107,8 @@ fn trimRange(line: []const u8, offset: usize) [2]usize {
 }
 
 fn makeLowerCase(s: []u8) void {
-	for (s, 0..) |c, i| {
-		s[i] = std.ascii.toLower(c);
+	for (s) |*c| {
+		c.* = std.ascii.toLower(c.*);
 	}
 }
 
