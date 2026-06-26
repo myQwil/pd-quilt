@@ -17,6 +17,13 @@ inline fn getDigit(c: u8) ?u8 {
 	return if ('0' <= c and c <= '9') c - '0' else null;
 }
 
+inline fn iDiv(g: Float, len: usize) struct {num: i32, den: i32, quo: i32 } {
+	const num: i32 = @intFromFloat(g);
+	const den: i32 = @intCast(len);
+	const quo: i32 = @divFloor(num, den);
+	return .{ .num = num, .den = den, .quo = quo };
+}
+
 /// Simple string-to-float converter
 pub fn fParse(s: [*:0]const u8, end_index: ?*usize) ?Float {
 	var i: usize = 0;
@@ -121,12 +128,10 @@ const Arp = extern struct {
 
 	fn interval(self: *const Arp, vec: []const Word, f: Float) Float {
 		const g = @floor(f);
-		const num: i32 = @intFromFloat(g);
-		const den: i32 = @intCast(vec.len);
-		const quo: i32 = @divFloor(num, den);
-		var i: u32 = @intCast(num - den * quo);
+		const div = iDiv(g, vec.len);
+		var i: u32 = @intCast(div.num - div.den * div.quo);
 
-		const oct = self.oct * @as(Float, @floatFromInt(quo));
+		const oct = self.oct * @as(Float, @floatFromInt(div.quo));
 		const note = oct + if (i == 0) 0 else vec[i].float;
 		const frac = f - g;
 		if (frac < epsilon) {
@@ -184,10 +189,8 @@ const Arp = extern struct {
 						break :blk dir * (fParse(s + j, null) orelse 1);
 					};
 					const g = @floor(f);
-					const num: i32 = @intFromFloat(g);
-					const den: i32 = @intCast(n);
-					const quo: i32 = @divFloor(num, den);
-					var d: u32 = @intCast(num - den * quo); // rotation amount
+					const div = iDiv(g, n);
+					var d: u32 = @intCast(div.num - div.den * div.quo); // rotation amount
 					var p = n - d; // pivot index
 
 					const vp = vec[i..][0..n];
@@ -212,7 +215,7 @@ const Arp = extern struct {
 							v.float = t.float - a;
 						}
 						if (mvrt) {
-							const octs = self.oct * @as(Float, @floatFromInt(quo));
+							const octs = self.oct * @as(Float, @floatFromInt(div.quo));
 							vp[0].float = root + octs + a;
 						}
 					} else {
@@ -236,7 +239,7 @@ const Arp = extern struct {
 							vp[p].float = (ob - min) * frac + min;
 						}
 						if (mvrt) {
-							const octs = self.oct * @as(Float, @floatFromInt(quo));
+							const octs = self.oct * @as(Float, @floatFromInt(div.quo));
 							vp[0].float = root + octs + (b - a) * frac + a;
 						}
 					}
