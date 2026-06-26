@@ -1,9 +1,10 @@
 const std = @import("std");
 const pd = @import("pd");
 
+const Atom = pd.Atom;
 const Symbol = pd.Symbol;
-const StringHashMap = std.StringHashMap(void);
-const ArrayList = std.ArrayList(*Symbol);
+const StringMap = std.StringHashMap(void);
+const SymbolList = std.ArrayList(*Symbol);
 
 const trext = ".trax";
 const gpa = pd.gpa;
@@ -48,10 +49,12 @@ const LangDict = struct {
 	}
 };
 
-pub const MetaHashMap = struct {
-	map: std.array_hash_map.Auto(*Symbol, LangDict) = .empty,
+pub const Meta = struct {
+	map: Map = .empty,
 
-	pub fn deinit(self: *MetaHashMap) void {
+	const Map = std.array_hash_map.Auto(*Symbol, LangDict);
+
+	pub fn deinit(self: *Meta) void {
 		var iter = self.map.iterator();
 		while (iter.next()) |kv| {
 			kv.value_ptr.dict.deinit(gpa);
@@ -59,7 +62,7 @@ pub const MetaHashMap = struct {
 		self.map.deinit(gpa);
 	}
 
-	fn add(self: *MetaHashMap, key: *Symbol, lang: *Symbol, value: *Symbol) !void {
+	fn add(self: *Meta, key: *Symbol, lang: *Symbol, value: *Symbol) !void {
 		if (self.map.getPtr(key)) |ld| {
 			try ld.add(lang, value);
 		} else {
@@ -137,8 +140,8 @@ fn resolveZ(allocator: std.mem.Allocator, paths: []const []const u8) ![:0]u8 {
 }
 
 fn traverseList(
-	list: *ArrayList,
-	parents: *StringHashMap,
+	list: *SymbolList,
+	parents: *StringMap,
 	file_path: [:0]const u8,
 ) !void {
 	if (parents.contains(file_path)) {
@@ -179,8 +182,8 @@ fn traverseList(
 }
 
 fn traverseMeta(
-	meta: *MetaHashMap,
-	parents: *StringHashMap,
+	meta: *Meta,
+	parents: *StringMap,
 	file_path: [:0]const u8,
 ) !void {
 	if (parents.contains(file_path)) {
@@ -312,12 +315,12 @@ inline fn getSidecar(path: []const u8) !?[:0]const u8 {
 	return trx_path[0..i :0];
 }
 
-pub fn metadata(path: [*:0]const u8) !?MetaHashMap {
+pub fn metadata(path: [*:0]const u8) !?Meta {
 	const sidecar = try getSidecar(std.mem.sliceTo(path, 0)) orelse return null;
 	defer gpa.free(sidecar);
-	var meta: MetaHashMap = .{};
+	var meta: Meta = .{};
 	errdefer meta.deinit();
-	var parents: StringHashMap = .init(gpa);
+	var parents: StringMap = .init(gpa);
 	defer parents.deinit();
 
 	try traverseMeta(&meta, &parents, sidecar);
@@ -332,20 +335,20 @@ pub const Playlist = extern struct {
 	/// allocated length
 	cap: usize = 0,
 
-	fn asArrayList(self: Playlist) ArrayList {
-		return ArrayList{
+	fn asSymbolList(self: Playlist) SymbolList {
+		return SymbolList{
 			.items = self.ptr[0..self.len],
 			.capacity = self.cap,
 		};
 	}
 
 	pub fn deinit(self: *Playlist) void {
-		var list = self.asArrayList();
+		var list = self.asSymbolList();
 		list.deinit(gpa);
 	}
 
-	pub fn append(self: *Playlist, av: []const pd.Atom) !void {
-		var list = self.asArrayList();
+	pub fn append(self: *Playlist, av: []const Atom) !void {
+		var list = self.asSymbolList();
 		defer self.* = .{
 			.ptr = list.items.ptr,
 			.len = list.items.len,
@@ -356,7 +359,7 @@ pub const Playlist = extern struct {
 			const sym = arg.getSymbol() orelse return error.NotASymbol;
 			const name = std.mem.sliceTo(sym.name, 0);
 			if (isTrax(name)) {
-				var parents: StringHashMap = .init(gpa);
+				var parents: StringMap = .init(gpa);
 				defer parents.deinit();
 				try traverseList(&list, &parents, name);
 			} else {
@@ -365,7 +368,7 @@ pub const Playlist = extern struct {
 		}
 	}
 
-	pub fn replaceWith(self: *Playlist, av: []const pd.Atom) !void {
+	pub fn replaceWith(self: *Playlist, av: []const Atom) !void {
 		var playlist: Playlist = .{};
 		errdefer playlist.deinit();
 		try playlist.append(av);
@@ -385,8 +388,8 @@ pub const LangSet = extern struct {
 		gpa.free(self.ptr[0..self.len]);
 	}
 
-	pub fn replaceWith(self: *LangSet, args: []const pd.Atom) !void {
-		var arr: ArrayList = .empty;
+	pub fn replaceWith(self: *LangSet, args: []const Atom) !void {
+		var arr: SymbolList = .empty;
 		errdefer arr.deinit(gpa);
 		var set: std.AutoHashMap(*Symbol, void) = .init(gpa);
 		defer set.deinit();
