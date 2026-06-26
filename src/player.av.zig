@@ -185,7 +185,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 	inline fn loadMetadata(self: *Av, idx: usize) !void {
 		const dct = &self.format.metadata;
-		var hm = try tx.metadata(self.playlist.ptr[idx].name) orelse return;
+		var hm = try tx.Meta.fromPath(self.playlist.ptr[idx].name) orelse return;
 		defer hm.deinit();
 
 		const langs: []*Symbol = self.langs.ptr[0..self.langs.len];

@@ -56,7 +56,7 @@ const PList = extern struct {
 		if (i < 0 or self.plist.len <= i) {
 			return;
 		}
-		var hm = (tx.metadata(self.plist.ptr[@intCast(i)].name)
+		var hm = (tx.Meta.fromPath(self.plist.ptr[@intCast(i)].name)
 			catch |e| return self.err(e)) orelse return;
 		defer hm.deinit();
 
@@ -72,7 +72,7 @@ const PList = extern struct {
 			return;
 		}
 		defer pd.post.log(self, .normal, "", .{});
-		var hm = (tx.metadata(self.plist.ptr[@intCast(i)].name)
+		var hm = (tx.Meta.fromPath(self.plist.ptr[@intCast(i)].name)
 			catch |e| return self.err(e)) orelse return;
 		defer hm.deinit();
 

@@ -71,6 +71,21 @@ pub const Meta = struct {
 			try self.map.put(gpa, key, try .init(lang, value));
 		}
 	}
+
+	pub fn traverse(self: *Meta, sidecar: [:0]const u8) !void {
+		var parents: StringMap = .init(gpa);
+		defer parents.deinit();
+		try traverseMeta(self, &parents, sidecar);
+	}
+
+	pub fn fromPath(path: [*:0]const u8) !?Meta {
+		const sidecar = try getSidecar(std.mem.sliceTo(path, 0)) orelse return null;
+		defer gpa.free(sidecar);
+		var self: Meta = .{};
+		errdefer self.deinit();
+		try self.traverse(sidecar);
+		return self;
+	}
 };
 
 inline fn find(slice: []const u8, value: u8) ?usize {
@@ -282,7 +297,7 @@ fn traverseMeta(
 	}
 }
 
-inline fn getSidecar(path: []const u8) !?[:0]const u8 {
+pub fn getSidecar(path: []const u8) !?[:0]const u8 {
 	const txdir = trext ++ "/";
 	const dot = findLast(path, '.') orelse path.len;
 	var trx_path = try gpa.alloc(u8, dot + txdir.len + trext.len + 1);
@@ -315,18 +330,6 @@ inline fn getSidecar(path: []const u8) !?[:0]const u8 {
 	std.debug.assert(i + 1 <= trx_path.len);
 	trx_path = gpa.realloc(trx_path, i + 1) catch unreachable;
 	return trx_path[0..i :0];
-}
-
-pub fn metadata(path: [*:0]const u8) !?Meta {
-	const sidecar = try getSidecar(std.mem.sliceTo(path, 0)) orelse return null;
-	defer gpa.free(sidecar);
-	var meta: Meta = .{};
-	errdefer meta.deinit();
-	var parents: StringMap = .init(gpa);
-	defer parents.deinit();
-
-	try traverseMeta(&meta, &parents, sidecar);
-	return meta;
 }
 
 pub const Playlist = extern struct {
