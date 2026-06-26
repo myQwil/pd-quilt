@@ -163,9 +163,9 @@ pub fn build(b: *Build) !void {
 			.ffmpeg => {
 				// un-comment this to help with cross-compilation
 				// if (os == .windows) {
-					// mod.addLibraryPath(b.path("build-win-av"));
+					// mod.addLibraryPath(b.path("build-win/av"));
 				// } else if (os.isDarwin()) {
-					// mod.addLibraryPath(b.path("build-mac-av"));
+					// mod.addLibraryPath(b.path("build-mac/av"));
 				// }
 				const linkopt: std.Build.Module.LinkSystemLibraryOptions = .{
 					.preferred_link_mode = opt.linkage
@@ -178,7 +178,7 @@ pub fn build(b: *Build) !void {
 			}
 		};
 		if (os == .windows) {
-			mod.addObjectFile(b.path("build-win-pd/bin/pd.dll"));
+			mod.addObjectFile(b.path("build-win/pd/bin/pd.dll"));
 		}
 		if (opt.linkage == .dynamic and x.deps.len > 0) {
 			mod.addRPathSpecial(if (os.isDarwin()) "@loader_path" else "$ORIGIN");
