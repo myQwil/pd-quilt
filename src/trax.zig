@@ -86,6 +86,11 @@ pub const Meta = struct {
 		try self.traverse(sidecar);
 		return self;
 	}
+
+	pub fn get(self: *Meta, key: *Symbol, pref_langs: []*Symbol) ?*Symbol {
+		const ldict = self.map.get(key) orelse return null;
+		return ldict.get(pref_langs);
+	}
 };
 
 inline fn find(slice: []const u8, value: u8) ?usize {
@@ -389,6 +394,10 @@ pub const LangSet = extern struct {
 	/// length of the list
 	len: usize = 0,
 
+	pub inline fn slice(self: *const LangSet) []*Symbol {
+		return self.ptr[0..self.len];
+	}
+
 	pub fn deinit(self: *LangSet) void {
 		gpa.free(self.ptr[0..self.len]);
 	}
@@ -407,10 +416,10 @@ pub const LangSet = extern struct {
 				}
 			}
 		}
-		const slice = try arr.toOwnedSlice(gpa);
+		const slc = try arr.toOwnedSlice(gpa);
 		// on success, replace old list with new one
 		self.deinit();
-		self.ptr = slice.ptr;
-		self.len = slice.len;
+		self.ptr = slc.ptr;
+		self.len = slc.len;
 	}
 };

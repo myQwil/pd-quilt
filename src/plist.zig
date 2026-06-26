@@ -60,9 +60,9 @@ const PList = extern struct {
 			catch |e| return self.err(e)) orelse return;
 		defer hm.deinit();
 
-		if (hm.map.get(s)) |ldict| {
+		if (hm.get(s, self.langs.slice())) |val| {
 			self.out_idx.float(@floatFromInt(i));
-			self.out_val.symbol(ldict.get(self.langs.ptr[0..self.langs.len]));
+			self.out_val.symbol(val);
 		}
 	}
 
@@ -76,7 +76,7 @@ const PList = extern struct {
 			catch |e| return self.err(e)) orelse return;
 		defer hm.deinit();
 
-		const langs: []*Symbol = self.langs.ptr[0..self.langs.len];
+		const langs: []*Symbol = self.langs.slice();
 		var buf: [std.fs.max_path_bytes:0]u8 = undefined;
 		var iter = hm.map.iterator();
 		while (iter.next()) |kv| {
