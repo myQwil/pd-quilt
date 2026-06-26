@@ -12,11 +12,13 @@ pub fn Ramp(Owner: type) type { return extern struct {
 	const Self = @This();
 
 	pub inline fn setInc(self: *const Self, owner: *Owner) void {
-		owner.inc = (self.target - owner.value) / @as(Sample, @floatFromInt(self.remain));
+		owner.inc = if (self.remain > 0)
+			(self.target - owner.value) / @as(Sample, @floatFromInt(self.remain))
+		else 0;
 	}
 
 	pub inline fn reset(self: *Self, samples: Float, target: Sample) void {
-		self.remain = @intFromFloat(@max(1, samples));
+		self.remain = @intFromFloat(@max(0, samples));
 		self.target = target;
 	}
 
