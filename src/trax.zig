@@ -12,20 +12,22 @@ const io = std.Io.Threaded.global_single_threaded.io();
 
 const LangDict = struct {
 	dict: Dict,
-	default: *Symbol,
+	/// index of default entry
+	default: usize = 0,
 
 	const Dict = std.array_hash_map.Auto(*Symbol, *Symbol);
 
 	fn init(lang: *Symbol, value: *Symbol) !LangDict {
 		var dict: Dict = .empty;
 		try dict.put(gpa, lang, value);
-		return .{ .dict = dict, .default = lang };
+		return .{ .dict = dict };
 	}
 
 	fn add(self: *LangDict, lang: *Symbol, value: *Symbol) !void {
-		try self.dict.put(gpa, lang, value);
-		if (lang == pd.s.empty()) {
-			self.default = pd.s.empty();
+		const gop = try self.dict.getOrPut(gpa, lang);
+		gop.value_ptr.* = value;
+		if (!gop.found_existing and lang == pd.s.empty()) {
+			self.default = self.dict.entries.len - 1;
 		}
 	}
 
@@ -45,7 +47,7 @@ const LangDict = struct {
 				}
 			}
 		}
-		return self.dict.get(self.default).?;
+		return self.dict.entries.slice().items(.value)[self.default];
 	}
 };
 
