@@ -5,10 +5,10 @@ const Atom = pd.Atom;
 const Symbol = pd.Symbol;
 const StringMap = std.StringHashMap(void);
 const SymbolList = std.ArrayList(*Symbol);
+const Allocator = std.mem.Allocator;
+const Io = std.Io;
 
 const trext = ".trax";
-const gpa = pd.gpa;
-const io = std.Io.Threaded.global_single_threaded.io();
 
 const LangDict = struct {
 	dict: Dict,
@@ -17,13 +17,13 @@ const LangDict = struct {
 
 	const Dict = std.array_hash_map.Auto(*Symbol, *Symbol);
 
-	fn init(lang: *Symbol, value: *Symbol) !LangDict {
+	fn init(gpa: Allocator, lang: *Symbol, value: *Symbol) !LangDict {
 		var dict: Dict = .empty;
 		try dict.put(gpa, lang, value);
 		return .{ .dict = dict };
 	}
 
-	fn add(self: *LangDict, lang: *Symbol, value: *Symbol) !void {
+	fn add(self: *LangDict, gpa: Allocator, lang: *Symbol, value: *Symbol) !void {
 		const gop = try self.dict.getOrPut(gpa, lang);
 		gop.value_ptr.* = value;
 		if (!gop.found_existing and lang == pd.s.empty()) {
@@ -56,7 +56,7 @@ pub const Meta = struct {
 
 	const Map = std.array_hash_map.Auto(*Symbol, LangDict);
 
-	pub fn deinit(self: *Meta) void {
+	pub fn deinit(self: *Meta, gpa: Allocator) void {
 		var iter = self.map.iterator();
 		while (iter.next()) |kv| {
 			kv.value_ptr.dict.deinit(gpa);
@@ -64,26 +64,33 @@ pub const Meta = struct {
 		self.map.deinit(gpa);
 	}
 
-	fn add(self: *Meta, key: *Symbol, lang: *Symbol, value: *Symbol) !void {
+	fn add(
+		self: *Meta,
+		gpa: Allocator,
+		key: *Symbol,
+		lang: *Symbol,
+		value: *Symbol,
+	) !void {
 		if (self.map.getPtr(key)) |ld| {
-			try ld.add(lang, value);
+			try ld.add(gpa, lang, value);
 		} else {
-			try self.map.put(gpa, key, try .init(lang, value));
+			try self.map.put(gpa, key, try .init(gpa, lang, value));
 		}
 	}
 
-	pub fn traverse(self: *Meta, sidecar: [:0]const u8) !void {
+	pub fn traverse(self: *Meta, gpa: Allocator, io: Io, sidecar: [:0]const u8) !void {
 		var parents: StringMap = .init(gpa);
 		defer parents.deinit();
-		try traverseMeta(self, &parents, sidecar);
+		try traverseMeta(gpa, io, self, &parents, sidecar);
 	}
 
-	pub fn fromPath(path: [*:0]const u8) !?Meta {
-		const sidecar = try getSidecar(std.mem.sliceTo(path, 0)) orelse return null;
+	pub fn fromPath(gpa: Allocator, io: Io, path: [*:0]const u8) !?Meta {
+		const sidecar = try getSidecar(gpa, io, std.mem.sliceTo(path, 0))
+			orelse return null;
 		defer gpa.free(sidecar);
 		var self: Meta = .{};
-		errdefer self.deinit();
-		try self.traverse(sidecar);
+		errdefer self.deinit(gpa);
+		try self.traverse(gpa, io, sidecar);
 		return self;
 	}
 
@@ -163,6 +170,8 @@ fn resolveZ(allocator: std.mem.Allocator, paths: []const []const u8) ![:0]u8 {
 }
 
 fn traverseList(
+	gpa: Allocator,
+	io: Io,
 	list: *SymbolList,
 	parents: *StringMap,
 	file_path: [:0]const u8,
@@ -173,7 +182,7 @@ fn traverseList(
 	try parents.put(file_path, {});
 	defer _ = parents.remove(file_path);
 
-	const file = std.Io.Dir.cwd().openFile(io, file_path, .{ .mode = .read_only })
+	const file = Io.Dir.cwd().openFile(io, file_path, .{ .mode = .read_only })
 		catch |e| return err(list.items.len, e, file_path.ptr);
 	defer file.close(io);
 
@@ -195,7 +204,7 @@ fn traverseList(
 		const resolved = try resolveZ(gpa, &.{ base_dir, line[1..] });
 		defer gpa.free(resolved);
 		if (isTrax(resolved)) {
-			try traverseList(list, parents, resolved);
+			try traverseList(gpa, io, list, parents, resolved);
 		} else {
 			try list.append(gpa, .gen(resolved.ptr));
 		}
@@ -205,6 +214,8 @@ fn traverseList(
 }
 
 fn traverseMeta(
+	gpa: Allocator,
+	io: Io,
 	meta: *Meta,
 	parents: *StringMap,
 	file_path: [:0]const u8,
@@ -215,7 +226,7 @@ fn traverseMeta(
 	try parents.put(file_path, {});
 	defer _ = parents.remove(file_path);
 
-	const file = std.Io.Dir.cwd().openFile(io, file_path, .{ .mode = .read_only })
+	const file = Io.Dir.cwd().openFile(io, file_path, .{ .mode = .read_only })
 		catch |e| return err(meta.map.count(), e, file_path.ptr);
 	defer file.close(io);
 
@@ -251,7 +262,7 @@ fn traverseMeta(
 				const kl = keyLang(multiline.items[0..vpos]);
 				try multiline.append(gpa, 0);
 				const value = multiline.items[vpos .. multiline.items.len - 1 :0];
-				try meta.add(kl.key, kl.lang, .gen(value));
+				try meta.add(gpa, kl.key, kl.lang, .gen(value));
 				multiline.items.len = 0;
 			}
 		}
@@ -288,7 +299,7 @@ fn traverseMeta(
 			}
 			const resolved = try resolveZ(gpa, &.{ base_dir, arg[1..] });
 			defer gpa.free(resolved);
-			try traverseMeta(meta, parents, resolved);
+			try traverseMeta(gpa, io, meta, parents, resolved);
 			continue;
 		}
 	} else |e| if (e != error.EndOfStream) {
@@ -299,11 +310,11 @@ fn traverseMeta(
 		const kl = keyLang(multiline.items[0..vpos]);
 		try multiline.append(gpa, 0);
 		const value = multiline.items[vpos .. multiline.items.len - 1 :0];
-		try meta.add(kl.key, kl.lang, .gen(value));
+		try meta.add(gpa, kl.key, kl.lang, .gen(value));
 	}
 }
 
-pub fn getSidecar(path: []const u8) !?[:0]const u8 {
+pub fn getSidecar(gpa: Allocator, io: Io, path: []const u8) !?[:0]const u8 {
 	const txdir = trext ++ "/";
 	const dot = findLast(path, '.') orelse path.len;
 	var trx_path = try gpa.alloc(u8, dot + txdir.len + trext.len + 1);
@@ -322,11 +333,11 @@ pub fn getSidecar(path: []const u8) !?[:0]const u8 {
 	i += base.len;
 	@memcpy(trx_path[i..][0..trext.len], trext);
 	i += trext.len;
-	std.Io.Dir.cwd().access(io, trx_path[0..i], .{ .read = true }) catch {
+	Io.Dir.cwd().access(io, trx_path[0..i], .{ .read = true }) catch {
 		@memcpy(trx_path[0..dot], path[0..dot]);
 		@memcpy(trx_path[dot..][0..trext.len], trext);
 		i = dot + trext.len;
-		std.Io.Dir.cwd().access(io, trx_path[0..i], .{ .read = true }) catch {
+		Io.Dir.cwd().access(io, trx_path[0..i], .{ .read = true }) catch {
 			gpa.free(trx_path);
 			return null;
 		};
@@ -353,12 +364,12 @@ pub const Playlist = extern struct {
 		};
 	}
 
-	pub fn deinit(self: *Playlist) void {
+	pub fn deinit(self: *Playlist, gpa: Allocator) void {
 		var list = self.asSymbolList();
 		list.deinit(gpa);
 	}
 
-	pub fn append(self: *Playlist, av: []const Atom) !void {
+	pub fn append(self: *Playlist, gpa: Allocator, io: Io, av: []const Atom) !void {
 		var list = self.asSymbolList();
 		defer self.* = .{
 			.ptr = list.items.ptr,
@@ -372,19 +383,19 @@ pub const Playlist = extern struct {
 			if (isTrax(name)) {
 				var parents: StringMap = .init(gpa);
 				defer parents.deinit();
-				try traverseList(&list, &parents, name);
+				try traverseList(gpa, io, &list, &parents, name);
 			} else {
 				try list.append(gpa, sym);
 			}
 		}
 	}
 
-	pub fn replaceWith(self: *Playlist, av: []const Atom) !void {
+	pub fn replaceWith(self: *Playlist, gpa: Allocator, io: Io, av: []const Atom) !void {
 		var playlist: Playlist = .{};
-		errdefer playlist.deinit();
-		try playlist.append(av);
+		errdefer playlist.deinit(gpa);
+		try playlist.append(gpa, io, av);
 		// on success, replace old list with new one
-		self.deinit();
+		self.deinit(gpa);
 		self.* = playlist;
 	}
 };
@@ -395,15 +406,15 @@ pub const LangSet = extern struct {
 	/// length of the list
 	len: usize = 0,
 
-	pub inline fn slice(self: *const LangSet) []*Symbol {
+	pub inline fn slice(self: LangSet) []*Symbol {
 		return self.ptr[0..self.len];
 	}
 
-	pub fn deinit(self: *LangSet) void {
+	pub fn deinit(self: *LangSet, gpa: Allocator) void {
 		gpa.free(self.ptr[0..self.len]);
 	}
 
-	pub fn replaceWith(self: *LangSet, args: []const Atom) !void {
+	pub fn replaceWith(self: *LangSet, gpa: Allocator, args: []const Atom) !void {
 		var arr: SymbolList = .empty;
 		errdefer arr.deinit(gpa);
 		var set: std.AutoHashMap(*Symbol, void) = .init(gpa);
@@ -419,7 +430,7 @@ pub const LangSet = extern struct {
 		}
 		const slc = try arr.toOwnedSlice(gpa);
 		// on success, replace old list with new one
-		self.deinit();
+		self.deinit(gpa);
 		self.ptr = slc.ptr;
 		self.len = slc.len;
 	}

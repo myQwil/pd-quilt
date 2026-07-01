@@ -1,4 +1,5 @@
 const pd = @import("pd");
+const std = @import("std");
 const pr = @import("player.zig");
 const gm = @import("player.gme.zig");
 const ra = @import("player.rabbit.zig");
@@ -7,6 +8,7 @@ const Inlet = @import("inlet.zig").Inlet;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
+const Allocator = std.mem.Allocator;
 
 pub fn Impl(Root: type) type { return extern struct {
 	obj: pd.Object,
@@ -16,6 +18,8 @@ pub fn Impl(Root: type) type { return extern struct {
 
 	const Self = @This();
 	pub var class: *pd.Class = undefined;
+	pub const gpa = pd.gpa;
+	pub const io = std.Io.Threaded.global_single_threaded.io();
 
 	// Implementations
 	pub const Base = gm.Base(Root.nch, ra.frames);

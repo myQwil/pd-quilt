@@ -1,4 +1,5 @@
 const pd = @import("pd");
+const std = @import("std");
 const pr = @import("player.zig");
 const gm = @import("player.gme.zig");
 const ra = @import("player.rabbit.zig");
@@ -7,8 +8,6 @@ const ru = @import("player.rubber.zig");
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
-
-const gpa = pd.gpa;
 
 pub fn Impl(Root: type) type { return extern struct {
 	obj: pd.Object,
@@ -19,6 +18,8 @@ pub fn Impl(Root: type) type { return extern struct {
 
 	const Self = @This();
 	pub var class: *pd.Class = undefined;
+	pub const gpa = pd.gpa;
+	pub const io = std.Io.Threaded.global_single_threaded.io();
 
 	// Implementations
 	pub const Base = gm.Base(Root.nch, ra.frames);
@@ -108,7 +109,7 @@ pub fn Impl(Root: type) type { return extern struct {
 		var rabbit: ra.Rabbit = try .init(obj, Root.nch);
 		errdefer rabbit.deinit();
 
-		var rubber: ru.Rubber = try .init(obj, Root.nch, av);
+		var rubber: ru.Rubber = try .init(gpa, obj, Root.nch, av);
 		errdefer rubber.deinit();
 
 		var planar: [Root.nch][*]Sample = undefined;
@@ -148,7 +149,7 @@ pub fn Impl(Root: type) type { return extern struct {
 	pub inline fn setup() !void {
 		class = try .init(Self, Root.name, &.{ .gimme }, &initC, &deinitC, .{});
 		try BaseImpl.extend();
-		try Rubber.extend();
+		try Rubber.extend(gpa);
 		Rabbit.extend();
 		Player.extend();
 		class.setFreeFn(&classFreeC);

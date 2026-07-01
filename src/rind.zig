@@ -1,11 +1,14 @@
 //! Float random number generator. Seed is initialized with Zig's `io.random()`.
 
 const pd = @import("pd");
+const std = @import("std");
 const rn = @import("rng.zig");
 
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
+
+const io = std.Io.Threaded.global_single_threaded.io();
 
 pub const Rind = extern struct {
 	obj: pd.Object,
@@ -87,7 +90,7 @@ pub const Rind = extern struct {
 
 	inline fn setup() !void {
 		class = try .init(Rind, name, &.{ .gimme }, &initC, null, .{});
-		try rn.Impl(Rind).extend();
+		try rn.Impl(Rind).extend(io);
 		class.addBang(@ptrCast(&bangC));
 		class.addList(@ptrCast(&listC));
 		class.addAnything(@ptrCast(&anythingC));

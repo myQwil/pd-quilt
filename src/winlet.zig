@@ -1,9 +1,9 @@
 const pd = @import("pd");
 const std = @import("std");
 const Inlet = @import("inlet.zig").Inlet;
-const Word = pd.Word;
 
-const gpa = pd.gpa;
+const Word = pd.Word;
+const Allocator = std.mem.Allocator;
 
 /// Returns a capacity larger than minimum that grows super-linearly.
 fn growCapacity(current: usize, minimum: usize) usize {
@@ -22,7 +22,7 @@ pub const WordInlets = extern struct {
 	cap: usize,
 	len: usize,
 
-	pub fn init(owner: *pd.Object, av: []const pd.Atom) !WordInlets {
+	pub fn init(gpa: Allocator, owner: *pd.Object, av: []const pd.Atom) !WordInlets {
 		const vec = try gpa.alloc(Word, av.len);
 		for (vec, av) |*w, *a| {
 			w.float = a.getFloat() orelse 0;
@@ -36,7 +36,7 @@ pub const WordInlets = extern struct {
 		};
 	}
 
-	pub fn deinit(self: *WordInlets) void {
+	pub fn deinit(self: *WordInlets, gpa: Allocator) void {
 		gpa.free(self.ptr[0..self.cap]);
 	}
 
@@ -48,7 +48,7 @@ pub const WordInlets = extern struct {
 		try writer.print("(len={}/{}) ", .{ self.len, self.cap });
 	}
 
-	pub fn resize(self: *WordInlets, size: usize) !void {
+	pub fn resize(self: *WordInlets, gpa: Allocator, size: usize) !void {
 		if (self.cap < size) {
 			const n = growCapacity(self.cap, size);
 			const vec = try gpa.realloc(self.ptr[0..self.cap], n);

@@ -1,4 +1,5 @@
 const pd = @import("pd");
+const std = @import("std");
 const pr = @import("player.zig");
 const av = @import("player.av.zig");
 const ra = @import("player.rabbit.zig");
@@ -7,8 +8,6 @@ const ru = @import("player.rubber.zig");
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
-
-const gpa = pd.gpa;
 
 pub fn Impl(Root: type) type { return extern struct {
 	obj: pd.Object,
@@ -19,6 +18,8 @@ pub fn Impl(Root: type) type { return extern struct {
 
 	const Self = @This();
 	pub var class: *pd.Class = undefined;
+	pub const gpa = pd.gpa;
+	pub const io = std.Io.Threaded.global_single_threaded.io();
 
 	// Implementations
 	pub const Base = av.Base(ra.frames);
@@ -173,14 +174,16 @@ pub fn Impl(Root: type) type { return extern struct {
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
-		var base: Base = try .init(obj, if (args.len > 0) args[0] else .float(av.stereo));
-		errdefer base.deinit();
+		var base: Base = try .init(
+			gpa, obj, if (args.len > 0) args[0] else .float(av.stereo));
+		errdefer base.deinit(gpa);
 
 		const nch = base.nch;
 		var rabbit: ra.Rabbit = try .init(obj, nch);
 		errdefer rabbit.deinit();
 
-		var rubber: ru.Rubber = try .init(obj, nch, if (args.len > 1) args[1..] else &.{});
+		var rubber: ru.Rubber = try .init(
+			gpa, obj, nch, if (args.len > 1) args[1..] else &.{});
 		errdefer rubber.deinit();
 
 		const pslice = try gpa.alloc([*]Sample, nch);
@@ -212,7 +215,7 @@ pub fn Impl(Root: type) type { return extern struct {
 		gpa.free(self.planar[0..nch]);
 		self.rubber.deinit();
 		self.rabbit.deinit();
-		self.base.deinit();
+		self.base.deinit(gpa);
 	}
 
 	fn classFreeC(_: *pd.Class) callconv(.c) void {
@@ -223,7 +226,7 @@ pub fn Impl(Root: type) type { return extern struct {
 	pub inline fn setup() !void {
 		class = try .init(Self, Root.name, &.{ .gimme }, &initC, &deinitC, .{});
 		try BaseImpl.extend();
-		try Rubber.extend();
+		try Rubber.extend(gpa);
 		Player.extend();
 		Rabbit.extend();
 		class.addMethod(@ptrCast(&dspC), .gen("dsp"), &.{ .cant });

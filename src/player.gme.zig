@@ -12,13 +12,13 @@ const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
+const Allocator = std.mem.Allocator;
+const Io = std.Io;
 
 var s_mask: *Symbol = undefined;
-const io = std.Io.Threaded.global_single_threaded.io();
-const gpa = pd.gpa;
 
 const GmeInit = fn(*const gm.Type, uint) anyerror!*gm.Emu;
-const ArcInit = fn (std.mem.Allocator, [:0]const u8) anyerror!arc.ArcReader;
+const ArcInit = arc.ArcReader.InitFn;
 
 inline fn sampleRate(t: *const gm.Type) Float {
 	return if (t == gm.gme_spc_type) 32000.0 else pd.sampleRate();
@@ -44,7 +44,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 
 	const Gme = @This();
 
-	var dict: std.AutoHashMap(*Symbol, *const fn(*const Gme) Atom) = .init(gpa);
+	var dict: std.AutoHashMap(*Symbol, *const fn(*const Gme) Atom) = undefined;
 	pub fn freeDict() void {
 		dict.deinit();
 	}
@@ -76,7 +76,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		}
 	}
 
-	pub fn loadTrack(self: *Gme, index: usize) !void {
+	pub fn loadTrack(self: *Gme, _: Allocator, _: Io, index: usize) !void {
 		const idx: uint = @intCast(index);
 		try self.emu.startTrack(idx);
 		const info = try self.emu.trackInfo(idx);
@@ -84,11 +84,11 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		self.info = info;
 	}
 
-	pub inline fn open(self: *Gme, av: []const Atom) !void {
+	pub inline fn open(self: *Gme, gpa: Allocator, io: Io, av: []const Atom) !void {
 		const s = try pd.symbolArg(0, av);
 		const path = std.mem.sliceTo(s.name, 0);
 		const signature: u32 = blk: {
-			var file = try std.Io.Dir.cwd().openFile(io, path, .{});
+			var file = try Io.Dir.cwd().openFile(io, path, .{});
 			defer file.close(io);
 			var sig_buf: [4]u8 = undefined;
 			var reader = file.reader(io, &sig_buf);
@@ -99,8 +99,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		var arc_reader: ?arc.ArcReader = inline for (arc.types) |t| {
 			const sig: u32 = t.signature;
 			if (signature == sig) {
-				const initArc: ArcInit = t.init;
-				break try initArc(gpa, path);
+				break try @as(ArcInit, t.init)(gpa, io, path);
 			}
 		} else null;
 
@@ -154,11 +153,11 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		self.emu = emu;
 		self.info = info;
 		self.ratio = srate / pd.sampleRate();
-		self.loadM3u(path) catch {};
+		self.loadM3u(gpa, path) catch {};
 	}
 
 	/// Load a .m3u file with the same name as current file if it exists
-	inline fn loadM3u(self: *Gme, path: []const u8) !void {
+	inline fn loadM3u(self: *Gme, gpa: Allocator, path: []const u8) !void {
 		const ext = ".m3u";
 		const end = std.mem.findScalarLast(u8, path, '.') orelse path.len;
 		var ext_path = try gpa.allocSentinel(u8, end + ext.len, 0);
@@ -170,7 +169,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		try self.emu.loadM3u(ext_path);
 	}
 
-	pub inline fn printAuto(self: *const Gme, writer: *std.Io.Writer) !void {
+	pub inline fn printAuto(self: *const Gme, writer: *Io.Writer) !void {
 		// general track info: %game% - %song%
 		const info = self.info;
 		if (info.game[0] != 0) {
@@ -223,6 +222,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		const perform: fn(*Self, [*]usize, *u32) callconv(.@"inline") anyerror!void
 			= Self.perform;
 		const err: fn(*const Self, anyerror) callconv(.@"inline") void = Self.err;
+		const gpa = Self.gpa;
 
 		fn muteC(
 			self: *Self,
@@ -312,6 +312,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		pub inline fn extend() !void {
 			s_mask = .gen("mask");
 
+			dict = .init(gpa);
 			errdefer dict.deinit();
 			inline for ([_][:0]const u8{
 				"path", "time", "ftime", "fade", "tracks", "voices",

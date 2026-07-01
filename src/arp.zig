@@ -362,7 +362,7 @@ const InArray = extern struct {
 	}
 
 	fn resizeC(self: *InArray, f: Float) callconv(.c) void {
-		self.win.resize(@intFromFloat(@max(1, f))) catch |e| self.err(e);
+		self.win.resize(gpa, @intFromFloat(@max(1, f))) catch |e| self.err(e);
 	}
 
 	fn floatC(self: *InArray, f: Float) callconv(.c) void {
@@ -402,14 +402,14 @@ const InArray = extern struct {
 
 		self.* = .{
 			.obj = self.obj,
-			.win = try .init(obj, if (av.len > 0) av else &.{ .float(69), .float(7) }),
+			.win = try .init(gpa, obj, if (av.len > 0) av else &.{ .float(69), .float(7) }),
 			.arp = try .init(obj),
 		};
 		return self;
 	}
 
 	fn deinitC(self: *InArray) callconv(.c) void {
-		self.win.deinit();
+		self.win.deinit(gpa);
 	}
 
 	inline fn setup() !void {

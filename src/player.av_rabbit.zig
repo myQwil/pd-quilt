@@ -1,4 +1,5 @@
 const pd = @import("pd");
+const std = @import("std");
 const pr = @import("player.zig");
 const av = @import("player.av.zig");
 const ra = @import("player.rabbit.zig");
@@ -14,6 +15,8 @@ pub fn Impl(Root: type) type { return extern struct {
 
 	const Self = @This();
 	pub var class: *pd.Class = undefined;
+	pub const gpa = pd.gpa;
+	pub const io = std.Io.Threaded.global_single_threaded.io();
 
 	// Implementations
 	pub const Base = av.Base(ra.frames);
@@ -156,8 +159,8 @@ pub fn Impl(Root: type) type { return extern struct {
 		errdefer obj.g.pd.deinit();
 
 		const arg: Atom = if (args.len > 0) args[0] else .float(av.stereo);
-		var base: Base = try .init(obj, arg);
-		errdefer base.deinit();
+		var base: Base = try .init(gpa, obj, arg);
+		errdefer base.deinit(gpa);
 
 		const rabbit: ra.Rabbit = try .init(obj, base.nch);
 		self.* = .{
@@ -170,7 +173,7 @@ pub fn Impl(Root: type) type { return extern struct {
 
 	fn deinitC(self: *Self) callconv(.c) void {
 		self.rabbit.deinit();
-		self.base.deinit();
+		self.base.deinit(gpa);
 	}
 
 	fn classFreeC(_: *pd.Class) callconv(.c) void {

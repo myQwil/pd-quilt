@@ -7,20 +7,25 @@ const Inlet = @import("inlet.zig").Inlet;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
+const Allocator = std.mem.Allocator;
 
-const gpa = pd.gpa;
 var s_delay: *Symbol = undefined;
 
 pub const Rubber = extern struct {
 	state: *ru.State,
 	tempo: *Float,
 
-	pub inline fn init(obj: *pd.Object, channels: u8, av: []const Atom) !Rubber {
+	pub inline fn init(
+		gpa: Allocator,
+		obj: *pd.Object,
+		channels: u8,
+		av: []const Atom,
+	) !Rubber {
 		const in3: *Inlet = @ptrCast(@alignCast(try obj.inletSignal(1.0)));
 		return .{
 			.tempo = &in3.un.floatsignalvalue,
 			.state = try .init(
-				@intFromFloat(pd.sampleRate()), channels, 1, 1, try parseOptions(av)),
+				@intFromFloat(pd.sampleRate()), channels, 1, 1, try parseOptions(gpa, av)),
 		};
 	}
 
@@ -51,12 +56,12 @@ pub const Rubber = extern struct {
 };
 
 const FieldSetFunc = fn(*ru.Options, *Symbol) void;
-var dict: std.AutoHashMap(*Symbol, *const FieldSetFunc) = .init(gpa);
+var dict: std.AutoHashMap(*Symbol, *const FieldSetFunc) = undefined;
 pub fn freeDict() void {
 	dict.deinit();
 }
 
-fn parseOptions(av: []const Atom) !ru.Options {
+fn parseOptions(gpa: Allocator, av: []const Atom) !ru.Options {
 	var options: ru.Options = .{ .process = .realtime, .engine = .finer };
 	for (av) |a| {
 		if (a.getSymbol()) |s| {
@@ -151,9 +156,10 @@ pub fn Impl(Self: type) type { return struct {
 		});
 	}
 
-	pub inline fn extend() !void {
+	pub inline fn extend(gpa: Allocator) !void {
 		s_delay = .gen("delay");
 
+		dict = .init(gpa);
 		errdefer dict.deinit();
 		inline for ([_][:0]const u8{
 			"transients", "detector", "phase", "threading", "window",

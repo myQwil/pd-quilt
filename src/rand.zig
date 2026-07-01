@@ -10,6 +10,9 @@ const Float = pd.Float;
 const Symbol = pd.Symbol;
 const Writer = std.Io.Writer;
 
+const gpa = pd.gpa;
+const io = std.Io.Threaded.global_single_threaded.io();
+
 fn setWords(vec: []pd.Word, av: []const Atom) !void {
 	if (av.len < 2) {
 		return error.NotEnoughArgs;
@@ -174,7 +177,7 @@ const Range = extern struct {
 
 	inline fn setup() !void {
 		class = try .init(Range, name, &.{}, null, null, .{});
-		try rn.Impl(Range).extend();
+		try rn.Impl(Range).extend(io);
 		Rnd.extend();
 		class.addBang(@ptrCast(&bangC));
 		class.addList(@ptrCast(&listC));
@@ -209,7 +212,7 @@ const InArray = extern struct {
 	}
 
 	fn resizeC(self: *InArray, f: Float) callconv(.c) void {
-		self.win.resize(@intFromFloat(@max(1, f))) catch |e| self.err(e);
+		self.win.resize(gpa, @intFromFloat(@max(1, f))) catch |e| self.err(e);
 	}
 
 	fn listC(
@@ -237,7 +240,7 @@ const InArray = extern struct {
 
 		self.* = .{
 			.obj = self.obj,
-			.win = try .init(obj, av[0..n]),
+			.win = try .init(gpa, obj, av[0..n]),
 			.rand = try .init(obj),
 			.rng = .init(),
 		};
@@ -245,12 +248,12 @@ const InArray = extern struct {
 	}
 
 	fn deinitC(self: *InArray) callconv(.c) void {
-		self.win.deinit();
+		self.win.deinit(gpa);
 	}
 
 	inline fn setup() !void {
 		class = try .init(InArray, name, &.{}, null, &deinitC, .{});
-		try rn.Impl(InArray).extend();
+		try rn.Impl(InArray).extend(io);
 		Rnd.extend();
 		class.addBang(@ptrCast(&bangC));
 		class.addList(@ptrCast(&listC));
@@ -337,7 +340,7 @@ const ExArray = extern struct {
 
 	inline fn setup() !void {
 		class = try .init(ExArray, name, &.{}, null, null, .{});
-		try rn.Impl(ExArray).extend();
+		try rn.Impl(ExArray).extend(io);
 		Rnd.extend();
 		class.addBang(@ptrCast(&bangC));
 		class.addList(@ptrCast(&listC));

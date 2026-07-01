@@ -1,7 +1,6 @@
 const std = @import("std");
+const Io = std.Io;
 const Allocator = std.mem.Allocator;
-
-const io = std.Io.Threaded.global_single_threaded.io();
 
 const Entry = struct {
 	name: [:0]const u8,
@@ -11,13 +10,14 @@ const Entry = struct {
 pub const ArcReader = struct {
 	ptr: *anyopaque,
 	vtable: *const VTable,
-	allocator: Allocator,
 	count: usize,
 	size: usize,
 
+	pub const InitFn = fn (Allocator, Io, [:0]const u8) anyerror!ArcReader;
+
 	const VTable = struct {
 		next: *const fn (*anyopaque, []u8) anyerror!?Entry,
-		close: *const fn (*anyopaque, Allocator) void,
+		close: *const fn (*anyopaque) void,
 	};
 
 	pub fn next(self: *ArcReader, buf: []u8) !?Entry {
@@ -25,7 +25,7 @@ pub const ArcReader = struct {
 	}
 
 	pub fn close(self: *ArcReader) void {
-		self.vtable.close(self.ptr, self.allocator);
+		self.vtable.close(self.ptr);
 	}
 };
 
@@ -34,13 +34,14 @@ const RarReader = struct {
 	archive: *rar.Archive,
 	buf_ptr: [*]u8 = undefined,
 	buf_len: usize = undefined,
+	gpa: Allocator,
 
 	const rar = @import("unrar");
 	pub const signature: u32 = @bitCast([4]u8{'R', 'a', 'r', '!'});
 
 	const vtable: ArcReader.VTable = .{
-		.next = @ptrCast(&next),
-		.close = @ptrCast(&close),
+		.next = &next,
+		.close = &close,
 	};
 
 	fn cb(
@@ -61,12 +62,12 @@ const RarReader = struct {
 		return .success;
 	}
 
-	pub fn init(allocator: Allocator, path: [:0]const u8) !ArcReader {
+	pub fn init(gpa: Allocator, _: Io, path: [:0]const u8) !ArcReader {
 		var size: usize = 0;
 		var count: usize = 0;
 
-		const self = try allocator.create(RarReader);
-		self.* = .{ .archive = blk: {
+		const self = try gpa.create(RarReader);
+		self.* = .{ .gpa = gpa, .archive = blk: {
 			var head: rar.Header = .{};
 			var data: rar.OpenData = .{ .arc_name = path.ptr, .open_mode = .list };
 			{
@@ -88,13 +89,13 @@ const RarReader = struct {
 		return .{
 			.ptr = self,
 			.vtable = &vtable,
-			.allocator = allocator,
 			.count = count,
 			.size = size,
 		};
 	}
 
-	fn next(self: *RarReader, buf: []u8) !?Entry {
+	fn next(ptr: *anyopaque, buf: []u8) !?Entry {
+		const self: *RarReader = @ptrCast(@alignCast(ptr));
 		if (!try self.head.read(self.archive)) {
 			return null;
 		}
@@ -108,17 +109,19 @@ const RarReader = struct {
 		};
 	}
 
-	fn close(self: *RarReader, allocator: Allocator) void {
+	fn close(ptr: *anyopaque) void {
+		const self: *RarReader = @ptrCast(@alignCast(ptr));
 		self.archive.close() catch {};
-		allocator.destroy(self);
+		self.gpa.destroy(self);
 	}
 };
 
 const ZipReader = struct {
-	reader: std.Io.File.Reader,
+	reader: Io.File.Reader,
 	iterator: std.zip.Iterator,
 	filename: [std.fs.max_path_bytes:0]u8 = undefined,
-	allocator: Allocator,
+	gpa: Allocator,
+	io: Io,
 
 	pub const signature: u32 = @bitCast([4]u8{'P', 'K', 0x3, 0x4});
 	const gz_signature: u24 = @bitCast([3]u8{0x1f, 0x8b, 0x08});
@@ -129,20 +132,21 @@ const ZipReader = struct {
 	var buf_flate: [std.compress.flate.max_window_len]u8 = undefined;
 
 	const vtable: ArcReader.VTable = .{
-		.next = @ptrCast(&next),
-		.close = @ptrCast(&close),
+		.next = &next,
+		.close = &close,
 	};
 
-	pub fn init(allocator: Allocator, path: [:0]const u8) !ArcReader {
-		const file = try std.Io.Dir.cwd().openFile(io, path, .{ .mode = .read_only });
+	pub fn init(gpa: Allocator, io: Io, path: [:0]const u8) !ArcReader {
+		const file = try Io.Dir.cwd().openFile(io, path, .{ .mode = .read_only });
 		errdefer file.close(io);
 
-		const self = try allocator.create(ZipReader);
-		errdefer allocator.destroy(self);
+		const self = try gpa.create(ZipReader);
+		errdefer gpa.destroy(self);
 		self.* = .{
 			.reader = .init(file, io, &buf_read),
 			.iterator = try .init(&self.reader),
-			.allocator = allocator,
+			.gpa = gpa,
+			.io = io,
 		};
 		const r = &self.reader;
 		const iterator = &self.iterator;
@@ -177,8 +181,8 @@ const ZipReader = struct {
 						break :blk entry.uncompressed_size;
 					}
 					// gzip puts uncompressed size in the footer, decompress the whole file
-					const buf = try allocator.alloc(u8, entry.uncompressed_size - 3);
-					defer allocator.free(buf);
+					const buf = try gpa.alloc(u8, entry.uncompressed_size - 3);
+					defer gpa.free(buf);
 					try flate.reader.readSliceAll(buf);
 					break :blk @as(u32, @bitCast(buf[buf.len - 4..][0..4].*));
 				},
@@ -192,13 +196,13 @@ const ZipReader = struct {
 		return .{
 			.ptr = self,
 			.vtable = &vtable,
-			.allocator = allocator,
 			.count = count,
 			.size = size,
 		};
 	}
 
-	fn next(self: *ZipReader, buf: []u8) !?Entry {
+	fn next(ptr: *anyopaque, buf: []u8) !?Entry {
+		const self: *ZipReader = @ptrCast(@alignCast(ptr));
 		const entry = try self.iterator.next() orelse return null;
 		if (entry.filename_len > std.fs.max_path_bytes) {
 			return error.FilePathTooLong;
@@ -238,11 +242,11 @@ const ZipReader = struct {
 				if (sig != gz_signature) {
 					break :blk entry.uncompressed_size;
 				}
-				const temp = try self.allocator.alloc(u8, entry.uncompressed_size);
-				defer self.allocator.free(temp);
+				const temp = try self.gpa.alloc(u8, entry.uncompressed_size);
+				defer self.gpa.free(temp);
 				@memcpy(temp, buf[0..entry.uncompressed_size]);
 
-				var buf_stream: std.Io.Reader = .fixed(temp);
+				var buf_stream: Io.Reader = .fixed(temp);
 				var gzip: Decompress = .init(&buf_stream, .gzip, &buf_flate);
 				const size: u32 = @bitCast(buf[entry.uncompressed_size - 4 ..][0..4].*);
 				try gzip.reader.readSliceAll(buf[0..size]);
@@ -256,9 +260,10 @@ const ZipReader = struct {
 		};
 	}
 
-	fn close(self: *ZipReader, allocator: Allocator) void {
-		self.reader.file.close(io);
-		allocator.destroy(self);
+	fn close(ptr: *anyopaque) void {
+		const self: *ZipReader = @ptrCast(@alignCast(ptr));
+		self.reader.file.close(self.io);
+		self.gpa.destroy(self);
 	}
 };
 

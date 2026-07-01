@@ -7,6 +7,9 @@ const std = @import("std");
 const Float = pd.Float;
 const Symbol = pd.Symbol;
 
+const gpa = pd.gpa;
+const io = std.Io.Threaded.global_single_threaded.io();
+
 const PList = extern struct {
 	obj: pd.Object,
 	out_val: *pd.Outlet,
@@ -25,14 +28,14 @@ const PList = extern struct {
 		self: *PList,
 		_: *Symbol, ac: c_uint, av: [*]const pd.Atom,
 	) callconv(.c) void {
-		self.plist.replaceWith(av[0..ac]) catch |e| self.err(e);
+		self.plist.replaceWith(gpa, io, av[0..ac]) catch |e| self.err(e);
 	}
 
 	fn appendC(
 		self: *PList,
 		_: *Symbol, ac: c_uint, av: [*]const pd.Atom,
 	) callconv(.c) void {
-		self.plist.append(av[0..ac]) catch |e| self.err(e);
+		self.plist.append(gpa, io, av[0..ac]) catch |e| self.err(e);
 	}
 
 	fn bangC(self: *PList) callconv(.c) void {
@@ -56,9 +59,9 @@ const PList = extern struct {
 		if (i < 0 or self.plist.len <= i) {
 			return;
 		}
-		var hm = (tx.Meta.fromPath(self.plist.ptr[@intCast(i)].name)
+		var hm = (tx.Meta.fromPath(gpa, io, self.plist.ptr[@intCast(i)].name)
 			catch |e| return self.err(e)) orelse return;
-		defer hm.deinit();
+		defer hm.deinit(gpa);
 
 		if (hm.get(s, self.langs.slice())) |val| {
 			self.out_idx.float(@floatFromInt(i));
@@ -72,9 +75,9 @@ const PList = extern struct {
 			return;
 		}
 		defer pd.post.log(self, .normal, "", .{});
-		var hm = (tx.Meta.fromPath(self.plist.ptr[@intCast(i)].name)
+		var hm = (tx.Meta.fromPath(gpa, io, self.plist.ptr[@intCast(i)].name)
 			catch |e| return self.err(e)) orelse return;
-		defer hm.deinit();
+		defer hm.deinit(gpa);
 
 		const langs: []*Symbol = self.langs.slice();
 		var buf: [std.fs.max_path_bytes:0]u8 = undefined;
@@ -106,7 +109,7 @@ const PList = extern struct {
 		self: *PList,
 		_: *Symbol, ac: c_uint, args: [*]const pd.Atom,
 	) callconv(.c) void {
-		self.langs.replaceWith(args[0..ac]) catch |e| self.err(e);
+		self.langs.replaceWith(gpa, args[0..ac]) catch |e| self.err(e);
 	}
 
 	fn initC() callconv(.c) ?*PList {
@@ -126,8 +129,8 @@ const PList = extern struct {
 	}
 
 	fn deinitC(self: *PList) callconv(.c) void {
-		self.plist.deinit();
-		self.langs.deinit();
+		self.plist.deinit(gpa);
+		self.langs.deinit(gpa);
 	}
 
 	inline fn setup() !void {
