@@ -4,6 +4,7 @@ const pd = @import("pd");
 const tx = @import("trax.zig");
 const std = @import("std");
 
+const Meta = tx.Meta;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
 
@@ -59,13 +60,13 @@ const PList = extern struct {
 		if (i < 0 or self.plist.len <= i) {
 			return;
 		}
-		var hm = (tx.Meta.fromPath(gpa, io, self.plist.ptr[@intCast(i)].name)
+		var hm = (Meta.fromPath(gpa, io, self.plist.ptr[@intCast(i)].name)
 			catch |e| return self.err(e)) orelse return;
 		defer hm.deinit(gpa);
 
-		if (hm.get(s, self.langs.slice())) |val| {
+		if (hm.get(s, self.langs.slice())) |arena| {
 			self.out_idx.float(@floatFromInt(i));
-			self.out_val.symbol(val);
+			arena.send(gpa, self.out_val, s) catch |e| self.err(e);
 		}
 	}
 
@@ -74,34 +75,14 @@ const PList = extern struct {
 		if (i < 0 or self.plist.len <= i) {
 			return;
 		}
-		defer pd.post.log(self, .normal, "", .{});
-		var hm = (tx.Meta.fromPath(gpa, io, self.plist.ptr[@intCast(i)].name)
+		var hm = (Meta.fromPath(gpa, io, self.plist.ptr[@intCast(i)].name)
 			catch |e| return self.err(e)) orelse return;
 		defer hm.deinit(gpa);
 
 		const langs: []*Symbol = self.langs.slice();
-		var buf: [std.fs.max_path_bytes:0]u8 = undefined;
 		var iter = hm.map.iterator();
 		while (iter.next()) |kv| {
-			const value = std.mem.sliceTo(kv.value_ptr.*.get(langs).name, 0);
-			if (std.mem.findScalar(u8, value, '\n')) |_| {
-				pd.post.start("%s:", .{ kv.key_ptr.*.name });
-				var r: std.Io.Reader = .fixed(value);
-				while (r.takeDelimiterExclusive('\n')) |slice| {
-					defer _ = r.take(1) catch {};
-					pd.post.start("\n  ", .{});
-
-					const min = @min(buf.len, slice.len);
-					@memcpy(buf[0..min], slice[0..min]);
-					buf[min] = 0;
-					pd.post.start("%s", .{ &buf });
-				} else |e| if (e != error.EndOfStream) {
-					self.err(e);
-				}
-				pd.post.log(self, .normal, "", .{});
-			} else {
-				pd.post.log(self, .normal, "%s: %s", .{ kv.key_ptr.*.name, value.ptr });
-			}
+			kv.value_ptr.get(langs).print(&self.obj, kv.key_ptr.*.name);
 		}
 	}
 

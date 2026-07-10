@@ -192,8 +192,23 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		const langs: []*Symbol = self.langs.ptr[0..self.langs.len];
 		var it = hm.map.iterator();
 		while (it.next()) |kv| {
-			dct.set(kv.key_ptr.*.name, kv.value_ptr.get(langs).name, .{})
-				catch |e| pd.post.err(null, "dct.set: %s", .{ @errorName(e).ptr });
+			const arena = kv.value_ptr.get(langs);
+			if (arena.tbl.items.len > 1) {
+				const temp = try gpa.alloc(u8, arena.buf.items.len);
+				defer gpa.free(temp);
+				@memcpy(temp[0..arena.tbl.items[0]], arena.get(0));
+				for (1..arena.tbl.items.len) |i| {
+					const start = arena.tbl.items[i - 1];
+					temp[start - 1] = '/';
+					const str = arena.get(i);
+					@memcpy(temp[start..][0..str.len], str);
+				}
+				dct.set(kv.key_ptr.*.name, temp[0 .. temp.len - 1 :0], .{})
+					catch |e| pd.post.err(null, "dct.set: %s", .{ @errorName(e).ptr });
+			} else {
+				dct.set(kv.key_ptr.*.name, arena.getZ(0), .{})
+					catch |e| pd.post.err(null, "dct.set: %s", .{ @errorName(e).ptr });
+			}
 		}
 	}
 

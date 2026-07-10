@@ -5,8 +5,10 @@
 # Tags can be language-specific. The first language-specific tag
 # is also a fallback when none match with language preferences.
 album[en]      =Hello World
-# keys and language codes are internally converted to lower case
-ALbUM[fR]      =Bonjour le monde
+
+# Keys and language codes are case-insensitive.
+ALbUM[jA]      =こんにちは
+alBum[Ja]      =世界
 
 # A tag without a language code becomes the new fallback.
 album          =Hella Werld

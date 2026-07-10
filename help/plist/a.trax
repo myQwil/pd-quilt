@@ -10,9 +10,12 @@
 # Whitespace surrounding the key is ignored,
 # but any whitespace after the equal sign is part of the value.
 artist         =
- # The first line break before a multiline value is ignored
+ # If nothing comes after the equal sign, the first line break is ignored.
  :foobar
  :barbaz
+
+# Add more lines after the fact by assigning to the same key
+artist         =Third Guy
 
 # Track listing
 

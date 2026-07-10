@@ -3,6 +3,7 @@ const pd = @import("pd");
 
 const Atom = pd.Atom;
 const Symbol = pd.Symbol;
+const Outlet = pd.Outlet;
 const StringMap = std.StringHashMap(void);
 const SymbolList = std.ArrayList(*Symbol);
 const Allocator = std.mem.Allocator;
@@ -10,31 +11,127 @@ const Io = std.Io;
 
 const trext = ".trax";
 
+pub const Arena = struct {
+	/// byte array
+	buf: std.ArrayList(u8) = .empty,
+	/// ending offsets
+	tbl: std.ArrayList(usize) = .empty,
+
+	fn init(gpa: Allocator, str: []const u8) !Arena {
+		var arena: Arena = .{};
+		if (str.len > 0) {
+			try arena.append(gpa, str);
+		}
+		return arena;
+	}
+
+	fn deinit(self: *Arena, gpa: Allocator) void {
+		self.buf.deinit(gpa);
+		self.tbl.deinit(gpa);
+	}
+
+	fn append(self: *Arena, gpa: Allocator, str: []const u8) !void {
+		const amount = str.len + 1;
+		try self.buf.ensureUnusedCapacity(gpa, amount);
+		try self.tbl.ensureUnusedCapacity(gpa, 1);
+
+		const old_len = self.buf.items.len;
+		const new_len = old_len + amount;
+
+		self.buf.items.len = new_len;
+		self.tbl.appendAssumeCapacity(@intCast(new_len));
+
+		@memcpy(self.buf.items[old_len..][0..str.len], str);
+		self.buf.items[self.buf.items.len - 1] = 0;
+	}
+
+	pub fn get(self: *const Arena, index: usize) []const u8 {
+		std.debug.assert(index < self.tbl.items.len);
+		const start = if (index == 0) 0 else self.tbl.items[index - 1];
+		return self.buf.items[start..self.tbl.items[index]];
+	}
+
+	pub fn getZ(self: *const Arena, index: usize) [:0]const u8 {
+		const str = self.get(index);
+		return str[0 .. str.len - 1 :0];
+	}
+
+	pub fn send(self: *const Arena, gpa: Allocator, outlet: *Outlet, key: *Symbol) !void {
+		var arr: [8]Atom = undefined;
+		if (self.tbl.items.len > arr.len) {
+			const atoms = try gpa.alloc(Atom, self.tbl.items.len);
+			defer gpa.free(atoms);
+			self.doSend(outlet, key, atoms);
+		} else {
+			self.doSend(outlet, key, &arr);
+		}
+	}
+
+	fn doSend(self: *const Arena, outlet: *Outlet, key: *Symbol, atoms: []Atom) void {
+		for (0..self.tbl.items.len) |i| {
+			atoms[i] = .symbol(.gen(self.getZ(i)));
+		}
+		outlet.anything(key, atoms[0..self.tbl.items.len]);
+	}
+
+	pub fn print(self: *const Arena, obj: *pd.Object, key: [*:0]const u8) void {
+		pd.post.start("%s:", .{ key });
+		if (self.tbl.items.len > 1) {
+			for (0..self.tbl.items.len) |i| {
+				pd.post.start("\n  %s", .{ self.getZ(i).ptr });
+			}
+		} else if (self.tbl.items.len > 0) {
+			pd.post.start(" %s", .{ self.getZ(0).ptr });
+		}
+		pd.post.log(obj, .normal, "", .{});
+	}
+};
+
 const LangDict = struct {
 	dict: Dict,
 	/// index of default entry
 	default: usize = 0,
 
-	const Dict = std.array_hash_map.Auto(*Symbol, *Symbol);
+	const Dict = std.array_hash_map.Auto(*Symbol, Arena);
 
-	fn init(gpa: Allocator, lang: *Symbol, value: *Symbol) !LangDict {
+	fn init(gpa: Allocator, lang: *Symbol, value: []u8) !LangDict {
+		var arena: Arena = try .init(gpa, value);
+		errdefer arena.deinit(gpa);
 		var dict: Dict = .empty;
-		try dict.put(gpa, lang, value);
+		try dict.put(gpa, lang, arena);
 		return .{ .dict = dict };
 	}
 
-	fn add(self: *LangDict, gpa: Allocator, lang: *Symbol, value: *Symbol) !void {
-		const gop = try self.dict.getOrPut(gpa, lang);
-		gop.value_ptr.* = value;
-		if (!gop.found_existing and lang == pd.s.empty()) {
-			self.default = self.dict.entries.len - 1;
+	fn deinit(self: *LangDict, gpa: Allocator) void {
+		var iter = self.dict.iterator();
+		while (iter.next()) |kv| {
+			kv.value_ptr.deinit(gpa);
 		}
+		self.dict.deinit(gpa);
 	}
 
-	pub fn get(self: *const LangDict, pref_langs: []*Symbol) *Symbol {
+	fn add(
+		self: *LangDict,
+		gpa: Allocator,
+		lang: *Symbol,
+		value: []u8,
+	) !*Arena {
+		const gop = try self.dict.getOrPut(gpa, lang);
+		if (gop.found_existing) {
+			try gop.value_ptr.append(gpa, value);
+		} else {
+			gop.value_ptr.* = try .init(gpa, value);
+			if (lang == pd.s.empty()) {
+				self.default = self.dict.entries.len - 1;
+			}
+		}
+		return gop.value_ptr;
+	}
+
+	pub fn get(self: *const LangDict, pref_langs: []*Symbol) *const Arena {
 		for (pref_langs) |s| {
 			// exact match
-			if (self.dict.get(s)) |value| {
+			if (self.dict.getPtr(s)) |value| {
 				return value;
 			}
 			// prefix match (fuzzy)
@@ -43,11 +140,11 @@ const LangDict = struct {
 			while (iter.next()) |kv| {
 				const lang = std.mem.sliceTo(kv.key_ptr.*.name, 0);
 				if (std.mem.startsWith(u8, lang, pref)) {
-					return kv.value_ptr.*;
+					return kv.value_ptr;
 				}
 			}
 		}
-		return self.dict.entries.slice().items(.value)[self.default];
+		return &self.dict.entries.slice().items(.value)[self.default];
 	}
 };
 
@@ -59,22 +156,24 @@ pub const Meta = struct {
 	pub fn deinit(self: *Meta, gpa: Allocator) void {
 		var iter = self.map.iterator();
 		while (iter.next()) |kv| {
-			kv.value_ptr.dict.deinit(gpa);
+			kv.value_ptr.deinit(gpa);
 		}
 		self.map.deinit(gpa);
 	}
 
-	fn add(
+	pub fn add(
 		self: *Meta,
 		gpa: Allocator,
 		key: *Symbol,
 		lang: *Symbol,
-		value: *Symbol,
-	) !void {
-		if (self.map.getPtr(key)) |ld| {
-			try ld.add(gpa, lang, value);
+		value: []u8,
+	) !*Arena {
+		const gop = try self.map.getOrPut(gpa, key);
+		if (gop.found_existing) {
+			return try gop.value_ptr.add(gpa, lang, value);
 		} else {
-			try self.map.put(gpa, key, try .init(gpa, lang, value));
+			gop.value_ptr.* = try .init(gpa, lang, value);
+			return &gop.value_ptr.dict.entries.slice().items(.value)[0];
 		}
 	}
 
@@ -94,7 +193,7 @@ pub const Meta = struct {
 		return self;
 	}
 
-	pub fn get(self: *Meta, key: *Symbol, pref_langs: []*Symbol) ?*Symbol {
+	pub fn get(self: *const Meta, key: *Symbol, pref_langs: []*Symbol) ?*const Arena {
 		const ldict = self.map.get(key) orelse return null;
 		return ldict.get(pref_langs);
 	}
@@ -230,10 +329,7 @@ fn traverseMeta(
 		catch |e| return err(meta.map.count(), e, file_path.ptr);
 	defer file.close(io);
 
-	var vpos: usize = 0;
-	var multiline: std.ArrayList(u8) = .empty;
-	defer multiline.deinit(gpa);
-
+	var value: ?*Arena = null;
 	var buf: [std.fs.max_path_bytes:0]u8 = undefined;
 	var r = file.reader(io, &buf);
 	const base_dir = std.fs.path.dirname(file_path) orelse ".";
@@ -251,20 +347,12 @@ fn traverseMeta(
 		}
 
 		// :multiline
-		if (multiline.items.len > 0) {
-			if (line[0] == ':') {
-				if (multiline.items.len > vpos) {
-					try multiline.append(gpa, '\n');
-				}
-				try multiline.appendSlice(gpa, line[1..]);
-				continue;
-			} else {
-				const kl = keyLang(multiline.items[0..vpos]);
-				try multiline.append(gpa, 0);
-				const value = multiline.items[vpos .. multiline.items.len - 1 :0];
-				try meta.add(gpa, kl.key, kl.lang, .gen(value));
-				multiline.items.len = 0;
+		if (line[0] == ':') {
+			if (value) |v| {
+				try v.append(gpa, line[1..]);
 			}
+		} else {
+			value = null;
 		}
 
 		// @path
@@ -275,13 +363,8 @@ fn traverseMeta(
 		// key[lang]=value
 		if (line[0] != '!') {
 			const eql = find(line, '=') orelse continue;
-			vpos = trimEnd(line[0..eql], " \t") + 1;
-			try multiline.appendSlice(gpa, line[0 .. vpos - 1]);
-			try multiline.append(gpa, 0);
-			const value = line[eql + 1 ..];
-			if (value.len > 0) {
-				try multiline.appendSlice(gpa, value);
-			}
+			const kl = keyLang(line[0 .. trimEnd(line[0..eql], " \t") + 1]);
+			value = try meta.add(gpa, kl.key, kl.lang, line[eql + 1 ..]);
 			continue;
 		}
 
@@ -304,13 +387,6 @@ fn traverseMeta(
 		}
 	} else |e| if (e != error.EndOfStream) {
 		return e;
-	}
-
-	if (multiline.items.len > 0) {
-		const kl = keyLang(multiline.items[0..vpos]);
-		try multiline.append(gpa, 0);
-		const value = multiline.items[vpos .. multiline.items.len - 1 :0];
-		try meta.add(gpa, kl.key, kl.lang, .gen(value));
 	}
 }
 
