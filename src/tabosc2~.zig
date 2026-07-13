@@ -33,7 +33,7 @@ const TabOsc2 = extern struct {
 			return w + 6;
 		};
 		const len = self.len;
-		const mask = @as(i32, @intFromFloat(len)) - 1;
+		const mask = @as(u32, @intFromFloat(len)) - 1;
 		const conv = len * self.conv;
 		var dphase = len * self.phase + unitbit32;
 
@@ -45,7 +45,7 @@ const TabOsc2 = extern struct {
 		for (out, inlet1, inlet2) |*o, in1, in2| {
 			t.d = dphase;
 			dphase += in1 * conv;
-			const i: usize = @intCast(t.i[hioffset] & mask);
+			const i: u32 = t.i[hioffset] & mask;
 			t.i[hioffset] = normhipart;
 			o.* = tb.sample(vec + i, @floatCast(t.d - unitbit32), in2);
 		}
@@ -66,7 +66,7 @@ const TabOsc2 = extern struct {
 		self.len = @floatFromInt(len);
 		self.invlen = 1.0 / self.len;
 	}
-	inline fn set(self: *TabOsc2, s: *Symbol) !usize {
+	inline fn set(self: *TabOsc2, s: *Symbol) !u32 {
 		errdefer self.tab2.vec = null;
 		self.tab2.arrayname = s;
 
@@ -80,7 +80,7 @@ const TabOsc2 = extern struct {
 
 		self.tab2.vec = vec.ptr;
 		array.useInDsp();
-		return @intCast(@as(usize, 1) << pd.ulog2(vec.len - 1).?);
+		return @truncate(@as(usize, 1) << pd.ulog2(vec.len - 1).?);
 	}
 
 	fn dspC(self: *TabOsc2, sp: [*]*pd.Signal) callconv(.c) void {

@@ -46,21 +46,23 @@ const PList = extern struct {
 		}
 	}
 
-	fn floatC(self: *PList, f: Float) callconv(.c) void {
+	fn indexFromFloat(f: Float, len: usize) ?u32 {
 		const i: i32 = @intFromFloat(f);
-		if (i < 0 or self.plist.len <= i) {
-			return;
+		if (i < 0 or len <= i) {
+			return null;
 		}
+		return @bitCast(i);
+	}
+
+	fn floatC(self: *PList, f: Float) callconv(.c) void {
+		const i = indexFromFloat(f, self.plist.len) orelse return;
 		self.out_idx.float(@floatFromInt(i));
-		self.out_val.symbol(self.plist.ptr[@intCast(i)]);
+		self.out_val.symbol(self.plist.ptr[i]);
 	}
 
 	fn getC(self: *PList, f: Float, s: *Symbol) callconv(.c) void {
-		const i: i32 = @intFromFloat(f);
-		if (i < 0 or self.plist.len <= i) {
-			return;
-		}
-		var hm = (Meta.fromPath(gpa, io, self.plist.ptr[@intCast(i)].name)
+		const i = indexFromFloat(f, self.plist.len) orelse return;
+		var hm = (Meta.fromPath(gpa, io, self.plist.ptr[i].name)
 			catch |e| return self.err(e)) orelse return;
 		defer hm.deinit(gpa);
 
@@ -71,11 +73,8 @@ const PList = extern struct {
 	}
 
 	fn dumpC(self: *PList, f: Float) callconv(.c) void {
-		const i: i32 = @intFromFloat(f);
-		if (i < 0 or self.plist.len <= i) {
-			return;
-		}
-		var hm = (Meta.fromPath(gpa, io, self.plist.ptr[@intCast(i)].name)
+		const i = indexFromFloat(f, self.plist.len) orelse return;
+		var hm = (Meta.fromPath(gpa, io, self.plist.ptr[i].name)
 			catch |e| return self.err(e)) orelse return;
 		defer hm.deinit(gpa);
 

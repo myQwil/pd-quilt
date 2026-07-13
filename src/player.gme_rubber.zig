@@ -41,15 +41,15 @@ pub fn Impl(Root: type) type { return extern struct {
 		self.rubber.reset();
 		// gme resets the fade-out start time on seeks and track changes.
 		// we want to play tracks forever and handle fade-out at the patch level.
-		self.base.emu.neverFade();
+		self.base.emu.ignoreFade(true);
 	}
 
 	pub fn prepNewTrack(self: *Self) void {
 		self.rubber.processStartPad(&self.planar, Root.nch, ra.frames);
 	}
 
-	pub inline fn perform(self: *Self, w: [*]usize, ip: *u32) !void {
-		var i: u32 = 0;
+	pub inline fn perform(self: *Self, w: [*]usize, ip: *usize) !void {
+		var i: usize = 0;
 		errdefer ip.* = i;
 		const n = w[2];
 		const inlet2: [*]Sample = @ptrFromInt(w[3]);
@@ -82,14 +82,14 @@ pub fn Impl(Root: type) type { return extern struct {
 					data.input_frames -= data.input_frames_used;
 					data.data_in += data.input_frames_used * Root.nch;
 				}
-				const used: u8 = @intCast(data.output_frames_gen);
+				const used: usize = data.output_frames_gen;
 				_ = pr.leavedToPlanar(data.data_out, &self.planar, Root.nch, used);
 				rbr.setTimeRatio(1 / @min(@max(ra.slowest, inlet2[i]), ra.fastest));
-				rbr.process(&self.planar, used, false);
+				rbr.process(&self.planar, @truncate(used), false);
 				data.output_frames_gen = 0;
 				m = rbr.available();
 			}
-			const used = rbr.retrieve(&outs, @min(@as(u31, @intCast(m)), n - i));
+			const used = rbr.retrieve(&outs, @min(pd.uFromI(m), n - i));
 			inline for (0..Root.nch) |ch| {
 				outs[ch] += used;
 			}

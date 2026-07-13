@@ -56,10 +56,10 @@ fn printTime(writer: *Writer, ms: i64) !void {
 	if (ms < 0) {
 		return writer.print("?:?", .{});
 	}
-	const t: u64 = @intCast(ms);
-	const hr: u8 = @intCast(@divFloor(t, hours));
-	const mn: u8 = @intCast(@mod(@divFloor(t, mins), 60));
-	const sc: u8 = @intCast(@mod(@divFloor(t, secs), 60));
+	const t: u64 = @bitCast(ms);
+	const hr: u8 = @truncate(@divFloor(t, hours));
+	const mn: u8 = @truncate(@mod(@divFloor(t, mins), 60));
+	const sc: u8 = @truncate(@mod(@divFloor(t, secs), 60));
 
 	if (hr >= 1) {
 		try writer.print("{}:", .{ hr });
@@ -106,8 +106,8 @@ fn alignBuffer(w: *Writer, buf: []const u8, fmt: []const u8) !void {
 pub inline fn leavedToPlanar(
 	leaved: [*]const Sample,
 	planar: [*][*]Sample,
-	channels: u8,
-	frames: u8,
+	channels: usize,
+	frames: usize,
 ) usize {
 	var l = leaved;
 	for (0..frames) |frame| {
@@ -301,7 +301,7 @@ pub fn Impl(Self: type) type { return struct {
 
 		const track: u32 = @intFromFloat(try pd.floatArg(0, av));
 		const result: bool = blk: { if (0 < track and track <= bTrackCount(base)) {
-			try bLoadTrack(base, gpa, io, @intCast(track - 1));
+			try bLoadTrack(base, gpa, io, track - 1);
 			if (pd.floatArg(1, av)) |msec| {
 				try bSeek(base, msec);
 			} else |_| {}

@@ -39,7 +39,7 @@ pub const Arena = struct {
 		const new_len = old_len + amount;
 
 		self.buf.items.len = new_len;
-		self.tbl.appendAssumeCapacity(@intCast(new_len));
+		self.tbl.appendAssumeCapacity(new_len);
 
 		@memcpy(self.buf.items[old_len..][0..str.len], str);
 		self.buf.items[self.buf.items.len - 1] = 0;

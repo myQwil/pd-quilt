@@ -46,7 +46,7 @@ pub fn Impl(Root: type) type { return extern struct {
 		const base: *Base = &self.base;
 		const player: *pr.Player = &base.player;
 		if (player.play) {
-			var i: u32 = undefined;
+			var i: usize = undefined;
 			perform(self, w, &i) catch |e| {
 				player.play = false;
 				player.sendState(pr.s_play, player.play);
@@ -64,8 +64,8 @@ pub fn Impl(Root: type) type { return extern struct {
 		}
 		return w + 4;
 	}
-	pub inline fn perform(self: *Self, w: [*]usize, ip: *u32) !void {
-		var i: u32 = 0;
+	pub inline fn perform(self: *Self, w: [*]usize, ip: *usize) !void {
+		var i: usize = 0;
 		errdefer ip.* = i;
 		const n = w[2];
 		const inlet1: [*]Sample = @ptrFromInt(w[3]);
@@ -92,7 +92,7 @@ pub fn Impl(Root: type) type { return extern struct {
 							try b.audio.ctx.receiveFrame(frm);
 							data.input_frames = try b.swr.convert(
 								@ptrCast(&in), ra.frames,
-								@ptrCast(frm.extended_data), frm.nb_samples,
+								@ptrCast(frm.extended_data), frm.nb_samples.u,
 							);
 							data.data_in = in;
 							data.input_frames = ra.frames;
@@ -129,10 +129,10 @@ pub fn Impl(Root: type) type { return extern struct {
 					data.data_in = in;
 					data.input_frames = try b.swr.convert(@ptrCast(&in), ra.frames, null, 0);
 				} else {
-					data.data_in += @as(usize, @intCast(data.input_frames_used)) * b.nch;
+					data.data_in += data.input_frames_used * b.nch;
 				}
 			}
-			const used: u8 = @min(@as(u8, @intCast(data.output_frames_gen)), n - i);
+			const used: usize = @min(data.output_frames_gen, n - i);
 			data.data_out += pr.leavedToPlanar(data.data_out, &outs, b.nch, used);
 			for (0..b.nch) |ch| {
 				outs[ch] += used;

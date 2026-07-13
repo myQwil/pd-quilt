@@ -13,7 +13,7 @@ const TabRead2 = extern struct {
 	obj: pd.Object,
 	tab2: tb.Tab2,
 	onset: Float = 0,
-	len: usize = 0,
+	len: u32 = 0,
 
 	const name = "tabread2~";
 	pub var class: *pd.Class = undefined;
@@ -33,18 +33,18 @@ const TabRead2 = extern struct {
 		const inlet1: [*]Sample = @ptrFromInt(w[5]);
 		for (out, inlet1, inlet2) |*o, in1, in2| {
 			const findex: f64 = in1 + onset;
-			const fint: i64 = @intFromFloat(findex);
-			var index: usize = undefined;
+			const ffloor: f64 = @trunc(findex);
+			var index: u32 = undefined;
 			var frac: Sample = undefined;
-			if (fint < 0) {
+			if (ffloor < 0) {
 				index = 0;
 				frac = 0;
-			} else if (fint > maxindex) {
+			} else if (ffloor > maxindex) {
 				index = maxindex;
 				frac = 1;
 			} else {
-				index = @intCast(fint);
-				frac = @floatCast(findex - @as(f64, @floatFromInt(fint)));
+				index = @intFromFloat(ffloor);
+				frac = @floatCast(findex - ffloor);
 			}
 			o.* = tb.sample(vec + index, frac, in2);
 		}
@@ -57,7 +57,7 @@ const TabRead2 = extern struct {
 			return;
 		};
 	}
-	inline fn set(self: *TabRead2, s: *Symbol) !usize {
+	inline fn set(self: *TabRead2, s: *Symbol) !u32 {
 		errdefer self.tab2.vec = null;
 		self.tab2.arrayname = s;
 
@@ -67,7 +67,7 @@ const TabRead2 = extern struct {
 		const vec = try array.floatWords();
 		self.tab2.vec = vec.ptr;
 		array.useInDsp();
-		return @intCast(vec.len);
+		return @truncate(vec.len);
 	}
 
 	fn dspC(self: *TabRead2, sp: [*]*pd.Signal) callconv(.c) void {

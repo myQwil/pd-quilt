@@ -7,7 +7,6 @@ const gm = @import("gme");
 const arc = @import("player.arc.zig");
 const pr = @import("player.zig");
 
-const uint = gm.uint;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
@@ -17,7 +16,7 @@ const Io = std.Io;
 
 var s_mask: *Symbol = undefined;
 
-const GmeInit = fn(*const gm.Type, uint) anyerror!*gm.Emu;
+const GmeInit = fn(*const gm.Type, c_uint) anyerror!*gm.Emu;
 const ArcInit = arc.ArcReader.InitFn;
 
 inline fn sampleRate(t: *const gm.Type) Float {
@@ -77,7 +76,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 	}
 
 	pub fn loadTrack(self: *Gme, _: Allocator, _: Io, index: usize) !void {
-		const idx: uint = @intCast(index);
+		const idx: c_uint = @truncate(index);
 		try self.emu.startTrack(idx);
 		const info = try self.emu.trackInfo(idx);
 		self.info.deinit();
@@ -120,7 +119,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 					emu_type = t;
 				}
 				if (emu_type == t) {
-					sizes[n] = @intCast(entry.size);
+					sizes[n] = @truncate(entry.size);
 					bp = bp[sizes[n]..];
 					n += 1;
 				}
@@ -204,7 +203,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 	fn mute(self: *Gme, av: []const Atom) void {
 		for (av) |*a| {
 			self.mask = if (a.type == .symbol) // mute all channels
-				(@as(c_uint, 1) << @intCast(self.emu.voiceCount())) - 1
+				(@as(c_uint, 1) << @truncate(self.emu.voiceCount())) - 1
 			else blk: {
 				var d: c_int = @intFromFloat(a.w.float);
 				if (d == 0) { // unmute all channels
@@ -212,14 +211,16 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 				}
 				d -= if (d > 0) 1 else 0;
 				// toggle the bit at i position
-				const i = @mod(d, @as(c_int, @intCast(self.emu.voiceCount())));
-				break :blk self.mask ^ (@as(c_uint, 1) << @intCast(i));
+				break :blk self.mask ^ (@as(c_uint, 1) << pos: {
+					const i = @mod(d, @as(pd.uint, @truncate(self.emu.voiceCount())));
+					break :pos @truncate(@as(c_uint, @bitCast(i)));
+				});
 			};
 		}
 	}
 
 	pub fn Impl(Self: type) type { return struct {
-		const perform: fn(*Self, [*]usize, *u32) callconv(.@"inline") anyerror!void
+		const perform: fn(*Self, [*]usize, *usize) callconv(.@"inline") anyerror!void
 			= Self.perform;
 		const err: fn(*const Self, anyerror) callconv(.@"inline") void = Self.err;
 		const gpa = Self.gpa;
@@ -241,7 +242,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		) callconv(.c) void {
 			const gme: *Gme = &self.base;
 			const prev = gme.mask;
-			gme.mask = (@as(u32, 1) << @intCast(gme.emu.voiceCount())) - 1;
+			gme.mask = (@as(c_uint, 1) << @truncate(gme.emu.voiceCount())) - 1;
 			gme.mute(av[0..ac]);
 			if (prev == gme.mask) {
 				gme.mask = 0;
@@ -271,9 +272,9 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		fn bMaskC(self: *Self) callconv(.c) void {
 			const gme: *Gme = &self.base;
 			var buf: [32:0]u8 = undefined;
-			const voices: u6 = @intCast(gme.emu.voiceCount());
+			const voices: u6 = @truncate(gme.emu.voiceCount());
 			for (0..voices) |i| {
-				buf[i] = '0' + @as(u8, @intCast((gme.mask >> @intCast(i)) & 1));
+				buf[i] = '0' + @as(u8, @truncate((gme.mask >> @truncate(i)) & 1));
 			}
 			buf[voices] = 0;
 			pd.post.log(self, .normal, "%s", .{ &buf });
@@ -284,7 +285,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 			const base: *Gme = &self.base;
 			const player: *pr.Player = &base.player;
 			if (player.play) {
-				var i: u32 = undefined;
+				var i: usize = undefined;
 				perform(self, w, &i) catch |e| {
 					player.play = false;
 					player.sendState(pr.s_play, player.play);

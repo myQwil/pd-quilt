@@ -43,15 +43,15 @@ pub fn Impl(Root: type) type { return extern struct {
 		self.rabbit.reset() catch |e| self.err(e);
 		// gme resets the fade-out start time on seeks and track changes.
 		// we want to play tracks forever and handle fade-out at the patch level.
-		self.base.emu.neverFade();
+		self.base.emu.ignoreFade(true);
 	}
 
 	pub fn prepNewTrack(_: *Self) void {
 		return;
 	}
 
-	pub inline fn perform(self: *Self, w: [*]usize, ip: *u32) !void {
-		var i: u32 = 0;
+	pub inline fn perform(self: *Self, w: [*]usize, ip: *usize) !void {
+		var i: usize = 0;
 		errdefer ip.* = i;
 		const n = w[2];
 		const inlet2: [*]Sample = @ptrFromInt(w[3]);
@@ -82,7 +82,7 @@ pub fn Impl(Root: type) type { return extern struct {
 				data.input_frames -= data.input_frames_used;
 				data.data_in += data.input_frames_used * Root.nch;
 			}
-			const used: u8 = @min(@as(u8, @intCast(data.output_frames_gen)), n - i);
+			const used: usize = @min(data.output_frames_gen, n - i);
 			data.data_out += pr.leavedToPlanar(data.data_out, &outs, Root.nch, used);
 			inline for (0..Root.nch) |ch| {
 				outs[ch] += used;

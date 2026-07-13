@@ -90,7 +90,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			std.fmt.parseInt(u64, std.mem.sliceTo(s.name, 0), 0) catch stereo
 		else @as(u64, @intFromFloat(arg.w.float)));
 
-		const nch: u8 = @intCast(layout.nb_channels);
+		const nch: u8 = @truncate(@as(c_uint, @bitCast(layout.nb_channels)));
 		for (0..nch) |_| {
 			_ = try obj.outlet(pd.s.signal());
 		}
@@ -143,7 +143,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 	fn newSwr(self: *Av, a: *const av.Codec.Context) !*av.SwrContext {
 		var cl: av.ChannelLayout = if (a.ch_layout.u.mask != 0)
 			try .fromMask(a.ch_layout.u.mask)
-		else .default(a.ch_layout.nb_channels);
+		else .default(pd.uFromI(a.ch_layout.nb_channels));
 		const sf: av.SampleFormat = if (@bitSizeOf(Float) == 64) .dbl else .flt;
 		return .init(&self.layout, sf, 1, &cl, a.sample_fmt, 1, 0, null);
 	}
@@ -282,7 +282,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 	}
 
 	pub fn Impl(Self: type) type { return struct {
-		const perform: fn(*Self, [*]usize, *u32) callconv(.@"inline") anyerror!void
+		const perform: fn(*Self, [*]usize, *usize) callconv(.@"inline") anyerror!void
 			= Self.perform;
 		const err: fn(*const Self, anyerror) callconv(.@"inline") void = Self.err;
 		const gpa = Self.gpa;

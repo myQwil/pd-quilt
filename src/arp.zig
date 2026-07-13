@@ -19,7 +19,7 @@ inline fn getDigit(c: u8) ?u8 {
 
 inline fn iDiv(g: Float, len: usize) struct {num: i32, den: i32, quo: i32 } {
 	const num: i32 = @intFromFloat(g);
-	const den: i32 = @intCast(len);
+	const den: i32 = @as(u31, @truncate(len));
 	const quo: i32 = @divFloor(num, den);
 	return .{ .num = num, .den = den, .quo = quo };
 }
@@ -129,7 +129,7 @@ const Arp = extern struct {
 	fn interval(self: *const Arp, vec: []const Word, f: Float) Float {
 		const g = @floor(f);
 		const div = iDiv(g, vec.len);
-		var i: u32 = @intCast(div.num - div.den * div.quo);
+		var i: u32 = @bitCast(div.num - div.den * div.quo);
 
 		const oct = self.oct * @as(Float, @floatFromInt(div.quo));
 		const note = oct + if (i == 0) 0 else vec[i].float;
@@ -184,14 +184,17 @@ const Arp = extern struct {
 				} else if (c == '<' or c == '>') { // scale inversion
 					const mvrt: bool = (c == s[1]); // << or >> moves the root
 					const f = blk: {
-						const dir: Float = @floatFromInt(@as(i8, @intCast(c)) - '=');
+						const dir: Float = if (c == '<') -1 else 1;
 						const j = @as(u8, @intFromBool(mvrt)) + 1;
 						break :blk dir * (fParse(s + j, null) orelse 1);
 					};
 					const g = @floor(f);
 					const div = iDiv(g, n);
-					var d: u32 = @intCast(div.num - div.den * div.quo); // rotation amount
-					var p = n - d; // pivot index
+
+					// rotation amount
+					var d: u32 = @bitCast(div.num - div.den * div.quo);
+					// pivot index
+					var p = n - d;
 
 					const vp = vec[i..][0..n];
 					const tp = temp[i..][0..n];

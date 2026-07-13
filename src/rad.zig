@@ -121,6 +121,8 @@ test precision {
 	try std.testing.expectEqual(precision(0, 32), 5);
 }
 
+const usze = @Int(.unsigned, @bitSizeOf(isize) - 1);
+
 /// Returns the difference between two values.
 inline fn diff(lhs: anytype, rhs: anytype) isize {
 	comptime if (@TypeOf(lhs) != @TypeOf(rhs)) {
@@ -131,8 +133,8 @@ inline fn diff(lhs: anytype, rhs: anytype) isize {
 		else => lhs < rhs,
 	};
 	return if (swap)
-		-@as(isize, @intCast(rhs - lhs))
-	else @as(isize, @intCast(lhs - rhs));
+		-@as(isize, @as(usze, @truncate(rhs - lhs)))
+	else @as(isize, @as(usze, @truncate(lhs - rhs)));
 }
 
 test diff {
@@ -146,8 +148,8 @@ test diff {
 inline fn offset(base: anytype, n: isize) @TypeOf(base) {
 	// we can't add a negative to unsigned, but we can subtract a positive.
 	return if (n < 0)
-		base - @as(usize, @intCast(-n))
-	else base + @as(usize, @intCast(n));
+		base - @as(usize, @bitCast(-n))
+	else base + @as(usize, @bitCast(n));
 }
 
 test offset {
@@ -236,7 +238,7 @@ pub const Rad = extern struct {
 			});
 			self.buf[w.end] = 0;
 			self.resize = if (self.end == w.end) false else blk: {
-				self.end = @intCast(w.end);
+				self.end = @truncate(w.end);
 				break :blk true;
 			};
 			return;
@@ -265,7 +267,7 @@ pub const Rad = extern struct {
 			break :blk frexp.exponent;
 		};
 		if (y != 0) {
-			y *= @floatFromInt(@as(usize, 1) << @as(u6, @intCast(sb)));
+			y *= @floatFromInt(@as(usize, 1) << @as(u6, @truncate(sb)));
 			e2 -= bps;
 		}
 
@@ -294,12 +296,12 @@ pub const Rad = extern struct {
 		while (e2 > 0) {
 			var carry: u32 = 0;
 			const sh = @min(bps, e2);
-			const sh6: u6 = @intCast(sh);
+			const sh6: u6 = @truncate(@as(u32, @bitCast(sh)));
 			d = z - 1;
 			while (@intFromPtr(d) >= @intFromPtr(a)) : (d -= 1) {
 				const u: u64 = (@as(u64, d[0]) << sh6) + carry;
-				carry = @intCast(u / pwr);
-				d[0] = @intCast(u % pwr);
+				carry = @truncate(u / pwr);
+				d[0] = @truncate(u % pwr);
 			}
 			if (carry != 0) {
 				a -= 1;
@@ -312,7 +314,7 @@ pub const Rad = extern struct {
 		while (e2 < 0) {
 			var carry: u32 = 0;
 			const sh = @min(dps, -e2);
-			const sh5: u5 = @intCast(sh);
+			const sh5: u5 = @truncate(@as(u32, @bitCast(sh)));
 			const need: i32 = 1 + @divTrunc(p + ldbl_mant_dig / 3 + sd, dps);
 			d = a;
 			while (@intFromPtr(d) < @intFromPtr(z)) : (d += 1) {
@@ -340,7 +342,7 @@ pub const Rad = extern struct {
 
 		if (@intFromPtr(a) < @intFromPtr(z)) {
 			i = base;
-			e = @intCast(dps * diff(r, a));
+			e = @truncate(dps * diff(r, a));
 			while (a[0] >= @as(u32, @truncate(i))) : ({ i *= base; e += 1; }) {}
 		} else {
 			e = 0;
@@ -354,7 +356,7 @@ pub const Rad = extern struct {
 			j = @mod(j + di * ldbl_max_exp, di) + 1;
 			i = base;
 			while (j < dps) : ({ i *= base; j += 1; }) {}
-			const u: u32 = d[0] % @as(u32, @intCast(i));
+			const u: u32 = d[0] % @as(u32, @truncate(i));
 			// Are there any significant digits past j?
 			if (u != 0 or d + 1 != z) {
 				var round: FBig = 2 / std.math.floatEps(FBig);
@@ -377,7 +379,7 @@ pub const Rad = extern struct {
 				d[0] -= u;
 				// Decide whether to round by probing round+small
 				if (round + small != round) {
-					d[0] += @as(u32, @intCast(i));
+					d[0] += @as(u32, @truncate(i));
 					while (d[0] > pwr - 1) {
 						d[0] = 0;
 						d -= 1;
@@ -388,7 +390,7 @@ pub const Rad = extern struct {
 						d[0] += 1;
 					}
 					i = base;
-					e = @intCast(dps * diff(r, a));
+					e = @truncate(dps * diff(r, a));
 					while (a[0] >= i) : ({ i *= base; e += 1; }) {}
 				}
 			}
@@ -456,12 +458,12 @@ pub const Rad = extern struct {
 				var s = fmtU(d[0], b + dps, base);
 				while (@intFromPtr(s) > @intFromPtr(b)) : ({ s -= 1; s[0] = '0'; }) {}
 				const len = @min(dps, p);
-				_ = try w.write(s[0..@intCast(len)]);
+				_ = try w.write(s[0..@as(u32, @bitCast(len))]);
 			}
 		} else {
 			p = @min(@max(0, dps * diff(z, r + 1) + e - j), p);
 			const erad = base;
-			var estr = fmtU(@intCast(if (e < 0) -e else e), ebuf, erad);
+			var estr = fmtU(@as(u32, @bitCast(if (e < 0) -e else e)), ebuf, erad);
 			while (diff(ebuf, estr) < lead) : ({ estr -= 1; estr[0] = '0'; }) {}
 			estr -= 1;
 			estr[0] = if (e < 0) '-' else '+';
@@ -489,8 +491,8 @@ pub const Rad = extern struct {
 					}
 				}
 				const l = b + dps - s;
-				_ = try w.write(s[0..@min(l, @as(usize, @intCast(p)))]);
-				p -= @intCast(l);
+				_ = try w.write(s[0..@min(l, @as(u32, @bitCast(p)))]);
+				p -= @as(u31, @truncate(l));
 			}
 			onxt = w.buffer.ptr + w.end;
 			_ = try w.write(estr[0 .. ebuf - estr]);
@@ -501,9 +503,9 @@ pub const Rad = extern struct {
 		if (self.width > 0 and w.end > self.width) {
 			const dec = odec orelse w.buffer.ptr + w.end;
 			var nxt = onxt orelse w.buffer.ptr + w.end;
-			const reduce: isize = diff(@as(u16, @intCast(w.end)), self.width);
+			const reduce: isize = diff(@as(u16, @truncate(w.end)), self.width);
 			if (diff(nxt, dec) >= reduce) {
-				var s1: [*]u8 = nxt - @as(usize, @intCast(reduce));
+				var s1: [*]u8 = nxt - @as(usize, @bitCast(reduce));
 				ebuf = w.buffer.ptr + w.end;
 				while (@intFromPtr(nxt) < @intFromPtr(ebuf)) : ({ s1 += 1; nxt += 1; }) {
 					s1[0] = nxt[0];
@@ -518,7 +520,7 @@ pub const Rad = extern struct {
 			w.end = 3;
 		}
 		self.resize = if (self.end == w.end) false else blk: {
-			self.end = @intCast(w.end);
+			self.end = @truncate(w.end);
 			break :blk true;
 		};
 	}

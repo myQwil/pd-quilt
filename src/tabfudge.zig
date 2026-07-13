@@ -6,5 +6,5 @@ pub const hioffset: u1 = blk: {
 
 pub const TabFudge = extern union {
 	d: f64,
-	i: [2]i32,
+	i: [2]u32,
 };

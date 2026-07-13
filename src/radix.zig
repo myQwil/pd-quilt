@@ -177,9 +177,7 @@ const Radix = extern struct {
 
 	fn getRect(self: *Radix, glist: *GList) pd.Rect(c_int) {
 		const obj: *Object = &self.obj;
-		const fontsize: uint = if (self.font_size != 0)
-			@intCast(self.font_size)
-		else glist.getFont();
+		const fontsize: uint = if (self.font_size != 0) self.font_size else glist.getFont();
 		const len: uint = if (self.rad.width == 0)
 			@max(3, self.rad.end) else self.rad.width;
 		const size: IVec2 = blk: {
@@ -232,7 +230,7 @@ const Radix = extern struct {
 		firsttime: bool,
 	) void {
 		self.tag_type.* = .border;
-		const zoom: c_int = @intCast(glist.zoom);
+		const zoom = glist.zoom;
 		const grabbed: c_int = zoom * @intFromBool(self.b.grabbed);
 		const p1 = rect.p1 + IVec2{ grabbed, grabbed };
 		const p2 = rect.p2;
@@ -274,12 +272,12 @@ const Radix = extern struct {
 		const obj: *Object = &self.obj;
 		const canvas = glist.getCanvas();
 		const dvec: IVec2 = .{ dx, dy };
-		obj.pix = obj.pix + @as(SVec2, @intCast(dvec));
+		obj.pix = obj.pix + @as(SVec2, @truncate(dvec));
 		if (!glist.isVisible()) {
 			return;
 		}
 
-		const zoom: c_int = @intCast(glist.zoom);
+		const zoom = glist.zoom;
 		const d = dvec * IVec2{ zoom, zoom };
 
 		self.tag_type.* = .text;
@@ -326,9 +324,7 @@ const Radix = extern struct {
 		self.drawBorder(glist, rect, true);
 
 		// draw the text
-		const fontsize: uint = if (self.font_size != 0)
-			@intCast(self.font_size)
-		else glist.getFont();
+		const fontsize: uint = if (self.font_size != 0) self.font_size else glist.getFont();
 		const uz = glist.getZoom();
 		const iz: c_int = uz;
 		{
@@ -355,7 +351,7 @@ const Radix = extern struct {
 		const p1 = switch (self.b.where) {
 			.left => blk: {
 				const len = std.mem.len(label);
-				const wid: c_int = @intCast(len * pd.zoomFontWidth(fontsize, uz, false));
+				const wid: c_int = pd.iFromU(len * pd.zoomFontWidth(fontsize, uz, false));
 				break :blk rect.p1 + IVec2{ -3 * iz - wid, 2 * iz };
 			},
 			.right => blk: {
@@ -363,7 +359,7 @@ const Radix = extern struct {
 				break :blk IVec2{ rect.p2[0], rect.p1[1] } + IVec2{ dz, dz };
 			},
 			.up => blk: {
-				const h: c_int = @intCast(pd.zoomFontHeight(fontsize, uz, false));
+				const h: c_int = pd.zoomFontHeight(fontsize, uz, false);
 				break :blk rect.p1 - IVec2{ iz, iz + h };
 			},
 			.down => IVec2{ rect.p1[0], rect.p2[1] } + IVec2{ -iz, 3 * iz },
