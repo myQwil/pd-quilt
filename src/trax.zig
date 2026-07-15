@@ -351,6 +351,7 @@ fn traverseMeta(
 			if (value) |v| {
 				try v.append(gpa, line[1..]);
 			}
+			continue;
 		} else {
 			value = null;
 		}
