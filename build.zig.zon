@@ -5,12 +5,12 @@
 	.minimum_zig_version = "0.16.0",
 	.dependencies = .{
 		.pd = .{
-			.url = "git+https://github.com/myQwil/pd#78a5702e1331bc3110bea8bde08d68d4c715952f",
-			.hash = "pd-0.56.2-DC007UtiAgBsJte9osB6-xzQIl9ZzgSKoTR7YGLkrZvJ",
+			.url = "git+https://github.com/myQwil/pd#c117141a8c29ada6f54da60a81a788a4cd5e09e5",
+			.hash = "pd-0.56.2-DC007flhAgAxi2-QHjbbp2KaIAqh0eh23ottjgDAmqOE",
 		},
 		.gme = .{
-			.url = "git+https://codeberg.org/myQwil/gme#7df7599152b9cf2e1e33791c973ba9e5bce79bf9",
-			.hash = "game_music_emu-0.6.6-YdNlAG9zAADUZm7dVI-0jWpR1fTVj7JwheT0Z4tp_tmj",
+			.url = "git+https://codeberg.org/myQwil/gme#0df3acddb89aa4461d7de8f2508f323eef322c4b",
+			.hash = "game_music_emu-0.6.6-YdNlAMxyAAB0YMvcQcITeOHcX8GtaRhYFOxBiVhxCmNf",
 		},
 		.unrar = .{
 			.url = "git+https://github.com/myQwil/unrar#cd11629c7a603a001697d2dd80ef995840184052",
@@ -25,8 +25,8 @@
 			.hash = "rubberband-4.0.0-RbnorIwaAQD2vQx76Kz4621lEa7pm7gkB0CG5hw3dY96",
 		},
 		.ffmpeg = .{
-			.url = "git+https://github.com/myQwil/ffmpeg#51f24bd7e625e27edf86acb0f6ed5d022fec03c4",
-			.hash = "ffmpeg-8.0.1-1kurkwQYAgDrxhBoR2-1ailhf79mQfczESxPwNLxRYgJ",
+			.url = "git+https://github.com/myQwil/ffmpeg#e92303fb4472de21e80f0b6690a164c6886a656a",
+			.hash = "ffmpeg-8.1.2-1kurk-UFAgAMhZV7YkON3Vglvs35BhtNW7C2F2-YR4xh",
 		},
 	},
 	.paths = .{
