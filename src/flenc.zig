@@ -52,7 +52,7 @@ const FlEnc = extern struct {
 		const b = self.uf.b;
 		const s = try std.fmt.bufPrintSentinel(
 			&buf, &fmt, .{ b.sign, b.exponent, b.mantissa }, 0);
-		pd.post.log(self, .normal, "%s", .{ s.ptr });
+		pd.post.log(self, .normal, s, .{});
 	}
 
 	fn mantissaC(self: *FlEnc, f: Float) callconv(.c) void {

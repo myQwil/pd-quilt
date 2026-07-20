@@ -277,7 +277,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 				buf[i] = '0' + @as(u8, @truncate((gme.mask >> @truncate(i)) & 1));
 			}
 			buf[voices] = 0;
-			pd.post.log(self, .normal, "%s", .{ &buf });
+			pd.post.log(self, .normal, &buf, .{});
 		}
 
 		fn performC(w: [*]usize) callconv(.c) [*]usize {

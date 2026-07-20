@@ -396,7 +396,7 @@ const Sym = extern struct {
 	const BluntImpl = Blunt.Impl(Sym);
 
 	fn printC(self: *const Sym) callconv(.c) void {
-		pd.post.log(self, .normal, "%s", .{ self.sym.name });
+		pd.post.log(self, .normal, self.sym.name, .{});
 	}
 
 	fn bangC(self: *const Sym) callconv(.c) void {

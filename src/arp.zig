@@ -361,7 +361,7 @@ const InArray = extern struct {
 		self.win.print(&writer) catch unreachable;
 		wr.writeVec(&writer, self.win.items()) catch wr.ellipsis(&writer);
 		buffer[writer.end] = 0;
-		pd.post.log(self, .normal, "%s", .{ &buffer });
+		pd.post.log(self, .normal, &buffer, .{});
 	}
 
 	fn resizeC(self: *InArray, f: Float) callconv(.c) void {
@@ -458,7 +458,7 @@ const ExArray = extern struct {
 		writer.print("{s} ({*}) ", .{ self.sym.name, self.sym.thing }) catch unreachable;
 		wr.writeVec(&writer, vec) catch wr.ellipsis(&writer);
 		buffer[writer.end] = 0;
-		pd.post.log(self, .normal, "%s", .{ &buffer });
+		pd.post.log(self, .normal, &buffer, .{});
 	}
 
 	fn resizeC(self: *ExArray, f: Float) callconv(.c) void {

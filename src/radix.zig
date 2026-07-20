@@ -172,7 +172,7 @@ const Radix = extern struct {
 	var class: *pd.Class = undefined;
 
 	inline fn err(self: *Radix, e: anyerror) void {
-		pd.post.err(self, "%s", .{ @errorName(e).ptr });
+		pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
 	fn getRect(self: *Radix, glist: *GList) pd.Rect(c_int) {
