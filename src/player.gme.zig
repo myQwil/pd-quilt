@@ -75,7 +75,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		}
 	}
 
-	pub fn loadTrack(self: *Gme, _: Allocator, _: Io, index: usize) !void {
+	pub fn loadTrack(self: *Gme, index: usize) !void {
 		const idx: c_uint = @truncate(index);
 		try self.emu.startTrack(idx);
 		const info = try self.emu.trackInfo(idx);

@@ -136,7 +136,7 @@ pub fn Impl(Self: type) type { return struct {
 	/// Seek to a time in milliseconds.
 	const bSeek: fn(*Base, Float) anyerror!void = Base.seek;
 	/// Load a track in the playlist by index.
-	const bLoadTrack: fn(*Base, Allocator, Io, usize) anyerror!void = Base.loadTrack;
+	const bLoadTrack: fn(*Base, usize) anyerror!void = Base.loadTrack;
 	/// Open a file or playlist and load the first track.
 	const bOpen: fn(*Base, Allocator, Io, []const Atom) callconv(.@"inline") anyerror!void
 		= Base.open;
@@ -280,7 +280,7 @@ pub fn Impl(Self: type) type { return struct {
 	}
 	inline fn open(base: *Base, av: []const Atom) !void {
 		try bOpen(base, gpa, io, av);
-		try bLoadTrack(base, gpa, io, 0);
+		try bLoadTrack(base, 0);
 	}
 
 	fn listC(
@@ -301,7 +301,7 @@ pub fn Impl(Self: type) type { return struct {
 
 		const track: u32 = @intFromFloat(try pd.floatArg(0, av));
 		const result: bool = blk: { if (0 < track and track <= bTrackCount(base)) {
-			try bLoadTrack(base, gpa, io, track - 1);
+			try bLoadTrack(base, track - 1);
 			if (pd.floatArg(1, av)) |msec| {
 				try bSeek(base, msec);
 			} else |_| {}

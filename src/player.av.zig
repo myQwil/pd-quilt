@@ -148,7 +148,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		return .init(&self.layout, sf, 1, &cl, a.sample_fmt, 1, 0, null);
 	}
 
-	pub fn loadTrack(self: *Av, gpa: Allocator, io: Io, idx: usize) !void {
+	pub fn loadTrack(self: *Av, idx: usize) !void {
 		if (idx >= self.trackCount()) {
 			return error.IndexOutOfBounds;
 		}
@@ -180,36 +180,6 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		self.swr = swr;
 		self.ratio = @as(f64, @floatFromInt(audio.ctx.sample_rate)) / pd.sampleRate();
 		self.frame.pts = 0;
-		self.loadMetadata(gpa, io, idx)
-			catch |e| pd.post.err(null, "Av.loadMetadata: %s", .{ @errorName(e).ptr });
-	}
-
-	inline fn loadMetadata(self: *Av, gpa: Allocator, io: Io, idx: usize) !void {
-		const dct = &self.format.metadata;
-		var hm = try tx.Meta.fromPath(gpa, io, self.playlist.ptr[idx].name) orelse return;
-		defer hm.deinit(gpa);
-
-		const langs: []*Symbol = self.langs.ptr[0..self.langs.len];
-		var it = hm.map.iterator();
-		while (it.next()) |kv| {
-			const arena = kv.value_ptr.get(langs);
-			if (arena.tbl.items.len > 1) {
-				const temp = try gpa.alloc(u8, arena.buf.items.len);
-				defer gpa.free(temp);
-				@memcpy(temp[0..arena.tbl.items[0]], arena.get(0));
-				for (1..arena.tbl.items.len) |i| {
-					const start = arena.tbl.items[i - 1];
-					temp[start - 1] = '/';
-					const str = arena.get(i);
-					@memcpy(temp[start..][0..str.len], str);
-				}
-				dct.set(kv.key_ptr.*.name, temp[0 .. temp.len - 1 :0], .{})
-					catch |e| pd.post.err(null, "dct.set: %s", .{ @errorName(e).ptr });
-			} else {
-				dct.set(kv.key_ptr.*.name, arena.getZ(0), .{})
-					catch |e| pd.post.err(null, "dct.set: %s", .{ @errorName(e).ptr });
-			}
-		}
 	}
 
 	pub inline fn open(self: *Av, gpa: Allocator, io: Io, args: []const Atom) !void {
