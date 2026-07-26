@@ -1,7 +1,9 @@
 const std = @import("std");
 const pd = @import("pd");
+const wr = @import("write.zig");
 
 const Atom = pd.Atom;
+const Float = pd.Float;
 const Symbol = pd.Symbol;
 const Outlet = pd.Outlet;
 const StringMap = std.StringHashMap(void);
@@ -14,8 +16,41 @@ const trext = ".trax";
 pub const Arena = struct {
 	/// byte array
 	buf: std.ArrayList(u8) = .empty,
-	/// ending offsets
-	tbl: std.ArrayList(usize) = .empty,
+	/// ending offsets and types of each item
+	tbl: std.ArrayList(Entry) = .empty,
+
+	const Enum = enum(u1) { float, string };
+
+	const Entry = packed struct(usize) {
+		end: @Int(.unsigned, @bitSizeOf(usize) - @bitSizeOf(Enum)) = 0,
+		typ: Enum = .float,
+	};
+
+	const Union = union(Enum) {
+		float: Float,
+		string: []const u8,
+
+		pub fn asAtom(self: Union) Atom {
+			return switch (self) {
+				.float => |f| .float(f),
+				.string => |s| .symbol(.gen(s[0 .. s.len - 1 :0])),
+			};
+		}
+
+		pub fn print(self: Union) void {
+			switch (self) {
+				.float => |f| pd.post.start("%g", .{ f }),
+				.string => |s| pd.post.start(s[0 .. s.len - 1 :0], .{}),
+			}
+		}
+
+		pub fn write(self: Union, w: *Io.Writer) !void {
+			switch (self) {
+				.float => |f| try wr.fmtG(w, f),
+				.string => |s| try w.writeAll(s[0 .. s.len - 1 :0]),
+			}
+		}
+	};
 
 	fn init(gpa: Allocator, str: []const u8) !Arena {
 		var arena: Arena = .{};
@@ -30,8 +65,31 @@ pub const Arena = struct {
 		self.tbl.deinit(gpa);
 	}
 
-	fn append(self: *Arena, gpa: Allocator, str: []const u8) !void {
-		const amount = str.len + 1;
+	const one = struct {
+		var entry: Entry = .{};
+		var arena: Arena = .{ .tbl = .{ .items = (&entry)[0..1], .capacity = 0 }};
+		var float: Float = 0;
+	};
+
+	pub fn float(f: Float) *const Arena {
+		one.float = f;
+		one.arena.buf.items = @constCast(std.mem.asBytes(&one.float));
+		one.entry = .{ .typ = .float, .end = @truncate(one.arena.buf.items.len) };
+		return &one.arena;
+	}
+
+	pub fn string(str: [:0]const u8) *const Arena {
+		one.arena.buf.items.len = str.len + 1;
+		one.arena.buf.items.ptr = @constCast(str.ptr);
+		one.entry = .{ .typ = .string, .end = @truncate(one.arena.buf.items.len) };
+		return &one.arena;
+	}
+
+	pub fn parse(str: [:0]const u8) *const Arena {
+		return if (std.fmt.parseFloat(Float, str)) |f| .float(f) else |_| .string(str);
+	}
+
+	fn grow(self: *Arena, gpa: Allocator, amount: usize, t: Enum) !usize {
 		try self.buf.ensureUnusedCapacity(gpa, amount);
 		try self.tbl.ensureUnusedCapacity(gpa, 1);
 
@@ -39,21 +97,33 @@ pub const Arena = struct {
 		const new_len = old_len + amount;
 
 		self.buf.items.len = new_len;
-		self.tbl.appendAssumeCapacity(new_len);
-
-		@memcpy(self.buf.items[old_len..][0..str.len], str);
-		self.buf.items[self.buf.items.len - 1] = 0;
+		self.tbl.appendAssumeCapacity(.{ .typ = t, .end = @intCast(new_len) });
+		return old_len;
 	}
 
-	pub fn get(self: *const Arena, index: usize) []const u8 {
+	fn append(self: *Arena, gpa: Allocator, str: []const u8) !void {
+		if (std.fmt.parseFloat(Float, str)) |f| {
+			const start = try self.grow(gpa, @sizeOf(Float), .float);
+			@memcpy(self.buf.items[start..][0..@sizeOf(Float)], std.mem.asBytes(&f));
+		} else |_| {
+			const start = try self.grow(gpa, str.len + 1, .string);
+			@memcpy(self.buf.items[start..][0..str.len], str);
+			self.buf.items[self.buf.items.len - 1] = 0;
+		}
+	}
+
+	pub fn get(self: *const Arena, index: usize) Union {
 		std.debug.assert(index < self.tbl.items.len);
-		const start = if (index == 0) 0 else self.tbl.items[index - 1];
-		return self.buf.items[start..self.tbl.items[index]];
-	}
-
-	pub fn getZ(self: *const Arena, index: usize) [:0]const u8 {
-		const str = self.get(index);
-		return str[0 .. str.len - 1 :0];
+		const start = if (index == 0) 0 else self.tbl.items[index - 1].end;
+		return switch (self.tbl.items[index].typ) {
+			.float => blk: {
+				const bytes = self.buf.items[start..][0..@sizeOf(Float)];
+				break :blk .{ .float = std.mem.bytesToValue(Float, bytes) };
+			},
+			.string => .{
+				.string = self.buf.items[start..self.tbl.items[index].end],
+			},
+		};
 	}
 
 	pub fn send(self: *const Arena, gpa: Allocator, outlet: *Outlet, key: *Symbol) !void {
@@ -66,10 +136,9 @@ pub const Arena = struct {
 			self.doSend(outlet, key, &arr);
 		}
 	}
-
 	fn doSend(self: *const Arena, outlet: *Outlet, key: *Symbol, atoms: []Atom) void {
 		for (0..self.tbl.items.len) |i| {
-			atoms[i] = .symbol(.gen(self.getZ(i)));
+			atoms[i] = self.get(i).asAtom();
 		}
 		outlet.anything(key, atoms[0..self.tbl.items.len]);
 	}
@@ -78,12 +147,25 @@ pub const Arena = struct {
 		pd.post.start("%s:", .{ key });
 		if (self.tbl.items.len > 1) {
 			for (0..self.tbl.items.len) |i| {
-				pd.post.start("\n  %s", .{ self.getZ(i).ptr });
+				pd.post.start("\n  ", .{});
+				self.get(i).print();
 			}
 		} else if (self.tbl.items.len > 0) {
-			pd.post.start(" %s", .{ self.getZ(0).ptr });
+			pd.post.start(" ", .{});
+			self.get(0).print();
 		}
 		pd.post.log(obj, .normal, "", .{});
+	}
+
+	pub fn write(self: *const Arena, w: *Io.Writer) !void {
+		if (self.tbl.items.len <= 0) {
+			return;
+		}
+		try self.get(0).write(w);
+		for (1..self.tbl.items.len) |i| {
+			try w.writeByte('/');
+			try self.get(i).write(w);
+		}
 	}
 };
 

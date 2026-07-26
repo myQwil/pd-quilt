@@ -1,6 +1,7 @@
 const std = @import("std");
 const pd = @import("pd");
 const wr = @import("write.zig");
+const tx = @import("trax.zig");
 
 const Atom = pd.Atom;
 const Float = pd.Float;
@@ -9,6 +10,8 @@ const Symbol = pd.Symbol;
 const Allocator = std.mem.Allocator;
 const Io = std.Io;
 const Writer = Io.Writer;
+const Meta = tx.Meta;
+const Arena = tx.Arena;
 
 const toggle = @import("toggle.zig").toggle;
 const find = std.mem.findScalar;
@@ -130,9 +133,11 @@ pub fn Impl(Self: type) type { return struct {
 	const io = Self.io;
 
 	const Base = Self.Base;
-	const GetMetaFn = fn(*const Base, *Symbol) ?Atom;
+	const GetMetaFn = fn(*const Base, *const Meta, *Symbol) ?*const Arena;
 	/// Returns the value of a given metadata field if available.
 	const bGet: GetMetaFn = Base.get;
+	/// Returns a trax.Meta object
+	const bTrax: fn(*const Base, Allocator, Io) callconv(.@"inline") Meta = Base.getTrax;
 	/// Seek to a time in milliseconds.
 	const bSeek: fn(*Base, Float) anyerror!void = Base.seek;
 	/// Load a track in the playlist by index.
@@ -141,13 +146,13 @@ pub fn Impl(Self: type) type { return struct {
 	const bOpen: fn(*Base, Allocator, Io, []const Atom) callconv(.@"inline") anyerror!void
 		= Base.open;
 	/// Print function for when no args are specified.
-	const bPrint: fn (*const Base, *Writer) callconv(.@"inline") anyerror!void
+	const bPrint: fn (*const Base, *const Meta, *Writer) callconv(.@"inline") anyerror!void
 		= Base.printAuto;
 	/// Returns the number of tracks in the current playlist.
 	const bTrackCount: fn(*const Base) callconv(.@"inline") usize = Base.trackCount;
 
 
-	fn getNone(_: *const Base, _: *Symbol) ?Atom {
+	fn getNone(_: *const Base, _: *const Meta, _: *Symbol) ?*const Arena {
 		return null;
 	}
 
@@ -167,8 +172,10 @@ pub fn Impl(Self: type) type { return struct {
 		const base: *const Base = &self.base;
 		const player: *const Player = &base.player;
 		const getfn: *const GetMetaFn = if (player.open) &bGet else &getNone;
+		var trax: Meta = bTrax(base, gpa, io);
+		defer trax.deinit(gpa);
 		if (av.len == 0) {
-			return bPrint(base, w);
+			return bPrint(base, &trax, w);
 		}
 
 		const ilast = av.len - 1;
@@ -202,20 +209,29 @@ pub fn Impl(Self: type) type { return struct {
 					try w.writeAll(str[pos..end]);
 					try w.writeByte(0);
 					const key: *Symbol = .gen(w.buffer[kpos..][0 .. end - pos :0].ptr);
-					const meta: Atom = getfn(base, key) orelse .symbol(pd.s.empty());
+					const meta: *const Arena = getfn(base, &trax, key) orelse &.{};
 					w.end = kpos;
 
 					var mbuf: [std.fmt.float.bufferSize(.decimal, Float)]u8 = undefined;
-					const mstr: []const u8 = if (meta.type == .float) blk: {
-						var mw: Writer = .fixed(&mbuf);
-						try wr.fmtG(&mw, meta.w.float);
-						break :blk mw.buffered();
-					} else std.mem.sliceTo(meta.w.symbol.name, 0);
+					for (0..meta.tbl.items.len) |j| {
+						if (j > 0) {
+							try w.writeByte('/');
+						}
+						const val = meta.get(j);
+						const mstr: []const u8 = switch (val) {
+							.float => |f| blk: {
+								var mw: Writer = .fixed(&mbuf);
+								try wr.fmtG(&mw, f);
+								break :blk mw.buffered();
+							},
+							.string => |s| s[0 .. s.len - 1 :0],
+						};
 
-					if (cons == null or pctend < end + 3) {
-						try w.writeAll(mstr);
-					} else {
-						try alignBuffer(w, mstr, str[end..pctend]);
+						if (cons == null or pctend < end + 3) {
+							try w.writeAll(mstr);
+						} else {
+							try alignBuffer(w, mstr, str[end..pctend]);
+						}
 					}
 				}
 				try w.writeAll(str);
@@ -233,8 +249,10 @@ pub fn Impl(Self: type) type { return struct {
 		const base: *const Base = &self.base;
 		const player: *const Player = &base.player;
 		const getfn: *const GetMetaFn = if (player.open) &bGet else &getNone;
-		if (getfn(base, s)) |a| {
-			player.outlet.anything(s, &.{ a });
+		var trax: Meta = bTrax(base, gpa, io);
+		defer trax.deinit(gpa);
+		if (getfn(base, &trax, s)) |a| {
+			try a.send(gpa, player.outlet, s);
 		} else {
 			player.outlet.anything(s, &.{});
 		}

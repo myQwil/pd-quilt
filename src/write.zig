@@ -33,6 +33,7 @@ pub fn writeVec(writer: *Writer, vec: []const pd.Word) !void {
 }
 
 pub fn ellipsis(w: *Writer) void {
+	std.debug.assert(w.buffer.len >= 3);
 	w.end = w.buffer.len - 3;
 	w.writeAll("...") catch unreachable;
 }

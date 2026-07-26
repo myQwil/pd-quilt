@@ -16,6 +16,8 @@ const Symbol = pd.Symbol;
 const Allocator = std.mem.Allocator;
 const Io = std.Io;
 pub const Subtitle = av.Subtitle;
+const Meta = tx.Meta;
+const Arena = tx.Arena;
 
 var s_pos: *Symbol = undefined;
 var s_bpm: *Symbol = undefined;
@@ -80,7 +82,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 	const Av = @This();
 
-	var dict: std.AutoHashMap(*Symbol, *const fn(*const Av) Atom) = undefined;
+	var dict: std.AutoHashMap(*Symbol, *const fn(*const Av) *const Arena) = undefined;
 	pub fn freeDict() void {
 		dict.deinit();
 	}
@@ -182,6 +184,11 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		self.frame.pts = 0;
 	}
 
+	pub inline fn getTrax(self: *const Av, gpa: Allocator, io: Io) Meta {
+		self.player.assertFileOpened() catch return .{};
+		return Meta.fromPath(gpa, io, self.format.url) catch Meta{} orelse .{};
+	}
+
 	pub inline fn open(self: *Av, gpa: Allocator, io: Io, args: []const Atom) !void {
 		try self.playlist.replaceWith(gpa, io, args);
 	}
@@ -196,16 +203,16 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		} else |_| {}
 	}
 
-	pub inline fn printAuto(self: *const Av, writer: *Io.Writer) !void {
+	pub inline fn printAuto(self: *const Av, trax: *const Meta, w: *Io.Writer) !void {
 		// general track info: %artist% - %title%
-		const mdata = self.format.metadata.toConst();
-		if (mdata.get("artist", null, .{})) |artist| {
-			try writer.print("{s}", .{ artist.value });
-			if (mdata.get("title", null, .{})) |title| {
-				try writer.print(" - {s}", .{ title.value });
+		if (self.get(trax, .gen("artist"))) |artist| {
+			try artist.write(w);
+			if (self.get(trax, .gen("title"))) |title| {
+				try w.writeAll(" - ");
+				try title.write(w);
 			}
-		} else if (mdata.get("title", null, .{})) |title| {
-			try writer.print("{s}", .{ title.value });
+		} else if (self.get(trax, .gen("title"))) |title| {
+			try title.write(w);
 		}
 	}
 
@@ -230,13 +237,16 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		return self.playlist.len;
 	}
 
-	pub fn get(self: *const Av, s: *Symbol) ?Atom {
+	pub fn get(self: *const Av, trax: *const Meta, s: *Symbol) ?*const Arena {
+		if (trax.get(s, self.langs.slice())) |arena| {
+			return arena;
+		}
 		if (dict.get(s)) |func| {
 			return func(self);
 		}
 		const dct = self.format.metadata.toConst();
 		if (dct.get(s.name, null, .{})) |entry| {
-			return .symbol(.gen(entry.value));
+			return .parse(std.mem.sliceTo(entry.value, 0));
 		}
 		// try matching close-enough terms
 		var request: ?*const av.Dictionary.Entry = null;
@@ -248,7 +258,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		} else if (s == s_bpm) {
 			request = dct.get("tbpm", null, .{});
 		}
-		return if (request) |entry| .symbol(.gen(entry.value)) else null;
+		return if (request) |entry| .parse(std.mem.sliceTo(entry.value, 0)) else null;
 	}
 
 	pub fn Impl(Self: type) type { return struct {
@@ -357,30 +367,32 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 	};}
 
 	const meta = struct {
-		fn path(self: *const Av) Atom {
-			return .symbol(.gen(self.format.url));
+		fn path(self: *const Av) *const Arena {
+			return .string(std.mem.sliceTo(self.format.url, 0));
 		}
-		fn time(self: *const Av) Atom {
+		fn time(self: *const Av) *const Arena {
 			return .float(@as(Float, @floatFromInt(self.format.duration)) / 1000.0);
 		}
-		fn ftime(self: *const Av) Atom {
-			return .symbol(pr.timeSym(@divTrunc(self.format.duration, 1000)));
+		fn ftime(self: *const Av) *const Arena {
+			const ts = pr.timeSym(@divTrunc(self.format.duration, 1000));
+			return .string(std.mem.sliceTo(ts.name, 0));
 		}
-		fn tracks(self: *const Av) Atom {
+		fn tracks(self: *const Av) *const Arena {
 			return .float(@floatFromInt(self.trackCount()));
 		}
-		fn samplefmt(self: *const Av) Atom {
-			return .symbol(.gen(self.audio.ctx.sample_fmt.getName() orelse "unknown"));
+		fn samplefmt(self: *const Av) *const Arena {
+			const name = self.audio.ctx.sample_fmt.getName();
+			return .string(if (name) |s| std.mem.sliceTo(s, 0) else "unknown");
 		}
-		fn samplerate(self: *const Av) Atom {
+		fn samplerate(self: *const Av) *const Arena {
 			return .float(@floatFromInt(self.audio.ctx.sample_rate));
 		}
-		fn bitrate(self: *const Av) Atom {
+		fn bitrate(self: *const Av) *const Arena {
 			const bit_rate: Float = @floatFromInt(self.format.bit_rate);
 			return .float(bit_rate / 1000);
 		}
-		fn codec(self: *const Av) Atom {
-			return .symbol(.gen(@tagName(self.audio.ctx.codec_id).ptr));
+		fn codec(self: *const Av) *const Arena {
+			return .string(@tagName(self.audio.ctx.codec_id));
 		}
 	};
 };}
