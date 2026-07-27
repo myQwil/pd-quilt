@@ -4,6 +4,7 @@ const pd = @import("pd");
 
 const Atom = pd.Atom;
 const Symbol = pd.Symbol;
+const Uf = @import("bitfloat.zig").Uf;
 
 const Has = extern struct {
 	obj: pd.Object,
@@ -24,7 +25,15 @@ const Has = extern struct {
 	) callconv(.c) void {
 		const a = self.atom;
 		self.out.float(for (av[0..ac]) |b| {
-			if (a.type == b.type and a.w.array == b.w.array) {
+			if (a.type != b.type) {
+				continue;
+			}
+			// pointer comparison for float types results in false negatives
+			if (
+				(a.type == .float // compare float-size number of bits
+				and @as(Uf, @bitCast(a.w.float)) == @as(Uf, @bitCast(b.w.float)))
+				or a.w.gpointer == b.w.gpointer // compare pointer-size number of bits
+			) {
 				break 1;
 			}
 		} else 0);
