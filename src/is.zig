@@ -6,7 +6,7 @@ const Atom = pd.Atom;
 const Symbol = pd.Symbol;
 
 const Proxy = extern struct {
-	obj: pd.Object,
+	obj: pd.Pd,
 	owner: *Is,
 
 	const name = "_is_pxy";
@@ -75,7 +75,7 @@ const Is = extern struct {
 		errdefer obj.g.pd.deinit();
 
 		const proxy: *Proxy = try .init(self);
-		errdefer proxy.obj.g.pd.deinit();
+		errdefer proxy.obj.deinit();
 
 		_ = try obj.inlet(@ptrCast(proxy), null, null);
 		self.* = .{
@@ -88,7 +88,7 @@ const Is = extern struct {
 	}
 
 	fn deinitC(self: *const Is) callconv(.c) void {
-		self.proxy.obj.g.pd.deinit();
+		self.proxy.obj.deinit();
 	}
 
 	inline fn setup() !void {

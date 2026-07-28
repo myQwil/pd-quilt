@@ -9,8 +9,22 @@ const Symbol = pd.Symbol;
 const gpa = pd.gpa;
 var dot: *Symbol = undefined; // skips args
 
+fn set(self: []Atom, s: *Symbol, source: []const Atom) void {
+	const firstarg = (s != pd.s.list());
+	if (firstarg and s != dot) {
+		self[0] = .symbol(s);
+	}
+	const i = @intFromBool(firstarg);
+	const n = @min(source.len, self.len - i);
+	for (self[i..][0..n], source[0..n]) |*v, *a| {
+		if (!(a.type == .symbol and a.w.symbol == dot)) {
+			v.* = a.*;
+		}
+	}
+}
+
 const Proxy = extern struct {
-	obj: pd.Object,
+	obj: pd.Pd,
 	ptr: [*]Atom,
 	len: usize,
 
@@ -31,21 +45,11 @@ const Proxy = extern struct {
 		self: *Proxy,
 		s: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
-		const firstarg = (s != pd.s.list());
-		if (firstarg and s != dot) {
-			self.ptr[0] = .symbol(s);
-		}
-		const i = @intFromBool(firstarg);
-		const n = @min(ac, self.len - i);
-		for (self.ptr[i..][0..n], av[0..n]) |*v, *a| {
-			if (!(a.type == .symbol and a.w.symbol == dot)) {
-				v.* = a.*;
-			}
-		}
+		set(self.ptr[0..self.len], s, av[0..ac]);
 	}
 
-	fn init(cls: *pd.Class, vec: []Atom) !*Proxy {
-		const self: *Proxy = @ptrCast(try cls.pd());
+	fn init(vec: []Atom) !*Proxy {
+		const self: *Proxy = @ptrCast(try class.pd());
 		self.* = .{
 			.obj = self.obj,
 			.ptr = vec.ptr,
@@ -68,7 +72,9 @@ const Proxy = extern struct {
 };
 
 const Paq = extern struct {
-	proxy: Proxy,
+	obj: pd.Object,
+	ptr: [*]Atom,
+	len: usize,
 	out: *pd.Outlet,
 	ins: [*]*Proxy,
 
@@ -76,29 +82,32 @@ const Paq = extern struct {
 	var class: *pd.Class = undefined;
 
 	fn bangC(self: *const Paq) callconv(.c) void {
-		const vec = gpa.dupe(Atom, self.proxy.ptr[0..self.proxy.len]) catch
+		const vec = gpa.dupe(Atom, self.ptr[0..self.len]) catch
 			return pd.post.err(self, name ++ ": Out of memory", .{});
 		defer gpa.free(vec);
 		self.out.list(pd.s.list(), vec);
 	}
 
 	fn floatC(self: *Paq, f: Float) callconv(.c) void {
-		self.proxy.floatC(f);
+		self.ptr[0] = .float(f);
 		self.bangC();
 	}
+
 	fn symbolC(self: *Paq, s: *Symbol) callconv(.c) void {
-		self.proxy.symbolC(s);
+		self.ptr[0] = .symbol(s);
 		self.bangC();
 	}
+
 	fn pointerC(self: *Paq, p: *pd.GPointer) callconv(.c) void {
-		self.proxy.pointerC(p);
+		self.ptr[0] = .pointer(p);
 		self.bangC();
 	}
+
 	fn anythingC(
 		self: *Paq,
 		s: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
-		self.proxy.anythingC(s, ac, av);
+		set(self.ptr[0..self.len], s, av[0..ac]);
 		self.bangC();
 	}
 
@@ -113,8 +122,8 @@ const Paq = extern struct {
 		errdefer gpa.free(vec);
 		vec[0] = av[0];
 
-		const self: *Paq = @ptrCast(try Proxy.init(class, vec));
-		const obj: *pd.Object = &self.proxy.obj;
+		const self: *Paq = @ptrCast(try class.pd());
+		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
 		const ins = try gpa.alloc(*Proxy, av.len - 1);
@@ -122,17 +131,19 @@ const Paq = extern struct {
 
 		var n: u32 = 0; // proxies allocated
 		errdefer for (ins[0..n]) |pxy| {
-			pxy.obj.g.pd.deinit();
+			pxy.obj.deinit();
 		};
 		while (n < ins.len) {
 			const i = n + 1;
 			vec[i] = av[i];
-			ins[n] = try .init(Proxy.class, vec[i..]);
+			ins[n] = try .init(vec[i..]);
 			_ = try obj.inlet(@ptrCast(ins[n]), null, null);
 			n = i;
 		}
 		self.* = .{
-			.proxy = self.proxy,
+			.obj = self.obj,
+			.ptr = vec.ptr,
+			.len = vec.len,
 			.out = try .init(obj, pd.s.list()),
 			.ins = ins.ptr,
 		};
@@ -140,13 +151,12 @@ const Paq = extern struct {
 	}
 
 	fn deinitC(self: *const Paq) callconv(.c) void {
-		const paq = &self.proxy;
-		const n = paq.len - 1;
+		const n = self.len - 1;
 		for (self.ins[0..n]) |pxy| {
-			pxy.obj.g.pd.deinit();
+			pxy.obj.deinit();
 		}
 		gpa.free(self.ins[0..n]);
-		gpa.free(paq.ptr[0..paq.len]);
+		gpa.free(self.ptr[0..self.len]);
 	}
 
 	inline fn setup() !void {
