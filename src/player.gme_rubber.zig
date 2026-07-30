@@ -5,6 +5,7 @@ const gm = @import("player.gme.zig");
 const ra = @import("player.rabbit.zig");
 const ru = @import("player.rubber.zig");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
@@ -20,6 +21,8 @@ pub fn Impl(Root: type) type { return extern struct {
 	pub var class: *pd.Class = undefined;
 	pub const gpa = pd.gpa;
 	pub const io = std.Io.Threaded.global_single_threaded.io();
+	pub const parentPtr = pd.parentPtr(Self);
+	pub const parentConstPtr = pd.parentConstPtr(Self);
 
 	// Implementations
 	pub const Base = gm.Base(Root.nch, ra.frames);
@@ -97,11 +100,12 @@ pub fn Impl(Root: type) type { return extern struct {
 		}
 	}
 
-	fn initC(_: *pd.Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Self {
-		return pd.wrap(*Self, init(av[0..ac]), Root.name);
+	fn initC(_: *pd.Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(av[0..ac]), Root.name);
 	}
-	inline fn init(av: []const Atom) !*Self {
-		const self: *Self = @ptrCast(try class.pd());
+	inline fn init(av: []const Atom) !*Pd {
+		const self: *Self = try pd.gpa.create(Self);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -129,10 +133,11 @@ pub fn Impl(Root: type) type { return extern struct {
 			.rubber = rubber,
 			.planar = planar,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
-	fn deinitC(self: *Self) callconv(.c) void {
+	fn deinitC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		inline for (0..Root.nch) |ch| {
 			gpa.free(@as([]Sample, self.planar[ch][0..ra.frames]));
 		}
@@ -147,11 +152,11 @@ pub fn Impl(Root: type) type { return extern struct {
 	}
 
 	pub inline fn setup() !void {
-		class = try .init(Self, Root.name, &.{ .gimme }, &initC, &deinitC, .{});
+		class = try .init(Self, Root.name, &.{ .gimme }, initC, deinitC, .{});
 		try BaseImpl.extend();
 		try Rubber.extend(gpa);
 		Rabbit.extend();
 		Player.extend();
-		class.setFreeFn(&classFreeC);
+		class.setFreeFn(classFreeC);
 	}
 };}

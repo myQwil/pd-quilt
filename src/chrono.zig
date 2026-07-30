@@ -3,6 +3,7 @@
 const pd = @import("pd");
 const tm = @import("timer.zig");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Symbol = pd.Symbol;
 
@@ -20,6 +21,8 @@ const Chrono = extern struct {
 
 	const name = "chrono";
 	var class: *pd.Class = undefined;
+	const parentPtr = pd.parentPtr(Chrono);
+	const parentConstPtr = pd.parentConstPtr(Chrono);
 
 	fn setTime(self: *Chrono) void {
 		self.settime = pd.time();
@@ -33,37 +36,36 @@ const Chrono = extern struct {
 		self.lapmore = 0;
 	}
 
-	fn delayC(self: *Chrono, f: pd.Float) callconv(.c) void {
-		self.setmore -= f;
+	fn delayC(p: *Pd, f: pd.Float) callconv(.c) void {
+		parentPtr(p).setmore -= f;
 	}
 
-	fn bangC(self: *Chrono) callconv(.c) void {
-		self.reset(false);
+	fn bangC(p: *Pd) callconv(.c) void {
+		parentPtr(p).reset(false);
 	}
 
-	fn floatC(self: *Chrono, f: pd.Float) callconv(.c) void {
-		self.reset(false);
-		self.delayC(f);
+	fn floatC(p: *Pd, f: pd.Float) callconv(.c) void {
+		parentPtr(p).reset(false);
+		delayC(p, f);
 	}
 
-	fn listC(
-		self: *Chrono,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
 		const a = av[0..ac];
-		self.reset((pd.floatArg(1, a) catch 0) != 0);
+		parentPtr(p).reset((pd.floatArg(1, a) catch 0) != 0);
 		if (pd.floatArg(0, a)) |f| {
-			self.delayC(f);
+			delayC(p, f);
 		} else |_| {}
 	}
 
-	fn bang2C(self: *const Chrono) callconv(.c) void {
+	fn bang2C(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		const result = self.setmore + if (self.timer.paused)
 			0 else self.timer.timeSince(self.settime);
 		self.out_total.float(@floatCast(result));
 	}
 
-	fn lapC(self: *Chrono) callconv(.c) void {
+	fn lapC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		const result = self.lapmore + if (self.timer.paused)
 			0 else self.timer.timeSince(self.laptime);
 		self.out_lap.float(@floatCast(result));
@@ -71,10 +73,8 @@ const Chrono = extern struct {
 		self.lapmore = 0;
 	}
 
-	fn pauseC(
-		self: *Chrono,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn pauseC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		if (!self.timer.tglPause(av[0..ac])) {
 			return;
 		}
@@ -87,10 +87,8 @@ const Chrono = extern struct {
 		}
 	}
 
-	fn tempoC(
-		self: *Chrono,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn tempoC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		if (!self.timer.paused) {
 			self.setmore += self.timer.timeSince(self.settime);
 			self.lapmore += self.timer.timeSince(self.laptime);
@@ -100,11 +98,12 @@ const Chrono = extern struct {
 			catch |e| pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Chrono {
-		return pd.wrap(*Chrono, init(av[0..ac]), name);
+	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) !*Chrono {
-		const self: *Chrono = @ptrCast(try class.pd());
+	inline fn init(av: []const Atom) !*Pd {
+		const self: *Chrono = try pd.gpa.create(Chrono);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -118,20 +117,20 @@ const Chrono = extern struct {
 			.settime = settime,
 			.laptime = settime,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
-		class = try .init(Chrono, name, &.{ .gimme }, &initC, null, .{});
-		class.addBang(@ptrCast(&bangC));
-		class.addFloat(@ptrCast(&floatC));
-		class.addList(@ptrCast(&listC));
-		class.addMethod(@ptrCast(&lapC), .gen("lap"), &.{});
-		class.addMethod(@ptrCast(&bang2C), .gen("bang2"), &.{});
-		class.addMethod(@ptrCast(&delayC), .gen("del"), &.{ .float });
-		class.addMethod(@ptrCast(&delayC), .gen("delay"), &.{ .float });
-		class.addMethod(@ptrCast(&pauseC), .gen("pause"), &.{ .gimme });
-		class.addMethod(@ptrCast(&tempoC), .gen("tempo"), &.{ .gimme });
+		class = try .init(Chrono, name, &.{ .gimme }, initC, null, .{});
+		class.addBang(bangC);
+		class.addFloat(floatC);
+		class.addList(listC);
+		class.addMethod(&.{}, lapC, .gen("lap"));
+		class.addMethod(&.{}, bang2C, .gen("bang2"));
+		class.addMethod(&.{ .float }, delayC, .gen("del"));
+		class.addMethod(&.{ .float }, delayC, .gen("delay"));
+		class.addMethod(&.{ .gimme }, pauseC, .gen("pause"));
+		class.addMethod(&.{ .gimme }, tempoC, .gen("tempo"));
 	}
 };
 

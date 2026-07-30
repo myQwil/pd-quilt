@@ -3,6 +3,7 @@ const ra = @import("rabbit");
 const Inlet = @import("inlet.zig").Inlet;
 pub const uint = ra.uint;
 
+const Pd = pd.Pd;
 const Float = pd.Float;
 
 pub const frames = 0x10;
@@ -53,19 +54,21 @@ pub const Rabbit = extern struct {
 
 pub fn Impl(Self: type) type { return struct {
 	const conv: fn(*Self, uint) callconv(.@"inline") void = Self.conv;
+	const parentPtr = Self.parentPtr;
 
-	fn convC(self: *Self, f: Float) callconv(.c) void {
-		conv(self, @intFromFloat(f));
+	fn convC(p: *Pd, f: Float) callconv(.c) void {
+		conv(parentPtr(p), @intFromFloat(f));
 	}
 
-	fn speedC(self: *Self, f: Float) callconv(.c) void {
+	fn speedC(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		const rabbit: *Rabbit = &self.rabbit;
 		rabbit.speed.* = f;
 	}
 
 	pub inline fn extend() void {
 		const class: *pd.Class = Self.class;
-		class.addMethod(@ptrCast(&convC), .gen("conv"), &.{ .float });
-		class.addMethod(@ptrCast(&speedC), .gen("speed"), &.{ .float });
+		class.addMethod(&.{ .float }, convC, .gen("conv"));
+		class.addMethod(&.{ .float }, speedC, .gen("speed"));
 	}
 };}

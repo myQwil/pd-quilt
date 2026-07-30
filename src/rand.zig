@@ -5,6 +5,7 @@ const std = @import("std");
 const rn = @import("rng.zig");
 const wr = @import("write.zig");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
@@ -47,10 +48,10 @@ const Rand = extern struct {
 		return .{ .out = try .init(obj, pd.s.float()) };
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]Atom) callconv(.c) ?*anyopaque {
-		return pd.wrap(*anyopaque, choose(av[0..ac]), name);
+	fn initC(_: *Symbol, ac: c_uint, av: [*]Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, choose(av[0..ac]), name);
 	}
-	inline fn choose(av: []Atom) !*anyopaque {
+	inline fn choose(av: []Atom) !*Pd {
 		if (av.len == 1 and av[0].type == .symbol) {
 			return try ExArray.init(av[0].w.symbol);
 		} else if (av.len > 2) {
@@ -62,7 +63,7 @@ const Rand = extern struct {
 
 	inline fn setup() !void {
 		s_rep = .gen("rep");
-		pd.addCreator(anyopaque, name, &.{ .gimme }, &initC);
+		pd.addCreator(name, &.{ .gimme }, initC);
 		try Range.setup();
 		try InArray.setup();
 		try ExArray.setup();
@@ -87,14 +88,15 @@ const Rand = extern struct {
 			return f;
 		}
 
-		fn repC(self: *Self, f: Float) callconv(.c) void {
+		fn repC(p: *Pd, f: Float) callconv(.c) void {
+			const self = Self.parentPtr(p);
 			const rand: *Rand = &self.rand;
 			rand.rep = @intFromFloat(f);
 		}
 
 		fn extend() void {
 			const class: *pd.Class = Self.class;
-			class.addMethod(@ptrCast(&repC), s_rep, &.{ .float });
+			class.addMethod(&.{ .float }, repC, s_rep);
 			class.setHelpSymbol(.gen("rand"));
 		}
 	};}
@@ -110,15 +112,16 @@ const Range = extern struct {
 	const name = "_rand_range";
 	const Rnd = Rand.Impl(Range);
 	pub var class: *pd.Class = undefined;
+	pub const parentPtr = pd.parentPtr(Range);
+	pub const parentConstPtr = pd.parentConstPtr(Range);
 
-	fn printC(self: *const Range) callconv(.c) void {
+	fn printC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		pd.post.log(self, .normal, "%g..%g", .{ self.min, self.max });
 	}
 
-	fn listC(
-		self: *Range,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		sw: switch (@min(ac, 2)) {
 			2 => { if (av[1].getFloat()) |f| self.max = f; continue :sw 1; },
 			1 => { if (av[0].getFloat()) |f| self.min = f; },
@@ -126,21 +129,21 @@ const Range = extern struct {
 		}
 	}
 
-	fn anythingC(
-		self: *Range,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn anythingC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		self.min = pd.floatArg(0, av[0..ac]) catch self.min;
 	}
 
-	fn bangC(self: *Range) callconv(.c) void {
+	fn bangC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		const range = self.max - self.min;
 		const f = Rnd.next(self, @abs(range));
 		self.rand.out.float(@floor((if (range < 0) -f else f) + self.min));
 	}
 
-	inline fn init(av: []const Atom) !*Range {
-		const self: *Range = @ptrCast(try class.pd());
+	inline fn init(av: []const Atom) !*Pd {
+		const self: *Range = try pd.gpa.create(Range);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -172,17 +175,17 @@ const Range = extern struct {
 			.min = min,
 			.max = max,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
 		class = try .init(Range, name, &.{}, null, null, .{});
 		try rn.Impl(Range).extend(io);
 		Rnd.extend();
-		class.addBang(@ptrCast(&bangC));
-		class.addList(@ptrCast(&listC));
-		class.addAnything(@ptrCast(&anythingC));
-		class.addMethod(@ptrCast(&printC), .gen("print"), &.{});
+		class.addBang(bangC);
+		class.addList(listC);
+		class.addAnything(anythingC);
+		class.addMethod(&.{}, printC, .gen("print"));
 	}
 };
 
@@ -197,38 +200,42 @@ const InArray = extern struct {
 	const name = "_rand_array";
 	const Rnd = Rand.Impl(InArray);
 	pub var class: *pd.Class = undefined;
+	pub const parentPtr = pd.parentPtr(InArray);
+	pub const parentConstPtr = pd.parentConstPtr(InArray);
 
 	inline fn err(self: *const InArray, e: anyerror) void {
 		pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
-	fn printC(self: *const InArray) callconv(.c) void {
+	fn printC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		var buffer: [pd.max_string:0]u8 = undefined;
-		var writer: Writer = .fixed(&buffer);
-		self.win.print(&writer) catch unreachable;
-		wr.writeVec(&writer, self.win.items()) catch wr.ellipsis(&writer);
-		buffer[writer.end] = 0;
+		var w: Writer = .fixed(&buffer);
+		self.win.print(&w) catch unreachable;
+		wr.writeVec(&w, self.win.items()) catch wr.ellipsis(&w);
+		buffer[w.end] = 0;
 		pd.post.log(self, .normal, &buffer, .{});
 	}
 
-	fn resizeC(self: *InArray, f: Float) callconv(.c) void {
+	fn resizeC(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		self.win.resize(gpa, @intFromFloat(@max(1, f))) catch |e| self.err(e);
 	}
 
-	fn listC(
-		self: *InArray,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		setWords(self.win.items(), av[0..ac]) catch |e| self.err(e);
 	}
 
-	fn bangC(self: *InArray) callconv(.c) void {
+	fn bangC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		const f = Rnd.next(self, @floatFromInt(self.win.len));
 		self.rand.out.float(self.win.ptr[@intFromFloat(f)].float);
 	}
 
-	inline fn init(av: []Atom) !*InArray {
-		const self: *InArray = @ptrCast(try class.pd());
+	inline fn init(av: []Atom) !*Pd {
+		const self: *InArray = try pd.gpa.create(InArray);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -244,21 +251,22 @@ const InArray = extern struct {
 			.rand = try .init(obj),
 			.rng = .init(),
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
-	fn deinitC(self: *InArray) callconv(.c) void {
+	fn deinitC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		self.win.deinit(gpa);
 	}
 
 	inline fn setup() !void {
-		class = try .init(InArray, name, &.{}, null, &deinitC, .{});
+		class = try .init(InArray, name, &.{}, null, deinitC, .{});
 		try rn.Impl(InArray).extend(io);
 		Rnd.extend();
-		class.addBang(@ptrCast(&bangC));
-		class.addList(@ptrCast(&listC));
-		class.addMethod(@ptrCast(&printC), .gen("print"), &.{});
-		class.addMethod(@ptrCast(&resizeC), .gen("n"), &.{ .float });
+		class.addBang(bangC);
+		class.addList(listC);
+		class.addMethod(&.{}, printC, .gen("print"));
+		class.addMethod(&.{ .float }, resizeC, .gen("n"));
 	}
 };
 
@@ -272,29 +280,34 @@ const ExArray = extern struct {
 	const name = "_rand_garray";
 	const Rnd = Rand.Impl(ExArray);
 	pub var class: *pd.Class = undefined;
+	pub const parentPtr = pd.parentPtr(ExArray);
+	pub const parentConstPtr = pd.parentConstPtr(ExArray);
 
 	inline fn err(self: *const ExArray, e: anyerror) void {
 		pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
 	inline fn garray(self: *const ExArray) error{GArrayNotFound}!*pd.GArray {
-		return @ptrCast(pd.garray_class.find(self.sym) orelse return error.GArrayNotFound);
+		const result = pd.garray_class.find(self.sym);
+		return if (result) |ga| @ptrCast(ga) else error.GArrayNotFound;
 	}
 
-	fn printC(self: *const ExArray) callconv(.c) void {
+	fn printC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		self.print() catch |e| self.err(e);
 	}
 	inline fn print(self: *const ExArray) !void {
 		const vec = try (try self.garray()).floatWords();
 		var buffer: [pd.max_string:0]u8 = undefined;
-		var writer: Writer = .fixed(&buffer);
-		writer.print("{s} ({*}) ", .{ self.sym.name, self.sym.thing }) catch unreachable;
-		wr.writeVec(&writer, vec) catch wr.ellipsis(&writer);
-		buffer[writer.end] = 0;
+		var w: Writer = .fixed(&buffer);
+		w.print("{s} ({*}) ", .{ self.sym.name, self.sym.thing }) catch unreachable;
+		wr.writeVec(&w, vec) catch wr.ellipsis(&w);
+		buffer[w.end] = 0;
 		pd.post.log(self, .normal, &buffer, .{});
 	}
 
-	fn resizeC(self: *ExArray, f: Float) callconv(.c) void {
+	fn resizeC(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		self.resize(f) catch |e| self.err(e);
 	}
 	inline fn resize(self: *ExArray, f: Float) !void {
@@ -302,10 +315,8 @@ const ExArray = extern struct {
 		try arr.resize(@intFromFloat(f));
 	}
 
-	fn listC(
-		self: *ExArray,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		self.list(av[0..ac]) catch |e| self.err(e);
 	}
 	inline fn list(self: *ExArray, av: []const Atom) !void {
@@ -314,7 +325,8 @@ const ExArray = extern struct {
 		try setWords(try garr.floatWords(), av);
 	}
 
-	fn bangC(self: *ExArray) callconv(.c) void {
+	fn bangC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		self.bang() catch |e| self.err(e);
 	}
 	inline fn bang(self: *ExArray) !void {
@@ -323,8 +335,9 @@ const ExArray = extern struct {
 		self.rand.out.float(vec[@intFromFloat(f)].float);
 	}
 
-	inline fn init(s: *Symbol) !*ExArray {
-		const self: *ExArray = @ptrCast(try class.pd());
+	inline fn init(s: *Symbol) !*Pd {
+		const self: *ExArray = try pd.gpa.create(ExArray);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -335,17 +348,17 @@ const ExArray = extern struct {
 			.rng = .init(),
 			.sym = s,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
 		class = try .init(ExArray, name, &.{}, null, null, .{});
 		try rn.Impl(ExArray).extend(io);
 		Rnd.extend();
-		class.addBang(@ptrCast(&bangC));
-		class.addList(@ptrCast(&listC));
-		class.addMethod(@ptrCast(&printC), .gen("print"), &.{});
-		class.addMethod(@ptrCast(&resizeC), .gen("n"), &.{ .float });
+		class.addBang(bangC);
+		class.addList(listC);
+		class.addMethod(&.{}, printC, .gen("print"));
+		class.addMethod(&.{ .float }, resizeC, .gen("n"));
 	}
 };
 

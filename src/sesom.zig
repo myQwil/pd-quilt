@@ -2,6 +2,7 @@
 
 const pd = @import("pd");
 
+const Pd = pd.Pd;
 const Float = pd.Float;
 
 const Sesom = extern struct {
@@ -12,16 +13,19 @@ const Sesom = extern struct {
 
 	const name = "sesom";
 	var class: *pd.Class = undefined;
+	const parentPtr = pd.parentPtr(Sesom);
 
-	fn floatC(self: *Sesom, f: Float) callconv(.c) void {
+	fn floatC(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		(if (f > self.f) self.out_l else self.out_r).float(f);
 	}
 
-	fn initC(f: Float) callconv(.c) ?*Sesom {
-		return pd.wrap(*Sesom, init(f), name);
+	fn initC(f: Float) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(f), name);
 	}
-	inline fn init(f: Float) !*Sesom {
-		const self: *Sesom = @ptrCast(try class.pd());
+	inline fn init(f: Float) !*Pd {
+		const self: *Sesom = try pd.gpa.create(Sesom);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -32,12 +36,12 @@ const Sesom = extern struct {
 			.out_r = try .init(obj, pd.s.float()),
 			.f = f,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
-		class = try .init(Sesom, name, &.{ .deffloat }, &initC, null, .{});
-		class.addFloat(@ptrCast(&floatC));
+		class = try .init(Sesom, name, &.{ .deffloat }, initC, null, .{});
+		class.addFloat(floatC);
 	}
 };
 

@@ -1,6 +1,7 @@
 const pd = @import("pd");
 const Inlet = @import("inlet.zig").Inlet;
 
+const Pd = pd.Pd;
 const Float = pd.Float;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
@@ -36,14 +37,16 @@ pub inline fn sample(w: [*]pd.Word, x: Sample, hold: Sample) Sample {
 }
 
 pub fn Impl(Self: type) type { return struct {
-	fn holdC(self: *Self, f: Float) callconv(.c) void {
-		const tab2: *Tab2 = &self.tab2;
+	const parentPtr = Self.parentPtr;
+
+	fn holdC(p: *Pd, f: Float) callconv(.c) void {
+		const tab2: *Tab2 = &parentPtr(p).tab2;
 		tab2.hold.* = f;
 	}
 
 	pub inline fn extend() void {
 		const class: *pd.Class = Self.class;
 		class.doMainSignalIn(@offsetOf(Self, "tab2") + @offsetOf(Tab2, "f"));
-		class.addMethod(@ptrCast(&holdC), .gen("hold"), &.{ .float });
+		class.addMethod(&.{ .float }, holdC, .gen("hold"));
 	}
 };}

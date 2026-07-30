@@ -12,7 +12,8 @@ pub inline fn getMin(k: f64, ref: Float) f64 {
 	return @exp2(69 / k) / ref;
 }
 
-pub fn floatC(self: *const Tet, f: Float) callconv(.c) void {
+pub fn floatC(p: *const pd.Pd, f: Float) callconv(.c) void {
+	const self = Tet.parentConstPtr(p);
 	self.out.float(@floatCast(@log2(f * self.min) * self.k));
 }
 

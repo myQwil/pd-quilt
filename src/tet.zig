@@ -1,5 +1,6 @@
 const pd = @import("pd");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
@@ -20,16 +21,20 @@ pub fn Tet(T: type) type { return extern struct {
 
 	const Self = @This();
 	var class: *pd.Class = undefined;
+	const parentPtr = pd.parentPtr(Self);
+	pub const parentConstPtr = pd.parentConstPtr(Self);
 
 	const getK: fn(tet: Float) callconv(.@"inline") f64 = T.getK;
 	const getMin: fn(k: f64, ref: Float) callconv(.@"inline") f64 = T.getMin;
 
-	fn refC(self: *Self, f: Float) callconv(.c) void {
+	fn refC(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		self.ref = if (f == 0) 1 else f;
 		self.min = getMin(self.k, self.ref);
 	}
 
-	fn tetC(self: *Self, f: Float) callconv(.c) void {
+	fn tetC(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		self.tet = if (f == 0) 1 else f;
 		self.k = getK(f);
 		self.min = getMin(self.k, self.ref);
@@ -54,32 +59,24 @@ pub fn Tet(T: type) type { return extern struct {
 		}
 	}
 
-	fn setC(
-		self: *Self,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
-		self.set(0, av[0..ac]);
+	fn setC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		parentPtr(p).set(0, av[0..ac]);
 	}
 
-	fn listC(
-		self: *Self,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
-		self.set(0, av[0..ac]);
+	fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		parentPtr(p).set(0, av[0..ac]);
 	}
 
-	fn anythingC(
-		self: *Self,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
-		self.set(1, av[0..ac]);
+	fn anythingC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		parentPtr(p).set(1, av[0..ac]);
 	}
 
-	pub fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Self {
-		return pd.wrap(*Self, init(av[0..ac]), T.name);
+	pub fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(av[0..ac]), T.name);
 	}
-	inline fn init(av: []const Atom) !*Self {
-		const self: *Self = @ptrCast(try class.pd());
+	inline fn init(av: []const Atom) !*Pd {
+		const self: *Self = try pd.gpa.create(Self);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -97,18 +94,18 @@ pub fn Tet(T: type) type { return extern struct {
 			.k = k,
 			.min = getMin(k, ref),
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	pub inline fn setup() !void {
-		class = try .init(Self, T.name, &.{ .gimme }, &initC, null, .{});
+		class = try .init(Self, T.name, &.{ .gimme }, initC, null, .{});
 
-		class.addFloat(@ptrCast(&T.floatC));
-		class.addList(@ptrCast(&listC));
-		class.addAnything(@ptrCast(&anythingC));
-		class.addMethod(@ptrCast(&refC), .gen("ref"), &.{ .float });
-		class.addMethod(@ptrCast(&tetC), .gen("tet"), &.{ .float });
-		class.addMethod(@ptrCast(&setC), .gen("set"), &.{ .gimme });
+		class.addFloat(&T.floatC);
+		class.addList(listC);
+		class.addAnything(anythingC);
+		class.addMethod(&.{ .float }, refC, .gen("ref"));
+		class.addMethod(&.{ .float }, tetC, .gen("tet"));
+		class.addMethod(&.{ .gimme }, setC, .gen("set"));
 		class.setHelpSymbol(.gen("tet"));
 	}
 };}

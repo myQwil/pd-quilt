@@ -3,6 +3,7 @@
 const pd = @import("pd");
 const tm = @import("timer.zig");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Outlet = pd.Outlet;
 const Symbol = pd.Symbol;
@@ -21,12 +22,15 @@ const DelP = extern struct {
 
 	const name = "delp";
 	var class: *pd.Class = undefined;
+	const parentPtr = pd.parentPtr(DelP);
+	const parentConstPtr = pd.parentConstPtr(DelP);
 
 	fn timeoutC(self: *const DelP) callconv(.c) void {
 		self.out_b.bang();
 	}
 
-	fn delayC(self: *DelP, f: pd.Float) callconv(.c) void {
+	fn delayC(p: *Pd, f: pd.Float) callconv(.c) void {
+		const self = parentPtr(p);
 		self.setmore -= f;
 		if (!self.tmr.paused) {
 			self.clock.unset();
@@ -38,16 +42,15 @@ const DelP = extern struct {
 		}
 	}
 
-	fn timeC(self: *const DelP) callconv(.c) void {
+	fn timeC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		const result = self.setmore + if (self.tmr.paused)
 			0 else self.tmr.timeSince(self.settime);
 		self.out_f.float(@floatCast(result));
 	}
 
-	fn pauseC(
-		self: *DelP,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn pauseC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		if (!self.tmr.tglPause(av[0..ac])) {
 			return;
 		}
@@ -63,14 +66,12 @@ const DelP = extern struct {
 		}
 	}
 
-	fn stopC(self: *DelP) callconv(.c) void {
-		self.pauseC(pd.s.empty(), 1, &.{ .float(1) });
+	fn stopC(p: *Pd) callconv(.c) void {
+		pauseC(p, pd.s.empty(), 1, &.{ .float(1) });
 	}
 
-	fn tempoC(
-		self: *DelP,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn tempoC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		if (!self.tmr.paused) {
 			self.setmore += self.tmr.timeSince(self.settime);
 			self.settime = pd.time();
@@ -80,8 +81,8 @@ const DelP = extern struct {
 		self.clock.setUnit(self.tmr.unit);
 	}
 
-	fn ft1C(self: *DelP, f: pd.Float) callconv(.c) void {
-		self.deltime = @max(0, f);
+	fn ft1C(p: *Pd, f: pd.Float) callconv(.c) void {
+		parentPtr(p).deltime = @max(0, f);
 	}
 
 	fn reset(self: *DelP, paused: bool) void {
@@ -95,38 +96,35 @@ const DelP = extern struct {
 		self.setmore = -self.deltime;
 	}
 
-	fn bangC(self: *DelP) callconv(.c) void {
-		self.reset(false);
+	fn bangC(p: *Pd) callconv(.c) void {
+		parentPtr(p).reset(false);
 	}
 
-	fn floatC(self: *DelP, f: pd.Float) callconv(.c) void {
+	fn floatC(p: *Pd, f: pd.Float) callconv(.c) void {
+		const self = parentPtr(p);
 		self.deltime = @max(0, f);
 		self.reset(false);
 	}
 
-	fn listC(
-		self: *DelP,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		const a = av[0..ac];
 		if (pd.floatArg(0, a)) |f| {
-			self.ft1C(f);
+			ft1C(p, f);
 		} else |_| {}
 		self.reset((pd.floatArg(1, a) catch 0) != 0);
 	}
 
-	fn anythingC(
-		self: *DelP,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
-		self.reset((pd.floatArg(0, av[0..ac]) catch 0) != 0);
+	fn anythingC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		parentPtr(p).reset((pd.floatArg(0, av[0..ac]) catch 0) != 0);
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*DelP {
-		return pd.wrap(*DelP, init(av[0..ac]), name);
+	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) !*DelP {
-		const self: *DelP = @ptrCast(try class.pd());
+	inline fn init(av: []const Atom) !*Pd {
+		const self: *DelP = try pd.gpa.create(DelP);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -134,7 +132,7 @@ const DelP = extern struct {
 		const out_b: *Outlet = try .init(obj, pd.s.bang());
 		const out_f: *Outlet = try .init(obj, pd.s.float());
 
-		var clock: *pd.Clock = try .init(self, @ptrCast(&timeoutC));
+		var clock: *pd.Clock = try .init(DelP, self, timeoutC);
 		errdefer clock.deinit();
 
 		var a = av;
@@ -156,26 +154,26 @@ const DelP = extern struct {
 			.settime = settime,
 			.tmr = tmr,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
-	fn deinitC(self: *const DelP) callconv(.c) void {
-		self.clock.deinit();
+	fn deinitC(p: *const Pd) callconv(.c) void {
+		parentConstPtr(p).clock.deinit();
 	}
 
 	inline fn setup() !void {
-		class = try .init(DelP, name, &.{ .gimme }, &initC, &deinitC, .{});
-		class.addBang(@ptrCast(&bangC));
-		class.addFloat(@ptrCast(&floatC));
-		class.addList(@ptrCast(&listC));
-		class.addAnything(@ptrCast(&anythingC));
-		class.addMethod(@ptrCast(&stopC), .gen("stop"), &.{});
-		class.addMethod(@ptrCast(&timeC), .gen("time"), &.{});
-		class.addMethod(@ptrCast(&ft1C), .gen("ft1"), &.{ .float });
-		class.addMethod(@ptrCast(&delayC), .gen("del"), &.{ .float });
-		class.addMethod(@ptrCast(&delayC), .gen("delay"), &.{ .float });
-		class.addMethod(@ptrCast(&pauseC), .gen("pause"), &.{ .gimme });
-		class.addMethod(@ptrCast(&tempoC), .gen("tempo"), &.{ .gimme });
+		class = try .init(DelP, name, &.{ .gimme }, initC, deinitC, .{});
+		class.addBang(bangC);
+		class.addFloat(floatC);
+		class.addList(listC);
+		class.addAnything(anythingC);
+		class.addMethod(&.{}, stopC, .gen("stop"));
+		class.addMethod(&.{}, timeC, .gen("time"));
+		class.addMethod(&.{ .float }, ft1C, .gen("ft1"));
+		class.addMethod(&.{ .float }, delayC, .gen("del"));
+		class.addMethod(&.{ .float }, delayC, .gen("delay"));
+		class.addMethod(&.{ .gimme }, pauseC, .gen("pause"));
+		class.addMethod(&.{ .gimme }, tempoC, .gen("tempo"));
 	}
 };
 

@@ -2,6 +2,7 @@
 
 const pd = @import("pd");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
@@ -40,6 +41,7 @@ const AttackDecay = extern struct {
 
 	const name = "ad~";
 	var class: *pd.Class = undefined;
+	const parentPtr = pd.parentPtr(AttackDecay);
 
 	fn performC(w: [*]usize) callconv(.c) [*]usize {
 		const self: *AttackDecay = @ptrFromInt(w[1]);
@@ -67,16 +69,18 @@ const AttackDecay = extern struct {
 		return w + 4;
 	}
 
-	fn dspC(self: *AttackDecay, sp: [*]*pd.Signal) callconv(.c) void {
-		pd.dsp.add(&performC, .{ self, sp[0].len, sp[0].vec });
+	fn dspC(p: *Pd, sp: [*]*pd.Signal) callconv(.c) void {
+		const self = parentPtr(p);
+		pd.dsp.add(performC, .{ self, sp[0].len, sp[0].vec });
 		self.ratio = sp[0].srate / 1000;
 	}
 
-	fn bangC(self: *AttackDecay) callconv(.c) void {
-		self.b.retarget = true;
+	fn bangC(p: *Pd) callconv(.c) void {
+		parentPtr(p).b.retarget = true;
 	}
 
-	fn floatC(self: *AttackDecay, f: Float) callconv(.c) void {
+	fn floatC(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		if (f == 0) {
 			self.b.release = true;
 		} else if (f < 0) {
@@ -89,7 +93,8 @@ const AttackDecay = extern struct {
 		self.b.retarget = true;
 	}
 
-	fn stopC(self: *AttackDecay) callconv(.c) void {
+	fn stopC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		self.b.release = true;
 		self.b.retarget = true;
 	}
@@ -102,39 +107,34 @@ const AttackDecay = extern struct {
 		}
 	}
 
-	fn listC(
-		self: *AttackDecay,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
-		self.list(av[0..ac]);
+	fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		parentPtr(p).list(av[0..ac]);
 	}
 
-	fn anythingC(
-		self: *AttackDecay,
-		s: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn anythingC(p: *Pd, s: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
 		if (ac > 0) {
-			self.list(&.{ .symbol(s), av[0] });
+			parentPtr(p).list(&.{ .symbol(s), av[0] });
 		}
 	}
 
-	fn attackC(self: *AttackDecay, f: Float) callconv(.c) void {
-		self.attack = f;
+	fn attackC(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).attack = f;
 	}
 
-	fn decayC(self: *AttackDecay, f: Float) callconv(.c) void {
-		self.decay = f;
+	fn decayC(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).decay = f;
 	}
 
-	fn releaseC(self: *AttackDecay, f: Float) callconv(.c) void {
-		self.release = f;
+	fn releaseC(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).release = f;
 	}
 
-	fn initC(a: Float, d: Float) callconv(.c) ?*AttackDecay {
-		return pd.wrap(*AttackDecay, init(a, d), name);
+	fn initC(a: Float, d: Float) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(a, d), name);
 	}
-	inline fn init(a: Float, d: Float) !*AttackDecay {
-		const self: *AttackDecay = @ptrCast(try class.pd());
+	inline fn init(a: Float, d: Float) !*Pd {
+		const self: *AttackDecay = try pd.gpa.create(AttackDecay);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -147,24 +147,21 @@ const AttackDecay = extern struct {
 			.attack = a,
 			.decay = d,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
-		const args: []const Atom.Type = &.{
-			.deffloat,
-			.deffloat,
-		};
-		class = try .init(AttackDecay, name, args, &initC, null, .{});
-		class.addBang(@ptrCast(&bangC));
-		class.addFloat(@ptrCast(&floatC));
-		class.addList(@ptrCast(&listC));
-		class.addAnything(@ptrCast(&anythingC));
-		class.addMethod(@ptrCast(&dspC), .gen("dsp"), &.{ .cant });
-		class.addMethod(@ptrCast(&attackC), .gen("a"), &.{ .float });
-		class.addMethod(@ptrCast(&decayC), .gen("d"), &.{ .float });
-		class.addMethod(@ptrCast(&releaseC), .gen("r"), &.{ .float });
-		class.addMethod(@ptrCast(&stopC), .gen("stop"), &.{});
+		const args: [2]Atom.Type = @splat(.deffloat);
+		class = try .init(AttackDecay, name, &args, initC, null, .{});
+		class.addBang(bangC);
+		class.addFloat(floatC);
+		class.addList(listC);
+		class.addAnything(anythingC);
+		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));
+		class.addMethod(&.{ .float }, attackC, .gen("a"));
+		class.addMethod(&.{ .float }, decayC, .gen("d"));
+		class.addMethod(&.{ .float }, releaseC, .gen("r"));
+		class.addMethod(&.{}, stopC, .gen("stop"));
 	}
 };
 

@@ -3,6 +3,7 @@
 
 const pd = @import("pd");
 
+const Pd = pd.Pd;
 const Float = pd.Float;
 
 const Same = extern struct {
@@ -15,12 +16,16 @@ const Same = extern struct {
 
 	const name = "same";
 	var class: *pd.Class = undefined;
+	const parentPtr = pd.parentPtr(Same);
+	const parentConstPtr = pd.parentConstPtr(Same);
 
-	fn bangC(self: *const Same) callconv(.c) void {
+	fn bangC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		self.out_diff.float(self.f);
 	}
 
-	fn floatC(self: *Same, f: Float) callconv(.c) void {
+	fn floatC(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		if (self.f != f) {
 			self.f = f;
 			self.out_diff.float(f);
@@ -29,15 +34,16 @@ const Same = extern struct {
 		}
 	}
 
-	fn setC(self: *Same, f: Float) callconv(.c) void {
-		self.f = f;
+	fn setC(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).f = f;
 	}
 
-	fn initC(f: Float) callconv(.c) ?*Same {
-		return pd.wrap(*Same, init(f), name);
+	fn initC(f: Float) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(f), name);
 	}
-	inline fn init(f: Float) !*Same {
-		const self: *Same = @ptrCast(try class.pd());
+	inline fn init(f: Float) !*Pd {
+		const self: *Same = try pd.gpa.create(Same);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -47,14 +53,14 @@ const Same = extern struct {
 			.out_same = try .init(obj, pd.s.float()),
 			.f = f,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
-		class = try .init(Same, name, &.{ .deffloat }, &initC, null, .{});
-		class.addBang(@ptrCast(&bangC));
-		class.addFloat(@ptrCast(&floatC));
-		class.addMethod(@ptrCast(&setC), .gen("set"), &.{ .deffloat });
+		class = try .init(Same, name, &.{ .deffloat }, initC, null, .{});
+		class.addBang(bangC);
+		class.addFloat(floatC);
+		class.addMethod(&.{ .deffloat }, setC, .gen("set"));
 	}
 };
 

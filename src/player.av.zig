@@ -9,6 +9,7 @@ const arc = @import("player.arc.zig");
 const pr = @import("player.zig");
 const tx = @import("trax.zig");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
@@ -267,23 +268,27 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		const err: fn(*const Self, anyerror) callconv(.@"inline") void = Self.err;
 		const gpa = Self.gpa;
 		const io = Self.io;
+		const parentPtr = Self.parentPtr;
 
-		fn posC(self: *Self) callconv(.c) void {
+		fn posC(p: *Pd) callconv(.c) void {
+			const self = parentPtr(p);
 			const base: *Av = &self.base;
 			base.pos() catch |e| err(self, e);
 		}
 
 		fn appendC(
-			self: *Self,
+			p: *Pd,
 			_: *Symbol, ac: c_uint, args: [*]const pd.Atom,
 		) callconv(.c) void {
+			const self = parentPtr(p);
 			const base: *Av = &self.base;
 			base.playlist.append(gpa, io, args[0..ac]) catch |e| err(self, e);
 			const count: Float = @floatFromInt(base.trackCount());
 			base.player.outlet.anything(s_append, &.{ .float(count) });
 		}
 
-		fn dumpC(self: *Self) callconv(.c) void {
+		fn dumpC(p: *Pd) callconv(.c) void {
+			const self = parentPtr(p);
 			const base: *Av = &self.base;
 			const dct = &base.format.metadata;
 			var prev: ?*const av.Dictionary.Entry = null;
@@ -293,14 +298,16 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		}
 
 		fn langsC(
-			self: *Self,
+			p: *Pd,
 			_: *Symbol, ac: c_uint, args: [*]const pd.Atom,
 		) callconv(.c) void {
+			const self = parentPtr(p);
 			const base: *Av = &self.base;
 			base.langs.replaceWith(gpa, args[0..ac]) catch |e| err(self, e);
 		}
 
-		fn audioC(self: *Self, f: Float) callconv(.c) void {
+		fn audioC(p: *Pd, f: Float) callconv(.c) void {
+			const self = parentPtr(p);
 			audio(self, f) catch |e| err(self, e);
 		}
 		inline fn audio(self: *Self, f: Float) !void {
@@ -318,7 +325,8 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			pd.post.log(self, .normal, "audio stream set to %u", .{ a.idx });
 		}
 
-		fn subtitleC(self: *Self, f: Float) callconv(.c) void {
+		fn subtitleC(p: *Pd, f: Float) callconv(.c) void {
+			const self = parentPtr(p);
 			subtitle(self, f) catch |e| err(self, e);
 		}
 		inline fn subtitle(self: *Self, f: Float) !void {
@@ -357,12 +365,12 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			}
 
 			const class: *pd.Class = Self.class;
-			class.addMethod(@ptrCast(&posC), s_pos, &.{});
-			class.addMethod(@ptrCast(&dumpC), .gen("dump"), &.{});
-			class.addMethod(@ptrCast(&audioC), .gen("audio"), &.{ .float });
-			class.addMethod(@ptrCast(&subtitleC), .gen("subtitle"), &.{ .float });
-			class.addMethod(@ptrCast(&appendC), .gen("append"), &.{ .gimme });
-			class.addMethod(@ptrCast(&langsC), .gen("langs"), &.{ .gimme });
+			class.addMethod(&.{}, posC, s_pos);
+			class.addMethod(&.{}, dumpC, .gen("dump"));
+			class.addMethod(&.{ .float }, audioC, .gen("audio"));
+			class.addMethod(&.{ .float }, subtitleC, .gen("subtitle"));
+			class.addMethod(&.{ .gimme }, appendC, .gen("append"));
+			class.addMethod(&.{ .gimme }, langsC, .gen("langs"));
 		}
 	};}
 

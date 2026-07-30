@@ -5,6 +5,7 @@ const gm = @import("player.gme.zig");
 const ra = @import("player.rabbit.zig");
 const Inlet = @import("inlet.zig").Inlet;
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
@@ -26,6 +27,8 @@ pub fn Impl(Root: type) type { return extern struct {
 	const BaseImpl = Base.Impl(Self);
 	const Player = pr.Impl(Self);
 	const Rabbit = ra.Impl(Self);
+	pub const parentPtr = pd.parentPtr(Self);
+	pub const parentConstPtr = pd.parentConstPtr(Self);
 
 	pub inline fn err(self: *const Self, e: anyerror) void {
 		pd.post.err(self, Root.name ++ ": %s", .{ @errorName(e).ptr });
@@ -35,8 +38,8 @@ pub fn Impl(Root: type) type { return extern struct {
 		self.rabbit.conv(i, Root.nch) catch |e| self.err(e);
 	}
 
-	fn tempoC(self: *Self, f: Float) callconv(.c) void {
-		self.tempo.* = f;
+	fn tempoC(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).tempo.* = f;
 	}
 
 	pub fn resetBuffers(self: *Self) void {
@@ -92,11 +95,12 @@ pub fn Impl(Root: type) type { return extern struct {
 		}
 	}
 
-	fn initC(_: *pd.Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Self {
-		return pd.wrap(*Self, init(av[0..ac]), Root.name);
+	fn initC(_: *pd.Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(av[0..ac]), Root.name);
 	}
-	inline fn init(av: []const Atom) !*Self {
-		const self: *Self = @ptrCast(try class.pd());
+	inline fn init(av: []const Atom) !*Pd {
+		const self: *Self = try pd.gpa.create(Self);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -111,10 +115,11 @@ pub fn Impl(Root: type) type { return extern struct {
 			.rabbit = rabbit,
 			.tempo = &in3.un.floatsignalvalue,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
-	fn deinitC(self: *Self) callconv(.c) void {
+	fn deinitC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		self.rabbit.deinit();
 		self.base.deinit(gpa);
 	}
@@ -124,11 +129,11 @@ pub fn Impl(Root: type) type { return extern struct {
 	}
 
 	pub inline fn setup() !void {
-		class = try .init(Self, Root.name, &.{ .gimme }, &initC, &deinitC, .{});
+		class = try .init(Self, Root.name, &.{ .gimme }, initC, deinitC, .{});
 		try BaseImpl.extend();
 		Rabbit.extend();
 		Player.extend();
-		class.addMethod(@ptrCast(&tempoC), .gen("tempo"), &.{ .float });
-		class.setFreeFn(&classFreeC);
+		class.addMethod(&.{ .float }, tempoC, .gen("tempo"));
+		class.setFreeFn(classFreeC);
 	}
 };}

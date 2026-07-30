@@ -3,6 +3,7 @@
 const pd = @import("pd");
 const tg = @import("toggle.zig");
 
+const Pd = pd.Pd;
 const Sample = pd.Sample;
 const Float = pd.Float;
 
@@ -23,6 +24,7 @@ const LinPSignal = extern struct {
 
 	const name = "linp~";
 	var class: *pd.Class = undefined;
+	const parentPtr = pd.parentPtr(LinPSignal);
 
 	fn tglPause(self: *LinPSignal, av: []const pd.Atom) bool {
 		const changed = tg.toggle(&self.paused, av);
@@ -67,27 +69,27 @@ const LinPSignal = extern struct {
 		return w + 4;
 	}
 
-	fn dspC(self: *LinPSignal, sp: [*]*pd.Signal) callconv(.c) void {
-		pd.dsp.add(&performC, .{ self, sp[0].len, sp[0].vec });
+	fn dspC(p: *Pd, sp: [*]*pd.Signal) callconv(.c) void {
+		const self = parentPtr(p);
+		pd.dsp.add(performC, .{ self, sp[0].len, sp[0].vec });
 		self.invn = 1 / @as(Float, @floatFromInt(sp[0].len));
 		self.dspticktomsec = sp[0].srate
 			/ @as(Float, @floatFromInt(1000 * sp[0].len));
 	}
 
-	fn stopC(self: *LinPSignal) callconv(.c) void {
+	fn stopC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		self.target = self.value;
 		self.ticksleft = 0;
 		self.retarget = false;
 	}
 
-	fn pauseC(
-		self: *LinPSignal,
-		_: *pd.Symbol, ac: c_uint, av: [*]const pd.Atom,
-	) callconv(.c) void {
-		_ = self.tglPause(av[0..ac]);
+	fn pauseC(p: *Pd, _: *pd.Symbol, ac: c_uint, av: [*]const pd.Atom) callconv(.c) void {
+		_ = parentPtr(p).tglPause(av[0..ac]);
 	}
 
-	fn floatC(self: *LinPSignal, f: Float) callconv(.c) void {
+	fn floatC(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		if (self.inletvalue <= 0) {
 			self.target = f;
 			self.value = f;
@@ -104,11 +106,12 @@ const LinPSignal = extern struct {
 		}
 	}
 
-	fn initC() callconv(.c) ?*LinPSignal {
-		return pd.wrap(*LinPSignal, init(), name);
+	fn initC() callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(), name);
 	}
-	inline fn init() !*LinPSignal {
-		const self: *LinPSignal = @ptrCast(try class.pd());
+	inline fn init() !*Pd {
+		const self: *LinPSignal = try pd.gpa.create(LinPSignal);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -119,15 +122,15 @@ const LinPSignal = extern struct {
 			.obj = self.obj,
 			.o_pause = try .init(obj, pd.s.float()),
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
-		class = try .init(LinPSignal, name, &.{}, &initC, null, .{});
-		class.addFloat(@ptrCast(&floatC));
-		class.addMethod(@ptrCast(&stopC), .gen("stop"), &.{});
-		class.addMethod(@ptrCast(&dspC), .gen("dsp"), &.{ .cant });
-		class.addMethod(@ptrCast(&pauseC), .gen("pause"), &.{ .gimme });
+		class = try .init(LinPSignal, name, &.{}, initC, null, .{});
+		class.addFloat(floatC);
+		class.addMethod(&.{}, stopC, .gen("stop"));
+		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));
+		class.addMethod(&.{ .gimme }, pauseC, .gen("pause"));
 	}
 };
 

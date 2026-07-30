@@ -2,6 +2,7 @@
 
 const pd = @import("pd");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Symbol = pd.Symbol;
 
@@ -15,16 +16,15 @@ const Unpaq = extern struct {
 	const name = "unpaq";
 	var class: *pd.Class = undefined;
 	var dot: *Symbol = undefined; // skips args
+	const parentConstPtr = pd.parentConstPtr(Unpaq);
 
 	const Outlet = struct {
 		out: *pd.Outlet,
 		type: Atom.Type,
 	};
 
-	fn anythingC(
-		self: *const Unpaq,
-		s: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn anyC(p: *const Pd, s: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentConstPtr(p);
 		const firstarg = (s != pd.s.list());
 		const j = @intFromBool(firstarg);
 		var i = @min(ac, self.len - j);
@@ -48,11 +48,12 @@ const Unpaq = extern struct {
 		}
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Unpaq {
-		return pd.wrap(*Unpaq, init(av[0..ac]), name);
+	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(argv: []const Atom) !*Unpaq {
-		const self: *Unpaq = @ptrCast(try class.pd());
+	inline fn init(argv: []const Atom) !*Pd {
+		const self: *Unpaq = try gpa.create(Unpaq);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -73,17 +74,18 @@ const Unpaq = extern struct {
 			.ptr = vec.ptr,
 			.len = vec.len,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
-	fn deinitC(self: *const Unpaq) callconv(.c) void {
+	fn deinitC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		gpa.free(self.ptr[0..self.len]);
 	}
 
 	inline fn setup() !void {
 		dot = .gen(".");
-		class = try .init(Unpaq, name, &.{ .gimme }, &initC, &deinitC, .{});
-		class.addAnything(@ptrCast(&anythingC));
+		class = try .init(Unpaq, name, &.{ .gimme }, initC, deinitC, .{});
+		class.addAnything(anyC);
 		class.setHelpSymbol(.gen("paq"));
 	}
 };

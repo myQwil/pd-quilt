@@ -4,6 +4,7 @@
 const std = @import("std");
 const pd = @import("pd");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Class = pd.Class;
 const Float = pd.Float;
@@ -46,29 +47,31 @@ const Blunt = extern struct {
 		return .{ .mask = mask };
 	}
 
-	fn initC() callconv(.c) ?*Object {
-		return @ptrCast(pd.wrap(*pd.Pd, class.pd(), name));
+	fn initC() callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, boxInit(), name);
+	}
+	inline fn boxInit() !*Pd {
+		const obj = try pd.gpa.create(Object);
+		obj.* = .{ .g = .{ .pd = .{ .class = class } } };
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
 		pd.post.do("Blunt! v0.9", .{});
-		class = try .init(Object, name, &.{}, &initC, null, .{
-			.no_inlet = true,
-		});
+		class = try .init(Object, name, &.{}, initC, null, .{ .no_inlet = true });
 	}
 
 	pub fn Impl(Self: type) type { return struct {
-		fn loadbangC(self: *Self, f: Float) callconv(.c) void {
-			const obj: *Object = &self.obj;
-			const blunt: *Blunt = &self.blunt;
+		fn loadbangC(p: *Pd, f: Float) callconv(.c) void {
+			const blunt: *Blunt = &Self.parentPtr(p).blunt;
 			const action = @as(u8, 1) << @intFromFloat(f);
 			if (blunt.mask & action != 0) {
-				obj.g.pd.bang();
+				p.bang();
 			}
 		}
 
 		inline fn extend(cls: *Class) void {
-			cls.addMethod(@ptrCast(&loadbangC), .gen("loadbang"), &.{ .deffloat });
+			cls.addMethod(&.{ .deffloat }, loadbangC, .gen("loadbang"));
 			cls.setHelpSymbol(s_blunt);
 		}
 	};}
@@ -84,25 +87,26 @@ const BinOp = extern struct {
 	f2: Float,
 	blunt: Blunt,
 
-	const Init = fn (*Class, []const Atom) anyerror!*BinOp;
+	const Init = fn (*Class, []const Atom) anyerror!*Pd;
 	const BluntImpl = Blunt.Impl(BinOp);
+	const parentPtr = pd.parentPtr(BinOp);
+	const parentConstPtr = pd.parentConstPtr(BinOp);
 
-	fn printC(self: *const BinOp) callconv(.c) void {
+	fn printC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		pd.post.log(self, .normal, "%g %g", .{ self.f1, self.f2 });
 	}
 
-	fn f1C(self: *BinOp, f: Float) callconv(.c) void {
-		self.f1 = f;
+	fn f1C(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).f1 = f;
 	}
 
-	fn f2C(self: *BinOp, f: Float) callconv(.c) void {
-		self.f2 = f;
+	fn f2C(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).f2 = f;
 	}
 
-	fn setC(
-		self: *BinOp,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn setC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		sw: switch (@min(ac, 2)) {
 			2 => { if (av[1].getFloat()) |f| self.f2 = f; continue :sw 1; },
 			1 => { if (av[0].getFloat()) |f| self.f1 = f; },
@@ -110,25 +114,20 @@ const BinOp = extern struct {
 		}
 	}
 
-	fn floatC(self: *BinOp, f: Float) callconv(.c) void {
-		self.f1 = f;
-		self.obj.g.pd.bang();
+	fn floatC(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).f1 = f;
+		p.bang();
 	}
 
-	fn listC(
-		self: *BinOp,
-		s: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
-		self.setC(s, ac, av);
-		self.obj.g.pd.bang();
+	fn listC(p: *Pd, s: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		setC(p, s, ac, av);
+		p.bang();
 	}
 
-	fn anythingC(
-		self: *BinOp,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn anythingC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		self.f2 = pd.floatArg(0, av[0..ac]) catch self.f2;
-		self.obj.g.pd.bang();
+		p.bang();
 	}
 
 	fn initBase(self: *BinOp, av: []const Atom) !void {
@@ -156,35 +155,37 @@ const BinOp = extern struct {
 		};
 	}
 
-	fn initCold(class: *Class, av: []const Atom) !*BinOp {
-		const self: *BinOp = @ptrCast(try class.pd());
+	fn initCold(class: *Class, av: []const Atom) !*Pd {
+		const self: *BinOp = try pd.gpa.create(BinOp);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
 		_ = try obj.inletFloat(&self.f2);
 		try self.initBase(av);
-		return self;
+		return &obj.g.pd;
 	}
 
-	fn initHot(class: *Class, av: []const Atom) !*BinOp {
-		const self: *BinOp = @ptrCast(try class.pd());
+	fn initHot(class: *Class, av: []const Atom) !*Pd {
+		const self: *BinOp = try pd.gpa.create(BinOp);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), pd.s.anything());
 		try self.initBase(av);
-		return self;
+		return &obj.g.pd;
 	}
 
 	fn extend(class: *Class) void {
-		class.addFloat(@ptrCast(&floatC));
-		class.addList(@ptrCast(&listC));
-		class.addAnything(@ptrCast(&anythingC));
+		class.addFloat(floatC);
+		class.addList(listC);
+		class.addAnything(anythingC);
 
-		class.addMethod(@ptrCast(&printC), .gen("print"), &.{});
-		class.addMethod(@ptrCast(&setC), .gen("set"), &.{ .gimme });
-		class.addMethod(@ptrCast(&f1C), .gen("f1"), &.{ .float });
-		class.addMethod(@ptrCast(&f2C), .gen("f2"), &.{ .float });
+		class.addMethod(&.{}, printC, .gen("print"));
+		class.addMethod(&.{ .gimme }, setC, .gen("set"));
+		class.addMethod(&.{ .float }, f1C, .gen("f1"));
+		class.addMethod(&.{ .float }, f2C, .gen("f2"));
 		BluntImpl.extend(class);
 	}
 
@@ -207,23 +208,27 @@ const BinOp = extern struct {
 	fn Impl(comptime ob: Obj, comptime t: Type) type { return struct {
 		var class: *Class = undefined;
 
-		fn sendC(self: *BinOp, s: *Symbol) callconv(.c) void {
+		fn sendC(p: *Pd, s: *Symbol) callconv(.c) void {
+			const self = parentPtr(p);
 			const thing = s.thing
 				orelse return pd.post.err(self, "%s: no such object", .{ s.name });
 			thing.float(if (t == .reverse_op)
-				ob.op(self.f2, self.f1) else
+				ob.op(self.f2, self.f1)
+			else
 				ob.op(self.f1, self.f2));
 		}
 
-		fn bangC(self: *const BinOp) callconv(.c) void {
+		fn bangC(p: *const Pd) callconv(.c) void {
+			const self = parentConstPtr(p);
 			self.out.float(if (t == .reverse_op)
-				ob.op(self.f2, self.f1) else
+				ob.op(self.f2, self.f1)
+			else
 				ob.op(self.f1, self.f2));
 		}
 
-		fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*BinOp {
+		fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
 			const init: Init = if (t == .hot_inlets) initHot else initCold;
-			return pd.wrap(*BinOp, init(class, av[0..ac]), ob.name);
+			return pd.wrap(*Pd, init(class, av[0..ac]), ob.name);
 		}
 
 		fn setup() !void {
@@ -233,9 +238,9 @@ const BinOp = extern struct {
 				.alias      => "`",
 				.none       => "",
 			};
-			class = try .init(BinOp, pre ++ ob.name, &.{ .gimme }, &initC, null, .{});
-			class.addBang(@ptrCast(&bangC));
-			class.addMethod(@ptrCast(&sendC), .gen("send"), &.{ .symbol });
+			class = try .init(BinOp, pre ++ ob.name, &.{ .gimme }, initC, null, .{});
+			class.addBang(bangC);
+			class.addMethod(&.{ .symbol }, sendC, .gen("send"));
 			extend(class);
 		}
 	};}
@@ -251,30 +256,34 @@ const UnOp = extern struct {
 	blunt: Blunt,
 
 	const BluntImpl = Blunt.Impl(UnOp);
+	const parentPtr = pd.parentPtr(UnOp);
+	const parentConstPtr = pd.parentConstPtr(UnOp);
 
-	fn printC(self: *const UnOp) callconv(.c) void {
+	fn printC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		pd.post.log(self, .normal, "%g", .{ self.f });
 	}
 
-	fn setC(self: *UnOp, f: Float) callconv(.c) void {
-		self.f = f;
+	fn setC(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).f = f;
 	}
 
-	fn floatC(self: *UnOp, f: Float) callconv(.c) void {
-		self.f = f;
-		self.obj.g.pd.bang();
+	fn floatC(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).f = f;
+		p.bang();
 	}
 
-	fn symbolC(self: *UnOp, s: *Symbol) callconv(.c) void {
+	fn symbolC(p: *Pd, s: *Symbol) callconv(.c) void {
 		const f = std.fmt.parseFloat(Float, std.mem.sliceTo(s.name, 0)) catch {
-			pd.post.err(self, "Couldn't convert %s to float.", .{ s.name });
+			pd.post.err(p, "Couldn't convert %s to float.", .{ s.name });
 			return;
 		};
-		self.floatC(f);
+		floatC(p, f);
 	}
 
 	fn init(class: *Class, av: []const Atom) !*UnOp {
-		const self: *UnOp = @ptrCast(try class.pd());
+		const self: *UnOp = try pd.gpa.create(UnOp);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -290,11 +299,11 @@ const UnOp = extern struct {
 	}
 
 	fn extend(class: *Class) void {
-		class.addFloat(@ptrCast(&floatC));
-		class.addSymbol(@ptrCast(&symbolC));
+		class.addFloat(floatC);
+		class.addSymbol(symbolC);
 
-		class.addMethod(@ptrCast(&printC), .gen("print"), &.{});
-		class.addMethod(@ptrCast(&setC), .gen("set"), &.{ .float });
+		class.addMethod(&.{}, printC, .gen("print"));
+		class.addMethod(&.{ .float }, setC, .gen("set"));
 		BluntImpl.extend(class);
 	}
 
@@ -308,32 +317,34 @@ const UnOp = extern struct {
 	fn Impl(comptime t: Type) type { return struct {
 		var class: *Class = undefined;
 
-		fn sendC(self: *const UnOp, s: *Symbol) callconv(.c) void {
+		fn sendC(p: *const Pd, s: *Symbol) callconv(.c) void {
+			const self = parentConstPtr(p);
 			const thing = s.thing
 				orelse return pd.post.err(self, "%s: no such object", .{ s.name });
 			thing.float(t.op(self.f));
 		}
 
-		fn bangC(self: *const UnOp) callconv(.c) void {
+		fn bangC(p: *const Pd) callconv(.c) void {
+			const self = parentConstPtr(p);
 			self.out.float(t.op(self.f));
 		}
 
-		fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*UnOp {
-			return pd.wrap(*UnOp, implNew(av[0..ac]), t.name);
+		fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+			return pd.wrap(*Pd, implNew(av[0..ac]), t.name);
 		}
-		inline fn implNew(av: []const Atom) !*UnOp {
+		inline fn implNew(av: []const Atom) !*Pd {
 			const self = try init(class, av);
 			if (t.inlet) {
 				_ = try self.obj.inletFloat(&self.f);
 			}
-			return self;
+			return &self.obj.g.pd;
 		}
 
 		fn setup() !void {
 			const pre = if (t.new) "" else "`";
-			class = try .init(UnOp, pre ++ t.name, &.{ .gimme }, &initC, null, .{});
-			class.addBang(@ptrCast(&bangC));
-			class.addMethod(@ptrCast(&sendC), .gen("send"), &.{ .symbol });
+			class = try .init(UnOp, pre ++ t.name, &.{ .gimme }, initC, null, .{});
+			class.addBang(bangC);
+			class.addMethod(&.{ .symbol }, sendC, .gen("send"));
 			extend(class);
 		}
 	};}
@@ -350,16 +361,30 @@ const Bang = extern struct {
 	const name = "`b";
 	var class: *Class = undefined;
 	const BluntImpl = Blunt.Impl(Bang);
+	const parentPtr = pd.parentPtr(Bang);
+	const parentConstPtr = pd.parentConstPtr(Bang);
 
-	fn bangC(self: *const Bang) callconv(.c) void {
+	fn bangC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		self.out.bang();
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Bang {
-		return pd.wrap(*Bang, init(av[0..ac]), name);
+	fn floatC(p: *const Pd, _: Float) callconv(.c) void {
+		bangC(p);
 	}
-	inline fn init(av: []const Atom) !*Bang {
-		const self: *Bang = @ptrCast(try class.pd());
+	fn symbolC(p: *const Pd, _: *Symbol) callconv(.c) void {
+		bangC(p);
+	}
+	fn listC(p: *Pd, _: *Symbol, _: c_uint, _: [*]const Atom) callconv(.c) void {
+		bangC(p);
+	}
+
+	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(av[0..ac]), name);
+	}
+	inline fn init(av: []const Atom) !*Pd {
+		const self: *Bang = try pd.gpa.create(Bang);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -368,16 +393,16 @@ const Bang = extern struct {
 			.out = try .init(obj, pd.s.bang()),
 			.blunt = .init(av),
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
-		class = try .init(Bang, name, &.{ .gimme }, &initC, null, .{});
-		class.addBang(@ptrCast(&bangC));
-		class.addFloat(@ptrCast(&bangC));
-		class.addSymbol(@ptrCast(&bangC));
-		class.addList(@ptrCast(&bangC));
-		class.addAnything(@ptrCast(&bangC));
+		class = try .init(Bang, name, &.{ .gimme }, initC, null, .{});
+		class.addBang(bangC);
+		class.addFloat(floatC);
+		class.addSymbol(symbolC);
+		class.addList(listC);
+		class.addAnything(listC);
 		BluntImpl.extend(class);
 	}
 };
@@ -394,36 +419,42 @@ const Sym = extern struct {
 	const name = "`s";
 	var class: *Class = undefined;
 	const BluntImpl = Blunt.Impl(Sym);
+	const parentPtr = pd.parentPtr(Sym);
+	const parentConstPtr = pd.parentConstPtr(Sym);
 
-	fn printC(self: *const Sym) callconv(.c) void {
+	fn printC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		pd.post.log(self, .normal, self.sym.name, .{});
 	}
 
-	fn bangC(self: *const Sym) callconv(.c) void {
+	fn bangC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		self.out.symbol(self.sym);
 	}
 
-	fn symbolC(self: *Sym, s: *Symbol) callconv(.c) void {
-		self.sym = s;
-		self.bangC();
+	fn symbolC(p: *Pd, s: *Symbol) callconv(.c) void {
+		parentPtr(p).sym = s;
+		bangC(p);
 	}
 
-	fn listC(
-		self: *Sym,
-		s: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn listC(p: *Pd, s: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
 		if (ac == 0) {
-			self.bangC();
+			bangC(p);
 		} else {
-			self.symbolC(av[0].getSymbol() orelse s);
+			symbolC(p, av[0].getSymbol() orelse s);
 		}
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Sym {
-		return pd.wrap(*Sym, init(av[0..ac]), name);
+	fn anythingC(p: *Pd, s: *Symbol, _: c_uint, _: [*]const Atom) callconv(.c) void {
+		symbolC(p, s);
 	}
-	inline fn init(av: []const Atom) !*Sym {
-		const self: *Sym = @ptrCast(try class.pd());
+
+	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(av[0..ac]), name);
+	}
+	inline fn init(av: []const Atom) !*Pd {
+		const self: *Sym = try pd.gpa.create(Sym);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -437,16 +468,16 @@ const Sym = extern struct {
 			.sym = pd.symbolArg(0, av[0..n]) catch pd.s.empty(),
 			.blunt = blunt,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
-		class = try .init(Sym, name, &.{ .gimme }, &initC, null, .{});
-		class.addBang(@ptrCast(&bangC));
-		class.addSymbol(@ptrCast(&symbolC));
-		class.addList(@ptrCast(&listC));
-		class.addAnything(@ptrCast(&symbolC));
-		class.addMethod(@ptrCast(&printC), .gen("print"), &.{});
+		class = try .init(Sym, name, &.{ .gimme }, initC, null, .{});
+		class.addBang(bangC);
+		class.addSymbol(symbolC);
+		class.addList(listC);
+		class.addAnything(anythingC);
+		class.addMethod(&.{}, printC, .gen("print"));
 		BluntImpl.extend(class);
 	}
 };

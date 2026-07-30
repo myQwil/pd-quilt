@@ -4,6 +4,7 @@ const pd = @import("pd");
 const std = @import("std");
 const rn = @import("rng.zig");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
@@ -19,21 +20,23 @@ pub const Rind = extern struct {
 
 	const name = "rind";
 	pub var class: *pd.Class = undefined;
+	pub const parentPtr = pd.parentPtr(Rind);
+	pub const parentConstPtr = pd.parentConstPtr(Rind);
 
-	fn printC(self: *const Rind) callconv(.c) void {
+	fn printC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		pd.post.log(self, .normal, "%g..%g", .{ self.min, self.max });
 	}
 
-	fn bangC(self: *Rind) callconv(.c) void {
+	fn bangC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		const min = self.min;
 		const range = self.max - min;
 		self.out.float(self.rng.next() * range + min);
 	}
 
-	fn listC(
-		self: *Rind,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		sw: switch (@min(ac, 2)) {
 			2 => { if (av[1].getFloat()) |f| self.min = f; continue :sw 1; },
 			1 => { if (av[0].getFloat()) |f| self.max = f; },
@@ -41,20 +44,18 @@ pub const Rind = extern struct {
 		}
 	}
 
-	fn anythingC(
-		self: *Rind,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn anythingC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
 		if (ac >= 1 and av[0].type == .float) {
-			self.min = av[0].w.float;
+			parentPtr(p).min = av[0].w.float;
 		}
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Rind {
-		return pd.wrap(*Rind, init(av[0..ac]), name);
+	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) !*Rind {
-		const self: *Rind = @ptrCast(try class.pd());
+	inline fn init(av: []const Atom) !*Pd {
+		const self: *Rind = try pd.gpa.create(Rind);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -85,16 +86,16 @@ pub const Rind = extern struct {
 			.min = min,
 			.max = max,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
-		class = try .init(Rind, name, &.{ .gimme }, &initC, null, .{});
+		class = try .init(Rind, name, &.{ .gimme }, initC, null, .{});
 		try rn.Impl(Rind).extend(io);
-		class.addBang(@ptrCast(&bangC));
-		class.addList(@ptrCast(&listC));
-		class.addAnything(@ptrCast(&anythingC));
-		class.addMethod(@ptrCast(&printC), .gen("print"), &.{});
+		class.addBang(bangC);
+		class.addList(listC);
+		class.addAnything(anythingC);
+		class.addMethod(&.{}, printC, .gen("print"));
 	}
 };
 

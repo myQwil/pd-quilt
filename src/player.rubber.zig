@@ -4,6 +4,7 @@ const ru = @import("rubber");
 const pr = @import("player.zig");
 const Inlet = @import("inlet.zig").Inlet;
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
@@ -103,52 +104,55 @@ fn FieldSetter(comptime name: []const u8) type { return struct {
 };}
 
 pub fn Impl(Self: type) type { return struct {
-	fn transientsC(self: *Self, s: *Symbol) callconv(.c) void {
+	const parentPtr = Self.parentPtr;
+
+	fn transientsC(p: *Pd, s: *Symbol) callconv(.c) void {
 		if (getEnum(ru.Options.Transients, s)) |value| {
-			const rubber: *Rubber = &self.rubber;
+			const rubber: *Rubber = &parentPtr(p).rubber;
 			rubber.state.setTransientsOption(value);
 		}
 	}
 
-	fn detectorC(self: *Self, s: *Symbol) callconv(.c) void {
+	fn detectorC(p: *Pd, s: *Symbol) callconv(.c) void {
 		if (getEnum(ru.Options.Detector, s)) |value| {
-			const rubber: *Rubber = &self.rubber;
+			const rubber: *Rubber = &parentPtr(p).rubber;
 			rubber.state.setDetectorOption(value);
 		}
 	}
 
-	fn formantC(self: *Self, s: *Symbol) callconv(.c) void {
+	fn formantC(p: *Pd, s: *Symbol) callconv(.c) void {
 		if (getEnum(ru.Options.Formant, s)) |value| {
-			const rubber: *Rubber = &self.rubber;
+			const rubber: *Rubber = &parentPtr(p).rubber;
 			rubber.state.setFormantOption(value);
 		}
 	}
 
-	fn phaseC(self: *Self, s: *Symbol) callconv(.c) void {
+	fn phaseC(p: *Pd, s: *Symbol) callconv(.c) void {
 		if (getEnum(ru.Options.Phase, s)) |value| {
-			const rubber: *Rubber = &self.rubber;
+			const rubber: *Rubber = &parentPtr(p).rubber;
 			rubber.state.setPhaseOption(value);
 		}
 	}
 
-	fn pitchC(self: *Self, s: *Symbol) callconv(.c) void {
+	fn pitchC(p: *Pd, s: *Symbol) callconv(.c) void {
 		if (getEnum(ru.Options.Pitch, s)) |value| {
-			const rubber: *Rubber = &self.rubber;
+			const rubber: *Rubber = &parentPtr(p).rubber;
 			rubber.state.setPitchOption(value);
 		}
 	}
 
-	fn fscaleC(self: *Self, f: Float) callconv(.c) void {
-		const rubber: *Rubber = &self.rubber;
+	fn fscaleC(p: *Pd, f: Float) callconv(.c) void {
+		const rubber: *Rubber = &parentPtr(p).rubber;
 		rubber.state.setFormantScale(f);
 	}
 
-	fn tempoC(self: *Self, f: Float) callconv(.c) void {
-		const rubber: *Rubber = &self.rubber;
+	fn tempoC(p: *Pd, f: Float) callconv(.c) void {
+		const rubber: *Rubber = &parentPtr(p).rubber;
 		rubber.tempo.* = f;
 	}
 
-	fn delayC(self: *Self) callconv(.c) void {
+	fn delayC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		const player: *pr.Player = &self.base.player;
 		const rubber: *Rubber = &self.rubber;
 		player.outlet.anything(s_delay, &.{
@@ -169,13 +173,13 @@ pub fn Impl(Self: type) type { return struct {
 		}
 
 		const class: *pd.Class = Self.class;
-		class.addMethod(@ptrCast(&transientsC), .gen("transients"), &.{ .symbol });
-		class.addMethod(@ptrCast(&detectorC), .gen("detector"), &.{ .symbol });
-		class.addMethod(@ptrCast(&formantC), .gen("formant"), &.{ .symbol });
-		class.addMethod(@ptrCast(&phaseC), .gen("phase"), &.{ .symbol });
-		class.addMethod(@ptrCast(&pitchC), .gen("pitch"), &.{ .symbol });
-		class.addMethod(@ptrCast(&fscaleC), .gen("fscale"), &.{ .float });
-		class.addMethod(@ptrCast(&tempoC), .gen("tempo"), &.{ .float });
-		class.addMethod(@ptrCast(&delayC), s_delay, &.{});
+		class.addMethod(&.{ .symbol }, transientsC, .gen("transients"));
+		class.addMethod(&.{ .symbol }, detectorC, .gen("detector"));
+		class.addMethod(&.{ .symbol }, formantC, .gen("formant"));
+		class.addMethod(&.{ .symbol }, phaseC, .gen("phase"));
+		class.addMethod(&.{ .symbol }, pitchC, .gen("pitch"));
+		class.addMethod(&.{ .float }, fscaleC, .gen("fscale"));
+		class.addMethod(&.{ .float }, tempoC, .gen("tempo"));
+		class.addMethod(&.{}, delayC, s_delay);
 	}
 };}

@@ -4,6 +4,7 @@
 const pd = @import("pd");
 const tb = @import("tab2.zig");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
@@ -17,6 +18,7 @@ const TabRead2 = extern struct {
 
 	const name = "tabread2~";
 	pub var class: *pd.Class = undefined;
+	pub const parentPtr = pd.parentPtr(TabRead2);
 
 	fn performC(w: [*]usize) callconv(.c) [*]usize {
 		const self: *TabRead2 = @ptrFromInt(w[1]);
@@ -51,7 +53,8 @@ const TabRead2 = extern struct {
 		return w + 6;
 	}
 
-	fn setC(self: *TabRead2, s: *Symbol) callconv(.c) void {
+	fn setC(p: *Pd, s: *Symbol) callconv(.c) void {
+		const self = parentPtr(p);
 		self.len = self.set(s) catch |e| {
 			pd.post.err(self, "%s: %s", .{ s.name, @errorName(e).ptr });
 			return;
@@ -61,8 +64,8 @@ const TabRead2 = extern struct {
 		errdefer self.tab2.vec = null;
 		self.tab2.arrayname = s;
 
-		const array: *pd.GArray = @ptrCast(pd.garray_class.find(s)
-			orelse return error.GArrayNotFound);
+		const array: *pd.GArray = if (pd.garray_class.find(s)) |ga| @ptrCast(ga)
+			else return error.GArrayNotFound;
 
 		const vec = try array.floatWords();
 		self.tab2.vec = vec.ptr;
@@ -70,16 +73,18 @@ const TabRead2 = extern struct {
 		return @truncate(vec.len);
 	}
 
-	fn dspC(self: *TabRead2, sp: [*]*pd.Signal) callconv(.c) void {
-		self.setC(self.tab2.arrayname);
-		pd.dsp.add(&performC, .{ self, sp[2].len, sp[2].vec, sp[1].vec, sp[0].vec });
+	fn dspC(p: *Pd, sp: [*]*pd.Signal) callconv(.c) void {
+		const self = parentPtr(p);
+		setC(p, self.tab2.arrayname);
+		pd.dsp.add(performC, .{ self, sp[2].len, sp[2].vec, sp[1].vec, sp[0].vec });
 	}
 
-	fn initC(_: *pd.Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*TabRead2 {
-		return pd.wrap(*TabRead2, init(av[0..ac]), name);
+	fn initC(_: *pd.Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) !*TabRead2 {
-		const self: *TabRead2 = @ptrCast(try class.pd());
+	inline fn init(av: []const Atom) !*Pd {
+		const self: *TabRead2 = try pd.gpa.create(TabRead2);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer self.obj.g.pd.deinit();
 
@@ -91,14 +96,14 @@ const TabRead2 = extern struct {
 			.obj = self.obj,
 			.tab2 = tab2,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
-		class = try .init(TabRead2, name, &.{ .gimme }, &initC, null, .{});
+		class = try .init(TabRead2, name, &.{ .gimme }, initC, null, .{});
 		tb.Impl(TabRead2).extend();
-		class.addMethod(@ptrCast(&dspC), .gen("dsp"), &.{ .cant });
-		class.addMethod(@ptrCast(&setC), .gen("set"), &.{ .symbol });
+		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));
+		class.addMethod(&.{ .symbol }, setC, .gen("set"));
 	}
 };
 

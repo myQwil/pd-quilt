@@ -2,6 +2,7 @@
 
 const pd = @import("pd");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
@@ -31,27 +32,28 @@ const Proxy = extern struct {
 	const name = "_paq_pxy";
 	var class: *pd.Class = undefined;
 
-	fn floatC(self: *Proxy, f: Float) callconv(.c) void {
+	fn floatC(p: *Pd, f: Float) callconv(.c) void {
+		const self: *Proxy = @fieldParentPtr("obj", p);
 		self.ptr[0] = .float(f);
 	}
-	fn symbolC(self: *Proxy, s: *Symbol) callconv(.c) void {
+	fn symbolC(p: *Pd, s: *Symbol) callconv(.c) void {
+		const self: *Proxy = @fieldParentPtr("obj", p);
 		self.ptr[0] = .symbol(s);
 	}
-	fn pointerC(self: *Proxy, p: *pd.GPointer) callconv(.c) void {
-		self.ptr[0] = .pointer(p);
+	fn pointerC(p: *Pd, gp: *pd.GPointer) callconv(.c) void {
+		const self: *Proxy = @fieldParentPtr("obj", p);
+		self.ptr[0] = .pointer(gp);
 	}
 
-	fn anythingC(
-		self: *Proxy,
-		s: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn anythingC(p: *Pd, s: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self: *Proxy = @fieldParentPtr("obj", p);
 		set(self.ptr[0..self.len], s, av[0..ac]);
 	}
 
 	fn init(vec: []Atom) !*Proxy {
-		const self: *Proxy = @ptrCast(try class.pd());
+		const self: *Proxy = try gpa.create(Proxy);
 		self.* = .{
-			.obj = self.obj,
+			.obj = .{ .class = class },
 			.ptr = vec.ptr,
 			.len = vec.len,
 		};
@@ -60,14 +62,12 @@ const Proxy = extern struct {
 
 	inline fn setup() !void {
 		dot = .gen(".");
-		class = try .init(Proxy, name, &.{}, null, null, .{
-			.bare = true,
-			.no_inlet = true,
-		});
-		class.addFloat(@ptrCast(&Proxy.floatC));
-		class.addSymbol(@ptrCast(&Proxy.symbolC));
-		class.addPointer(@ptrCast(&Proxy.pointerC));
-		class.addAnything(@ptrCast(&Proxy.anythingC));
+		const opts: pd.Class.Options = .{ .bare = true, .no_inlet = true };
+		class = try .init(Proxy, name, &.{}, null, null, opts);
+		class.addFloat(floatC);
+		class.addSymbol(symbolC);
+		class.addPointer(pointerC);
+		class.addAnything(anythingC);
 	}
 };
 
@@ -80,41 +80,42 @@ const Paq = extern struct {
 
 	const name = "paq";
 	var class: *pd.Class = undefined;
+	const parentPtr = pd.parentPtr(Paq);
+	const parentConstPtr = pd.parentConstPtr(Paq);
 
-	fn bangC(self: *const Paq) callconv(.c) void {
-		const vec = gpa.dupe(Atom, self.ptr[0..self.len]) catch
-			return pd.post.err(self, name ++ ": Out of memory", .{});
+	fn bangC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
+		const vec = gpa.dupe(Atom, self.ptr[0..self.len]) catch |e|
+			return pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
 		defer gpa.free(vec);
 		self.out.list(pd.s.list(), vec);
 	}
 
-	fn floatC(self: *Paq, f: Float) callconv(.c) void {
-		self.ptr[0] = .float(f);
-		self.bangC();
+	fn floatC(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).ptr[0] = .float(f);
+		bangC(p);
 	}
 
-	fn symbolC(self: *Paq, s: *Symbol) callconv(.c) void {
-		self.ptr[0] = .symbol(s);
-		self.bangC();
+	fn symbolC(p: *Pd, s: *Symbol) callconv(.c) void {
+		parentPtr(p).ptr[0] = .symbol(s);
+		bangC(p);
 	}
 
-	fn pointerC(self: *Paq, p: *pd.GPointer) callconv(.c) void {
-		self.ptr[0] = .pointer(p);
-		self.bangC();
+	fn pointerC(p: *Pd, gp: *pd.GPointer) callconv(.c) void {
+		parentPtr(p).ptr[0] = .pointer(gp);
+		bangC(p);
 	}
 
-	fn anythingC(
-		self: *Paq,
-		s: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn anythingC(p: *Pd, s: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		set(self.ptr[0..self.len], s, av[0..ac]);
-		self.bangC();
+		bangC(p);
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Paq {
-		return pd.wrap(*Paq, init(av[0..ac]), name);
+	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(argv: []const Atom) !*Paq {
+	inline fn init(argv: []const Atom) !*Pd {
 		const av: []const Atom = if (argv.len > 0)
 			argv
 		else &.{ .float(0), .float(0) };
@@ -122,7 +123,8 @@ const Paq = extern struct {
 		errdefer gpa.free(vec);
 		vec[0] = av[0];
 
-		const self: *Paq = @ptrCast(try class.pd());
+		const self: *Paq = try gpa.create(Paq);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -137,7 +139,7 @@ const Paq = extern struct {
 			const i = n + 1;
 			vec[i] = av[i];
 			ins[n] = try .init(vec[i..]);
-			_ = try obj.inlet(@ptrCast(ins[n]), null, null);
+			_ = try obj.inlet(&ins[n].obj, null, null);
 			n = i;
 		}
 		self.* = .{
@@ -147,10 +149,11 @@ const Paq = extern struct {
 			.out = try .init(obj, pd.s.list()),
 			.ins = ins.ptr,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
-	fn deinitC(self: *const Paq) callconv(.c) void {
+	fn deinitC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		const n = self.len - 1;
 		for (self.ins[0..n]) |pxy| {
 			pxy.obj.deinit();
@@ -160,12 +163,12 @@ const Paq = extern struct {
 	}
 
 	inline fn setup() !void {
-		class = try .init(Paq, name, &.{ .gimme }, &initC, &deinitC, .{});
-		class.addBang(@ptrCast(&bangC));
-		class.addFloat(@ptrCast(&floatC));
-		class.addSymbol(@ptrCast(&symbolC));
-		class.addPointer(@ptrCast(&pointerC));
-		class.addAnything(@ptrCast(&anythingC));
+		class = try .init(Paq, name, &.{ .gimme }, initC, deinitC, .{});
+		class.addBang(bangC);
+		class.addFloat(floatC);
+		class.addSymbol(symbolC);
+		class.addPointer(pointerC);
+		class.addAnything(anythingC);
 		try Proxy.setup();
 	}
 };

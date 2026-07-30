@@ -3,6 +3,7 @@
 const pd = @import("pd");
 const Inlet = @import("inlet.zig").Inlet;
 
+const Pd = pd.Pd;
 const Float = pd.Float;
 const Sample = pd.Sample;
 
@@ -19,9 +20,10 @@ const Pulse = extern struct {
 
 	const name = "pulse~";
 	var class: *pd.Class = undefined;
+	const parentPtr = pd.parentPtr(Pulse);
 
-	fn edgeC(self: *Pulse, f: Float) callconv(.c) void {
-		self.edge.* = f;
+	fn edgeC(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).edge.* = f;
 	}
 
 	fn performC(w: [*]usize) callconv(.c) [*]usize {
@@ -48,20 +50,22 @@ const Pulse = extern struct {
 		return w + 6;
 	}
 
-	fn dspC(self: *Pulse, sp: [*]*pd.Signal) callconv(.c) void {
+	fn dspC(p: *Pd, sp: [*]*pd.Signal) callconv(.c) void {
+		const self = parentPtr(p);
 		self.conv = 1.0 / sp[0].srate;
-		pd.dsp.add(&performC, .{ self, sp[2].len, sp[2].vec, sp[1].vec, sp[0].vec });
+		pd.dsp.add(performC, .{ self, sp[2].len, sp[2].vec, sp[1].vec, sp[0].vec });
 	}
 
-	fn ft1C(self: *Pulse, f: Float) callconv(.c) void {
-		self.phase = f;
+	fn ft1C(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).phase = f;
 	}
 
-	fn initC(_: *pd.Symbol, ac: c_uint, av: [*]const pd.Atom) callconv(.c) ?*Pulse {
-		return pd.wrap(*Pulse, init(av[0..ac]), name);
+	fn initC(_: *pd.Symbol, ac: c_uint, av: [*]const pd.Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(av: []const pd.Atom) !*Pulse {
-		const self: *Pulse = @ptrCast(try class.pd());
+	inline fn init(av: []const pd.Atom) !*Pd {
+		const self: *Pulse = try pd.gpa.create(Pulse);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -75,15 +79,15 @@ const Pulse = extern struct {
 			.edge = &inlet.un.floatsignalvalue,
 			.f = pd.floatArg(1, av) catch 0,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
-		class = try .init(Pulse, name, &.{ .gimme }, &initC, null, .{});
+		class = try .init(Pulse, name, &.{ .gimme }, initC, null, .{});
 		class.doMainSignalIn(@offsetOf(Pulse, "f"));
-		class.addMethod(@ptrCast(&dspC), .gen("dsp"), &.{ .cant });
-		class.addMethod(@ptrCast(&ft1C), .gen("ft1"), &.{ .float });
-		class.addMethod(@ptrCast(&edgeC), .gen("edge"), &.{ .float });
+		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));
+		class.addMethod(&.{ .float }, ft1C, .gen("ft1"));
+		class.addMethod(&.{ .float }, edgeC, .gen("edge"));
 	}
 };
 

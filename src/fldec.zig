@@ -3,6 +3,7 @@
 const pd = @import("pd");
 const UnFloat = @import("bitfloat.zig").UnFloat;
 
+const Pd = pd.Pd;
 const Float = pd.Float;
 
 const FlDec = extern struct {
@@ -14,32 +15,37 @@ const FlDec = extern struct {
 
 	const name = "fldec";
 	var class: *pd.Class = undefined;
+	const parentPtr = pd.parentPtr(FlDec);
+	const parentConstPtr = pd.parentConstPtr(FlDec);
 
-	fn printC(self: *const FlDec) callconv(.c) void {
+	fn printC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		pd.post.log(self, .normal, "%g", .{ self.f });
 	}
 
-	fn setC(self: *FlDec, f: Float) callconv(.c) void {
-		self.f = f;
+	fn setC(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).f = f;
 	}
 
-	fn bangC(self: *const FlDec) callconv(.c) void {
+	fn bangC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		const uf: UnFloat = .{ .f = self.f };
 		self.out_s.float(@floatFromInt(uf.b.sign));
 		self.out_e.float(@floatFromInt(uf.b.exponent));
 		self.out_m.float(@floatFromInt(uf.b.mantissa));
 	}
 
-	fn floatC(self: *FlDec, f: Float) callconv(.c) void {
-		self.f = f;
-		self.bangC();
+	fn floatC(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).f = f;
+		bangC(p);
 	}
 
-	fn initC(f: Float) callconv(.c) ?*FlDec {
-		return pd.wrap(*FlDec, init(f), name);
+	fn initC(f: Float) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(f), name);
 	}
-	inline fn init(f: Float) !*FlDec {
-		const self: *FlDec = @ptrCast(try class.pd());
+	inline fn init(f: Float) !*Pd {
+		const self: *FlDec = try pd.gpa.create(FlDec);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -51,15 +57,15 @@ const FlDec = extern struct {
 			.out_s = try .init(obj, pd.s.float()),
 			.f = f,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
-		class = try .init(FlDec, name, &.{ .deffloat }, &initC, null, .{});
-		class.addBang(@ptrCast(&bangC));
-		class.addFloat(@ptrCast(&floatC));
-		class.addMethod(@ptrCast(&printC), .gen("print"), &.{});
-		class.addMethod(@ptrCast(&setC), .gen("set"), &.{ .float });
+		class = try .init(FlDec, name, &.{ .deffloat }, initC, null, .{});
+		class.addBang(bangC);
+		class.addFloat(floatC);
+		class.addMethod(&.{}, printC, .gen("print"));
+		class.addMethod(&.{ .float }, setC, .gen("set"));
 		class.setHelpSymbol(.gen("flenc"));
 	}
 };

@@ -1,6 +1,7 @@
 const std = @import("std");
 const pd = @import("pd");
 
+const Pd = pd.Pd;
 const Float = pd.Float;
 
 var seed: u32 = undefined;
@@ -20,12 +21,14 @@ pub const Rng = extern struct {
 };
 
 pub fn Impl(Self: type) type { return struct {
-	fn stateC(self: *const Self) callconv(.c) void {
+	fn stateC(p: *const Pd) callconv(.c) void {
+		const self = Self.parentConstPtr(p);
 		const rng: *const Rng = &self.rng;
 		pd.post.log(self, .normal, "%u", .{ rng.state });
 	}
 
-	fn seedC(self: *Self, f: Float) callconv(.c) void {
+	fn seedC(p: *Pd, f: Float) callconv(.c) void {
+		const self = Self.parentPtr(p);
 		const rng: *Rng = &self.rng;
 		rng.state = @intFromFloat(f);
 	}
@@ -35,7 +38,7 @@ pub fn Impl(Self: type) type { return struct {
 		seed |= 1; // odd numbers only
 
 		const class: *pd.Class = Self.class;
-		class.addMethod(@ptrCast(&seedC), .gen("seed"), &.{ .float });
-		class.addMethod(@ptrCast(&stateC), .gen("state"), &.{});
+		class.addMethod(&.{ .float }, seedC, .gen("seed"));
+		class.addMethod(&.{}, stateC, .gen("state"));
 	}
 };}

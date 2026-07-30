@@ -6,8 +6,10 @@ const rx = @import("rad.zig");
 const bf = @import("bitfloat.zig");
 const cnv = pd.cnv;
 
+const Pd = pd.Pd;
 const uint = pd.uint;
 const Atom = pd.Atom;
+const GObj = pd.GObj;
 const Float = pd.Float;
 const GList = pd.GList;
 const Object = pd.Object;
@@ -170,6 +172,7 @@ const Radix = extern struct {
 
 	const name = "radix";
 	var class: *pd.Class = undefined;
+	const parentPtr = pd.parentPtr(Radix);
 
 	inline fn err(self: *Radix, e: anyerror) void {
 		pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
@@ -194,10 +197,11 @@ const Radix = extern struct {
 	}
 
 	fn getRectC(
-		self: *Radix, glist: *GList,
+		g: *GObj, glist: *GList,
 		xp1: *c_int, yp1: *c_int,
 		xp2: *c_int, yp2: *c_int,
 	) callconv(.c) void {
+		const self = parentPtr(&g.pd);
 		const rect = self.getRect(glist);
 		xp1.* = rect.p1[0];
 		yp1.* = rect.p1[1];
@@ -205,23 +209,23 @@ const Radix = extern struct {
 		yp2.* = rect.p2[1];
 	}
 
-	fn selectC(self: *Radix, glist: *GList, selected: c_int) callconv(.c) void {
-		const obj: *Object = &self.obj;
-		if (!glist.isVisible() or !obj.g.shouldVis(glist)) {
+	fn selectC(g: *GObj, glist: *GList, selected: c_int) callconv(.c) void {
+		if (!glist.isVisible() or !g.shouldVis(glist)) {
 			return;
 		}
 		const color = if (selected != 0)
 			pd.this().gui.selectcolor
 		else pd.this().gui.foregroundcolor;
 
+		const self = parentPtr(&g.pd);
 		self.tag_type.* = .text;
 		pd.vMess(null, "crs rk", .{ glist, "itemconfigure", &self.tag, "-fill", color });
 		self.tag_type.* = .border;
 		pd.vMess(null, "crs rk", .{ glist, "itemconfigure", &self.tag, "-fill", color });
 	}
 
-	fn deleteC(self: *Radix, glist: *GList) callconv(.c) void {
-		glist.deleteLinesFor(&self.obj);
+	fn deleteC(g: *GObj, glist: *GList) callconv(.c) void {
+		glist.deleteLinesFor(&parentPtr(&g.pd).obj);
 	}
 
 	fn drawBorder(
@@ -268,7 +272,8 @@ const Radix = extern struct {
 		glist.drawIoFor(&self.obj, firsttime, &self.tag, p1[0], p1[1], p2[0], p2[1]);
 	}
 
-	fn displaceC(self: *Radix, glist: *GList, dx: c_int, dy: c_int) callconv(.c) void {
+	fn displaceC(g: *GObj, glist: *GList, dx: c_int, dy: c_int) callconv(.c) void {
+		const self = parentPtr(&g.pd);
 		const obj: *Object = &self.obj;
 		const canvas = glist.getCanvas();
 		const dvec: IVec2 = .{ dx, dy };
@@ -295,11 +300,11 @@ const Radix = extern struct {
 		};
 	}
 
-	fn visC(self: *Radix, glist: *GList, visible: c_int) callconv(.c) void {
-		const obj: *Object = &self.obj;
-		if (!obj.g.shouldVis(glist)) {
+	fn visC(g: *GObj, glist: *GList, visible: c_int) callconv(.c) void {
+		if (!g.shouldVis(glist)) {
 			return;
 		}
+		const self = parentPtr(&g.pd);
 		const canvas = glist.getCanvas();
 		if (visible == 0) {
 			if (self.lbl != pd.s.empty()) {
@@ -311,7 +316,7 @@ const Radix = extern struct {
 			pd.vMess(null, "crs", .{ canvas, "delete", &self.tag });
 
 			self.tag_type.* = .border;
-			glist.eraseIoFor(obj, &self.tag);
+			glist.eraseIoFor(&self.obj, &self.tag);
 			pd.vMess(null, "crs", .{ canvas, "delete", &self.tag });
 			return;
 		}
@@ -337,7 +342,7 @@ const Radix = extern struct {
 				pos[0], pos[1],
 				&self.rad.buf,
 				@as(c_uint, pd.hostFontSize(fontsize, uz)),
-				if (glist.isSelected(&obj.g))
+				if (glist.isSelected(g))
 					pd.this().gui.selectcolor
 				else pd.this().gui.foregroundcolor,
 			});
@@ -375,7 +380,8 @@ const Radix = extern struct {
 		});
 	}
 
-	fn redrawC(self: *Radix, glist: *GList) callconv(.c) void {
+	fn redrawC(g: *GObj, glist: *GList) callconv(.c) void {
+		const self = parentPtr(&g.pd);
 		self.write();
 		self.tag_type.* = .text;
 		pd.vMess("pdtk_text_set", "cs s", .{
@@ -390,18 +396,20 @@ const Radix = extern struct {
 	fn sendItUp(self: *Radix) void {
 		const canvas = self.gl.getCanvas();
 		if (canvas.editor != null and self.obj.g.shouldVis(self.gl)) {
-			pd.queueGui(self, canvas, @ptrCast(&redrawC));
+			pd.queueGui(self, canvas, redrawC);
 		}
 	}
 
-	fn setC(self: *Radix, f: Float) callconv(.c) void {
+	fn setC(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		if (@as(bf.Uf, @bitCast(self.rad.value)) != @as(bf.Uf, @bitCast(f))) {
 			self.rad.value = f;
 			self.sendItUp();
 		}
 	}
 
-	fn bangC(self: *Radix) callconv(.c) void {
+	fn bangC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		if (self.obj.outlets) |outlet| {
 			outlet.float(self.rad.value);
 		} else if (self.sndx.thing) |thing| {
@@ -413,31 +421,33 @@ const Radix = extern struct {
 		}
 	}
 
-	fn floatC(self: *Radix, f: Float) callconv(.c) void {
-		self.setC(f);
-		self.bangC();
+	fn floatC(p: *Pd, f: Float) callconv(.c) void {
+		setC(p, f);
+		bangC(p);
 	}
 
 	fn checkRange(self: *Radix) void {
 		self.range.sort();
 		const f = self.range.sanitized(self.rad.value);
 		if (f != self.rad.value) {
-			self.setC(f);
+			setC(&self.obj.g.pd, f);
 		}
 	}
 
-	fn keyC(self: *Radix, _: *Symbol, f: Float) callconv(.c) void {
+	fn keyC(g: *GObj, _: *Symbol, f: Float) callconv(.c) void {
 		const char: u8 = @intFromFloat(f);
 		if (char == 0) {
+			const self = parentPtr(&g.pd);
 			self.b.grabbed = false;
 			self.drawBorder(self.gl, self.getRect(self.gl), false);
 		}
 	}
 
-	fn motionC(self: *Radix, dx: Float, dy: Float, released: Float) callconv(.c) void {
+	fn motionC(p: *Pd, dx: Float, dy: Float, released: Float) callconv(.c) void {
 		if (released != 0 or (dx == 0 and dy == 0)) {
 			return;
 		}
+		const self = parentPtr(p);
 		const e = self.gl.getCanvas().editor orelse return;
 		const bn2: Float = 1.0 / @as(Float, @floatFromInt(self.rad.base * self.rad.base));
 		const bn4: Float = bn2 * bn2;
@@ -467,35 +477,37 @@ const Radix = extern struct {
 		if (@as(bf.Uf, @bitCast(self.rad.value)) != @as(bf.Uf, @bitCast(nval))) {
 			self.rad.value = nval;
 			self.sendItUp();
-			self.bangC();
+			bangC(&self.obj.g.pd);
 		}
 	}
 
 	/// called when clicked on in run mode
 	fn clickC(
-		self: *Radix, gl: *GList,
+		g: *GObj, gl: *GList,
 		xpos: c_int, ypos: c_int,
 		shift: c_int, alt: c_int, _: c_int, doit: c_int,
 	) callconv(.c) c_int {
 		if (doit == 0) {
 			return 1;
 		}
+		const p: *Pd = &g.pd;
+		const self = parentPtr(p);
 		if (alt != 0) {
 			const zero: Float = self.range.sanitized(0);
 			if (self.rad.value != zero) {
 				self.alt = self.rad.value;
-				self.floatC(zero);
+				floatC(p, zero);
 			} else {
-				self.floatC(self.alt);
+				floatC(p, self.alt);
 			}
-			gl.grab(&self.obj.g, null, @ptrCast(&keyC), 0, 0);
+			gl.grab(&self.obj.g, null, keyC, 0, 0);
 		} else {
 			const pos: FVec2 = @floatFromInt(IVec2{ xpos, ypos });
 			// start in the middle of a step rather than at the beginning of one
 			self.grab = pos - self.step * FVec2{ 0.25, 0.25 };
 			self.b.shift = (shift != 0);
 			self.alt = self.rad.value;
-			gl.grab(&self.obj.g, @ptrCast(&motionC), @ptrCast(&keyC), xpos, ypos);
+			gl.grab(&self.obj.g, motionC, keyC, xpos, ypos);
 		}
 		self.b.grabbed = true;
 		self.drawBorder(gl, self.getRect(gl), false);
@@ -521,8 +533,9 @@ const Radix = extern struct {
 		};
 	}
 
-	fn saveC(self: *Radix, b: *pd.BinBuf) callconv(.c) void {
-		save(self, b) catch |e| self.err(e);
+	fn saveC(g: *GObj, b: *pd.BinBuf) callconv(.c) void {
+		const self = parentPtr(&g.pd);
+		self.save(b) catch |e| self.err(e);
 	}
 	inline fn save(self: *Radix, b: *pd.BinBuf) !void {
 		const rsl = try self.getRSL();
@@ -542,7 +555,8 @@ const Radix = extern struct {
 		});
 	}
 
-	fn propertiesC(self: *Radix, _: *GList) callconv(.c) void {
+	fn propertiesC(g: *GObj, _: *GList) callconv(.c) void {
+		const self = parentPtr(&g.pd);
 		properties(self) catch |e| self.err(e);
 	}
 	inline fn properties(self: *Radix) !void {
@@ -562,10 +576,8 @@ const Radix = extern struct {
 		});
 	}
 
-	fn paramC(
-		self: *Radix,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn paramC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		param(self, av[0..ac]) catch |e| self.err(e);
 	}
 	inline fn param(self: *Radix, av: []const Atom) !void {
@@ -573,10 +585,11 @@ const Radix = extern struct {
 			return error.WrongArgCount;
 		}
 		const obj: *Object = &self.obj;
+		const p: *Pd = &obj.g.pd;
 		const visible = self.gl.isVisible();
 		const rsl = try self.getRSL();
 
-		self.gl.setUndoState(&obj.g.pd, .gen("param"), &.{
+		self.gl.setUndoState(p, .gen("param"), &.{
 			.float(@floatFromInt(self.rad.base)),
 			.float(@floatFromInt(self.rad.prec)),
 			.float(self.step[0]),
@@ -617,19 +630,19 @@ const Radix = extern struct {
 		if (rcv_old != pd.s.empty()) {
 			if (rcv_new != pd.s.empty()) {
 				if (rcv_old != rcv_new) { // symbol to symbol
-					obj.g.pd.unbind(self.gl.realizeDollar(rcv_old));
-					obj.g.pd.bind(self.gl.realizeDollar(rcv_new));
+					p.unbind(self.gl.realizeDollar(rcv_old));
+					p.bind(self.gl.realizeDollar(rcv_new));
 				}
 			} else { // symbol to inlet
-				obj.g.pd.unbind(self.gl.realizeDollar(rcv_old));
-				_ = try obj.inlet(&obj.g.pd, null, null);
+				p.unbind(self.gl.realizeDollar(rcv_old));
+				_ = try obj.inlet(p, null, null);
 			}
 		} else if (rcv_new != pd.s.empty()) { // inlet to symbol
 			if (obj.inlets) |inlet| {
 				deleteLinesForIo(self.gl, obj, inlet, null);
 				inlet.deinit();
 			}
-			obj.g.pd.bind(self.gl.realizeDollar(rcv_new));
+			p.bind(self.gl.realizeDollar(rcv_new));
 		}
 		self.rcv = rcv_new;
 
@@ -666,17 +679,15 @@ const Radix = extern struct {
 
 		if (visible) {
 			if (obj.g.shouldVis(self.gl)) {
-				self.visC(self.gl, 1);
+				visC(&self.obj.g, self.gl, 1);
 			}
 			self.gl.fixLinesFor(obj);
 		}
 		self.gl.setDirty(true);
 	}
 
-	fn stepC(
-		self: *Radix,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn stepC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		const a = av[0..ac];
 		if (a.len > 1) {
 			self.step = .{
@@ -688,10 +699,8 @@ const Radix = extern struct {
 		} else |_| {}
 	}
 
-	fn readC(
-		self: *Radix,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn readC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		self.read(self.rad.base, av[0..ac]) catch |e| self.err(e);
 	}
 	fn read(self: *Radix, base: u16, av: []const Atom) !void {
@@ -702,13 +711,11 @@ const Radix = extern struct {
 		const cp: [*:0]const u8 = if (av[0].type == .float)
 			try std.fmt.bufPrintSentinel(&res, "{}", .{ av[0].w.float }, 0)
 		else av[0].w.symbol.name;
-		self.floatC(try rx.parseFloat(cp, base));
+		floatC(&self.obj.g.pd, try rx.parseFloat(cp, base));
 	}
 
-	fn anythingC(
-		self: *Radix,
-		s: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn anythingC(p: *Pd, s: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		if (s.name[0] == 'b') {
 			self.read(rx.getBase(std.mem.sliceTo(s.name, 0)[1..]), av[0..ac])
 				catch |e| self.err(e);
@@ -717,10 +724,8 @@ const Radix = extern struct {
 		}
 	}
 
-	fn baseC(
-		self: *Radix,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn baseC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		const a = av[0..ac];
 		if (pd.floatArg(0, a)) |f| { // set
 			self.rad.base = @intFromFloat(@max(0, f));
@@ -734,10 +739,8 @@ const Radix = extern struct {
 		}
 	}
 
-	fn precC(
-		self: *Radix,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn precC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		if (pd.floatArg(0, av[0..ac])) |f| { // set
 			self.rad.setPrecision(f);
 			self.sendItUp();
@@ -746,10 +749,8 @@ const Radix = extern struct {
 		}
 	}
 
-	fn minC(
-		self: *Radix,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn minC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		if (ac > 0) {
 			self.range.lo = .init(av[0].getFloat());
 			self.checkRange();
@@ -760,10 +761,8 @@ const Radix = extern struct {
 		}
 	}
 
-	fn maxC(
-		self: *Radix,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn maxC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		if (ac > 0) {
 			self.range.hi = .init(av[0].getFloat());
 			self.checkRange();
@@ -774,10 +773,8 @@ const Radix = extern struct {
 		}
 	}
 
-	fn rangeC(
-		self: *Radix,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn rangeC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		const a = av[0..ac];
 		if (a.len > 0) {
 			self.range.lo = .init(a[0].getFloat());
@@ -792,14 +789,16 @@ const Radix = extern struct {
 		}
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Radix {
-		return pd.wrap(*Radix, init(av[0..ac]), name);
+	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) !*Radix {
+	inline fn init(av: []const Atom) !*Pd {
 		const gl = GList.getCurrent() orelse return error.NoCurrentGList;
-		const self: *Radix = @ptrCast(try class.pd());
+		const self: *Radix = try pd.gpa.create(Radix);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		const p: *Pd = &obj.g.pd;
+		errdefer p.deinit();
 
 		var tag: [@sizeOf(usize) * 2 + 2 :0]u8 = undefined;
 		var w: Writer = .fixed(&tag);
@@ -848,9 +847,9 @@ const Radix = extern struct {
 		rad.value = range.sanitized(rad.value);
 
 		if (rsl[0] == pd.s.empty()) {
-			_ = try obj.inlet(&obj.g.pd, null, null);
+			_ = try obj.inlet(p, null, null);
 		} else {
-			obj.g.pd.bind(gl.realizeDollar(rsl[0]));
+			p.bind(gl.realizeDollar(rsl[0]));
 		}
 		if (rsl[1] == pd.s.empty()) {
 			_ = try obj.outlet(pd.s.float());
@@ -871,45 +870,44 @@ const Radix = extern struct {
 			.tag = tag,
 			.tag_type = @ptrCast(&self.tag[w.end - 1]),
 		};
-		return self;
+		return p;
 	}
 
-	fn freeC(self: *Radix) callconv(.c) void {
+	fn freeC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		if (self.rcv != pd.s.empty()) {
-			self.obj.g.pd.unbind(self.gl.realizeDollar(self.rcv));
+			p.unbind(self.gl.realizeDollar(self.rcv));
 		}
 		pd.deleteStubForKey(self);
 		pd.unqueueGui(self);
 	}
 
 	inline fn setup() !void {
-		class = try .init(Radix, name, &.{ .gimme }, &initC, &freeC, .{
-			.no_inlet = true,
-			.patchable = true,
-		});
-		class.addBang(@ptrCast(&bangC));
-		class.addFloat(@ptrCast(&floatC));
-		class.addAnything(@ptrCast(&anythingC));
-		class.addMethod(@ptrCast(&setC), .gen("set"), &.{ .float });
-		class.addMethod(@ptrCast(&minC), .gen("min"), &.{ .gimme });
-		class.addMethod(@ptrCast(&maxC), .gen("max"), &.{ .gimme });
-		class.addMethod(@ptrCast(&readC), .gen("read"), &.{ .gimme });
-		class.addMethod(@ptrCast(&baseC), .gen("base"), &.{ .gimme });
-		class.addMethod(@ptrCast(&precC), .gen("prec"), &.{ .gimme });
-		class.addMethod(@ptrCast(&stepC), .gen("step"), &.{ .gimme });
-		class.addMethod(@ptrCast(&rangeC), .gen("range"), &.{ .gimme });
-		class.addMethod(@ptrCast(&paramC), .gen("param"), &.{ .gimme });
+		const opts: pd.Class.Options = .{ .no_inlet = true, .patchable = true };
+		class = try .init(Radix, name, &.{ .gimme }, initC, freeC, opts);
+		class.addBang(bangC);
+		class.addFloat(floatC);
+		class.addAnything(anythingC);
+		class.addMethod(&.{ .float }, setC, .gen("set"));
+		class.addMethod(&.{ .gimme }, minC, .gen("min"));
+		class.addMethod(&.{ .gimme }, maxC, .gen("max"));
+		class.addMethod(&.{ .gimme }, readC, .gen("read"));
+		class.addMethod(&.{ .gimme }, baseC, .gen("base"));
+		class.addMethod(&.{ .gimme }, precC, .gen("prec"));
+		class.addMethod(&.{ .gimme }, stepC, .gen("step"));
+		class.addMethod(&.{ .gimme }, rangeC, .gen("range"));
+		class.addMethod(&.{ .gimme }, paramC, .gen("param"));
 
 		class.setWidget(&.{
-			.getrect = @ptrCast(&getRectC),
-			.displace = @ptrCast(&displaceC),
-			.select = @ptrCast(&selectC),
-			.delete = @ptrCast(&deleteC),
-			.vis = @ptrCast(&visC),
-			.click = @ptrCast(&clickC),
+			.getrect = getRectC,
+			.displace = displaceC,
+			.select = selectC,
+			.delete = deleteC,
+			.vis = visC,
+			.click = clickC,
 		});
-		class.setSaveFn(@ptrCast(&saveC));
-		class.setPropertiesFn(@ptrCast(&propertiesC));
+		class.setSaveFn(saveC);
+		class.setPropertiesFn(propertiesC);
 		pd.vMess(null, "r", .{ @embedFile("tcl/dialog_radix.tcl") });
 	}
 };

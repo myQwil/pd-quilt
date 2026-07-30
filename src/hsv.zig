@@ -2,6 +2,7 @@
 
 const pd = @import("pd");
 
+const Pd = pd.Pd;
 const Float = pd.Float;
 
 const Rgb = struct {
@@ -19,8 +20,11 @@ const Hsv = extern struct {
 
 	const name = "hsv";
 	var class: *pd.Class = undefined;
+	const parentPtr = pd.parentPtr(Hsv);
+	const parentConstPtr = pd.parentConstPtr(Hsv);
 
-	fn bangC(self: *const Hsv) callconv(.c) void {
+	fn bangC(pp: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(pp);
 		const s = self.s;
 		const v = self.v;
 		const color: Rgb = if (s <= 0)
@@ -49,16 +53,17 @@ const Hsv = extern struct {
 		self.out.float(@floatFromInt(R + G + B));
 	}
 
-	fn floatC(self: *Hsv, f: Float) callconv(.c) void {
-		self.h = f;
-		self.bangC();
+	fn floatC(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).h = f;
+		bangC(p);
 	}
 
-	fn initC(h: Float, s: Float, v: Float) callconv(.c) ?*Hsv {
-		return pd.wrap(*Hsv, init(h, s, v), name);
+	fn initC(h: Float, s: Float, v: Float) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(h, s, v), name);
 	}
-	inline fn init(h: Float, s: Float, v: Float) !*Hsv {
-		const self: *Hsv = @ptrCast(try class.pd());
+	inline fn init(h: Float, s: Float, v: Float) !*Pd {
+		const self: *Hsv = try pd.gpa.create(Hsv);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -71,14 +76,14 @@ const Hsv = extern struct {
 			.s = s,
 			.v = v,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
-		class = try .init(Hsv, name,
-			&.{ .deffloat, .deffloat, .deffloat }, &initC, null, .{});
-		class.addBang(@ptrCast(&bangC));
-		class.addFloat(@ptrCast(&floatC));
+		const args: [3]pd.Atom.Type = @splat(.deffloat);
+		class = try .init(Hsv, name, &args, &initC, null, .{});
+		class.addBang(&bangC);
+		class.addFloat(&floatC);
 	}
 };
 

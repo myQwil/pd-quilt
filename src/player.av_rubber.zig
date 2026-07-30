@@ -5,6 +5,7 @@ const av = @import("player.av.zig");
 const ra = @import("player.rabbit.zig");
 const ru = @import("player.rubber.zig");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
@@ -27,6 +28,8 @@ pub fn Impl(Root: type) type { return extern struct {
 	const Player = pr.Impl(Self);
 	const Rabbit = ra.Impl(Self);
 	const Rubber = ru.Impl(Self);
+	pub const parentPtr = pd.parentPtr(Self);
+	pub const parentConstPtr = pd.parentConstPtr(Self);
 
 	pub inline fn err(self: *const Self, e: anyerror) void {
 		pd.post.err(self, Root.name ++ ": %s", .{ @errorName(e).ptr });
@@ -158,19 +161,21 @@ pub fn Impl(Root: type) type { return extern struct {
 		}
 	}
 
-	fn dspC(self: *Self, sp: [*]*pd.Signal) callconv(.c) void {
+	fn dspC(p: *Pd, sp: [*]*pd.Signal) callconv(.c) void {
+		const self = parentPtr(p);
 		const base: *Base = &self.base;
 		for (base.outs[0..base.nch], sp[2..][0..base.nch]) |*o, s| {
 			o.* = s.vec;
 		}
-		pd.dsp.add(&performC, .{ self, sp[1].len, sp[1].vec, sp[0].vec });
+		pd.dsp.add(performC, .{ self, sp[1].len, sp[1].vec, sp[0].vec });
 	}
 
-	fn initC(_: *pd.Symbol, ac: c_uint, args: [*]const Atom) callconv(.c) ?*Self {
-		return pd.wrap(*Self, init(args[0..ac]), Root.name);
+	fn initC(_: *pd.Symbol, ac: c_uint, args: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(args[0..ac]), Root.name);
 	}
-	inline fn init(args: []const Atom) !*Self {
-		const self: *Self = @ptrCast(try class.pd());
+	inline fn init(args: []const Atom) !*Pd {
+		const self: *Self = try pd.gpa.create(Self);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -204,10 +209,11 @@ pub fn Impl(Root: type) type { return extern struct {
 			.rubber = rubber,
 			.planar = pslice.ptr,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
-	fn deinitC(self: *Self) callconv(.c) void {
+	fn deinitC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		const nch = self.base.nch;
 		for (0..nch) |ch| {
 			gpa.free(@as([]Sample, self.planar[ch][0..ra.frames]));
@@ -224,12 +230,12 @@ pub fn Impl(Root: type) type { return extern struct {
 	}
 
 	pub inline fn setup() !void {
-		class = try .init(Self, Root.name, &.{ .gimme }, &initC, &deinitC, .{});
+		class = try .init(Self, Root.name, &.{ .gimme }, initC, deinitC, .{});
 		try BaseImpl.extend();
 		try Rubber.extend(gpa);
 		Player.extend();
 		Rabbit.extend();
-		class.addMethod(@ptrCast(&dspC), .gen("dsp"), &.{ .cant });
-		class.setFreeFn(&classFreeC);
+		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));
+		class.setFreeFn(classFreeC);
 	}
 };}

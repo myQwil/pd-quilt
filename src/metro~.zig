@@ -7,6 +7,7 @@ const tb = @import("tabfudge.zig");
 const unitbit32 = tb.unitbit32;
 const hioffset = tb.hioffset;
 
+const Pd = pd.Pd;
 const Float = pd.Float;
 const Sample = pd.Sample;
 
@@ -20,6 +21,7 @@ const MetroSignal = extern struct {
 
 	const name = "metro~";
 	var class: *pd.Class = undefined;
+	const parentPtr = pd.parentPtr(MetroSignal);
 
 	fn performC(w: [*]usize) callconv(.c) [*]usize {
 		const self: *MetroSignal = @ptrFromInt(w[1]);
@@ -52,20 +54,22 @@ const MetroSignal = extern struct {
 		return w + 4;
 	}
 
-	fn dspC(self: *MetroSignal, sp: [*]*pd.Signal) callconv(.c) void {
+	fn dspC(p: *Pd, sp: [*]*pd.Signal) callconv(.c) void {
+		const self = parentPtr(p);
 		self.conv = -1.0 / sp[0].srate;
-		pd.dsp.add(&performC, .{ self, sp[0].len, sp[0].vec });
+		pd.dsp.add(performC, .{ self, sp[0].len, sp[0].vec });
 	}
 
-	fn ft1C(self: *MetroSignal, f: Float) callconv(.c) void {
-		self.phase = f;
+	fn ft1C(p: *Pd, f: Float) callconv(.c) void {
+		parentPtr(p).phase = f;
 	}
 
-	fn initC(f: Float) callconv(.c) ?*MetroSignal {
-		return pd.wrap(*MetroSignal, init(f), name);
+	fn initC(f: Float) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(f), name);
 	}
-	inline fn init(f: Float) !*MetroSignal {
-		const self: *MetroSignal = @ptrCast(try class.pd());
+	inline fn init(f: Float) !*Pd {
+		const self: *MetroSignal = try pd.gpa.create(MetroSignal);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -75,14 +79,14 @@ const MetroSignal = extern struct {
 			.out = try .init(obj, pd.s.bang()),
 			.f = f,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
-		class = try .init(MetroSignal, name, &.{ .deffloat }, &initC, null, .{});
+		class = try .init(MetroSignal, name, &.{ .deffloat }, initC, null, .{});
 		class.doMainSignalIn(@offsetOf(MetroSignal, "f"));
-		class.addMethod(@ptrCast(&dspC), .gen("dsp"), &.{ .cant });
-		class.addMethod(@ptrCast(&ft1C), .gen("ft1"), &.{ .float });
+		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));
+		class.addMethod(&.{ .float }, ft1C, .gen("ft1"));
 	}
 };
 

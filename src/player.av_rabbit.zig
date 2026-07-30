@@ -4,6 +4,7 @@ const pr = @import("player.zig");
 const av = @import("player.av.zig");
 const ra = @import("player.rabbit.zig");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
@@ -17,6 +18,8 @@ pub fn Impl(Root: type) type { return extern struct {
 	pub var class: *pd.Class = undefined;
 	pub const gpa = pd.gpa;
 	pub const io = std.Io.Threaded.global_single_threaded.io();
+	pub const parentPtr = pd.parentPtr(Self);
+	pub const parentConstPtr = pd.parentConstPtr(Self);
 
 	// Implementations
 	pub const Base = av.Base(ra.frames);
@@ -127,7 +130,8 @@ pub fn Impl(Root: type) type { return extern struct {
 				data.input_frames -= data.input_frames_used;
 				if (data.input_frames <= 0) {
 					data.data_in = in;
-					data.input_frames = try b.swr.convert(@ptrCast(&in), ra.frames, null, 0);
+					data.input_frames = try b.swr.convert(
+						@ptrCast(&in), ra.frames, null, 0);
 				} else {
 					data.data_in += data.input_frames_used * b.nch;
 				}
@@ -142,19 +146,21 @@ pub fn Impl(Root: type) type { return extern struct {
 		}
 	}
 
-	fn dspC(self: *Self, sp: [*]*pd.Signal) callconv(.c) void {
+	fn dspC(p: *Pd, sp: [*]*pd.Signal) callconv(.c) void {
+		const self = parentPtr(p);
 		const base: *Base = &self.base;
 		for (base.outs[0..base.nch], sp[1..][0..base.nch]) |*o, s| {
 			o.* = s.vec;
 		}
-		pd.dsp.add(&performC, .{ self, sp[0].len, sp[0].vec });
+		pd.dsp.add(performC, .{ self, sp[0].len, sp[0].vec });
 	}
 
-	fn initC(_: *pd.Symbol, ac: c_uint, args: [*]const Atom) callconv(.c) ?*Self {
-		return pd.wrap(*Self, init(args[0..ac]), Root.name);
+	fn initC(_: *pd.Symbol, ac: c_uint, args: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(args[0..ac]), Root.name);
 	}
-	inline fn init(args: []const Atom) !*Self {
-		const self: *Self = @ptrCast(try class.pd());
+	inline fn init(args: []const Atom) !*Pd {
+		const self: *Self = try pd.gpa.create(Self);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -168,10 +174,11 @@ pub fn Impl(Root: type) type { return extern struct {
 			.base = base,
 			.rabbit = rabbit,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
-	fn deinitC(self: *Self) callconv(.c) void {
+	fn deinitC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		self.rabbit.deinit();
 		self.base.deinit(gpa);
 	}
@@ -181,11 +188,11 @@ pub fn Impl(Root: type) type { return extern struct {
 	}
 
 	pub inline fn setup() !void {
-		class = try .init(Self, Root.name, &.{ .gimme }, &initC, &deinitC, .{});
+		class = try .init(Self, Root.name, &.{ .gimme }, initC, deinitC, .{});
 		try BaseImpl.extend();
 		Player.extend();
 		Rabbit.extend();
-		class.addMethod(@ptrCast(&dspC), .gen("dsp"), &.{ .cant });
-		class.setFreeFn(&classFreeC);
+		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));
+		class.setFreeFn(classFreeC);
 	}
 };}

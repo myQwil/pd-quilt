@@ -4,6 +4,7 @@ const pd = @import("pd");
 const tx = @import("trax.zig");
 const std = @import("std");
 
+const Pd = pd.Pd;
 const Meta = tx.Meta;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
@@ -20,26 +21,24 @@ const PList = extern struct {
 
 	const name = "plist";
 	var class: *pd.Class = undefined;
+	pub const parentPtr = pd.parentPtr(PList);
 
 	inline fn err(self: *const PList, e: anyerror) void {
 		pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
-	fn readC(
-		self: *PList,
-		_: *Symbol, ac: c_uint, av: [*]const pd.Atom,
-	) callconv(.c) void {
+	fn readC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const pd.Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		self.plist.replaceWith(gpa, io, av[0..ac]) catch |e| self.err(e);
 	}
 
-	fn appendC(
-		self: *PList,
-		_: *Symbol, ac: c_uint, av: [*]const pd.Atom,
-	) callconv(.c) void {
+	fn appendC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const pd.Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		self.plist.append(gpa, io, av[0..ac]) catch |e| self.err(e);
 	}
 
-	fn bangC(self: *PList) callconv(.c) void {
+	fn bangC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		for (0..self.plist.len) |i| {
 			self.out_idx.float(@floatFromInt(i));
 			self.out_val.symbol(self.plist.ptr[i]);
@@ -54,13 +53,15 @@ const PList = extern struct {
 		return @bitCast(i);
 	}
 
-	fn floatC(self: *PList, f: Float) callconv(.c) void {
+	fn floatC(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		const i = indexFromFloat(f, self.plist.len) orelse return;
 		self.out_idx.float(@floatFromInt(i));
 		self.out_val.symbol(self.plist.ptr[i]);
 	}
 
-	fn getC(self: *PList, f: Float, s: *Symbol) callconv(.c) void {
+	fn getC(p: *Pd, f: Float, s: *Symbol) callconv(.c) void {
+		const self = parentPtr(p);
 		const i = indexFromFloat(f, self.plist.len) orelse return;
 		var hm = (Meta.fromPath(gpa, io, self.plist.ptr[i].name)
 			catch |e| return self.err(e)) orelse return;
@@ -72,7 +73,8 @@ const PList = extern struct {
 		}
 	}
 
-	fn dumpC(self: *PList, f: Float) callconv(.c) void {
+	fn dumpC(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		const i = indexFromFloat(f, self.plist.len) orelse return;
 		var hm = (Meta.fromPath(gpa, io, self.plist.ptr[i].name)
 			catch |e| return self.err(e)) orelse return;
@@ -85,18 +87,17 @@ const PList = extern struct {
 		}
 	}
 
-	fn langsC(
-		self: *PList,
-		_: *Symbol, ac: c_uint, args: [*]const pd.Atom,
-	) callconv(.c) void {
+	fn langsC(p: *Pd, _: *Symbol, ac: c_uint, args: [*]const pd.Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		self.langs.replaceWith(gpa, args[0..ac]) catch |e| self.err(e);
 	}
 
-	fn initC() callconv(.c) ?*PList {
-		return pd.wrap(*PList, init(), name);
+	fn initC() callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(), name);
 	}
-	inline fn init() !*PList {
-		const self: *PList = @ptrCast(try class.pd());
+	inline fn init() !*Pd {
+		const self: *PList = try pd.gpa.create(PList);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -105,23 +106,24 @@ const PList = extern struct {
 			.out_val = try .init(obj, pd.s.symbol()),
 			.out_idx = try .init(obj, pd.s.float()),
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
-	fn deinitC(self: *PList) callconv(.c) void {
+	fn deinitC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		self.plist.deinit(gpa);
 		self.langs.deinit(gpa);
 	}
 
 	inline fn setup() !void {
-		class = try .init(PList, name, &.{}, &initC, &deinitC, .{});
-		class.addBang(@ptrCast(&bangC));
-		class.addFloat(@ptrCast(&floatC));
-		class.addMethod(@ptrCast(&dumpC), .gen("dump"), &.{ .float });
-		class.addMethod(@ptrCast(&appendC), .gen("append"), &.{ .gimme });
-		class.addMethod(@ptrCast(&langsC), .gen("langs"), &.{ .gimme });
-		class.addMethod(@ptrCast(&readC), .gen("read"), &.{ .gimme });
-		class.addMethod(@ptrCast(&getC), .gen("get"), &.{ .float, .symbol });
+		class = try .init(PList, name, &.{}, initC, deinitC, .{});
+		class.addBang(bangC);
+		class.addFloat(floatC);
+		class.addMethod(&.{ .float }, dumpC, .gen("dump"));
+		class.addMethod(&.{ .gimme }, appendC, .gen("append"));
+		class.addMethod(&.{ .gimme }, langsC, .gen("langs"));
+		class.addMethod(&.{ .gimme }, readC, .gen("read"));
+		class.addMethod(&.{ .float, .symbol }, getC, .gen("get"));
 	}
 };
 

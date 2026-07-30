@@ -3,6 +3,7 @@ const pd = @import("pd");
 const wr = @import("write.zig");
 const tx = @import("trax.zig");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
@@ -131,6 +132,8 @@ pub fn Impl(Self: type) type { return struct {
 	const err: fn(*const Self, anyerror) callconv(.@"inline") void = Self.err;
 	const gpa = Self.gpa;
 	const io = Self.io;
+	const parentPtr = Self.parentPtr;
+	const parentConstPtr = Self.parentConstPtr;
 
 	const Base = Self.Base;
 	const GetMetaFn = fn(*const Base, *const Meta, *Symbol) ?*const Arena;
@@ -157,9 +160,10 @@ pub fn Impl(Self: type) type { return struct {
 	}
 
 	fn printC(
-		self: *const Self,
+		p: *const Pd,
 		_: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
+		const self = parentConstPtr(p);
 		var buffer: [pd.max_string:0]u8 = undefined;
 		var writer: Writer = .fixed(&buffer);
 		print(self, &writer, av[0..ac]) catch wr.ellipsis(&writer);
@@ -242,7 +246,8 @@ pub fn Impl(Self: type) type { return struct {
 		}
 	}
 
-	fn getC(self: *const Self, s: *Symbol) callconv(.c) void {
+	fn getC(p: *const Pd, s: *Symbol) callconv(.c) void {
+		const self = parentConstPtr(p);
 		get(self, s) catch |e| err(self, e);
 	}
 	fn get(self: *const Self, s: *Symbol) !void {
@@ -259,13 +264,15 @@ pub fn Impl(Self: type) type { return struct {
 	}
 
 	fn anythingC(
-		self: *const Self,
+		p: *const Pd,
 		s: *Symbol, _: c_uint, _: [*]const Atom,
 	) callconv(.c) void {
+		const self = parentConstPtr(p);
 		get(self, s) catch |e| err(self, e);
 	}
 
-	fn seekC(self: *Self, f: Float) callconv(.c) void {
+	fn seekC(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		seek(self, f) catch |e| err(self, e);
 	}
 	inline fn seek(self: *Self, msec: Float) !void {
@@ -277,9 +284,10 @@ pub fn Impl(Self: type) type { return struct {
 	}
 
 	fn openC(
-		self: *Self,
+		p: *Pd,
 		_: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
+		const self = parentPtr(p);
 		const base: *Base = &self.base;
 		const player: *Player = &base.player;
 		const result: bool = blk: { if (open(base, av[0..ac])) {
@@ -302,9 +310,10 @@ pub fn Impl(Self: type) type { return struct {
 	}
 
 	fn listC(
-		self: *Self,
+		p: *Pd,
 		_: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
+		const self = parentPtr(p);
 		const player: *Player = &self.base.player;
 		player.play = list(self, av[0..ac]) catch |e| blk: {
 			err(self, e);
@@ -334,21 +343,22 @@ pub fn Impl(Self: type) type { return struct {
 		return result;
 	}
 
-	fn stopC(self: *Self) callconv(.c) void {
-		listC(self, pd.s.empty(), 1, &.{ .float(0) });
+	fn stopC(p: *Pd) callconv(.c) void {
+		listC(p, pd.s.empty(), 1, &.{ .float(0) });
 	}
 
 	/// toggle the play/pause state, or set to arg if one is given
-	fn playC(
-		self: *Self,
+	fn playC(p: *Pd,
 		_: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
+		const self = parentPtr(p);
 		const player: *Player = &self.base.player;
 		player.setPlay(av[0..ac]) catch |e| err(self, e);
 	}
 
 	/// toggle the play/pause state
-	fn bangC(self: *Self) callconv(.c) void {
+	fn bangC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		const player: *Player = &self.base.player;
 		player.setPlay(&.{}) catch |e| err(self, e);
 	}
@@ -358,14 +368,14 @@ pub fn Impl(Self: type) type { return struct {
 		s_play = .gen("play");
 
 		const class: *pd.Class = Self.class;
-		class.addBang(@ptrCast(&bangC));
-		class.addList(@ptrCast(&listC));
-		class.addAnything(@ptrCast(&anythingC));
-		class.addMethod(@ptrCast(&stopC), .gen("stop"), &.{});
-		class.addMethod(@ptrCast(&seekC), .gen("seek"), &.{ .float });
-		class.addMethod(@ptrCast(&getC), .gen("get"), &.{ .symbol });
-		class.addMethod(@ptrCast(&printC), .gen("print"), &.{ .gimme });
-		class.addMethod(@ptrCast(&openC), s_open, &.{ .gimme });
-		class.addMethod(@ptrCast(&playC), s_play, &.{ .gimme });
+		class.addBang(bangC);
+		class.addList(listC);
+		class.addAnything(anythingC);
+		class.addMethod(&.{}, stopC, .gen("stop"));
+		class.addMethod(&.{ .float }, seekC, .gen("seek"));
+		class.addMethod(&.{ .symbol }, getC, .gen("get"));
+		class.addMethod(&.{ .gimme }, printC, .gen("print"));
+		class.addMethod(&.{ .gimme }, openC, s_open);
+		class.addMethod(&.{ .gimme }, playC, s_play);
 	}
 };}

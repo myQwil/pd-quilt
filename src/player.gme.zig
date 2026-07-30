@@ -8,6 +8,7 @@ const arc = @import("player.arc.zig");
 const pr = @import("player.zig");
 const tx = @import("trax.zig");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
@@ -243,12 +244,13 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 			= Self.perform;
 		const err: fn(*const Self, anyerror) callconv(.@"inline") void = Self.err;
 		const gpa = Self.gpa;
+		const parentPtr = Self.parentPtr;
 
 		fn muteC(
-			self: *Self,
+			p: *Pd,
 			_: *Symbol, ac: c_uint, av: [*]const Atom,
 		) callconv(.c) void {
-			const gme: *Gme = &self.base;
+			const gme: *Gme = &parentPtr(p).base;
 			gme.mute(av[0..ac]);
 			if (gme.player.open) {
 				gme.emu.muteVoices(gme.mask);
@@ -256,10 +258,10 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		}
 
 		fn soloC(
-			self: *Self,
+			p: *Pd,
 			_: *Symbol, ac: c_uint, av: [*]const Atom,
 		) callconv(.c) void {
-			const gme: *Gme = &self.base;
+			const gme: *Gme = &parentPtr(p).base;
 			const prev = gme.mask;
 			gme.mask = (@as(c_uint, 1) << @truncate(gme.emu.voiceCount())) - 1;
 			gme.mute(av[0..ac]);
@@ -272,10 +274,10 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		}
 
 		fn maskC(
-			self: *Self,
+			p: *Pd,
 			_: *Symbol, ac: c_uint, av: [*]const Atom,
 		) callconv(.c) void {
-			const gme: *Gme = &self.base;
+			const gme: *Gme = &parentPtr(p).base;
 			if (ac > 0 and av[0].type == .float) {
 				// set
 				gme.mask = @intFromFloat(av[0].w.float);
@@ -288,7 +290,8 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 			}
 		}
 
-		fn bMaskC(self: *Self) callconv(.c) void {
+		fn bMaskC(p: *Pd) callconv(.c) void {
+			const self = parentPtr(p);
 			const gme: *Gme = &self.base;
 			var buf: [32:0]u8 = undefined;
 			const voices: u6 = @truncate(gme.emu.voiceCount());
@@ -322,19 +325,21 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		}
 
 		fn langsC(
-			self: *Self,
+			p: *Pd,
 			_: *Symbol, ac: c_uint, args: [*]const pd.Atom,
 		) callconv(.c) void {
+			const self = parentPtr(p);
 			const base: *Gme = &self.base;
 			base.langs.replaceWith(gpa, args[0..ac]) catch |e| err(self, e);
 		}
 
-		fn dspC(self: *Self, sp: [*]*pd.Signal) callconv(.c) void {
+		fn dspC(p: *Pd, sp: [*]*pd.Signal) callconv(.c) void {
+			const self = parentPtr(p);
 			const base: *Gme = &self.base;
 			for (&base.outs, sp[2..][0..nch]) |*o, s| {
 				o.* = s.vec;
 			}
-			pd.dsp.add(&performC, .{ self, sp[1].len, sp[1].vec, sp[0].vec });
+			pd.dsp.add(performC, .{ self, sp[1].len, sp[1].vec, sp[0].vec });
 		}
 
 		pub inline fn extend() !void {
@@ -350,12 +355,12 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 			}
 
 			const class: *pd.Class = Self.class;
-			class.addMethod(@ptrCast(&muteC), .gen("mute"), &.{ .gimme });
-			class.addMethod(@ptrCast(&soloC), .gen("solo"), &.{ .gimme });
-			class.addMethod(@ptrCast(&langsC), .gen("langs"), &.{ .gimme });
-			class.addMethod(@ptrCast(&maskC), s_mask, &.{ .gimme });
-			class.addMethod(@ptrCast(&bMaskC), .gen("bmask"), &.{});
-			class.addMethod(@ptrCast(&dspC), .gen("dsp"), &.{ .cant });
+			class.addMethod(&.{ .gimme }, muteC, .gen("mute"));
+			class.addMethod(&.{ .gimme }, soloC, .gen("solo"));
+			class.addMethod(&.{ .gimme }, langsC, .gen("langs"));
+			class.addMethod(&.{ .gimme }, maskC, s_mask);
+			class.addMethod(&.{}, bMaskC, .gen("bmask"));
+			class.addMethod(&.{ .cant }, dspC, .gen("dsp"));
 		}
 	};}
 

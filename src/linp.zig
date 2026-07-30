@@ -3,6 +3,7 @@
 const pd = @import("pd");
 const tg = @import("toggle.zig");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
@@ -28,6 +29,7 @@ const LinP = extern struct {
 
 	const name = "linp";
 	var class: *pd.Class = undefined;
+	const parentPtr = pd.parentPtr(LinP);
 
 	fn setPause(self: *LinP, state: bool) void {
 		if (tg.set(&self.paused, state)) {
@@ -43,12 +45,14 @@ const LinP = extern struct {
 		return changed;
 	}
 
-	fn ft1C(self: *LinP, f: Float) callconv(.c) void {
+	fn ft1C(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		self.in1val = f;
 		self.gotinlet = true;
 	}
 
-	fn setC(self: *LinP, f: Float) callconv(.c) void {
+	fn setC(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		self.clock.unset();
 		self.targetval = f;
 		self.setval = f;
@@ -64,7 +68,8 @@ const LinP = extern struct {
 		self.clock.unset();
 	}
 
-	fn stopC(self: *LinP) callconv(.c) void {
+	fn stopC(p: *Pd) callconv(.c) void {
+		const self = parentPtr(p);
 		if (pd.pd_compatibilitylevel >= 48) {
 			self.freeze();
 		}
@@ -72,10 +77,8 @@ const LinP = extern struct {
 		self.setPause(true);
 	}
 
-	fn pauseC(
-		self: *LinP,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn pauseC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentPtr(p);
 		if (!self.tglPause(av[0..ac]) or self.setval == self.targetval) {
 			return;
 		}
@@ -111,7 +114,8 @@ const LinP = extern struct {
 		}
 	}
 
-	fn floatC(self: *LinP, f: Float) callconv(.c) void {
+	fn floatC(p: *Pd, f: Float) callconv(.c) void {
+		const self = parentPtr(p);
 		const timenow = pd.time();
 		if (self.gotinlet and self.in1val > 0) {
 			if (timenow > self.targettime) {
@@ -140,15 +144,16 @@ const LinP = extern struct {
 		self.gotinlet = false;
 	}
 
-	fn initC(f: Float, grain: Float) callconv(.c) ?*LinP {
-		return pd.wrap(*LinP, init(f, grain), name);
+	fn initC(f: Float, grain: Float) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(f, grain), name);
 	}
-	inline fn init(f: Float, grain: Float) !*LinP {
-		const self: *LinP = @ptrCast(try class.pd());
+	inline fn init(f: Float, grain: Float) !*Pd {
+		const self: *LinP = try pd.gpa.create(LinP);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
-		var clock: *pd.Clock = try .init(self, @ptrCast(&tickC));
+		var clock: *pd.Clock = try .init(LinP, self, tickC);
 		errdefer clock.deinit();
 
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("ft1"));
@@ -166,20 +171,20 @@ const LinP = extern struct {
 			.targetval = f,
 			.setval = f,
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
-	fn deinitC(self: *LinP) callconv(.c) void {
-		self.clock.deinit();
+	fn deinitC(p: *Pd) callconv(.c) void {
+		parentPtr(p).clock.deinit();
 	}
 
 	inline fn setup() !void {
-		class = try .init(LinP, name, &.{ .deffloat, .deffloat }, &initC, &deinitC, .{});
-		class.addFloat(@ptrCast(&floatC));
-		class.addMethod(@ptrCast(&stopC), .gen("stop"), &.{});
-		class.addMethod(@ptrCast(&ft1C), .gen("ft1"), &.{ .float });
-		class.addMethod(@ptrCast(&setC), .gen("set"), &.{ .float });
-		class.addMethod(@ptrCast(&pauseC), .gen("pause"), &.{ .gimme });
+		class = try .init(LinP, name, &.{ .deffloat, .deffloat }, initC, deinitC, .{});
+		class.addFloat(floatC);
+		class.addMethod(&.{}, stopC, .gen("stop"));
+		class.addMethod(&.{ .float }, ft1C, .gen("ft1"));
+		class.addMethod(&.{ .float }, setC, .gen("set"));
+		class.addMethod(&.{ .gimme }, pauseC, .gen("pause"));
 	}
 };
 

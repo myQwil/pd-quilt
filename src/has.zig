@@ -2,6 +2,7 @@
 
 const pd = @import("pd");
 
+const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Symbol = pd.Symbol;
 const Uf = @import("bitfloat.zig").Uf;
@@ -13,16 +14,17 @@ const Has = extern struct {
 
 	const name = "has";
 	var class: *pd.Class = undefined;
+	const parentPtr = pd.parentPtr(Has);
+	const parentConstPtr = pd.parentConstPtr(Has);
 
-	fn bangC(self: *const Has) callconv(.c) void {
+	fn bangC(p: *const Pd) callconv(.c) void {
+		const self = parentConstPtr(p);
 		const a = self.atom;
 		self.out.float(if (a.type == .symbol and a.w.symbol == pd.s.bang()) 1 else 0);
 	}
 
-	fn listC(
-		self: *const Has,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn listC(p: *const Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+		const self = parentConstPtr(p);
 		const a = self.atom;
 		self.out.float(for (av[0..ac]) |b| {
 			if (a.type != b.type) {
@@ -39,20 +41,18 @@ const Has = extern struct {
 		} else 0);
 	}
 
-	fn setC(
-		self: *Has,
-		_: *Symbol, ac: c_uint, av: [*]const Atom,
-	) callconv(.c) void {
+	fn setC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
 		if (ac >= 1) {
-			self.atom = av[0];
+			parentPtr(p).atom = av[0];
 		}
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Has {
-		return pd.wrap(*Has, init(av[0..ac]), name);
+	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) !*Has {
-		const self: *Has = @ptrCast(try class.pd());
+	inline fn init(av: []const Atom) !*Pd {
+		const self: *Has = try pd.gpa.create(Has);
+		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
 		errdefer obj.g.pd.deinit();
 
@@ -62,14 +62,14 @@ const Has = extern struct {
 			.out = try .init(obj, pd.s.float()),
 			.atom = if (av.len > 0) av[0] else .float(0),
 		};
-		return self;
+		return &obj.g.pd;
 	}
 
 	inline fn setup() !void {
 		class = try .init(Has, name, &.{ .gimme }, &initC, null, .{});
-		class.addBang(@ptrCast(&bangC));
-		class.addList(@ptrCast(&listC));
-		class.addMethod(@ptrCast(&setC), .gen("set"), &.{ .gimme });
+		class.addBang(&bangC);
+		class.addList(&listC);
+		class.addMethod(&.{ .gimme }, &setC, .gen("set"));
 	}
 };
 
