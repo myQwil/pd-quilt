@@ -144,7 +144,7 @@ const Adsr = extern struct {
 	fn initC(a: Float, d: Float, s: Float, r: Float) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(a, d, s, r), name);
 	}
-	inline fn init(a: Float, d: Float, s: Float, r: Float) !*Pd {
+	inline fn init(a: Float, d: Float, s: Float, r: Float) pd.Oom!*Pd {
 		const self: *Adsr = try pd.gpa.create(Adsr);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -166,7 +166,7 @@ const Adsr = extern struct {
 		return &obj.g.pd;
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		const args: [4]Atom.Type = @splat(.deffloat);
 		class = try .init(Adsr, name, &args, initC, null, .{});
 		class.addBang(bangC);

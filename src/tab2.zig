@@ -12,7 +12,7 @@ pub const Tab2 = extern struct {
 	arrayname: *Symbol,
 	f: Float = 0,
 
-	pub inline fn init(obj: *pd.Object, arrayname: *Symbol, hold: Float) !Tab2 {
+	pub inline fn init(obj: *pd.Object, arrayname: *Symbol, hold: Float) pd.Oom!Tab2 {
 		_ = try obj.outlet(pd.s.signal());
 		const inlet: *Inlet = @ptrCast(@alignCast(try obj.inletSignal(hold)));
 		return .{

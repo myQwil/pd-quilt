@@ -46,7 +46,8 @@ pub fn getBase(s: []const u8) u16 {
 }
 
 /// Simple string-to-number converter
-pub fn parseFloat(s: [*:0]const u8, base: u16) !Float {
+pub const ParseError = error{NoDigitsParsed,Overflow,Underflow};
+pub fn parseFloat(s: [*:0]const u8, base: u16) ParseError!Float {
 	var i: usize = 0;
 	var no_digits: bool = true;
 	if (s[0] == '-' or s[0] == '+') {
@@ -228,7 +229,7 @@ pub const Rad = extern struct {
 	}
 
 	/// based on musl-libc: `src/stdio/vfprintf.c`
-	pub fn write(self: *Rad) !void {
+	pub fn write(self: *Rad) std.Io.Writer.Error!void {
 		var w: std.Io.Writer = .fixed(&self.buf);
 		const uf: UnFloat = .{ .f = self.value };
 		if (uf.b.exponent == inf_exp) {

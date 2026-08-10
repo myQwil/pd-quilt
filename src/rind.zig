@@ -53,7 +53,7 @@ pub const Rind = extern struct {
 	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) !*Pd {
+	inline fn init(av: []const Atom) pd.Oom!*Pd {
 		const self: *Rind = try pd.gpa.create(Rind);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -89,9 +89,9 @@ pub const Rind = extern struct {
 		return &obj.g.pd;
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		class = try .init(Rind, name, &.{ .gimme }, initC, null, .{});
-		try rn.Impl(Rind).extend(io);
+		rn.Impl(Rind).extend(io);
 		class.addBang(bangC);
 		class.addList(listC);
 		class.addAnything(anythingC);

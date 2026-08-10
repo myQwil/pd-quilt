@@ -51,7 +51,7 @@ const Unpaq = extern struct {
 	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(argv: []const Atom) !*Pd {
+	inline fn init(argv: []const Atom) pd.Oom!*Pd {
 		const self: *Unpaq = try gpa.create(Unpaq);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -82,7 +82,7 @@ const Unpaq = extern struct {
 		gpa.free(self.ptr[0..self.len]);
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		dot = .gen(".");
 		class = try .init(Unpaq, name, &.{ .gimme }, initC, deinitC, .{});
 		class.addAnything(anyC);

@@ -41,7 +41,7 @@ const Same = extern struct {
 	fn initC(f: Float) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(f), name);
 	}
-	inline fn init(f: Float) !*Pd {
+	inline fn init(f: Float) pd.Oom!*Pd {
 		const self: *Same = try pd.gpa.create(Same);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -56,7 +56,7 @@ const Same = extern struct {
 		return &obj.g.pd;
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		class = try .init(Same, name, &.{ .deffloat }, initC, null, .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);

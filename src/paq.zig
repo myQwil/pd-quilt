@@ -50,7 +50,7 @@ const Proxy = extern struct {
 		set(self.ptr[0..self.len], s, av[0..ac]);
 	}
 
-	fn init(vec: []Atom) !*Proxy {
+	fn init(vec: []Atom) pd.Oom!*Proxy {
 		const self: *Proxy = try gpa.create(Proxy);
 		self.* = .{
 			.obj = .{ .class = class },
@@ -60,7 +60,7 @@ const Proxy = extern struct {
 		return self;
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		dot = .gen(".");
 		const opts: pd.Class.Options = .{ .bare = true, .no_inlet = true };
 		class = try .init(Proxy, name, &.{}, null, null, opts);
@@ -115,7 +115,7 @@ const Paq = extern struct {
 	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(argv: []const Atom) !*Pd {
+	inline fn init(argv: []const Atom) pd.Oom!*Pd {
 		const av: []const Atom = if (argv.len > 0)
 			argv
 		else &.{ .float(0), .float(0) };
@@ -162,7 +162,7 @@ const Paq = extern struct {
 		gpa.free(self.ptr[0..self.len]);
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		class = try .init(Paq, name, &.{ .gimme }, initC, deinitC, .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);

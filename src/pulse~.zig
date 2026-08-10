@@ -63,7 +63,7 @@ const Pulse = extern struct {
 	fn initC(_: *pd.Symbol, ac: c_uint, av: [*]const pd.Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(av: []const pd.Atom) !*Pd {
+	inline fn init(av: []const pd.Atom) pd.Oom!*Pd {
 		const self: *Pulse = try pd.gpa.create(Pulse);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -82,7 +82,7 @@ const Pulse = extern struct {
 		return &obj.g.pd;
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		class = try .init(Pulse, name, &.{ .gimme }, initC, null, .{});
 		class.doMainSignalIn(@offsetOf(Pulse, "f"));
 		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));

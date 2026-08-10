@@ -21,7 +21,7 @@ pub const Rubber = extern struct {
 		obj: *pd.Object,
 		channels: u8,
 		av: []const Atom,
-	) !Rubber {
+	) pd.Oom!Rubber {
 		const in3: *Inlet = @ptrCast(@alignCast(try obj.inletSignal(1.0)));
 		return .{
 			.tempo = &in3.un.floatsignalvalue,
@@ -62,7 +62,7 @@ pub fn freeDict() void {
 	dict.deinit();
 }
 
-fn parseOptions(gpa: Allocator, av: []const Atom) !ru.Options {
+fn parseOptions(gpa: Allocator, av: []const Atom) pd.Oom!ru.Options {
 	var options: ru.Options = .{ .process = .realtime, .engine = .finer };
 	for (av) |a| {
 		if (a.getSymbol()) |s| {
@@ -160,7 +160,7 @@ pub fn Impl(Self: type) type { return struct {
 		});
 	}
 
-	pub inline fn extend(gpa: Allocator) !void {
+	pub inline fn extend(gpa: Allocator) Allocator.Error!void {
 		s_delay = .gen("delay");
 
 		dict = .init(gpa);

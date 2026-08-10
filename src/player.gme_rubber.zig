@@ -151,7 +151,7 @@ pub fn Impl(Root: type) type { return extern struct {
 		ru.freeDict();
 	}
 
-	pub inline fn setup() !void {
+	pub inline fn setup() (pd.Class.Error || std.mem.Allocator.Error)!void {
 		class = try .init(Self, Root.name, &.{ .gimme }, initC, deinitC, .{});
 		try BaseImpl.extend();
 		try Rubber.extend(gpa);

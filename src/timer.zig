@@ -5,8 +5,9 @@ const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
 const TimeUnit = pd.TimeUnit;
+const TUError = TimeUnit.Error;
 
-fn unitFromArgs(av: []const Atom) !TimeUnit {
+fn unitFromArgs(av: []const Atom) TUError!TimeUnit {
 	var amount: Float = 1;
 	var name: *Symbol = .gen("ms");
 	for (av[0..@min(av.len, 2)]) |*a| {
@@ -25,7 +26,7 @@ pub const Timer = extern struct {
 	unit: TimeUnit,
 	paused: bool = true,
 
-	pub fn init(obj: *pd.Object, av: []const Atom) !Timer {
+	pub fn init(obj: *pd.Object, av: []const Atom) (pd.Oom || TUError)!Timer {
 		return .{
 			.outlet = try .init(obj, pd.s.float()),
 			.unit = if (av.len > 0) try unitFromArgs(av) else .{},
@@ -36,7 +37,7 @@ pub const Timer = extern struct {
 		return self.unit.timeSince(f);
 	}
 
-	pub fn parseUnits(self: *Timer, av: []const Atom) !void {
+	pub fn parseUnits(self: *Timer, av: []const Atom) TUError!void {
 		self.unit = try unitFromArgs(av);
 	}
 

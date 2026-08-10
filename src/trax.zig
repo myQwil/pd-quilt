@@ -9,7 +9,11 @@ const Outlet = pd.Outlet;
 const StringMap = std.StringHashMap(void);
 const SymbolList = std.ArrayList(*Symbol);
 const Allocator = std.mem.Allocator;
+const Oom = Allocator.Error;
 const Io = std.Io;
+const Writer = Io.Writer;
+const WriteError = Writer.Error;
+const TraverseError = Oom || std.Io.Reader.DelimiterError;
 
 const trext = ".trax";
 
@@ -44,7 +48,7 @@ pub const Arena = struct {
 			}
 		}
 
-		pub fn write(self: Union, w: *Io.Writer) !void {
+		pub fn write(self: Union, w: *Writer) WriteError!void {
 			switch (self) {
 				.float => |f| try wr.fmtG(w, f),
 				.string => |s| try w.writeAll(s[0 .. s.len - 1 :0]),
@@ -52,7 +56,7 @@ pub const Arena = struct {
 		}
 	};
 
-	fn init(gpa: Allocator, str: []const u8) !Arena {
+	fn init(gpa: Allocator, str: []const u8) Oom!Arena {
 		var arena: Arena = .{};
 		if (str.len > 0) {
 			try arena.append(gpa, str);
@@ -89,7 +93,7 @@ pub const Arena = struct {
 		return if (std.fmt.parseFloat(Float, str)) |f| .float(f) else |_| .string(str);
 	}
 
-	fn grow(self: *Arena, gpa: Allocator, amount: usize, t: Enum) !usize {
+	fn grow(self: *Arena, gpa: Allocator, amount: usize, t: Enum) Oom!usize {
 		try self.buf.ensureUnusedCapacity(gpa, amount);
 		try self.tbl.ensureUnusedCapacity(gpa, 1);
 
@@ -101,7 +105,7 @@ pub const Arena = struct {
 		return old_len;
 	}
 
-	fn append(self: *Arena, gpa: Allocator, str: []const u8) !void {
+	fn append(self: *Arena, gpa: Allocator, str: []const u8) Oom!void {
 		if (std.fmt.parseFloat(Float, str)) |f| {
 			const start = try self.grow(gpa, @sizeOf(Float), .float);
 			@memcpy(self.buf.items[start..][0..@sizeOf(Float)], std.mem.asBytes(&f));
@@ -126,7 +130,12 @@ pub const Arena = struct {
 		};
 	}
 
-	pub fn send(self: *const Arena, gpa: Allocator, outlet: *Outlet, key: *Symbol) !void {
+	pub fn send(
+		self: *const Arena,
+		gpa: Allocator,
+		outlet: *Outlet,
+		key: *Symbol,
+	) Oom!void {
 		var arr: [8]Atom = undefined;
 		if (self.tbl.items.len > arr.len) {
 			const atoms = try gpa.alloc(Atom, self.tbl.items.len);
@@ -157,7 +166,7 @@ pub const Arena = struct {
 		pd.post.log(obj, .normal, "", .{});
 	}
 
-	pub fn write(self: *const Arena, w: *Io.Writer) !void {
+	pub fn write(self: *const Arena, w: *Writer) WriteError!void {
 		if (self.tbl.items.len <= 0) {
 			return;
 		}
@@ -176,7 +185,7 @@ const LangDict = struct {
 
 	const Dict = std.array_hash_map.Auto(*Symbol, Arena);
 
-	fn init(gpa: Allocator, lang: *Symbol, value: []u8) !LangDict {
+	fn init(gpa: Allocator, lang: *Symbol, value: []u8) Oom!LangDict {
 		var arena: Arena = try .init(gpa, value);
 		errdefer arena.deinit(gpa);
 		var dict: Dict = .empty;
@@ -197,7 +206,7 @@ const LangDict = struct {
 		gpa: Allocator,
 		lang: *Symbol,
 		value: []u8,
-	) !*Arena {
+	) Oom!*Arena {
 		const gop = try self.dict.getOrPut(gpa, lang);
 		if (gop.found_existing) {
 			try gop.value_ptr.append(gpa, value);
@@ -249,7 +258,7 @@ pub const Meta = struct {
 		key: *Symbol,
 		lang: *Symbol,
 		value: []u8,
-	) !*Arena {
+	) Oom!*Arena {
 		const gop = try self.map.getOrPut(gpa, key);
 		if (gop.found_existing) {
 			return try gop.value_ptr.add(gpa, lang, value);
@@ -259,13 +268,18 @@ pub const Meta = struct {
 		}
 	}
 
-	pub fn traverse(self: *Meta, gpa: Allocator, io: Io, sidecar: [:0]const u8) !void {
+	pub fn traverse(
+		self: *Meta,
+		gpa: Allocator,
+		io: Io,
+		sidecar: [:0]const u8,
+	) TraverseError!void {
 		var parents: StringMap = .init(gpa);
 		defer parents.deinit();
 		try traverseMeta(gpa, io, self, &parents, sidecar);
 	}
 
-	pub fn fromPath(gpa: Allocator, io: Io, path: [*:0]const u8) !?Meta {
+	pub fn fromPath(gpa: Allocator, io: Io, path: [*:0]const u8) TraverseError!?Meta {
 		const sidecar = try getSidecar(gpa, io, std.mem.sliceTo(path, 0))
 			orelse return null;
 		defer gpa.free(sidecar);
@@ -338,13 +352,13 @@ fn keyLang(line: []u8) struct { key: *Symbol, lang: *Symbol } {
 	return .{ .key = .gen(line[0..kend :0]), .lang = .gen(lang) };
 }
 
-fn resolveZ(allocator: std.mem.Allocator, paths: []const []const u8) ![:0]u8 {
-	var res = try std.fs.path.resolve(allocator, paths);
-	errdefer allocator.free(res);
-	if (allocator.resize(res, res.len + 1)) {
+fn resolveZ(gpa: Allocator, paths: []const []const u8) Oom![:0]u8 {
+	var res = try std.fs.path.resolve(gpa, paths);
+	errdefer gpa.free(res);
+	if (gpa.resize(res, res.len + 1)) {
 		res.len += 1;
 	} else {
-		res = try allocator.realloc(res, res.len + 1);
+		res = try gpa.realloc(res, res.len + 1);
 	}
 	res[res.len - 1] = 0;
 	return res[0 .. res.len - 1 :0];
@@ -356,7 +370,7 @@ fn traverseList(
 	list: *SymbolList,
 	parents: *StringMap,
 	file_path: [:0]const u8,
-) !void {
+) TraverseError!void {
 	if (parents.contains(file_path)) {
 		return err(list.items.len, error.InfiniteRecursion, file_path.ptr);
 	}
@@ -400,7 +414,7 @@ fn traverseMeta(
 	meta: *Meta,
 	parents: *StringMap,
 	file_path: [:0]const u8,
-) !void {
+) TraverseError!void {
 	if (parents.contains(file_path)) {
 		return err(meta.map.count(), error.InfiniteRecursion, file_path.ptr);
 	}
@@ -473,7 +487,7 @@ fn traverseMeta(
 	}
 }
 
-pub fn getSidecar(gpa: Allocator, io: Io, path: []const u8) !?[:0]const u8 {
+pub fn getSidecar(gpa: Allocator, io: Io, path: []const u8) Oom!?[:0]const u8 {
 	const txdir = trext ++ "/";
 	const dot = findLast(path, '.') orelse path.len;
 	var trx_path = try gpa.alloc(u8, dot + txdir.len + trext.len + 1);
@@ -516,6 +530,8 @@ pub const Playlist = extern struct {
 	/// allocated length
 	cap: usize = 0,
 
+	pub const AppendError = TraverseError || error{NotASymbol};
+
 	fn asSymbolList(self: Playlist) SymbolList {
 		return SymbolList{
 			.items = self.ptr[0..self.len],
@@ -528,7 +544,12 @@ pub const Playlist = extern struct {
 		list.deinit(gpa);
 	}
 
-	pub fn append(self: *Playlist, gpa: Allocator, io: Io, av: []const Atom) !void {
+	pub fn append(
+		self: *Playlist,
+		gpa: Allocator,
+		io: Io,
+		av: []const Atom,
+	) AppendError!void {
 		var list = self.asSymbolList();
 		defer self.* = .{
 			.ptr = list.items.ptr,
@@ -549,7 +570,12 @@ pub const Playlist = extern struct {
 		}
 	}
 
-	pub fn replaceWith(self: *Playlist, gpa: Allocator, io: Io, av: []const Atom) !void {
+	pub fn replaceWith(
+		self: *Playlist,
+		gpa: Allocator,
+		io: Io,
+		av: []const Atom,
+	) AppendError!void {
 		var playlist: Playlist = .{};
 		errdefer playlist.deinit(gpa);
 		try playlist.append(gpa, io, av);
@@ -573,7 +599,7 @@ pub const LangSet = extern struct {
 		gpa.free(self.ptr[0..self.len]);
 	}
 
-	pub fn replaceWith(self: *LangSet, gpa: Allocator, args: []const Atom) !void {
+	pub fn replaceWith(self: *LangSet, gpa: Allocator, args: []const Atom) Oom!void {
 		var arr: SymbolList = .empty;
 		errdefer arr.deinit(gpa);
 		var set: std.AutoHashMap(*Symbol, void) = .init(gpa);

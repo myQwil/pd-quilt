@@ -95,7 +95,7 @@ const PList = extern struct {
 	fn initC() callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(), name);
 	}
-	inline fn init() !*Pd {
+	inline fn init() pd.Oom!*Pd {
 		const self: *PList = try pd.gpa.create(PList);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -115,7 +115,7 @@ const PList = extern struct {
 		self.langs.deinit(gpa);
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		class = try .init(PList, name, &.{}, initC, deinitC, .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);

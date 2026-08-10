@@ -173,7 +173,7 @@ pub fn Impl(Root: type) type { return extern struct {
 	fn initC(_: *pd.Symbol, ac: c_uint, args: [*]const Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(args[0..ac]), Root.name);
 	}
-	inline fn init(args: []const Atom) !*Pd {
+	inline fn init(args: []const Atom) (ra.InitError || error{FFmpegInvalid})!*Pd {
 		const self: *Self = try pd.gpa.create(Self);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -229,7 +229,7 @@ pub fn Impl(Root: type) type { return extern struct {
 		ru.freeDict();
 	}
 
-	pub inline fn setup() !void {
+	pub inline fn setup() (pd.Class.Error || pd.Oom)!void {
 		class = try .init(Self, Root.name, &.{ .gimme }, initC, deinitC, .{});
 		try BaseImpl.extend();
 		try Rubber.extend(gpa);

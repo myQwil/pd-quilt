@@ -2,6 +2,7 @@ const pd = @import("pd");
 const ra = @import("rabbit");
 const Inlet = @import("inlet.zig").Inlet;
 pub const uint = ra.uint;
+pub const InitError = ra.Error || pd.Oom;
 
 const Pd = pd.Pd;
 const Float = pd.Float;
@@ -17,7 +18,7 @@ pub const Rabbit = extern struct {
 	state: *ra.State,
 	speed: *Float,
 
-	pub inline fn init(obj: *pd.Object, channels: u8) !Rabbit {
+	pub inline fn init(obj: *pd.Object, channels: u8) InitError!Rabbit {
 		const inlet: *Inlet = @ptrCast(@alignCast(try obj.inletSignal(1.0)));
 		return .{
 			.state = try .init(.sinc_fast, channels),

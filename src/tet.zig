@@ -74,7 +74,7 @@ pub fn Tet(T: type) type { return extern struct {
 	pub fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(av[0..ac]), T.name);
 	}
-	inline fn init(av: []const Atom) !*Pd {
+	inline fn init(av: []const Atom) pd.Oom!*Pd {
 		const self: *Self = try pd.gpa.create(Self);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -97,7 +97,7 @@ pub fn Tet(T: type) type { return extern struct {
 		return &obj.g.pd;
 	}
 
-	pub inline fn setup() !void {
+	pub inline fn setup() pd.Class.Error!void {
 		class = try .init(Self, T.name, &.{ .gimme }, initC, null, .{});
 
 		class.addFloat(&T.floatC);

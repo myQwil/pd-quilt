@@ -61,7 +61,7 @@ const Hsv = extern struct {
 	fn initC(h: Float, s: Float, v: Float) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(h, s, v), name);
 	}
-	inline fn init(h: Float, s: Float, v: Float) !*Pd {
+	inline fn init(h: Float, s: Float, v: Float) pd.Oom!*Pd {
 		const self: *Hsv = try pd.gpa.create(Hsv);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -79,7 +79,7 @@ const Hsv = extern struct {
 		return &obj.g.pd;
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		const args: [3]pd.Atom.Type = @splat(.deffloat);
 		class = try .init(Hsv, name, &args, &initC, null, .{});
 		class.addBang(&bangC);

@@ -5,8 +5,8 @@
 	.minimum_zig_version = "0.16.0",
 	.dependencies = .{
 		.pd = .{
-			.url = "git+https://github.com/myQwil/pd#89e2eda00973df2ffc8a3aa600a4262474291a10",
-			.hash = "pd-0.56.2-DC007VZlAgAE5htf4Eww-iKVTqLUTBvXOMbgarIbCGpq",
+			.url = "git+https://github.com/myQwil/pd#da8fc7d8b5835d915a5b8378b082837a0c487863",
+			.hash = "pd-0.56.2-DC007SplAgDZ1vI-0KSFu-7v27J-Ie1OhtFAmoFMBKoZ",
 		},
 		.gme = .{
 			.url = "git+https://codeberg.org/myQwil/gme#0df3acddb89aa4461d7de8f2508f323eef322c4b",
@@ -21,8 +21,8 @@
 			.hash = "libsamplerate-0.2.3-f8m6boU1AACMcGs_74VBrwQhNdGpeGU0TjQ-Rn0n0ugh",
 		},
 		.rubberband = .{
-			.url = "git+https://github.com/myQwil/rubberband#1bf7c3a00cfe26fdc683ec0289edd33eefa2e87a",
-			.hash = "rubberband-4.0.0-RbnorIwaAQD2vQx76Kz4621lEa7pm7gkB0CG5hw3dY96",
+			.url = "git+https://github.com/myQwil/rubberband#94d2738268bc6eec3f31236a42744bdbf5bd22e5",
+			.hash = "rubberband-4.0.0-RbnorIQaAQAJhcFNkUrddtpUi-eEw9jph3Xm8tBpAV_v",
 		},
 		.ffmpeg = .{
 			.url = "git+https://github.com/myQwil/ffmpeg#e92303fb4472de21e80f0b6690a164c6886a656a",

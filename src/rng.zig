@@ -33,7 +33,7 @@ pub fn Impl(Self: type) type { return struct {
 		rng.state = @intFromFloat(f);
 	}
 
-	pub inline fn extend(io: std.Io) !void {
+	pub inline fn extend(io: std.Io) void {
 		io.random(std.mem.asBytes(&seed));
 		seed |= 1; // odd numbers only
 

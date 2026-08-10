@@ -60,7 +60,7 @@ const TabRead2 = extern struct {
 			return;
 		};
 	}
-	inline fn set(self: *TabRead2, s: *Symbol) !u32 {
+	inline fn set(self: *TabRead2, s: *Symbol) pd.GArray.GetError!u32 {
 		errdefer self.tab2.vec = null;
 		self.tab2.arrayname = s;
 
@@ -82,7 +82,7 @@ const TabRead2 = extern struct {
 	fn initC(_: *pd.Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) !*Pd {
+	inline fn init(av: []const Atom) (pd.Oom || pd.ArgError)!*Pd {
 		const self: *TabRead2 = try pd.gpa.create(TabRead2);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -99,7 +99,7 @@ const TabRead2 = extern struct {
 		return &obj.g.pd;
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		class = try .init(TabRead2, name, &.{ .gimme }, initC, null, .{});
 		tb.Impl(TabRead2).extend();
 		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));

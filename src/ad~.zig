@@ -132,7 +132,7 @@ const AttackDecay = extern struct {
 	fn initC(a: Float, d: Float) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(a, d), name);
 	}
-	inline fn init(a: Float, d: Float) !*Pd {
+	inline fn init(a: Float, d: Float) pd.Oom!*Pd {
 		const self: *AttackDecay = try pd.gpa.create(AttackDecay);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -150,7 +150,7 @@ const AttackDecay = extern struct {
 		return &obj.g.pd;
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		const args: [2]Atom.Type = @splat(.deffloat);
 		class = try .init(AttackDecay, name, &args, initC, null, .{});
 		class.addBang(bangC);

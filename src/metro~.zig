@@ -67,7 +67,7 @@ const MetroSignal = extern struct {
 	fn initC(f: Float) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(f), name);
 	}
-	inline fn init(f: Float) !*Pd {
+	inline fn init(f: Float) pd.Oom!*Pd {
 		const self: *MetroSignal = try pd.gpa.create(MetroSignal);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -82,7 +82,7 @@ const MetroSignal = extern struct {
 		return &obj.g.pd;
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		class = try .init(MetroSignal, name, &.{ .deffloat }, initC, null, .{});
 		class.doMainSignalIn(@offsetOf(MetroSignal, "f"));
 		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));

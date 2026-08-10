@@ -10,6 +10,7 @@ const Float = pd.Float;
 const Symbol = pd.Symbol;
 const Word = pd.Word;
 const Writer = std.Io.Writer;
+const ClassError = pd.Class.Error;
 
 const epsilon = std.math.floatEps(Float);
 const gpa = pd.gpa;
@@ -120,7 +121,7 @@ const Arp = extern struct {
 
 	const name = "arp";
 
-	fn init(obj: *pd.Object) !Arp {
+	fn init(obj: *pd.Object) pd.Oom!Arp {
 		return .{
 			.out_f = try .init(obj, pd.s.float()),
 			.out_l = try .init(obj, pd.s.list()),
@@ -149,7 +150,7 @@ const Arp = extern struct {
 		else fParse(s, null);
 	}
 
-	fn list(self: *const Arp, vec: []Word, av: []const Atom, on: i32) !void {
+	fn list(self: *const Arp, vec: []Word, av: []const Atom, on: i32) pd.Oom!void {
 		const temp = try gpa.dupe(Word, vec); // vec in its initial state
 		defer gpa.free(temp);
 
@@ -261,7 +262,7 @@ const Arp = extern struct {
 		self: *const Arp,
 		vec: []Word,
 		sym: *Symbol, av: []const Atom,
-	) !void {
+	) pd.Oom!void {
 		const s = sym.name;
 		if (av.len == 0) {
 			// check if it's `interval+semitone` syntax
@@ -284,7 +285,7 @@ const Arp = extern struct {
 		try self.list(vec, argv, 0);
 	}
 
-	fn send(self: *const Arp, vec: []const Word, av: []const Atom) !void {
+	fn send(self: *const Arp, vec: []const Word, av: []const Atom) pd.Oom!void {
 		const temp = try gpa.alloc(Word, vec.len);
 		defer gpa.free(temp);
 		@memcpy(temp, vec);
@@ -306,7 +307,7 @@ const Arp = extern struct {
 	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, choose(av[0..ac]), name);
 	}
-	inline fn choose(av: []const Atom) !*Pd {
+	inline fn choose(av: []const Atom) pd.Oom!*Pd {
 		if (av.len == 1 and av[0].type == .symbol) {
 			return try ExArray.init(av[0].w.symbol);
 		} else {
@@ -314,7 +315,7 @@ const Arp = extern struct {
 		}
 	}
 
-	inline fn setup() !void {
+	inline fn setup() (std.mem.Allocator.Error || ClassError)!void {
 		errdefer ops.deinit();
 		try ops.put('+', opPlus);
 		try ops.put('^', opPlus);
@@ -398,7 +399,7 @@ const InArray = extern struct {
 		anythingC(p, s, 0, &.{});
 	}
 
-	inline fn init(av: []const Atom) !*Pd {
+	inline fn init(av: []const Atom) pd.Oom!*Pd {
 		const self: *InArray = try pd.gpa.create(InArray);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -416,7 +417,7 @@ const InArray = extern struct {
 		parentPtr(p).win.deinit(gpa);
 	}
 
-	inline fn setup() !void {
+	inline fn setup() ClassError!void {
 		class = try .init(InArray, name, &.{}, null, deinitC, .{});
 		Arp.Impl(InArray).extend();
 		class.addList(listC);
@@ -441,6 +442,8 @@ const ExArray = extern struct {
 	const parentPtr = pd.parentPtr(ExArray);
 	const parentConstPtr = pd.parentConstPtr(ExArray);
 
+	const Error = pd.GArray.GetError || pd.Oom;
+
 	inline fn err(self: *const ExArray, e: anyerror) void {
 		pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
 	}
@@ -454,7 +457,7 @@ const ExArray = extern struct {
 		const self = parentConstPtr(p);
 		self.print() catch |e| self.err(e);
 	}
-	inline fn print(self: *const ExArray) !void {
+	inline fn print(self: *const ExArray) pd.GArray.GetError!void {
 		const vec = try (try self.garray()).floatWords();
 		var buffer: [pd.max_string:0]u8 = undefined;
 		var writer: Writer = .fixed(&buffer);
@@ -468,7 +471,8 @@ const ExArray = extern struct {
 		const self = parentPtr(p);
 		self.resize(f) catch |e| self.err(e);
 	}
-	inline fn resize(self: *ExArray, f: Float) !void {
+	const ResizeError = pd.GArray.ResizeError || error{GArrayNotFound};
+	inline fn resize(self: *ExArray, f: Float) ResizeError!void {
 		const arr = try self.garray();
 		try arr.resize(@intFromFloat(f));
 	}
@@ -477,7 +481,7 @@ const ExArray = extern struct {
 		const self = parentPtr(p);
 		self.float(f) catch |e| self.err(e);
 	}
-	inline fn float(self: ExArray, f: Float) !void {
+	inline fn float(self: ExArray, f: Float) pd.GArray.GetError!void {
 		const vec = try (try self.garray()).floatWords();
 		self.arp.out_f.float(vec[0].float + self.arp.interval(vec, f));
 	}
@@ -486,7 +490,7 @@ const ExArray = extern struct {
 		const self = parentConstPtr(p);
 		self.send(av[0..ac]) catch |e| self.err(e);
 	}
-	inline fn send(self: *const ExArray, av: []const Atom) !void {
+	inline fn send(self: *const ExArray, av: []const Atom) Error!void {
 		const garr = try self.garray();
 		defer garr.redraw();
 		try self.arp.send(try garr.floatWords(), av);
@@ -496,7 +500,7 @@ const ExArray = extern struct {
 		const self = parentPtr(p);
 		self.list(av[0..ac]) catch |e| self.err(e);
 	}
-	inline fn list(self: *ExArray, av: []const Atom) !void {
+	inline fn list(self: *ExArray, av: []const Atom) Error!void {
 		const garr = try self.garray();
 		defer garr.redraw();
 		try self.arp.list(try garr.floatWords(), av, 0);
@@ -506,7 +510,7 @@ const ExArray = extern struct {
 		const self = parentPtr(p);
 		self.anything(s, av[0..ac]) catch |e| self.err(e);
 	}
-	inline fn anything(self: *ExArray, s: *Symbol, av: []const Atom) !void {
+	inline fn anything(self: *ExArray, s: *Symbol, av: []const Atom) Error!void {
 		const garr = try self.garray();
 		defer garr.redraw();
 		try self.arp.anything(try garr.floatWords(), s, av);
@@ -516,7 +520,7 @@ const ExArray = extern struct {
 		anythingC(p, s, 0, &.{});
 	}
 
-	inline fn init(s: *Symbol) !*Pd {
+	inline fn init(s: *Symbol) pd.Oom!*Pd {
 		const self: *ExArray = try pd.gpa.create(ExArray);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -535,7 +539,7 @@ const ExArray = extern struct {
 		ops.deinit();
 	}
 
-	inline fn setup() !void {
+	inline fn setup() ClassError!void {
 		class = try .init(ExArray, name, &.{}, null, null, .{});
 		Arp.Impl(ExArray).extend();
 		class.addList(listC);

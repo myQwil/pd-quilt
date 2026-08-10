@@ -190,7 +190,12 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		return Meta.fromPath(gpa, io, self.format.url) catch Meta{} orelse .{};
 	}
 
-	pub inline fn open(self: *Av, gpa: Allocator, io: Io, args: []const Atom) !void {
+	pub inline fn open(
+		self: *Av,
+		gpa: Allocator,
+		io: Io,
+		args: []const Atom,
+	) tx.Playlist.AppendError!void {
 		try self.playlist.replaceWith(gpa, io, args);
 	}
 
@@ -204,7 +209,11 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		} else |_| {}
 	}
 
-	pub inline fn printAuto(self: *const Av, trax: *const Meta, w: *Io.Writer) !void {
+	pub inline fn printAuto(
+		self: *const Av,
+		trax: *const Meta,
+		w: *Io.Writer,
+	) Io.Writer.Error!void {
 		// general track info: %artist% - %title%
 		if (self.get(trax, .gen("artist"))) |artist| {
 			try artist.write(w);
@@ -348,7 +357,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			pd.post.log(self, .normal, "subtitle stream set to %u", .{ s.idx });
 		}
 
-		pub inline fn extend() !void {
+		pub inline fn extend() Allocator.Error!void {
 			s_bpm = .gen("bpm");
 			s_date = .gen("date");
 			s_done = .gen("done");

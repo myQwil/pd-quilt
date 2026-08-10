@@ -28,13 +28,15 @@ pub const Player = extern struct {
 	/// Whether a track is currently playing
 	play: bool = false,
 
-	pub inline fn init(obj: *pd.Object) !Player {
+	pub const Error = error{NoFileOpened};
+
+	pub inline fn init(obj: *pd.Object) pd.Oom!Player {
 		return .{
 			.outlet = try .init(obj, null),
 		};
 	}
 
-	pub inline fn assertFileOpened(self: *const Player) error{NoFileOpened}!void {
+	pub inline fn assertFileOpened(self: *const Player) Error!void {
 		if (!self.open) {
 			return error.NoFileOpened;
 		}
@@ -44,7 +46,7 @@ pub const Player = extern struct {
 		self.outlet.anything(s, &.{ .float(@floatFromInt(@intFromBool(state))) });
 	}
 
-	inline fn setPlay(self: *Player, av: []const Atom) error{NoFileOpened}!void {
+	inline fn setPlay(self: *Player, av: []const Atom) Error!void {
 		try self.assertFileOpened();
 		if (toggle(&self.play, av)) {
 			self.sendState(s_play, self.play);
@@ -56,7 +58,7 @@ const secs = 1000;
 const mins = 60 * secs;
 const hours = 60 * mins;
 
-fn printTime(writer: *Writer, ms: i64) !void {
+fn printTime(writer: *Writer, ms: i64) Writer.Error!void {
 	if (ms < 0) {
 		return writer.print("?:?", .{});
 	}
@@ -68,7 +70,7 @@ fn printTime(writer: *Writer, ms: i64) !void {
 	if (hr >= 1) {
 		try writer.print("{}:", .{ hr });
 	}
-	try writer.print("{:0>2}:{:0>2}", .{ mn, sc });
+	return writer.print("{:0>2}:{:0>2}", .{ mn, sc });
 }
 
 test printTime {
@@ -93,7 +95,7 @@ inline fn isDigit(c: u8) bool {
 	return ('0' <= c and c <= '9');
 }
 
-fn alignBuffer(w: *Writer, buf: []const u8, fmt: []const u8) !void {
+fn alignBuffer(w: *Writer, buf: []const u8, fmt: []const u8) Writer.Error!void {
 	const fill = fmt[1];
 	const has_al = !isDigit(fmt[2]);
 	const alignment: std.fmt.Alignment = if (has_al) switch (fmt[2]) {
@@ -172,7 +174,7 @@ pub fn Impl(Self: type) type { return struct {
 			pd.post.log(self, .normal, "%s", .{ &buffer });
 		}
 	}
-	inline fn print(self: *const Self, w: *Writer, av: []const Atom) !void {
+	inline fn print(self: *const Self, w: *Writer, av: []const Atom) Writer.Error!void {
 		const base: *const Base = &self.base;
 		const player: *const Player = &base.player;
 		const getfn: *const GetMetaFn = if (player.open) &bGet else &getNone;
@@ -250,7 +252,7 @@ pub fn Impl(Self: type) type { return struct {
 		const self = parentConstPtr(p);
 		get(self, s) catch |e| err(self, e);
 	}
-	fn get(self: *const Self, s: *Symbol) !void {
+	fn get(self: *const Self, s: *Symbol) pd.Oom!void {
 		const base: *const Base = &self.base;
 		const player: *const Player = &base.player;
 		const getfn: *const GetMetaFn = if (player.open) &bGet else &getNone;

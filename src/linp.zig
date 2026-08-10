@@ -147,7 +147,7 @@ const LinP = extern struct {
 	fn initC(f: Float, grain: Float) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(f, grain), name);
 	}
-	inline fn init(f: Float, grain: Float) !*Pd {
+	inline fn init(f: Float, grain: Float) pd.Oom!*Pd {
 		const self: *LinP = try pd.gpa.create(LinP);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -178,7 +178,7 @@ const LinP = extern struct {
 		parentPtr(p).clock.deinit();
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		class = try .init(LinP, name, &.{ .deffloat, .deffloat }, initC, deinitC, .{});
 		class.addFloat(floatC);
 		class.addMethod(&.{}, stopC, .gen("stop"));

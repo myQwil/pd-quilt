@@ -69,7 +69,8 @@ const TabOsc2 = extern struct {
 		self.len = @floatFromInt(len);
 		self.invlen = 1.0 / self.len;
 	}
-	inline fn set(self: *TabOsc2, s: *Symbol) !u32 {
+	const SetError = pd.GArray.GetError || error{BadArraySize};
+	inline fn set(self: *TabOsc2, s: *Symbol) SetError!u32 {
 		errdefer self.tab2.vec = null;
 		self.tab2.arrayname = s;
 
@@ -100,7 +101,7 @@ const TabOsc2 = extern struct {
 	fn initC(_: *pd.Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) !*Pd {
+	inline fn init(av: []const Atom) (pd.Oom || pd.ArgError)!*Pd {
 		const self: *TabOsc2 = try pd.gpa.create(TabOsc2);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -117,7 +118,7 @@ const TabOsc2 = extern struct {
 		return &obj.g.pd;
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		class = try .init(TabOsc2, name, &.{ .gimme }, initC, null, .{});
 		tb.Impl(TabOsc2).extend();
 		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));

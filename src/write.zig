@@ -6,7 +6,7 @@ const Writer = std.Io.Writer;
 
 const prec = if (@bitSizeOf(Float) == 64) 14 else 6;
 
-pub fn fmtG(stream: *Writer, f: Float) !void {
+pub fn fmtG(stream: *Writer, f: Float) Writer.Error!void {
 	const gmin = @exp(@log(10.0) * (2 - prec));
 	const gmax = @exp(@log(10.0) * prec);
 
@@ -18,7 +18,7 @@ pub fn fmtG(stream: *Writer, f: Float) !void {
 	}
 }
 
-pub fn writeVec(writer: *Writer, vec: []const pd.Word) !void {
+pub fn writeVec(writer: *Writer, vec: []const pd.Word) Writer.Error!void {
 	if (vec.len == 0) {
 		_ = try writer.write("[]");
 		return;

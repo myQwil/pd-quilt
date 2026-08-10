@@ -18,7 +18,7 @@ const Proxy = extern struct {
 		self.owner.type = s;
 	}
 
-	inline fn init(owner: *Is) !*Proxy {
+	inline fn init(owner: *Is) pd.Oom!*Proxy {
 		const self: *Proxy = try pd.gpa.create(Proxy);
 		self.obj = .{ .class = class };
 		self.* = .{
@@ -28,7 +28,7 @@ const Proxy = extern struct {
 		return self;
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		class = try .init(Proxy, name, &.{}, null, null, .{
 			.bare = true,
 			.no_inlet = true,
@@ -71,7 +71,7 @@ const Is = extern struct {
 	fn initC(s: *Symbol) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(s), name);
 	}
-	inline fn init(s: *Symbol) !*Pd {
+	inline fn init(s: *Symbol) pd.Oom!*Pd {
 		const self: *Is = try pd.gpa.create(Is);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -94,7 +94,7 @@ const Is = extern struct {
 		parentConstPtr(p).proxy.obj.deinit();
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		class = try .init(Is, name, &.{ .defsymbol }, &initC, &deinitC, .{});
 		class.addBang(&bangC);
 		class.addAnything(&anythingC);

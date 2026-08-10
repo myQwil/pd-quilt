@@ -122,7 +122,7 @@ const DelP = extern struct {
 	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) !*Pd {
+	inline fn init(av: []const Atom) (pd.Oom || pd.TimeUnit.Error)!*Pd {
 		const self: *DelP = try pd.gpa.create(DelP);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -161,7 +161,7 @@ const DelP = extern struct {
 		parentConstPtr(p).clock.deinit();
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		class = try .init(DelP, name, &.{ .gimme }, initC, deinitC, .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);

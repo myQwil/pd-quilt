@@ -15,6 +15,7 @@ const GList = pd.GList;
 const Object = pd.Object;
 const Symbol = pd.Symbol;
 const Writer = std.Io.Writer;
+const BufPrintError = std.fmt.BufPrintError;
 
 const IVec2 = @Vector(2, c_int);
 const SVec2 = @Vector(2, c_short);
@@ -29,7 +30,7 @@ const margin = struct {
 const atom_rmargin = margin.left + margin.right - 2;
 const atom_bmargin = margin.top + margin.bottom - 1;
 
-fn escape(s: *Symbol) !*Symbol {
+fn escape(s: *Symbol) BufPrintError!*Symbol {
 	return if (s == pd.s.empty()) .gen("_") else if (s.name[0] != '_') s else blk: {
 		var shmo: [100]u8 = undefined;
 		const str = try std.fmt.bufPrintSentinel(&shmo, "_{s}", .{ s.name }, 0);
@@ -518,7 +519,7 @@ const Radix = extern struct {
 	///
 	/// Symbols are already resolved if radix is loaded from a patch,
 	/// so we have to find the unresolved versions in the object's binbuf.
-	fn getRSL(self: *Radix) ![3]*Symbol {
+	fn getRSL(self: *Radix) BufPrintError![3]*Symbol {
 		return if (self.obj.binbuf) |binbuf| blk: {
 			const a = binbuf.getSlice();
 			break :blk .{
@@ -537,7 +538,7 @@ const Radix = extern struct {
 		const self = parentPtr(&g.pd);
 		self.save(b) catch |e| self.err(e);
 	}
-	inline fn save(self: *Radix, b: *pd.BinBuf) !void {
+	inline fn save(self: *Radix, b: *pd.BinBuf) (pd.Oom || BufPrintError)!void {
 		const rsl = try self.getRSL();
 		try b.add(&.{
 			.symbol(.gen("#X")), .symbol(.gen("obj")),
@@ -559,7 +560,7 @@ const Radix = extern struct {
 		const self = parentPtr(&g.pd);
 		properties(self) catch |e| self.err(e);
 	}
-	inline fn properties(self: *Radix) !void {
+	inline fn properties(self: *Radix) BufPrintError!void {
 		var buf_min: [16:0]u8 = undefined;
 		var buf_max: [16:0]u8 = undefined;
 		self.range.lo.atom().bufPrint(&buf_min);
@@ -580,7 +581,8 @@ const Radix = extern struct {
 		const self = parentPtr(p);
 		param(self, av[0..ac]) catch |e| self.err(e);
 	}
-	inline fn param(self: *Radix, av: []const Atom) !void {
+	const ParamError = BufPrintError || error{WrongArgCount} || pd.Oom;
+	inline fn param(self: *Radix, av: []const Atom) ParamError!void {
 		if (av.len != 12) {
 			return error.WrongArgCount;
 		}
@@ -703,7 +705,8 @@ const Radix = extern struct {
 		const self = parentPtr(p);
 		self.read(self.rad.base, av[0..ac]) catch |e| self.err(e);
 	}
-	fn read(self: *Radix, base: u16, av: []const Atom) !void {
+	const ReadError = error{NotEnoughArgs} || BufPrintError || rx.ParseError;
+	fn read(self: *Radix, base: u16, av: []const Atom) ReadError!void {
 		if (av.len < 1) {
 			return error.NotEnoughArgs;
 		}
@@ -792,7 +795,8 @@ const Radix = extern struct {
 	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) !*Pd {
+	const InitError = pd.Oom || error{NoCurrentGList} || Writer.Error;
+	inline fn init(av: []const Atom) InitError!*Pd {
 		const gl = GList.getCurrent() orelse return error.NoCurrentGList;
 		const self: *Radix = try pd.gpa.create(Radix);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
@@ -882,7 +886,7 @@ const Radix = extern struct {
 		pd.unqueueGui(self);
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		const opts: pd.Class.Options = .{ .no_inlet = true, .patchable = true };
 		class = try .init(Radix, name, &.{ .gimme }, initC, freeC, opts);
 		class.addBang(bangC);

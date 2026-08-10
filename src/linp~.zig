@@ -109,7 +109,7 @@ const LinPSignal = extern struct {
 	fn initC() callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(), name);
 	}
-	inline fn init() !*Pd {
+	inline fn init() pd.Oom!*Pd {
 		const self: *LinPSignal = try pd.gpa.create(LinPSignal);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -125,7 +125,7 @@ const LinPSignal = extern struct {
 		return &obj.g.pd;
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		class = try .init(LinPSignal, name, &.{}, initC, null, .{});
 		class.addFloat(floatC);
 		class.addMethod(&.{}, stopC, .gen("stop"));

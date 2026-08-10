@@ -51,7 +51,7 @@ const FlEnc = extern struct {
 		const self = parentConstPtr(p);
 		self.print() catch |e| self.err(e);
 	}
-	inline fn print(self: *const FlEnc) !void {
+	inline fn print(self: *const FlEnc) std.fmt.BufPrintError!void {
 		var buf: [@bitSizeOf(Float) + 3]u8 = undefined;
 		const b = self.uf.b;
 		const s = try std.fmt.bufPrintSentinel(
@@ -110,7 +110,7 @@ const FlEnc = extern struct {
 	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) !*Pd {
+	inline fn init(av: []const Atom) pd.Oom!*Pd {
 		const self: *FlEnc = try pd.gpa.create(FlEnc);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -126,7 +126,7 @@ const FlEnc = extern struct {
 		return &obj.g.pd;
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		class = try .init(FlEnc, name, &.{ .gimme }, initC, null, .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);

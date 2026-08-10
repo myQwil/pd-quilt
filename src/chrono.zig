@@ -101,7 +101,7 @@ const Chrono = extern struct {
 	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, init(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) !*Pd {
+	inline fn init(av: []const Atom) (pd.Oom || pd.TimeUnit.Error)!*Pd {
 		const self: *Chrono = try pd.gpa.create(Chrono);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
@@ -120,7 +120,7 @@ const Chrono = extern struct {
 		return &obj.g.pd;
 	}
 
-	inline fn setup() !void {
+	inline fn setup() pd.Class.Error!void {
 		class = try .init(Chrono, name, &.{ .gimme }, initC, null, .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);

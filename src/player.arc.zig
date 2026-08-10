@@ -62,7 +62,7 @@ const RarReader = struct {
 		return .success;
 	}
 
-	pub fn init(gpa: Allocator, _: Io, path: [:0]const u8) !ArcReader {
+	pub fn init(gpa: Allocator, _: Io, path: [:0]const u8) rar.Error!ArcReader {
 		var size: usize = 0;
 		var count: usize = 0;
 
@@ -94,7 +94,7 @@ const RarReader = struct {
 		};
 	}
 
-	fn next(ptr: *anyopaque, buf: []u8) !?Entry {
+	fn next(ptr: *anyopaque, buf: []u8) rar.Error!?Entry {
 		const self: *RarReader = @ptrCast(@alignCast(ptr));
 		if (!try self.head.read(self.archive)) {
 			return null;

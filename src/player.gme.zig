@@ -63,7 +63,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		return null;
 	}
 
-	pub inline fn init(obj: *pd.Object, av: []const Atom) !Gme {
+	pub inline fn init(obj: *pd.Object, av: []const Atom) pd.Oom!Gme {
 		inline for (0..nch) |_| {
 			_ = try obj.outlet(pd.s.signal());
 		}
@@ -86,7 +86,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		}
 	}
 
-	pub fn loadTrack(self: *Gme, index: usize) !void {
+	pub fn loadTrack(self: *Gme, index: usize) gm.Error!void {
 		const idx: c_uint = @truncate(index);
 		try self.emu.startTrack(idx);
 		const info = try self.emu.trackInfo(idx);
@@ -176,7 +176,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 	}
 
 	/// Load a .m3u file with the same name as current file if it exists
-	inline fn loadM3u(self: *Gme, gpa: Allocator, path: []const u8) !void {
+	inline fn loadM3u(self: *Gme, gpa: Allocator, path: []const u8) gm.Error!void {
 		const ext = ".m3u";
 		const end = std.mem.findScalarLast(u8, path, '.') orelse path.len;
 		var ext_path = try gpa.allocSentinel(u8, end + ext.len, 0);
@@ -188,7 +188,11 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		try self.emu.loadM3u(ext_path);
 	}
 
-	pub inline fn printAuto(self: *const Gme, trax: *const Meta, w: *Io.Writer) !void {
+	pub inline fn printAuto(
+		self: *const Gme,
+		trax: *const Meta,
+		w: *Io.Writer,
+	) Io.Writer.Error!void {
 		// general track info: %artist% - %title%
 		if (self.get(trax, .gen("game"))) |game| {
 			try game.write(w);
@@ -201,7 +205,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		}
 	}
 
-	pub fn seek(self: *Gme, msec: Float) !void {
+	pub fn seek(self: *Gme, msec: Float) gm.Error!void {
 		try self.emu.seekScaled(@intFromFloat(msec));
 	}
 
@@ -342,7 +346,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 			pd.dsp.add(performC, .{ self, sp[1].len, sp[1].vec, sp[0].vec });
 		}
 
-		pub inline fn extend() !void {
+		pub inline fn extend() Allocator.Error!void {
 			s_mask = .gen("mask");
 
 			dict = .init(gpa);
