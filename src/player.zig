@@ -230,7 +230,7 @@ pub fn Impl(Self: type) type { return struct {
 								try wr.fmtG(&mw, f);
 								break :blk mw.buffered();
 							},
-							.string => |s| s[0 .. s.len - 1 :0],
+							.string => |s| s,
 						};
 
 						if (cons == null or pctend < end + 3) {

@@ -32,26 +32,26 @@ pub const Arena = struct {
 
 	const Union = union(Enum) {
 		float: Float,
-		string: []const u8,
+		string: [:0]const u8,
 
 		pub fn asAtom(self: Union) Atom {
 			return switch (self) {
 				.float => |f| .float(f),
-				.string => |s| .symbol(.gen(s[0 .. s.len - 1 :0])),
+				.string => |s| .symbol(.gen(s)),
 			};
 		}
 
 		pub fn print(self: Union) void {
 			switch (self) {
 				.float => |f| pd.post.start("%g", .{ f }),
-				.string => |s| pd.post.start(s[0 .. s.len - 1 :0], .{}),
+				.string => |s| pd.post.start(s, .{}),
 			}
 		}
 
 		pub fn write(self: Union, w: *Writer) WriteError!void {
 			switch (self) {
 				.float => |f| try wr.fmtG(w, f),
-				.string => |s| try w.writeAll(s[0 .. s.len - 1 :0]),
+				.string => |s| try w.writeAll(s),
 			}
 		}
 	};
@@ -125,7 +125,7 @@ pub const Arena = struct {
 				break :blk .{ .float = std.mem.bytesToValue(Float, bytes) };
 			},
 			.string => .{
-				.string = self.buf.items[start..self.tbl.items[index].end],
+				.string = self.buf.items[start .. self.tbl.items[index].end - 1 :0],
 			},
 		};
 	}
