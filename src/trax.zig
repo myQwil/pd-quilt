@@ -219,8 +219,8 @@ const LangDict = struct {
 		return gop.value_ptr;
 	}
 
-	pub fn get(self: *const LangDict, pref_langs: []*Symbol) *const Arena {
-		for (pref_langs) |s| {
+	pub fn get(self: *const LangDict, prefs: []const *Symbol) *const Arena {
+		for (prefs) |s| {
 			// exact match
 			if (self.dict.getPtr(s)) |value| {
 				return value;
@@ -289,9 +289,9 @@ pub const Meta = struct {
 		return self;
 	}
 
-	pub fn get(self: *const Meta, key: *Symbol, pref_langs: []*Symbol) ?*const Arena {
+	pub fn get(self: *const Meta, key: *Symbol, prefs: []const *Symbol) ?*const Arena {
 		const ldict = self.map.get(key) orelse return null;
-		return ldict.get(pref_langs);
+		return ldict.get(prefs);
 	}
 };
 
@@ -591,7 +591,7 @@ pub const LangSet = extern struct {
 	/// length of the list
 	len: usize = 0,
 
-	pub inline fn slice(self: LangSet) []*Symbol {
+	pub inline fn slice(self: LangSet) []const *Symbol {
 		return self.ptr[0..self.len];
 	}
 

@@ -80,7 +80,7 @@ const PList = extern struct {
 			catch |e| return self.err(e)) orelse return;
 		defer hm.deinit(gpa);
 
-		const langs: []*Symbol = self.langs.slice();
+		const langs: []const *Symbol = self.langs.slice();
 		var iter = hm.map.iterator();
 		while (iter.next()) |kv| {
 			kv.value_ptr.get(langs).print(&self.obj, kv.key_ptr.*.name);
