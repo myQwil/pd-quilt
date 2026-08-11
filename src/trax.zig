@@ -185,7 +185,7 @@ const LangDict = struct {
 
 	const Dict = std.array_hash_map.Auto(*Symbol, Arena);
 
-	fn init(gpa: Allocator, lang: *Symbol, value: []u8) Oom!LangDict {
+	fn init(gpa: Allocator, lang: *Symbol, value: []const u8) Oom!LangDict {
 		var arena: Arena = try .init(gpa, value);
 		errdefer arena.deinit(gpa);
 		var dict: Dict = .empty;
@@ -205,7 +205,7 @@ const LangDict = struct {
 		self: *LangDict,
 		gpa: Allocator,
 		lang: *Symbol,
-		value: []u8,
+		value: []const u8,
 	) Oom!*Arena {
 		const gop = try self.dict.getOrPut(gpa, lang);
 		if (gop.found_existing) {
@@ -257,7 +257,7 @@ pub const Meta = struct {
 		gpa: Allocator,
 		key: *Symbol,
 		lang: *Symbol,
-		value: []u8,
+		value: []const u8,
 	) Oom!*Arena {
 		const gop = try self.map.getOrPut(gpa, key);
 		if (gop.found_existing) {
