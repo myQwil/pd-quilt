@@ -16,7 +16,7 @@ const Symbol = pd.Symbol;
 const Allocator = std.mem.Allocator;
 const Io = std.Io;
 const Meta = tx.Meta;
-const Arena = tx.Arena;
+const Pile = tx.Pile;
 
 var s_mask: *Symbol = undefined;
 
@@ -48,14 +48,14 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 
 	const Gme = @This();
 
-	var dict: std.AutoHashMap(*Symbol, *const fn(*const Gme) *const Arena) = undefined;
+	var dict: std.AutoHashMap(*Symbol, *const fn(*const Gme) *const Pile) = undefined;
 	pub fn freeDict() void {
 		dict.deinit();
 	}
 
-	pub fn get(self: *const Gme, trax: *const Meta, s: *Symbol) ?*const Arena {
-		if (trax.get(s, self.langs.slice())) |arena| {
-			return arena;
+	pub fn get(self: *const Gme, trax: *const Meta, s: *Symbol) ?*const Pile {
+		if (trax.get(s, self.langs.slice())) |pile| {
+			return pile;
 		}
 		if (dict.get(s)) |func| {
 			return func(self);
@@ -355,7 +355,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 				"path", "time", "ftime", "fade", "tracks", "voices",
 				"system", "game", "song", "author", "copyright", "comment", "dumper",
 			}) |field_name| {
-				try dict.put(.gen(field_name.ptr), @field(meta, field_name));
+				try dict.put(.gen(field_name.ptr), @field(dispatch, field_name));
 			}
 
 			const class: *pd.Class = Self.class;
@@ -368,45 +368,45 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		}
 	};}
 
-	const meta = struct {
-		fn path(self: *const Gme) *const Arena {
+	const dispatch = struct {
+		fn path(self: *const Gme) *const Pile {
 			return .string(std.mem.sliceTo(self.path.name, 0));
 		}
-		fn time(self: *const Gme) *const Arena {
+		fn time(self: *const Gme) *const Pile {
 			return .float(@floatFromInt(self.length()));
 		}
-		fn ftime(self: *const Gme) *const Arena {
+		fn ftime(self: *const Gme) *const Pile {
 			const ts = pr.timeSym(self.length());
 			return .string(std.mem.sliceTo(ts.name, 0));
 		}
-		fn fade(self: *const Gme) *const Arena {
+		fn fade(self: *const Gme) *const Pile {
 			return .float(@floatFromInt(self.info.fade_length));
 		}
-		fn tracks(self: *const Gme) *const Arena {
+		fn tracks(self: *const Gme) *const Pile {
 			return .float(@floatFromInt(self.emu.trackCount()));
 		}
-		fn voices(self: *const Gme) *const Arena {
+		fn voices(self: *const Gme) *const Pile {
 			return .float(@floatFromInt(self.emu.voiceCount()));
 		}
-		fn system(self: *const Gme) *const Arena {
+		fn system(self: *const Gme) *const Pile {
 			return .string(std.mem.sliceTo(self.info.system, 0));
 		}
-		fn game(self: *const Gme) *const Arena {
+		fn game(self: *const Gme) *const Pile {
 			return .string(std.mem.sliceTo(self.info.game, 0));
 		}
-		fn song(self: *const Gme) *const Arena {
+		fn song(self: *const Gme) *const Pile {
 			return .string(std.mem.sliceTo(self.info.song, 0));
 		}
-		fn author(self: *const Gme) *const Arena {
+		fn author(self: *const Gme) *const Pile {
 			return .string(std.mem.sliceTo(self.info.author, 0));
 		}
-		fn copyright(self: *const Gme) *const Arena {
+		fn copyright(self: *const Gme) *const Pile {
 			return .string(std.mem.sliceTo(self.info.copyright, 0));
 		}
-		fn comment(self: *const Gme) *const Arena {
+		fn comment(self: *const Gme) *const Pile {
 			return .string(std.mem.sliceTo(self.info.comment, 0));
 		}
-		fn dumper(self: *const Gme) *const Arena {
+		fn dumper(self: *const Gme) *const Pile {
 			return .string(std.mem.sliceTo(self.info.dumper, 0));
 		}
 	};

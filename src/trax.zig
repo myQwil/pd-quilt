@@ -17,7 +17,7 @@ const TraverseError = Oom || std.Io.Reader.DelimiterError;
 
 const trext = ".trax";
 
-pub const Arena = struct {
+pub const Pile = struct {
 	/// byte array
 	buf: std.ArrayList(u8) = .empty,
 	/// ending offsets and types of each item
@@ -56,44 +56,44 @@ pub const Arena = struct {
 		}
 	};
 
-	fn init(gpa: Allocator, str: []const u8) Oom!Arena {
-		var arena: Arena = .{};
+	fn init(gpa: Allocator, str: []const u8) Oom!Pile {
+		var pile: Pile = .{};
 		if (str.len > 0) {
-			try arena.append(gpa, str);
+			try pile.append(gpa, str);
 		}
-		return arena;
+		return pile;
 	}
 
-	fn deinit(self: *Arena, gpa: Allocator) void {
+	fn deinit(self: *Pile, gpa: Allocator) void {
 		self.buf.deinit(gpa);
 		self.tbl.deinit(gpa);
 	}
 
 	const one = struct {
 		var entry: Entry = .{};
-		var arena: Arena = .{ .tbl = .{ .items = (&entry)[0..1], .capacity = 0 }};
+		var pile: Pile = .{ .tbl = .{ .items = (&entry)[0..1], .capacity = 0 }};
 		var float: Float = 0;
 	};
 
-	pub fn float(f: Float) *const Arena {
+	pub fn float(f: Float) *const Pile {
 		one.float = f;
-		one.arena.buf.items = @constCast(std.mem.asBytes(&one.float));
-		one.entry = .{ .typ = .float, .end = @truncate(one.arena.buf.items.len) };
-		return &one.arena;
+		one.pile.buf.items = @constCast(std.mem.asBytes(&one.float));
+		one.entry = .{ .typ = .float, .end = @truncate(one.pile.buf.items.len) };
+		return &one.pile;
 	}
 
-	pub fn string(str: [:0]const u8) *const Arena {
-		one.arena.buf.items.len = str.len + 1;
-		one.arena.buf.items.ptr = @constCast(str.ptr);
-		one.entry = .{ .typ = .string, .end = @truncate(one.arena.buf.items.len) };
-		return &one.arena;
+	pub fn string(str: [:0]const u8) *const Pile {
+		one.pile.buf.items.len = str.len + 1;
+		one.pile.buf.items.ptr = @constCast(str.ptr);
+		one.entry = .{ .typ = .string, .end = @truncate(one.pile.buf.items.len) };
+		return &one.pile;
 	}
 
-	pub fn parse(str: [:0]const u8) *const Arena {
+	pub fn parse(str: [:0]const u8) *const Pile {
 		return if (std.fmt.parseFloat(Float, str)) |f| .float(f) else |_| .string(str);
 	}
 
-	fn grow(self: *Arena, gpa: Allocator, amount: usize, t: Enum) Oom!usize {
+	fn grow(self: *Pile, gpa: Allocator, amount: usize, t: Enum) Oom!usize {
 		try self.buf.ensureUnusedCapacity(gpa, amount);
 		try self.tbl.ensureUnusedCapacity(gpa, 1);
 
@@ -105,7 +105,7 @@ pub const Arena = struct {
 		return old_len;
 	}
 
-	fn append(self: *Arena, gpa: Allocator, str: []const u8) Oom!void {
+	fn append(self: *Pile, gpa: Allocator, str: []const u8) Oom!void {
 		if (std.fmt.parseFloat(Float, str)) |f| {
 			const start = try self.grow(gpa, @sizeOf(Float), .float);
 			@memcpy(self.buf.items[start..][0..@sizeOf(Float)], std.mem.asBytes(&f));
@@ -116,7 +116,7 @@ pub const Arena = struct {
 		}
 	}
 
-	pub fn get(self: *const Arena, index: usize) Union {
+	pub fn get(self: *const Pile, index: usize) Union {
 		std.debug.assert(index < self.tbl.items.len);
 		const start = if (index == 0) 0 else self.tbl.items[index - 1].end;
 		return switch (self.tbl.items[index].typ) {
@@ -131,7 +131,7 @@ pub const Arena = struct {
 	}
 
 	pub fn send(
-		self: *const Arena,
+		self: *const Pile,
 		gpa: Allocator,
 		outlet: *Outlet,
 		key: *Symbol,
@@ -145,14 +145,14 @@ pub const Arena = struct {
 			self.doSend(outlet, key, &arr);
 		}
 	}
-	fn doSend(self: *const Arena, outlet: *Outlet, key: *Symbol, atoms: []Atom) void {
+	fn doSend(self: *const Pile, outlet: *Outlet, key: *Symbol, atoms: []Atom) void {
 		for (0..self.tbl.items.len) |i| {
 			atoms[i] = self.get(i).asAtom();
 		}
 		outlet.anything(key, atoms[0..self.tbl.items.len]);
 	}
 
-	pub fn print(self: *const Arena, obj: *pd.Object, key: [*:0]const u8) void {
+	pub fn print(self: *const Pile, obj: *pd.Object, key: [*:0]const u8) void {
 		pd.post.start("%s:", .{ key });
 		if (self.tbl.items.len > 1) {
 			for (0..self.tbl.items.len) |i| {
@@ -166,7 +166,7 @@ pub const Arena = struct {
 		pd.post.log(obj, .normal, "", .{});
 	}
 
-	pub fn write(self: *const Arena, w: *Writer) WriteError!void {
+	pub fn write(self: *const Pile, w: *Writer) WriteError!void {
 		if (self.tbl.items.len <= 0) {
 			return;
 		}
@@ -178,22 +178,22 @@ pub const Arena = struct {
 	}
 };
 
-const LangDict = struct {
+const Tag = struct {
 	dict: Dict,
 	/// index of default entry
 	default: usize = 0,
 
-	const Dict = std.array_hash_map.Auto(*Symbol, Arena);
+	const Dict = std.array_hash_map.Auto(*Symbol, Pile);
 
-	fn init(gpa: Allocator, lang: *Symbol, value: []const u8) Oom!LangDict {
-		var arena: Arena = try .init(gpa, value);
-		errdefer arena.deinit(gpa);
+	fn init(gpa: Allocator, lang: *Symbol, value: []const u8) Oom!Tag {
+		var pile: Pile = try .init(gpa, value);
+		errdefer pile.deinit(gpa);
 		var dict: Dict = .empty;
-		try dict.put(gpa, lang, arena);
+		try dict.put(gpa, lang, pile);
 		return .{ .dict = dict };
 	}
 
-	fn deinit(self: *LangDict, gpa: Allocator) void {
+	fn deinit(self: *Tag, gpa: Allocator) void {
 		var iter = self.dict.iterator();
 		while (iter.next()) |kv| {
 			kv.value_ptr.deinit(gpa);
@@ -202,11 +202,11 @@ const LangDict = struct {
 	}
 
 	fn add(
-		self: *LangDict,
+		self: *Tag,
 		gpa: Allocator,
 		lang: *Symbol,
 		value: []const u8,
-	) Oom!*Arena {
+	) Oom!*Pile {
 		const gop = try self.dict.getOrPut(gpa, lang);
 		if (gop.found_existing) {
 			try gop.value_ptr.append(gpa, value);
@@ -219,7 +219,7 @@ const LangDict = struct {
 		return gop.value_ptr;
 	}
 
-	pub fn get(self: *const LangDict, prefs: []const *Symbol) *const Arena {
+	pub fn get(self: *const Tag, prefs: []const *Symbol) *const Pile {
 		for (prefs) |s| {
 			// exact match
 			if (self.dict.getPtr(s)) |value| {
@@ -240,16 +240,16 @@ const LangDict = struct {
 };
 
 pub const Meta = struct {
-	map: Map = .empty,
+	data: Data = .empty,
 
-	const Map = std.array_hash_map.Auto(*Symbol, LangDict);
+	const Data = std.array_hash_map.Auto(*Symbol, Tag);
 
 	pub fn deinit(self: *Meta, gpa: Allocator) void {
-		var iter = self.map.iterator();
+		var iter = self.data.iterator();
 		while (iter.next()) |kv| {
 			kv.value_ptr.deinit(gpa);
 		}
-		self.map.deinit(gpa);
+		self.data.deinit(gpa);
 	}
 
 	pub fn add(
@@ -258,8 +258,8 @@ pub const Meta = struct {
 		key: *Symbol,
 		lang: *Symbol,
 		value: []const u8,
-	) Oom!*Arena {
-		const gop = try self.map.getOrPut(gpa, key);
+	) Oom!*Pile {
+		const gop = try self.data.getOrPut(gpa, key);
 		if (gop.found_existing) {
 			return try gop.value_ptr.add(gpa, lang, value);
 		} else {
@@ -289,8 +289,8 @@ pub const Meta = struct {
 		return self;
 	}
 
-	pub fn get(self: *const Meta, key: *Symbol, prefs: []const *Symbol) ?*const Arena {
-		const ldict = self.map.get(key) orelse return null;
+	pub fn get(self: *const Meta, key: *Symbol, prefs: []const *Symbol) ?*const Pile {
+		const ldict = self.data.get(key) orelse return null;
 		return ldict.get(prefs);
 	}
 };
@@ -416,16 +416,16 @@ fn traverseMeta(
 	file_path: [:0]const u8,
 ) TraverseError!void {
 	if (parents.contains(file_path)) {
-		return err(meta.map.count(), error.InfiniteRecursion, file_path.ptr);
+		return err(meta.data.count(), error.InfiniteRecursion, file_path.ptr);
 	}
 	try parents.put(file_path, {});
 	defer _ = parents.remove(file_path);
 
 	const file = Io.Dir.cwd().openFile(io, file_path, .{ .mode = .read_only })
-		catch |e| return err(meta.map.count(), e, file_path.ptr);
+		catch |e| return err(meta.data.count(), e, file_path.ptr);
 	defer file.close(io);
 
-	var value: ?*Arena = null;
+	var pile: ?*Pile = null;
 	var buf: [std.fs.max_path_bytes:0]u8 = undefined;
 	var r = file.reader(io, &buf);
 	const base_dir = std.fs.path.dirname(file_path) orelse ".";
@@ -444,12 +444,12 @@ fn traverseMeta(
 
 		// :multiline
 		if (line[0] == ':') {
-			if (value) |v| {
-				try v.append(gpa, line[1..]);
+			if (pile) |p| {
+				try p.append(gpa, line[1..]);
 			}
 			continue;
 		} else {
-			value = null;
+			pile = null;
 		}
 
 		// @path
@@ -461,7 +461,7 @@ fn traverseMeta(
 		if (line[0] != '!') {
 			const eql = find(line, '=') orelse continue;
 			const kl = keyLang(line[0 .. trimEnd(line[0..eql], " \t") + 1]);
-			value = try meta.add(gpa, kl.key, kl.lang, line[eql + 1 ..]);
+			pile = try meta.add(gpa, kl.key, kl.lang, line[eql + 1 ..]);
 			continue;
 		}
 
@@ -474,7 +474,7 @@ fn traverseMeta(
 				break :blk arg[trimStart(arg, " \t")..];
 			};
 			if (arg.len == 0 or arg[0] != '@') {
-				err(meta.map.count(), error.IncludeSyntaxError, file_path.ptr);
+				err(meta.data.count(), error.IncludeSyntaxError, file_path.ptr);
 				continue;
 			}
 			const resolved = try resolveZ(gpa, &.{ base_dir, arg[1..] });

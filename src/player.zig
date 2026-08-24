@@ -12,7 +12,7 @@ const Allocator = std.mem.Allocator;
 const Io = std.Io;
 const Writer = Io.Writer;
 const Meta = tx.Meta;
-const Arena = tx.Arena;
+const Pile = tx.Pile;
 
 const toggle = @import("toggle.zig").toggle;
 const find = std.mem.findScalar;
@@ -138,7 +138,7 @@ pub fn Impl(Self: type) type { return struct {
 	const parentConstPtr = Self.parentConstPtr;
 
 	const Base = Self.Base;
-	const GetMetaFn = fn(*const Base, *const Meta, *Symbol) ?*const Arena;
+	const GetMetaFn = fn(*const Base, *const Meta, *Symbol) ?*const Pile;
 	/// Returns the value of a given metadata field if available.
 	const bGet: GetMetaFn = Base.get;
 	/// Returns a trax.Meta object
@@ -157,7 +157,7 @@ pub fn Impl(Self: type) type { return struct {
 	const bTrackCount: fn(*const Base) callconv(.@"inline") usize = Base.trackCount;
 
 
-	fn getNone(_: *const Base, _: *const Meta, _: *Symbol) ?*const Arena {
+	fn getNone(_: *const Base, _: *const Meta, _: *Symbol) ?*const Pile {
 		return null;
 	}
 
@@ -215,15 +215,15 @@ pub fn Impl(Self: type) type { return struct {
 					try w.writeAll(str[pos..end]);
 					try w.writeByte(0);
 					const key: *Symbol = .gen(w.buffer[kpos..][0 .. end - pos :0].ptr);
-					const meta: *const Arena = getfn(base, &trax, key) orelse &.{};
+					const pile: *const Pile = getfn(base, &trax, key) orelse &.{};
 					w.end = kpos;
 
 					var mbuf: [std.fmt.float.bufferSize(.decimal, Float)]u8 = undefined;
-					for (0..meta.tbl.items.len) |j| {
+					for (0..pile.tbl.items.len) |j| {
 						if (j > 0) {
 							try w.writeByte('/');
 						}
-						const val = meta.get(j);
+						const val = pile.get(j);
 						const mstr: []const u8 = switch (val) {
 							.float => |f| blk: {
 								var mw: Writer = .fixed(&mbuf);

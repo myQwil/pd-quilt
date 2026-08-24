@@ -18,7 +18,7 @@ const Allocator = std.mem.Allocator;
 const Io = std.Io;
 pub const Subtitle = av.Subtitle;
 const Meta = tx.Meta;
-const Arena = tx.Arena;
+const Pile = tx.Pile;
 
 var s_pos: *Symbol = undefined;
 var s_bpm: *Symbol = undefined;
@@ -83,7 +83,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 	const Av = @This();
 
-	var dict: std.AutoHashMap(*Symbol, *const fn(*const Av) *const Arena) = undefined;
+	var dict: std.AutoHashMap(*Symbol, *const fn(*const Av) *const Pile) = undefined;
 	pub fn freeDict() void {
 		dict.deinit();
 	}
@@ -247,9 +247,9 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		return self.playlist.len;
 	}
 
-	pub fn get(self: *const Av, trax: *const Meta, s: *Symbol) ?*const Arena {
-		if (trax.get(s, self.langs.slice())) |arena| {
-			return arena;
+	pub fn get(self: *const Av, trax: *const Meta, s: *Symbol) ?*const Pile {
+		if (trax.get(s, self.langs.slice())) |pile| {
+			return pile;
 		}
 		if (dict.get(s)) |func| {
 			return func(self);
@@ -370,7 +370,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 				"path", "time", "ftime", "tracks",
 				"samplefmt", "samplerate", "bitrate", "codec",
 			}) |field_name| {
-				try dict.put(.gen(field_name), @field(meta, field_name));
+				try dict.put(.gen(field_name), @field(dispatch, field_name));
 			}
 
 			const class: *pd.Class = Self.class;
@@ -383,32 +383,32 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		}
 	};}
 
-	const meta = struct {
-		fn path(self: *const Av) *const Arena {
+	const dispatch = struct {
+		fn path(self: *const Av) *const Pile {
 			return .string(std.mem.sliceTo(self.format.url, 0));
 		}
-		fn time(self: *const Av) *const Arena {
+		fn time(self: *const Av) *const Pile {
 			return .float(@as(Float, @floatFromInt(self.format.duration)) / 1000.0);
 		}
-		fn ftime(self: *const Av) *const Arena {
+		fn ftime(self: *const Av) *const Pile {
 			const ts = pr.timeSym(@divTrunc(self.format.duration, 1000));
 			return .string(std.mem.sliceTo(ts.name, 0));
 		}
-		fn tracks(self: *const Av) *const Arena {
+		fn tracks(self: *const Av) *const Pile {
 			return .float(@floatFromInt(self.trackCount()));
 		}
-		fn samplefmt(self: *const Av) *const Arena {
+		fn samplefmt(self: *const Av) *const Pile {
 			const name = self.audio.ctx.sample_fmt.getName();
 			return .string(if (name) |s| std.mem.sliceTo(s, 0) else "unknown");
 		}
-		fn samplerate(self: *const Av) *const Arena {
+		fn samplerate(self: *const Av) *const Pile {
 			return .float(@floatFromInt(self.audio.ctx.sample_rate));
 		}
-		fn bitrate(self: *const Av) *const Arena {
+		fn bitrate(self: *const Av) *const Pile {
 			const bit_rate: Float = @floatFromInt(self.format.bit_rate);
 			return .float(bit_rate / 1000);
 		}
-		fn codec(self: *const Av) *const Arena {
+		fn codec(self: *const Av) *const Pile {
 			return .string(@tagName(self.audio.ctx.codec_id));
 		}
 	};

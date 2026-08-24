@@ -67,21 +67,21 @@ const PList = extern struct {
 			catch |e| return self.err(e)) orelse return;
 		defer hm.deinit(gpa);
 
-		if (hm.get(s, self.langs.slice())) |arena| {
+		if (hm.get(s, self.langs.slice())) |pile| {
 			self.out_idx.float(@floatFromInt(i));
-			arena.send(gpa, self.out_val, s) catch |e| self.err(e);
+			pile.send(gpa, self.out_val, s) catch |e| self.err(e);
 		}
 	}
 
 	fn dumpC(p: *Pd, f: Float) callconv(.c) void {
 		const self = parentPtr(p);
 		const i = indexFromFloat(f, self.plist.len) orelse return;
-		var hm = (Meta.fromPath(gpa, io, self.plist.ptr[i].name)
+		var meta = (Meta.fromPath(gpa, io, self.plist.ptr[i].name)
 			catch |e| return self.err(e)) orelse return;
-		defer hm.deinit(gpa);
+		defer meta.deinit(gpa);
 
 		const langs: []const *Symbol = self.langs.slice();
-		var iter = hm.map.iterator();
+		var iter = meta.data.iterator();
 		while (iter.next()) |kv| {
 			kv.value_ptr.get(langs).print(&self.obj, kv.key_ptr.*.name);
 		}
