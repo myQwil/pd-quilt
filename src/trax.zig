@@ -457,31 +457,30 @@ fn traverseMeta(
 			break;
 		}
 
-		// key[lang]=value
-		if (line[0] != '!') {
-			const eql = find(line, '=') orelse continue;
-			const kl = keyLang(line[0 .. trimEnd(line[0..eql], " \t") + 1]);
-			pile = try meta.add(gpa, kl.key, kl.lang, line[eql + 1 ..]);
+		// !include @path
+		if (line[0] == '!') {
+			const cmd = line[1..];
+			const inc = "include";
+			if (std.mem.startsWith(u8, cmd, inc)) {
+				const arg = blk: {
+					const arg = cmd[inc.len..];
+					break :blk arg[trimStart(arg, " \t")..];
+				};
+				if (arg.len == 0 or arg[0] != '@') {
+					err(meta.data.count(), error.IncludeSyntaxError, file_path.ptr);
+					continue;
+				}
+				const resolved = try resolveZ(gpa, &.{ base_dir, arg[1..] });
+				defer gpa.free(resolved);
+				try traverseMeta(gpa, io, meta, parents, resolved);
+			}
 			continue;
 		}
 
-		// !include @path
-		const cmd = line[1..];
-		const inc = "include";
-		if (std.mem.startsWith(u8, cmd, inc)) {
-			const arg = blk: {
-				const arg = cmd[inc.len..];
-				break :blk arg[trimStart(arg, " \t")..];
-			};
-			if (arg.len == 0 or arg[0] != '@') {
-				err(meta.data.count(), error.IncludeSyntaxError, file_path.ptr);
-				continue;
-			}
-			const resolved = try resolveZ(gpa, &.{ base_dir, arg[1..] });
-			defer gpa.free(resolved);
-			try traverseMeta(gpa, io, meta, parents, resolved);
-			continue;
-		}
+		// key[lang]=value
+		const eql = find(line, '=') orelse continue;
+		const kl = keyLang(line[0 .. trimEnd(line[0..eql], " \t") + 1]);
+		pile = try meta.add(gpa, kl.key, kl.lang, line[eql + 1 ..]);
 	} else |e| if (e != error.EndOfStream) {
 		return e;
 	}
