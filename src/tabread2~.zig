@@ -18,7 +18,7 @@ const TabRead2 = extern struct {
 
 	const name = "tabread2~";
 	pub var class: *pd.Class = undefined;
-	pub const parentPtr = pd.parentPtr(TabRead2);
+	pub const parentPtr = pd.parentPtr(TabRead2, "obj");
 
 	fn performC(w: [*]usize) callconv(.c) [*]usize {
 		const self: *TabRead2 = @ptrFromInt(w[1]);

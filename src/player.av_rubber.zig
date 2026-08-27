@@ -28,8 +28,8 @@ pub fn Impl(Root: type) type { return extern struct {
 	const Player = pr.Impl(Self);
 	const Rabbit = ra.Impl(Self);
 	const Rubber = ru.Impl(Self);
-	pub const parentPtr = pd.parentPtr(Self);
-	pub const parentConstPtr = pd.parentConstPtr(Self);
+	pub const parentPtr = pd.parentPtr(Self, "obj");
+	pub const parentConstPtr = pd.parentConstPtr(Self, "obj");
 
 	pub inline fn err(self: *const Self, e: anyerror) void {
 		pd.post.err(self, Root.name ++ ": %s", .{ @errorName(e).ptr });

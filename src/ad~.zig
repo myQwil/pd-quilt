@@ -41,7 +41,7 @@ const AttackDecay = extern struct {
 
 	const name = "ad~";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(AttackDecay);
+	const parentPtr = pd.parentPtr(AttackDecay, "obj");
 
 	fn performC(w: [*]usize) callconv(.c) [*]usize {
 		const self: *AttackDecay = @ptrFromInt(w[1]);

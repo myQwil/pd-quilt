@@ -16,7 +16,7 @@ const Unpaq = extern struct {
 	const name = "unpaq";
 	var class: *pd.Class = undefined;
 	var dot: *Symbol = undefined; // skips args
-	const parentConstPtr = pd.parentConstPtr(Unpaq);
+	const parentConstPtr = pd.parentConstPtr(Unpaq, "obj");
 
 	const Outlet = struct {
 		out: *pd.Outlet,

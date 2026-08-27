@@ -20,7 +20,7 @@ const Pulse = extern struct {
 
 	const name = "pulse~";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(Pulse);
+	const parentPtr = pd.parentPtr(Pulse, "obj");
 
 	fn edgeC(p: *Pd, f: Float) callconv(.c) void {
 		parentPtr(p).edge.* = f;

@@ -21,8 +21,8 @@ pub fn Tet(T: type) type { return extern struct {
 
 	const Self = @This();
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(Self);
-	pub const parentConstPtr = pd.parentConstPtr(Self);
+	const parentPtr = pd.parentPtr(Self, "obj");
+	pub const parentConstPtr = pd.parentConstPtr(Self, "obj");
 
 	const getK: fn(tet: Float) callconv(.@"inline") f64 = T.getK;
 	const getMin: fn(k: f64, ref: Float) callconv(.@"inline") f64 = T.getMin;

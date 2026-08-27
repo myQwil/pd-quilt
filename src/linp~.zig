@@ -24,7 +24,7 @@ const LinPSignal = extern struct {
 
 	const name = "linp~";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(LinPSignal);
+	const parentPtr = pd.parentPtr(LinPSignal, "obj");
 
 	fn tglPause(self: *LinPSignal, av: []const pd.Atom) bool {
 		const changed = tg.toggle(&self.paused, av);

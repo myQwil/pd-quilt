@@ -15,8 +15,8 @@ const FlDec = extern struct {
 
 	const name = "fldec";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(FlDec);
-	const parentConstPtr = pd.parentConstPtr(FlDec);
+	const parentPtr = pd.parentPtr(FlDec, "obj");
+	const parentConstPtr = pd.parentConstPtr(FlDec, "obj");
 
 	fn printC(p: *const Pd) callconv(.c) void {
 		const self = parentConstPtr(p);

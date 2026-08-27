@@ -90,8 +90,8 @@ const BinOp = extern struct {
 
 	const Init = fn (*Class, []const Atom) anyerror!*Pd;
 	const BluntImpl = Blunt.Impl(BinOp);
-	const parentPtr = pd.parentPtr(BinOp);
-	const parentConstPtr = pd.parentConstPtr(BinOp);
+	const parentPtr = pd.parentPtr(BinOp, "obj");
+	const parentConstPtr = pd.parentConstPtr(BinOp, "obj");
 
 	fn printC(p: *const Pd) callconv(.c) void {
 		const self = parentConstPtr(p);
@@ -257,8 +257,8 @@ const UnOp = extern struct {
 	blunt: Blunt,
 
 	const BluntImpl = Blunt.Impl(UnOp);
-	const parentPtr = pd.parentPtr(UnOp);
-	const parentConstPtr = pd.parentConstPtr(UnOp);
+	const parentPtr = pd.parentPtr(UnOp, "obj");
+	const parentConstPtr = pd.parentConstPtr(UnOp, "obj");
 
 	fn printC(p: *const Pd) callconv(.c) void {
 		const self = parentConstPtr(p);
@@ -362,8 +362,8 @@ const Bang = extern struct {
 	const name = "`b";
 	var class: *Class = undefined;
 	const BluntImpl = Blunt.Impl(Bang);
-	const parentPtr = pd.parentPtr(Bang);
-	const parentConstPtr = pd.parentConstPtr(Bang);
+	const parentPtr = pd.parentPtr(Bang, "obj");
+	const parentConstPtr = pd.parentConstPtr(Bang, "obj");
 
 	fn bangC(p: *const Pd) callconv(.c) void {
 		const self = parentConstPtr(p);
@@ -420,8 +420,8 @@ const Sym = extern struct {
 	const name = "`s";
 	var class: *Class = undefined;
 	const BluntImpl = Blunt.Impl(Sym);
-	const parentPtr = pd.parentPtr(Sym);
-	const parentConstPtr = pd.parentConstPtr(Sym);
+	const parentPtr = pd.parentPtr(Sym, "obj");
+	const parentConstPtr = pd.parentConstPtr(Sym, "obj");
 
 	fn printC(p: *const Pd) callconv(.c) void {
 		const self = parentConstPtr(p);

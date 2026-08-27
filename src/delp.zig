@@ -22,8 +22,8 @@ const DelP = extern struct {
 
 	const name = "delp";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(DelP);
-	const parentConstPtr = pd.parentConstPtr(DelP);
+	const parentPtr = pd.parentPtr(DelP, "obj");
+	const parentConstPtr = pd.parentConstPtr(DelP, "obj");
 
 	fn timeoutC(self: *const DelP) callconv(.c) void {
 		self.out_b.bang();

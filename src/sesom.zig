@@ -13,7 +13,7 @@ const Sesom = extern struct {
 
 	const name = "sesom";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(Sesom);
+	const parentPtr = pd.parentPtr(Sesom, "obj");
 
 	fn floatC(p: *Pd, f: Float) callconv(.c) void {
 		const self = parentPtr(p);

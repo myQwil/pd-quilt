@@ -43,7 +43,7 @@ const Adsr = extern struct {
 
 	const name = "adsr~";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(Adsr);
+	const parentPtr = pd.parentPtr(Adsr, "obj");
 
 	fn performC(w: [*]usize) callconv(.c) [*]usize {
 		const self: *Adsr = @ptrFromInt(w[1]);

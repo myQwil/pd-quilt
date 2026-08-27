@@ -16,8 +16,8 @@ pub fn Slope(T: type) type { return extern struct {
 
 	const Self = @This();
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(Self);
-	pub const parentConstPtr = pd.parentConstPtr(Self);
+	const parentPtr = pd.parentPtr(Self, "obj");
+	pub const parentConstPtr = pd.parentConstPtr(Self, "obj");
 
 	const getK: fn(min: f64, max: f64, run: f64) callconv(.@"inline") f64 = T.getK;
 

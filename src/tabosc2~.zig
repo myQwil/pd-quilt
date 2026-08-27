@@ -25,7 +25,7 @@ const TabOsc2 = extern struct {
 	const name = "tabosc2~";
 	const default_len = 512.0;
 	pub var class: *pd.Class = undefined;
-	pub const parentPtr = pd.parentPtr(TabOsc2);
+	pub const parentPtr = pd.parentPtr(TabOsc2, "obj");
 
 	fn performC(w: [*]usize) callconv(.c) [*]usize {
 		const self: *TabOsc2 = @ptrFromInt(w[1]);

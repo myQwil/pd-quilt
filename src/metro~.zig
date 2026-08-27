@@ -21,7 +21,7 @@ const MetroSignal = extern struct {
 
 	const name = "metro~";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(MetroSignal);
+	const parentPtr = pd.parentPtr(MetroSignal, "obj");
 
 	fn performC(w: [*]usize) callconv(.c) [*]usize {
 		const self: *MetroSignal = @ptrFromInt(w[1]);

@@ -21,8 +21,8 @@ const Chrono = extern struct {
 
 	const name = "chrono";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(Chrono);
-	const parentConstPtr = pd.parentConstPtr(Chrono);
+	const parentPtr = pd.parentPtr(Chrono, "obj");
+	const parentConstPtr = pd.parentConstPtr(Chrono, "obj");
 
 	fn setTime(self: *Chrono) void {
 		self.settime = pd.time();

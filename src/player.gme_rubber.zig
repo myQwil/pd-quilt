@@ -21,8 +21,8 @@ pub fn Impl(Root: type) type { return extern struct {
 	pub var class: *pd.Class = undefined;
 	pub const gpa = pd.gpa;
 	pub const io = std.Io.Threaded.global_single_threaded.io();
-	pub const parentPtr = pd.parentPtr(Self);
-	pub const parentConstPtr = pd.parentConstPtr(Self);
+	pub const parentPtr = pd.parentPtr(Self, "obj");
+	pub const parentConstPtr = pd.parentConstPtr(Self, "obj");
 
 	// Implementations
 	pub const Base = gm.Base(Root.nch, ra.frames);

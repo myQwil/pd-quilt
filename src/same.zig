@@ -16,8 +16,8 @@ const Same = extern struct {
 
 	const name = "same";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(Same);
-	const parentConstPtr = pd.parentConstPtr(Same);
+	const parentPtr = pd.parentPtr(Same, "obj");
+	const parentConstPtr = pd.parentConstPtr(Same, "obj");
 
 	fn bangC(p: *const Pd) callconv(.c) void {
 		const self = parentConstPtr(p);

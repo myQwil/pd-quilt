@@ -113,8 +113,8 @@ const Range = extern struct {
 	const name = "_rand_range";
 	const Rnd = Rand.Impl(Range);
 	pub var class: *pd.Class = undefined;
-	pub const parentPtr = pd.parentPtr(Range);
-	pub const parentConstPtr = pd.parentConstPtr(Range);
+	pub const parentPtr = pd.parentPtr(Range, "obj");
+	pub const parentConstPtr = pd.parentConstPtr(Range, "obj");
 
 	fn printC(p: *const Pd) callconv(.c) void {
 		const self = parentConstPtr(p);
@@ -201,8 +201,8 @@ const InArray = extern struct {
 	const name = "_rand_array";
 	const Rnd = Rand.Impl(InArray);
 	pub var class: *pd.Class = undefined;
-	pub const parentPtr = pd.parentPtr(InArray);
-	pub const parentConstPtr = pd.parentConstPtr(InArray);
+	pub const parentPtr = pd.parentPtr(InArray, "obj");
+	pub const parentConstPtr = pd.parentConstPtr(InArray, "obj");
 
 	inline fn err(self: *const InArray, e: anyerror) void {
 		pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
@@ -281,8 +281,8 @@ const ExArray = extern struct {
 	const name = "_rand_garray";
 	const Rnd = Rand.Impl(ExArray);
 	pub var class: *pd.Class = undefined;
-	pub const parentPtr = pd.parentPtr(ExArray);
-	pub const parentConstPtr = pd.parentConstPtr(ExArray);
+	pub const parentPtr = pd.parentPtr(ExArray, "obj");
+	pub const parentConstPtr = pd.parentConstPtr(ExArray, "obj");
 
 	const Error = pd.GArray.GetError;
 

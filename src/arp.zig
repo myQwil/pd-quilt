@@ -352,8 +352,8 @@ const InArray = extern struct {
 	const WordInlets = @import("winlet.zig").WordInlets;
 	const name = "_arp_inarray";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(InArray);
-	const parentConstPtr = pd.parentConstPtr(InArray);
+	const parentPtr = pd.parentPtr(InArray, "obj");
+	const parentConstPtr = pd.parentConstPtr(InArray, "obj");
 
 	inline fn err(self: *const InArray, e: anyerror) void {
 		pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
@@ -439,8 +439,8 @@ const ExArray = extern struct {
 
 	const name = "_arp_exarray";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(ExArray);
-	const parentConstPtr = pd.parentConstPtr(ExArray);
+	const parentPtr = pd.parentPtr(ExArray, "obj");
+	const parentConstPtr = pd.parentConstPtr(ExArray, "obj");
 
 	const Error = pd.GArray.GetError || pd.Oom;
 

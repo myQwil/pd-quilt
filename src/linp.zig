@@ -29,7 +29,7 @@ const LinP = extern struct {
 
 	const name = "linp";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(LinP);
+	const parentPtr = pd.parentPtr(LinP, "obj");
 
 	fn setPause(self: *LinP, state: bool) void {
 		if (tg.set(&self.paused, state)) {

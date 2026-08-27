@@ -45,8 +45,8 @@ const Is = extern struct {
 
 	const name = "is";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(Is);
-	const parentConstPtr = pd.parentConstPtr(Is);
+	const parentPtr = pd.parentPtr(Is, "obj");
+	const parentConstPtr = pd.parentConstPtr(Is, "obj");
 
 	fn printC(p: *const Pd) callconv(.c) void {
 		const self = parentConstPtr(p);

@@ -14,8 +14,8 @@ const Has = extern struct {
 
 	const name = "has";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(Has);
-	const parentConstPtr = pd.parentConstPtr(Has);
+	const parentPtr = pd.parentPtr(Has, "obj");
+	const parentConstPtr = pd.parentConstPtr(Has, "obj");
 
 	fn bangC(p: *const Pd) callconv(.c) void {
 		const self = parentConstPtr(p);

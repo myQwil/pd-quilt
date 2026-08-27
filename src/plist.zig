@@ -21,7 +21,7 @@ const PList = extern struct {
 
 	const name = "plist";
 	var class: *pd.Class = undefined;
-	pub const parentPtr = pd.parentPtr(PList);
+	pub const parentPtr = pd.parentPtr(PList, "obj");
 
 	inline fn err(self: *const PList, e: anyerror) void {
 		pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });

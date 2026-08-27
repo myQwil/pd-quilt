@@ -173,7 +173,7 @@ const Radix = extern struct {
 
 	const name = "radix";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(Radix);
+	const parentPtr = pd.parentPtr(Radix, "obj");
 
 	inline fn err(self: *Radix, e: anyerror) void {
 		pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });

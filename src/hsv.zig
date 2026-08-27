@@ -20,8 +20,8 @@ const Hsv = extern struct {
 
 	const name = "hsv";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(Hsv);
-	const parentConstPtr = pd.parentConstPtr(Hsv);
+	const parentPtr = pd.parentPtr(Hsv, "obj");
+	const parentConstPtr = pd.parentConstPtr(Hsv, "obj");
 
 	fn bangC(pp: *const Pd) callconv(.c) void {
 		const self = parentConstPtr(pp);

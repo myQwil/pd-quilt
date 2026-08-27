@@ -40,8 +40,8 @@ const FlEnc = extern struct {
 
 	const name = "flenc";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(FlEnc);
-	const parentConstPtr = pd.parentConstPtr(FlEnc);
+	const parentPtr = pd.parentPtr(FlEnc, "obj");
+	const parentConstPtr = pd.parentConstPtr(FlEnc, "obj");
 
 	inline fn err(self: *const FlEnc, e: anyerror) void {
 		pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });

@@ -5,8 +5,8 @@
 	.minimum_zig_version = "0.16.0",
 	.dependencies = .{
 		.pd = .{
-			.url = "git+https://github.com/myQwil/pd#da8fc7d8b5835d915a5b8378b082837a0c487863",
-			.hash = "pd-0.56.2-DC007SplAgDZ1vI-0KSFu-7v27J-Ie1OhtFAmoFMBKoZ",
+			.url = "git+https://github.com/myQwil/pd#772e9376532b85deec0911a22d573371cef32a48",
+			.hash = "pd-0.56.2-DC007XplAgB15Eoo1-PrGBPZFnLhG-rFb8JuwybLsoQh",
 		},
 		.gme = .{
 			.url = "git+https://codeberg.org/myQwil/gme#0df3acddb89aa4461d7de8f2508f323eef322c4b",

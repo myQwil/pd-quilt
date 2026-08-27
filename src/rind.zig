@@ -20,8 +20,8 @@ pub const Rind = extern struct {
 
 	const name = "rind";
 	pub var class: *pd.Class = undefined;
-	pub const parentPtr = pd.parentPtr(Rind);
-	pub const parentConstPtr = pd.parentConstPtr(Rind);
+	pub const parentPtr = pd.parentPtr(Rind, "obj");
+	pub const parentConstPtr = pd.parentConstPtr(Rind, "obj");
 
 	fn printC(p: *const Pd) callconv(.c) void {
 		const self = parentConstPtr(p);
