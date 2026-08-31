@@ -30,6 +30,42 @@ pub const Pile = struct {
 		typ: Enum = .float,
 	};
 
+	fn grow(self: *Pile, gpa: Allocator, amount: usize, t: Enum) Oom!usize {
+		try self.buf.ensureUnusedCapacity(gpa, amount);
+		try self.tbl.ensureUnusedCapacity(gpa, 1);
+
+		const old_len = self.buf.items.len;
+		const new_len = old_len + amount;
+
+		self.buf.items.len = new_len;
+		self.tbl.appendAssumeCapacity(.{ .typ = t, .end = @intCast(new_len) });
+		return old_len;
+	}
+
+	fn append(self: *Pile, gpa: Allocator, str: []const u8) Oom!void {
+		if (std.fmt.parseFloat(Float, str)) |f| {
+			const start = try self.grow(gpa, @sizeOf(Float), .float);
+			@memcpy(self.buf.items[start..][0..@sizeOf(Float)], std.mem.asBytes(&f));
+		} else |_| {
+			const start = try self.grow(gpa, str.len + 1, .string);
+			@memcpy(self.buf.items[start..][0..str.len], str);
+			self.buf.items[self.buf.items.len - 1] = 0;
+		}
+	}
+
+	fn init(gpa: Allocator, str: []const u8) Oom!Pile {
+		var pile: Pile = .{};
+		if (str.len > 0) {
+			try pile.append(gpa, str);
+		}
+		return pile;
+	}
+
+	fn deinit(self: *Pile, gpa: Allocator) void {
+		self.buf.deinit(gpa);
+		self.tbl.deinit(gpa);
+	}
+
 	const Union = union(Enum) {
 		float: Float,
 		string: [:0]const u8,
@@ -56,66 +92,6 @@ pub const Pile = struct {
 		}
 	};
 
-	fn init(gpa: Allocator, str: []const u8) Oom!Pile {
-		var pile: Pile = .{};
-		if (str.len > 0) {
-			try pile.append(gpa, str);
-		}
-		return pile;
-	}
-
-	fn deinit(self: *Pile, gpa: Allocator) void {
-		self.buf.deinit(gpa);
-		self.tbl.deinit(gpa);
-	}
-
-	const one = struct {
-		var entry: Entry = .{};
-		var pile: Pile = .{ .tbl = .{ .items = (&entry)[0..1], .capacity = 0 }};
-		var float: Float = 0;
-	};
-
-	pub fn float(f: Float) *const Pile {
-		one.float = f;
-		one.pile.buf.items = @constCast(std.mem.asBytes(&one.float));
-		one.entry = .{ .typ = .float, .end = @truncate(one.pile.buf.items.len) };
-		return &one.pile;
-	}
-
-	pub fn string(str: [:0]const u8) *const Pile {
-		one.pile.buf.items.len = str.len + 1;
-		one.pile.buf.items.ptr = @constCast(str.ptr);
-		one.entry = .{ .typ = .string, .end = @truncate(one.pile.buf.items.len) };
-		return &one.pile;
-	}
-
-	pub fn parse(str: [:0]const u8) *const Pile {
-		return if (std.fmt.parseFloat(Float, str)) |f| .float(f) else |_| .string(str);
-	}
-
-	fn grow(self: *Pile, gpa: Allocator, amount: usize, t: Enum) Oom!usize {
-		try self.buf.ensureUnusedCapacity(gpa, amount);
-		try self.tbl.ensureUnusedCapacity(gpa, 1);
-
-		const old_len = self.buf.items.len;
-		const new_len = old_len + amount;
-
-		self.buf.items.len = new_len;
-		self.tbl.appendAssumeCapacity(.{ .typ = t, .end = @intCast(new_len) });
-		return old_len;
-	}
-
-	fn append(self: *Pile, gpa: Allocator, str: []const u8) Oom!void {
-		if (std.fmt.parseFloat(Float, str)) |f| {
-			const start = try self.grow(gpa, @sizeOf(Float), .float);
-			@memcpy(self.buf.items[start..][0..@sizeOf(Float)], std.mem.asBytes(&f));
-		} else |_| {
-			const start = try self.grow(gpa, str.len + 1, .string);
-			@memcpy(self.buf.items[start..][0..str.len], str);
-			self.buf.items[self.buf.items.len - 1] = 0;
-		}
-	}
-
 	pub fn get(self: *const Pile, index: usize) Union {
 		std.debug.assert(index < self.tbl.items.len);
 		const start = if (index == 0) 0 else self.tbl.items[index - 1].end;
@@ -128,6 +104,13 @@ pub const Pile = struct {
 				.string = self.buf.items[start .. self.tbl.items[index].end - 1 :0],
 			},
 		};
+	}
+
+	fn doSend(self: *const Pile, outlet: *Outlet, key: *Symbol, atoms: []Atom) void {
+		for (0..self.tbl.items.len) |i| {
+			atoms[i] = self.get(i).asAtom();
+		}
+		outlet.anything(key, atoms[0..self.tbl.items.len]);
 	}
 
 	pub fn send(
@@ -144,12 +127,6 @@ pub const Pile = struct {
 		} else {
 			self.doSend(outlet, key, &arr);
 		}
-	}
-	fn doSend(self: *const Pile, outlet: *Outlet, key: *Symbol, atoms: []Atom) void {
-		for (0..self.tbl.items.len) |i| {
-			atoms[i] = self.get(i).asAtom();
-		}
-		outlet.anything(key, atoms[0..self.tbl.items.len]);
 	}
 
 	pub fn print(self: *const Pile, obj: *pd.Object, key: [*:0]const u8) void {
@@ -175,6 +152,30 @@ pub const Pile = struct {
 			try w.writeByte('/');
 			try self.get(i).write(w);
 		}
+	}
+
+	const one = struct {
+		var entry: Entry = .{};
+		var pile: Pile = .{ .tbl = .{ .items = (&entry)[0..1], .capacity = 0 }};
+		var float: Float = 0;
+	};
+
+	pub fn float(f: Float) *const Pile {
+		one.float = f;
+		one.pile.buf.items = @constCast(std.mem.asBytes(&one.float));
+		one.entry = .{ .typ = .float, .end = @truncate(one.pile.buf.items.len) };
+		return &one.pile;
+	}
+
+	pub fn string(str: [:0]const u8) *const Pile {
+		one.pile.buf.items.len = str.len + 1;
+		one.pile.buf.items.ptr = @constCast(str.ptr);
+		one.entry = .{ .typ = .string, .end = @truncate(one.pile.buf.items.len) };
+		return &one.pile;
+	}
+
+	pub fn parse(str: [:0]const u8) *const Pile {
+		return if (std.fmt.parseFloat(Float, str)) |f| .float(f) else |_| .string(str);
 	}
 };
 
