@@ -2,7 +2,10 @@
 # first checking `.trax/filename.trax`, then `filename.trax`.
 
 # It is at this time that metadata traversal occurs.
-!include @../b.trax
+!include       =../b.trax
 
-track =1
-title =Foo (bar)
+track          =1
+title          =Foo (bar)
+
+[0]            >chap1.trax
+[1:23.456]     >chap2.trax

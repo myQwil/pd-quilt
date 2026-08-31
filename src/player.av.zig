@@ -187,7 +187,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 	pub inline fn getTrax(self: *const Av, gpa: Allocator, io: Io) Meta {
 		self.player.assertFileOpened() catch return .{};
-		return Meta.fromPath(gpa, io, self.format.url) catch Meta{} orelse .{};
+		return Meta.fromPath(gpa, io, self.format.url) catch Meta{};
 	}
 
 	pub inline fn open(

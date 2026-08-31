@@ -63,8 +63,8 @@ const PList = extern struct {
 	fn getC(p: *Pd, f: Float, s: *Symbol) callconv(.c) void {
 		const self = parentPtr(p);
 		const i = indexFromFloat(f, self.plist.len) orelse return;
-		var hm = (Meta.fromPath(gpa, io, self.plist.ptr[i].name)
-			catch |e| return self.err(e)) orelse return;
+		var hm = Meta.fromPath(gpa, io, self.plist.ptr[i].name)
+			catch |e| return self.err(e);
 		defer hm.deinit(gpa);
 
 		if (hm.get(s, self.langs.slice())) |pile| {
@@ -73,11 +73,21 @@ const PList = extern struct {
 		}
 	}
 
-	fn dumpC(p: *Pd, f: Float) callconv(.c) void {
+	fn dumpC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const pd.Atom) callconv(.c) void {
 		const self = parentPtr(p);
+		const a = av[0..ac];
+		const f = pd.floatArg(0, a) catch return;
 		const i = indexFromFloat(f, self.plist.len) orelse return;
-		var meta = (Meta.fromPath(gpa, io, self.plist.ptr[i].name)
-			catch |e| return self.err(e)) orelse return;
+		var meta: Meta = if (pd.floatArg(1, a)) |g| blk: {
+			var chaps = tx.getChapters(gpa, io, self.plist.ptr[i].name)
+				catch |e| return self.err(e);
+			defer chaps.deinit(gpa);
+			const chap = chaps.items[indexFromFloat(g, chaps.items.len) orelse return];
+			pd.post.log(p, .normal, "at %g:", .{ chap.time });
+			break :blk Meta.fromPath(gpa, io, chap.trax.name)
+				catch |e| return self.err(e);
+		} else |_| Meta.fromPath(gpa, io, self.plist.ptr[i].name)
+			catch |e| return self.err(e);
 		defer meta.deinit(gpa);
 
 		const langs: []const *Symbol = self.langs.slice();
@@ -119,7 +129,7 @@ const PList = extern struct {
 		class = try .init(PList, name, &.{}, initC, deinitC, .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);
-		class.addMethod(&.{ .float }, dumpC, .gen("dump"));
+		class.addMethod(&.{ .gimme }, dumpC, .gen("dump"));
 		class.addMethod(&.{ .gimme }, appendC, .gen("append"));
 		class.addMethod(&.{ .gimme }, langsC, .gen("langs"));
 		class.addMethod(&.{ .gimme }, readC, .gen("read"));

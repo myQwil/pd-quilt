@@ -96,7 +96,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 
 	pub inline fn getTrax(self: *const Gme, gpa: Allocator, io: Io) Meta {
 		self.player.assertFileOpened() catch return .{};
-		return Meta.fromPath(gpa, io, self.path.name) catch Meta{} orelse .{};
+		return Meta.fromPath(gpa, io, self.path.name) catch Meta{};
 	}
 
 	pub inline fn open(self: *Gme, gpa: Allocator, io: Io, av: []const Atom) !void {

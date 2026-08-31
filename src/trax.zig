@@ -1,12 +1,13 @@
 const std = @import("std");
 const pd = @import("pd");
 const wr = @import("write.zig");
+const iParse = @import("numparse.zig").iParse;
 
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
 const Outlet = pd.Outlet;
-const StringMap = std.StringHashMap(void);
+const StringMap = std.StringHashMapUnmanaged(void);
 const SymbolList = std.ArrayList(*Symbol);
 const Allocator = std.mem.Allocator;
 const Oom = Allocator.Error;
@@ -30,6 +31,16 @@ pub const Pile = struct {
 		typ: Enum = .float,
 	};
 
+	fn deinit(self: *Pile, gpa: Allocator) void {
+		self.buf.deinit(gpa);
+		self.tbl.deinit(gpa);
+	}
+
+	fn erase(self: *Pile) void {
+		self.buf.items.len = 0;
+		self.tbl.items.len = 0;
+	}
+
 	fn grow(self: *Pile, gpa: Allocator, amount: usize, t: Enum) Oom!usize {
 		try self.buf.ensureUnusedCapacity(gpa, amount);
 		try self.tbl.ensureUnusedCapacity(gpa, 1);
@@ -51,19 +62,6 @@ pub const Pile = struct {
 			@memcpy(self.buf.items[start..][0..str.len], str);
 			self.buf.items[self.buf.items.len - 1] = 0;
 		}
-	}
-
-	fn init(gpa: Allocator, str: []const u8) Oom!Pile {
-		var pile: Pile = .{};
-		if (str.len > 0) {
-			try pile.append(gpa, str);
-		}
-		return pile;
-	}
-
-	fn deinit(self: *Pile, gpa: Allocator) void {
-		self.buf.deinit(gpa);
-		self.tbl.deinit(gpa);
 	}
 
 	const Union = union(Enum) {
@@ -180,19 +178,11 @@ pub const Pile = struct {
 };
 
 const Tag = struct {
-	dict: Dict,
+	dict: Dict = .empty,
 	/// index of default entry
 	default: usize = 0,
 
 	const Dict = std.array_hash_map.Auto(*Symbol, Pile);
-
-	fn init(gpa: Allocator, lang: *Symbol, value: []const u8) Oom!Tag {
-		var pile: Pile = try .init(gpa, value);
-		errdefer pile.deinit(gpa);
-		var dict: Dict = .empty;
-		try dict.put(gpa, lang, pile);
-		return .{ .dict = dict };
-	}
 
 	fn deinit(self: *Tag, gpa: Allocator) void {
 		var iter = self.dict.iterator();
@@ -200,24 +190,6 @@ const Tag = struct {
 			kv.value_ptr.deinit(gpa);
 		}
 		self.dict.deinit(gpa);
-	}
-
-	fn add(
-		self: *Tag,
-		gpa: Allocator,
-		lang: *Symbol,
-		value: []const u8,
-	) Oom!*Pile {
-		const gop = try self.dict.getOrPut(gpa, lang);
-		if (gop.found_existing) {
-			try gop.value_ptr.append(gpa, value);
-		} else {
-			gop.value_ptr.* = try .init(gpa, value);
-			if (lang == pd.s.empty()) {
-				self.default = self.dict.entries.len - 1;
-			}
-		}
-		return gop.value_ptr;
 	}
 
 	pub fn get(self: *const Tag, prefs: []const *Symbol) *const Pile {
@@ -244,6 +216,7 @@ pub const Meta = struct {
 	data: Data = .empty,
 
 	const Data = std.array_hash_map.Auto(*Symbol, Tag);
+	const traverse = traverseMeta;
 
 	pub fn deinit(self: *Meta, gpa: Allocator) void {
 		var iter = self.data.iterator();
@@ -253,46 +226,77 @@ pub const Meta = struct {
 		self.data.deinit(gpa);
 	}
 
-	pub fn add(
-		self: *Meta,
-		gpa: Allocator,
-		key: *Symbol,
-		lang: *Symbol,
-		value: []const u8,
-	) Oom!*Pile {
-		const gop = try self.data.getOrPut(gpa, key);
-		if (gop.found_existing) {
-			return try gop.value_ptr.add(gpa, lang, value);
-		} else {
-			gop.value_ptr.* = try .init(gpa, lang, value);
-			return &gop.value_ptr.dict.entries.slice().items(.value)[0];
-		}
-	}
-
-	pub fn traverse(
-		self: *Meta,
-		gpa: Allocator,
-		io: Io,
-		sidecar: [:0]const u8,
-	) TraverseError!void {
-		var parents: StringMap = .init(gpa);
-		defer parents.deinit();
-		try traverseMeta(gpa, io, self, &parents, sidecar);
-	}
-
-	pub fn fromPath(gpa: Allocator, io: Io, path: [*:0]const u8) TraverseError!?Meta {
+	pub fn fromPath(gpa: Allocator, io: Io, path: [*:0]const u8) TraverseError!Meta {
 		const sidecar = try getSidecar(gpa, io, std.mem.sliceTo(path, 0))
-			orelse return null;
+			orelse return .{};
 		defer gpa.free(sidecar);
 		var self: Meta = .{};
 		errdefer self.deinit(gpa);
-		try self.traverse(gpa, io, sidecar);
+		var parents: StringMap = .empty;
+		defer parents.deinit(gpa);
+		try self.traverse(gpa, io, &parents, sidecar);
 		return self;
 	}
 
 	pub fn get(self: *const Meta, key: *Symbol, prefs: []const *Symbol) ?*const Pile {
 		const ldict = self.data.get(key) orelse return null;
 		return ldict.get(prefs);
+	}
+};
+
+const Result = union(enum) {
+	dict: *Tag.Dict,
+	pile: *Pile,
+
+	pub fn get(
+		data: *Meta.Data,
+		gpa: Allocator,
+		key: *Symbol,
+		lang: *Symbol,
+		erase: bool,
+	) Oom!Result {
+		const tag_gop = try data.getOrPut(gpa, key);
+		if (tag_gop.found_existing) {
+			const dict = &tag_gop.value_ptr.dict;
+			if (lang == Symbol.gen("*")) {
+				if (erase) {
+					var iter = dict.iterator();
+					while (iter.next()) |kv| {
+						kv.value_ptr.erase();
+					}
+				}
+				return .{ .dict = dict };
+			}
+			const pile_gop = try dict.getOrPut(gpa, lang);
+			if (!pile_gop.found_existing) {
+				pile_gop.value_ptr.* = .{};
+				if (lang == pd.s.empty()) {
+					tag_gop.value_ptr.default = dict.entries.len - 1;
+				}
+			} else if (erase) {
+				pile_gop.value_ptr.erase();
+			}
+			return .{ .pile = pile_gop.value_ptr };
+		} else {
+			const l = if (lang == Symbol.gen("*")) pd.s.empty() else lang;
+			tag_gop.value_ptr.* = .{};
+			const pile_gop = try tag_gop.value_ptr.dict.getOrPut(gpa, l);
+			pile_gop.value_ptr.* = .{};
+			return .{ .pile = pile_gop.value_ptr };
+		}
+	}
+
+	fn put(result: Result, gpa: Allocator, value: ?[]const u8) Oom!void {
+		const v = value orelse return;
+		switch (result) {
+			.dict => |d| {
+				var iter = d.iterator();
+				while (iter.next()) |kv| {
+					try kv.value_ptr.append(gpa, v);
+				}
+			},
+			.pile => |p| try p.append(gpa, v),
+		}
 	}
 };
 
@@ -306,11 +310,6 @@ inline fn findLast(slice: []const u8, value: u8) ?usize {
 
 inline fn isTrax(filename: []const u8) bool {
 	return std.mem.endsWith(u8, filename, trext);
-}
-
-/// Print message and skip, do not fail completely by returning error.
-inline fn err(len: usize, e: anyerror, s: [*:0]const u8) void {
-	pd.post.err(null, "%u:%s: \"%s\"", .{ len, @errorName(e).ptr, s });
 }
 
 fn trimStart(s: []const u8, exclude: []const u8) usize {
@@ -337,8 +336,10 @@ fn makeLowerCase(s: []u8) void {
 	}
 }
 
-fn keyLang(line: []u8) struct { key: *Symbol, lang: *Symbol } {
-	const end = line.len - 1;
+fn keyLang(line: [:0]u8) struct { key: *Symbol, lang: *Symbol, value: ?[]const u8 } {
+	const eq = find(line, '=');
+	const value = if (eq) |i| line[i + 1 ..] else null;
+	const end = trimEnd(line[0..(eq orelse line.len)], " \t");
 	var lang: [:0]const u8 = "";
 	const kend = if (find(line[0..end], '[')) |brac| blk: {
 		const lbeg = brac + 1;
@@ -349,8 +350,10 @@ fn keyLang(line: []u8) struct { key: *Symbol, lang: *Symbol } {
 		break :blk brac;
 	} else end;
 	makeLowerCase(line[0..kend]);
-	line[kend] = 0;
-	return .{ .key = .gen(line[0..kend :0]), .lang = .gen(lang) };
+	if (kend < line.len) {
+		line[kend] = 0;
+	}
+	return .{ .key = .gen(line[0..kend :0]), .lang = .gen(lang), .value = value };
 }
 
 fn resolveZ(gpa: Allocator, paths: []const []const u8) Oom![:0]u8 {
@@ -365,26 +368,40 @@ fn resolveZ(gpa: Allocator, paths: []const []const u8) Oom![:0]u8 {
 	return res[0 .. res.len - 1 :0];
 }
 
-fn traverseList(
+/// Print message and skip, do not fail completely by returning error.
+inline fn err(len: usize, e: anyerror, s: [*:0]const u8, t: [*:0]const u8) void {
+	pd.post.err(null, "%u:%s (%s): \"%s\"", .{ len, @errorName(e).ptr, t, s });
+}
+
+fn pathCheck(
+	parents: *StringMap,
 	gpa: Allocator,
 	io: Io,
-	list: *SymbolList,
-	parents: *StringMap,
-	file_path: [:0]const u8,
-) TraverseError!void {
-	if (parents.contains(file_path)) {
-		return err(list.items.len, error.InfiniteRecursion, file_path.ptr);
+	path: [:0]const u8,
+) (Oom || Io.File.OpenError || error{InfiniteRecursion})!Io.File {
+	if (parents.contains(path)) {
+		return error.InfiniteRecursion;
 	}
-	try parents.put(file_path, {});
-	defer _ = parents.remove(file_path);
+	try parents.put(gpa, path, {});
+	errdefer _ = parents.remove(path);
+	return try Io.Dir.cwd().openFile(io, path, .{ .mode = .read_only });
+}
 
-	const file = Io.Dir.cwd().openFile(io, file_path, .{ .mode = .read_only })
-		catch |e| return err(list.items.len, e, file_path.ptr);
+fn traverseList(
+	list: *SymbolList,
+	gpa: Allocator,
+	io: Io,
+	parents: *StringMap,
+	path: [:0]const u8,
+) TraverseError!void {
+	const file = pathCheck(parents, gpa, io, path)
+		catch |e| return err(list.items.len, e, path.ptr, "list");
+	defer _ = parents.remove(path);
 	defer file.close(io);
+	const dir = std.fs.path.dirname(path) orelse ".";
 
 	var buf: [std.fs.max_path_bytes:0]u8 = undefined;
 	var r = file.reader(io, &buf);
-	const base_dir = std.fs.path.dirname(file_path) orelse ".";
 	while (r.interface.takeDelimiterExclusive('\n')) |slice| {
 		defer _ = r.interface.take(1) catch {};
 		const line = blk: {
@@ -392,15 +409,15 @@ fn traverseList(
 			break :blk slice[trim[0]..trim[1]];
 		};
 
-		// empty or not @path
-		if (line.len == 0 or line[0] != '@') {
+		// empty or not >path
+		if (line.len == 0 or line[0] != '>') {
 			continue;
 		}
 
-		const resolved = try resolveZ(gpa, &.{ base_dir, line[1..] });
+		const resolved = try resolveZ(gpa, &.{ dir, line[1..] });
 		defer gpa.free(resolved);
 		if (isTrax(resolved)) {
-			try traverseList(gpa, io, list, parents, resolved);
+			try traverseList(list, gpa, io, parents, resolved);
 		} else {
 			try list.append(gpa, .gen(resolved.ptr));
 		}
@@ -410,26 +427,22 @@ fn traverseList(
 }
 
 fn traverseMeta(
+	meta: *Meta,
 	gpa: Allocator,
 	io: Io,
-	meta: *Meta,
 	parents: *StringMap,
-	file_path: [:0]const u8,
+	path: [:0]const u8,
 ) TraverseError!void {
-	if (parents.contains(file_path)) {
-		return err(meta.data.count(), error.InfiniteRecursion, file_path.ptr);
-	}
-	try parents.put(file_path, {});
-	defer _ = parents.remove(file_path);
-
-	const file = Io.Dir.cwd().openFile(io, file_path, .{ .mode = .read_only })
-		catch |e| return err(meta.data.count(), e, file_path.ptr);
+	const file = pathCheck(parents, gpa, io, path)
+		catch |e| return err(0, e, path.ptr, "meta");
+	defer _ = parents.remove(path);
 	defer file.close(io);
+	const dir = std.fs.path.dirname(path) orelse ".";
 
-	var pile: ?*Pile = null;
+	var result: ?Result = null;
+	var typ: enum { tag, include } = .tag;
 	var buf: [std.fs.max_path_bytes:0]u8 = undefined;
 	var r = file.reader(io, &buf);
-	const base_dir = std.fs.path.dirname(file_path) orelse ".";
 	while (r.interface.takeDelimiterExclusive('\n')) |slice| {
 		defer _ = r.interface.take(1) catch {};
 		const line: [:0]u8 = blk: {
@@ -443,48 +456,150 @@ fn traverseMeta(
 			continue;
 		}
 
-		// :multiline
-		if (line[0] == ':') {
-			if (pile) |p| {
-				try p.append(gpa, line[1..]);
+		// =multiline
+		if (line[0] == '=') {
+			if (typ == .include) {
+				const resolved = try resolveZ(gpa, &.{ dir, line[1..] });
+				defer gpa.free(resolved);
+				try meta.traverse(gpa, io, parents, resolved);
+			} else if (result) |res| {
+				try res.put(gpa, line[1..]);
 			}
 			continue;
 		} else {
-			pile = null;
+			result = null;
 		}
 
-		// @path
-		if (line[0] == '@') {
+		// >path or [01:23.456]
+		if (line[0] == '>' or line[0] == '[') {
 			break;
 		}
 
-		// !include @path
+		// !control
 		if (line[0] == '!') {
-			const cmd = line[1..];
-			const inc = "include";
-			if (std.mem.startsWith(u8, cmd, inc)) {
-				const arg = blk: {
-					const arg = cmd[inc.len..];
-					break :blk arg[trimStart(arg, " \t")..];
-				};
-				if (arg.len == 0 or arg[0] != '@') {
-					err(meta.data.count(), error.IncludeSyntaxError, file_path.ptr);
-					continue;
+			const kl = keyLang(line[1..]);
+			if (kl.key == Symbol.gen("include")) {
+				typ = .include;
+				if (kl.value) |v| {
+					const resolved = try resolveZ(gpa, &.{ dir, v });
+					defer gpa.free(resolved);
+					try meta.traverse(gpa, io, parents, resolved);
 				}
-				const resolved = try resolveZ(gpa, &.{ base_dir, arg[1..] });
-				defer gpa.free(resolved);
-				try traverseMeta(gpa, io, meta, parents, resolved);
 			}
 			continue;
 		}
 
+		// ~erase
+		const erase = line[0] == '~';
+
 		// key[lang]=value
-		const eql = find(line, '=') orelse continue;
-		const kl = keyLang(line[0 .. trimEnd(line[0..eql], " \t") + 1]);
-		pile = try meta.add(gpa, kl.key, kl.lang, line[eql + 1 ..]);
+		typ = .tag;
+		const kl = keyLang(if (erase) line[1..] else line);
+		result = try .get(&meta.data, gpa, kl.key, kl.lang, erase);
+		try result.?.put(gpa, kl.value);
 	} else |e| if (e != error.EndOfStream) {
 		return e;
 	}
+}
+
+const Chapter = struct {
+	trax: *Symbol,
+	title: ?*Symbol = null,
+	time: f64,
+};
+const ChapterList = std.ArrayList(Chapter);
+
+fn traverseChapters(
+	gpa: Allocator,
+	io: Io,
+	parents: *StringMap,
+	path: [:0]const u8,
+	time: f64,
+) TraverseError!ChapterList {
+	var list: ChapterList = .empty;
+	errdefer list.deinit(gpa);
+	const file = pathCheck(parents, gpa, io, path) catch |e| {
+		err(0, e, path.ptr, "chapter");
+		return list;
+	};
+	defer _ = parents.remove(path);
+	defer file.close(io);
+	const dir = std.fs.path.dirname(path) orelse ".";
+
+	var buf: [std.fs.max_path_bytes:0]u8 = undefined;
+	var r = file.reader(io, &buf);
+	while (r.interface.takeDelimiterExclusive('\n')) |slice| {
+		defer _ = r.interface.take(1) catch {};
+		const line: [:0]u8 = blk: {
+			const trim = trimRange(slice, r.interface.seek - slice.len);
+			buf[trim[1]] = 0;
+			break :blk buf[trim[0]..trim[1] :0];
+		};
+
+		// not [01:23.456]
+		if (line[0] != '[') {
+			continue;
+		}
+
+		// bare minimum: start time in seconds
+		var s = line[1 + trimStart(line[1..], " \t") ..];
+		var end: usize = undefined;
+		var sec: f64 = if (iParse(s, &end)) |i| @floatFromInt(i) else continue;
+		s = s[end..];
+
+		// minute/hour syntax
+		while (s[0] == ':') {
+			s = s[1..];
+			if (iParse(s, &end)) |i| {
+				s = s[end..];
+				sec = (sec * 60) + @as(f64, @floatFromInt(i));
+			}
+		}
+
+		// milliseconds
+		if (s[0] == '.') {
+			s = s[1..];
+			if (iParse(s, &end)) |i| {
+				s = s[end..];
+				const scale: f64 = @floatFromInt(std.math.powi(usize, 10, end) catch 1);
+				sec += @as(f64, @floatFromInt(i)) / scale;
+			}
+		}
+		s = s[1 + trimStart(s[1..], " \t")..];
+
+		const agg = time + sec;
+		if (s[0] == '>') {
+			const resolved = try resolveZ(gpa, &.{ dir, s[1..] });
+			defer gpa.free(resolved);
+			var chaps = try traverseChapters(gpa, io, parents, resolved, agg);
+			defer chaps.deinit(gpa);
+			if (chaps.items.len == 0 or chaps.items[0].time > agg) {
+				try list.append(gpa, .{ .time = agg, .trax = .gen(resolved) });
+			}
+			for (chaps.items) |chap| {
+				try list.append(gpa, chap);
+			}
+		} else {
+			const title: ?*Symbol = if (s[0] == '=') .gen(s[1..]) else null;
+			try list.append(gpa, .{ .time = agg, .trax = .gen(path), .title = title });
+		}
+	} else |e| if (e != error.EndOfStream) {
+		return e;
+	}
+	return list;
+}
+
+pub fn getChapters(
+	gpa: Allocator,
+	io: Io,
+	path: [*:0]const u8,
+) TraverseError!ChapterList {
+	const sidecar = try getSidecar(gpa, io, std.mem.sliceTo(path, 0))
+		orelse return .empty;
+	defer gpa.free(sidecar);
+	var parents: StringMap = .empty;
+	defer parents.deinit(gpa);
+	return traverseChapters(gpa, io, &parents, sidecar, 0);
 }
 
 pub fn getSidecar(gpa: Allocator, io: Io, path: []const u8) Oom!?[:0]const u8 {
@@ -561,9 +676,9 @@ pub const Playlist = extern struct {
 			const sym = arg.getSymbol() orelse return error.NotASymbol;
 			const name = std.mem.sliceTo(sym.name, 0);
 			if (isTrax(name)) {
-				var parents: StringMap = .init(gpa);
-				defer parents.deinit();
-				try traverseList(gpa, io, &list, &parents, name);
+				var parents: StringMap = .empty;
+				defer parents.deinit(gpa);
+				try traverseList(&list, gpa, io, &parents, name);
 			} else {
 				try list.append(gpa, sym);
 			}

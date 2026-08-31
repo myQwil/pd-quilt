@@ -9,19 +9,18 @@
 
 # Whitespace surrounding the key is ignored,
 # but any whitespace after the equal sign is part of the value.
-artist         =
- # If nothing comes after the equal sign, the first line break is ignored.
- :foobar
- :barbaz
+artist
+ =foobar
+ =barbaz
 
 # Add more lines after the fact by assigning to the same key
 artist         =Third Guy
 
 # Track listing
 
-# A file path has `@` as its first non-whitespace character.
-@trax/foo
-@trax/bar
+# A file path has `>` as its first non-whitespace character.
+>trax/foo
+>trax/bar
 
 # A file path can point to another trax file.
-@trax/b.trax
+>trax/b.trax
