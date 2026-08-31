@@ -3,6 +3,7 @@
 const pd = @import("pd");
 const std = @import("std");
 const wr = @import("write.zig");
+const np = @import("numparse.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;
@@ -11,84 +12,17 @@ const Symbol = pd.Symbol;
 const Word = pd.Word;
 const Writer = std.Io.Writer;
 const ClassError = pd.Class.Error;
+const iParse = np.iParse;
+const fParse = np.fParse;
 
 const epsilon = std.math.floatEps(Float);
 const gpa = pd.gpa;
-
-inline fn getDigit(c: u8) ?u8 {
-	return if ('0' <= c and c <= '9') c - '0' else null;
-}
 
 inline fn iDiv(g: Float, len: usize) struct {num: i32, den: i32, quo: i32 } {
 	const num: i32 = @intFromFloat(g);
 	const den: i32 = @as(u31, @truncate(len));
 	const quo: i32 = @divFloor(num, den);
 	return .{ .num = num, .den = den, .quo = quo };
-}
-
-/// Simple string-to-float converter
-pub fn fParse(s: [*:0]const u8, end_index: ?*usize) ?Float {
-	var i: usize = 0;
-	var no_digits: bool = true;
-	if (s[0] == '-' or s[0] == '+') {
-		i += 1;
-	}
-
-	// integer digits
-	var acc: u64 = 0;
-	while (getDigit(s[i])) |d| : (i += 1) {
-		acc = acc *| 10 +| d;
-		no_digits = false;
-	}
-
-	// fractional digits
-	const exp_offset: usize = if (s[i] == '.') blk: {
-		i += 1;
-		const start: usize = i;
-		while (getDigit(s[i])) |d| : (i += 1) {
-			acc = acc *| 10 +| d;
-			no_digits = false;
-		}
-		break :blk i - start;
-	} else 0;
-
-	if (no_digits) {
-		return null;
-	}
-
-	const f: f64 = blk: {
-		const a: f64 = @floatFromInt(acc);
-		const scale: f64 = @floatFromInt(
-			std.math.powi(usize, 10, exp_offset) catch return null);
-		break :blk a / scale;
-	};
-	if (end_index) |end| {
-		end.* = i;
-	}
-	return @floatCast(if (s[0] == '-') -f else f);
-}
-
-/// Simple string-to-int converter
-pub fn iParse(s: [*:0]const u8, end_index: ?*usize) ?i32 {
-	var i: usize = 0;
-	var no_digits: bool = true;
-	if (s[0] == '-' or s[0] == '+') {
-		i += 1;
-	}
-
-	var acc: i32 = 0;
-	while (getDigit(s[i])) |d| : (i += 1) {
-		acc = acc *| 10 +| d;
-		no_digits = false;
-	}
-
-	if (no_digits) {
-		return null;
-	}
-	if (end_index) |end| {
-		end.* = i;
-	}
-	return if (s[0] == '-') -acc else acc;
 }
 
 fn onset(i: i32, len: usize) usize {
