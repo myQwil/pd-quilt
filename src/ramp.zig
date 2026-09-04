@@ -3,7 +3,7 @@ const pd = @import("pd");
 const Sample = pd.Sample;
 const Float = pd.Float;
 
-pub fn Ramp(Owner: type) type { return extern struct {
+pub fn Ramp(Owner: type) type { return struct {
 	/// remaining samples
 	remain: usize = 0,
 	/// target value

@@ -67,6 +67,7 @@ const RarReader = struct {
 		var count: usize = 0;
 
 		const self = try gpa.create(RarReader);
+		errdefer gpa.destroy(self);
 		self.* = .{ .gpa = gpa, .archive = blk: {
 			var head: rar.Header = .{};
 			var data: rar.OpenData = .{ .arc_name = path.ptr, .open_mode = .list };

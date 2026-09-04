@@ -11,8 +11,7 @@ const Float = pd.Float;
 const Sample = pd.Sample;
 const Allocator = std.mem.Allocator;
 
-pub fn Impl(Root: type) type { return extern struct {
-	obj: pd.Object,
+pub fn Impl(Root: type) type { return struct {
 	base: Base,
 	rabbit: ra.Rabbit,
 	tempo: *Float,
@@ -27,29 +26,29 @@ pub fn Impl(Root: type) type { return extern struct {
 	const BaseImpl = Base.Impl(Self);
 	const Player = pr.Impl(Self);
 	const Rabbit = ra.Impl(Self);
-	pub const parentPtr = pd.parentPtr(Self, "obj");
-	pub const parentConstPtr = pd.parentConstPtr(Self, "obj");
+	pub const Box = pd.Box(pd.Object, Self);
 
-	pub inline fn err(self: *const Self, e: anyerror) void {
-		pd.post.err(self, Root.name ++ ": %s", .{ @errorName(e).ptr });
+	pub inline fn err(p: *const Pd, e: anyerror) void {
+		pd.post.err(p, Root.name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
-	pub inline fn conv(self: *Self, i: ra.uint) void {
-		self.rabbit.conv(i, Root.nch) catch |e| self.err(e);
+	pub inline fn conv(p: *Pd, i: ra.uint) void {
+		Box.state(p).rabbit.conv(i, Root.nch) catch |e| err(p, e);
 	}
 
 	fn tempoC(p: *Pd, f: Float) callconv(.c) void {
-		parentPtr(p).tempo.* = f;
+		Box.state(p).tempo.* = f;
 	}
 
-	pub fn resetBuffers(self: *Self) void {
-		self.rabbit.reset() catch |e| self.err(e);
+	pub fn resetBuffers(p: *Pd) void {
+		const self = Box.state(p);
+		self.rabbit.reset() catch |e| err(p, e);
 		// gme resets the fade-out start time on seeks and track changes.
 		// we want to play tracks forever and handle fade-out at the patch level.
 		self.base.emu.ignoreFade(true);
 	}
 
-	pub fn prepNewTrack(_: *Self) void {
+	pub fn prepNewTrack(_: *Pd) void {
 		return;
 	}
 
@@ -99,9 +98,8 @@ pub fn Impl(Root: type) type { return extern struct {
 		return pd.wrap(*Pd, create(av[0..ac]), Root.name);
 	}
 	inline fn create(av: []const Atom) ra.InitError!*Pd {
-		const self: *Self = try pd.gpa.create(Self);
-		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
-		const obj: *pd.Object = &self.obj;
+		const obj: *pd.Object = @ptrCast(try class.pd());
+		const self = Box.state(&obj.g.pd);
 		errdefer obj.g.pd.destroy();
 
 		const base: Base = try .init(obj, av);
@@ -110,7 +108,6 @@ pub fn Impl(Root: type) type { return extern struct {
 
 		const in3: *Inlet = @ptrCast(@alignCast(try obj.inletSignal(1.0)));
 		self.* = .{
-			.obj = self.obj,
 			.base = base,
 			.rabbit = rabbit,
 			.tempo = &in3.un.floatsignalvalue,
@@ -119,17 +116,17 @@ pub fn Impl(Root: type) type { return extern struct {
 	}
 
 	fn destroyC(p: *Pd) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.stateConst(p);
 		self.rabbit.deinit();
 		self.base.deinit(gpa);
 	}
 
 	fn classFreeC(_: *pd.Class) callconv(.c) void {
-		Base.freeDict();
+		Base.freeDict(gpa);
 	}
 
 	pub inline fn setup() (pd.Class.Error || pd.Oom)!void {
-		class = try .create(Root.name, &.{ .gimme }, createC, destroyC, @sizeOf(Self), .{});
+		class = try .create(Root.name, &.{ .gimme }, createC, destroyC, @sizeOf(Box), .{});
 		try BaseImpl.extend();
 		Rabbit.extend();
 		Player.extend();

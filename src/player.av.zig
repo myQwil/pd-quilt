@@ -26,12 +26,20 @@ var s_date: *Symbol = undefined;
 var s_append: *Symbol = undefined;
 pub var s_done: *Symbol = undefined;
 
+fn indexFromFloat(f: Float, len: usize) ?u32 {
+	const i: i32 = @intFromFloat(f);
+	if (i < 0 or len <= i) {
+		return null;
+	}
+	return @bitCast(i);
+}
+
 pub const stereo = (
 	(1 << @intFromEnum(av.Channel.front_left)) |
 	(1 << @intFromEnum(av.Channel.front_right))
 );
 
-const Stream = extern struct {
+const Stream = struct {
 	ctx: *av.Codec.Context = undefined,
 	idx: usize = 0,
 
@@ -62,9 +70,9 @@ const Stream = extern struct {
 	}
 };
 
-pub fn Base(frames: comptime_int) type { return extern struct {
+pub fn Base(frames: comptime_int) type { return struct {
 	layout: av.ChannelLayout,
-	playlist: tx.Playlist = .{},
+	playlist: tx.SymbolList = .empty,
 	player: pr.Player,
 	audio: Stream = .{},
 	subtitle: Stream = .{},
@@ -75,7 +83,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 	frame: *av.Frame,
 	format: *av.FormatContext = undefined,
 	swr: *av.SwrContext = undefined,
-	langs: tx.LangSet = .{},
+	langs: []*Symbol = &.{},
 	/// ratio between file samplerate and pd samplerate
 	ratio: f64 = 1,
 	nch: u8,
@@ -83,9 +91,9 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 	const Av = @This();
 
-	var dict: std.AutoHashMap(*Symbol, *const fn(*const Av) *const Pile) = undefined;
-	pub fn freeDict() void {
-		dict.deinit();
+	var dict: std.AutoHashMapUnmanaged(*Symbol, *const fn(*const Av) *const Pile) = .empty;
+	pub fn freeDict(gpa: Allocator) void {
+		dict.deinit(gpa);
 	}
 
 	pub inline fn init(gpa: Allocator, obj: *pd.Object, arg: Atom) !Av {
@@ -130,7 +138,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		gpa.free(self.obuf[0 .. self.nch * frames]);
 		gpa.free(self.outs[0 .. self.nch]);
 		self.playlist.deinit(gpa);
-		self.langs.deinit(gpa);
+		gpa.free(self.langs);
 		self.packet.destroy();
 		self.frame.destroy();
 		if (self.player.open) {
@@ -156,7 +164,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			return error.IndexOutOfBounds;
 		}
 		const format: *av.FormatContext = try .openInput(
-			self.playlist.ptr[idx].name, null, null, null);
+			self.playlist.items[idx].name, null, null, null);
 		errdefer format.closeInput();
 
 		try format.findStreamInfo(null);
@@ -195,8 +203,8 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		gpa: Allocator,
 		io: Io,
 		args: []const Atom,
-	) tx.Playlist.AppendError!void {
-		try self.playlist.replaceWith(gpa, io, args);
+	) tx.AppendError!void {
+		try tx.listReplace(&self.playlist, gpa, io, args);
 	}
 
 	pub inline fn reset(self: *Av) void {
@@ -244,11 +252,11 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 	}
 
 	pub inline fn trackCount(self: *const Av) usize {
-		return self.playlist.len;
+		return self.playlist.items.len;
 	}
 
 	pub fn get(self: *const Av, trax: *const Meta, s: *Symbol) ?*const Pile {
-		if (trax.get(s, self.langs.slice())) |pile| {
+		if (trax.get(s, self.langs)) |pile| {
 			return pile;
 		}
 		if (dict.get(s)) |func| {
@@ -274,35 +282,57 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 	pub fn Impl(Self: type) type { return struct {
 		const perform: fn(*Self, [*]usize, *usize) callconv(.@"inline") anyerror!void
 			= Self.perform;
-		const err: fn(*const Self, anyerror) callconv(.@"inline") void = Self.err;
+		const err: fn(*const Pd, anyerror) callconv(.@"inline") void = Self.err;
 		const gpa = Self.gpa;
 		const io = Self.io;
-		const parentPtr = Self.parentPtr;
+		const Box = Self.Box;
 
 		fn posC(p: *Pd) callconv(.c) void {
-			const self = parentPtr(p);
+			const self = Box.state(p);
 			const base: *Av = &self.base;
-			base.pos() catch |e| err(self, e);
+			base.pos() catch |e| err(p, e);
 		}
 
 		fn appendC(
 			p: *Pd,
 			_: *Symbol, ac: c_uint, args: [*]const pd.Atom,
 		) callconv(.c) void {
-			const self = parentPtr(p);
+			const self = Box.state(p);
 			const base: *Av = &self.base;
-			base.playlist.append(gpa, io, args[0..ac]) catch |e| err(self, e);
+			tx.listAppend(&base.playlist, gpa, io, args[0..ac]) catch |e| err(p, e);
 			const count: Float = @floatFromInt(base.trackCount());
 			base.player.outlet.anything(s_append, &.{ .float(count) });
 		}
 
-		fn dumpC(p: *Pd) callconv(.c) void {
-			const self = parentPtr(p);
+		fn dumpC(
+			p: *Pd,
+			_: *Symbol, ac: c_uint, args: [*]const pd.Atom,
+		) callconv(.c) void {
+			const self = Box.state(p);
 			const base: *Av = &self.base;
-			const dct = &base.format.metadata;
-			var prev: ?*const av.Dictionary.Entry = null;
-			while (dct.iterate(prev)) |entry| : (prev = entry) {
-				pd.post.log(self, .normal, "%s: %s", .{ entry.key, entry.value });
+			const path = base.format.url;
+			const meta_err: anyerror!Meta = if (pd.floatArg(0, args[0..ac])) |f| blk: {
+				var chaps = tx.getChapters(gpa, io, path) catch |e| return err(p, e);
+				defer chaps.deinit(gpa);
+				const chap = chaps.items[indexFromFloat(f, chaps.items.len) orelse return];
+				pd.post.log(p, .normal, "at %g:", .{ chap.time });
+				break :blk Meta.fromPath(gpa, io, chap.trax.name);
+			} else |_| Meta.fromPath(gpa, io, base.format.url);
+
+			if (meta_err) |meta| {
+				var m = meta;
+				defer m.deinit(gpa);
+				const langs: []const *Symbol = base.langs;
+				var iter = meta.data.iterator();
+				while (iter.next()) |kv| {
+					kv.value_ptr.get(langs).print(p, kv.key_ptr.*.name);
+				}
+			} else |_| {
+				const dct = &base.format.metadata;
+				var prev: ?*const av.Dictionary.Entry = null;
+				while (dct.iterate(prev)) |entry| : (prev = entry) {
+					pd.post.log(p, .normal, "%s: %s", .{ entry.key, entry.value });
+				}
 			}
 		}
 
@@ -310,16 +340,16 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			p: *Pd,
 			_: *Symbol, ac: c_uint, args: [*]const pd.Atom,
 		) callconv(.c) void {
-			const self = parentPtr(p);
+			const self = Box.state(p);
 			const base: *Av = &self.base;
-			base.langs.replaceWith(gpa, args[0..ac]) catch |e| err(self, e);
+			tx.langReplace(&base.langs, gpa, args[0..ac]) catch |e| err(p, e);
 		}
 
 		fn audioC(p: *Pd, f: Float) callconv(.c) void {
-			const self = parentPtr(p);
-			audio(self, f) catch |e| err(self, e);
+			audio(p, f) catch |e| err(p, e);
 		}
-		inline fn audio(self: *Self, f: Float) !void {
+		inline fn audio(p: *Pd, f: Float) !void {
+			const self = Box.state(p);
 			const base: *Av = &self.base;
 			try base.player.assertFileOpened();
 			var a: Stream = try .init(base.format, .audio, @intFromFloat(f));
@@ -331,14 +361,14 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			base.audio = a;
 			base.swr = swr;
 			base.ratio = @as(f64, @floatFromInt(a.ctx.sample_rate)) / pd.sampleRate();
-			pd.post.log(self, .normal, "audio stream set to %u", .{ a.idx });
+			pd.post.log(p, .normal, "audio stream set to %u", .{ a.idx });
 		}
 
 		fn subtitleC(p: *Pd, f: Float) callconv(.c) void {
-			const self = parentPtr(p);
-			subtitle(self, f) catch |e| err(self, e);
+			subtitle(p, f) catch |e| err(p, e);
 		}
-		inline fn subtitle(self: *Self, f: Float) !void {
+		inline fn subtitle(p: *Pd, f: Float) !void {
+			const self = Box.state(p);
 			const base: *Av = &self.base;
 			try base.player.assertFileOpened();
 			if (f < 0) {
@@ -354,7 +384,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			}
 			base.subtitle = s;
 			base.sub_open = true;
-			pd.post.log(self, .normal, "subtitle stream set to %u", .{ s.idx });
+			pd.post.log(p, .normal, "subtitle stream set to %u", .{ s.idx });
 		}
 
 		pub inline fn extend() Allocator.Error!void {
@@ -364,22 +394,21 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			s_pos = .gen("pos");
 			s_append = .gen("append");
 
-			dict = .init(gpa);
-			errdefer dict.deinit();
+			errdefer dict.deinit(gpa);
 			inline for ([_][:0]const u8{
 				"path", "time", "ftime", "tracks",
 				"samplefmt", "samplerate", "bitrate", "codec",
 			}) |field_name| {
-				try dict.put(.gen(field_name), @field(dispatch, field_name));
+				try dict.put(gpa, .gen(field_name), @field(dispatch, field_name));
 			}
 
 			const class: *pd.Class = Self.class;
 			class.addMethod(&.{}, posC, s_pos);
-			class.addMethod(&.{}, dumpC, .gen("dump"));
 			class.addMethod(&.{ .float }, audioC, .gen("audio"));
 			class.addMethod(&.{ .float }, subtitleC, .gen("subtitle"));
 			class.addMethod(&.{ .gimme }, appendC, .gen("append"));
 			class.addMethod(&.{ .gimme }, langsC, .gen("langs"));
+			class.addMethod(&.{ .gimme }, dumpC, .gen("dump"));
 		}
 	};}
 

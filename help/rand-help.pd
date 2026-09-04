@@ -94,7 +94,7 @@
 #X connect 4 0 5 0;
 #X connect 5 0 0 0;
 #X restore 180 380 pd garrays;
-#X text 30 150 2 args specify a half-open range;
+#X text 30 150 2 args specify a half-open interval;
 #X msg 320 210 print;
 #X connect 2 0 4 0;
 #X connect 3 0 2 0;

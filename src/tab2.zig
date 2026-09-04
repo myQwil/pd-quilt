@@ -1,3 +1,4 @@
+const Tab2 = @This();
 const pd = @import("pd");
 const Inlet = @import("inlet.zig").Inlet;
 
@@ -6,21 +7,19 @@ const Float = pd.Float;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
 
-pub const Tab2 = extern struct {
-	hold: *Float,
-	vec: ?[*]pd.Word = null,
-	arrayname: *Symbol,
-	f: Float = 0,
+hold: *Float,
+vec: ?[*]pd.Word = null,
+arrayname: *Symbol,
+f: Float = 0,
 
-	pub inline fn init(obj: *pd.Object, arrayname: *Symbol, hold: Float) pd.Oom!Tab2 {
-		_ = try obj.outlet(pd.s.signal());
-		const inlet: *Inlet = @ptrCast(@alignCast(try obj.inletSignal(hold)));
-		return .{
-			.hold = &inlet.un.floatsignalvalue,
-			.arrayname = arrayname,
-		};
-	}
-};
+pub inline fn init(obj: *pd.Object, arrayname: *Symbol, hold: Float) pd.Oom!Tab2 {
+	_ = try obj.outlet(pd.s.signal());
+	const inlet: *Inlet = @ptrCast(@alignCast(try obj.inletSignal(hold)));
+	return .{
+		.hold = &inlet.un.floatsignalvalue,
+		.arrayname = arrayname,
+	};
+}
 
 pub inline fn sample(w: [*]pd.Word, x: Sample, hold: Sample) Sample {
 	const h = 0.5 * @min(hold, 1);
@@ -37,16 +36,14 @@ pub inline fn sample(w: [*]pd.Word, x: Sample, hold: Sample) Sample {
 }
 
 pub fn Impl(Self: type) type { return struct {
-	const parentPtr = Self.parentPtr;
-
 	fn holdC(p: *Pd, f: Float) callconv(.c) void {
-		const tab2: *Tab2 = &parentPtr(p).tab2;
-		tab2.hold.* = f;
+		Self.Box.state(p).tab2.hold.* = f;
 	}
 
 	pub inline fn extend() void {
 		const class: *pd.Class = Self.class;
-		class.doMainSignalIn(@offsetOf(Self, "tab2") + @offsetOf(Tab2, "f"));
+		class.doMainSignalIn(
+			@offsetOf(Self.Box, "body") + @offsetOf(Self, "tab2") + @offsetOf(Tab2, "f"));
 		class.addMethod(&.{ .float }, holdC, .gen("hold"));
 	}
 };}

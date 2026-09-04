@@ -13,7 +13,7 @@ pub const frames = 0x10;
 pub const fastest: f64 = @as(Float, @floatFromInt(frames)) - 0x1p-7;
 pub const slowest: f64 = 1 / @as(Float, @floatFromInt(frames));
 
-pub const Rabbit = extern struct {
+pub const Rabbit = struct {
 	data: ra.Data,
 	state: *ra.State,
 	speed: *Float,
@@ -31,7 +31,7 @@ pub const Rabbit = extern struct {
 		};
 	}
 
-	pub inline fn deinit(self: *Rabbit) void {
+	pub inline fn deinit(self: *const Rabbit) void {
 		self.state.destroy();
 	}
 
@@ -54,15 +54,15 @@ pub const Rabbit = extern struct {
 };
 
 pub fn Impl(Self: type) type { return struct {
-	const conv: fn(*Self, uint) callconv(.@"inline") void = Self.conv;
-	const parentPtr = Self.parentPtr;
+	const conv: fn(*Pd, uint) callconv(.@"inline") void = Self.conv;
+	const Box = Self.Box;
 
 	fn convC(p: *Pd, f: Float) callconv(.c) void {
-		conv(parentPtr(p), @intFromFloat(f));
+		conv(p, @intFromFloat(f));
 	}
 
 	fn speedC(p: *Pd, f: Float) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		const rabbit: *Rabbit = &self.rabbit;
 		rabbit.speed.* = f;
 	}

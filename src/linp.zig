@@ -1,5 +1,6 @@
 //! `[line]` with pause/resume functionality.
 
+const LinP = @This();
 const pd = @import("pd");
 const tg = @import("toggle.zig");
 
@@ -10,8 +11,6 @@ const Symbol = pd.Symbol;
 
 const default_grain = 20;
 
-const LinP = extern struct {
-	obj: pd.Object,
 	/// sends ramp value
 	out_f: *pd.Outlet,
 	/// sends pause state
@@ -29,7 +28,7 @@ const LinP = extern struct {
 
 	const name = "linp";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(LinP, "obj");
+	const Box = pd.Box(pd.Object, @This());
 
 	fn setPause(self: *LinP, state: bool) void {
 		if (tg.set(&self.paused, state)) {
@@ -46,13 +45,13 @@ const LinP = extern struct {
 	}
 
 	fn ft1C(p: *Pd, f: Float) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		self.in1val = f;
 		self.gotinlet = true;
 	}
 
 	fn setC(p: *Pd, f: Float) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		self.clock.unset();
 		self.targetval = f;
 		self.setval = f;
@@ -69,7 +68,7 @@ const LinP = extern struct {
 	}
 
 	fn stopC(p: *Pd) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		if (pd.pd_compatibilitylevel >= 48) {
 			self.freeze();
 		}
@@ -78,7 +77,7 @@ const LinP = extern struct {
 	}
 
 	fn pauseC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		if (!self.tglPause(av[0..ac]) or self.setval == self.targetval) {
 			return;
 		}
@@ -115,7 +114,7 @@ const LinP = extern struct {
 	}
 
 	fn floatC(p: *Pd, f: Float) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		const timenow = pd.time();
 		if (self.gotinlet and self.in1val > 0) {
 			if (timenow > self.targettime) {
@@ -148,9 +147,8 @@ const LinP = extern struct {
 		return pd.wrap(*Pd, create(f, grain), name);
 	}
 	inline fn create(f: Float, grain: Float) pd.Oom!*Pd {
-		const self: *LinP = try pd.gpa.create(LinP);
-		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
-		const obj: *pd.Object = &self.obj;
+		const obj: *pd.Object = @ptrCast(try class.pd());
+		const self = Box.state(&obj.g.pd);
 		errdefer obj.g.pd.destroy();
 
 		var clock: *pd.Clock = try .create(LinP, self, tickC);
@@ -161,7 +159,6 @@ const LinP = extern struct {
 
 		const targettime = pd.time();
 		self.* = .{
-			.obj = self.obj,
 			.clock = clock,
 			.out_f = try .create(obj, pd.s.float()),
 			.out_p = try .create(obj, pd.s.float()),
@@ -174,21 +171,20 @@ const LinP = extern struct {
 		return &obj.g.pd;
 	}
 
-	fn destroyC(p: *Pd) callconv(.c) void {
-		parentPtr(p).clock.destroy();
+	fn destroyC(p: *const Pd) callconv(.c) void {
+		Box.stateConst(p).clock.destroy();
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		const args: [2]pd.Atom.Type = @splat(.deffloat);
-		class = try .create(name, &args, createC, destroyC, @sizeOf(LinP), .{});
+		const args: [2]Atom.Type = @splat(.deffloat);
+		class = try .create(name, &args, createC, destroyC, @sizeOf(Box), .{});
 		class.addFloat(floatC);
 		class.addMethod(&.{}, stopC, .gen("stop"));
 		class.addMethod(&.{ .float }, ft1C, .gen("ft1"));
 		class.addMethod(&.{ .float }, setC, .gen("set"));
 		class.addMethod(&.{ .gimme }, pauseC, .gen("pause"));
 	}
-};
 
 export fn linp_setup() void {
-	_ = pd.wrap(void, LinP.setup(), @src().fn_name);
+	_ = pd.wrap(void, setup(), @src().fn_name);
 }

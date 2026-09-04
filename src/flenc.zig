@@ -1,7 +1,8 @@
 //! Float-encode. Creates floats out of sign, exponent, and mantissa integers.
 
-const std = @import("std");
+const FlEnc = @This();
 const pd = @import("pd");
+const std = @import("std");
 const bf = @import("bitfloat.zig");
 
 const Pd = pd.Pd;
@@ -33,115 +34,105 @@ fn getUf(uf: bf.UnFloat, onset: u2, av: []const Atom) bf.UnFloat {
 	return u;
 }
 
-const FlEnc = extern struct {
-	obj: pd.Object,
-	out: *pd.Outlet,
-	uf: bf.UnFloat,
+out: *pd.Outlet,
+uf: bf.UnFloat,
 
-	const name = "flenc";
-	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(FlEnc, "obj");
-	const parentConstPtr = pd.parentConstPtr(FlEnc, "obj");
+const name = "flenc";
+var class: *pd.Class = undefined;
+const Box = pd.Box(pd.Object, FlEnc);
 
-	inline fn err(self: *const FlEnc, e: anyerror) void {
-		pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
-	}
+fn printC(p: *const Pd) callconv(.c) void {
+	print(p) catch |e| pd.post.err(p, name ++ ": %s", .{ @errorName(e).ptr });
+}
+inline fn print(p: *const Pd) std.fmt.BufPrintError!void {
+	const self = Box.stateConst(p);
+	var buf: [@bitSizeOf(Float) + 3]u8 = undefined;
+	const b = self.uf.b;
+	const s = try std.fmt.bufPrintSentinel(
+		&buf, &fmt, .{ b.sign, b.exponent, b.mantissa }, 0);
+	pd.post.log(p, .normal, s, .{});
+}
 
-	fn printC(p: *const Pd) callconv(.c) void {
-		const self = parentConstPtr(p);
-		self.print() catch |e| self.err(e);
-	}
-	inline fn print(self: *const FlEnc) std.fmt.BufPrintError!void {
-		var buf: [@bitSizeOf(Float) + 3]u8 = undefined;
-		const b = self.uf.b;
-		const s = try std.fmt.bufPrintSentinel(
-			&buf, &fmt, .{ b.sign, b.exponent, b.mantissa }, 0);
-		pd.post.log(self, .normal, s, .{});
-	}
+fn mantissaC(p: *Pd, f: Float) callconv(.c) void {
+	Box.state(p).uf.b.mantissa = @intFromFloat(f);
+}
 
-	fn mantissaC(p: *Pd, f: Float) callconv(.c) void {
-		parentPtr(p).uf.b.mantissa = @intFromFloat(f);
-	}
+fn exponentC(p: *Pd, f: Float) callconv(.c) void {
+	Box.state(p).uf.b.exponent = @intFromFloat(f);
+}
 
-	fn exponentC(p: *Pd, f: Float) callconv(.c) void {
-		parentPtr(p).uf.b.exponent = @intFromFloat(f);
-	}
+fn signC(p: *Pd, f: Float) callconv(.c) void {
+	Box.state(p).uf.b.sign = @intFromFloat(f);
+}
 
-	fn signC(p: *Pd, f: Float) callconv(.c) void {
-		parentPtr(p).uf.b.sign = @intFromFloat(f);
-	}
+fn intC(p: *Pd, f: Float) callconv(.c) void {
+	Box.state(p).uf = .{ .u = @intFromFloat(f) };
+}
 
-	fn intC(p: *Pd, f: Float) callconv(.c) void {
-		parentPtr(p).uf = .{ .u = @intFromFloat(f) };
-	}
+fn f1C(p: *Pd, f: Float) callconv(.c) void {
+	Box.state(p).uf = .{ .f = f };
+}
 
-	fn f1C(p: *Pd, f: Float) callconv(.c) void {
-		parentPtr(p).uf = .{ .f = f };
-	}
+fn bangC(p: *const Pd) callconv(.c) void {
+	const self = Box.stateConst(p);
+	self.out.float(self.uf.f);
+}
 
-	fn bangC(p: *const Pd) callconv(.c) void {
-		const self = parentConstPtr(p);
-		self.out.float(self.uf.f);
-	}
+fn floatC(p: *Pd, f: Float) callconv(.c) void {
+	mantissaC(p, f);
+	bangC(p);
+}
 
-	fn floatC(p: *Pd, f: Float) callconv(.c) void {
-		mantissaC(p, f);
-		bangC(p);
-	}
+fn setC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+	const self = Box.state(p);
+	self.uf = getUf(self.uf, 0, av[0..ac]);
+}
 
-	fn setC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
-		const self = parentPtr(p);
-		self.uf = getUf(self.uf, 0, av[0..ac]);
-	}
+fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+	const self = Box.state(p);
+	self.uf = getUf(self.uf, 0, av[0..ac]);
+	bangC(p);
+}
 
-	fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
-		const self = parentPtr(p);
-		self.uf = getUf(self.uf, 0, av[0..ac]);
-		bangC(p);
-	}
+fn anythingC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
+	const self = Box.state(p);
+	// first arg is a symbol, skip it
+	self.uf = getUf(self.uf, 1, av[0..ac]);
+	bangC(p);
+}
 
-	fn anythingC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
-		const self = parentPtr(p);
-		// first arg is a symbol, skip it
-		self.uf = getUf(self.uf, 1, av[0..ac]);
-		bangC(p);
-	}
+fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+	return pd.wrap(*Pd, create(av[0..ac]), name);
+}
+inline fn create(av: []const Atom) pd.Oom!*Pd {
+	const obj: *pd.Object = @ptrCast(try class.pd());
+	const self = Box.state(&obj.g.pd);
+	errdefer obj.g.pd.destroy();
 
-	fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, create(av[0..ac]), name);
-	}
-	inline fn create(av: []const Atom) pd.Oom!*Pd {
-		const self: *FlEnc = try pd.gpa.create(FlEnc);
-		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
-		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.destroy();
+	_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("e"));
+	_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("s"));
+	self.* = .{
+		.out = try .create(obj, pd.s.float()),
+		.uf = getUf(.{ .u = 0 }, 0, av),
+	};
+	return &obj.g.pd;
+}
 
-		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("e"));
-		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("s"));
-		self.* = .{
-			.obj = self.obj,
-			.out = try .create(obj, pd.s.float()),
-			.uf = getUf(.{ .u = 0 }, 0, av),
-		};
-		return &obj.g.pd;
-	}
-
-	inline fn setup() pd.Class.Error!void {
-		class = try .create(name, &.{ .gimme }, createC, null, @sizeOf(FlEnc), .{});
-		class.addBang(bangC);
-		class.addFloat(floatC);
-		class.addList(listC);
-		class.addAnything(anythingC);
-		class.addMethod(&.{}, printC, .gen("print"));
-		class.addMethod(&.{ .float }, mantissaC, .gen("m"));
-		class.addMethod(&.{ .float }, exponentC, .gen("e"));
-		class.addMethod(&.{ .float }, signC, .gen("s"));
-		class.addMethod(&.{ .float }, f1C, .gen("f"));
-		class.addMethod(&.{ .float }, intC, .gen("u"));
-		class.addMethod(&.{ .gimme }, setC, .gen("set"));
-	}
-};
+inline fn setup() pd.Class.Error!void {
+	class = try .create(name, &.{ .gimme }, createC, null, @sizeOf(Box), .{});
+	class.addBang(bangC);
+	class.addFloat(floatC);
+	class.addList(listC);
+	class.addAnything(anythingC);
+	class.addMethod(&.{}, printC, .gen("print"));
+	class.addMethod(&.{ .float }, mantissaC, .gen("m"));
+	class.addMethod(&.{ .float }, exponentC, .gen("e"));
+	class.addMethod(&.{ .float }, signC, .gen("s"));
+	class.addMethod(&.{ .float }, f1C, .gen("f"));
+	class.addMethod(&.{ .float }, intC, .gen("u"));
+	class.addMethod(&.{ .gimme }, setC, .gen("set"));
+}
 
 export fn flenc_setup() void {
-	_ = pd.wrap(void, FlEnc.setup(), @src().fn_name);
+	_ = pd.wrap(void, setup(), @src().fn_name);
 }

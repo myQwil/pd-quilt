@@ -1,50 +1,46 @@
 //! Reverse `[moses]`. Outputs numbers to the left if they're greater than control value.
 
+const Sesom = @This();
 const pd = @import("pd");
 
 const Pd = pd.Pd;
 const Float = pd.Float;
 
-const Sesom = extern struct {
-	obj: pd.Object,
-	out_l: *pd.Outlet,
-	out_r: *pd.Outlet,
-	f: Float,
+out_l: *pd.Outlet,
+out_r: *pd.Outlet,
+f: Float,
 
-	const name = "sesom";
-	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(Sesom, "obj");
+const name = "sesom";
+var class: *pd.Class = undefined;
+const Box = pd.Box(pd.Object, Sesom);
 
-	fn floatC(p: *Pd, f: Float) callconv(.c) void {
-		const self = parentPtr(p);
-		(if (f > self.f) self.out_l else self.out_r).float(f);
-	}
+fn createC(f: Float) callconv(.c) ?*Pd {
+	return pd.wrap(*Pd, create(f), name);
+}
+inline fn create(f: Float) pd.Oom!*Pd {
+	const obj: *pd.Object = @ptrCast(try class.pd());
+	const self = Box.state(&obj.g.pd);
+	errdefer obj.g.pd.destroy();
 
-	fn createC(f: Float) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, create(f), name);
-	}
-	inline fn create(f: Float) pd.Oom!*Pd {
-		const self: *Sesom = try pd.gpa.create(Sesom);
-		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
-		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.destroy();
+	_ = try obj.inletFloat(&self.f);
+	self.* = .{
+		.out_l = try .create(obj, pd.s.float()),
+		.out_r = try .create(obj, pd.s.float()),
+		.f = f,
+	};
+	return &obj.g.pd;
+}
 
-		_ = try obj.inletFloat(&self.f);
-		self.* = .{
-			.obj = self.obj,
-			.out_l = try .create(obj, pd.s.float()),
-			.out_r = try .create(obj, pd.s.float()),
-			.f = f,
-		};
-		return &obj.g.pd;
-	}
+fn floatC(p: *const Pd, f: Float) callconv(.c) void {
+	const self = Box.stateConst(p);
+	(if (f > self.f) self.out_l else self.out_r).float(f);
+}
 
-	inline fn setup() pd.Class.Error!void {
-		class = try .create(name, &.{ .deffloat }, createC, null, @sizeOf(Sesom), .{});
-		class.addFloat(floatC);
-	}
-};
+inline fn setup() pd.Class.Error!void {
+	class = try .create(name, &.{ .deffloat }, createC, null, @sizeOf(Box), .{});
+	class.addFloat(floatC);
+}
 
 export fn sesom_setup() void {
-	_ = pd.wrap(void, Sesom.setup(), @src().fn_name);
+	_ = pd.wrap(void, setup(), @src().fn_name);
 }

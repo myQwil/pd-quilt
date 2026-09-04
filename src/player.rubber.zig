@@ -12,7 +12,7 @@ const Allocator = std.mem.Allocator;
 
 var s_delay: *Symbol = undefined;
 
-pub const Rubber = extern struct {
+pub const Rubber = struct {
 	state: *ru.State,
 	tempo: *Float,
 
@@ -30,11 +30,11 @@ pub const Rubber = extern struct {
 		};
 	}
 
-	pub inline fn deinit(self: *Rubber) void {
+	pub inline fn deinit(self: *const Rubber) void {
 		self.state.destroy();
 	}
 
-	pub inline fn reset(self: *Rubber) void {
+	pub inline fn reset(self: *const Rubber) void {
 		self.state.reset();
 	}
 
@@ -57,9 +57,9 @@ pub const Rubber = extern struct {
 };
 
 const FieldSetFunc = fn(*ru.Options, *Symbol) void;
-var dict: std.AutoHashMap(*Symbol, *const FieldSetFunc) = undefined;
-pub fn freeDict() void {
-	dict.deinit();
+var dict: std.AutoHashMapUnmanaged(*Symbol, *const FieldSetFunc) = .empty;
+pub fn freeDict(gpa: Allocator) void {
+	dict.deinit(gpa);
 }
 
 fn parseOptions(gpa: Allocator, av: []const Atom) pd.Oom!ru.Options {
@@ -104,55 +104,55 @@ fn FieldSetter(comptime name: []const u8) type { return struct {
 };}
 
 pub fn Impl(Self: type) type { return struct {
-	const parentPtr = Self.parentPtr;
+	const Box = Self.Box;
 
 	fn transientsC(p: *Pd, s: *Symbol) callconv(.c) void {
 		if (getEnum(ru.Options.Transients, s)) |value| {
-			const rubber: *Rubber = &parentPtr(p).rubber;
+			const rubber: *Rubber = &Box.state(p).rubber;
 			rubber.state.setTransientsOption(value);
 		}
 	}
 
 	fn detectorC(p: *Pd, s: *Symbol) callconv(.c) void {
 		if (getEnum(ru.Options.Detector, s)) |value| {
-			const rubber: *Rubber = &parentPtr(p).rubber;
+			const rubber: *Rubber = &Box.state(p).rubber;
 			rubber.state.setDetectorOption(value);
 		}
 	}
 
 	fn formantC(p: *Pd, s: *Symbol) callconv(.c) void {
 		if (getEnum(ru.Options.Formant, s)) |value| {
-			const rubber: *Rubber = &parentPtr(p).rubber;
+			const rubber: *Rubber = &Box.state(p).rubber;
 			rubber.state.setFormantOption(value);
 		}
 	}
 
 	fn phaseC(p: *Pd, s: *Symbol) callconv(.c) void {
 		if (getEnum(ru.Options.Phase, s)) |value| {
-			const rubber: *Rubber = &parentPtr(p).rubber;
+			const rubber: *Rubber = &Box.state(p).rubber;
 			rubber.state.setPhaseOption(value);
 		}
 	}
 
 	fn pitchC(p: *Pd, s: *Symbol) callconv(.c) void {
 		if (getEnum(ru.Options.Pitch, s)) |value| {
-			const rubber: *Rubber = &parentPtr(p).rubber;
+			const rubber: *Rubber = &Box.state(p).rubber;
 			rubber.state.setPitchOption(value);
 		}
 	}
 
 	fn fscaleC(p: *Pd, f: Float) callconv(.c) void {
-		const rubber: *Rubber = &parentPtr(p).rubber;
+		const rubber: *Rubber = &Box.state(p).rubber;
 		rubber.state.setFormantScale(f);
 	}
 
 	fn tempoC(p: *Pd, f: Float) callconv(.c) void {
-		const rubber: *Rubber = &parentPtr(p).rubber;
+		const rubber: *Rubber = &Box.state(p).rubber;
 		rubber.tempo.* = f;
 	}
 
 	fn delayC(p: *Pd) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		const player: *pr.Player = &self.base.player;
 		const rubber: *Rubber = &self.rubber;
 		player.outlet.anything(s_delay, &.{
@@ -163,13 +163,12 @@ pub fn Impl(Self: type) type { return struct {
 	pub inline fn extend(gpa: Allocator) Allocator.Error!void {
 		s_delay = .gen("delay");
 
-		dict = .init(gpa);
-		errdefer dict.deinit();
+		errdefer dict.deinit(gpa);
 		inline for ([_][:0]const u8{
 			"transients", "detector", "phase", "threading", "window",
 			"smoothing", "formant", "pitch", "channels", "engine",
 		}) |name| {
-			try dict.put(.gen(name), &FieldSetter(name).set);
+			try dict.put(gpa, .gen(name), &FieldSetter(name).set);
 		}
 
 		const class: *pd.Class = Self.class;

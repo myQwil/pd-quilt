@@ -10,8 +10,7 @@ const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
 
-pub fn Impl(Root: type) type { return extern struct {
-	obj: pd.Object,
+pub fn Impl(Root: type) type { return struct {
 	base: Base,
 	rabbit: ra.Rabbit,
 	rubber: ru.Rubber,
@@ -21,8 +20,7 @@ pub fn Impl(Root: type) type { return extern struct {
 	pub var class: *pd.Class = undefined;
 	pub const gpa = pd.gpa;
 	pub const io = std.Io.Threaded.global_single_threaded.io();
-	pub const parentPtr = pd.parentPtr(Self, "obj");
-	pub const parentConstPtr = pd.parentConstPtr(Self, "obj");
+	pub const Box = pd.Box(pd.Object, Self);
 
 	// Implementations
 	pub const Base = gm.Base(Root.nch, ra.frames);
@@ -31,23 +29,25 @@ pub fn Impl(Root: type) type { return extern struct {
 	const Rabbit = ra.Impl(Self);
 	const Rubber = ru.Impl(Self);
 
-	pub inline fn err(self: *const Self, e: anyerror) void {
-		pd.post.err(self, Root.name ++ ": %s", .{ @errorName(e).ptr });
+	pub inline fn err(p: *const Pd, e: anyerror) void {
+		pd.post.err(p, Root.name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
-	pub inline fn conv(self: *Self, i: ra.uint) void {
-		self.rabbit.conv(i, Root.nch) catch |e| self.err(e);
+	pub inline fn conv(p: *Pd, i: ra.uint) void {
+		Box.state(p).rabbit.conv(i, Root.nch) catch |e| err(p, e);
 	}
 
-	pub fn resetBuffers(self: *Self) void {
-		self.rabbit.reset() catch |e| self.err(e);
+	pub fn resetBuffers(p: *Pd) void {
+		const self = Box.state(p);
+		self.rabbit.reset() catch |e| err(p, e);
 		self.rubber.reset();
 		// gme resets the fade-out start time on seeks and track changes.
 		// we want to play tracks forever and handle fade-out at the patch level.
 		self.base.emu.ignoreFade(true);
 	}
 
-	pub fn prepNewTrack(self: *Self) void {
+	pub fn prepNewTrack(p: *Pd) void {
+		const self = Box.state(p);
 		self.rubber.processStartPad(&self.planar, Root.nch, ra.frames);
 	}
 
@@ -104,9 +104,8 @@ pub fn Impl(Root: type) type { return extern struct {
 		return pd.wrap(*Pd, create(av[0..ac]), Root.name);
 	}
 	inline fn create(av: []const Atom) !*Pd {
-		const self: *Self = try pd.gpa.create(Self);
-		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
-		const obj: *pd.Object = &self.obj;
+		const obj: *pd.Object = @ptrCast(try class.pd());
+		const self = Box.state(&obj.g.pd);
 		errdefer obj.g.pd.destroy();
 
 		const base: Base = try .init(obj, av);
@@ -127,7 +126,6 @@ pub fn Impl(Root: type) type { return extern struct {
 			n += 1;
 		}
 		self.* = .{
-			.obj = self.obj,
 			.base = base,
 			.rabbit = rabbit,
 			.rubber = rubber,
@@ -136,8 +134,8 @@ pub fn Impl(Root: type) type { return extern struct {
 		return &obj.g.pd;
 	}
 
-	fn destroyC(p: *Pd) callconv(.c) void {
-		const self = parentPtr(p);
+	fn destroyC(p: *const Pd) callconv(.c) void {
+		const self = Box.stateConst(p);
 		inline for (0..Root.nch) |ch| {
 			gpa.free(@as([]Sample, self.planar[ch][0..ra.frames]));
 		}
@@ -147,12 +145,12 @@ pub fn Impl(Root: type) type { return extern struct {
 	}
 
 	fn classFreeC(_: *pd.Class) callconv(.c) void {
-		Base.freeDict();
-		ru.freeDict();
+		Base.freeDict(gpa);
+		ru.freeDict(gpa);
 	}
 
 	pub inline fn setup() (pd.Class.Error || std.mem.Allocator.Error)!void {
-		class = try .create(Root.name, &.{ .gimme }, createC, destroyC, @sizeOf(Self), .{});
+		class = try .create(Root.name, &.{ .gimme }, createC, destroyC, @sizeOf(Box), .{});
 		try BaseImpl.extend();
 		try Rubber.extend(gpa);
 		Rabbit.extend();

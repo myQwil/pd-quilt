@@ -20,7 +20,7 @@ const find = std.mem.findScalar;
 var s_open: *Symbol = undefined;
 pub var s_play: *Symbol = undefined;
 
-pub const Player = extern struct {
+pub const Player = struct {
 	/// outlet for sending metadata and open/play states
 	outlet: *pd.Outlet,
 	/// Whether a track has been opened
@@ -127,15 +127,14 @@ pub inline fn leavedToPlanar(
 
 pub fn Impl(Self: type) type { return struct {
 	/// Perform this after seeking or loading a new track.
-	const resetBuffers: fn(*Self) void = Self.resetBuffers;
+	const resetBuffers: fn(*Pd) void = Self.resetBuffers;
 	/// Perform this after loading a new track.
-	const prepNewTrack: fn(*Self) void = Self.prepNewTrack;
+	const prepNewTrack: fn(*Pd) void = Self.prepNewTrack;
 	/// Print error to Pd console
-	const err: fn(*const Self, anyerror) callconv(.@"inline") void = Self.err;
+	const err: fn(*const Pd, anyerror) callconv(.@"inline") void = Self.err;
 	const gpa = Self.gpa;
 	const io = Self.io;
-	const parentPtr = Self.parentPtr;
-	const parentConstPtr = Self.parentConstPtr;
+	const Box = Self.Box;
 
 	const Base = Self.Base;
 	const GetMetaFn = fn(*const Base, *const Meta, *Symbol) ?*const Pile;
@@ -156,7 +155,6 @@ pub fn Impl(Self: type) type { return struct {
 	/// Returns the number of tracks in the current playlist.
 	const bTrackCount: fn(*const Base) callconv(.@"inline") usize = Base.trackCount;
 
-
 	fn getNone(_: *const Base, _: *const Meta, _: *Symbol) ?*const Pile {
 		return null;
 	}
@@ -165,13 +163,13 @@ pub fn Impl(Self: type) type { return struct {
 		p: *const Pd,
 		_: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
-		const self = parentConstPtr(p);
+		const self = Box.stateConst(p);
 		var buffer: [pd.max_string:0]u8 = undefined;
 		var writer: Writer = .fixed(&buffer);
 		print(self, &writer, av[0..ac]) catch wr.ellipsis(&writer);
 		if (writer.end > 0) {
 			buffer[writer.end] = 0;
-			pd.post.log(self, .normal, "%s", .{ &buffer });
+			pd.post.log(p, .normal, "%s", .{ &buffer });
 		}
 	}
 	inline fn print(self: *const Self, w: *Writer, av: []const Atom) Writer.Error!void {
@@ -249,8 +247,8 @@ pub fn Impl(Self: type) type { return struct {
 	}
 
 	fn getC(p: *const Pd, s: *Symbol) callconv(.c) void {
-		const self = parentConstPtr(p);
-		get(self, s) catch |e| err(self, e);
+		const self = Box.stateConst(p);
+		get(self, s) catch |e| err(p, e);
 	}
 	fn get(self: *const Self, s: *Symbol) pd.Oom!void {
 		const base: *const Base = &self.base;
@@ -269,39 +267,39 @@ pub fn Impl(Self: type) type { return struct {
 		p: *const Pd,
 		s: *Symbol, _: c_uint, _: [*]const Atom,
 	) callconv(.c) void {
-		const self = parentConstPtr(p);
-		get(self, s) catch |e| err(self, e);
+		const self = Box.stateConst(p);
+		get(self, s) catch |e| err(p, e);
 	}
 
 	fn seekC(p: *Pd, f: Float) callconv(.c) void {
-		const self = parentPtr(p);
-		seek(self, f) catch |e| err(self, e);
+		seek(p, f) catch |e| err(p, e);
 	}
-	inline fn seek(self: *Self, msec: Float) !void {
+	inline fn seek(p: *Pd, msec: Float) !void {
+		const self = Box.state(p);
 		const base: *Base = &self.base;
 		const player: *Player = &base.player;
 		try player.assertFileOpened();
 		try bSeek(base, msec);
-		resetBuffers(self);
+		resetBuffers(p);
 	}
 
 	fn openC(
 		p: *Pd,
 		_: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		const base: *Base = &self.base;
 		const player: *Player = &base.player;
 		const result: bool = blk: { if (open(base, av[0..ac])) {
 			player.open = true;
 			player.play = false;
-			resetBuffers(self);
-			prepNewTrack(self);
+			resetBuffers(p);
+			prepNewTrack(p);
 			break :blk true;
 		} else |e| {
 			// previous track is only replaced on a successful open,
 			// so open/play states should be left alone on failure
-			err(self, e);
+			err(p, e);
 			break :blk false;
 		}};
 		player.sendState(s_open, result);
@@ -315,15 +313,16 @@ pub fn Impl(Self: type) type { return struct {
 		p: *Pd,
 		_: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		const player: *Player = &self.base.player;
-		player.play = list(self, av[0..ac]) catch |e| blk: {
-			err(self, e);
+		player.play = list(p, av[0..ac]) catch |e| blk: {
+			err(p, e);
 			break :blk false;
 		};
 		player.sendState(s_play, player.play);
 	}
-	fn list(self: *Self, av: []const Atom) !bool {
+	fn list(p: *Pd, av: []const Atom) !bool {
+		const self = Box.state(p);
 		const base: *Base = &self.base;
 		const player: *Player = &base.player;
 		try player.assertFileOpened();
@@ -340,8 +339,8 @@ pub fn Impl(Self: type) type { return struct {
 			try bSeek(base, 0);
 			break :blk false;
 		}};
-		resetBuffers(self);
-		prepNewTrack(self);
+		resetBuffers(p);
+		prepNewTrack(p);
 		return result;
 	}
 
@@ -353,16 +352,16 @@ pub fn Impl(Self: type) type { return struct {
 	fn playC(p: *Pd,
 		_: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		const player: *Player = &self.base.player;
-		player.setPlay(av[0..ac]) catch |e| err(self, e);
+		player.setPlay(av[0..ac]) catch |e| err(p, e);
 	}
 
 	/// toggle the play/pause state
 	fn bangC(p: *Pd) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		const player: *Player = &self.base.player;
-		player.setPlay(&.{}) catch |e| err(self, e);
+		player.setPlay(&.{}) catch |e| err(p, e);
 	}
 
 	pub inline fn extend() void {

@@ -10,8 +10,7 @@ const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
 
-pub fn Impl(Root: type) type { return extern struct {
-	obj: pd.Object,
+pub fn Impl(Root: type) type { return struct {
 	base: Base,
 	rabbit: ra.Rabbit,
 	rubber: ru.Rubber,
@@ -24,28 +23,30 @@ pub fn Impl(Root: type) type { return extern struct {
 
 	// Implementations
 	pub const Base = av.Base(ra.frames);
+	pub const Box = pd.Box(pd.Object, Self);
 	const BaseImpl = Base.Impl(Self);
 	const Player = pr.Impl(Self);
 	const Rabbit = ra.Impl(Self);
 	const Rubber = ru.Impl(Self);
-	pub const parentPtr = pd.parentPtr(Self, "obj");
-	pub const parentConstPtr = pd.parentConstPtr(Self, "obj");
 
-	pub inline fn err(self: *const Self, e: anyerror) void {
-		pd.post.err(self, Root.name ++ ": %s", .{ @errorName(e).ptr });
+	pub inline fn err(p: *const Pd, e: anyerror) void {
+		pd.post.err(p, Root.name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
-	pub inline fn conv(self: *Self, i: ra.uint) void {
-		self.rabbit.conv(i, self.base.nch) catch |e| self.err(e);
+	pub inline fn conv(p: *Pd, i: ra.uint) void {
+		const self = Box.state(p);
+		self.rabbit.conv(i, self.base.nch) catch |e| err(p, e);
 	}
 
-	pub fn resetBuffers(self: *Self) void {
+	pub fn resetBuffers(p: *Pd) void {
+		const self = Box.state(p);
 		self.base.reset();
-		self.rabbit.reset() catch |e| self.err(e);
+		self.rabbit.reset() catch |e| err(p, e);
 		self.rubber.reset();
 	}
 
-	pub fn prepNewTrack(self: *Self) void {
+	pub fn prepNewTrack(p: *Pd) void {
+		const self = Box.state(p);
 		self.base.frame.pts = 0;
 		self.rubber.processStartPad(self.planar, self.base.nch, ra.frames);
 	}
@@ -60,7 +61,8 @@ pub fn Impl(Root: type) type { return extern struct {
 				player.play = false;
 				player.sendState(pr.s_play, player.play);
 				if (e != error.EndOfFile) {
-					pd.post.err(self, Root.name ++ ": %s", .{ @errorName(e).ptr });
+					const p: *Pd = @ptrFromInt(@intFromPtr(self) - @offsetOf(Box, "body"));
+					pd.post.err(p, Root.name ++ ": %s", .{ @errorName(e).ptr });
 				}
 				for (base.outs[0..base.nch]) |ch| {
 					@memset(ch[i..w[2]], 0);
@@ -113,7 +115,9 @@ pub fn Impl(Root: type) type { return extern struct {
 							} else if (b.sub_open and pkt.stream_index == b.subtitle.idx) {
 								var sub: av.Subtitle = undefined;
 								if (try b.subtitle.ctx.decodeSubtitle(&sub, pkt)) {
-									pd.post.log(self, .normal, "\n%s", .{ pkt.data });
+									const p: *Pd = @ptrFromInt(
+										@intFromPtr(self) - @offsetOf(Box, "body"));
+									pd.post.log(p, .normal, "\n%s", .{ pkt.data });
 								}
 							}
 						} else |e| {
@@ -162,7 +166,7 @@ pub fn Impl(Root: type) type { return extern struct {
 	}
 
 	fn dspC(p: *Pd, sp: [*]*pd.Signal) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		const base: *Base = &self.base;
 		for (base.outs[0..base.nch], sp[2..][0..base.nch]) |*o, s| {
 			o.* = s.vec;
@@ -174,9 +178,8 @@ pub fn Impl(Root: type) type { return extern struct {
 		return pd.wrap(*Pd, create(args[0..ac]), Root.name);
 	}
 	inline fn create(args: []const Atom) (ra.InitError || error{FFmpegInvalid})!*Pd {
-		const self: *Self = try pd.gpa.create(Self);
-		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
-		const obj: *pd.Object = &self.obj;
+		const obj: *pd.Object = @ptrCast(try class.pd());
+		const self = Box.state(&obj.g.pd);
 		errdefer obj.g.pd.destroy();
 
 		var base: Base = try .init(
@@ -203,7 +206,6 @@ pub fn Impl(Root: type) type { return extern struct {
 			n += 1;
 		}
 		self.* = .{
-			.obj = self.obj,
 			.base = base,
 			.rabbit = rabbit,
 			.rubber = rubber,
@@ -213,7 +215,7 @@ pub fn Impl(Root: type) type { return extern struct {
 	}
 
 	fn destroyC(p: *Pd) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		const nch = self.base.nch;
 		for (0..nch) |ch| {
 			gpa.free(@as([]Sample, self.planar[ch][0..ra.frames]));
@@ -225,12 +227,12 @@ pub fn Impl(Root: type) type { return extern struct {
 	}
 
 	fn classFreeC(_: *pd.Class) callconv(.c) void {
-		Base.freeDict();
-		ru.freeDict();
+		Base.freeDict(gpa);
+		ru.freeDict(gpa);
 	}
 
 	pub inline fn setup() (pd.Class.Error || pd.Oom)!void {
-		class = try .create(Root.name, &.{ .gimme }, createC, destroyC, @sizeOf(Self), .{});
+		class = try .create(Root.name, &.{ .gimme }, createC, destroyC, @sizeOf(Box), .{});
 		try BaseImpl.extend();
 		try Rubber.extend(gpa);
 		Player.extend();

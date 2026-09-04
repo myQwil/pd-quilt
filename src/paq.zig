@@ -24,46 +24,37 @@ fn set(self: []Atom, s: *Symbol, source: []const Atom) void {
 	}
 }
 
-const Proxy = extern struct {
-	obj: pd.Pd,
-	ptr: [*]Atom,
-	len: usize,
+const Proxy = struct {
+	vec: []Atom,
 
 	const name = "_paq_pxy";
 	var class: *pd.Class = undefined;
+	const Box = pd.Box(Pd, Proxy);
 
 	fn floatC(p: *Pd, f: Float) callconv(.c) void {
-		const self: *Proxy = @fieldParentPtr("obj", p);
-		self.ptr[0] = .float(f);
+		Box.state(p).vec[0] = .float(f);
 	}
 	fn symbolC(p: *Pd, s: *Symbol) callconv(.c) void {
-		const self: *Proxy = @fieldParentPtr("obj", p);
-		self.ptr[0] = .symbol(s);
+		Box.state(p).vec[0] = .symbol(s);
 	}
 	fn pointerC(p: *Pd, gp: *pd.GPointer) callconv(.c) void {
-		const self: *Proxy = @fieldParentPtr("obj", p);
-		self.ptr[0] = .pointer(gp);
+		Box.state(p).vec[0] = .pointer(gp);
 	}
 
 	fn anythingC(p: *Pd, s: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
-		const self: *Proxy = @fieldParentPtr("obj", p);
-		set(self.ptr[0..self.len], s, av[0..ac]);
+		set(Box.state(p).vec, s, av[0..ac]);
 	}
 
-	fn init(vec: []Atom) pd.Oom!*Proxy {
-		const self: *Proxy = try gpa.create(Proxy);
-		self.* = .{
-			.obj = .{ .class = class },
-			.ptr = vec.ptr,
-			.len = vec.len,
-		};
-		return self;
+	fn create(vec: []Atom) pd.Oom!*Pd {
+		const p: *Pd = try class.pd();
+		Box.state(p).* = .{ .vec = vec };
+		return p;
 	}
 
 	inline fn setup() pd.Class.Error!void {
 		dot = .gen(".");
 		const opts: pd.Class.Options = .{ .bare = true, .no_inlet = true };
-		class = try .create(name, &.{}, null, null, @sizeOf(Proxy), opts);
+		class = try .create(name, &.{}, null, null, @sizeOf(Box), opts);
 		class.addFloat(floatC);
 		class.addSymbol(symbolC);
 		class.addPointer(pointerC);
@@ -71,44 +62,41 @@ const Proxy = extern struct {
 	}
 };
 
-const Paq = extern struct {
-	obj: pd.Object,
-	ptr: [*]Atom,
-	len: usize,
+const Paq = struct {
+	vec: []Atom,
 	out: *pd.Outlet,
-	ins: [*]*Proxy,
+	ins: [*]*Pd,
 
 	const name = "paq";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(Paq, "obj");
-	const parentConstPtr = pd.parentConstPtr(Paq, "obj");
+	const Box = pd.Box(pd.Object, Paq);
 
 	fn bangC(p: *const Pd) callconv(.c) void {
-		const self = parentConstPtr(p);
-		const vec = gpa.dupe(Atom, self.ptr[0..self.len]) catch |e|
-			return pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
+		const self = Box.stateConst(p);
+		const vec = gpa.dupe(Atom, self.vec) catch |e|
+			return pd.post.err(p, name ++ ": %s", .{ @errorName(e).ptr });
 		defer gpa.free(vec);
 		self.out.list(pd.s.list(), vec);
 	}
 
 	fn floatC(p: *Pd, f: Float) callconv(.c) void {
-		parentPtr(p).ptr[0] = .float(f);
+		Box.state(p).vec[0] = .float(f);
 		bangC(p);
 	}
 
 	fn symbolC(p: *Pd, s: *Symbol) callconv(.c) void {
-		parentPtr(p).ptr[0] = .symbol(s);
+		Box.state(p).vec[0] = .symbol(s);
 		bangC(p);
 	}
 
 	fn pointerC(p: *Pd, gp: *pd.GPointer) callconv(.c) void {
-		parentPtr(p).ptr[0] = .pointer(gp);
+		Box.state(p).vec[0] = .pointer(gp);
 		bangC(p);
 	}
 
 	fn anythingC(p: *Pd, s: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
-		const self = parentPtr(p);
-		set(self.ptr[0..self.len], s, av[0..ac]);
+		const self = Box.state(p);
+		set(self.vec, s, av[0..ac]);
 		bangC(p);
 	}
 
@@ -116,36 +104,31 @@ const Paq = extern struct {
 		return pd.wrap(*Pd, create(av[0..ac]), name);
 	}
 	inline fn create(argv: []const Atom) pd.Oom!*Pd {
-		const av: []const Atom = if (argv.len > 0)
-			argv
-		else &.{ .float(0), .float(0) };
+		const av: []const Atom = if (argv.len > 0) argv else &.{ .float(0), .float(0) };
 		const vec = try gpa.alloc(Atom, av.len);
 		errdefer gpa.free(vec);
 		vec[0] = av[0];
 
-		const self: *Paq = try gpa.create(Paq);
-		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
-		const obj: *pd.Object = &self.obj;
+		const obj: *pd.Object = @ptrCast(try class.pd());
+		const self = Box.state(&obj.g.pd);
 		errdefer obj.g.pd.destroy();
 
-		const ins = try gpa.alloc(*Proxy, av.len - 1);
+		const ins = try gpa.alloc(*Pd, av.len - 1);
 		errdefer gpa.free(ins);
 
 		var n: u32 = 0; // proxies allocated
 		errdefer for (ins[0..n]) |pxy| {
-			pxy.obj.destroy();
+			pxy.destroy();
 		};
 		while (n < ins.len) {
 			const i = n + 1;
 			vec[i] = av[i];
-			ins[n] = try .init(vec[i..]);
-			_ = try obj.inlet(&ins[n].obj, null, null);
+			ins[n] = try Proxy.create(vec[i..]);
+			_ = try obj.inlet(ins[n], null, null);
 			n = i;
 		}
 		self.* = .{
-			.obj = self.obj,
-			.ptr = vec.ptr,
-			.len = vec.len,
+			.vec = vec,
 			.out = try .create(obj, pd.s.list()),
 			.ins = ins.ptr,
 		};
@@ -153,17 +136,17 @@ const Paq = extern struct {
 	}
 
 	fn destroyC(p: *const Pd) callconv(.c) void {
-		const self = parentConstPtr(p);
-		const n = self.len - 1;
+		const self = Box.stateConst(p);
+		const n = self.vec.len - 1;
 		for (self.ins[0..n]) |pxy| {
-			pxy.obj.destroy();
+			pxy.destroy();
 		}
 		gpa.free(self.ins[0..n]);
-		gpa.free(self.ptr[0..self.len]);
+		gpa.free(self.vec);
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .create(name, &.{ .gimme }, createC, destroyC, @sizeOf(Paq), .{});
+		class = try .create(name, &.{ .gimme }, createC, destroyC, @sizeOf(Box), .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);
 		class.addSymbol(symbolC);

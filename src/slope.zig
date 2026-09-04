@@ -6,8 +6,7 @@ const Float = pd.Float;
 const Symbol = pd.Symbol;
 
 /// Non-gui slider objects.
-pub fn Slope(T: type) type { return extern struct {
-	obj: pd.Object,
+pub fn Slope(T: type) type { return struct {
 	out: *pd.Outlet,
 	min: f64,
 	max: f64,
@@ -16,25 +15,24 @@ pub fn Slope(T: type) type { return extern struct {
 
 	const Self = @This();
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(Self, "obj");
-	pub const parentConstPtr = pd.parentConstPtr(Self, "obj");
+	pub const Box = pd.Box(pd.Object, Self);
 
 	const getK: fn(min: f64, max: f64, run: f64) callconv(.@"inline") f64 = T.getK;
 
 	fn minC(p: *Pd, f: Float) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		self.min = f;
 		self.k = getK(self.min, self.max, self.run);
 	}
 
 	fn maxC(p: *Pd, f: Float) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		self.max = f;
 		self.k = getK(self.min, self.max, self.run);
 	}
 
 	fn runC(p: *Pd, f: Float) callconv(.c) void {
-		const self = parentPtr(p);
+		const self = Box.state(p);
 		self.run = f;
 		self.k = getK(self.min, self.max, self.run);
 	}
@@ -53,25 +51,24 @@ pub fn Slope(T: type) type { return extern struct {
 	}
 
 	fn setC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
-		parentPtr(p).set(0, av[0..ac]);
+		Box.state(p).set(0, av[0..ac]);
 	}
 
 	fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
-		parentPtr(p).set(0, av[0..ac]);
+		Box.state(p).set(0, av[0..ac]);
 	}
 
 	fn anythingC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
 		// first arg is a symbol, skip it
-		parentPtr(p).set(1, av[0..ac]);
+		Box.state(p).set(1, av[0..ac]);
 	}
 
 	pub fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, create(av[0..ac]), T.name);
 	}
 	inline fn create(av: []const Atom) pd.Oom!*Pd {
-		const self: *Self = try pd.gpa.create(Self);
-		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
-		const obj: *pd.Object = &self.obj;
+		const obj: *pd.Object = @ptrCast(try class.pd());
+		const self = Box.state(&obj.g.pd);
 		errdefer obj.g.pd.destroy();
 
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("min"));
@@ -93,7 +90,6 @@ pub fn Slope(T: type) type { return extern struct {
 			else => {},
 		}
 		self.* = .{
-			.obj = self.obj,
 			.out = try .create(obj, pd.s.float()),
 			.min = min,
 			.max = max,
@@ -104,7 +100,7 @@ pub fn Slope(T: type) type { return extern struct {
 	}
 
 	pub inline fn setup() pd.Class.Error!void {
-		class = try .create(T.name, &.{ .gimme }, createC, null, @sizeOf(Self), .{});
+		class = try .create(T.name, &.{ .gimme }, createC, null, @sizeOf(Box), .{});
 		class.addFloat(&T.floatC);
 		class.addList(listC);
 		class.addAnything(anythingC);

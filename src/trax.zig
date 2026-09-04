@@ -8,7 +8,8 @@ const Float = pd.Float;
 const Symbol = pd.Symbol;
 const Outlet = pd.Outlet;
 const StringMap = std.StringHashMapUnmanaged(void);
-const SymbolList = std.ArrayList(*Symbol);
+pub const SymbolList = std.ArrayList(*Symbol);
+
 const Allocator = std.mem.Allocator;
 const Oom = Allocator.Error;
 const Io = std.Io;
@@ -127,7 +128,7 @@ pub const Pile = struct {
 		}
 	}
 
-	pub fn print(self: *const Pile, obj: *pd.Object, key: [*:0]const u8) void {
+	pub fn print(self: *const Pile, p: *pd.Pd, key: [*:0]const u8) void {
 		pd.post.start("%s:", .{ key });
 		if (self.tbl.items.len > 1) {
 			for (0..self.tbl.items.len) |i| {
@@ -138,7 +139,7 @@ pub const Pile = struct {
 			pd.post.start(" ", .{});
 			self.get(0).print();
 		}
-		pd.post.log(obj, .normal, "", .{});
+		pd.post.log(p, .normal, "", .{});
 	}
 
 	pub fn write(self: *const Pile, w: *Writer) WriteError!void {
@@ -637,101 +638,60 @@ pub fn getSidecar(gpa: Allocator, io: Io, path: []const u8) Oom!?[:0]const u8 {
 	return trx_path[0..i :0];
 }
 
-pub const Playlist = extern struct {
-	/// list of tracks
-	ptr: [*]*Symbol = &.{},
-	/// length of the list
-	len: usize = 0,
-	/// allocated length
-	cap: usize = 0,
+pub const AppendError = TraverseError || error{NotASymbol};
 
-	pub const AppendError = TraverseError || error{NotASymbol};
-
-	fn asSymbolList(self: Playlist) SymbolList {
-		return SymbolList{
-			.items = self.ptr[0..self.len],
-			.capacity = self.cap,
-		};
-	}
-
-	pub fn deinit(self: *Playlist, gpa: Allocator) void {
-		var list = self.asSymbolList();
-		list.deinit(gpa);
-	}
-
-	pub fn append(
-		self: *Playlist,
-		gpa: Allocator,
-		io: Io,
-		av: []const Atom,
-	) AppendError!void {
-		var list = self.asSymbolList();
-		defer self.* = .{
-			.ptr = list.items.ptr,
-			.len = list.items.len,
-			.cap = list.capacity,
-		};
-
-		for (av) |arg| {
-			const sym = arg.getSymbol() orelse return error.NotASymbol;
-			const name = std.mem.sliceTo(sym.name, 0);
-			if (isTrax(name)) {
-				var parents: StringMap = .empty;
-				defer parents.deinit(gpa);
-				try traverseList(&list, gpa, io, &parents, name);
-			} else {
-				try list.append(gpa, sym);
-			}
+pub fn listAppend(
+	self: *SymbolList,
+	gpa: Allocator,
+	io: Io,
+	av: []const Atom,
+) AppendError!void {
+	for (av) |arg| {
+		const sym = arg.getSymbol() orelse return error.NotASymbol;
+		const name = std.mem.sliceTo(sym.name, 0);
+		if (isTrax(name)) {
+			var parents: StringMap = .empty;
+			defer parents.deinit(gpa);
+			try traverseList(self, gpa, io, &parents, name);
+		} else {
+			try self.append(gpa, sym);
 		}
 	}
+}
 
-	pub fn replaceWith(
-		self: *Playlist,
-		gpa: Allocator,
-		io: Io,
-		av: []const Atom,
-	) AppendError!void {
-		var playlist: Playlist = .{};
-		errdefer playlist.deinit(gpa);
-		try playlist.append(gpa, io, av);
-		// on success, replace old list with new one
-		self.deinit(gpa);
-		self.* = playlist;
-	}
-};
+pub fn listReplace(
+	self: *SymbolList,
+	gpa: Allocator,
+	io: Io,
+	av: []const Atom,
+) AppendError!void {
+	var list: SymbolList = .empty;
+	errdefer list.deinit(gpa);
+	try listAppend(&list, gpa, io, av);
+	// on success, replace old list with new one
+	self.deinit(gpa);
+	self.* = list;
+}
 
-pub const LangSet = extern struct {
-	/// list of preferred language codes
-	ptr: [*]*Symbol = &.{},
-	/// length of the list
-	len: usize = 0,
+pub fn langReplace(
+	self: *[]*Symbol,
+	gpa: Allocator,
+	args: []const Atom,
+) (Oom || error{NotASymbol})!void {
+	var arr: SymbolList = .empty;
+	errdefer arr.deinit(gpa);
+	var map: std.AutoHashMap(*Symbol, void) = .init(gpa);
+	defer map.deinit();
 
-	pub inline fn slice(self: LangSet) []const *Symbol {
-		return self.ptr[0..self.len];
-	}
-
-	pub fn deinit(self: *LangSet, gpa: Allocator) void {
-		gpa.free(self.ptr[0..self.len]);
-	}
-
-	pub fn replaceWith(self: *LangSet, gpa: Allocator, args: []const Atom) Oom!void {
-		var arr: SymbolList = .empty;
-		errdefer arr.deinit(gpa);
-		var set: std.AutoHashMap(*Symbol, void) = .init(gpa);
-		defer set.deinit();
-
-		for (args) |arg| {
-			if (arg.getSymbol()) |s| {
-				if (set.get(s) == null) {
-					try arr.append(gpa, s);
-					try set.put(s, {});
-				}
-			}
+	for (args) |arg| {
+		const s = arg.getSymbol() orelse return error.NotASymbol;
+		if (map.get(s) == null) {
+			try arr.append(gpa, s);
+			try map.put(s, {});
 		}
-		const slc = try arr.toOwnedSlice(gpa);
-		// on success, replace old list with new one
-		self.deinit(gpa);
-		self.ptr = slc.ptr;
-		self.len = slc.len;
 	}
-};
+	const slc = try arr.toOwnedSlice(gpa);
+	// on success, replace old list with new one
+	gpa.free(self.*);
+	self.* = slc;
+}

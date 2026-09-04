@@ -11,82 +11,76 @@ const Rgb = struct {
 	b: Float,
 };
 
-const Hsv = extern struct {
-	obj: pd.Object,
-	out: *pd.Outlet,
-	h: Float,
-	s: Float,
-	v: Float,
+out: *pd.Outlet,
+h: Float,
+s: Float,
+v: Float,
 
-	const name = "hsv";
-	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(Hsv, "obj");
-	const parentConstPtr = pd.parentConstPtr(Hsv, "obj");
+const name = "hsv";
+var class: *pd.Class = undefined;
+const Box = pd.Box(pd.Object, @This());
 
-	fn bangC(pp: *const Pd) callconv(.c) void {
-		const self = parentConstPtr(pp);
-		const s = self.s;
-		const v = self.v;
-		const color: Rgb = if (s <= 0)
-			.{ .r = v, .g = v, .b = v }
-		else blk: {
-			const h = @mod(self.h, 360) / 60;
-			const i: u3 = @intFromFloat(h);
+fn bangC(pp: *const Pd) callconv(.c) void {
+	const self = Box.stateConst(pp);
+	const s = self.s;
+	const v = self.v;
+	const color: Rgb = if (s <= 0)
+		.{ .r = v, .g = v, .b = v }
+	else blk: {
+		const h = @mod(self.h, 360) / 60;
+		const i: u3 = @intFromFloat(h);
 
-			const f = h - @as(Float, @floatFromInt(i));
-			const p = v * (1 - s);
-			const q = v * (1 - (s * if (i & 1 == 0) (1 - f) else f));
+		const f = h - @as(Float, @floatFromInt(i));
+		const p = v * (1 - s);
+		const q = v * (1 - (s * if (i & 1 == 0) (1 - f) else f));
 
-			break :blk switch (i) {
-				0 => .{ .r = v, .g = q, .b = p },
-				1 => .{ .r = q, .g = v, .b = p },
-				2 => .{ .r = p, .g = v, .b = q },
-				3 => .{ .r = p, .g = q, .b = v },
-				4 => .{ .r = q, .g = p, .b = v },
-				5 => .{ .r = v, .g = p, .b = q },
-				else => unreachable,
-			};
+		break :blk switch (i) {
+			0 => .{ .r = v, .g = q, .b = p },
+			1 => .{ .r = q, .g = v, .b = p },
+			2 => .{ .r = p, .g = v, .b = q },
+			3 => .{ .r = p, .g = q, .b = v },
+			4 => .{ .r = q, .g = p, .b = v },
+			5 => .{ .r = v, .g = p, .b = q },
+			else => unreachable,
 		};
-		const R = @as(u24, @intFromFloat(color.r * 0xff)) << 16;
-		const G = @as(u24, @intFromFloat(color.g * 0xff)) << 8;
-		const B = @as(u24, @intFromFloat(color.b * 0xff));
-		self.out.float(@floatFromInt(R + G + B));
-	}
+	};
+	const R = @as(u24, @intFromFloat(color.r * 0xff)) << 16;
+	const G = @as(u24, @intFromFloat(color.g * 0xff)) << 8;
+	const B = @as(u24, @intFromFloat(color.b * 0xff));
+	self.out.float(@floatFromInt(R + G + B));
+}
 
-	fn floatC(p: *Pd, f: Float) callconv(.c) void {
-		parentPtr(p).h = f;
-		bangC(p);
-	}
+fn floatC(p: *Pd, f: Float) callconv(.c) void {
+	Box.state(p).h = f;
+	bangC(p);
+}
 
-	fn createC(h: Float, s: Float, v: Float) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, create(h, s, v), name);
-	}
-	inline fn create(h: Float, s: Float, v: Float) pd.Oom!*Pd {
-		const self: *Hsv = try pd.gpa.create(Hsv);
-		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
-		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.destroy();
+fn createC(h: Float, s: Float, v: Float) callconv(.c) ?*Pd {
+	return pd.wrap(*Pd, create(h, s, v), name);
+}
+inline fn create(h: Float, s: Float, v: Float) pd.Oom!*Pd {
+	const obj: *pd.Object = @ptrCast(try class.pd());
+	const self = Box.state(&obj.g.pd);
+	errdefer obj.g.pd.destroy();
 
-		_ = try obj.inletFloat(&self.s);
-		_ = try obj.inletFloat(&self.v);
-		self.* = .{
-			.obj = self.obj,
-			.out = try .create(obj, pd.s.float()),
-			.h = h,
-			.s = s,
-			.v = v,
-		};
-		return &obj.g.pd;
-	}
+	_ = try obj.inletFloat(&self.s);
+	_ = try obj.inletFloat(&self.v);
+	self.* = .{
+		.out = try .create(obj, pd.s.float()),
+		.h = h,
+		.s = s,
+		.v = v,
+	};
+	return &obj.g.pd;
+}
 
-	inline fn setup() pd.Class.Error!void {
-		const args: [3]pd.Atom.Type = @splat(.deffloat);
-		class = try .create(name, &args, createC, null, @sizeOf(Hsv), .{});
-		class.addBang(&bangC);
-		class.addFloat(&floatC);
-	}
-};
+inline fn setup() pd.Class.Error!void {
+	const args: [3]pd.Atom.Type = @splat(.deffloat);
+	class = try .create(name, &args, &createC, null, @sizeOf(Box), .{});
+	class.addBang(&bangC);
+	class.addFloat(&floatC);
+}
 
 export fn hsv_setup() void {
-	_ = pd.wrap(void, Hsv.setup(), @src().fn_name);
+	_ = pd.wrap(void, setup(), @src().fn_name);
 }

@@ -7,7 +7,7 @@ pub inline fn getK(min: f64, max: f64, run: f64) f64 {
 }
 
 pub fn floatC(p: *const pd.Pd, f: pd.Float) callconv(.c) void {
-	const self = Slope.parentConstPtr(p);
+	const self = Slope.Box.stateConst(p);
 	self.out.float(@floatCast((f - self.min) * self.k));
 }
 

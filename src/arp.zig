@@ -30,7 +30,7 @@ fn onset(i: i32, len: usize) usize {
 	return if (i < 0) len - j else j;
 }
 
-var ops: std.AutoHashMap(u8, *const fn(Float, Float) Float) = .init(gpa);
+var ops: std.AutoHashMapUnmanaged(u8, *const fn(Float, Float) Float) = .empty;
 
 fn opPlus(f1: Float, f2: Float) Float {
 	return f1 + f2;
@@ -45,7 +45,7 @@ fn opOver(f1: Float, f2: Float) Float {
 	return if (f2 == 0) 0 else f1 / f2;
 }
 
-const Arp = extern struct {
+const Arp = struct {
 	/// sends the midi note equivalent of a given scale index
 	out_f: *pd.Outlet,
 	/// sends transformed copies of the current list
@@ -249,14 +249,14 @@ const Arp = extern struct {
 		}
 	}
 
-	inline fn setup() (std.mem.Allocator.Error || ClassError)!void {
-		errdefer ops.deinit();
-		try ops.put('+', opPlus);
-		try ops.put('^', opPlus);
-		try ops.put('-', opMinus);
-		try ops.put('v', opMinus);
-		try ops.put('*', opTimes);
-		try ops.put('/', opOver);
+	inline fn setup() (pd.Oom || ClassError)!void {
+		errdefer ops.deinit(gpa);
+		try ops.put(gpa, '+', opPlus);
+		try ops.put(gpa, '^', opPlus);
+		try ops.put(gpa, '-', opMinus);
+		try ops.put(gpa, 'v', opMinus);
+		try ops.put(gpa, '*', opTimes);
+		try ops.put(gpa, '/', opOver);
 
 		pd.addCreator(name, &.{ .gimme }, createC);
 		try InArray.setup();
@@ -265,7 +265,7 @@ const Arp = extern struct {
 
 	fn Impl(Self: type) type { return struct {
 		fn octC(p: *Pd, f: Float) callconv(.c) void {
-			const arp: *Arp = &Self.parentPtr(p).arp;
+			const arp: *Arp = &Self.Box.state(p).arp;
 			arp.oct = f;
 		}
 
@@ -278,55 +278,53 @@ const Arp = extern struct {
 };
 
 /// uses an internal array
-const InArray = extern struct {
-	obj: pd.Object,
+const InArray = struct {
 	arp: Arp,
 	win: WordInlets,
 
-	const WordInlets = @import("winlet.zig").WordInlets;
+	const WordInlets = @import("WordInlets.zig");
 	const name = "_arp_inarray";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(InArray, "obj");
-	const parentConstPtr = pd.parentConstPtr(InArray, "obj");
+	const Box = pd.Box(pd.Object, InArray);
 
-	inline fn err(self: *const InArray, e: anyerror) void {
-		pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
+	inline fn err(p: *const Pd, e: anyerror) void {
+		pd.post.err(p, name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
 	fn printC(p: *const Pd) callconv(.c) void {
-		const self = parentConstPtr(p);
+		const self = Box.stateConst(p);
 		var buffer: [pd.max_string:0]u8 = undefined;
 		var writer: Writer = .fixed(&buffer);
 		self.win.print(&writer) catch unreachable;
-		wr.writeVec(&writer, self.win.items()) catch wr.ellipsis(&writer);
+		wr.writeVec(&writer, self.win.vec) catch wr.ellipsis(&writer);
 		buffer[writer.end] = 0;
-		pd.post.log(self, .normal, &buffer, .{});
+		pd.post.log(p, .normal, &buffer, .{});
 	}
 
 	fn resizeC(p: *Pd, f: Float) callconv(.c) void {
-		const self = parentPtr(p);
-		self.win.resize(gpa, @intFromFloat(@max(1, f))) catch |e| self.err(e);
+		const self = Box.state(p);
+		self.win.resize(gpa, @intFromFloat(@max(1, f))) catch |e| err(p, e);
 	}
 
 	fn floatC(p: *Pd, f: Float) callconv(.c) void {
-		const self = parentPtr(p);
-		const vec = self.win.items();
+		const self = Box.state(p);
+		const vec = self.win.vec;
 		self.arp.out_f.float(vec[0].float + self.arp.interval(vec, f));
 	}
 
 	fn sendC(p: *const Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
-		const self = parentConstPtr(p);
-		self.arp.send(self.win.items(), av[0..ac]) catch |e| self.err(e);
+		const self = Box.stateConst(p);
+		self.arp.send(self.win.vec, av[0..ac]) catch |e| err(p, e);
 	}
 
 	fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
-		const self = parentPtr(p);
-		self.arp.list(self.win.items(), av[0..ac], 0) catch |e| self.err(e);
+		const self = Box.state(p);
+		self.arp.list(self.win.vec, av[0..ac], 0) catch |e| err(p, e);
 	}
 
 	fn anythingC(p: *Pd, s: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
-		const self = parentPtr(p);
-		self.arp.anything(self.win.items(), s, av[0..ac]) catch |e| self.err(e);
+		const self = Box.state(p);
+		self.arp.anything(self.win.vec, s, av[0..ac]) catch |e| err(p, e);
 	}
 
 	fn symbolC(p: *Pd, s: *Symbol) callconv(.c) void {
@@ -334,13 +332,11 @@ const InArray = extern struct {
 	}
 
 	inline fn create(av: []const Atom) pd.Oom!*Pd {
-		const self: *InArray = try pd.gpa.create(InArray);
-		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
-		const obj: *pd.Object = &self.obj;
+		const obj: *pd.Object = @ptrCast(try class.pd());
+		const self = Box.state(&obj.g.pd);
 		errdefer obj.g.pd.destroy();
 
 		self.* = .{
-			.obj = self.obj,
 			.win = try .init(gpa, obj, if (av.len > 0) av else &.{ .float(69), .float(7) }),
 			.arp = try .init(obj),
 		};
@@ -348,11 +344,11 @@ const InArray = extern struct {
 	}
 
 	fn destroyC(p: *Pd) callconv(.c) void {
-		parentPtr(p).win.deinit(gpa);
+		Box.state(p).win.deinit(gpa);
 	}
 
 	inline fn setup() ClassError!void {
-		class = try .create(name, &.{}, null, destroyC, @sizeOf(InArray), .{});
+		class = try .create(name, &.{}, null, destroyC, @sizeOf(Box), .{});
 		Arp.Impl(InArray).extend();
 		class.addList(listC);
 		class.addFloat(floatC);
@@ -366,20 +362,18 @@ const InArray = extern struct {
 };
 
 /// uses an external array
-const ExArray = extern struct {
-	obj: pd.Object,
+const ExArray = struct {
 	arp: Arp,
 	sym: *Symbol,
 
 	const name = "_arp_exarray";
 	var class: *pd.Class = undefined;
-	const parentPtr = pd.parentPtr(ExArray, "obj");
-	const parentConstPtr = pd.parentConstPtr(ExArray, "obj");
+	const Box = pd.Box(pd.Object, ExArray);
 
 	const Error = pd.GArray.GetError || pd.Oom;
 
-	inline fn err(self: *const ExArray, e: anyerror) void {
-		pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
+	inline fn err(p: *const Pd, e: anyerror) void {
+		pd.post.err(p, name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
 	inline fn garray(self: *const ExArray) error{GArrayNotFound}!*pd.GArray {
@@ -388,22 +382,22 @@ const ExArray = extern struct {
 	}
 
 	fn printC(p: *const Pd) callconv(.c) void {
-		const self = parentConstPtr(p);
-		self.print() catch |e| self.err(e);
+		print(p) catch |e| err(p, e);
 	}
-	inline fn print(self: *const ExArray) pd.GArray.GetError!void {
+	inline fn print(p: *const Pd) pd.GArray.GetError!void {
+		const self = Box.stateConst(p);
 		const vec = try (try self.garray()).floatWords();
 		var buffer: [pd.max_string:0]u8 = undefined;
 		var writer: Writer = .fixed(&buffer);
 		writer.print("{s} ({*}) ", .{ self.sym.name, self.sym.thing }) catch unreachable;
 		wr.writeVec(&writer, vec) catch wr.ellipsis(&writer);
 		buffer[writer.end] = 0;
-		pd.post.log(self, .normal, &buffer, .{});
+		pd.post.log(p, .normal, &buffer, .{});
 	}
 
 	fn resizeC(p: *Pd, f: Float) callconv(.c) void {
-		const self = parentPtr(p);
-		self.resize(f) catch |e| self.err(e);
+		const self = Box.state(p);
+		self.resize(f) catch |e| err(p, e);
 	}
 	const ResizeError = pd.GArray.ResizeError || error{GArrayNotFound};
 	inline fn resize(self: *ExArray, f: Float) ResizeError!void {
@@ -412,8 +406,8 @@ const ExArray = extern struct {
 	}
 
 	fn floatC(p: *Pd, f: Float) callconv(.c) void {
-		const self = parentPtr(p);
-		self.float(f) catch |e| self.err(e);
+		const self = Box.state(p);
+		self.float(f) catch |e| err(p, e);
 	}
 	inline fn float(self: ExArray, f: Float) pd.GArray.GetError!void {
 		const vec = try (try self.garray()).floatWords();
@@ -421,8 +415,8 @@ const ExArray = extern struct {
 	}
 
 	fn sendC(p: *const Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
-		const self = parentConstPtr(p);
-		self.send(av[0..ac]) catch |e| self.err(e);
+		const self = Box.stateConst(p);
+		self.send(av[0..ac]) catch |e| err(p, e);
 	}
 	inline fn send(self: *const ExArray, av: []const Atom) Error!void {
 		const garr = try self.garray();
@@ -431,8 +425,8 @@ const ExArray = extern struct {
 	}
 
 	fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
-		const self = parentPtr(p);
-		self.list(av[0..ac]) catch |e| self.err(e);
+		const self = Box.state(p);
+		self.list(av[0..ac]) catch |e| err(p, e);
 	}
 	inline fn list(self: *ExArray, av: []const Atom) Error!void {
 		const garr = try self.garray();
@@ -441,8 +435,8 @@ const ExArray = extern struct {
 	}
 
 	fn anythingC(p: *Pd, s: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
-		const self = parentPtr(p);
-		self.anything(s, av[0..ac]) catch |e| self.err(e);
+		const self = Box.state(p);
+		self.anything(s, av[0..ac]) catch |e| err(p, e);
 	}
 	inline fn anything(self: *ExArray, s: *Symbol, av: []const Atom) Error!void {
 		const garr = try self.garray();
@@ -455,14 +449,12 @@ const ExArray = extern struct {
 	}
 
 	inline fn create(s: *Symbol) pd.Oom!*Pd {
-		const self: *ExArray = try pd.gpa.create(ExArray);
-		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
-		const obj: *pd.Object = &self.obj;
+		const obj: *pd.Object = @ptrCast(try class.pd());
+		const self = Box.state(&obj.g.pd);
 		errdefer obj.g.pd.destroy();
 
 		_ = try obj.inletSymbol(&self.sym);
 		self.* = .{
-			.obj = self.obj,
 			.arp = try .init(obj),
 			.sym = s,
 		};
@@ -470,11 +462,11 @@ const ExArray = extern struct {
 	}
 
 	fn classFreeC(_: *pd.Class) callconv(.c) void {
-		ops.deinit();
+		ops.deinit(gpa);
 	}
 
 	inline fn setup() ClassError!void {
-		class = try .create(name, &.{}, null, null, @sizeOf(ExArray), .{});
+		class = try .create(name, &.{}, null, null, @sizeOf(Box), .{});
 		Arp.Impl(ExArray).extend();
 		class.addList(listC);
 		class.addFloat(floatC);

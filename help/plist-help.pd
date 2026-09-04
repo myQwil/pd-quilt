@@ -76,7 +76,7 @@
 #X msg 190 90 langs en ja;
 #X msg 200 120 langs ja en;
 #X obj 30 60 radix 10 6 0 3 0 _ 0 0 _ _ _ 0;
-#X msg 30 90 \$1 \, dump 0 \$1;
+#X msg 30 90 0 \, dump 0 \$1;
 #X connect 1 0 0 0;
 #X connect 2 0 0 0;
 #X connect 3 0 0 0;

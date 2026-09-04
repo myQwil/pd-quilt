@@ -27,7 +27,7 @@ inline fn sampleRate(t: *const gm.Type) Float {
 	return if (t == gm.gme_spc_type) 32000.0 else pd.sampleRate();
 }
 
-pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct {
+pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 	player: pr.Player,
 	/// array for storing signal buffer addresses
 	outs: [nch][*]Sample = undefined,
@@ -36,7 +36,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 	path: *Symbol,
 	/// ratio between file samplerate and pd samplerate
 	ratio: f64 = 1,
-	langs: tx.LangSet = .{},
+	langs: []*Symbol = &.{},
 	/// short-to-float converted samples and resampler input
 	ibuf: [nch * frames]Sample = undefined,
 	/// resampler output
@@ -48,13 +48,14 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 
 	const Gme = @This();
 
-	var dict: std.AutoHashMap(*Symbol, *const fn(*const Gme) *const Pile) = undefined;
-	pub fn freeDict() void {
-		dict.deinit();
+	var dict: std.AutoHashMapUnmanaged(*Symbol, *const fn(*const Gme) *const Pile)
+		= .empty;
+	pub fn freeDict(gpa: Allocator) void {
+		dict.deinit(gpa);
 	}
 
 	pub fn get(self: *const Gme, trax: *const Meta, s: *Symbol) ?*const Pile {
-		if (trax.get(s, self.langs.slice())) |pile| {
+		if (trax.get(s, self.langs)) |pile| {
 			return pile;
 		}
 		if (dict.get(s)) |func| {
@@ -78,8 +79,8 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		};
 	}
 
-	pub inline fn deinit(self: *Gme, gpa: Allocator) void {
-		self.langs.deinit(gpa);
+	pub inline fn deinit(self: *const Gme, gpa: Allocator) void {
+		gpa.free(self.langs);
 		if (self.player.open) {
 			self.info.destroy();
 			self.emu.destroy();
@@ -110,10 +111,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 			break :blk @bitCast((try reader.interface.take(4))[0..4].*);
 		};
 
-		const createEmu: GmeInit = if (nch > 2)
-			gm.Emu.createMultiChannel
-		else
-			gm.Emu.create;
+		const initEmu: GmeInit = if (nch > 2) gm.Emu.createMultiChannel else gm.Emu.create;
 		var arc_reader: ?arc.ArcReader = inline for (arc.types) |t| {
 			const sig: u32 = t.signature;
 			if (signature == sig) {
@@ -146,7 +144,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 
 			const t = emu_type orelse return error.ArchiveNoMatch;
 			srate = sampleRate(t);
-			const emu = try createEmu(t, @intFromFloat(srate));
+			const emu = try initEmu(t, @intFromFloat(srate));
 			errdefer emu.destroy();
 			if (t.trackCount() == 1) {
 				try emu.loadTracks(buf.ptr, sizes[0..n]);
@@ -157,14 +155,14 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		} else {
 			const t = try gm.Type.fromFile(path) orelse return error.FileNoMatch;
 			srate = sampleRate(t);
-			const emu = try createEmu(t, @intFromFloat(srate));
+			const emu = try initEmu(t, @intFromFloat(srate));
 			errdefer emu.destroy();
 			try emu.loadFile(path);
 			break :blk emu;
 		}};
 		emu.ignoreSilence(true);
 		emu.muteVoices(self.mask);
-		const info = try emu.trackInfo(0); // throwaway, something to deinit
+		const info = try emu.trackInfo(0); // throwaway, something to destroy
 
 		// safe to delete the previous emulator
 		if (self.player.open) {
@@ -249,15 +247,15 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 	pub fn Impl(Self: type) type { return struct {
 		const perform: fn(*Self, [*]usize, *usize) callconv(.@"inline") anyerror!void
 			= Self.perform;
-		const err: fn(*const Self, anyerror) callconv(.@"inline") void = Self.err;
+		const err: fn(*const Pd, anyerror) callconv(.@"inline") void = Self.err;
 		const gpa = Self.gpa;
-		const parentPtr = Self.parentPtr;
+		const Box = Self.Box;
 
 		fn muteC(
 			p: *Pd,
 			_: *Symbol, ac: c_uint, av: [*]const Atom,
 		) callconv(.c) void {
-			const gme: *Gme = &parentPtr(p).base;
+			const gme: *Gme = &Box.state(p).base;
 			gme.mute(av[0..ac]);
 			if (gme.player.open) {
 				gme.emu.muteVoices(gme.mask);
@@ -268,7 +266,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 			p: *Pd,
 			_: *Symbol, ac: c_uint, av: [*]const Atom,
 		) callconv(.c) void {
-			const gme: *Gme = &parentPtr(p).base;
+			const gme: *Gme = &Box.state(p).base;
 			const prev = gme.mask;
 			gme.mask = (@as(c_uint, 1) << @truncate(gme.emu.voiceCount())) - 1;
 			gme.mute(av[0..ac]);
@@ -284,7 +282,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 			p: *Pd,
 			_: *Symbol, ac: c_uint, av: [*]const Atom,
 		) callconv(.c) void {
-			const gme: *Gme = &parentPtr(p).base;
+			const gme: *Gme = &Box.state(p).base;
 			if (ac > 0 and av[0].type == .float) {
 				// set
 				gme.mask = @intFromFloat(av[0].w.float);
@@ -298,7 +296,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		}
 
 		fn bMaskC(p: *Pd) callconv(.c) void {
-			const self = parentPtr(p);
+			const self = Box.state(p);
 			const gme: *Gme = &self.base;
 			var buf: [32:0]u8 = undefined;
 			const voices: u6 = @truncate(gme.emu.voiceCount());
@@ -306,7 +304,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 				buf[i] = '0' + @as(u8, @truncate((gme.mask >> @truncate(i)) & 1));
 			}
 			buf[voices] = 0;
-			pd.post.log(self, .normal, &buf, .{});
+			pd.post.log(p, .normal, &buf, .{});
 		}
 
 		fn performC(w: [*]usize) callconv(.c) [*]usize {
@@ -318,7 +316,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 				perform(self, w, &i) catch |e| {
 					player.play = false;
 					player.sendState(pr.s_play, player.play);
-					err(self, e);
+					err(@ptrFromInt(@intFromPtr(self) - @offsetOf(Box, "body")), e);
 					inline for (base.outs[0..nch]) |ch| {
 						@memset(ch[i..w[2]], 0);
 					}
@@ -335,13 +333,13 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 			p: *Pd,
 			_: *Symbol, ac: c_uint, args: [*]const pd.Atom,
 		) callconv(.c) void {
-			const self = parentPtr(p);
+			const self = Box.state(p);
 			const base: *Gme = &self.base;
-			base.langs.replaceWith(gpa, args[0..ac]) catch |e| err(self, e);
+			tx.langReplace(&base.langs, gpa, args[0..ac]) catch |e| err(p, e);
 		}
 
 		fn dspC(p: *Pd, sp: [*]*pd.Signal) callconv(.c) void {
-			const self = parentPtr(p);
+			const self = Box.state(p);
 			const base: *Gme = &self.base;
 			for (&base.outs, sp[2..][0..nch]) |*o, s| {
 				o.* = s.vec;
@@ -352,13 +350,12 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		pub inline fn extend() Allocator.Error!void {
 			s_mask = .gen("mask");
 
-			dict = .init(gpa);
-			errdefer dict.deinit();
+			errdefer dict.deinit(gpa);
 			inline for ([_][:0]const u8{
 				"path", "time", "ftime", "fade", "tracks", "voices",
 				"system", "game", "song", "author", "copyright", "comment", "dumper",
 			}) |field_name| {
-				try dict.put(.gen(field_name.ptr), @field(dispatch, field_name));
+				try dict.put(gpa, .gen(field_name.ptr), @field(dispatch, field_name));
 			}
 
 			const class: *pd.Class = Self.class;
