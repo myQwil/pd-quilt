@@ -57,8 +57,8 @@ const Arp = extern struct {
 
 	fn init(obj: *pd.Object) pd.Oom!Arp {
 		return .{
-			.out_f = try .init(obj, pd.s.float()),
-			.out_l = try .init(obj, pd.s.list()),
+			.out_f = try .create(obj, pd.s.float()),
+			.out_l = try .create(obj, pd.s.list()),
 		};
 	}
 
@@ -238,14 +238,14 @@ const Arp = extern struct {
 		self.out_l.list(null, atoms);
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+	fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, choose(av[0..ac]), name);
 	}
 	inline fn choose(av: []const Atom) pd.Oom!*Pd {
 		if (av.len == 1 and av[0].type == .symbol) {
-			return try ExArray.init(av[0].w.symbol);
+			return try ExArray.create(av[0].w.symbol);
 		} else {
-			return try InArray.init(av);
+			return try InArray.create(av);
 		}
 	}
 
@@ -258,7 +258,7 @@ const Arp = extern struct {
 		try ops.put('*', opTimes);
 		try ops.put('/', opOver);
 
-		pd.addCreator(name, &.{ .gimme }, initC);
+		pd.addCreator(name, &.{ .gimme }, createC);
 		try InArray.setup();
 		try ExArray.setup();
 	}
@@ -333,11 +333,11 @@ const InArray = extern struct {
 		anythingC(p, s, 0, &.{});
 	}
 
-	inline fn init(av: []const Atom) pd.Oom!*Pd {
+	inline fn create(av: []const Atom) pd.Oom!*Pd {
 		const self: *InArray = try pd.gpa.create(InArray);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		self.* = .{
 			.obj = self.obj,
@@ -347,12 +347,12 @@ const InArray = extern struct {
 		return &obj.g.pd;
 	}
 
-	fn deinitC(p: *Pd) callconv(.c) void {
+	fn destroyC(p: *Pd) callconv(.c) void {
 		parentPtr(p).win.deinit(gpa);
 	}
 
 	inline fn setup() ClassError!void {
-		class = try .init(InArray, name, &.{}, null, deinitC, .{});
+		class = try .create(name, &.{}, null, destroyC, @sizeOf(InArray), .{});
 		Arp.Impl(InArray).extend();
 		class.addList(listC);
 		class.addFloat(floatC);
@@ -454,11 +454,11 @@ const ExArray = extern struct {
 		anythingC(p, s, 0, &.{});
 	}
 
-	inline fn init(s: *Symbol) pd.Oom!*Pd {
+	inline fn create(s: *Symbol) pd.Oom!*Pd {
 		const self: *ExArray = try pd.gpa.create(ExArray);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		_ = try obj.inletSymbol(&self.sym);
 		self.* = .{
@@ -474,7 +474,7 @@ const ExArray = extern struct {
 	}
 
 	inline fn setup() ClassError!void {
-		class = try .init(ExArray, name, &.{}, null, null, .{});
+		class = try .create(name, &.{}, null, null, @sizeOf(ExArray), .{});
 		Arp.Impl(ExArray).extend();
 		class.addList(listC);
 		class.addFloat(floatC);

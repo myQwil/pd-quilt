@@ -106,27 +106,27 @@ const LinPSignal = extern struct {
 		}
 	}
 
-	fn initC() callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(), name);
+	fn createC() callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(), name);
 	}
-	inline fn init() pd.Oom!*Pd {
+	inline fn create() pd.Oom!*Pd {
 		const self: *LinPSignal = try pd.gpa.create(LinPSignal);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		_ = try obj.inletFloat(&self.inletvalue);
 		_ = try obj.outlet(pd.s.signal());
 
 		self.* = .{
 			.obj = self.obj,
-			.o_pause = try .init(obj, pd.s.float()),
+			.o_pause = try .create(obj, pd.s.float()),
 		};
 		return &obj.g.pd;
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(LinPSignal, name, &.{}, initC, null, .{});
+		class = try .create(name, &.{}, createC, null, @sizeOf(LinPSignal), .{});
 		class.addFloat(floatC);
 		class.addMethod(&.{}, stopC, .gen("stop"));
 		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));

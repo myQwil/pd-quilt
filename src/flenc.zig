@@ -107,27 +107,27 @@ const FlEnc = extern struct {
 		bangC(p);
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(av[0..ac]), name);
+	fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) pd.Oom!*Pd {
+	inline fn create(av: []const Atom) pd.Oom!*Pd {
 		const self: *FlEnc = try pd.gpa.create(FlEnc);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("e"));
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("s"));
 		self.* = .{
 			.obj = self.obj,
-			.out = try .init(obj, pd.s.float()),
+			.out = try .create(obj, pd.s.float()),
 			.uf = getUf(.{ .u = 0 }, 0, av),
 		};
 		return &obj.g.pd;
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(FlEnc, name, &.{ .gimme }, initC, null, .{});
+		class = try .create(name, &.{ .gimme }, createC, null, @sizeOf(FlEnc), .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);
 		class.addList(listC);

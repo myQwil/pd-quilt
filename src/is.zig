@@ -18,7 +18,7 @@ const Proxy = extern struct {
 		self.owner.type = s;
 	}
 
-	inline fn init(owner: *Is) pd.Oom!*Proxy {
+	inline fn create(owner: *Is) pd.Oom!*Proxy {
 		const self: *Proxy = try pd.gpa.create(Proxy);
 		self.obj = .{ .class = class };
 		self.* = .{
@@ -29,10 +29,8 @@ const Proxy = extern struct {
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(Proxy, name, &.{}, null, null, .{
-			.bare = true,
-			.no_inlet = true,
-		});
+		const opts: pd.Class.Options = .{ .bare = true, .no_inlet = true };
+		class = try .create(name, &.{}, null, null, @sizeOf(Proxy), opts);
 		class.addAnything(&anythingC);
 	}
 };
@@ -68,34 +66,34 @@ const Is = extern struct {
 		parentPtr(p).type = s;
 	}
 
-	fn initC(s: *Symbol) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(s), name);
+	fn createC(s: *Symbol) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(s), name);
 	}
-	inline fn init(s: *Symbol) pd.Oom!*Pd {
+	inline fn create(s: *Symbol) pd.Oom!*Pd {
 		const self: *Is = try pd.gpa.create(Is);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
-		const proxy: *Proxy = try .init(self);
-		errdefer proxy.obj.deinit();
+		const proxy: *Proxy = try .create(self);
+		errdefer proxy.obj.destroy();
 
 		_ = try obj.inlet(&proxy.obj, null, null);
 		self.* = .{
 			.obj = self.obj,
-			.out = try .init(obj, pd.s.float()),
+			.out = try .create(obj, pd.s.float()),
 			.type = if (s != pd.s.empty()) s else pd.s.float(),
 			.proxy = proxy,
 		};
 		return &obj.g.pd;
 	}
 
-	fn deinitC(p: *const Pd) callconv(.c) void {
-		parentConstPtr(p).proxy.obj.deinit();
+	fn destroyC(p: *const Pd) callconv(.c) void {
+		parentConstPtr(p).proxy.obj.destroy();
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(Is, name, &.{ .defsymbol }, &initC, &deinitC, .{});
+		class = try .create(name, &.{ .defsymbol }, createC, destroyC, @sizeOf(Is), .{});
 		class.addBang(&bangC);
 		class.addAnything(&anythingC);
 		class.addMethod(&.{}, &printC, .gen("print"));

@@ -20,27 +20,27 @@ const Sesom = extern struct {
 		(if (f > self.f) self.out_l else self.out_r).float(f);
 	}
 
-	fn initC(f: Float) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(f), name);
+	fn createC(f: Float) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(f), name);
 	}
-	inline fn init(f: Float) pd.Oom!*Pd {
+	inline fn create(f: Float) pd.Oom!*Pd {
 		const self: *Sesom = try pd.gpa.create(Sesom);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		_ = try obj.inletFloat(&self.f);
 		self.* = .{
 			.obj = self.obj,
-			.out_l = try .init(obj, pd.s.float()),
-			.out_r = try .init(obj, pd.s.float()),
+			.out_l = try .create(obj, pd.s.float()),
+			.out_r = try .create(obj, pd.s.float()),
 			.f = f,
 		};
 		return &obj.g.pd;
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(Sesom, name, &.{ .deffloat }, initC, null, .{});
+		class = try .create(name, &.{ .deffloat }, createC, null, @sizeOf(Sesom), .{});
 		class.addFloat(floatC);
 	}
 };

@@ -102,31 +102,31 @@ const PList = extern struct {
 		self.langs.replaceWith(gpa, args[0..ac]) catch |e| self.err(e);
 	}
 
-	fn initC() callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(), name);
+	fn createC() callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(), name);
 	}
-	inline fn init() pd.Oom!*Pd {
+	inline fn create() pd.Oom!*Pd {
 		const self: *PList = try pd.gpa.create(PList);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		self.* = .{
 			.obj = self.obj,
-			.out_val = try .init(obj, pd.s.symbol()),
-			.out_idx = try .init(obj, pd.s.float()),
+			.out_val = try .create(obj, pd.s.symbol()),
+			.out_idx = try .create(obj, pd.s.float()),
 		};
 		return &obj.g.pd;
 	}
 
-	fn deinitC(p: *Pd) callconv(.c) void {
+	fn destroyC(p: *Pd) callconv(.c) void {
 		const self = parentPtr(p);
 		self.plist.deinit(gpa);
 		self.langs.deinit(gpa);
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(PList, name, &.{}, initC, deinitC, .{});
+		class = try .create(name, &.{}, createC, destroyC, @sizeOf(PList), .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);
 		class.addMethod(&.{ .gimme }, dumpC, .gen("dump"));

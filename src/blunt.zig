@@ -48,10 +48,10 @@ const Blunt = extern struct {
 		return .{ .mask = mask };
 	}
 
-	fn initC() callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, boxInit(), name);
+	fn createC() callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(), name);
 	}
-	inline fn boxInit() pd.Oom!*Pd {
+	inline fn create() pd.Oom!*Pd {
 		const obj = try pd.gpa.create(Object);
 		obj.* = .{ .g = .{ .pd = .{ .class = class } } };
 		return &obj.g.pd;
@@ -59,7 +59,8 @@ const Blunt = extern struct {
 
 	inline fn setup() ClassError!void {
 		pd.post.do("Blunt! v0.9", .{});
-		class = try .init(Object, name, &.{}, initC, null, .{ .no_inlet = true });
+		const size = @sizeOf(Object);
+		class = try .create(name, &.{}, createC, null, size, .{ .no_inlet = true });
 	}
 
 	pub fn Impl(Self: type) type { return struct {
@@ -88,7 +89,7 @@ const BinOp = extern struct {
 	f2: Float,
 	blunt: Blunt,
 
-	const Init = fn (*Class, []const Atom) anyerror!*Pd;
+	const CreateFn = fn (*Class, []const Atom) anyerror!*Pd;
 	const BluntImpl = Blunt.Impl(BinOp);
 	const parentPtr = pd.parentPtr(BinOp, "obj");
 	const parentConstPtr = pd.parentConstPtr(BinOp, "obj");
@@ -131,7 +132,7 @@ const BinOp = extern struct {
 		p.bang();
 	}
 
-	fn initBase(self: *BinOp, av: []const Atom) pd.Oom!void {
+	fn init(self: *BinOp, av: []const Atom) pd.Oom!void {
 		const blunt: Blunt = .init(av);
 		// last arg shouldn't be part of arg count if it was blunt's bit mask
 		const n: usize = av.len - @intFromBool(blunt.mask != 0);
@@ -149,32 +150,32 @@ const BinOp = extern struct {
 		}
 		self.* = .{
 			.obj = self.obj,
-			.out = try .init(&self.obj, pd.s.float()),
+			.out = try .create(&self.obj, pd.s.float()),
 			.blunt = blunt,
 			.f1 = f1,
 			.f2 = f2,
 		};
 	}
 
-	fn initCold(class: *Class, av: []const Atom) pd.Oom!*Pd {
+	fn createCold(class: *Class, av: []const Atom) pd.Oom!*Pd {
 		const self: *BinOp = try pd.gpa.create(BinOp);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		_ = try obj.inletFloat(&self.f2);
-		try self.initBase(av);
+		try self.init(av);
 		return &obj.g.pd;
 	}
 
-	fn initHot(class: *Class, av: []const Atom) pd.Oom!*Pd {
+	fn createHot(class: *Class, av: []const Atom) pd.Oom!*Pd {
 		const self: *BinOp = try pd.gpa.create(BinOp);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), pd.s.anything());
-		try self.initBase(av);
+		try self.init(av);
 		return &obj.g.pd;
 	}
 
@@ -227,19 +228,19 @@ const BinOp = extern struct {
 				ob.op(self.f1, self.f2));
 		}
 
-		fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-			const init: Init = if (t == .hot_inlets) initHot else initCold;
-			return pd.wrap(*Pd, init(class, av[0..ac]), ob.name);
+		fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+			const create: CreateFn = if (t == .hot_inlets) createHot else createCold;
+			return pd.wrap(*Pd, create(class, av[0..ac]), ob.name);
 		}
 
 		fn setup() ClassError!void {
-			const pre = switch (t) {
+			const name = switch (t) {
 				.reverse_op => "@",
 				.hot_inlets => "#",
 				.alias      => "`",
 				.none       => "",
-			};
-			class = try .init(BinOp, pre ++ ob.name, &.{ .gimme }, initC, null, .{});
+			} ++ ob.name;
+			class = try .create(name, &.{ .gimme }, createC, null, @sizeOf(BinOp), .{});
 			class.addBang(bangC);
 			class.addMethod(&.{ .symbol }, sendC, .gen("send"));
 			extend(class);
@@ -282,23 +283,6 @@ const UnOp = extern struct {
 		floatC(p, f);
 	}
 
-	fn init(class: *Class, av: []const Atom) pd.Oom!*UnOp {
-		const self: *UnOp = try pd.gpa.create(UnOp);
-		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
-		const obj: *Object = &self.obj;
-		errdefer obj.g.pd.deinit();
-
-		const blunt: Blunt = .init(av);
-		const n: usize = av.len - @intFromBool(blunt.mask != 0);
-		self.* = .{
-			.obj = self.obj,
-			.out = try .init(obj, pd.s.float()),
-			.f = pd.floatArg(0, av[0..n]) catch 0,
-			.blunt = blunt,
-		};
-		return self;
-	}
-
 	fn extend(class: *Class) void {
 		class.addFloat(floatC);
 		class.addSymbol(symbolC);
@@ -330,20 +314,32 @@ const UnOp = extern struct {
 			self.out.float(t.op(self.f));
 		}
 
-		fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-			return pd.wrap(*Pd, implNew(av[0..ac]), t.name);
+		fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+			return pd.wrap(*Pd, create(av[0..ac]), t.name);
 		}
-		inline fn implNew(av: []const Atom) pd.Oom!*Pd {
-			const self = try init(class, av);
+		inline fn create(av: []const Atom) pd.Oom!*Pd {
+			const self: *UnOp = try pd.gpa.create(UnOp);
+			self.obj = .{ .g = .{ .pd = .{ .class = class } } };
+			const obj: *Object = &self.obj;
+			errdefer obj.g.pd.destroy();
+
+			const blunt: Blunt = .init(av);
+			const n: usize = av.len - @intFromBool(blunt.mask != 0);
+			self.* = .{
+				.obj = self.obj,
+				.out = try .create(obj, pd.s.float()),
+				.f = pd.floatArg(0, av[0..n]) catch 0,
+				.blunt = blunt,
+			};
 			if (t.inlet) {
-				_ = try self.obj.inletFloat(&self.f);
+				_ = try obj.inletFloat(&self.f);
 			}
-			return &self.obj.g.pd;
+			return &obj.g.pd;
 		}
 
 		fn setup() ClassError!void {
-			const pre = if (t.new) "" else "`";
-			class = try .init(UnOp, pre ++ t.name, &.{ .gimme }, initC, null, .{});
+			const name = (if (t.new) "" else "`") ++ t.name;
+			class = try .create(name, &.{ .gimme }, createC, null, @sizeOf(UnOp), .{});
 			class.addBang(bangC);
 			class.addMethod(&.{ .symbol }, sendC, .gen("send"));
 			extend(class);
@@ -380,25 +376,25 @@ const Bang = extern struct {
 		bangC(p);
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(av[0..ac]), name);
+	fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) pd.Oom!*Pd {
+	inline fn create(av: []const Atom) pd.Oom!*Pd {
 		const self: *Bang = try pd.gpa.create(Bang);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		self.* = .{
 			.obj = self.obj,
-			.out = try .init(obj, pd.s.bang()),
+			.out = try .create(obj, pd.s.bang()),
 			.blunt = .init(av),
 		};
 		return &obj.g.pd;
 	}
 
 	inline fn setup() ClassError!void {
-		class = try .init(Bang, name, &.{ .gimme }, initC, null, .{});
+		class = try .create(name, &.{ .gimme }, createC, null, @sizeOf(Bang), .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);
 		class.addSymbol(symbolC);
@@ -450,14 +446,14 @@ const Sym = extern struct {
 		symbolC(p, s);
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(av[0..ac]), name);
+	fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) pd.Oom!*Pd {
+	inline fn create(av: []const Atom) pd.Oom!*Pd {
 		const self: *Sym = try pd.gpa.create(Sym);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		const blunt: Blunt = .init(av);
 		const n: usize = av.len - @intFromBool(blunt.mask != 0);
@@ -465,7 +461,7 @@ const Sym = extern struct {
 		_ = try obj.inletSymbol(&self.sym);
 		self.* = .{
 			.obj = self.obj,
-			.out = try .init(obj, pd.s.symbol()),
+			.out = try .create(obj, pd.s.symbol()),
 			.sym = pd.symbolArg(0, av[0..n]) catch pd.s.empty(),
 			.blunt = blunt,
 		};
@@ -473,7 +469,7 @@ const Sym = extern struct {
 	}
 
 	inline fn setup() ClassError!void {
-		class = try .init(Sym, name, &.{ .gimme }, initC, null, .{});
+		class = try .create(name, &.{ .gimme }, createC, null, @sizeOf(Sym), .{});
 		class.addBang(bangC);
 		class.addSymbol(symbolC);
 		class.addList(listC);

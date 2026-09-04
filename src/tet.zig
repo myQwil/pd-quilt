@@ -71,14 +71,14 @@ pub fn Tet(T: type) type { return extern struct {
 		parentPtr(p).set(1, av[0..ac]);
 	}
 
-	pub fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(av[0..ac]), T.name);
+	pub fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(av[0..ac]), T.name);
 	}
-	inline fn init(av: []const Atom) pd.Oom!*Pd {
+	inline fn create(av: []const Atom) pd.Oom!*Pd {
 		const self: *Self = try pd.gpa.create(Self);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		const ref = pd.floatArg(0, av) catch 440;
 		const tet = pd.floatArg(1, av) catch 12;
@@ -88,7 +88,7 @@ pub fn Tet(T: type) type { return extern struct {
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("tet"));
 		self.* = .{
 			.obj = self.obj,
-			.out = try .init(obj, pd.s.float()),
+			.out = try .create(obj, pd.s.float()),
 			.ref = ref,
 			.tet = tet,
 			.k = k,
@@ -98,7 +98,7 @@ pub fn Tet(T: type) type { return extern struct {
 	}
 
 	pub inline fn setup() pd.Class.Error!void {
-		class = try .init(Self, T.name, &.{ .gimme }, initC, null, .{});
+		class = try .create(T.name, &.{ .gimme }, createC, null, @sizeOf(Self), .{});
 
 		class.addFloat(&T.floatC);
 		class.addList(listC);

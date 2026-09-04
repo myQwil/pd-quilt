@@ -144,17 +144,17 @@ const LinP = extern struct {
 		self.gotinlet = false;
 	}
 
-	fn initC(f: Float, grain: Float) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(f, grain), name);
+	fn createC(f: Float, grain: Float) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(f, grain), name);
 	}
-	inline fn init(f: Float, grain: Float) pd.Oom!*Pd {
+	inline fn create(f: Float, grain: Float) pd.Oom!*Pd {
 		const self: *LinP = try pd.gpa.create(LinP);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
-		var clock: *pd.Clock = try .init(LinP, self, tickC);
-		errdefer clock.deinit();
+		var clock: *pd.Clock = try .create(LinP, self, tickC);
+		errdefer clock.destroy();
 
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("ft1"));
 		_ = try obj.inletFloat(&self.grain);
@@ -163,8 +163,8 @@ const LinP = extern struct {
 		self.* = .{
 			.obj = self.obj,
 			.clock = clock,
-			.out_f = try .init(obj, pd.s.float()),
-			.out_p = try .init(obj, pd.s.float()),
+			.out_f = try .create(obj, pd.s.float()),
+			.out_p = try .create(obj, pd.s.float()),
 			.targettime = targettime,
 			.prevtime = targettime,
 			.grain = grain,
@@ -174,12 +174,13 @@ const LinP = extern struct {
 		return &obj.g.pd;
 	}
 
-	fn deinitC(p: *Pd) callconv(.c) void {
-		parentPtr(p).clock.deinit();
+	fn destroyC(p: *Pd) callconv(.c) void {
+		parentPtr(p).clock.destroy();
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(LinP, name, &.{ .deffloat, .deffloat }, initC, deinitC, .{});
+		const args: [2]pd.Atom.Type = @splat(.deffloat);
+		class = try .create(name, &args, createC, destroyC, @sizeOf(LinP), .{});
 		class.addFloat(floatC);
 		class.addMethod(&.{}, stopC, .gen("stop"));
 		class.addMethod(&.{ .float }, ft1C, .gen("ft1"));

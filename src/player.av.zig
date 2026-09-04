@@ -44,8 +44,8 @@ const Stream = extern struct {
 		}
 		const stream = ic.streams[i];
 
-		const ctx: *av.Codec.Context = try .init(try stream.codecpar.codec_id.decoder());
-		errdefer ctx.deinit();
+		const ctx: *av.Codec.Context = try .create(try stream.codecpar.codec_id.decoder());
+		errdefer ctx.destroy();
 
 		try ctx.parametersToContext(stream.codecpar);
 		ctx.pkt_timebase = stream.time_base;
@@ -58,7 +58,7 @@ const Stream = extern struct {
 	}
 
 	pub fn deinit(self: *Stream) void {
-		self.ctx.deinit();
+		self.ctx.destroy();
 	}
 };
 
@@ -98,11 +98,11 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			_ = try obj.outlet(pd.s.signal());
 		}
 
-		const packet: *av.Packet = try .init();
-		errdefer packet.deinit();
+		const packet: *av.Packet = try .create();
+		errdefer packet.destroy();
 
-		const frame: *av.Frame = try .init();
-		errdefer frame.deinit();
+		const frame: *av.Frame = try .create();
+		errdefer frame.destroy();
 
 		const ibuf = try gpa.alloc(Sample, nch * frames);
 		errdefer gpa.free(ibuf);
@@ -131,12 +131,12 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 		gpa.free(self.outs[0 .. self.nch]);
 		self.playlist.deinit(gpa);
 		self.langs.deinit(gpa);
-		self.packet.deinit();
-		self.frame.deinit();
+		self.packet.destroy();
+		self.frame.destroy();
 		if (self.player.open) {
-			self.format.deinit();
+			self.format.closeInput();
 			self.audio.deinit();
-			self.swr.deinit();
+			self.swr.destroy();
 		}
 		if (self.sub_open) {
 			self.subtitle.deinit();
@@ -148,16 +148,16 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			try .fromMask(a.ch_layout.u.mask)
 		else .default(pd.uFromI(a.ch_layout.nb_channels));
 		const sf: av.SampleFormat = if (@bitSizeOf(Float) == 64) .dbl else .flt;
-		return .init(&self.layout, sf, 1, &cl, a.sample_fmt, 1, 0, null);
+		return .create(&self.layout, sf, 1, &cl, a.sample_fmt, 1, 0, null);
 	}
 
 	pub fn loadTrack(self: *Av, idx: usize) !void {
 		if (idx >= self.trackCount()) {
 			return error.IndexOutOfBounds;
 		}
-		const format: *av.FormatContext = try .init(
+		const format: *av.FormatContext = try .openInput(
 			self.playlist.ptr[idx].name, null, null, null);
-		errdefer format.deinit();
+		errdefer format.closeInput();
 
 		try format.findStreamInfo(null);
 		format.seek2any = 1;
@@ -174,9 +174,9 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 
 		// safe to delete the previous track
 		if (self.player.open) {
-			self.format.deinit();
+			self.format.closeInput();
 			self.audio.deinit();
-			self.swr.deinit();
+			self.swr.destroy();
 		}
 		self.format = format;
 		self.audio = audio;
@@ -327,7 +327,7 @@ pub fn Base(frames: comptime_int) type { return extern struct {
 			const swr = try base.newSwr(a.ctx);
 
 			base.audio.deinit();
-			base.swr.deinit();
+			base.swr.destroy();
 			base.audio = a;
 			base.swr = swr;
 			base.ratio = @as(f64, @floatFromInt(a.ctx.sample_rate)) / pd.sampleRate();

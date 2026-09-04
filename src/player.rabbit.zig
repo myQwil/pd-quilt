@@ -21,7 +21,7 @@ pub const Rabbit = extern struct {
 	pub inline fn init(obj: *pd.Object, channels: u8) InitError!Rabbit {
 		const inlet: *Inlet = @ptrCast(@alignCast(try obj.inletSignal(1.0)));
 		return .{
-			.state = try .init(.sinc_fast, channels),
+			.state = try .create(.sinc_fast, channels),
 			.speed = &inlet.un.floatsignalvalue,
 			.data = .{
 				.data_in = undefined,
@@ -32,13 +32,13 @@ pub const Rabbit = extern struct {
 	}
 
 	pub inline fn deinit(self: *Rabbit) void {
-		self.state.deinit();
+		self.state.destroy();
 	}
 
 	pub inline fn conv(self: *Rabbit, i: uint, nch: uint) ra.Error!void {
 		try ra.Converter.expectValid(i);
-		const new_state: *ra.State = try .init(@enumFromInt(i), nch);
-		self.state.deinit();
+		const new_state: *ra.State = try .create(@enumFromInt(i), nch);
+		self.state.destroy();
 		self.state = new_state;
 	}
 

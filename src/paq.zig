@@ -63,7 +63,7 @@ const Proxy = extern struct {
 	inline fn setup() pd.Class.Error!void {
 		dot = .gen(".");
 		const opts: pd.Class.Options = .{ .bare = true, .no_inlet = true };
-		class = try .init(Proxy, name, &.{}, null, null, opts);
+		class = try .create(name, &.{}, null, null, @sizeOf(Proxy), opts);
 		class.addFloat(floatC);
 		class.addSymbol(symbolC);
 		class.addPointer(pointerC);
@@ -112,10 +112,10 @@ const Paq = extern struct {
 		bangC(p);
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(av[0..ac]), name);
+	fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(av[0..ac]), name);
 	}
-	inline fn init(argv: []const Atom) pd.Oom!*Pd {
+	inline fn create(argv: []const Atom) pd.Oom!*Pd {
 		const av: []const Atom = if (argv.len > 0)
 			argv
 		else &.{ .float(0), .float(0) };
@@ -126,14 +126,14 @@ const Paq = extern struct {
 		const self: *Paq = try gpa.create(Paq);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		const ins = try gpa.alloc(*Proxy, av.len - 1);
 		errdefer gpa.free(ins);
 
 		var n: u32 = 0; // proxies allocated
 		errdefer for (ins[0..n]) |pxy| {
-			pxy.obj.deinit();
+			pxy.obj.destroy();
 		};
 		while (n < ins.len) {
 			const i = n + 1;
@@ -146,24 +146,24 @@ const Paq = extern struct {
 			.obj = self.obj,
 			.ptr = vec.ptr,
 			.len = vec.len,
-			.out = try .init(obj, pd.s.list()),
+			.out = try .create(obj, pd.s.list()),
 			.ins = ins.ptr,
 		};
 		return &obj.g.pd;
 	}
 
-	fn deinitC(p: *const Pd) callconv(.c) void {
+	fn destroyC(p: *const Pd) callconv(.c) void {
 		const self = parentConstPtr(p);
 		const n = self.len - 1;
 		for (self.ins[0..n]) |pxy| {
-			pxy.obj.deinit();
+			pxy.obj.destroy();
 		}
 		gpa.free(self.ins[0..n]);
 		gpa.free(self.ptr[0..self.len]);
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(Paq, name, &.{ .gimme }, initC, deinitC, .{});
+		class = try .create(name, &.{ .gimme }, createC, destroyC, @sizeOf(Paq), .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);
 		class.addSymbol(symbolC);

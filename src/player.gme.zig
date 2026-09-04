@@ -81,8 +81,8 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 	pub inline fn deinit(self: *Gme, gpa: Allocator) void {
 		self.langs.deinit(gpa);
 		if (self.player.open) {
-			self.info.deinit();
-			self.emu.deinit();
+			self.info.destroy();
+			self.emu.destroy();
 		}
 	}
 
@@ -90,7 +90,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		const idx: c_uint = @truncate(index);
 		try self.emu.startTrack(idx);
 		const info = try self.emu.trackInfo(idx);
-		self.info.deinit();
+		self.info.destroy();
 		self.info = info;
 	}
 
@@ -110,7 +110,10 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 			break :blk @bitCast((try reader.interface.take(4))[0..4].*);
 		};
 
-		const initEmu: GmeInit = if (nch > 2) gm.emuMultiChannel else gm.emu;
+		const createEmu: GmeInit = if (nch > 2)
+			gm.Emu.createMultiChannel
+		else
+			gm.Emu.create;
 		var arc_reader: ?arc.ArcReader = inline for (arc.types) |t| {
 			const sig: u32 = t.signature;
 			if (signature == sig) {
@@ -143,8 +146,8 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 
 			const t = emu_type orelse return error.ArchiveNoMatch;
 			srate = sampleRate(t);
-			const emu = try initEmu(t, @intFromFloat(srate));
-			errdefer emu.deinit();
+			const emu = try createEmu(t, @intFromFloat(srate));
+			errdefer emu.destroy();
 			if (t.trackCount() == 1) {
 				try emu.loadTracks(buf.ptr, sizes[0..n]);
 			} else {
@@ -154,8 +157,8 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 		} else {
 			const t = try gm.Type.fromFile(path) orelse return error.FileNoMatch;
 			srate = sampleRate(t);
-			const emu = try initEmu(t, @intFromFloat(srate));
-			errdefer emu.deinit();
+			const emu = try createEmu(t, @intFromFloat(srate));
+			errdefer emu.destroy();
 			try emu.loadFile(path);
 			break :blk emu;
 		}};
@@ -165,8 +168,8 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return extern struct
 
 		// safe to delete the previous emulator
 		if (self.player.open) {
-			self.info.deinit();
-			self.emu.deinit();
+			self.info.destroy();
+			self.emu.destroy();
 		}
 		self.path = s;
 		self.emu = emu;

@@ -98,21 +98,21 @@ const Chrono = extern struct {
 			catch |e| pd.post.err(self, name ++ ": %s", .{ @errorName(e).ptr });
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(av[0..ac]), name);
+	fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) (pd.Oom || pd.TimeUnit.Error)!*Pd {
+	inline fn create(av: []const Atom) (pd.Oom || pd.TimeUnit.Error)!*Pd {
 		const self: *Chrono = try pd.gpa.create(Chrono);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		const settime = pd.time();
 		_ = try obj.inlet(&obj.g.pd, pd.s.bang(), .gen("bang2"));
 		self.* = .{
 			.obj = self.obj,
-			.out_total = try .init(obj, pd.s.float()),
-			.out_lap = try .init(obj, pd.s.float()),
+			.out_total = try .create(obj, pd.s.float()),
+			.out_lap = try .create(obj, pd.s.float()),
 			.timer = try .init(obj, av),
 			.settime = settime,
 			.laptime = settime,
@@ -121,7 +121,7 @@ const Chrono = extern struct {
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(Chrono, name, &.{ .gimme }, initC, null, .{});
+		class = try .create(name, &.{ .gimme }, createC, null, @sizeOf(Chrono), .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);
 		class.addList(listC);

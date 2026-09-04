@@ -119,21 +119,21 @@ const DelP = extern struct {
 		parentPtr(p).reset((pd.floatArg(0, av[0..ac]) catch 0) != 0);
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(av[0..ac]), name);
+	fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) (pd.Oom || pd.TimeUnit.Error)!*Pd {
+	inline fn create(av: []const Atom) (pd.Oom || pd.TimeUnit.Error)!*Pd {
 		const self: *DelP = try pd.gpa.create(DelP);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("ft1"));
-		const out_b: *Outlet = try .init(obj, pd.s.bang());
-		const out_f: *Outlet = try .init(obj, pd.s.float());
+		const out_b: *Outlet = try .create(obj, pd.s.bang());
+		const out_f: *Outlet = try .create(obj, pd.s.float());
 
-		var clock: *pd.Clock = try .init(DelP, self, timeoutC);
-		errdefer clock.deinit();
+		var clock: *pd.Clock = try .create(DelP, self, timeoutC);
+		errdefer clock.destroy();
 
 		var a = av;
 		const settime = pd.time();
@@ -157,12 +157,12 @@ const DelP = extern struct {
 		return &obj.g.pd;
 	}
 
-	fn deinitC(p: *const Pd) callconv(.c) void {
-		parentConstPtr(p).clock.deinit();
+	fn destroyC(p: *const Pd) callconv(.c) void {
+		parentConstPtr(p).clock.destroy();
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(DelP, name, &.{ .gimme }, initC, deinitC, .{});
+		class = try .create(name, &.{ .gimme }, createC, destroyC, @sizeOf(DelP), .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);
 		class.addList(listC);

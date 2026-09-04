@@ -60,14 +60,14 @@ const Pulse = extern struct {
 		parentPtr(p).phase = f;
 	}
 
-	fn initC(_: *pd.Symbol, ac: c_uint, av: [*]const pd.Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(av[0..ac]), name);
+	fn createC(_: *pd.Symbol, ac: c_uint, av: [*]const pd.Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(av[0..ac]), name);
 	}
-	inline fn init(av: []const pd.Atom) pd.Oom!*Pd {
+	inline fn create(av: []const pd.Atom) pd.Oom!*Pd {
 		const self: *Pulse = try pd.gpa.create(Pulse);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		_ = try obj.outlet(pd.s.signal());
 		const inlet: *Inlet = @ptrCast(@alignCast(
@@ -83,7 +83,7 @@ const Pulse = extern struct {
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(Pulse, name, &.{ .gimme }, initC, null, .{});
+		class = try .create(name, &.{ .gimme }, createC, null, @sizeOf(Pulse), .{});
 		class.doMainSignalIn(@offsetOf(Pulse, "f"));
 		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));
 		class.addMethod(&.{ .float }, ft1C, .gen("ft1"));

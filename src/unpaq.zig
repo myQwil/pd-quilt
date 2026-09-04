@@ -48,14 +48,14 @@ const Unpaq = extern struct {
 		}
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(av[0..ac]), name);
+	fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(av[0..ac]), name);
 	}
-	inline fn init(argv: []const Atom) pd.Oom!*Pd {
+	inline fn create(argv: []const Atom) pd.Oom!*Pd {
 		const self: *Unpaq = try gpa.create(Unpaq);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		const av: []const Atom = if (argv.len > 0) argv else &.{ .float(0), .float(0) };
 		const vec = try gpa.alloc(Outlet, av.len);
@@ -63,11 +63,11 @@ const Unpaq = extern struct {
 
 		for (vec, av) |*v, *a| {
 			v.* = if (a.getSymbol()) |s| switch (s.name[0]) {
-				'f' => .{ .out = try .init(obj, pd.s.float()), .type = .float },
-				's' => .{ .out = try .init(obj, pd.s.symbol()), .type = .symbol },
-				'p' => .{ .out = try .init(obj, pd.s.pointer()), .type = .pointer },
-				else => .{ .out = try .init(obj, null), .type = .gimme },
-			} else .{ .out = try .init(obj, null), .type = .gimme };
+				'f' => .{ .out = try .create(obj, pd.s.float()), .type = .float },
+				's' => .{ .out = try .create(obj, pd.s.symbol()), .type = .symbol },
+				'p' => .{ .out = try .create(obj, pd.s.pointer()), .type = .pointer },
+				else => .{ .out = try .create(obj, null), .type = .gimme },
+			} else .{ .out = try .create(obj, null), .type = .gimme };
 		}
 		self.* = .{
 			.obj = self.obj,
@@ -77,14 +77,14 @@ const Unpaq = extern struct {
 		return &obj.g.pd;
 	}
 
-	fn deinitC(p: *const Pd) callconv(.c) void {
+	fn destroyC(p: *const Pd) callconv(.c) void {
 		const self = parentConstPtr(p);
 		gpa.free(self.ptr[0..self.len]);
 	}
 
 	inline fn setup() pd.Class.Error!void {
 		dot = .gen(".");
-		class = try .init(Unpaq, name, &.{ .gimme }, initC, deinitC, .{});
+		class = try .create(name, &.{ .gimme }, createC, destroyC, @sizeOf(Unpaq), .{});
 		class.addAnything(anyC);
 		class.setHelpSymbol(.gen("paq"));
 	}

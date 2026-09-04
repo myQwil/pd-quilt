@@ -64,26 +64,27 @@ const MetroSignal = extern struct {
 		parentPtr(p).phase = f;
 	}
 
-	fn initC(f: Float) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(f), name);
+	fn createC(f: Float) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(f), name);
 	}
-	inline fn init(f: Float) pd.Oom!*Pd {
+	inline fn create(f: Float) pd.Oom!*Pd {
 		const self: *MetroSignal = try pd.gpa.create(MetroSignal);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		_ = try obj.inlet(&obj.g.pd, pd.s.float(), .gen("ft1"));
 		self.* = .{
 			.obj = self.obj,
-			.out = try .init(obj, pd.s.bang()),
+			.out = try .create(obj, pd.s.bang()),
 			.f = f,
 		};
 		return &obj.g.pd;
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(MetroSignal, name, &.{ .deffloat }, initC, null, .{});
+		const args: [1]pd.Atom.Type = @splat(.deffloat);
+		class = try .create(name, &args, createC, null, @sizeOf(MetroSignal), .{});
 		class.doMainSignalIn(@offsetOf(MetroSignal, "f"));
 		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));
 		class.addMethod(&.{ .float }, ft1C, .gen("ft1"));

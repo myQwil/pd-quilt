@@ -141,14 +141,14 @@ const Adsr = extern struct {
 		parentPtr(p).release = f;
 	}
 
-	fn initC(a: Float, d: Float, s: Float, r: Float) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(a, d, s, r), name);
+	fn createC(a: Float, d: Float, s: Float, r: Float) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(a, d, s, r), name);
 	}
-	inline fn init(a: Float, d: Float, s: Float, r: Float) pd.Oom!*Pd {
+	inline fn create(a: Float, d: Float, s: Float, r: Float) pd.Oom!*Pd {
 		const self: *Adsr = try pd.gpa.create(Adsr);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		_ = try obj.inletFloat(&self.attack);
 		_ = try obj.inletFloat(&self.decay);
@@ -168,7 +168,7 @@ const Adsr = extern struct {
 
 	inline fn setup() pd.Class.Error!void {
 		const args: [4]Atom.Type = @splat(.deffloat);
-		class = try .init(Adsr, name, &args, initC, null, .{});
+		class = try .create(name, &args, createC, null, @sizeOf(Adsr), .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);
 		class.addList(listC);

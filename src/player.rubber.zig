@@ -25,13 +25,13 @@ pub const Rubber = extern struct {
 		const in3: *Inlet = @ptrCast(@alignCast(try obj.inletSignal(1.0)));
 		return .{
 			.tempo = &in3.un.floatsignalvalue,
-			.state = try .init(
+			.state = try .create(
 				@intFromFloat(pd.sampleRate()), channels, 1, 1, try parseOptions(gpa, av)),
 		};
 	}
 
 	pub inline fn deinit(self: *Rubber) void {
-		self.state.deinit();
+		self.state.destroy();
 	}
 
 	pub inline fn reset(self: *Rubber) void {

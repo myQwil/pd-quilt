@@ -46,25 +46,25 @@ const Rand = extern struct {
 	var s_rep: *Symbol = undefined;
 
 	fn init(obj: *pd.Object) pd.Oom!Rand {
-		return .{ .out = try .init(obj, pd.s.float()) };
+		return .{ .out = try .create(obj, pd.s.float()) };
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]Atom) callconv(.c) ?*Pd {
+	fn createC(_: *Symbol, ac: c_uint, av: [*]Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, choose(av[0..ac]), name);
 	}
 	inline fn choose(av: []Atom) pd.Oom!*Pd {
 		if (av.len == 1 and av[0].type == .symbol) {
-			return try ExArray.init(av[0].w.symbol);
+			return try ExArray.create(av[0].w.symbol);
 		} else if (av.len > 2) {
-			return try InArray.init(av);
+			return try InArray.create(av);
 		} else {
-			return try Range.init(av);
+			return try Range.create(av);
 		}
 	}
 
 	inline fn setup() ClassError!void {
 		s_rep = .gen("rep");
-		pd.addCreator(name, &.{ .gimme }, initC);
+		pd.addCreator(name, &.{ .gimme }, createC);
 		try Range.setup();
 		try InArray.setup();
 		try ExArray.setup();
@@ -142,11 +142,11 @@ const Range = extern struct {
 		self.rand.out.float(@floor((if (range < 0) -f else f) + self.min));
 	}
 
-	inline fn init(av: []const Atom) pd.Oom!*Pd {
+	inline fn create(av: []const Atom) pd.Oom!*Pd {
 		const self: *Range = try pd.gpa.create(Range);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		// defaults
 		var min: Float = 0;
@@ -180,7 +180,7 @@ const Range = extern struct {
 	}
 
 	inline fn setup() ClassError!void {
-		class = try .init(Range, name, &.{}, null, null, .{});
+		class = try .create(name, &.{}, null, null, @sizeOf(Range), .{});
 		rn.Impl(Range).extend(io);
 		Rnd.extend();
 		class.addBang(bangC);
@@ -234,11 +234,11 @@ const InArray = extern struct {
 		self.rand.out.float(self.win.ptr[@intFromFloat(f)].float);
 	}
 
-	inline fn init(av: []Atom) pd.Oom!*Pd {
+	inline fn create(av: []Atom) pd.Oom!*Pd {
 		const self: *InArray = try pd.gpa.create(InArray);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		// 3 args with a symbol in the middle creates a 2-item array (ex: 7 or 9)
 		const n: usize = if (av.len == 3 and av[1].type != .float) blk: {
@@ -255,13 +255,13 @@ const InArray = extern struct {
 		return &obj.g.pd;
 	}
 
-	fn deinitC(p: *Pd) callconv(.c) void {
+	fn destroyC(p: *Pd) callconv(.c) void {
 		const self = parentPtr(p);
 		self.win.deinit(gpa);
 	}
 
 	inline fn setup() ClassError!void {
-		class = try .init(InArray, name, &.{}, null, deinitC, .{});
+		class = try .create(name, &.{}, null, destroyC, @sizeOf(InArray), .{});
 		rn.Impl(InArray).extend(io);
 		Rnd.extend();
 		class.addBang(bangC);
@@ -339,11 +339,11 @@ const ExArray = extern struct {
 		self.rand.out.float(vec[@intFromFloat(f)].float);
 	}
 
-	inline fn init(s: *Symbol) pd.Oom!*Pd {
+	inline fn create(s: *Symbol) pd.Oom!*Pd {
 		const self: *ExArray = try pd.gpa.create(ExArray);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		_ = try obj.inletSymbol(&self.sym);
 		self.* = .{
@@ -356,7 +356,7 @@ const ExArray = extern struct {
 	}
 
 	inline fn setup() ClassError!void {
-		class = try .init(ExArray, name, &.{}, null, null, .{});
+		class = try .create(name, &.{}, null, null, @sizeOf(ExArray), .{});
 		rn.Impl(ExArray).extend(io);
 		Rnd.extend();
 		class.addBang(bangC);

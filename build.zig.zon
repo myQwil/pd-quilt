@@ -5,28 +5,28 @@
 	.minimum_zig_version = "0.16.0",
 	.dependencies = .{
 		.pd = .{
-			.url = "git+https://github.com/myQwil/pd#772e9376532b85deec0911a22d573371cef32a48",
-			.hash = "pd-0.56.2-DC007XplAgB15Eoo1-PrGBPZFnLhG-rFb8JuwybLsoQh",
+			.url = "git+https://github.com/myQwil/pd#e353b6104f17c17fe7dd1074d37f98f17763d4a2",
+			.hash = "pd-0.56.2-DC007UxmAgCxbkBdKlontFkDOTIXv9SOjsqvK-GtnSqY",
 		},
 		.gme = .{
-			.url = "git+https://codeberg.org/myQwil/gme#0df3acddb89aa4461d7de8f2508f323eef322c4b",
-			.hash = "game_music_emu-0.6.6-YdNlAMxyAAB0YMvcQcITeOHcX8GtaRhYFOxBiVhxCmNf",
+			.url = "git+https://codeberg.org/myQwil/gme#606ebe81cd3a19c41dd51ebe7cbc546f96636fd4",
+			.hash = "game_music_emu-0.6.6-YdNlAIZyAADcr0uPcav2vWIm_RSeQSMTXvcSB1YILq6R",
 		},
 		.unrar = .{
 			.url = "git+https://github.com/myQwil/unrar#cd11629c7a603a001697d2dd80ef995840184052",
 			.hash = "unrar-7.2.5-zNpgmWA2AABcBM_CjB26Eevgqj1dnluBF6u6lPS1_4W2",
 		},
 		.samplerate = .{
-			.url = "git+https://github.com/myQwil/libsamplerate#50c39808b60547886d9bb39add0203c2b08db1a8",
-			.hash = "libsamplerate-0.2.3-f8m6boU1AACMcGs_74VBrwQhNdGpeGU0TjQ-Rn0n0ugh",
+			.url = "git+https://github.com/myQwil/libsamplerate#0e211f07e7154d9161cf9354d022f5b7808c0327",
+			.hash = "libsamplerate-0.2.3-f8m6bog1AAAl5JCT25IvgVnaX5y8XDvkEaB43ha70kn_",
 		},
 		.rubberband = .{
-			.url = "git+https://github.com/myQwil/rubberband#94d2738268bc6eec3f31236a42744bdbf5bd22e5",
-			.hash = "rubberband-4.0.0-RbnorIQaAQAJhcFNkUrddtpUi-eEw9jph3Xm8tBpAV_v",
+			.url = "git+https://github.com/myQwil/rubberband#5a6a8d55fd7f9e630718aa4c962e160bb67b3d76",
+			.hash = "rubberband-4.0.0-RbnorIcaAQBlddvXvyuucCTb-Y8fJlKLss9hFQ4LKSTV",
 		},
 		.ffmpeg = .{
-			.url = "git+https://github.com/myQwil/ffmpeg#e92303fb4472de21e80f0b6690a164c6886a656a",
-			.hash = "ffmpeg-8.1.2-1kurk-UFAgAMhZV7YkON3Vglvs35BhtNW7C2F2-YR4xh",
+			.url = "git+https://github.com/myQwil/ffmpeg#897d218f8cd137a649739432196868ed54c0ebbc",
+			.hash = "ffmpeg-8.1.2-1kurk_wFAgC-SpbRo3TqgpGjrf9i2aMPhb4enAfuSlO1",
 		},
 	},
 	.paths = .{

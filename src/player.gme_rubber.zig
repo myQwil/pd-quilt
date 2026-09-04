@@ -100,14 +100,14 @@ pub fn Impl(Root: type) type { return extern struct {
 		}
 	}
 
-	fn initC(_: *pd.Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(av[0..ac]), Root.name);
+	fn createC(_: *pd.Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(av[0..ac]), Root.name);
 	}
-	inline fn init(av: []const Atom) !*Pd {
+	inline fn create(av: []const Atom) !*Pd {
 		const self: *Self = try pd.gpa.create(Self);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		const base: Base = try .init(obj, av);
 		var rabbit: ra.Rabbit = try .init(obj, Root.nch);
@@ -136,7 +136,7 @@ pub fn Impl(Root: type) type { return extern struct {
 		return &obj.g.pd;
 	}
 
-	fn deinitC(p: *Pd) callconv(.c) void {
+	fn destroyC(p: *Pd) callconv(.c) void {
 		const self = parentPtr(p);
 		inline for (0..Root.nch) |ch| {
 			gpa.free(@as([]Sample, self.planar[ch][0..ra.frames]));
@@ -152,7 +152,7 @@ pub fn Impl(Root: type) type { return extern struct {
 	}
 
 	pub inline fn setup() (pd.Class.Error || std.mem.Allocator.Error)!void {
-		class = try .init(Self, Root.name, &.{ .gimme }, initC, deinitC, .{});
+		class = try .create(Root.name, &.{ .gimme }, createC, destroyC, @sizeOf(Self), .{});
 		try BaseImpl.extend();
 		try Rubber.extend(gpa);
 		Rabbit.extend();

@@ -79,14 +79,14 @@ const TabRead2 = extern struct {
 		pd.dsp.add(performC, .{ self, sp[2].len, sp[2].vec, sp[1].vec, sp[0].vec });
 	}
 
-	fn initC(_: *pd.Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(av[0..ac]), name);
+	fn createC(_: *pd.Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) (pd.Oom || pd.ArgError)!*Pd {
+	inline fn create(av: []const Atom) (pd.Oom || pd.ArgError)!*Pd {
 		const self: *TabRead2 = try pd.gpa.create(TabRead2);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer self.obj.g.pd.deinit();
+		errdefer self.obj.g.pd.destroy();
 
 		const arrayname = try pd.symbolArg(0, av);
 		const tab2: tb.Tab2 = try .init(obj, arrayname, pd.floatArg(1, av) catch 0);
@@ -100,7 +100,7 @@ const TabRead2 = extern struct {
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(TabRead2, name, &.{ .gimme }, initC, null, .{});
+		class = try .create(name, &.{ .gimme }, createC, null, @sizeOf(TabRead2), .{});
 		tb.Impl(TabRead2).extend();
 		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));
 		class.addMethod(&.{ .symbol }, setC, .gen("set"));

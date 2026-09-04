@@ -38,26 +38,26 @@ const Same = extern struct {
 		parentPtr(p).f = f;
 	}
 
-	fn initC(f: Float) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(f), name);
+	fn createC(f: Float) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(f), name);
 	}
-	inline fn init(f: Float) pd.Oom!*Pd {
+	inline fn create(f: Float) pd.Oom!*Pd {
 		const self: *Same = try pd.gpa.create(Same);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		self.* = .{
 			.obj = self.obj,
-			.out_diff = try .init(obj, pd.s.float()),
-			.out_same = try .init(obj, pd.s.float()),
+			.out_diff = try .create(obj, pd.s.float()),
+			.out_same = try .create(obj, pd.s.float()),
 			.f = f,
 		};
 		return &obj.g.pd;
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(Same, name, &.{ .deffloat }, initC, null, .{});
+		class = try .create(name, &.{ .deffloat }, createC, null, @sizeOf(Same), .{});
 		class.addBang(bangC);
 		class.addFloat(floatC);
 		class.addMethod(&.{ .deffloat }, setC, .gen("set"));

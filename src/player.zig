@@ -32,7 +32,7 @@ pub const Player = extern struct {
 
 	pub inline fn init(obj: *pd.Object) pd.Oom!Player {
 		return .{
-			.outlet = try .init(obj, null),
+			.outlet = try .create(obj, null),
 		};
 	}
 

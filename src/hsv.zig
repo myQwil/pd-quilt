@@ -58,20 +58,20 @@ const Hsv = extern struct {
 		bangC(p);
 	}
 
-	fn initC(h: Float, s: Float, v: Float) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(h, s, v), name);
+	fn createC(h: Float, s: Float, v: Float) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(h, s, v), name);
 	}
-	inline fn init(h: Float, s: Float, v: Float) pd.Oom!*Pd {
+	inline fn create(h: Float, s: Float, v: Float) pd.Oom!*Pd {
 		const self: *Hsv = try pd.gpa.create(Hsv);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		_ = try obj.inletFloat(&self.s);
 		_ = try obj.inletFloat(&self.v);
 		self.* = .{
 			.obj = self.obj,
-			.out = try .init(obj, pd.s.float()),
+			.out = try .create(obj, pd.s.float()),
 			.h = h,
 			.s = s,
 			.v = v,
@@ -81,7 +81,7 @@ const Hsv = extern struct {
 
 	inline fn setup() pd.Class.Error!void {
 		const args: [3]pd.Atom.Type = @splat(.deffloat);
-		class = try .init(Hsv, name, &args, &initC, null, .{});
+		class = try .create(name, &args, createC, null, @sizeOf(Hsv), .{});
 		class.addBang(&bangC);
 		class.addFloat(&floatC);
 	}

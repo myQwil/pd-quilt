@@ -98,14 +98,14 @@ const TabOsc2 = extern struct {
 		parentPtr(p).phase = f;
 	}
 
-	fn initC(_: *pd.Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(av[0..ac]), name);
+	fn createC(_: *pd.Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) (pd.Oom || pd.ArgError)!*Pd {
+	inline fn create(av: []const Atom) (pd.Oom || pd.ArgError)!*Pd {
 		const self: *TabOsc2 = try pd.gpa.create(TabOsc2);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		const arrayname = try pd.symbolArg(0, av);
 		const tab2: tb.Tab2 = try .init(obj, arrayname, pd.floatArg(1, av) catch 0);
@@ -119,7 +119,7 @@ const TabOsc2 = extern struct {
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(TabOsc2, name, &.{ .gimme }, initC, null, .{});
+		class = try .create(name, &.{ .gimme }, createC, null, @sizeOf(TabOsc2), .{});
 		tb.Impl(TabOsc2).extend();
 		class.addMethod(&.{ .cant }, dspC, .gen("dsp"));
 		class.addMethod(&.{ .symbol }, setC, .gen("set"));

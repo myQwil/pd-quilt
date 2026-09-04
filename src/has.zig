@@ -47,26 +47,26 @@ const Has = extern struct {
 		}
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(av[0..ac]), name);
+	fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(av[0..ac]), name);
 	}
-	inline fn init(av: []const Atom) pd.Oom!*Pd {
+	inline fn create(av: []const Atom) pd.Oom!*Pd {
 		const self: *Has = try pd.gpa.create(Has);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		_ = try obj.inlet(&obj.g.pd, pd.s.list(), .gen("set"));
 		self.* = .{
 			.obj = self.obj,
-			.out = try .init(obj, pd.s.float()),
+			.out = try .create(obj, pd.s.float()),
 			.atom = if (av.len > 0) av[0] else .float(0),
 		};
 		return &obj.g.pd;
 	}
 
 	inline fn setup() pd.Class.Error!void {
-		class = try .init(Has, name, &.{ .gimme }, &initC, null, .{});
+		class = try .create(name, &.{ .gimme }, createC, null, @sizeOf(Has), .{});
 		class.addBang(&bangC);
 		class.addList(&listC);
 		class.addMethod(&.{ .gimme }, &setC, .gen("set"));

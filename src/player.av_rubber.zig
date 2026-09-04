@@ -170,14 +170,14 @@ pub fn Impl(Root: type) type { return extern struct {
 		pd.dsp.add(performC, .{ self, sp[1].len, sp[1].vec, sp[0].vec });
 	}
 
-	fn initC(_: *pd.Symbol, ac: c_uint, args: [*]const Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(args[0..ac]), Root.name);
+	fn createC(_: *pd.Symbol, ac: c_uint, args: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(args[0..ac]), Root.name);
 	}
-	inline fn init(args: []const Atom) (ra.InitError || error{FFmpegInvalid})!*Pd {
+	inline fn create(args: []const Atom) (ra.InitError || error{FFmpegInvalid})!*Pd {
 		const self: *Self = try pd.gpa.create(Self);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *pd.Object = &self.obj;
-		errdefer obj.g.pd.deinit();
+		errdefer obj.g.pd.destroy();
 
 		var base: Base = try .init(
 			gpa, obj, if (args.len > 0) args[0] else .float(av.stereo));
@@ -212,7 +212,7 @@ pub fn Impl(Root: type) type { return extern struct {
 		return &obj.g.pd;
 	}
 
-	fn deinitC(p: *Pd) callconv(.c) void {
+	fn destroyC(p: *Pd) callconv(.c) void {
 		const self = parentPtr(p);
 		const nch = self.base.nch;
 		for (0..nch) |ch| {
@@ -230,7 +230,7 @@ pub fn Impl(Root: type) type { return extern struct {
 	}
 
 	pub inline fn setup() (pd.Class.Error || pd.Oom)!void {
-		class = try .init(Self, Root.name, &.{ .gimme }, initC, deinitC, .{});
+		class = try .create(Root.name, &.{ .gimme }, createC, destroyC, @sizeOf(Self), .{});
 		try BaseImpl.extend();
 		try Rubber.extend(gpa);
 		Player.extend();

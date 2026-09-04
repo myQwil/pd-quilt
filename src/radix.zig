@@ -642,7 +642,7 @@ const Radix = extern struct {
 		} else if (rcv_new != pd.s.empty()) { // inlet to symbol
 			if (obj.inlets) |inlet| {
 				deleteLinesForIo(self.gl, obj, inlet, null);
-				inlet.deinit();
+				inlet.destroy();
 			}
 			p.bind(self.gl.realizeDollar(rcv_new));
 		}
@@ -658,7 +658,7 @@ const Radix = extern struct {
 		} else if (snd_new != pd.s.empty()) { // outlet to symbol
 			if (obj.outlets) |outlet| {
 				deleteLinesForIo(self.gl, obj, null, outlet);
-				outlet.deinit();
+				outlet.destroy();
 			}
 		}
 		self.snd = snd_new;
@@ -792,17 +792,17 @@ const Radix = extern struct {
 		}
 	}
 
-	fn initC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
-		return pd.wrap(*Pd, init(av[0..ac]), name);
+	fn createC(_: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
+		return pd.wrap(*Pd, create(av[0..ac]), name);
 	}
 	const InitError = pd.Oom || error{NoCurrentGList} || Writer.Error;
-	inline fn init(av: []const Atom) InitError!*Pd {
+	inline fn create(av: []const Atom) InitError!*Pd {
 		const gl = GList.getCurrent() orelse return error.NoCurrentGList;
 		const self: *Radix = try pd.gpa.create(Radix);
 		self.obj = .{ .g = .{ .pd = .{ .class = class } } };
 		const obj: *Object = &self.obj;
 		const p: *Pd = &obj.g.pd;
-		errdefer p.deinit();
+		errdefer p.destroy();
 
 		var tag: [@sizeOf(usize) * 2 + 2 :0]u8 = undefined;
 		var w: Writer = .fixed(&tag);
@@ -888,7 +888,7 @@ const Radix = extern struct {
 
 	inline fn setup() pd.Class.Error!void {
 		const opts: pd.Class.Options = .{ .no_inlet = true, .patchable = true };
-		class = try .init(Radix, name, &.{ .gimme }, initC, freeC, opts);
+		class = try .create(name, &.{ .gimme }, createC, freeC, @sizeOf(Radix), opts);
 		class.addBang(bangC);
 		class.addFloat(floatC);
 		class.addAnything(anythingC);
