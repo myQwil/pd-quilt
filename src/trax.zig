@@ -239,53 +239,15 @@ pub const Meta = struct {
 		return self;
 	}
 
-	pub fn get(self: *const Meta, key: *Symbol, prefs: []const *Symbol) ?*const Pile {
+	pub fn get(self: *const Meta, key: *Symbol, langs: []const *Symbol) ?*const Pile {
 		const ldict = self.data.get(key) orelse return null;
-		return ldict.get(prefs);
+		return ldict.get(langs);
 	}
 };
 
 const Result = union(enum) {
 	dict: *Tag.Dict,
 	pile: *Pile,
-
-	pub fn get(
-		data: *Meta.Data,
-		gpa: Allocator,
-		key: *Symbol,
-		lang: *Symbol,
-		erase: bool,
-	) Oom!Result {
-		const tag_gop = try data.getOrPut(gpa, key);
-		if (tag_gop.found_existing) {
-			const dict = &tag_gop.value_ptr.dict;
-			if (lang == Symbol.gen("*")) {
-				if (erase) {
-					var iter = dict.iterator();
-					while (iter.next()) |kv| {
-						kv.value_ptr.erase();
-					}
-				}
-				return .{ .dict = dict };
-			}
-			const pile_gop = try dict.getOrPut(gpa, lang);
-			if (!pile_gop.found_existing) {
-				pile_gop.value_ptr.* = .{};
-				if (lang == pd.s.empty()) {
-					tag_gop.value_ptr.default = dict.entries.len - 1;
-				}
-			} else if (erase) {
-				pile_gop.value_ptr.erase();
-			}
-			return .{ .pile = pile_gop.value_ptr };
-		} else {
-			const l = if (lang == Symbol.gen("*")) pd.s.empty() else lang;
-			tag_gop.value_ptr.* = .{};
-			const pile_gop = try tag_gop.value_ptr.dict.getOrPut(gpa, l);
-			pile_gop.value_ptr.* = .{};
-			return .{ .pile = pile_gop.value_ptr };
-		}
-	}
 
 	fn put(result: Result, gpa: Allocator, value: ?[]const u8) Oom!void {
 		const v = value orelse return;
@@ -300,6 +262,49 @@ const Result = union(enum) {
 		}
 	}
 };
+
+pub fn putGet(
+	data: *Meta.Data,
+	gpa: Allocator,
+	key: *Symbol,
+	lang: *Symbol,
+	value: ?[]const u8,
+	erase: bool,
+) Oom!Result {
+	const result: Result = blk: {
+		const tag_gop = try data.getOrPut(gpa, key);
+		if (tag_gop.found_existing) {
+			const dict = &tag_gop.value_ptr.dict;
+			if (lang == Symbol.gen("*")) {
+				if (erase) {
+					var iter = dict.iterator();
+					while (iter.next()) |kv| {
+						kv.value_ptr.erase();
+					}
+				}
+				break :blk .{ .dict = dict };
+			}
+			const pile_gop = try dict.getOrPut(gpa, lang);
+			if (!pile_gop.found_existing) {
+				pile_gop.value_ptr.* = .{};
+				if (lang == pd.s.empty()) {
+					tag_gop.value_ptr.default = dict.entries.len - 1;
+				}
+			} else if (erase) {
+				pile_gop.value_ptr.erase();
+			}
+			break :blk .{ .pile = pile_gop.value_ptr };
+		} else {
+			const l = if (lang == Symbol.gen("*")) pd.s.empty() else lang;
+			tag_gop.value_ptr.* = .{};
+			const pile_gop = try tag_gop.value_ptr.dict.getOrPut(gpa, l);
+			pile_gop.value_ptr.* = .{};
+			break :blk .{ .pile = pile_gop.value_ptr };
+		}
+	};
+	try result.put(gpa, value);
+	return result;
+}
 
 inline fn find(slice: []const u8, value: u8) ?usize {
 	return std.mem.findScalar(u8, slice, value);
@@ -331,13 +336,13 @@ fn trimRange(line: []const u8, offset: usize) [2]usize {
 	return .{ offset + a, offset + (line.len - r) };
 }
 
-fn makeLowerCase(s: []u8) void {
+pub fn makeLowerCase(s: []u8) void {
 	for (s) |*c| {
 		c.* = std.ascii.toLower(c.*);
 	}
 }
 
-fn keyLang(line: [:0]u8) struct { key: *Symbol, lang: *Symbol, value: ?[]const u8 } {
+fn keyLang(line: [:0]u8) struct { *Symbol, *Symbol, ?[]const u8 } {
 	const eq = find(line, '=');
 	const value = if (eq) |i| line[i + 1 ..] else null;
 	const end = trimEnd(line[0..(eq orelse line.len)], " \t");
@@ -354,7 +359,7 @@ fn keyLang(line: [:0]u8) struct { key: *Symbol, lang: *Symbol, value: ?[]const u
 	if (kend < line.len) {
 		line[kend] = 0;
 	}
-	return .{ .key = .gen(line[0..kend :0]), .lang = .gen(lang), .value = value };
+	return .{ .gen(line[0..kend :0]), .gen(lang), value };
 }
 
 fn resolveZ(gpa: Allocator, paths: []const []const u8) Oom![:0]u8 {
@@ -478,10 +483,10 @@ fn traverseMeta(
 
 		// !control
 		if (line[0] == '!') {
-			const kl = keyLang(line[1..]);
-			if (kl.key == Symbol.gen("include")) {
+			const key, _, const value = keyLang(line[1..]);
+			if (key == Symbol.gen("include")) {
 				typ = .include;
-				if (kl.value) |v| {
+				if (value) |v| {
 					const resolved = try resolveZ(gpa, &.{ dir, v });
 					defer gpa.free(resolved);
 					try meta.traverse(gpa, io, parents, resolved);
@@ -495,9 +500,8 @@ fn traverseMeta(
 
 		// key[lang]=value
 		typ = .tag;
-		const kl = keyLang(if (erase) line[1..] else line);
-		result = try .get(&meta.data, gpa, kl.key, kl.lang, erase);
-		try result.?.put(gpa, kl.value);
+		const key, const lang, const value = keyLang(if (erase) line[1..] else line);
+		result = try putGet(&meta.data, gpa, key, lang, value, erase);
 	} else |e| if (e != error.EndOfStream) {
 		return e;
 	}

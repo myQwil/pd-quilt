@@ -48,20 +48,10 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 
 	const Gme = @This();
 
-	var dict: std.AutoHashMapUnmanaged(*Symbol, *const fn(*const Gme) *const Pile)
+	pub var dict: std.AutoHashMapUnmanaged(*Symbol, *const fn(*const Gme) *const Pile)
 		= .empty;
 	pub fn freeDict(gpa: Allocator) void {
 		dict.deinit(gpa);
-	}
-
-	pub fn get(self: *const Gme, trax: *const Meta, s: *Symbol) ?*const Pile {
-		if (trax.get(s, self.langs)) |pile| {
-			return pile;
-		}
-		if (dict.get(s)) |func| {
-			return func(self);
-		}
-		return null;
 	}
 
 	pub inline fn init(obj: *pd.Object, av: []const Atom) pd.Oom!Gme {
@@ -79,25 +69,43 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 		};
 	}
 
-	pub inline fn deinit(self: *const Gme, gpa: Allocator) void {
-		gpa.free(self.langs);
+	pub inline fn deinit(self: *const Gme) void {
 		if (self.player.open) {
 			self.info.destroy();
 			self.emu.destroy();
 		}
 	}
 
-	pub fn loadTrack(self: *Gme, index: usize) gm.Error!void {
+	pub fn loadTrack(self: *Gme, gpa: Allocator, io: Io, index: usize) gm.Error!void {
 		const idx: c_uint = @truncate(index);
 		try self.emu.startTrack(idx);
 		const info = try self.emu.trackInfo(idx);
 		self.info.destroy();
 		self.info = info;
+		self.player.meta.deinit(gpa);
+		self.player.meta = .{};
+		self.loadMetadata(gpa, io, idx)
+			catch |e| pd.post.err(null, "Gme.loadMetadata: %s", .{ @errorName(e).ptr });
 	}
 
-	pub inline fn getTrax(self: *const Gme, gpa: Allocator, io: Io) Meta {
-		self.player.assertFileOpened() catch return .{};
-		return Meta.fromPath(gpa, io, self.path.name) catch Meta{};
+	inline fn loadMetadata(self: *Gme, gpa: Allocator, io: Io, idx: c_uint) !void {
+		var chaps = try tx.getChapters(gpa, io, self.path.name);
+		defer chaps.deinit(gpa);
+		var meta: tx.Meta = .{};
+		errdefer meta.deinit(gpa);
+
+		if (idx < chaps.items.len) {
+			meta = try .fromPath(gpa, io, chaps.items[idx].trax.name);
+		}
+		inline for ([_][:0]const u8{
+			"system", "game", "song", "author", "copyright", "comment", "dumper",
+		}) |field| {
+			if (!meta.data.contains(.gen(field))) {
+				const name = std.mem.sliceTo(@field(self.info, field), 0);
+				_ = try tx.putGet(&meta.data, gpa, .gen(field), pd.s.empty(), name, false);
+			} 
+		}
+		self.player.meta = meta;
 	}
 
 	pub inline fn open(self: *Gme, gpa: Allocator, io: Io, av: []const Atom) !void {
@@ -189,21 +197,8 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 		try self.emu.loadM3u(ext_path);
 	}
 
-	pub inline fn printAuto(
-		self: *const Gme,
-		trax: *const Meta,
-		w: *Io.Writer,
-	) Io.Writer.Error!void {
-		// general track info: %artist% - %title%
-		if (self.get(trax, .gen("game"))) |game| {
-			try game.write(w);
-			if (self.get(trax, .gen("song"))) |song| {
-				try w.writeAll(" - ");
-				try song.write(w);
-			}
-		} else if (self.get(trax, .gen("song"))) |song| {
-			try song.write(w);
-		}
+	pub inline fn printAuto(self: *const Gme, w: *Io.Writer) Io.Writer.Error!void {
+		try self.player.printAuto(w, "game", "song");
 	}
 
 	pub fn seek(self: *Gme, msec: Float) gm.Error!void {
@@ -329,15 +324,6 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 			return w + 5;
 		}
 
-		fn langsC(
-			p: *Pd,
-			_: *Symbol, ac: c_uint, args: [*]const pd.Atom,
-		) callconv(.c) void {
-			const self = Box.state(p);
-			const base: *Gme = &self.base;
-			tx.langReplace(&base.langs, gpa, args[0..ac]) catch |e| err(p, e);
-		}
-
 		fn dspC(p: *Pd, sp: [*]*pd.Signal) callconv(.c) void {
 			const self = Box.state(p);
 			const base: *Gme = &self.base;
@@ -353,7 +339,6 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 			errdefer dict.deinit(gpa);
 			inline for ([_][:0]const u8{
 				"path", "time", "ftime", "fade", "tracks", "voices",
-				"system", "game", "song", "author", "copyright", "comment", "dumper",
 			}) |field_name| {
 				try dict.put(gpa, .gen(field_name.ptr), @field(dispatch, field_name));
 			}
@@ -361,7 +346,6 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 			const class: *pd.Class = Self.class;
 			class.addMethod(&.{ .gimme }, muteC, .gen("mute"));
 			class.addMethod(&.{ .gimme }, soloC, .gen("solo"));
-			class.addMethod(&.{ .gimme }, langsC, .gen("langs"));
 			class.addMethod(&.{ .gimme }, maskC, s_mask);
 			class.addMethod(&.{}, bMaskC, .gen("bmask"));
 			class.addMethod(&.{ .cant }, dspC, .gen("dsp"));
@@ -387,27 +371,6 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 		}
 		fn voices(self: *const Gme) *const Pile {
 			return .float(@floatFromInt(self.emu.voiceCount()));
-		}
-		fn system(self: *const Gme) *const Pile {
-			return .string(std.mem.sliceTo(self.info.system, 0));
-		}
-		fn game(self: *const Gme) *const Pile {
-			return .string(std.mem.sliceTo(self.info.game, 0));
-		}
-		fn song(self: *const Gme) *const Pile {
-			return .string(std.mem.sliceTo(self.info.song, 0));
-		}
-		fn author(self: *const Gme) *const Pile {
-			return .string(std.mem.sliceTo(self.info.author, 0));
-		}
-		fn copyright(self: *const Gme) *const Pile {
-			return .string(std.mem.sliceTo(self.info.copyright, 0));
-		}
-		fn comment(self: *const Gme) *const Pile {
-			return .string(std.mem.sliceTo(self.info.comment, 0));
-		}
-		fn dumper(self: *const Gme) *const Pile {
-			return .string(std.mem.sliceTo(self.info.dumper, 0));
 		}
 	};
 };}

@@ -54,9 +54,11 @@
 #X obj 130 150 s \$0tscale;
 #X obj 130 80 #*;
 #X obj 130 110 @/ 1;
+#X obj 180 80 s \$0pow;
 #X connect 0 0 3 0;
 #X connect 1 0 3 1;
 #X connect 3 0 4 0;
+#X connect 3 0 5 0;
 #X connect 4 0 2 0;
 #X restore 70 170 pd scale;
 #X text 100 20 speed = playback rate;
@@ -64,6 +66,7 @@
 #X obj 30 40 radix 12 6 0 3 _ _ 0 0 _ _ pitch 2;
 #X obj 30 110 radix 12 6 0 3 _ _ 0 0 _ _ _ 0;
 #X obj 170 110 radix 12 6 0 3 _ _ 0 0 _ _ _ 0;
+#X obj 210 170 bpm-finder \$0;
 #X connect 2 0 7 0;
 #X connect 3 0 8 0;
 #X connect 4 0 3 1;

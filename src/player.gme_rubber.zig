@@ -141,7 +141,7 @@ pub fn Impl(Root: type) type { return struct {
 		}
 		self.rubber.deinit();
 		self.rabbit.deinit();
-		self.base.deinit(gpa);
+		self.base.deinit();
 	}
 
 	fn classFreeC(_: *pd.Class) callconv(.c) void {

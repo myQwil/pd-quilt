@@ -23,6 +23,10 @@ pub var s_play: *Symbol = undefined;
 pub const Player = struct {
 	/// outlet for sending metadata and open/play states
 	outlet: *pd.Outlet,
+	/// metadata from a `.trax` sidecar
+	meta: tx.Meta = .{},
+	/// trax language preferences
+	langs: []*Symbol = &.{},
 	/// Whether a track has been opened
 	open: bool = false,
 	/// Whether a track is currently playing
@@ -34,6 +38,11 @@ pub const Player = struct {
 		return .{
 			.outlet = try .create(obj, null),
 		};
+	}
+
+	pub inline fn deinit(self: *Player, gpa: Allocator) void {
+		self.meta.deinit(gpa);
+		gpa.free(self.langs);
 	}
 
 	pub inline fn assertFileOpened(self: *const Player) Error!void {
@@ -50,6 +59,24 @@ pub const Player = struct {
 		try self.assertFileOpened();
 		if (toggle(&self.play, av)) {
 			self.sendState(s_play, self.play);
+		}
+	}
+
+	/// general track info: %artist% - %title%
+	pub inline fn printAuto(
+		self: *const Player,
+		w: *Io.Writer,
+		artist: [:0]const u8,
+		title: [:0]const u8,
+	) Io.Writer.Error!void {
+		if (self.meta.get(.gen(artist), self.langs)) |a| {
+			try a.write(w);
+			if (self.meta.get(.gen(title), self.langs)) |t| {
+				try w.writeAll(" - ");
+				try t.write(w);
+			}
+		} else if (self.meta.get(.gen(title), self.langs)) |t| {
+			try t.write(w);
 		}
 	}
 };
@@ -137,25 +164,30 @@ pub fn Impl(Self: type) type { return struct {
 	const Box = Self.Box;
 
 	const Base = Self.Base;
-	const GetMetaFn = fn(*const Base, *const Meta, *Symbol) ?*const Pile;
-	/// Returns the value of a given metadata field if available.
-	const bGet: GetMetaFn = Base.get;
-	/// Returns a trax.Meta object
-	const bTrax: fn(*const Base, Allocator, Io) callconv(.@"inline") Meta = Base.getTrax;
+	const GetMetaFn = fn(*const Base, *Symbol) ?*const Pile;
 	/// Seek to a time in milliseconds.
 	const bSeek: fn(*Base, Float) anyerror!void = Base.seek;
 	/// Load a track in the playlist by index.
-	const bLoadTrack: fn(*Base, usize) anyerror!void = Base.loadTrack;
+	const bLoadTrack: fn(*Base, Allocator, Io, usize) anyerror!void = Base.loadTrack;
 	/// Open a file or playlist and load the first track.
 	const bOpen: fn(*Base, Allocator, Io, []const Atom) callconv(.@"inline") anyerror!void
 		= Base.open;
 	/// Print function for when no args are specified.
-	const bPrint: fn (*const Base, *const Meta, *Writer) callconv(.@"inline") anyerror!void
+	const bPrint: fn (*const Base, *Writer) callconv(.@"inline") anyerror!void
 		= Base.printAuto;
 	/// Returns the number of tracks in the current playlist.
 	const bTrackCount: fn(*const Base) callconv(.@"inline") usize = Base.trackCount;
 
-	fn getNone(_: *const Base, _: *const Meta, _: *Symbol) ?*const Pile {
+	pub fn getSome(self: *const Base, s: *Symbol) ?*const Pile {
+		if (Base.dict.get(s)) |func| {
+			return func(self);
+		} else if (self.player.meta.get(s, self.player.langs)) |pile| {
+			return pile;
+		}
+		return null;
+	}
+
+	fn getNone(_: *const Base, _: *Symbol) ?*const Pile {
 		return null;
 	}
 
@@ -175,11 +207,9 @@ pub fn Impl(Self: type) type { return struct {
 	inline fn print(self: *const Self, w: *Writer, av: []const Atom) Writer.Error!void {
 		const base: *const Base = &self.base;
 		const player: *const Player = &base.player;
-		const getfn: *const GetMetaFn = if (player.open) &bGet else &getNone;
-		var trax: Meta = bTrax(base, gpa, io);
-		defer trax.deinit(gpa);
+		const getfn: *const GetMetaFn = if (player.open) &getSome else &getNone;
 		if (av.len == 0) {
-			return bPrint(base, &trax, w);
+			return bPrint(base, w);
 		}
 
 		const ilast = av.len - 1;
@@ -213,7 +243,7 @@ pub fn Impl(Self: type) type { return struct {
 					try w.writeAll(str[pos..end]);
 					try w.writeByte(0);
 					const key: *Symbol = .gen(w.buffer[kpos..][0 .. end - pos :0].ptr);
-					const pile: *const Pile = getfn(base, &trax, key) orelse &.{};
+					const pile: *const Pile = getfn(base, key) orelse &.{};
 					w.end = kpos;
 
 					var mbuf: [std.fmt.float.bufferSize(.decimal, Float)]u8 = undefined;
@@ -253,10 +283,8 @@ pub fn Impl(Self: type) type { return struct {
 	fn get(self: *const Self, s: *Symbol) pd.Oom!void {
 		const base: *const Base = &self.base;
 		const player: *const Player = &base.player;
-		const getfn: *const GetMetaFn = if (player.open) &bGet else &getNone;
-		var trax: Meta = bTrax(base, gpa, io);
-		defer trax.deinit(gpa);
-		if (getfn(base, &trax, s)) |a| {
+		const getfn: *const GetMetaFn = if (player.open) &getSome else &getNone;
+		if (getfn(base, s)) |a| {
 			try a.send(gpa, player.outlet, s);
 		} else {
 			player.outlet.anything(s, &.{});
@@ -306,7 +334,7 @@ pub fn Impl(Self: type) type { return struct {
 	}
 	inline fn open(base: *Base, av: []const Atom) !void {
 		try bOpen(base, gpa, io, av);
-		try bLoadTrack(base, 0);
+		try bLoadTrack(base, gpa, io, 0);
 	}
 
 	fn listC(
@@ -329,7 +357,7 @@ pub fn Impl(Self: type) type { return struct {
 
 		const track: u32 = @intFromFloat(try pd.floatArg(0, av));
 		const result: bool = blk: { if (0 < track and track <= bTrackCount(base)) {
-			try bLoadTrack(base, track - 1);
+			try bLoadTrack(base, gpa, io, track - 1);
 			if (pd.floatArg(1, av)) |msec| {
 				try bSeek(base, msec);
 			} else |_| {}
@@ -364,6 +392,21 @@ pub fn Impl(Self: type) type { return struct {
 		player.setPlay(&.{}) catch |e| err(p, e);
 	}
 
+	fn dumpC(p: *Pd) callconv(.c) void {
+		const player: *Player = &Box.state(p).base.player;
+		const meta = &player.meta;
+		const langs = player.langs;
+		var iter = meta.data.iterator();
+		while (iter.next()) |kv| {
+			kv.value_ptr.get(langs).print(p, kv.key_ptr.*.name);
+		}
+	}
+
+	fn langsC(p: *Pd, _: *Symbol, ac: c_uint, args: [*]const pd.Atom) callconv(.c) void {
+		const player: *Player = &Box.state(p).base.player;
+		tx.langReplace(&player.langs, gpa, args[0..ac]) catch |e| err(p, e);
+	}
+
 	pub inline fn extend() void {
 		s_open = .gen("open");
 		s_play = .gen("play");
@@ -373,8 +416,10 @@ pub fn Impl(Self: type) type { return struct {
 		class.addList(listC);
 		class.addAnything(anythingC);
 		class.addMethod(&.{}, stopC, .gen("stop"));
+		class.addMethod(&.{}, dumpC, .gen("dump"));
 		class.addMethod(&.{ .float }, seekC, .gen("seek"));
 		class.addMethod(&.{ .symbol }, getC, .gen("get"));
+		class.addMethod(&.{ .gimme }, langsC, .gen("langs"));
 		class.addMethod(&.{ .gimme }, printC, .gen("print"));
 		class.addMethod(&.{ .gimme }, openC, s_open);
 		class.addMethod(&.{ .gimme }, playC, s_play);
