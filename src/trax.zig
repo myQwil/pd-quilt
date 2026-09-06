@@ -612,33 +612,41 @@ pub fn getSidecar(gpa: Allocator, io: Io, path: []const u8) Oom!?[:0]const u8 {
 	const dot = findLast(path, '.') orelse path.len;
 	var trx_path = try gpa.alloc(u8, dot + txdir.len + trext.len + 1);
 
-	// first try `dir/.trax/file.trax`, then `dir/file.trax`
-	var i: usize = 0;
-	if (std.fs.path.dirname(path)) |dir| {
+	const start = if (std.fs.path.dirname(path)) |dir| blk: {
 		@memcpy(trx_path[0..dir.len], dir);
 		trx_path[dir.len] = '/';
-		i += dir.len + 1;
-	}
-	const base = path[i..dot];
-	@memcpy(trx_path[i..][0..txdir.len], txdir);
-	i += txdir.len;
-	@memcpy(trx_path[i..][0..base.len], base);
-	i += base.len;
-	@memcpy(trx_path[i..][0..trext.len], trext);
-	i += trext.len;
-	Io.Dir.cwd().access(io, trx_path[0..i], .{ .read = true }) catch {
-		@memcpy(trx_path[0..dot], path[0..dot]);
-		@memcpy(trx_path[dot..][0..trext.len], trext);
-		i = dot + trext.len;
-		Io.Dir.cwd().access(io, trx_path[0..i], .{ .read = true }) catch {
-			gpa.free(trx_path);
-			return null;
-		};
-	};
-	trx_path[i] = 0;
+		break :blk dir.len + 1;
+	} else 0;
 
-	std.debug.assert(i + 1 <= trx_path.len);
-	trx_path = gpa.realloc(trx_path, i + 1) catch unreachable;
+	const base = path[start..dot];
+	var i: usize = start;
+	while (true) {
+		// try `dir/file.trax`
+		@memcpy(trx_path[i..][0..base.len], base);
+		i += base.len;
+		@memcpy(trx_path[i..][0..trext.len], trext);
+		i += trext.len;
+		if (Io.Dir.cwd().access(io, trx_path[0..i], .{ .read = true })) {
+			break;
+		} else |_| {}
+
+		// try `dir/.trax/file.trax`
+		i = start;
+		@memcpy(trx_path[i..][0..txdir.len], txdir);
+		i += txdir.len;
+		@memcpy(trx_path[i..][0..base.len], base);
+		i += base.len;
+		@memcpy(trx_path[i..][0..trext.len], trext);
+		i += trext.len;
+		if (Io.Dir.cwd().access(io, trx_path[0..i], .{ .read = true })) {
+			break;
+		} else |_| {}
+
+		gpa.free(trx_path);
+		return null;
+	}
+	trx_path[i] = 0;
+	trx_path = try gpa.realloc(trx_path, i + 1);
 	return trx_path[0..i :0];
 }
 
