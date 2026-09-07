@@ -342,7 +342,7 @@ pub fn makeLowerCase(s: []u8) void {
 	}
 }
 
-fn keyLang(line: [:0]u8) struct { *Symbol, *Symbol, ?[]const u8 } {
+fn keyLangVal(line: [:0]u8) struct { *Symbol, *Symbol, ?[]const u8 } {
 	const eq = find(line, '=');
 	const value = if (eq) |i| line[i + 1 ..] else null;
 	const end = trimEnd(line[0..(eq orelse line.len)], " \t");
@@ -451,7 +451,7 @@ fn traverseMeta(
 	var r = file.reader(io, &buf);
 	while (r.interface.takeDelimiterExclusive('\n')) |slice| {
 		defer _ = r.interface.take(1) catch {};
-		const line: [:0]u8 = blk: {
+		var line: [:0]u8 = blk: {
 			const trim = trimRange(slice, r.interface.seek - slice.len);
 			buf[trim[1]] = 0;
 			break :blk buf[trim[0]..trim[1] :0];
@@ -483,10 +483,10 @@ fn traverseMeta(
 
 		// !control
 		if (line[0] == '!') {
-			const key, _, const value = keyLang(line[1..]);
+			const key, _, const val = keyLangVal(line[1..]);
 			if (key == Symbol.gen("include")) {
 				typ = .include;
-				if (value) |v| {
+				if (val) |v| {
 					const resolved = try resolveZ(gpa, &.{ dir, v });
 					defer gpa.free(resolved);
 					try meta.traverse(gpa, io, parents, resolved);
@@ -497,11 +497,17 @@ fn traverseMeta(
 
 		// ~erase
 		const erase = line[0] == '~';
+		line = if (erase) line[1..] else line;
+
+		// @import (not implemented)
+		if (line[0] == '@') {
+			continue;
+		}
 
 		// key[lang]=value
 		typ = .tag;
-		const key, const lang, const value = keyLang(if (erase) line[1..] else line);
-		result = try putGet(&meta.data, gpa, key, lang, value, erase);
+		const key, const lang, const val = keyLangVal(line);
+		result = try putGet(&meta.data, gpa, key, lang, val, erase);
 	} else |e| if (e != error.EndOfStream) {
 		return e;
 	}
