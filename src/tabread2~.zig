@@ -34,19 +34,13 @@ fn performC(w: [*]usize) callconv(.c) [*]usize {
 	const inlet1: [*]Sample = @ptrFromInt(w[5]);
 	for (out, inlet1, inlet2) |*o, in1, in2| {
 		const findex: f64 = in1 + onset;
-		const ffloor: f64 = @trunc(findex);
-		var index: u32 = undefined;
-		var frac: Sample = undefined;
-		if (ffloor < 0) {
-			index = 0;
-			frac = 0;
-		} else if (ffloor > maxindex) {
-			index = maxindex;
-			frac = 1;
-		} else {
-			index = @intFromFloat(ffloor);
-			frac = @floatCast(findex - ffloor);
-		}
+		const ftrunc: f64 = @trunc(findex);
+		const index: u32, const frac: Sample = if (ftrunc < 0)
+			.{ 0, 0 }
+		else if (ftrunc > maxindex)
+			.{ maxindex, 1 }
+		else
+			.{ @intFromFloat(ftrunc), @floatCast(findex - ftrunc) };
 		o.* = Tab2.sample(vec + index, frac, in2);
 	}
 	return w + 6;
