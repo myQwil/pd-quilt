@@ -1,18 +1,9 @@
-# A directive has `!` as its first non-whitespace character.
-# `!include` inherits the metadata of the trax file specified.
 !include       =../a.trax
 
-# Tags can be language-specific. The first language-specific tag
-# is also a fallback when none match with language preferences.
 album[en]      =Hello World
-
-# Keys and language codes are case-insensitive.
 ALbUM[jA]      =こんにちは
 alBum[Ja]      =世界
-
-# A tag without a language code becomes the new fallback.
 album          =Hella Werld
-
 date           =2026-03-16
 
 >baz

@@ -1,5 +1,5 @@
-!include =b.trax
+!include       =b.trax
 
-track    =6
-title    =Earth
-comment  =file.trax sidecar
+track          =6
+title          =Earth
+comment        =file.trax sidecar

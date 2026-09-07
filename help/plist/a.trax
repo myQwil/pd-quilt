@@ -1,26 +1,10 @@
-# A comment has # as its first non-whitespace character.
-# There are no inline comments.
+# Trax documentation: https://codeberg.org/myQwil/mpv-trax
 
-# Trax uses two types of traversal, one for building a list of file paths,
-# and one for collecting metadata for the track that is currently playing.
-
-# Metadata is specified before any tracks. These values are ignored during
-# list traversal, whereas metadata traversal ignores paths.
-
-# Whitespace surrounding the key is ignored,
-# but any whitespace after the equal sign is part of the value.
 artist
  =foobar
  =barbaz
-
-# Add more lines after the fact by assigning to the same key
 artist         =Third Guy
 
-# Track listing
-
-# A file path has `>` as its first non-whitespace character.
 >trax/foo
 >trax/bar
-
-# A file path can point to another trax file.
 >trax/b.trax

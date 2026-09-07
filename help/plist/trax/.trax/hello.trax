@@ -1,5 +1,5 @@
-!include =../b.trax
+!include       =../b.trax
 
-track   =5
-title   =Howdy
-comment =.trax/file.trax sidecar
+track          =5
+title          =Howdy
+comment        =.trax/file.trax sidecar
