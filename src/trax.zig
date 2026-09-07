@@ -27,9 +27,9 @@ pub const Pile = struct {
 
 	const Enum = enum(u1) { float, string };
 
-	const Entry = packed struct(usize) {
-		end: @Int(.unsigned, @bitSizeOf(usize) - @bitSizeOf(Enum)) = 0,
-		typ: Enum = .float,
+	const Entry = packed struct(u32) {
+		end: @Int(.unsigned, @bitSizeOf(u32) - @bitSizeOf(Enum)),
+		typ: Enum,
 	};
 
 	fn deinit(self: *Pile, gpa: Allocator) void {
@@ -154,7 +154,7 @@ pub const Pile = struct {
 	}
 
 	const one = struct {
-		var entry: Entry = .{};
+		var entry: Entry = .{ .end = 0, .typ = .float };
 		var pile: Pile = .{ .tbl = .{ .items = (&entry)[0..1], .capacity = 0 }};
 		var float: Float = 0;
 	};
