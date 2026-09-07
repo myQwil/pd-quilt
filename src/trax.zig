@@ -541,7 +541,7 @@ fn traverseChapters(
 	var r = file.reader(io, &buf);
 	while (r.interface.takeDelimiterExclusive('\n')) |slice| {
 		defer _ = r.interface.take(1) catch {};
-		const line: [:0]u8 = blk: {
+		var line: [:0]u8 = blk: {
 			const trim = trimRange(slice, r.interface.seek - slice.len);
 			buf[trim[1]] = 0;
 			break :blk buf[trim[0]..trim[1] :0];
@@ -551,36 +551,41 @@ fn traverseChapters(
 		if (line[0] != '[') {
 			continue;
 		}
+		line = line[1..];
+		line = line[trimStart(line, " \t")..];
 
-		// bare minimum: start time in seconds
-		var s = line[1 + trimStart(line[1..], " \t") ..];
+		// chapter start time in seconds
+		var sec: f64 = -1;
 		var end: usize = undefined;
-		var sec: f64 = if (iParse(s, &end)) |i| @floatFromInt(i) else continue;
-		s = s[end..];
+		if (iParse(line, &end)) |i| {
+			sec = @floatFromInt(i);
+			line = line[end..];
+		}
 
 		// minute/hour syntax
-		while (s[0] == ':') {
-			s = s[1..];
-			if (iParse(s, &end)) |i| {
-				s = s[end..];
+		while (line[0] == ':') {
+			line = line[1..];
+			if (iParse(line, &end)) |i| {
 				sec = (sec * 60) + @as(f64, @floatFromInt(i));
+				line = line[end..];
 			}
 		}
 
 		// milliseconds
-		if (s[0] == '.') {
-			s = s[1..];
-			if (iParse(s, &end)) |i| {
-				s = s[end..];
+		if (line[0] == '.') {
+			line = line[1..];
+			if (iParse(line, &end)) |i| {
 				const scale: f64 = @floatFromInt(std.math.powi(usize, 10, end) catch 1);
 				sec += @as(f64, @floatFromInt(i)) / scale;
+				line = line[end..];
 			}
 		}
-		s = s[1 + trimStart(s[1..], " \t")..];
+		line = line[1..];
+		line = line[trimStart(line, " \t")..];
 
 		const agg = time + sec;
-		if (s[0] == '>') {
-			const resolved = try resolveZ(gpa, &.{ dir, s[1..] });
+		if (line[0] == '>') {
+			const resolved = try resolveZ(gpa, &.{ dir, line[1..] });
 			defer gpa.free(resolved);
 			var chaps = try traverseChapters(gpa, io, parents, resolved, agg);
 			defer chaps.deinit(gpa);
@@ -591,7 +596,7 @@ fn traverseChapters(
 				try list.append(gpa, chap);
 			}
 		} else {
-			const title: ?*Symbol = if (s[0] == '=') .gen(s[1..]) else null;
+			const title: ?*Symbol = if (line[0] == '=') .gen(line[1..]) else null;
 			try list.append(gpa, .{ .time = agg, .trax = .gen(path), .title = title });
 		}
 	} else |e| if (e != error.EndOfStream) {
