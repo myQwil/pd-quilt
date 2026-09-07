@@ -36,7 +36,6 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 	path: *Symbol,
 	/// ratio between file samplerate and pd samplerate
 	ratio: f64 = 1,
-	langs: []*Symbol = &.{},
 	/// short-to-float converted samples and resampler input
 	ibuf: [nch * frames]Sample = undefined,
 	/// resampler output
