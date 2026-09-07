@@ -614,13 +614,14 @@ pub fn getChapters(
 }
 
 pub fn getSidecar(gpa: Allocator, io: Io, path: []const u8) Oom!?[:0]const u8 {
-	const txdir = trext ++ "/";
+	const sep = std.fs.path.sep;
+	const txdir = trext ++ (&sep)[0..1];
 	const dot = findLast(path, '.') orelse path.len;
 	var trx_path = try gpa.alloc(u8, dot + txdir.len + trext.len + 1);
 
 	const start = if (std.fs.path.dirname(path)) |dir| blk: {
 		@memcpy(trx_path[0..dir.len], dir);
-		trx_path[dir.len] = '/';
+		trx_path[dir.len] = sep;
 		break :blk dir.len + 1;
 	} else 0;
 
