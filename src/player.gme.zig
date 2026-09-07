@@ -20,8 +20,8 @@ const Pile = tx.Pile;
 
 var s_mask: *Symbol = undefined;
 
-const GmeInit = fn(*const gm.Type, c_uint) anyerror!*gm.Emu;
-const ArcInit = arc.ArcReader.InitFn;
+const EmuCreateFn = fn(*const gm.Type, c_uint) anyerror!*gm.Emu;
+const ArcInitFn = arc.ArcReader.InitFn;
 
 inline fn sampleRate(t: *const gm.Type) Float {
 	return if (t == gm.gme_spc_type) 32000.0 else pd.sampleRate();
@@ -119,11 +119,13 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 			break :blk @bitCast((try reader.interface.take(4))[0..4].*);
 		};
 
-		const initEmu: GmeInit = if (nch > 2) gm.Emu.createMultiChannel else gm.Emu.create;
+		const createEmu: EmuCreateFn = if (nch > 2)
+			gm.Emu.createMultiChannel
+		else gm.Emu.create;
 		var arc_reader: ?arc.ArcReader = inline for (arc.types) |t| {
 			const sig: u32 = t.signature;
 			if (signature == sig) {
-				break try @as(ArcInit, t.init)(gpa, io, path);
+				break try @as(ArcInitFn, t.init)(gpa, io, path);
 			}
 		} else null;
 
@@ -152,7 +154,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 
 			const t = emu_type orelse return error.ArchiveNoMatch;
 			srate = sampleRate(t);
-			const emu = try initEmu(t, @intFromFloat(srate));
+			const emu = try createEmu(t, @intFromFloat(srate));
 			errdefer emu.destroy();
 			if (t.trackCount() == 1) {
 				try emu.loadTracks(buf.ptr, sizes[0..n]);
@@ -163,7 +165,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 		} else {
 			const t = try gm.Type.fromFile(path) orelse return error.FileNoMatch;
 			srate = sampleRate(t);
-			const emu = try initEmu(t, @intFromFloat(srate));
+			const emu = try createEmu(t, @intFromFloat(srate));
 			errdefer emu.destroy();
 			try emu.loadFile(path);
 			break :blk emu;
