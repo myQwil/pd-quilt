@@ -1,4 +1,5 @@
 const Timer = @This();
+
 const pd = @import("pd");
 const tg = @import("toggle.zig");
 

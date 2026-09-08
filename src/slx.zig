@@ -1,5 +1,5 @@
 const pd = @import("pd");
-const Slope = @import("slope.zig").Slope(@This());
+const Slope = @import("misc/slope.zig").Slope(@This());
 pub const name = "slx";
 
 pub inline fn getK(min: f64, max: f64, run: f64) f64 {

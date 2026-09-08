@@ -1,8 +1,8 @@
 //! `[line~]` with pause/resume functionality.
-
 const LinPSignal = @This();
+
 const pd = @import("pd");
-const tg = @import("toggle.zig");
+const tg = @import("misc/toggle.zig");
 
 const Pd = pd.Pd;
 const Sample = pd.Sample;

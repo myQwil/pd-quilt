@@ -1,6 +1,7 @@
 const Rad = @This();
-const std = @import("std");
+
 const pd = @import("pd");
+const std = @import("std");
 const bf = @import("bitfloat.zig");
 
 const UnFloat = bf.UnFloat;

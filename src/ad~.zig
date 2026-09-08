@@ -1,8 +1,8 @@
 //! Attack/decay envelope generator.
-
 const AttackDecay = @This();
+
 const pd = @import("pd");
-const Ramp = @import("ramp.zig").Ramp(AttackDecay);
+const Ramp = @import("misc/ramp.zig").Ramp(AttackDecay);
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;

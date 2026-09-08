@@ -1,6 +1,5 @@
 //! `[unpack]` with `anything` outlets and passive mismatch error handling.
 
-const Unpaq = @This();
 const pd = @import("pd");
 
 const Pd = pd.Pd;
@@ -15,7 +14,7 @@ len: usize,
 const name = "unpaq";
 var class: *pd.Class = undefined;
 var dot: *Symbol = undefined; // skips args
-const Box = pd.Box(pd.Object, Unpaq);
+const Box = pd.Box(pd.Object, @This());
 
 const Outlet = struct {
 	out: *pd.Outlet,

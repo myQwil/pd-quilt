@@ -1,8 +1,8 @@
 //! Attack/decay/sustain/release envelope generator.
-
 const Adsr = @This();
+
 const pd = @import("pd");
-const Ramp = @import("ramp.zig").Ramp(Adsr);
+const Ramp = @import("misc/ramp.zig").Ramp(Adsr);
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;

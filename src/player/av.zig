@@ -2,12 +2,12 @@
 //! of various media formats. Includes playlist functionality and
 //! playback speed manipulation.
 
-const std = @import("std");
 const pd = @import("pd");
 const av = @import("av");
-const arc = @import("player.arc.zig");
+const std = @import("std");
+const arc = @import("arc.zig");
 const pr = @import("player.zig");
-const tx = @import("trax.zig");
+const tx = @import("../misc/trax.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;

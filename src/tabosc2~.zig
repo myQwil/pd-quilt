@@ -1,10 +1,10 @@
 //! Linear interpolating table oscillator.
 //! Uses the largest power of 2 + 1 points in an array and ignores leftovers.
-
 const TabOsc2 = @This();
+
 const pd = @import("pd");
-const Tab2 = @import("tab2.zig");
-const tf = @import("tabfudge.zig");
+const tf = @import("misc/tabfudge.zig");
+const Tab2 = @import("misc/tab2.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;

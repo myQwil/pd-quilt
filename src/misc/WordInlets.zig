@@ -1,4 +1,5 @@
 const WordInlets = @This();
+
 const pd = @import("pd");
 const std = @import("std");
 const Inlet = @import("inlet.zig").Inlet;

@@ -1,7 +1,7 @@
 //! Checks if a list contains a specific atom value.
 
 const pd = @import("pd");
-const Uf = @import("bitfloat.zig").Uf;
+const Uf = @import("misc/bitfloat.zig").Uf;
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;

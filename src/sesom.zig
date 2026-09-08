@@ -1,6 +1,5 @@
 //! Reverse `[moses]`. Outputs numbers to the left if they're greater than control value.
 
-const Sesom = @This();
 const pd = @import("pd");
 
 const Pd = pd.Pd;
@@ -12,7 +11,7 @@ f: Float,
 
 const name = "sesom";
 var class: *pd.Class = undefined;
-const Box = pd.Box(pd.Object, Sesom);
+const Box = pd.Box(pd.Object, @This());
 
 fn createC(f: Float) callconv(.c) ?*Pd {
 	return pd.wrap(*Pd, create(f), name);

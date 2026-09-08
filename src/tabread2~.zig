@@ -1,9 +1,9 @@
 //! Linear interpolating table lookup.
 //! Uses the largest power of 2 + 1 points in an array and ignores leftovers.
-
 const TabRead2 = @This();
+
 const pd = @import("pd");
-const Tab2 = @import("tab2.zig");
+const Tab2 = @import("misc/tab2.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;

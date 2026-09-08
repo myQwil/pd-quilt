@@ -1,7 +1,7 @@
 const pd = @import("pd");
 
-const Sample = pd.Sample;
 const Float = pd.Float;
+const Sample = pd.Sample;
 
 pub fn Ramp(Owner: type) type { return struct {
 	/// remaining samples

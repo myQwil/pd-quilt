@@ -2,8 +2,8 @@
 
 const pd = @import("pd");
 const std = @import("std");
-const wr = @import("write.zig");
-const Rng = @import("Rng.zig");
+const Rng = @import("misc/Rng.zig");
+const wr = @import("misc/write.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;
@@ -192,7 +192,7 @@ const InArray = struct {
 	win: WordInlets,
 	rng: Rng,
 
-	const WordInlets = @import("WordInlets.zig");
+	const WordInlets = @import("misc/WordInlets.zig");
 	const name = "_rand_array";
 	const Impl = Rand.Impl(InArray);
 	pub var class: *pd.Class = undefined;

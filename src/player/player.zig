@@ -1,7 +1,7 @@
-const std = @import("std");
 const pd = @import("pd");
-const wr = @import("write.zig");
-const tx = @import("trax.zig");
+const std = @import("std");
+const tx = @import("../misc/trax.zig");
+const wr = @import("../misc/write.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;
@@ -14,7 +14,7 @@ const Writer = Io.Writer;
 const Meta = tx.Meta;
 const Pile = tx.Pile;
 
-const toggle = @import("toggle.zig").toggle;
+const toggle = @import("../misc/toggle.zig").toggle;
 const find = std.mem.findScalar;
 
 var s_open: *Symbol = undefined;

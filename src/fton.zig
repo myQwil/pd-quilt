@@ -1,5 +1,5 @@
 const pd = @import("pd");
-const Tet = @import("tet.zig").Tet(@This());
+const Tet = @import("misc/tet.zig").Tet(@This());
 pub const name = "fton";
 
 const Float = pd.Float;

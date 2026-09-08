@@ -1,8 +1,7 @@
 //! Float-decode. Splits the sign, exponent, and mantissa of a float.
 
-const FlDec = @This();
 const pd = @import("pd");
-const UnFloat = @import("bitfloat.zig").UnFloat;
+const UnFloat = @import("misc/bitfloat.zig").UnFloat;
 
 const Pd = pd.Pd;
 const Float = pd.Float;
@@ -14,7 +13,7 @@ f: Float,
 
 const name = "fldec";
 var class: *pd.Class = undefined;
-const Box = pd.Box(pd.Object, FlDec);
+const Box = pd.Box(pd.Object, @This());
 
 fn printC(p: *const Pd) callconv(.c) void {
 	pd.post.log(p, .normal, "%g", .{ Box.stateConst(p).f });

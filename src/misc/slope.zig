@@ -1,3 +1,5 @@
+//! Non-gui slider objects.
+
 const pd = @import("pd");
 
 const Pd = pd.Pd;
@@ -5,7 +7,6 @@ const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
 
-/// Non-gui slider objects.
 pub fn Slope(T: type) type { return struct {
 	out: *pd.Outlet,
 	min: f64,

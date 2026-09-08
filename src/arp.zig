@@ -2,8 +2,8 @@
 
 const pd = @import("pd");
 const std = @import("std");
-const wr = @import("write.zig");
-const np = @import("numparse.zig");
+const wr = @import("misc/write.zig");
+const np = @import("misc/numparse.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;
@@ -282,7 +282,7 @@ const InArray = struct {
 	arp: Arp,
 	win: WordInlets,
 
-	const WordInlets = @import("WordInlets.zig");
+	const WordInlets = @import("misc/WordInlets.zig");
 	const name = "_arp_inarray";
 	var class: *pd.Class = undefined;
 	const Box = pd.Box(pd.Object, InArray);

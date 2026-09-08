@@ -1,7 +1,6 @@
 //! Similar to `[change]` in that it sends different values through the left outlet,
 //! but also sends repeat values through the right outlet.
 
-const Same = @This();
 const pd = @import("pd");
 
 const Pd = pd.Pd;
@@ -15,7 +14,7 @@ f: Float,
 
 const name = "same";
 var class: *pd.Class = undefined;
-const Box = pd.Box(pd.Object, Same);
+const Box = pd.Box(pd.Object, @This());
 
 fn bangC(p: *const Pd) callconv(.c) void {
 	const self = Box.stateConst(p);

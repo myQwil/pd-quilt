@@ -1,9 +1,9 @@
 //! Float random number generator. Seed is initialized with Zig's `io.random()`.
-
 const Rind = @This();
+
 const pd = @import("pd");
 const std = @import("std");
-const Rng = @import("Rng.zig");
+const Rng = @import("misc/Rng.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;

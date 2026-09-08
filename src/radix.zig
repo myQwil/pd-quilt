@@ -1,10 +1,9 @@
 //! A number box with options for specifying base, precision, and dragging sensitivity.
 
-const Radix = @This();
 const pd = @import("pd");
 const std = @import("std");
-const Rad = @import("rad.zig");
-const bf = @import("bitfloat.zig");
+const Rad = @import("misc/rad.zig");
+const bf = @import("misc/bitfloat.zig");
 const cnv = pd.cnv;
 
 const Pd = pd.Pd;
@@ -167,7 +166,7 @@ b: packed struct(u8) {
 
 const name = "radix";
 var class: *pd.Class = undefined;
-const Box = pd.Box(Object, Radix);
+const Box = pd.Box(Object, @This());
 
 inline fn err(p: *const Pd, e: anyerror) void {
 	pd.post.err(p, name ++ ": %s", .{ @errorName(e).ptr });

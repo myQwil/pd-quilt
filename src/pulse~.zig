@@ -1,14 +1,14 @@
 //! Pulse wave generator.
-
 const Pulse = @This();
+
 const pd = @import("pd");
-const Inlet = @import("inlet.zig").Inlet;
+const tb = @import("misc/tabfudge.zig");
+const Inlet = @import("misc/inlet.zig").Inlet;
 
 const Pd = pd.Pd;
 const Float = pd.Float;
 const Sample = pd.Sample;
 
-const tb = @import("tabfudge.zig");
 const unitbit32 = tb.unitbit32;
 const hioffset = tb.hioffset;
 

@@ -1,9 +1,8 @@
 //! Playlist reader.
 
-const PList = @This();
 const pd = @import("pd");
-const tx = @import("trax.zig");
 const std = @import("std");
+const tx = @import("misc/trax.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;
@@ -21,7 +20,7 @@ langs: []*Symbol = &.{},
 
 const name = "plist";
 var class: *pd.Class = undefined;
-pub const Box = pd.Box(pd.Object, PList);
+pub const Box = pd.Box(pd.Object, @This());
 
 inline fn err(p: *const Pd, e: anyerror) void {
 	pd.post.err(p, name ++ ": %s", .{ @errorName(e).ptr });

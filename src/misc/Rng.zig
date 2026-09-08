@@ -1,6 +1,7 @@
 const Rng = @This();
-const std = @import("std");
+
 const pd = @import("pd");
+const std = @import("std");
 
 const Pd = pd.Pd;
 const Float = pd.Float;

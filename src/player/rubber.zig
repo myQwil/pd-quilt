@@ -1,8 +1,8 @@
-const std = @import("std");
 const pd = @import("pd");
+const std = @import("std");
 const ru = @import("rubber");
 const pr = @import("player.zig");
-const Inlet = @import("inlet.zig").Inlet;
+const Inlet = @import("../misc/inlet.zig").Inlet;
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;

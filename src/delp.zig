@@ -1,8 +1,8 @@
 //! `[delay]` with pause/resume functionality.
-
 const DelP = @This();
+
 const pd = @import("pd");
-const Timer = @import("timer.zig");
+const Timer = @import("misc/timer.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;

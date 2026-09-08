@@ -1,9 +1,8 @@
 //! Float-encode. Creates floats out of sign, exponent, and mantissa integers.
 
-const FlEnc = @This();
 const pd = @import("pd");
 const std = @import("std");
-const bf = @import("bitfloat.zig");
+const bf = @import("misc/bitfloat.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;
@@ -39,7 +38,7 @@ uf: bf.UnFloat,
 
 const name = "flenc";
 var class: *pd.Class = undefined;
-const Box = pd.Box(pd.Object, FlEnc);
+const Box = pd.Box(pd.Object, @This());
 
 fn printC(p: *const Pd) callconv(.c) void {
 	print(p) catch |e| pd.post.err(p, name ++ ": %s", .{ @errorName(e).ptr });

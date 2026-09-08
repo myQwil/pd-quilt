@@ -1,9 +1,9 @@
 const pd = @import("pd");
 const std = @import("std");
+const gm = @import("gme.zig");
+const ra = @import("rabbit.zig");
 const pr = @import("player.zig");
-const gm = @import("player.gme.zig");
-const ra = @import("player.rabbit.zig");
-const Inlet = @import("inlet.zig").Inlet;
+const Inlet = @import("../misc/inlet.zig").Inlet;
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;

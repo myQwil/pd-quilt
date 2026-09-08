@@ -1,6 +1,6 @@
 const pd = @import("pd");
 const ra = @import("rabbit");
-const Inlet = @import("inlet.zig").Inlet;
+const Inlet = @import("../misc/inlet.zig").Inlet;
 pub const uint = ra.uint;
 pub const InitError = ra.Error || pd.Oom;
 
