@@ -134,14 +134,14 @@ pub fn Impl(Root: type) type { return struct {
 		return &obj.g.pd;
 	}
 
-	fn destroyC(p: *const Pd) callconv(.c) void {
-		const self = Box.stateConst(p);
+	fn destroyC(p: *Pd) callconv(.c) void {
+		const self = Box.state(p);
 		inline for (0..Root.nch) |ch| {
 			gpa.free(@as([]Sample, self.planar[ch][0..ra.frames]));
 		}
 		self.rubber.deinit();
 		self.rabbit.deinit();
-		self.base.deinit();
+		self.base.deinit(gpa);
 	}
 
 	fn classFreeC(_: *pd.Class) callconv(.c) void {

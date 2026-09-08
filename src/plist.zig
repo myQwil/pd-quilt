@@ -2,7 +2,7 @@
 
 const pd = @import("pd");
 const std = @import("std");
-const tx = @import("misc/trax.zig");
+const tx = @import("trax/trax.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;
@@ -15,7 +15,7 @@ const io = std.Io.Threaded.global_single_threaded.io();
 
 out_val: *pd.Outlet,
 out_idx: *pd.Outlet,
-plist: tx.SymbolList = .empty,
+plist: tx.Playlist = .{},
 langs: []*Symbol = &.{},
 
 const name = "plist";
@@ -28,42 +28,41 @@ inline fn err(p: *const Pd, e: anyerror) void {
 
 fn readC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
 	const self = Box.state(p);
-	tx.listReplace(&self.plist, gpa, io, av[0..ac]) catch |e| err(p, e);
+	self.plist.replace(gpa, io, av[0..ac]) catch |e| err(p, e);
 }
 
 fn appendC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
 	const self = Box.state(p);
-	tx.listAppend(&self.plist, gpa, io, av[0..ac]) catch |e| err(p, e);
+	self.plist.appendArgs(gpa, io, av[0..ac]) catch |e| err(p, e);
 }
 
 fn bangC(p: *Pd) callconv(.c) void {
 	const self = Box.state(p);
-	for (0..self.plist.items.len) |i| {
+	for (0..self.plist.tbl.items.len) |i| {
 		self.out_idx.float(@floatFromInt(i));
-		self.out_val.symbol(self.plist.items[i]);
+		self.out_val.symbol(.gen(self.plist.get(i)));
 	}
 }
 
-fn indexFromFloat(f: Float, len: usize) ?u32 {
+fn indexFromFloat(f: Float, len: usize) error{IndexOutOfBounds}!u32 {
 	const i: i32 = @intFromFloat(f);
 	if (i < 0 or len <= i) {
-		return null;
+		return error.IndexOutOfBounds;
 	}
 	return @bitCast(i);
 }
 
 fn floatC(p: *Pd, f: Float) callconv(.c) void {
 	const self = Box.state(p);
-	const i = indexFromFloat(f, self.plist.items.len) orelse return;
+	const i = indexFromFloat(f, self.plist.tbl.items.len) catch return;
 	self.out_idx.float(@floatFromInt(i));
-	self.out_val.symbol(self.plist.items[i]);
+	self.out_val.symbol(.gen(self.plist.get(i)));
 }
 
 fn getC(p: *Pd, f: Float, s: *Symbol) callconv(.c) void {
 	const self = Box.state(p);
-	const i = indexFromFloat(f, self.plist.items.len) orelse return;
-	var hm = Meta.fromPath(gpa, io, self.plist.items[i].name)
-		catch |e| return err(p, e);
+	const i = indexFromFloat(f, self.plist.tbl.items.len) catch return;
+	var hm = Meta.fromPath(gpa, io, self.plist.get(i)) catch |e| return err(p, e);
 	defer hm.deinit(gpa);
 
 	if (hm.get(s, self.langs)) |pile| {
@@ -78,14 +77,14 @@ fn dumpC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
 inline fn dump(p: *Pd, av: []const Atom) !void {
 	const self = Box.state(p);
 	const f = try pd.floatArg(0, av);
-	const i = indexFromFloat(f, self.plist.items.len) orelse return;
+	const i = indexFromFloat(f, self.plist.tbl.items.len) catch return;
 	var meta: Meta = if (pd.floatArg(1, av)) |g| blk: {
-		var chaps = try tx.getChapters(gpa, io, self.plist.items[i].name);
+		var chaps: tx.Chapters = try .fromPath(gpa, io, self.plist.get(i));
 		defer chaps.deinit(gpa);
-		const chap = chaps.items[indexFromFloat(g, chaps.items.len) orelse return];
-		pd.post.log(p, .normal, "at %g:", .{ chap.time });
-		break :blk try .fromPath(gpa, io, chap.trax.name);
-	} else |_| try .fromPath(gpa, io, self.plist.items[i].name);
+		const j = indexFromFloat(g, chaps.tbl.items.len) catch return;
+		pd.post.log(p, .normal, "at %g:", .{ chaps.tbl.items[j].time });
+		break :blk try .fromPath(gpa, io, chaps.get(j));
+	} else |_| try .fromPath(gpa, io, self.plist.get(i));
 	defer meta.deinit(gpa);
 
 	const langs: []const *Symbol = self.langs;

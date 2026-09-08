@@ -7,7 +7,7 @@ const av = @import("av");
 const std = @import("std");
 const arc = @import("arc.zig");
 const pr = @import("player.zig");
-const tx = @import("../misc/trax.zig");
+const tx = @import("../trax/trax.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;
@@ -70,7 +70,7 @@ const Stream = struct {
 
 pub fn Base(frames: comptime_int) type { return struct {
 	layout: av.ChannelLayout,
-	playlist: tx.SymbolList = .empty,
+	playlist: tx.Playlist = .{},
 	player: pr.Player,
 	audio: Stream = .{},
 	subtitle: Stream = .{},
@@ -161,7 +161,7 @@ pub fn Base(frames: comptime_int) type { return struct {
 		if (idx >= self.trackCount()) {
 			return error.IndexOutOfBounds;
 		}
-		const url = self.playlist.items[idx].name;
+		const url = self.playlist.get(idx);
 		const format: *av.FormatContext = try .openInput(url, null, null, null);
 		errdefer format.closeInput();
 
@@ -220,7 +220,7 @@ pub fn Base(frames: comptime_int) type { return struct {
 		io: Io,
 		args: []const Atom,
 	) tx.AppendError!void {
-		try tx.listReplace(&self.playlist, gpa, io, args);
+		try self.playlist.replace(gpa, io, args);
 	}
 
 	pub inline fn reset(self: *Av) void {
@@ -255,7 +255,7 @@ pub fn Base(frames: comptime_int) type { return struct {
 	}
 
 	pub inline fn trackCount(self: *const Av) usize {
-		return self.playlist.items.len;
+		return self.playlist.tbl.items.len;
 	}
 
 	pub fn Impl(Self: type) type { return struct {
@@ -275,7 +275,7 @@ pub fn Base(frames: comptime_int) type { return struct {
 		fn appendC(p: *Pd, _: *Symbol, ac: c_uint, args: [*]const Atom) callconv(.c) void {
 			const self = Box.state(p);
 			const base: *Av = &self.base;
-			tx.listAppend(&base.playlist, gpa, io, args[0..ac]) catch |e| err(p, e);
+			base.playlist.appendArgs(gpa, io, args[0..ac]) catch |e| err(p, e);
 			const count: Float = @floatFromInt(base.trackCount());
 			base.player.outlet.anything(s_append, &.{ .float(count) });
 		}

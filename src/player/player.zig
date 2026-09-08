@@ -1,6 +1,6 @@
 const pd = @import("pd");
 const std = @import("std");
-const tx = @import("../misc/trax.zig");
+const tx = @import("../trax/trax.zig");
 const wr = @import("../misc/write.zig");
 
 const Pd = pd.Pd;
@@ -24,7 +24,7 @@ pub const Player = struct {
 	/// outlet for sending metadata and open/play states
 	outlet: *pd.Outlet,
 	/// list of chapters
-	chaps: tx.ChapterList = .empty,
+	chaps: tx.Chapters = .{},
 	/// trax metadata for the current chapter
 	meta: tx.Meta = .{},
 	/// trax language preferences

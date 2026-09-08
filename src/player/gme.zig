@@ -6,7 +6,7 @@ const gm = @import("gme");
 const std = @import("std");
 const arc = @import("arc.zig");
 const pr = @import("player.zig");
-const tx = @import("../misc/trax.zig");
+const tx = @import("../trax/trax.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;
@@ -73,7 +73,8 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 		};
 	}
 
-	pub inline fn deinit(self: *const Gme) void {
+	pub inline fn deinit(self: *Gme, gpa: Allocator) void {
+		self.player.deinit(gpa);
 		if (self.player.open) {
 			self.emu.destroy();
 		}
@@ -97,8 +98,17 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 		self.loop_length = info.loop_length;
 		self.fade_length = info.fade_length;
 
-		const chps = self.player.chaps.items;
-		var meta: tx.Meta = if (idx < chps.len) try .fromPath(gpa, io, chps[idx].trax.name) else .{};
+		const ch = self.player.chaps;
+		var meta: tx.Meta = if (idx < ch.tbl.items.len) switch (ch.tbl.items[idx].typ) {
+			.bare => .{},
+			.trax => try .fromPath(gpa, io, ch.get(idx)),
+			.title => blk: {
+				var meta: tx.Meta = .{};
+				_ = try tx.putGet(
+					&meta.data, gpa, .gen("song"), pd.s.empty(), ch.get(idx), false);
+				break :blk meta;
+			},
+		} else .{};
 		errdefer meta.deinit(gpa);
 		inline for ([_][:0]const u8{
 			"system", "game", "song", "author", "copyright", "comment", "dumper",
@@ -190,7 +200,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 	inline fn loadChapters(self: *Gme, gpa: Allocator, io: Io, path: []const u8) !void {
 		// load a .trax sidecar
 		self.player.chaps.deinit(gpa);
-		self.player.chaps = try tx.getChapters(gpa, io, self.path.name);
+		self.player.chaps = try .fromPath(gpa, io, self.path.name);
 
 		// load a .m3u sidecar
 		const ext = ".m3u";

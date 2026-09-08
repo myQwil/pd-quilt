@@ -116,9 +116,9 @@ pub fn Impl(Root: type) type { return struct {
 	}
 
 	fn destroyC(p: *Pd) callconv(.c) void {
-		const self = Box.stateConst(p);
+		const self = Box.state(p);
 		self.rabbit.deinit();
-		self.base.deinit();
+		self.base.deinit(gpa);
 	}
 
 	fn classFreeC(_: *pd.Class) callconv(.c) void {
