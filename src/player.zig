@@ -23,7 +23,9 @@ pub var s_play: *Symbol = undefined;
 pub const Player = struct {
 	/// outlet for sending metadata and open/play states
 	outlet: *pd.Outlet,
-	/// metadata from a `.trax` sidecar
+	/// list of chapters
+	chaps: tx.ChapterList = .empty,
+	/// trax metadata for the current chapter
 	meta: tx.Meta = .{},
 	/// trax language preferences
 	langs: []*Symbol = &.{},
@@ -41,6 +43,7 @@ pub const Player = struct {
 	}
 
 	pub inline fn deinit(self: *Player, gpa: Allocator) void {
+		self.chaps.deinit(gpa);
 		self.meta.deinit(gpa);
 		gpa.free(self.langs);
 	}

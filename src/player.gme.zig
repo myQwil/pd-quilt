@@ -31,8 +31,9 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 	player: pr.Player,
 	/// array for storing signal buffer addresses
 	outs: [nch][*]Sample = undefined,
+	/// emulator for currently opened file
 	emu: *gm.Emu = undefined, // safe if player.open or player.play is true
-	info: *gm.Info = undefined, // safe if player.open or player.play is true
+	/// path of currently opened file
 	path: *Symbol,
 	/// ratio between file samplerate and pd samplerate
 	ratio: f64 = 1,
@@ -44,6 +45,10 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 	mask: c_uint,
 	/// samples directly from the emulator
 	raw: [nch * frames]i16 = undefined,
+	track_length: c_int = -1,
+	intro_length: c_int = -1,
+	loop_length: c_int = -1,
+	fade_length: c_int = -1,
 
 	const Gme = @This();
 
@@ -70,7 +75,6 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 
 	pub inline fn deinit(self: *const Gme) void {
 		if (self.player.open) {
-			self.info.destroy();
 			self.emu.destroy();
 		}
 	}
@@ -78,29 +82,29 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 	pub fn loadTrack(self: *Gme, gpa: Allocator, io: Io, index: usize) gm.Error!void {
 		const idx: c_uint = @truncate(index);
 		try self.emu.startTrack(idx);
-		const info = try self.emu.trackInfo(idx);
-		self.info.destroy();
-		self.info = info;
-		self.player.meta.deinit(gpa);
-		self.player.meta = .{};
 		self.loadMetadata(gpa, io, idx)
 			catch |e| pd.post.err(null, "Gme.loadMetadata: %s", .{ @errorName(e).ptr });
 	}
 
 	inline fn loadMetadata(self: *Gme, gpa: Allocator, io: Io, idx: c_uint) !void {
-		var chaps = try tx.getChapters(gpa, io, self.path.name);
-		defer chaps.deinit(gpa);
-		var meta: tx.Meta = .{};
-		errdefer meta.deinit(gpa);
+		self.player.meta.deinit(gpa);
+		self.player.meta = .{};
 
-		if (idx < chaps.items.len) {
-			meta = try .fromPath(gpa, io, chaps.items[idx].trax.name);
-		}
+		const info = try self.emu.trackInfo(idx);
+		defer info.destroy();
+		self.track_length = info.length;
+		self.intro_length = info.intro_length;
+		self.loop_length = info.loop_length;
+		self.fade_length = info.fade_length;
+
+		const chps = self.player.chaps.items;
+		var meta: tx.Meta = if (idx < chps.len) try .fromPath(gpa, io, chps[idx].trax.name) else .{};
+		errdefer meta.deinit(gpa);
 		inline for ([_][:0]const u8{
 			"system", "game", "song", "author", "copyright", "comment", "dumper",
 		}) |field| {
 			if (!meta.data.contains(.gen(field))) {
-				const name = std.mem.sliceTo(@field(self.info, field), 0);
+				const name = std.mem.sliceTo(@field(info, field), 0);
 				_ = try tx.putGet(&meta.data, gpa, .gen(field), pd.s.empty(), name, false);
 			} 
 		}
@@ -171,22 +175,24 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 		}};
 		emu.ignoreSilence(true);
 		emu.muteVoices(self.mask);
-		const info = try emu.trackInfo(0); // throwaway, something to destroy
 
 		// safe to delete the previous emulator
 		if (self.player.open) {
-			self.info.destroy();
 			self.emu.destroy();
 		}
 		self.path = s;
 		self.emu = emu;
-		self.info = info;
 		self.ratio = srate / pd.sampleRate();
-		self.loadM3u(gpa, path) catch {};
+		self.loadChapters(gpa, io, path)
+			catch |e| pd.post.err(null, "Gme.loadChapters: %s", .{ @errorName(e).ptr });
 	}
 
-	/// Load a .m3u file with the same name as current file if it exists
-	inline fn loadM3u(self: *Gme, gpa: Allocator, path: []const u8) gm.Error!void {
+	inline fn loadChapters(self: *Gme, gpa: Allocator, io: Io, path: []const u8) !void {
+		// load a .trax sidecar
+		self.player.chaps.deinit(gpa);
+		self.player.chaps = try tx.getChapters(gpa, io, self.path.name);
+
+		// load a .m3u sidecar
 		const ext = ".m3u";
 		const end = std.mem.findScalarLast(u8, path, '.') orelse path.len;
 		var ext_path = try gpa.allocSentinel(u8, end + ext.len, 0);
@@ -195,7 +201,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 		@memcpy(ext_path[0..end], path[0..end]);
 		@memcpy(ext_path[end..][0..ext.len], ext);
 		ext_path[ext_path.len] = 0;
-		try self.emu.loadM3u(ext_path);
+		self.emu.loadM3u(ext_path) catch {};
 	}
 
 	pub inline fn printAuto(self: *const Gme, w: *Io.Writer) Io.Writer.Error!void {
@@ -207,14 +213,12 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 	}
 
 	fn length(self: *const Gme) i64 {
-		const ms = self.info.length;
-		return if (ms >= 0) ms else blk: { // try intro + 2 loops
-			const intro = self.info.intro_length;
-			const loop = self.info.loop_length;
-			break :blk if (intro < 0 and loop < 0)
-				ms
-			else @max(0, intro) + @max(0, 2 * loop);
-		};
+		return if (self.track_length >= 0)
+			self.track_length
+		else if (self.intro_length < 0 and self.loop_length < 0)
+			-1 // decide a length at the patch level
+		else // intro + 2 loops
+			@max(0, self.intro_length) + @max(0, 2 * self.loop_length);
 	}
 
 	pub inline fn trackCount(self: *const Gme) usize {
@@ -365,7 +369,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 			return .string(std.mem.sliceTo(ts.name, 0));
 		}
 		fn fade(self: *const Gme) *const Pile {
-			return .float(@floatFromInt(self.info.fade_length));
+			return .float(@floatFromInt(self.fade_length));
 		}
 		fn tracks(self: *const Gme) *const Pile {
 			return .float(@floatFromInt(self.emu.trackCount()));

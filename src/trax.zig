@@ -518,7 +518,7 @@ const Chapter = struct {
 	title: ?*Symbol = null,
 	time: f64,
 };
-const ChapterList = std.ArrayList(Chapter);
+pub const ChapterList = std.ArrayList(Chapter);
 
 fn traverseChapters(
 	gpa: Allocator,
