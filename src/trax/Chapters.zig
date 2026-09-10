@@ -67,8 +67,8 @@ fn traverse(
 			break :blk buf[trim[0]..trim[1] :0];
 		};
 
-		// not [01:23.456]
-		if (line[0] != '[') {
+		// empty or not [01:23.456]
+		if (line.len == 0 or line[0] != '[') {
 			continue;
 		}
 		line = line[1..];
