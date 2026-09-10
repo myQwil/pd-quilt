@@ -45,7 +45,7 @@ fn bangC(p: *Pd) callconv(.c) void {
 }
 
 fn indexFromFloat(f: Float, len: usize) error{IndexOutOfBounds}!u32 {
-	const i: i32 = @intFromFloat(f);
+	const i: i32 = @trunc(f);
 	if (i < 0 or len <= i) {
 		return error.IndexOutOfBounds;
 	}

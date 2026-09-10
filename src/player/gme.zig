@@ -67,7 +67,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 			.path = pd.s.empty(),
 			.mask = for (av) |a| {
 				if (a.type == .float) {
-					break @intFromFloat(a.w.float);
+					break @trunc(a.w.float);
 				}
 			} else 0,
 		};
@@ -167,7 +167,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 
 			const t = emu_type orelse return error.ArchiveNoMatch;
 			srate = sampleRate(t);
-			const emu = try createEmu(t, @intFromFloat(srate));
+			const emu = try createEmu(t, @trunc(srate));
 			errdefer emu.destroy();
 			if (t.trackCount() == 1) {
 				try emu.loadTracks(buf.ptr, sizes[0..n]);
@@ -178,7 +178,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 		} else {
 			const t = try gm.Type.fromFile(path) orelse return error.FileNoMatch;
 			srate = sampleRate(t);
-			const emu = try createEmu(t, @intFromFloat(srate));
+			const emu = try createEmu(t, @trunc(srate));
 			errdefer emu.destroy();
 			try emu.loadFile(path);
 			break :blk emu;
@@ -219,7 +219,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 	}
 
 	pub fn seek(self: *Gme, msec: Float) gm.Error!void {
-		try self.emu.seekScaled(@intFromFloat(msec));
+		try self.emu.seekScaled(@trunc(msec));
 	}
 
 	fn length(self: *const Gme) i64 {
@@ -240,7 +240,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 			self.mask = if (a.type == .symbol) // mute all channels
 				(@as(c_uint, 1) << @truncate(self.emu.voiceCount())) - 1
 			else blk: {
-				var d: c_int = @intFromFloat(a.w.float);
+				var d: c_int = @trunc(a.w.float);
 				if (d == 0) { // unmute all channels
 					break :blk 0;
 				}
@@ -295,7 +295,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 			const gme: *Gme = &Box.state(p).base;
 			if (ac > 0 and av[0].type == .float) {
 				// set
-				gme.mask = @intFromFloat(av[0].w.float);
+				gme.mask = @trunc(av[0].w.float);
 				if (gme.player.open) {
 					gme.emu.muteVoices(gme.mask);
 				}

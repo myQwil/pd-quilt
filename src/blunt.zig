@@ -61,7 +61,7 @@ const Blunt = struct {
 	pub fn Impl(Self: type) type { return struct {
 		fn loadbangC(p: *Pd, f: Float) callconv(.c) void {
 			const blunt: *Blunt = &Self.Box.state(p).blunt;
-			const action = @as(u8, 1) << @intFromFloat(f);
+			const action = @as(u8, 1) << @trunc(f);
 			if (blunt.mask & action != 0) {
 				p.bang();
 			}
@@ -485,7 +485,7 @@ inline fn log(f1: Float, f2: Float) Float {
 }
 
 inline fn pow(f1: Float, f2: Float) Float {
-	const d2: Float = @floatFromInt(@as(Int, @intFromFloat(f2)));
+	const d2: Float = @floatFromInt(@as(Int, @trunc(f2)));
 	return if (f1 == 0 or (f1 < 0 and f2 - d2 != 0))
 		0
 	else std.math.pow(Float, f1, f2);
@@ -519,32 +519,32 @@ inline fn lo(f1: Float, f2: Float) Float {
 	return @floatFromInt(@intFromBool(f1 != 0 or f2 != 0));
 }
 inline fn ba(f1: Float, f2: Float) Float {
-	return @floatFromInt(@as(Int, @intFromFloat(f1)) & @as(Int, @intFromFloat(f2)));
+	return @floatFromInt(@as(Int, @trunc(f1)) & @as(Int, @trunc(f2)));
 }
 inline fn bo(f1: Float, f2: Float) Float {
-	 return @floatFromInt(@as(Int, @intFromFloat(f1)) | @as(Int, @intFromFloat(f2)));
+	 return @floatFromInt(@as(Int, @trunc(f1)) | @as(Int, @trunc(f2)));
 }
 inline fn bx(f1: Float, f2: Float) Float {
-	 return @floatFromInt(@as(Int, @intFromFloat(f1)) ^ @as(Int, @intFromFloat(f2)));
+	 return @floatFromInt(@as(Int, @trunc(f1)) ^ @as(Int, @trunc(f2)));
 }
 inline fn ls(f1: Float, f2: Float) Float {
-	 return @floatFromInt(@as(Int, @intFromFloat(f1)) << @intFromFloat(f2));
+	 return @floatFromInt(@as(Int, @trunc(f1)) << @trunc(f2));
 }
 inline fn rs(f1: Float, f2: Float) Float {
-	 return @floatFromInt(@as(Int, @intFromFloat(f1)) >> @intFromFloat(f2));
+	 return @floatFromInt(@as(Int, @trunc(f1)) >> @trunc(f2));
 }
 
 inline fn rem(f1: Float, f2: Float) Float {
-	const n2: Int = @intFromFloat(@max(1, @abs(f2)));
-	return @floatFromInt(@rem(@as(Int, @intFromFloat(f1)), n2));
+	const n2: Int = @trunc(@max(1, @abs(f2)));
+	return @floatFromInt(@rem(@as(Int, @trunc(f1)), n2));
 }
 inline fn mod(f1: Float, f2: Float) Float {
-	const n2: Int = @intFromFloat(@max(1, @abs(f2)));
-	return @floatFromInt(@mod(@as(Int, @intFromFloat(f1)), n2));
+	const n2: Int = @trunc(@max(1, @abs(f2)));
+	return @floatFromInt(@mod(@as(Int, @trunc(f1)), n2));
 }
 inline fn div(f1: Float, f2: Float) Float {
-	const n2: Int = @intFromFloat(@max(1, @abs(f2)));
-	return @floatFromInt(@divFloor(@as(Int, @intFromFloat(f1)), n2));
+	const n2: Int = @trunc(@max(1, @abs(f2)));
+	return @floatFromInt(@divFloor(@as(Int, @trunc(f1)), n2));
 }
 
 inline fn frem(f1: Float, f2: Float) Float {
@@ -562,7 +562,7 @@ inline fn float(f: Float) Float {
 	return f;
 }
 inline fn int(f: Float) Float {
-	return @floatFromInt(@as(Int, @intFromFloat(f)));
+	return @floatFromInt(@as(Int, @trunc(f)));
 }
 inline fn floor(f: Float) Float {
 	return @floor(f);
@@ -571,7 +571,7 @@ inline fn ceil(f: Float) Float {
 	return @ceil(f);
 }
 inline fn bnot(f: Float) Float {
-	return @floatFromInt(~@as(Int, @intFromFloat(f)));
+	return @floatFromInt(~@as(Int, @trunc(f)));
 }
 inline fn lnot(f: Float) Float {
 	return @floatFromInt(@intFromBool(f == 0));

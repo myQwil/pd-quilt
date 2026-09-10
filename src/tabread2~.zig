@@ -40,7 +40,7 @@ fn performC(w: [*]usize) callconv(.c) [*]usize {
 		else if (ftrunc > maxindex)
 			.{ maxindex, 1 }
 		else
-			.{ @intFromFloat(ftrunc), @floatCast(findex - ftrunc) };
+			.{ @trunc(ftrunc), @floatCast(findex - ftrunc) };
 		o.* = Tab2.sample(vec + index, frac, in2);
 	}
 	return w + 6;

@@ -435,7 +435,7 @@ fn checkRange(p: *Pd) void {
 }
 
 fn keyC(g: *GObj, _: *Symbol, f: Float) callconv(.c) void {
-	const char: u8 = @intFromFloat(f);
+	const char: u8 = @trunc(f);
 	if (char == 0) {
 		const self = Box.state(&g.pd);
 		self.b.grabbed = false;
@@ -615,10 +615,10 @@ inline fn param(p: *Pd, av: []const Atom) ParamError!void {
 		obj.g.vis(self.gl, false);
 	}
 
-	self.rad.base = if (av[0].getFloat()) |f| @intFromFloat(f) else self.rad.base;
-	self.rad.prec = if (av[1].getFloat()) |f| @intFromFloat(f) else self.rad.prec;
+	self.rad.base = if (av[0].getFloat()) |f| @trunc(f) else self.rad.base;
+	self.rad.prec = if (av[1].getFloat()) |f| @trunc(f) else self.rad.prec;
 	self.rad.reset();
-	const width: u16 = @intFromFloat(av[6].getFloat() orelse 0);
+	const width: u16 = if (av[6].getFloat()) |f| @trunc(f) else 0;
 	self.rad.width = @min(width, 1000);
 
 	self.step = .{
@@ -629,7 +629,7 @@ inline fn param(p: *Pd, av: []const Atom) ParamError!void {
 	self.range = .{ .lo = av[4].getFloat(), .hi = av[5].getFloat() };
 	checkRange(p);
 
-	const fs: u16 = @intFromFloat(av[7].getFloat() orelse 0);
+	const fs: u16 = if (av[7].getFloat()) |f| @trunc(f) else 0;
 	self.font_size = @min(fs, 36);
 
 	const rcv_old = self.rcv;
@@ -672,7 +672,7 @@ inline fn param(p: *Pd, av: []const Atom) ParamError!void {
 
 	const lbl_raw = av[10].getSymbol() orelse pd.s.empty();
 	self.lbl = unescape(lbl_raw);
-	const where: u2 = @intFromFloat(av[11].getFloat() orelse 0);
+	const where: u2 = if (av[11].getFloat()) |f| @trunc(f) else 0;
 	self.b.where = @enumFromInt(where);
 
 	if (obj.binbuf) |binbuf| {
@@ -736,9 +736,9 @@ fn baseC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
 	const self = Box.state(p);
 	const a = av[0..ac];
 	if (pd.floatArg(0, a)) |f| { // set
-		self.rad.base = @intFromFloat(@max(0, f));
+		self.rad.base = @trunc(@max(0, f));
 		if (pd.floatArg(1, a)) |g| {
-			self.rad.prec = @intFromFloat(@max(0, g));
+			self.rad.prec = @trunc(@max(0, g));
 		} else |_| {}
 		self.rad.reset();
 		sendItUp(p);
@@ -823,7 +823,7 @@ inline fn create(av: []const Atom) CreateError!*Pd {
 	var where: WhereLabel = .left;
 	sw: switch (@min(av.len, 12)) {
 		12 => {
-			if (av[11].getFloat()) |f| where = @enumFromInt(@as(u2, @intFromFloat(f)));
+			if (av[11].getFloat()) |f| where = @enumFromInt(@as(u2, @trunc(f)));
 		continue :sw 11; }, 11 => {
 			if (av[10].getSymbol()) |s| rsl[2] = unescape(s);
 		continue :sw 10; }, 10 => {
@@ -831,9 +831,9 @@ inline fn create(av: []const Atom) CreateError!*Pd {
 		continue :sw 9; }, 9 => {
 			if (av[8].getSymbol()) |s| rsl[0] = unescape(s);
 		continue :sw 8; }, 8 => {
-			if (av[7].getFloat()) |f| font_size = @intFromFloat(@min(f, 36));
+			if (av[7].getFloat()) |f| font_size = @trunc(@min(f, 36));
 		continue :sw 7; }, 7 => {
-			if (av[6].getFloat()) |f| width = @intFromFloat(@min(f, 500));
+			if (av[6].getFloat()) |f| width = @trunc(@min(f, 500));
 		continue :sw 6; }, 6 => {
 			if (av[5].getFloat()) |f| range.hi = f;
 		continue :sw 5; }, 5 => {
@@ -843,9 +843,9 @@ inline fn create(av: []const Atom) CreateError!*Pd {
 		continue :sw 3; }, 3 => {
 			if (av[2].getFloat()) |f| step[0] = f;
 		continue :sw 2; }, 2 => {
-			if (av[1].getFloat()) |f| prec = @intFromFloat(f);
+			if (av[1].getFloat()) |f| prec = @trunc(f);
 		continue :sw 1; }, 1 => {
-			if (av[0].getFloat()) |f| base = @intFromFloat(f);
+			if (av[0].getFloat()) |f| base = @trunc(f);
 		}, else => {},
 	}
 

@@ -26,7 +26,7 @@ pub fn Impl(Self: type) type { return struct {
 	}
 
 	fn seedC(p: *Pd, f: Float) callconv(.c) void {
-		Self.Box.state(p).rng.state = @intFromFloat(f);
+		Self.Box.state(p).rng.state = @trunc(f);
 	}
 
 	pub inline fn extend(io: std.Io) void {

@@ -34,7 +34,7 @@ fn performC(w: [*]usize) callconv(.c) [*]usize {
 		return w + 6;
 	};
 	const len = self.len;
-	const mask = @as(u32, @intFromFloat(len)) - 1;
+	const mask = @as(u32, @trunc(len)) - 1;
 	const conv = len * self.conv;
 	var dphase = len * self.phase + unitbit32;
 

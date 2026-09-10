@@ -358,7 +358,7 @@ pub fn Impl(Self: type) type { return struct {
 		const player: *Player = &base.player;
 		try player.assertFileOpened();
 
-		const track: u32 = @intFromFloat(try pd.floatArg(0, av));
+		const track: u32 = @trunc(try pd.floatArg(0, av));
 		const result: bool = blk: { if (0 < track and track <= bTrackCount(base)) {
 			try bLoadTrack(base, gpa, io, track - 1);
 			if (pd.floatArg(1, av)) |msec| {

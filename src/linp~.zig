@@ -42,7 +42,7 @@ fn performC(w: [*]usize) callconv(.c) [*]usize {
 	}
 	if (self.retarget) {
 		const nticks = @max(1,
-			@as(u32, @intFromFloat(self.inletwas * self.dspticktomsec)));
+			@as(u32, @trunc(self.inletwas * self.dspticktomsec)));
 		self.ticksleft = nticks;
 		self.biginc = (self.target - self.value)
 			/ @as(Sample, @floatFromInt(nticks));

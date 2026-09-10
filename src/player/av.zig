@@ -25,7 +25,7 @@ var s_append: *Symbol = undefined;
 pub var s_done: *Symbol = undefined;
 
 fn indexFromFloat(f: Float, len: usize) ?u32 {
-	const i: i32 = @intFromFloat(f);
+	const i: i32 = @trunc(f);
 	if (i < 0 or len <= i) {
 		return null;
 	}
@@ -97,7 +97,7 @@ pub fn Base(frames: comptime_int) type { return struct {
 	pub inline fn init(gpa: Allocator, obj: *pd.Object, arg: Atom) !Av {
 		const layout: av.ChannelLayout = try .fromMask(if (arg.getSymbol()) |s|
 			std.fmt.parseInt(u64, std.mem.sliceTo(s.name, 0), 0) catch stereo
-		else @as(u64, @intFromFloat(arg.w.float)));
+		else @as(u64, @trunc(arg.w.float)));
 
 		const nch: u8 = @truncate(@as(c_uint, @bitCast(layout.nb_channels)));
 		for (0..nch) |_| {
@@ -238,13 +238,13 @@ pub fn Base(frames: comptime_int) type { return struct {
 	}
 
 	pub fn seek(self: *Av, f: Float) !void {
-		const ts: i64 = @intFromFloat(f * 1000);
+		const ts: i64 = @trunc(f * 1000);
 		try self.format.seekFile(-1, 0, ts, self.format.duration, .{});
 
 		const ratio = self.format.streams[self.audio.idx].time_base;
 		const num: f64 = @floatFromInt(ratio.num);
 		const den: f64 = @floatFromInt(ratio.den);
-		self.frame.pts = @intFromFloat(f * den / (num * 1000));
+		self.frame.pts = @trunc(f * den / (num * 1000));
 	}
 
 	pub inline fn pos(self: *Av) !void {
@@ -287,7 +287,7 @@ pub fn Base(frames: comptime_int) type { return struct {
 			const self = Box.state(p);
 			const base: *Av = &self.base;
 			try base.player.assertFileOpened();
-			var a: Stream = try .init(base.format, .audio, @intFromFloat(f));
+			var a: Stream = try .init(base.format, .audio, @trunc(f));
 			errdefer a.deinit();
 			const swr = try base.newSwr(a.ctx);
 
@@ -313,7 +313,7 @@ pub fn Base(frames: comptime_int) type { return struct {
 				}
 				return;
 			}
-			const s: Stream = try .init(base.format, .subtitle, @intFromFloat(f));
+			const s: Stream = try .init(base.format, .subtitle, @trunc(f));
 			if (base.sub_open) {
 				base.subtitle.deinit();
 			}

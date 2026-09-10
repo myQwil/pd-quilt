@@ -21,7 +21,7 @@ fn setWords(vec: []pd.Word, av: []const Atom) error{NotEnoughArgs}!void {
 	}
 	// first arg specifies the onset
 	const i = blk: {
-		const i: i32 = @intFromFloat(av[0].getFloat() orelse 0);
+		const i: i32 = if (av[0].getFloat()) |f| @trunc(f) else 0;
 		const j: usize = @min(@max(0, @abs(i)), vec.len);
 		break :blk if (i < 0) vec.len - j else j;
 	};
@@ -83,7 +83,7 @@ const Rand = struct {
 				}
 				break :blk nxt * range;
 			};
-			const i: u32 = @intFromFloat(f);
+			const i: u32 = @trunc(f);
 			rand.reps = if (rand.prev == i) rand.reps + 1 else 1;
 			rand.prev = i;
 			return f;
@@ -92,7 +92,7 @@ const Rand = struct {
 		fn repC(p: *Pd, f: Float) callconv(.c) void {
 			const self = Self.Box.state(p);
 			const rand: *Rand = &self.rand;
-			rand.rep = @intFromFloat(f);
+			rand.rep = @trunc(f);
 		}
 
 		fn extend() void {
@@ -214,7 +214,7 @@ const InArray = struct {
 
 	fn resizeC(p: *Pd, f: Float) callconv(.c) void {
 		const self = Box.state(p);
-		self.win.resize(gpa, @intFromFloat(@max(1, f))) catch |e| err(p, e);
+		self.win.resize(gpa, @trunc(@max(1, f))) catch |e| err(p, e);
 	}
 
 	fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
@@ -225,7 +225,7 @@ const InArray = struct {
 	fn bangC(p: *Pd) callconv(.c) void {
 		const self = Box.state(p);
 		const f = Impl.next(self, @floatFromInt(self.win.vec.len));
-		self.rand.out.float(self.win.vec[@intFromFloat(f)].float);
+		self.rand.out.float(self.win.vec[@trunc(f)].float);
 	}
 
 	inline fn create(av: []Atom) pd.Oom!*Pd {
@@ -305,7 +305,7 @@ const ExArray = struct {
 	const ResizeError = pd.GArray.ResizeError || error{GArrayNotFound};
 	inline fn resize(self: *ExArray, f: Float) ResizeError!void {
 		const arr = try self.garray();
-		try arr.resize(@intFromFloat(f));
+		try arr.resize(@trunc(f));
 	}
 
 	fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
@@ -325,7 +325,7 @@ const ExArray = struct {
 	inline fn bang(self: *ExArray) Error!void {
 		const vec = try (try self.garray()).floatWords();
 		const f = Impl.next(self, @floatFromInt(vec.len));
-		self.rand.out.float(vec[@intFromFloat(f)].float);
+		self.rand.out.float(vec[@trunc(f)].float);
 	}
 
 	inline fn create(s: *Symbol) pd.Oom!*Pd {

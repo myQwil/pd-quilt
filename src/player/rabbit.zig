@@ -58,7 +58,7 @@ pub fn Impl(Self: type) type { return struct {
 	const Box = Self.Box;
 
 	fn convC(p: *Pd, f: Float) callconv(.c) void {
-		conv(p, @intFromFloat(f));
+		conv(p, @trunc(f));
 	}
 
 	fn speedC(p: *Pd, f: Float) callconv(.c) void {

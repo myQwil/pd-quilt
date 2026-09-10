@@ -28,7 +28,7 @@ fn bangC(pp: *const Pd) callconv(.c) void {
 		.{ .r = v, .g = v, .b = v }
 	else blk: {
 		const h = @mod(self.h, 360) / 60;
-		const i: u3 = @intFromFloat(h);
+		const i: u3 = @trunc(h);
 
 		const f = h - @as(Float, @floatFromInt(i));
 		const p = v * (1 - s);
@@ -44,9 +44,9 @@ fn bangC(pp: *const Pd) callconv(.c) void {
 			else => unreachable,
 		};
 	};
-	const R = @as(u24, @intFromFloat(color.r * 0xff)) << 16;
-	const G = @as(u24, @intFromFloat(color.g * 0xff)) << 8;
-	const B = @as(u24, @intFromFloat(color.b * 0xff));
+	const R = @as(u24, @trunc(color.r * 0xff)) << 16;
+	const G = @as(u24, @trunc(color.g * 0xff)) << 8;
+	const B = @as(u24, @trunc(color.b * 0xff));
 	self.out.float(@floatFromInt(R + G + B));
 }
 

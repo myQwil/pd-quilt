@@ -112,7 +112,7 @@ const big_len = blk: {
 
 fn precision(request: u16, base: u16) u16 {
 	const log2_base: f64 = @log2(@as(f64, @floatFromInt(base)));
-	const max: u16 = @intFromFloat(@ceil(mant_digits / log2_base));
+	const max: u16 = @trunc(@as(f64, @ceil(mant_digits / log2_base)));
 	const req = if (request == 0) dgt.default_prec[base] else request;
 	return if (req == 0) max else @min(req, max);
 }
@@ -194,12 +194,12 @@ pub fn init(base: u16, prec: u16) Rad {
 		const fd = @floor(d);
 		break :blk if (d == fd) fd - 1 else fd;
 	};
-	const udps: u16 = @intFromFloat(fdps);
+	const udps: u16 = @trunc(fdps);
 
 	return .{
 		.base = b,
 		.dps = udps,
-		.bps = @intFromFloat(fdps * log2_base),
+		.bps = @trunc(fdps * log2_base),
 		.pwr = std.math.powi(UInt, b, udps) catch unreachable,
 		.prec = precision(prec, b),
 	};
@@ -216,7 +216,7 @@ pub fn reset(self: *Rad) void {
 }
 
 pub fn setPrecision(self: *Rad, f: Float) void {
-	self.prec = precision(@intFromFloat(@max(0, f)), self.base);
+	self.prec = precision(@trunc(@max(0, f)), self.base);
 }
 
 fn fmtU(u: usize, s: [*]u8, base: u16) [*]u8 {
@@ -286,7 +286,7 @@ pub fn write(self: *Rad) std.Io.Writer.Error!void {
 		@divTrunc(ldbl_max_exp + ldbl_mant_dig + @as(u32, sb + sd), dps);
 
 	while (true) {
-		z[0] = @intFromFloat(y);
+		z[0] = @trunc(y);
 		y = @as(FBig, @floatFromInt(pwr)) * (y - @as(FBig, @floatFromInt(z[0])));
 		z += 1;
 		size -= 1;

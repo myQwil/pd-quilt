@@ -19,7 +19,7 @@ const epsilon = std.math.floatEps(Float);
 const gpa = pd.gpa;
 
 inline fn iDiv(g: Float, len: usize) struct {num: i32, den: i32, quo: i32 } {
-	const num: i32 = @intFromFloat(g);
+	const num: i32 = @trunc(g);
 	const den: i32 = @as(u31, @truncate(len));
 	const quo: i32 = @divFloor(num, den);
 	return .{ .num = num, .den = den, .quo = quo };
@@ -303,7 +303,7 @@ const InArray = struct {
 
 	fn resizeC(p: *Pd, f: Float) callconv(.c) void {
 		const self = Box.state(p);
-		self.win.resize(gpa, @intFromFloat(@max(1, f))) catch |e| err(p, e);
+		self.win.resize(gpa, @trunc(@max(1, f))) catch |e| err(p, e);
 	}
 
 	fn floatC(p: *Pd, f: Float) callconv(.c) void {
@@ -402,7 +402,7 @@ const ExArray = struct {
 	const ResizeError = pd.GArray.ResizeError || error{GArrayNotFound};
 	inline fn resize(self: *ExArray, f: Float) ResizeError!void {
 		const arr = try self.garray();
-		try arr.resize(@intFromFloat(f));
+		try arr.resize(@trunc(f));
 	}
 
 	fn floatC(p: *Pd, f: Float) callconv(.c) void {

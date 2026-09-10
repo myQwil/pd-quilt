@@ -26,7 +26,7 @@ pub const Rubber = struct {
 		return .{
 			.tempo = &in3.un.floatsignalvalue,
 			.state = try .create(
-				@intFromFloat(pd.sampleRate()), channels, 1, 1, try parseOptions(gpa, av)),
+				@trunc(pd.sampleRate()), channels, 1, 1, try parseOptions(gpa, av)),
 		};
 	}
 

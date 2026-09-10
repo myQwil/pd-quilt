@@ -23,11 +23,11 @@ fn getUf(uf: bf.UnFloat, onset: u2, av: []const Atom) bf.UnFloat {
 	var u: bf.UnFloat = uf;
 	sw: switch (@min(av.len + onset, 3)) {
 		3 => {
-			if (av[2 - onset].getFloat()) |f| u.b.sign = @intFromFloat(f);
+			if (av[2 - onset].getFloat()) |f| u.b.sign = @trunc(f);
 		continue :sw 2; }, 2 => {
-			if (av[1 - onset].getFloat()) |f| u.b.exponent = @intFromFloat(f);
+			if (av[1 - onset].getFloat()) |f| u.b.exponent = @trunc(f);
 		continue :sw 1; }, 1 => if (onset == 0) {
-			if (av[0].getFloat()) |f| u.b.mantissa = @intFromFloat(f);
+			if (av[0].getFloat()) |f| u.b.mantissa = @trunc(f);
 		}, else => {},
 	}
 	return u;
@@ -53,19 +53,19 @@ inline fn print(p: *const Pd) std.fmt.BufPrintError!void {
 }
 
 fn mantissaC(p: *Pd, f: Float) callconv(.c) void {
-	Box.state(p).uf.b.mantissa = @intFromFloat(f);
+	Box.state(p).uf.b.mantissa = @trunc(f);
 }
 
 fn exponentC(p: *Pd, f: Float) callconv(.c) void {
-	Box.state(p).uf.b.exponent = @intFromFloat(f);
+	Box.state(p).uf.b.exponent = @trunc(f);
 }
 
 fn signC(p: *Pd, f: Float) callconv(.c) void {
-	Box.state(p).uf.b.sign = @intFromFloat(f);
+	Box.state(p).uf.b.sign = @trunc(f);
 }
 
 fn intC(p: *Pd, f: Float) callconv(.c) void {
-	Box.state(p).uf = .{ .u = @intFromFloat(f) };
+	Box.state(p).uf = .{ .u = @trunc(f) };
 }
 
 fn f1C(p: *Pd, f: Float) callconv(.c) void {

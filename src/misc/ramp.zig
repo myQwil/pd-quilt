@@ -18,7 +18,7 @@ pub fn Ramp(Owner: type) type { return struct {
 	}
 
 	pub inline fn reset(self: *Self, samples: Float, target: Sample) void {
-		self.remain = @intFromFloat(@max(0, samples));
+		self.remain = @trunc(@max(0, samples));
 		self.target = target;
 	}
 
