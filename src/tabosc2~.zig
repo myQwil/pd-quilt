@@ -4,7 +4,7 @@ const TabOsc2 = @This();
 
 const pd = @import("pd");
 const tf = @import("misc/tabfudge.zig");
-const Tab2 = @import("misc/tab2.zig");
+const Tab2 = @import("misc/Tab2.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;

@@ -2,7 +2,7 @@
 
 const pd = @import("pd");
 const std = @import("std");
-const Rad = @import("misc/rad.zig");
+const Rad = @import("misc/Rad.zig");
 const bf = @import("misc/bitfloat.zig");
 const cnv = pd.cnv;
 

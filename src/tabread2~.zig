@@ -3,7 +3,7 @@
 const TabRead2 = @This();
 
 const pd = @import("pd");
-const Tab2 = @import("misc/tab2.zig");
+const Tab2 = @import("misc/Tab2.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;
