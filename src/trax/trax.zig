@@ -5,8 +5,6 @@ pub const Meta = @import("Meta.zig");
 pub const Playlist = @import("Playlist.zig");
 pub const Chapters = @import("Chapters.zig");
 
-const Atom = pd.Atom;
-const Symbol = pd.Symbol;
 const Io = std.Io;
 const Allocator = std.mem.Allocator;
 pub const StringMap = std.StringHashMapUnmanaged(void);
@@ -55,12 +53,16 @@ pub fn makeLowerCase(s: []u8) void {
 	}
 }
 
-pub fn appendSliceZ(buf: *Buffer, gpa: Allocator, str: []const u8) Oom!void {
+pub const Offset = struct { start: u32 = 0, len: u32 = 0 };
+
+pub fn appendSliceZ(buf: *Buffer, gpa: Allocator, str: []const u8) Oom!Offset {
 	const amount = str.len + 1;
 	try buf.ensureUnusedCapacity(gpa, amount);
-	@memcpy(buf.items.ptr[buf.items.len..][0..str.len], str);
+	const old_len = buf.items.len;
 	buf.items.len += amount;
+	@memcpy(buf.items[old_len..][0..str.len], str);
 	buf.items[buf.items.len - 1] = 0;
+	return .{ .start = @truncate(old_len), .len = @truncate(str.len) };
 }
 
 pub fn resolveZ(gpa: Allocator, paths: []const []const u8) Oom![:0]u8 {
@@ -139,13 +141,13 @@ pub fn getSidecar(gpa: Allocator, io: Io, path: []const u8) Oom!?[:0]const u8 {
 }
 
 pub fn langReplace(
-	self: *[]*Symbol,
+	self: *[]*pd.Symbol,
 	gpa: Allocator,
-	args: []const Atom,
+	args: []const pd.Atom,
 ) (Oom || error{WrongAtomType})!void {
-	var arr: std.ArrayList(*Symbol) = .empty;
+	var arr: std.ArrayList(*pd.Symbol) = .empty;
 	errdefer arr.deinit(gpa);
-	var map: std.AutoHashMap(*Symbol, void) = .init(gpa);
+	var map: std.AutoHashMap(*pd.Symbol, void) = .init(gpa);
 	defer map.deinit();
 
 	for (args) |arg| {

@@ -10,37 +10,32 @@ const StringMap = tx.StringMap;
 
 /// byte array
 buf: tx.Buffer = .empty,
-/// ending offset of each string
+/// list of chapter entries
 tbl: std.ArrayList(Entry) = .empty,
 
-const Enum = enum { bare, title, trax };
 const Entry = struct {
 	time: f64,
-	typ: Enum,
-	end: u32,
+	trax: tx.Offset,
+	title: ?tx.Offset = null,
 };
+const Chapter = struct {
+	time: f64,
+	trax: [:0]const u8,
+	title: ?[:0]const u8,
+};
+
+pub fn get(self: *const Chapters, index: usize) Chapter {
+	const chap = self.tbl.items[index];
+	return .{
+		.time = chap.time,
+		.trax = self.buf.items[chap.trax.start..][0..chap.trax.len :0],
+		.title = if (chap.title) |t| self.buf.items[t.start..][0..t.len :0] else null,
+	};
+}
 
 pub fn deinit(self: *Chapters, gpa: Allocator) void {
 	self.buf.deinit(gpa);
 	self.tbl.deinit(gpa);
-}
-
-pub fn append(
-	self: *Chapters,
-	gpa: Allocator,
-	time: f64,
-	typ: Enum,
-	str: []const u8,
-) Allocator.Error!void {
-	try tx.appendSliceZ(&self.buf, gpa, str);
-	const end: u32 = @truncate(self.buf.items.len);
-	try self.tbl.append(gpa, .{ .time = time, .typ = typ, .end = end });
-}
-
-pub fn get(self: *const Chapters, index: usize) [:0]const u8 {
-	std.debug.assert(index < self.tbl.items.len);
-	const start = if (index == 0) 0 else self.tbl.items[index - 1].end;
-	return self.buf.items[start .. self.tbl.items[index].end - 1 :0];
 }
 
 fn traverse(
@@ -52,10 +47,14 @@ fn traverse(
 	time: f64,
 ) tx.TravError!void {
 	const file = tx.pathCheck(parents, gpa, io, path)
-		catch |e| return tx.err(0, e, path.ptr, "meta");
+		catch |e| return tx.err(0, e, path.ptr, "chapter");
 	defer _ = parents.remove(path);
 	defer file.close(io);
 	const dir = std.fs.path.dirname(path) orelse ".";
+	const trax = try tx.appendSliceZ(&self.buf, gpa, path);
+	if (self.tbl.items.len > 0) {
+		self.tbl.items[self.tbl.items.len - 1].trax = trax;
+	}
 
 	var buf: [std.fs.max_path_bytes:0]u8 = undefined;
 	var r = file.reader(io, &buf);
@@ -104,18 +103,21 @@ fn traverse(
 		line = line[tx.trimStart(line, " \t")..];
 
 		if (sec == 0 and self.tbl.items.len > 0) {
-			self.buf.items.len -= self.get(self.tbl.items.len - 1).len + 1;
 			self.tbl.items.len -= 1;
 		}
 		const agg = time + sec;
 		if (line[0] == '>') {
 			const resolved = try tx.resolveZ(gpa, &.{ dir, line[1..] });
 			defer gpa.free(resolved);
-			try self.append(gpa, agg, .trax, resolved);
+			try self.tbl.append(gpa, .{ .time = agg, .trax = .{} });
+			try self.traverse(gpa, io, parents, resolved, agg);
 		} else {
-			const typ: Enum = if (line[0] == '=') .title else .bare;
-			const title = line[(if (typ == .bare) 0 else 1)..];
-			try self.append(gpa, agg, typ, title);
+			if (line[0] == '=') {
+				const title = try tx.appendSliceZ(&self.buf, gpa, line[1..]);
+				try self.tbl.append(gpa, .{ .time = agg, .trax = trax, .title = title });
+			} else {
+				try self.tbl.append(gpa, .{ .time = agg, .trax = trax });
+			}
 		}
 	} else |e| if (e != error.EndOfStream) {
 		return e;
@@ -123,13 +125,12 @@ fn traverse(
 }
 
 pub fn fromPath(gpa: Allocator, io: Io, path: [*:0]const u8) tx.TravError!Chapters {
-	const sidecar = try tx.getSidecar(gpa, io, std.mem.sliceTo(path, 0))
-		orelse return .{};
-	defer gpa.free(sidecar);
+	const sc = try tx.getSidecar(gpa, io, std.mem.sliceTo(path, 0)) orelse return .{};
+	defer gpa.free(sc);
 	var parents: StringMap = .empty;
 	defer parents.deinit(gpa);
 	var self: Chapters = .{};
 	errdefer self.deinit(gpa);
-	try self.traverse(gpa, io, &parents, sidecar, 0);
+	try self.traverse(gpa, io, &parents, sc, 0);
 	return self;
 }

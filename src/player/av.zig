@@ -24,14 +24,6 @@ var s_pos: *Symbol = undefined;
 var s_append: *Symbol = undefined;
 pub var s_done: *Symbol = undefined;
 
-fn indexFromFloat(f: Float, len: usize) ?u32 {
-	const i: i32 = @trunc(f);
-	if (i < 0 or len <= i) {
-		return null;
-	}
-	return @bitCast(i);
-}
-
 pub const stereo = (
 	(1 << @intFromEnum(av.Channel.front_left)) |
 	(1 << @intFromEnum(av.Channel.front_right))

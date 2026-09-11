@@ -43,7 +43,7 @@ pub fn append(self: *Pile, gpa: Allocator, str: []const u8) Oom!void {
 		try self.buf.appendSlice(gpa, std.mem.asBytes(&f));
 		try self.tbl.append(gpa, .{ .typ = .float, .end = @truncate(self.buf.items.len) });
 	} else |_| {
-		try tx.appendSliceZ(&self.buf, gpa, str);
+		_ = try tx.appendSliceZ(&self.buf, gpa, str);
 		try self.tbl.append(gpa, .{ .typ = .string, .end = @truncate(self.buf.items.len) });
 	}
 }

@@ -81,9 +81,9 @@ inline fn dump(p: *Pd, av: []const Atom) !void {
 	var meta: Meta = if (pd.floatArg(1, av)) |g| blk: {
 		var chaps: tx.Chapters = try .fromPath(gpa, io, self.plist.get(i));
 		defer chaps.deinit(gpa);
-		const j = indexFromFloat(g, chaps.tbl.items.len) catch return;
-		pd.post.log(p, .normal, "at %g:", .{ chaps.tbl.items[j].time });
-		break :blk try .fromPath(gpa, io, chaps.get(j));
+		const chap = chaps.get(indexFromFloat(g, chaps.tbl.items.len) catch return);
+		pd.post.log(p, .normal, "at %g:", .{ chap.time });
+		break :blk try .fromPath(gpa, io, chap.trax);
 	} else |_| try .fromPath(gpa, io, self.plist.get(i));
 	defer meta.deinit(gpa);
 

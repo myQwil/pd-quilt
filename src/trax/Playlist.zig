@@ -20,7 +20,7 @@ pub fn deinit(self: *Playlist, gpa: Allocator) void {
 }
 
 pub fn append(self: *Playlist, gpa: Allocator, str: []const u8) Allocator.Error!void {
-	try tx.appendSliceZ(&self.buf, gpa, str);
+	_ = try tx.appendSliceZ(&self.buf, gpa, str);
 	try self.tbl.append(gpa, @truncate(self.buf.items.len));
 }
 

@@ -98,16 +98,13 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 		self.loop_length = info.loop_length;
 		self.fade_length = info.fade_length;
 
-		const ch = self.player.chaps;
-		var meta: tx.Meta = if (idx < ch.tbl.items.len) switch (ch.tbl.items[idx].typ) {
-			.bare => .{},
-			.trax => try .fromPath(gpa, io, ch.get(idx)),
-			.title => blk: {
-				var meta: tx.Meta = .{};
-				_ = try tx.putGet(
-					&meta.data, gpa, .gen("song"), pd.s.empty(), ch.get(idx), false);
-				break :blk meta;
-			},
+		var meta: tx.Meta = if (idx < self.player.chaps.tbl.items.len) blk: {
+			const chap = self.player.chaps.get(idx);
+			var meta: tx.Meta = try .fromPath(gpa, io, chap.trax);
+			if (chap.title) |title| {
+				_ = try tx.putGet(&meta.data, gpa, .gen("song"), pd.s.empty(), title, false);
+			}
+			break :blk meta;
 		} else .{};
 		errdefer meta.deinit(gpa);
 		inline for ([_][:0]const u8{
