@@ -105,7 +105,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 				_ = try tx.putGet(&meta.data, gpa, .gen("song"), pd.s.empty(), title, false);
 			}
 			break :blk meta;
-		} else .{};
+		} else try .fromPath(gpa, io, self.path.name);
 		errdefer meta.deinit(gpa);
 		inline for ([_][:0]const u8{
 			"system", "game", "song", "author", "copyright", "comment", "dumper",
