@@ -224,8 +224,8 @@ fn traverse(
 	}
 }
 
-pub fn fromPath(gpa: Allocator, io: Io, path: [*:0]const u8) tx.TravError!Meta {
-	const sc = try tx.getSidecar(gpa, io, std.mem.sliceTo(path, 0)) orelse return .{};
+pub fn fromPath(gpa: Allocator, io: Io, path: []const u8) tx.TravError!Meta {
+	const sc = try tx.getSidecar(gpa, io, path) orelse return .{};
 	defer gpa.free(sc);
 	var parents: StringMap = .empty;
 	defer parents.deinit(gpa);

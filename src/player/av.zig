@@ -187,7 +187,7 @@ pub fn Base(frames: comptime_int) type { return struct {
 			catch |e| pd.post.err(null, "Av.loadMetadata: %s", .{ @errorName(e).ptr });
 	}
 
-	inline fn loadMetadata(self: *Av, gpa: Allocator, io: Io, url: [*:0]const u8) !void {
+	inline fn loadMetadata(self: *Av, gpa: Allocator, io: Io, url: []const u8) !void {
 		var meta: tx.Meta = try .fromPath(gpa, io, url);
 		errdefer meta.deinit(gpa);
 

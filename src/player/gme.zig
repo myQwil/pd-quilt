@@ -105,7 +105,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 				_ = try tx.putGet(&meta.data, gpa, .gen("song"), pd.s.empty(), title, false);
 			}
 			break :blk meta;
-		} else try .fromPath(gpa, io, self.path.name);
+		} else try .fromPath(gpa, io, std.mem.sliceTo(self.path.name, 0));
 		errdefer meta.deinit(gpa);
 		inline for ([_][:0]const u8{
 			"system", "game", "song", "author", "copyright", "comment", "dumper",
@@ -197,7 +197,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 	inline fn loadChapters(self: *Gme, gpa: Allocator, io: Io, path: []const u8) !void {
 		// load a .trax sidecar
 		self.player.chaps.deinit(gpa);
-		self.player.chaps = try .fromPath(gpa, io, self.path.name);
+		self.player.chaps = try .fromPath(gpa, io, path);
 
 		// load a .m3u sidecar
 		const ext = ".m3u";
