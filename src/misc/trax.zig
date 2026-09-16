@@ -99,16 +99,16 @@ pub fn pathCheck(
 pub fn getSidecar(gpa: Allocator, io: Io, path: []const u8) Oom!?[:0]const u8 {
 	const sep = std.fs.path.sep;
 	const txdir = trext ++ (&sep)[0..1];
-	const dot = findLast(path, '.') orelse path.len;
-	var trx_path = try gpa.alloc(u8, dot + txdir.len + trext.len + 1);
+	const dirname = std.fs.path.dirname(path);
+	const start = if (dirname) |dir| dir.len + 1 else 0;
+	const name = path[start..];
+	const stem = name[0 .. findLast(name, '.') orelse name.len];
 
-	const start = if (std.fs.path.dirname(path)) |dir| blk: {
+	var trx_path = try gpa.alloc(u8, start + stem.len + txdir.len + trext.len + 1);
+	if (dirname) |dir| {
 		@memcpy(trx_path[0..dir.len], dir);
 		trx_path[dir.len] = sep;
-		break :blk dir.len + 1;
-	} else 0;
-
-	const stem = path[start..dot];
+	}
 	var i: usize = start;
 	while (true) {
 		// try `file.trax`
@@ -117,6 +117,7 @@ pub fn getSidecar(gpa: Allocator, io: Io, path: []const u8) Oom!?[:0]const u8 {
 		@memcpy(trx_path[i..][0..trext.len], trext);
 		i += trext.len;
 		if (Io.Dir.cwd().access(io, trx_path[0..i], .{ .read = true })) {
+			trx_path = try gpa.realloc(trx_path, i + 1);
 			break;
 		} else |_| {}
 
@@ -136,8 +137,22 @@ pub fn getSidecar(gpa: Allocator, io: Io, path: []const u8) Oom!?[:0]const u8 {
 		return null;
 	}
 	trx_path[i] = 0;
-	trx_path = try gpa.realloc(trx_path, i + 1);
 	return trx_path[0..i :0];
+}
+
+test getSidecar {
+	const gpa = std.testing.allocator;
+	const io = std.testing.io;
+
+	var sidecar = try getSidecar(gpa, io, "help/plist/trax/hello")
+		orelse return error.FileNotFound;
+	try std.testing.expectEqualStrings("help/plist/trax/.trax/hello.trax", sidecar);
+	gpa.free(sidecar);
+
+	sidecar = try getSidecar(gpa, io, "help/plist/trax/world")
+		orelse return error.FileNotFound;
+	try std.testing.expectEqualStrings("help/plist/trax/world.trax", sidecar);
+	gpa.free(sidecar);
 }
 
 pub fn langReplace(
