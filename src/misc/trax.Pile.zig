@@ -5,7 +5,7 @@ const Pile = @This();
 const pd = @import("pd");
 const std = @import("std");
 const tx = @import("trax.zig");
-const wr = @import("../misc/write.zig");
+const wr = @import("write.zig");
 
 const Atom = pd.Atom;
 const Float = pd.Float;

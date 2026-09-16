@@ -2,7 +2,7 @@
 
 const pd = @import("pd");
 const std = @import("std");
-const tx = @import("trax/trax.zig");
+const tx = @import("misc/trax.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;

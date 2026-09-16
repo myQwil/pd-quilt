@@ -1,9 +1,9 @@
 const pd = @import("pd");
 const std = @import("std");
-pub const Pile = @import("Pile.zig");
-pub const Meta = @import("Meta.zig");
-pub const Playlist = @import("Playlist.zig");
-pub const Chapters = @import("Chapters.zig");
+pub const Pile = @import("trax.Pile.zig");
+pub const Meta = @import("trax.Meta.zig");
+pub const Playlist = @import("trax.Playlist.zig");
+pub const Chapters = @import("trax.Chapters.zig");
 
 const Io = std.Io;
 const Allocator = std.mem.Allocator;

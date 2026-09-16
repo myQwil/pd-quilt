@@ -3,7 +3,7 @@ const Meta = @This();
 const pd = @import("pd");
 const std = @import("std");
 const tx = @import("trax.zig");
-const Pile = @import("Pile.zig");
+const Pile = @import("trax.Pile.zig");
 
 const Symbol = pd.Symbol;
 const Io = std.Io;

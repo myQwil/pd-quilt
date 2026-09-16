@@ -1,33 +1,32 @@
 const pd = @import("pd");
 const std = @import("std");
-const gm = @import("gme.zig");
-const ra = @import("rabbit.zig");
-const ru = @import("rubber.zig");
 const pr = @import("player.zig");
+const gm = @import("player.gme.zig");
+const ra = @import("player.rabbit.zig");
+const Inlet = @import("inlet.zig").Inlet;
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
+const Allocator = std.mem.Allocator;
 
 pub fn Impl(Root: type) type { return struct {
 	base: Base,
 	rabbit: ra.Rabbit,
-	rubber: ru.Rubber,
-	planar: [Root.nch][*]Sample,
+	tempo: *Float,
 
 	const Self = @This();
 	pub var class: *pd.Class = undefined;
 	pub const gpa = pd.gpa;
 	pub const io = std.Io.Threaded.global_single_threaded.io();
-	pub const Box = pd.Box(pd.Object, Self);
 
 	// Implementations
 	pub const Base = gm.Base(Root.nch, ra.frames);
 	const BaseImpl = Base.Impl(Self);
 	const Player = pr.Impl(Self);
 	const Rabbit = ra.Impl(Self);
-	const Rubber = ru.Impl(Self);
+	pub const Box = pd.Box(pd.Object, Self);
 
 	pub inline fn err(p: *const Pd, e: anyerror) void {
 		pd.post.err(p, Root.name ++ ": %s", .{ @errorName(e).ptr });
@@ -37,18 +36,20 @@ pub fn Impl(Root: type) type { return struct {
 		Box.state(p).rabbit.conv(i, Root.nch) catch |e| err(p, e);
 	}
 
+	fn tempoC(p: *Pd, f: Float) callconv(.c) void {
+		Box.state(p).tempo.* = f;
+	}
+
 	pub fn resetBuffers(p: *Pd) void {
 		const self = Box.state(p);
 		self.rabbit.reset() catch |e| err(p, e);
-		self.rubber.reset();
 		// gme resets the fade-out start time on seeks and track changes.
 		// we want to play tracks forever and handle fade-out at the patch level.
 		self.base.emu.ignoreFade(true);
 	}
 
-	pub fn prepNewTrack(p: *Pd) void {
-		const self = Box.state(p);
-		self.rubber.processStartPad(&self.planar, Root.nch, ra.frames);
+	pub fn prepNewTrack(_: *Pd) void {
+		return;
 	}
 
 	pub inline fn perform(self: *Self, w: [*]usize, ip: *usize) !void {
@@ -63,39 +64,32 @@ pub fn Impl(Root: type) type { return struct {
 		const out = &b.obuf;
 		const emu = b.emu;
 		const rbt = self.rabbit.state;
-		const rbr = self.rubber.state;
 		const data = &self.rabbit.data;
 		var outs: [Root.nch][*]Sample = b.outs;
 
 		while (i < n) {
-			var m = rbr.available();
-			while (m <= 0) {
-				while (data.output_frames_gen <= 0) {
-					if (data.input_frames <= 0) {
-						try emu.play(&b.raw, b.raw.len);
-						for (&b.raw, in) |*from, *to| {
-							to.* = @as(Sample, @floatFromInt(from.*)) * 0x1p-15;
-						}
-						data.data_in = in;
-						data.input_frames = ra.frames;
+			while (data.output_frames_gen <= 0) {
+				if (data.input_frames <= 0) {
+					emu.setTempo(inlet2[i]);
+					try emu.play(&b.raw, b.raw.len);
+					for (&b.raw, in) |*from, *to| {
+						to.* = @as(Sample, @floatFromInt(from.*)) * 0x1p-15;
 					}
-					data.data_out = out;
-					self.rabbit.setRatio(inlet1[i] * b.ratio);
-					try rbt.process(data);
-					data.input_frames -= data.input_frames_used;
-					data.data_in += data.input_frames_used * Root.nch;
+					data.data_in = in;
+					data.input_frames = ra.frames;
 				}
-				const used: usize = data.output_frames_gen;
-				_ = pr.leavedToPlanar(data.data_out, &self.planar, Root.nch, used);
-				rbr.setTimeRatio(1 / @min(@max(ra.slowest, inlet2[i]), ra.fastest));
-				rbr.process(&self.planar, @truncate(used), false);
-				data.output_frames_gen = 0;
-				m = rbr.available();
+				data.data_out = out;
+				self.rabbit.setRatio(inlet1[i] * b.ratio);
+				try rbt.process(data);
+				data.input_frames -= data.input_frames_used;
+				data.data_in += data.input_frames_used * Root.nch;
 			}
-			const used = rbr.retrieve(&outs, @min(pd.uFromI(m), n - i));
+			const used: usize = @min(data.output_frames_gen, n - i);
+			data.data_out += pr.leavedToPlanar(data.data_out, &outs, Root.nch, used);
 			inline for (0..Root.nch) |ch| {
 				outs[ch] += used;
 			}
+			data.output_frames_gen -= used;
 			i += used;
 		}
 	}
@@ -103,7 +97,7 @@ pub fn Impl(Root: type) type { return struct {
 	fn createC(_: *pd.Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) ?*Pd {
 		return pd.wrap(*Pd, create(av[0..ac]), Root.name);
 	}
-	inline fn create(av: []const Atom) !*Pd {
+	inline fn create(av: []const Atom) ra.InitError!*Pd {
 		const obj: *pd.Object = @ptrCast(try class.pd());
 		const self = Box.state(&obj.g.pd);
 		errdefer obj.g.pd.destroy();
@@ -112,49 +106,31 @@ pub fn Impl(Root: type) type { return struct {
 		var rabbit: ra.Rabbit = try .init(obj, Root.nch);
 		errdefer rabbit.deinit();
 
-		var rubber: ru.Rubber = try .init(gpa, obj, Root.nch, av);
-		errdefer rubber.deinit();
-
-		var planar: [Root.nch][*]Sample = undefined;
-
-		var n: u32 = 0; // planar channels allocated
-		errdefer for (0..n) |ch| {
-			gpa.free(@as([]Sample, planar[ch][0..ra.frames]));
-		};
-		inline for (0..Root.nch) |ch| {
-			planar[ch] = (try gpa.alloc(Sample, ra.frames)).ptr;
-			n += 1;
-		}
+		const in3: *Inlet = @ptrCast(@alignCast(try obj.inletSignal(1.0)));
 		self.* = .{
 			.base = base,
 			.rabbit = rabbit,
-			.rubber = rubber,
-			.planar = planar,
+			.tempo = &in3.un.floatsignalvalue,
 		};
 		return &obj.g.pd;
 	}
 
 	fn destroyC(p: *Pd) callconv(.c) void {
 		const self = Box.state(p);
-		inline for (0..Root.nch) |ch| {
-			gpa.free(@as([]Sample, self.planar[ch][0..ra.frames]));
-		}
-		self.rubber.deinit();
 		self.rabbit.deinit();
 		self.base.deinit(gpa);
 	}
 
 	fn classFreeC(_: *pd.Class) callconv(.c) void {
 		Base.freeDict(gpa);
-		ru.freeDict(gpa);
 	}
 
-	pub inline fn setup() (pd.Class.Error || std.mem.Allocator.Error)!void {
+	pub inline fn setup() (pd.Class.Error || pd.Oom)!void {
 		class = try .create(Root.name, &.{ .gimme }, createC, destroyC, @sizeOf(Box), .{});
 		try BaseImpl.extend();
-		try Rubber.extend(gpa);
 		Rabbit.extend();
 		Player.extend();
+		class.addMethod(&.{ .float }, tempoC, .gen("tempo"));
 		class.setFreeFn(classFreeC);
 	}
 };}

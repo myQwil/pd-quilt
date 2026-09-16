@@ -5,9 +5,8 @@
 const pd = @import("pd");
 const av = @import("av");
 const std = @import("std");
-const arc = @import("arc.zig");
+const tx = @import("trax.zig");
 const pr = @import("player.zig");
-const tx = @import("../trax/trax.zig");
 
 const Pd = pd.Pd;
 const Atom = pd.Atom;

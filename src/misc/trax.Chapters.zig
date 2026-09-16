@@ -2,7 +2,7 @@ const Chapters = @This();
 
 const std = @import("std");
 const tx = @import("trax.zig");
-const iParse = @import("../misc/numparse.zig").iParse;
+const iParse = @import("numparse.zig").iParse;
 
 const Io = std.Io;
 const Allocator = std.mem.Allocator;
