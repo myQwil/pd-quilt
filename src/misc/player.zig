@@ -107,10 +107,10 @@ test printTime {
 	var buf: [16]u8 = undefined;
 	var w: Writer = .fixed(&buf);
 	try printTime(&w, 1*mins + 3*secs);
-	try std.testing.expect(std.mem.eql(u8, w.buffered(), "01:03"));
+	try std.testing.expectEqualStrings("01:03", w.buffered());
 	w.end = 0;
 	try printTime(&w, 2*hours + 30*mins + 45*secs);
-	try std.testing.expect(std.mem.eql(u8, w.buffered(), "2:30:45"));
+	try std.testing.expectEqualStrings("2:30:45", w.buffered());
 }
 
 pub fn timeSym(ms: i64) *Symbol {

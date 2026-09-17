@@ -20,8 +20,11 @@ const Entry = struct {
 };
 
 const Chapter = struct {
+	/// start time
 	time: f64,
+	/// chapter metadata trax file
 	trax: [:0]const u8,
+	/// chapter title
 	title: ?[:0]const u8,
 };
 

@@ -78,8 +78,8 @@ pub fn resolveZ(gpa: Allocator, paths: []const []const u8) Oom![:0]u8 {
 }
 
 /// Print message and skip, do not fail completely by returning error.
-pub inline fn err(len: usize, e: anyerror, s: [*:0]const u8, t: [*:0]const u8) void {
-	pd.post.err(null, "%u:%s (%s): \"%s\"", .{ len, @errorName(e).ptr, t, s });
+pub inline fn err(len: usize, e: anyerror, str: [*:0]const u8, typ: [*:0]const u8) void {
+	pd.post.err(null, "%u:%s (%s): \"%s\"", .{ len, @errorName(e).ptr, typ, str });
 }
 
 pub fn pathCheck(

@@ -174,8 +174,6 @@ pub fn Base(frames: comptime_int) type { return struct {
 			self.format.closeInput();
 			self.audio.deinit();
 			self.swr.destroy();
-			self.player.meta.deinit(gpa);
-			self.player.meta = .{};
 		}
 		self.format = format;
 		self.audio = audio;
@@ -187,6 +185,8 @@ pub fn Base(frames: comptime_int) type { return struct {
 	}
 
 	inline fn loadMetadata(self: *Av, gpa: Allocator, io: Io, url: []const u8) !void {
+		self.player.meta.deinit(gpa);
+		self.player.meta = .{};
 		var meta: tx.Meta = try .fromPath(gpa, io, url);
 		errdefer meta.deinit(gpa);
 
