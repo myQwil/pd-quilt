@@ -32,8 +32,7 @@ pub const ArcReader = struct {
 const RarReader = struct {
 	head: rar.Header = .{},
 	archive: *rar.Archive,
-	buf_ptr: [*]u8 = undefined,
-	buf_len: usize = undefined,
+	buf: []u8 = undefined,
 	gpa: Allocator,
 
 	const rar = @import("unrar");
@@ -51,14 +50,13 @@ const RarReader = struct {
 		len: usize,
 	) callconv(.c) rar.ErrorCode {
 		const self: *RarReader = @ptrFromInt(udata);
-		if (self.buf_len < len) {
+		if (self.buf.len < len) {
 			return .small_buf;
 		}
 
 		const addr: [*]u8 = @ptrFromInt(ptr);
-		@memcpy(self.buf_ptr[0..len], addr[0..len]);
-		self.buf_ptr += len;
-		self.buf_len -= len;
+		@memcpy(self.buf[0..len], addr[0..len]);
+		self.buf = self.buf[len..];
 		return .success;
 	}
 
@@ -100,9 +98,8 @@ const RarReader = struct {
 		if (!try self.head.read(self.archive)) {
 			return null;
 		}
-		// if prev entry was not a music emu file, buf_ptr returns to prev position
-		self.buf_ptr = buf.ptr;
-		self.buf_len = buf.len;
+		// if prev entry was not a music emu file, self.buf returns to prev position
+		self.buf = buf;
 		try self.archive.processFile(.read, null, null);
 		return .{
 			.name = std.mem.sliceTo(&self.head.file_name, 0),

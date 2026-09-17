@@ -8,8 +8,7 @@ const Symbol = pd.Symbol;
 
 const gpa = pd.gpa;
 
-ptr: [*]Outlet,
-len: usize,
+vec: []Outlet,
 
 const name = "unpaq";
 var class: *pd.Class = undefined;
@@ -25,10 +24,10 @@ fn anyC(p: *const Pd, s: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) vo
 	const self = Box.stateConst(p);
 	const firstarg = (s != pd.s.list());
 	const j = @intFromBool(firstarg);
-	var i = @min(ac, self.len - j);
+	var i = @min(ac, self.vec.len - j);
 	while (i > 0) {
 		i -= 1;
-		const v = &self.ptr[i + j];
+		const v = &self.vec[i + j];
 		const a = &av[i];
 		if (v.type != .gimme and v.type != a.type) {
 			continue;
@@ -42,7 +41,7 @@ fn anyC(p: *const Pd, s: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) vo
 		}
 	}
 	if (firstarg and s != dot) {
-		self.ptr[0].out.symbol(s);
+		self.vec[0].out.symbol(s);
 	}
 }
 
@@ -66,16 +65,13 @@ inline fn create(argv: []const Atom) pd.Oom!*Pd {
 			else => .{ .out = try .create(obj, null), .type = .gimme },
 		} else .{ .out = try .create(obj, null), .type = .gimme };
 	}
-	self.* = .{
-		.ptr = vec.ptr,
-		.len = vec.len,
-	};
+	self.* = .{ .vec = vec };
 	return &obj.g.pd;
 }
 
 fn destroyC(p: *const Pd) callconv(.c) void {
 	const self = Box.stateConst(p);
-	gpa.free(self.ptr[0..self.len]);
+	gpa.free(self.vec);
 }
 
 inline fn setup() pd.Class.Error!void {
