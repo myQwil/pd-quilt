@@ -350,7 +350,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 
 			errdefer dict.deinit(gpa);
 			inline for ([_][:0]const u8{
-				"path", "time", "ftime", "fade", "tracks", "voices",
+				"path", "time", "ftime", "ptime", "fade", "tracks", "voices",
 			}) |field_name| {
 				try dict.put(gpa, .gen(field_name.ptr), @field(dispatch, field_name));
 			}
@@ -371,9 +371,12 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 		fn time(self: *const Gme) *const Pile {
 			return .float(@floatFromInt(self.length()));
 		}
+		var buf: [24]u8 = undefined;
 		fn ftime(self: *const Gme) *const Pile {
-			const ts = pr.timeSym(self.length());
-			return .string(std.mem.sliceTo(ts.name, 0));
+			return .string(pr.bufTime(&buf, self.length(), false));
+		}
+		fn ptime(self: *const Gme) *const Pile {
+			return .string(pr.bufTime(&buf, self.length(), true));
 		}
 		fn fade(self: *const Gme) *const Pile {
 			return .float(@floatFromInt(self.fade_length));

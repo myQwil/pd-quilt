@@ -320,7 +320,7 @@ pub fn Base(frames: comptime_int) type { return struct {
 
 			errdefer dict.deinit(gpa);
 			inline for ([_][:0]const u8{
-				"path", "time", "ftime", "tracks",
+				"path", "time", "ftime", "ptime", "tracks",
 				"samplefmt", "samplerate", "bitrate", "codec",
 			}) |field_name| {
 				try dict.put(gpa, .gen(field_name), @field(dispatch, field_name));
@@ -341,9 +341,12 @@ pub fn Base(frames: comptime_int) type { return struct {
 		fn time(self: *const Av) *const Pile {
 			return .float(@as(Float, @floatFromInt(self.format.duration)) / 1000.0);
 		}
+		var buf: [24]u8 = undefined;
 		fn ftime(self: *const Av) *const Pile {
-			const ts = pr.timeSym(@divTrunc(self.format.duration, 1000));
-			return .string(std.mem.sliceTo(ts.name, 0));
+			return .string(pr.bufTime(&buf, @divTrunc(self.format.duration, 1000), false));
+		}
+		fn ptime(self: *const Av) *const Pile {
+			return .string(pr.bufTime(&buf, @divTrunc(self.format.duration, 1000), true));
 		}
 		fn tracks(self: *const Av) *const Pile {
 			return .float(@floatFromInt(self.trackCount()));

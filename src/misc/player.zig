@@ -88,37 +88,37 @@ const secs = 1000;
 const mins = 60 * secs;
 const hours = 60 * mins;
 
-fn printTime(writer: *Writer, ms: i64) Writer.Error!void {
+fn printTime(writer: *Writer, ms: i64, precise: bool) Writer.Error!void {
 	if (ms < 0) {
-		return writer.print("?:?", .{});
+		return;
 	}
-	const t: u64 = @bitCast(ms);
-	const hr: u8 = @truncate(@divFloor(t, hours));
+	const t: u63 = @truncate(@as(u64, @bitCast(ms)));
+	const hr: u42 = @truncate(@divFloor(t, hours));
 	const mn: u8 = @truncate(@mod(@divFloor(t, mins), 60));
 	const sc: u8 = @truncate(@mod(@divFloor(t, secs), 60));
 
-	if (hr >= 1) {
+	if (hr > 0) {
 		try writer.print("{}:", .{ hr });
 	}
-	return writer.print("{:0>2}:{:0>2}", .{ mn, sc });
+	try writer.print("{:0>2}:{:0>2}", .{ mn, sc });
+	if (precise) {
+		try writer.print(".{}", .{ @mod(t, secs) });
+	}
 }
 
-test printTime {
-	var buf: [16]u8 = undefined;
-	var w: Writer = .fixed(&buf);
-	try printTime(&w, 1*mins + 3*secs);
-	try std.testing.expectEqualStrings("01:03", w.buffered());
-	w.end = 0;
-	try printTime(&w, 2*hours + 30*mins + 45*secs);
-	try std.testing.expectEqualStrings("2:30:45", w.buffered());
-}
-
-pub fn timeSym(ms: i64) *Symbol {
-	var buf: [32:0]u8 = undefined;
-	var w: Writer = .fixed(&buf);
-	printTime(&w, ms) catch return pd.s.empty();
+pub fn bufTime(buf: []u8, ms: i64, precise: bool) [:0]u8 {
+	var w: Writer = .fixed(buf[0 .. buf.len - 1]);
+	printTime(&w, ms, precise) catch { w.end = 0; };
 	buf[w.end] = 0;
-	return .gen(buf[0..w.end :0]);
+	return buf[0..w.end :0];
+}
+
+test bufTime {
+	var buf: [24]u8 = undefined;
+	try std.testing.expectEqualStrings("01:03",
+		bufTime(&buf, 1*mins + 3*secs + 123, false));
+	try std.testing.expectEqualStrings("2562047788015:12:55.807",
+		bufTime(&buf, 2562047788015*hours + 12*mins + 55*secs + 807, true));
 }
 
 inline fn isDigit(c: u8) bool {
