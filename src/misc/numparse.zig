@@ -6,7 +6,7 @@ inline fn getDigit(c: u8) ?u8 {
 }
 
 /// Simple string-to-float converter
-pub fn fParse(str: [*:0]const u8, end_index: ?*usize) ?Float {
+pub fn fParse(str: [*:0]const u8, len: ?*usize) ?Float {
 	var s = str;
 	var no_digits: bool = true;
 	if (s[0] == '-' or s[0] == '+') {
@@ -40,14 +40,14 @@ pub fn fParse(str: [*:0]const u8, end_index: ?*usize) ?Float {
 		const scale: f64 = @floatFromInt(powi(usize, 10, exp_offset) catch return null);
 		break :blk a / scale;
 	};
-	if (end_index) |end| {
-		end.* = s - str;
+	if (len) |l| {
+		l.* = s - str;
 	}
 	return @floatCast(if (str[0] == '-') -f else f);
 }
 
 /// Simple string-to-int converter
-pub fn iParse(str: [*:0]const u8, end_index: ?*usize) ?i32 {
+pub fn iParse(str: [*:0]const u8, len: ?*usize) ?i32 {
 	var s = str;
 	var no_digits: bool = true;
 	if (s[0] == '-' or s[0] == '+') {
@@ -63,8 +63,8 @@ pub fn iParse(str: [*:0]const u8, end_index: ?*usize) ?i32 {
 	if (no_digits) {
 		return null;
 	}
-	if (end_index) |end| {
-		end.* = s - str;
+	if (len) |l| {
+		l.* = s - str;
 	}
 	return if (str[0] == '-') -num else num;
 }

@@ -97,9 +97,9 @@ const Arp = struct {
 				var s = atom.w.symbol.name;
 				const n = blk: { // inner arg count
 					var rem = vec.len - i;
-					var end: usize = undefined;
-					if (iParse(s, &end)) |j| {
-						s += end;
+					var len: usize = undefined;
+					if (iParse(s, &len)) |j| {
+						s += len;
 						rem = onset(j, rem);
 					}
 					break :blk rem;
@@ -108,14 +108,14 @@ const Arp = struct {
 				if (ops.get(c)) |op| {
 					if (c == s[1]) { // ++, --, etc.
 						// do the same shift for all intervals that follow
-						const f = self.refParse(temp, s+2) orelse 1;
+						const f = self.refParse(temp, s + 2) orelse 1;
 						for (vec[i..][0..n]) |*x| {
 							x.float = op(x.float, f);
 						}
 						i += n;
 						continue;
 					} else {
-						w.float = op(w.float, self.refParse(temp, s+1) orelse 1);
+						w.float = op(w.float, self.refParse(temp, s + 1) orelse 1);
 					}
 				} else if (c == '<' or c == '>') { // scale inversion
 					const mvrt: bool = (c == s[1]); // << or >> moves the root
@@ -150,7 +150,7 @@ const Arp = struct {
 						for (vp[p..n], tp[0..d]) |*v, *t| {
 							v.float = t.float + oa;
 						}
-						for (vp[1..p], tp[d+1..n]) |*v, *t| {
+						for (vp[1..p], tp[d + 1 .. n]) |*v, *t| {
 							v.float = t.float - a;
 						}
 						if (mvrt) {
@@ -163,13 +163,13 @@ const Arp = struct {
 						const b = if (d >= n) self.oct else tp[d].float;
 						const ob = self.oct - b;
 						var min: Float = undefined;
-						for (vp[p..n], tp[0..d-1], tp[1..d]) |*v, *ta, *tb| {
+						for (vp[p..n], tp[0 .. d - 1], tp[1..d]) |*v, *ta, *tb| {
 							min = ta.float + oa;
 							v.float = (tb.float + ob - min) * frac + min;
 						}
 						p -= 1;
 						if (p > 0) {
-							for (vp[1..p], tp[d..n-1], tp[d+1..n]) |*v, *ta, *tb| {
+							for (vp[1..p], tp[d .. n - 1], tp[d + 1 .. n]) |*v, *ta, *tb| {
 								min = ta.float - a;
 								v.float = (tb.float - b - min) * frac + min;
 							}
@@ -200,17 +200,17 @@ const Arp = struct {
 		const s = sym.name;
 		if (av.len == 0) {
 			// check if it's `interval+semitone` syntax
-			var end: usize = undefined;
-			if (fParse(s, &end)) |f| {
-				if (ops.get(s[end])) |op| {
-					const g = fParse(s + end + 1, null) orelse 1;
+			var len: usize = undefined;
+			if (fParse(s, &len)) |f| {
+				if (ops.get(s[len])) |op| {
+					const g = fParse(s + len + 1, null) orelse 1;
 					return self.out_f.float(op(vec[0].float + self.interval(vec, f), g));
 				}
 			}
 			return self.list(vec, &.{ .symbol(sym) }, 0);
 		}
 		if (s[0] == '#') {
-			return self.list(vec, av, iParse(s+1, null) orelse 0);
+			return self.list(vec, av, iParse(s + 1, null) orelse 0);
 		}
 		const argv = try gpa.alloc(Atom, av.len + 1);
 		defer gpa.free(argv);
@@ -225,7 +225,7 @@ const Arp = struct {
 		@memcpy(temp, vec);
 
 		if (av.len >= 2 and av[0].type == .symbol and av[0].w.symbol.name[0] == '#') {
-			try self.list(temp, av[1..], iParse(av[0].w.symbol.name+1, null) orelse 0);
+			try self.list(temp, av[1..], iParse(av[0].w.symbol.name + 1, null) orelse 0);
 		} else if (av.len >= 1) {
 			try self.list(temp, av, 0);
 		}

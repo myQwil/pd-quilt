@@ -79,28 +79,28 @@ fn traverse(
 
 		// chapter start time in seconds
 		var sec: f64 = -1;
-		var end: usize = undefined;
-		if (iParse(line, &end)) |i| {
+		var len: usize = undefined;
+		if (iParse(line, &len)) |i| {
 			sec = @floatFromInt(i);
-			line = line[end..];
+			line = line[len..];
 		}
 
 		// minute/hour syntax
 		while (line[0] == ':') {
 			line = line[1..];
-			if (iParse(line, &end)) |i| {
+			if (iParse(line, &len)) |i| {
 				sec = (sec * 60) + @as(f64, @floatFromInt(i));
-				line = line[end..];
+				line = line[len..];
 			}
 		}
 
 		// milliseconds
 		if (line[0] == '.') {
 			line = line[1..];
-			if (iParse(line, &end)) |i| {
-				const scale: f64 = @floatFromInt(std.math.powi(usize, 10, end) catch 1);
+			if (iParse(line, &len)) |i| {
+				const scale: f64 = @floatFromInt(std.math.powi(usize, 10, len) catch 1);
 				sec += @as(f64, @floatFromInt(i)) / scale;
-				line = line[end..];
+				line = line[len..];
 			}
 		}
 		line = line[1..];

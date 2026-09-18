@@ -74,7 +74,7 @@ fn parseOptions(gpa: Allocator, av: []const Atom) pd.Oom!ru.Options {
 			str[eql] = 0;
 			const key: *Symbol = .gen(str[0..eql :0]);
 			if (dict.get(key)) |set| {
-				set(&options, .gen(str[eql+1.. :0]));
+				set(&options, .gen(str[eql + 1 .. :0]));
 			} else {
 				pd.post.err(null, "rubberband: option `%s` not recognized", .{ key.name });
 			}
