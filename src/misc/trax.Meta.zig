@@ -123,24 +123,38 @@ pub fn putGet(
 	return result;
 }
 
-fn keyLangVal(line: [:0]u8) struct { *Symbol, *Symbol, ?[]const u8 } {
-	const eq = tx.find(line, '=');
+fn keyLangVal(line: [:0]u8) struct { [:0]const u8, [:0]const u8, ?[]const u8 } {
+	const eq = std.mem.findScalar(u8, line, '=');
 	const value = if (eq) |i| line[i + 1 ..] else null;
-	const end = tx.trimEnd(line[0..(eq orelse line.len)], " \t");
-	var lang: [:0]const u8 = "";
-	const kend = if (tx.find(line[0..end], '[')) |brac| blk: {
-		const lbeg = brac + 1;
-		const lend = if (tx.find(line[lbeg..end], ']')) |b| lbeg + b else end;
-		tx.makeLowerCase(line[lbeg..lend]);
-		line[lend] = 0;
-		lang = line[lbeg..lend :0];
-		break :blk brac;
-	} else end;
-	tx.makeLowerCase(line[0..kend]);
+	const end = tx.trimEnd(line[0..(eq orelse line.len)], tx.wspace);
+
+	const kend, const lang = if (std.mem.findScalar(u8, line[0..end], '[')) |brac| blk: {
+		const lb = brac + 1 + tx.trimStart(line[brac + 1 ..], tx.wspace);
+		const lend = if (std.mem.findScalar(u8, line[lb..end], ']')) |b|
+			lb + tx.trimEnd(line[lb..][0..b], tx.wspace)
+		else end;
+		if (lend < line.len) {
+			line[lend] = 0;
+		}
+		break :blk .{ tx.trimEnd(line[0..brac], tx.wspace), line[lb..lend :0] };
+	} else .{ end, line[end..end :0] };
+
 	if (kend < line.len) {
 		line[kend] = 0;
 	}
-	return .{ .gen(line[0..kend :0]), .gen(lang), value };
+	const key = line[0..kend :0];
+	tx.makeLowerCase(key);
+	tx.makeLowerCase(lang);
+	return .{ key, lang, value };
+}
+
+test keyLangVal {
+	var line: [128:0]u8 = undefined;
+	@memcpy(line[0..25], "aRtIsT  [ eN ]  =Some Guy");
+	const key, const lang, const val = keyLangVal(&line);
+	try std.testing.expectEqualStrings(key, "artist");
+	try std.testing.expectEqualStrings(lang, "en");
+	try std.testing.expectStringStartsWith(val orelse "", "Some Guy");
 }
 
 fn traverse(
@@ -195,7 +209,7 @@ fn traverse(
 		// !control
 		if (line[0] == '!') {
 			const key, _, const val = keyLangVal(line[1..]);
-			if (key == Symbol.gen("include")) {
+			if (std.mem.eql(u8, key, "include")) {
 				typ = .include;
 				if (val) |v| {
 					const resolved = try tx.resolveZ(gpa, &.{ dir, v });
@@ -218,7 +232,7 @@ fn traverse(
 		// key[lang]=value
 		typ = .tag;
 		const key, const lang, const val = keyLangVal(line);
-		result = try putGet(&self.data, gpa, key, lang, val, erase);
+		result = try putGet(&self.data, gpa, .gen(key), .gen(lang), val, erase);
 	} else |e| if (e != error.EndOfStream) {
 		return e;
 	}
