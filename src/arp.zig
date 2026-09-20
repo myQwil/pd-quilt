@@ -78,10 +78,10 @@ const Arp = struct {
 		return (next - note) * frac + note;
 	}
 
-	inline fn refParse(self: *const Arp, vec: []const Word, s: [*:0]const u8) ?Float {
-		return if (s[0] == '&')
-			(if (fParse(s + 1, null)) |f| self.interval(vec, f) else null)
-		else fParse(s, null);
+	inline fn refParse(self: *const Arp, vec: []const Word, s: []const u8) !Float {
+		return if (s.len > 0 and s[0] == '&')
+			self.interval(vec, try fParse(s[1..], null))
+		else try fParse(s, null);
 	}
 
 	fn list(self: *const Arp, vec: []Word, av: []const Atom, on: i32) pd.Oom!void {
@@ -94,35 +94,35 @@ const Arp = struct {
 			if (atom.type == .float) {
 				w.float = atom.w.float;
 			} else {
-				var s = atom.w.symbol.name;
+				var s = std.mem.sliceTo(atom.w.symbol.name, 0);
 				const n = blk: { // inner arg count
 					var rem = vec.len - i;
 					var len: usize = undefined;
 					if (iParse(s, &len)) |j| {
-						s += len;
+						s = s[len..];
 						rem = onset(j, rem);
-					}
+					} else |_| {}
 					break :blk rem;
 				};
-				const c = s[0];
+				const c = if (s.len > 0) s[0] else 0;
 				if (ops.get(c)) |op| {
-					if (c == s[1]) { // ++, --, etc.
+					if (s.len > 1 and c == s[1]) { // ++, --, etc.
 						// do the same shift for all intervals that follow
-						const f = self.refParse(temp, s + 2) orelse 1;
+						const f = self.refParse(temp, s[2..]) catch 1;
 						for (vec[i..][0..n]) |*x| {
 							x.float = op(x.float, f);
 						}
 						i += n;
 						continue;
 					} else {
-						w.float = op(w.float, self.refParse(temp, s + 1) orelse 1);
+						w.float = op(w.float, self.refParse(temp, s[1..]) catch 1);
 					}
 				} else if (c == '<' or c == '>') { // scale inversion
-					const mvrt: bool = (c == s[1]); // << or >> moves the root
+					const mvrt: bool = (s.len > 1 and c == s[1]); // << or >> moves the root
 					const f = blk: {
 						const dir: Float = if (c == '<') -1 else 1;
 						const j = @as(u8, @intFromBool(mvrt)) + 1;
-						break :blk dir * (fParse(s + j, null) orelse 1);
+						break :blk dir * (fParse(s[j..], null) catch 1);
 					};
 					const g = @floor(f);
 					const div = iDiv(g, n);
@@ -186,7 +186,7 @@ const Arp = struct {
 					continue;
 				} else if (self.refParse(temp, s)) |f| {
 					w.float = f;
-				}
+				} else |_| {}
 			}
 			i += 1;
 		}
@@ -197,20 +197,20 @@ const Arp = struct {
 		vec: []Word,
 		sym: *Symbol, av: []const Atom,
 	) pd.Oom!void {
-		const s = sym.name;
+		const s = std.mem.sliceTo(sym.name, 0);
 		if (av.len == 0) {
 			// check if it's `interval+semitone` syntax
 			var len: usize = undefined;
 			if (fParse(s, &len)) |f| {
-				if (ops.get(s[len])) |op| {
-					const g = fParse(s + len + 1, null) orelse 1;
+				if (ops.get(if (s.len > len) s[len] else 0)) |op| {
+					const g = fParse(s[len + 1 ..], null) catch 1;
 					return self.out_f.float(op(vec[0].float + self.interval(vec, f), g));
 				}
-			}
+			} else |_| {}
 			return self.list(vec, &.{ .symbol(sym) }, 0);
 		}
-		if (s[0] == '#') {
-			return self.list(vec, av, iParse(s + 1, null) orelse 0);
+		if (s.len > 0 and s[0] == '#') {
+			return self.list(vec, av, iParse(s[1..], null) catch 0);
 		}
 		const argv = try gpa.alloc(Atom, av.len + 1);
 		defer gpa.free(argv);
@@ -225,7 +225,8 @@ const Arp = struct {
 		@memcpy(temp, vec);
 
 		if (av.len >= 2 and av[0].type == .symbol and av[0].w.symbol.name[0] == '#') {
-			try self.list(temp, av[1..], iParse(av[0].w.symbol.name + 1, null) orelse 0);
+			const s = std.mem.sliceTo(av[0].w.symbol.name + 1, 0);
+			try self.list(temp, av[1..], iParse(s, null) catch 0);
 		} else if (av.len >= 1) {
 			try self.list(temp, av, 0);
 		}

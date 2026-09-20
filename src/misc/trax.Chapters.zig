@@ -83,7 +83,7 @@ fn traverse(
 		if (iParse(line, &len)) |i| {
 			sec = @floatFromInt(i);
 			line = line[len..];
-		}
+		} else |_| {}
 
 		// minute/hour syntax
 		while (line[0] == ':') {
@@ -91,7 +91,7 @@ fn traverse(
 			if (iParse(line, &len)) |i| {
 				sec = (sec * 60) + @as(f64, @floatFromInt(i));
 				line = line[len..];
-			}
+			} else |_| {}
 		}
 
 		// milliseconds
@@ -101,7 +101,7 @@ fn traverse(
 				const scale: f64 = @floatFromInt(std.math.powi(usize, 10, len) catch 1);
 				sec += @as(f64, @floatFromInt(i)) / scale;
 				line = line[len..];
-			}
+			} else |_| {}
 		}
 		line = line[1..];
 		line = line[tx.trimStart(line, " \t")..];

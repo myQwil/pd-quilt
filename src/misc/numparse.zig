@@ -1,70 +1,65 @@
-const powi = @import("std").math.powi;
+const std = @import("std");
 const Float = @import("pd").Float;
 
-inline fn getDigit(c: u8) ?u8 {
-	return if ('0' <= c and c <= '9') c - '0' else null;
+inline fn isDigit(c: u8) bool {
+	return '0' <= c and c <= '9';
 }
 
-/// Simple string-to-float converter
-pub fn fParse(str: [*:0]const u8, len: ?*usize) ?Float {
-	var s = str;
-	var no_digits: bool = true;
-	if (s[0] == '-' or s[0] == '+') {
-		s += 1;
+pub fn iParse(buf: []const u8, len: ?*usize) std.fmt.ParseIntError!i32 {
+	var s = buf;
+	if (s.len > 0 and (s[0] == '-' or s[0] == '+')) {
+		s = s[1..];
 	}
-
-	// integer digits
-	var acc: u64 = 0;
-	while (getDigit(s[0])) |d| : (s += 1) {
-		acc = acc *| 10 +| d;
-		no_digits = false;
-	}
-
-	// fractional digits
-	const exp_offset: usize = if (s[0] == '.') blk: {
-		s += 1;
-		const start = s;
-		while (getDigit(s[0])) |d| : (s += 1) {
-			acc = acc *| 10 +| d;
-			no_digits = false;
-		}
-		break :blk s - start;
-	} else 0;
-
-	if (no_digits) {
-		return null;
-	}
-
-	const f: f64 = blk: {
-		const a: f64 = @floatFromInt(acc);
-		const scale: f64 = @floatFromInt(powi(usize, 10, exp_offset) catch return null);
-		break :blk a / scale;
-	};
+	while (s.len > 0 and isDigit(s[0])) : (s = s[1..]) {}
+	const used = buf.len - s.len;
 	if (len) |l| {
-		l.* = s - str;
+		l.* = used;
 	}
-	return @floatCast(if (str[0] == '-') -f else f);
+	return std.fmt.parseInt(i32, buf[0..used], 10);
 }
 
-/// Simple string-to-int converter
-pub fn iParse(str: [*:0]const u8, len: ?*usize) ?i32 {
-	var s = str;
-	var no_digits: bool = true;
-	if (s[0] == '-' or s[0] == '+') {
-		s += 1;
+test iParse {
+	for ([_]struct{ str: []const u8, num: std.fmt.ParseIntError!i32, len: usize }{
+		.{ .str = "123", .num = 123, .len = 3 },
+		.{ .str = "-456abc", .num = -456, .len = 4 },
+		.{ .str = "-abc", .num = error.InvalidCharacter, .len = 1 },
+		.{ .str = "99999999999999999999abc", .num = error.Overflow, .len = 20 },
+	}) |case| {
+		var len: usize = 0;
+		const num = iParse(case.str, &len);
+		try std.testing.expectEqual(case.num, num);
+		try std.testing.expectEqual(case.len, len);
 	}
+}
 
-	var num: i32 = 0;
-	while (getDigit(s[0])) |d| : (s += 1) {
-		num = num *| 10 +| d;
-		no_digits = false;
+pub fn fParse(buf: []const u8, len: ?*usize) std.fmt.ParseFloatError!Float {
+	var s = buf;
+	if (s.len > 0 and (s[0] == '-' or s[0] == '+')) {
+		s = s[1..];
 	}
+	while (s.len > 0 and isDigit(s[0])) : (s = s[1..]) {}
+	if (s.len > 0 and s[0] == '.') {
+		s = s[1..];
+		while (s.len > 0 and isDigit(s[0])) : (s = s[1..]) {}
+	}
+	const used = buf.len - s.len;
+		if (len) |l| {
+		l.* = used;
+	}
+	return std.fmt.parseFloat(Float, buf[0..used]);
+}
 
-	if (no_digits) {
-		return null;
+test fParse {
+	for ([_]struct{ str: []const u8, num: std.fmt.ParseFloatError!Float, len: usize }{
+		.{ .str = "123.456", .num = 123.456, .len = 7 },
+		.{ .str = "-654.321", .num = -654.321, .len = 8 },
+		.{ .str = "-.123", .num = -0.123, .len = 5 },
+		.{ .str = "456.abc", .num = 456, .len = 4 },
+		.{ .str = "-.abc", .num = error.InvalidCharacter, .len = 2 },
+	}) |case| {
+		var len: usize = 0;
+		const num = fParse(case.str, &len);
+		try std.testing.expectEqual(case.num, num);
+		try std.testing.expectEqual(case.len, len);
 	}
-	if (len) |l| {
-		l.* = s - str;
-	}
-	return if (str[0] == '-') -num else num;
 }
