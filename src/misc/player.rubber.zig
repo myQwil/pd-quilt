@@ -84,10 +84,12 @@ fn parseOptions(gpa: Allocator, av: []const Atom) pd.Oom!ru.Options {
 }
 
 fn getEnum(T: type, s: *Symbol) ?T {
-	return inline for (@typeInfo(T).@"enum".fields) |field| {
-		const field_symbol: *Symbol = .gen(field.name);
+	const names = @typeInfo(T).@"enum".field_names;
+	const values = @typeInfo(T).@"enum".field_values;
+	return inline for (0..names.len) |i| {
+		const field_symbol: *Symbol = .gen(names[i]);
 		if (field_symbol == s) {
-			break @enumFromInt(field.value);
+			break @enumFromInt(values[i]);
 		}
 	} else blk: {
 		pd.post.err(null, "%s: value `%s` not recognized", .{ @typeName(T).ptr, s.name });

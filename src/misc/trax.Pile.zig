@@ -138,7 +138,11 @@ pub fn write(self: *const Pile, w: *Writer) WriteError!void {
 
 const one = struct {
 	var entry: Entry = .{ .end = 0, .typ = .float };
-	var pile: Pile = .{ .tbl = .{ .items = (&entry)[0..1], .capacity = 0 }};
+	var pile: Pile = .{ .tbl = .{
+		.items = (&entry)[0..1],
+		.capacity = 0,
+		.pointer_stability = .{},
+	}};
 	var float: Float = 0;
 };
 

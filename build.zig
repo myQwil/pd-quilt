@@ -109,6 +109,17 @@ fn getModule(
 	return dep.module(name);
 }
 
+pub fn installLink(b: *Build, symlink: *Build.Step.Compile, src: []const u8) void {
+	const run = b.addRunArtifact(symlink);
+	run.addFileArg2(b.graph.path(.install_prefix, ""), .{});
+	run.addFileArg2(b.path(src), .{});
+	b.getInstallStep().dependOn(&run.step);
+}
+
+pub fn installFile(b: *Build, _: *Build.Step.Compile, src: []const u8) void {
+	b.installFile(src, std.fs.path.basename(src));
+}
+
 pub fn build(b: *Build) !void {
 	const target = b.standardTargetOptions(.{});
 	const optimize = b.standardOptimizeOption(.{});
@@ -116,7 +127,8 @@ pub fn build(b: *Build) !void {
 
 	//---------------------------------------------------------------------------
 	// Dependencies and modules
-	const pd_mod = b.dependency("pd", .{ .float_size = opt.float_size }).module("pd");
+	const pd_dep = b.dependency("pd", .{ .float_size = opt.float_size });
+	const pd_mod = pd_dep.module("pd");
 
 	const gme = getModule(b, "gme", .{
 		.target = target,
@@ -189,7 +201,7 @@ pub fn build(b: *Build) !void {
 			.linkage = .dynamic,
 			.root_module = mod,
 			// use llvm until self-hosted backend has better debugger support
-			.use_llvm = if (optimize == .Debug) true else null,
+			.use_llvm = if (optimize == .debug) true else null,
 		});
 		if (os.isDarwin()) {
 			lib.linker_allow_shlib_undefined = true;
@@ -205,20 +217,27 @@ pub fn build(b: *Build) !void {
 
 	//---------------------------------------------------------------------------
 	// Install help patches and abstractions
+	const symlink = b.addExecutable(.{
+		.name = "symlink",
+		.root_module = b.createModule(.{
+			.root_source_file = pd_dep.path("src/build/symlink.zig"),
+			.target = b.graph.host,
+		}),
+	});
 	switch (opt.patches) {
 		.copy => b.installDirectory(.{
 			.source_dir = b.path("help/plist"),
 			.install_dir = .prefix,
 			.install_subdir = "plist",
 		}),
-		.symbolic => pd.InstallLink.install(b, "help/plist", "plist"),
+		.symbolic => installLink(b, symlink, "help/plist"),
 		.skip => {},
 	}
 	const io = b.graph.io;
-	const InstallFunc = fn(*Build, src_path: []const u8, dest_rel_path: []const u8) void;
-	const installFile: *const InstallFunc = switch (opt.patches) {
-		.symbolic => &pd.InstallLink.install,
-		.copy => &Build.installFile,
+	const InstallFunc = fn(*Build, *Build.Step.Compile, src: []const u8) void;
+	const install: *const InstallFunc = switch (opt.patches) {
+		.symbolic => installLink,
+		.copy => installFile,
 		.skip => return,
 	};
 
@@ -231,7 +250,7 @@ pub fn build(b: *Build) !void {
 			if (file.kind != .file) {
 				continue;
 			}
-			installFile(b, b.fmt("{s}/{s}", .{ dir_name, file.name }), file.name);
+			install(b, symlink, b.fmt("{s}/{s}", .{ dir_name, file.name }));
 		}
 	}
 }

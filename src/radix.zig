@@ -453,7 +453,7 @@ fn motionC(p: *Pd, dx: Float, dy: Float, released: Float) callconv(.c) void {
 	const bn2: Float = 1.0 / @as(Float, @floatFromInt(self.rad.base * self.rad.base));
 	const bn4: Float = bn2 * bn2;
 
-	const pos = FVec2{ dx, dy } + @as(FVec2, @floatFromInt(@as(IVec2, e.was)));
+	const pos = FVec2{ dx, dy } + e.was;
 	const dif = pos - self.grab;
 	const sum =
 		(if (self.step[0] == 0) 0.25 else dif[0] / self.step[0]) +

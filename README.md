@@ -1,9 +1,27 @@
 # PdQuilt
-## A collection of pure data externals
+
+A collection of pure data externals
+
+## How to build
+
+```sh
+# Recommended release build
+zig build -Doptimize=ReleaseFast
+# Recommended debug build
+zig build -Dpatches=symbolic
+```
+
+### Build Options:
+| Option | Description | Default |
+| -------- | ------- | ------- |
+| `-Dfloat_size=[int]` | Size of a floating-point number | `32` |
+| `-Dlinkage=[static,dynamic]` | Library linking method | `static` |
+| `-Dpatches=[copy,symbolic,skip]` | Patch installation method. `symbolic` installs symbolic links, making it easier to track changes. | `copy` |
 
 --------------------------------------------------
 
-### Table of Contents
+## Externals
+
 - \[ [av\~](#av) \]
 - \[ [gme\~](#gme) \]
 - \[ [ntof](#ntof) \]

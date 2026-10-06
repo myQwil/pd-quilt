@@ -2,23 +2,23 @@
 	.name = .quilt,
 	.version = "0.9.1",
 	.fingerprint = 0x87570fed07d14de5,
-	.minimum_zig_version = "0.16.0",
+	.minimum_zig_version = "0.17.0",
 	.dependencies = .{
 		.pd = .{
-			.url = "git+https://github.com/myQwil/pd#27f92b40b9ce03cc47bea343194ee1a764cd132e",
-			.hash = "pd-0.56.5-DC007a5jAgBtgLmlYbTguL--3soy7wMaDiB5ML5T4Wpy",
+			.url = "git+https://github.com/myQwil/pd#a1651fd8bbdea23f67544b0af6b168ee5dbae0cd",
+			.hash = "pd-0.57.0-DC007cdbAgDerOMeUZgc1p7A9QEsL45YwqPoYYxOJYsC",
 		},
 		.gme = .{
-			.url = "git+https://codeberg.org/myQwil/gme#606ebe81cd3a19c41dd51ebe7cbc546f96636fd4",
-			.hash = "game_music_emu-0.6.6-YdNlAIZyAADcr0uPcav2vWIm_RSeQSMTXvcSB1YILq6R",
+			.url = "git+https://codeberg.org/myQwil/gme#271ca224b3c979cc79bf1e07f50254b2fc9645a1",
+			.hash = "game_music_emu-0.6.6-YdNlAOVzAAAOTlhQlS4hU0yXoyXKZBxqAQkCiOjGs-Lw",
 		},
 		.unrar = .{
-			.url = "git+https://github.com/myQwil/unrar#cd11629c7a603a001697d2dd80ef995840184052",
-			.hash = "unrar-7.2.5-zNpgmWA2AABcBM_CjB26Eevgqj1dnluBF6u6lPS1_4W2",
+			.url = "git+https://github.com/myQwil/unrar#1e9675070dd98f47606a5b26403be023692b6088",
+			.hash = "unrar-7.2.5-zNpgmUo2AAARWgcsOJ7OJND1t1F-TifZYY26vlt32WGy",
 		},
 		.samplerate = .{
-			.url = "git+https://github.com/myQwil/libsamplerate#0e211f07e7154d9161cf9354d022f5b7808c0327",
-			.hash = "libsamplerate-0.2.3-f8m6bog1AAAl5JCT25IvgVnaX5y8XDvkEaB43ha70kn_",
+			.url = "git+https://github.com/myQwil/libsamplerate#741482b48bb0405aa17613b52421faadde2ed484",
+			.hash = "libsamplerate-0.2.3-f8m6boE1AABaOEK6vHuHg6Sp4OREgSeJeTJQ3JiwC0Tw",
 		},
 		.rubberband = .{
 			.url = "git+https://github.com/myQwil/rubberband#5a6a8d55fd7f9e630718aa4c962e160bb67b3d76",
