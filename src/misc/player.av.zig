@@ -24,8 +24,8 @@ var s_append: *Symbol = undefined;
 pub var s_done: *Symbol = undefined;
 
 pub const stereo = (
-	(1 << @intFromEnum(av.Channel.front_left)) |
-	(1 << @intFromEnum(av.Channel.front_right))
+	(1 << @backingInt(av.Channel.front_left)) |
+	(1 << @backingInt(av.Channel.front_right))
 );
 
 const Stream = struct {

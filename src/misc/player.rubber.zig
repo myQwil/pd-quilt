@@ -87,9 +87,8 @@ fn getEnum(T: type, s: *Symbol) ?T {
 	const names = @typeInfo(T).@"enum".field_names;
 	const values = @typeInfo(T).@"enum".field_values;
 	return inline for (0..names.len) |i| {
-		const field_symbol: *Symbol = .gen(names[i]);
-		if (field_symbol == s) {
-			break @enumFromInt(values[i]);
+		if (Symbol.gen(names[i]) == s) {
+			break @fromBackingInt(values[i]);
 		}
 	} else blk: {
 		pd.post.err(null, "%s: value `%s` not recognized", .{ @typeName(T).ptr, s.name });

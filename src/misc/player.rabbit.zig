@@ -37,7 +37,7 @@ pub const Rabbit = struct {
 
 	pub inline fn conv(self: *Rabbit, i: uint, nch: uint) ra.Error!void {
 		try ra.Converter.expectValid(i);
-		const new_state: *ra.State = try .create(@enumFromInt(i), nch);
+		const new_state: *ra.State = try .create(@fromBackingInt(i), nch);
 		self.state.destroy();
 		self.state = new_state;
 	}

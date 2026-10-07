@@ -558,7 +558,7 @@ inline fn save(g: *GObj, b: *pd.BinBuf) (pd.Oom || BufPrintError)!void {
 
 		.float(self.rad.width), .float(self.font_size),
 		.symbol(rsl[0]), .symbol(rsl[1]), .symbol(rsl[2]),
-		.float(@floatFromInt(@intFromEnum(self.b.where))),
+		.float(@floatFromInt(@backingInt(self.b.where))),
 		.semi,
 	});
 }
@@ -580,7 +580,7 @@ inline fn properties(g: *GObj) BufPrintError!void {
 		&buf_min, &buf_max,
 		self.rad.width, self.font_size,
 		rsl[0].name, rsl[1].name,
-		rsl[2].name, @as(u8, @intFromEnum(self.b.where)),
+		rsl[2].name, @as(u8, @backingInt(self.b.where)),
 	});
 }
 
@@ -609,7 +609,7 @@ inline fn param(p: *Pd, av: []const Atom) ParamError!void {
 		.symbol(rsl[0]),
 		.symbol(rsl[1]),
 		.symbol(rsl[2]),
-		.float(@floatFromInt(@intFromEnum(self.b.where))),
+		.float(@floatFromInt(@backingInt(self.b.where))),
 	}, av);
 	if (visible) {
 		obj.g.vis(self.gl, false);
@@ -673,7 +673,7 @@ inline fn param(p: *Pd, av: []const Atom) ParamError!void {
 	const lbl_raw = av[10].getSymbol() orelse pd.s.empty();
 	self.lbl = unescape(lbl_raw);
 	const where: u2 = if (av[11].getFloat()) |f| @trunc(f) else 0;
-	self.b.where = @enumFromInt(where);
+	self.b.where = @fromBackingInt(where);
 
 	if (obj.binbuf) |binbuf| {
 		const slc = binbuf.getSlice();
@@ -823,7 +823,7 @@ inline fn create(av: []const Atom) CreateError!*Pd {
 	var where: WhereLabel = .left;
 	sw: switch (@min(av.len, 12)) {
 		12 => {
-			if (av[11].getFloat()) |f| where = @enumFromInt(@as(u2, @trunc(f)));
+			if (av[11].getFloat()) |f| where = @fromBackingInt(@as(u2, @trunc(f)));
 		continue :sw 11; }, 11 => {
 			if (av[10].getSymbol()) |s| rsl[2] = unescape(s);
 		continue :sw 10; }, 10 => {

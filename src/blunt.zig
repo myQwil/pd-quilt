@@ -38,10 +38,10 @@ const Blunt = struct {
 		var mask: u8 = 0;
 		const str = av[av.len - 1].w.symbol;
 		for (std.mem.sliceTo(str.name, 0)) |c| {
-			switch (@as(LBChar, @enumFromInt(c))) {
-				.load => mask |= 1 << @intFromEnum(LB.load),
-				.init => mask |= 1 << @intFromEnum(LB.init),
-				.close => mask |= 1 << @intFromEnum(LB.close),
+			switch (@as(LBChar, @fromBackingInt(c))) {
+				.load => mask |= 1 << @backingInt(LB.load),
+				.init => mask |= 1 << @backingInt(LB.init),
+				.close => mask |= 1 << @backingInt(LB.close),
 				_ => continue,
 			}
 		}

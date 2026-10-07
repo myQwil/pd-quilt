@@ -5,28 +5,28 @@
 	.minimum_zig_version = "0.17.0",
 	.dependencies = .{
 		.pd = .{
-			.url = "git+https://github.com/myQwil/pd#a1651fd8bbdea23f67544b0af6b168ee5dbae0cd",
-			.hash = "pd-0.57.0-DC007cdbAgDerOMeUZgc1p7A9QEsL45YwqPoYYxOJYsC",
+			.url = "git+https://github.com/myQwil/pd#485481925a486b82071dd6f1b404a231c8cbf256",
+			.hash = "pd-0.57.0-DC007ZhcAgDWbwwViGNdHWXF454Xycrh6WR-aNsIEFuW",
 		},
 		.gme = .{
-			.url = "git+https://codeberg.org/myQwil/gme#271ca224b3c979cc79bf1e07f50254b2fc9645a1",
-			.hash = "game_music_emu-0.6.6-YdNlAOVzAAAOTlhQlS4hU0yXoyXKZBxqAQkCiOjGs-Lw",
+			.url = "git+https://codeberg.org/myQwil/gme#dc91a281ac14687de12011cb7b120d9f5970dd3a",
+			.hash = "game_music_emu-0.6.6-YdNlAMF0AADrgE1qtc8Trzq9fe8ZhAKAwbddCfpRHiDc",
 		},
 		.unrar = .{
-			.url = "git+https://github.com/myQwil/unrar#1e9675070dd98f47606a5b26403be023692b6088",
-			.hash = "unrar-7.2.5-zNpgmUo2AAARWgcsOJ7OJND1t1F-TifZYY26vlt32WGy",
+			.url = "git+https://github.com/myQwil/unrar#9c23b9cf6bbf472ef4e0fb2e26081a8e4f3a0a29",
+			.hash = "unrar-7.2.5-zNpgmSA3AAAzlw-NjwVtbdBDvovSCROtfrfhmkI4_-ci",
 		},
 		.samplerate = .{
-			.url = "git+https://github.com/myQwil/libsamplerate#741482b48bb0405aa17613b52421faadde2ed484",
-			.hash = "libsamplerate-0.2.3-f8m6boE1AABaOEK6vHuHg6Sp4OREgSeJeTJQ3JiwC0Tw",
+			.url = "git+https://github.com/myQwil/libsamplerate#32c583312c4b48251a5cb217ed1383aeafe7ba0c",
+			.hash = "libsamplerate-0.2.3-f8m6blk2AADSBW1EUJaSjKDMR93YQ3_t8IjnmUBS1UIE",
 		},
 		.rubberband = .{
-			.url = "git+https://github.com/myQwil/rubberband#5a6a8d55fd7f9e630718aa4c962e160bb67b3d76",
-			.hash = "rubberband-4.0.0-RbnorIcaAQBlddvXvyuucCTb-Y8fJlKLss9hFQ4LKSTV",
+			.url = "git+https://github.com/myQwil/rubberband#6251da3362326f025d597cf985dee7cad28e0cfd",
+			.hash = "rubberband-4.0.0-RbnorGQbAQBJ0qiE0H94mtuMABGkzfKIAc-mWfaX3cIG",
 		},
 		.ffmpeg = .{
-			.url = "git+https://github.com/myQwil/ffmpeg#897d218f8cd137a649739432196868ed54c0ebbc",
-			.hash = "ffmpeg-8.1.2-1kurk_wFAgC-SpbRo3TqgpGjrf9i2aMPhb4enAfuSlO1",
+			.url = "git+https://github.com/myQwil/ffmpeg#fc6ac561bf00abe6c8571eeda8aca68294a06e82",
+			.hash = "ffmpeg-8.1.2-1kurk84FAgAzoxhYBVJD08tSZCyEqVzdFgHW_TfR6qM5",
 		},
 	},
 	.paths = .{
