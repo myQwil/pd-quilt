@@ -127,22 +127,22 @@ fn keyLangVal(line: [:0]u8) struct { [:0]const u8, [:0]const u8, ?[]const u8 } {
 	const eq = std.mem.findScalar(u8, line, '=');
 	const value = if (eq) |i| line[i + 1 ..] else null;
 	const end = tx.trimEnd(line[0..(eq orelse line.len)], tx.wspace);
-
-	const kend, const lang = if (std.mem.findScalar(u8, line[0..end], '[')) |brac| blk: {
-		const lb = brac + 1 + tx.trimStart(line[brac + 1 ..], tx.wspace);
-		const lend = if (std.mem.findScalar(u8, line[lb..end], ']')) |b|
-			lb + tx.trimEnd(line[lb..][0..b], tx.wspace)
-		else end;
-		if (lend < line.len) {
-			line[lend] = 0;
-		}
-		break :blk .{ tx.trimEnd(line[0..brac], tx.wspace), line[lb..lend :0] };
-	} else .{ end, line[end..end :0] };
-
-	if (kend < line.len) {
-		line[kend] = 0;
+	if (end < line.len) {
+		line[end] = 0;
 	}
-	const key = line[0..kend :0];
+
+	const key, const lang = if (std.mem.findScalar(u8, line[0..end], '[')) |brac| blk: {
+		const kend = tx.trimEnd(line[0..brac], tx.wspace);
+		line[kend] = 0;
+		const lb = brac + 1 + tx.trimStart(line[brac + 1 ..], tx.wspace);
+		const lend = if (std.mem.findScalar(u8, line[lb..end], ']')) |b| lend: {
+			const lend = lb + tx.trimEnd(line[lb..][0..b], tx.wspace);
+			line[lend] = 0;
+			break :lend lend;
+		} else end;
+		break :blk .{ line[0..kend :0], line[lb..lend :0] };
+	} else .{ line[0..end :0], line[end..end :0] };
+
 	tx.makeLowerCase(key);
 	tx.makeLowerCase(lang);
 	return .{ key, lang, value };
