@@ -123,7 +123,9 @@ pub fn putGet(
 	return result;
 }
 
-fn keyLangVal(line: [:0]u8) struct { [:0]const u8, [:0]const u8, ?[]const u8 } {
+const KlvResult = struct { [:0]const u8, [:0]const u8, ?[]const u8 };
+
+fn keyLangVal(line: [:0]u8) KlvResult {
 	const eq = std.mem.findScalar(u8, line, '=');
 	const value = if (eq) |i| line[i + 1 ..] else null;
 	const end = tx.trimEnd(line[0..(eq orelse line.len)], tx.wspace);
@@ -150,11 +152,24 @@ fn keyLangVal(line: [:0]u8) struct { [:0]const u8, [:0]const u8, ?[]const u8 } {
 
 test keyLangVal {
 	var line: [128:0]u8 = undefined;
-	@memcpy(line[0..25], "aRtIsT  [ eN ]  =Some Guy");
-	const key, const lang, const val = keyLangVal(&line);
-	try std.testing.expectEqualStrings(key, "artist");
-	try std.testing.expectEqualStrings(lang, "en");
-	try std.testing.expectStringStartsWith(val orelse "", "Some Guy");
+	for ([_]struct { str: []const u8, res: KlvResult }{
+		.{ .str = "aRtIsT  [ eN ]  =Some Guy", .res = .{ "artist", "en", "Some Guy" } },
+		.{ .str = "title = Hello World", .res = .{ "title", "", " Hello World" } },
+		.{ .str = "album[en]", .res = .{ "album", "en", null } },
+		.{ .str = "album[] =", .res = .{ "album", "", "" } },
+	}) |case| {
+		@memcpy(line[0..case.str.len], case.str);
+		line[case.str.len] = 0;
+		const expect_key, const expect_lang, const expect_val = case.res;
+		const key, const lang, const val = keyLangVal(line[0..case.str.len :0]);
+		try std.testing.expectEqualStrings(expect_key, key);
+		try std.testing.expectEqualStrings(expect_lang, lang);
+		if (val != null and expect_val != null) {
+			try std.testing.expectEqualStrings(expect_val.?, val.?);
+		} else {
+			try std.testing.expectEqual(expect_val, val);
+		}
+	}
 }
 
 fn traverse(
