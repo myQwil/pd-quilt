@@ -13,6 +13,11 @@ const name = "sesom";
 var class: *pd.Class = undefined;
 const Box = pd.Box(pd.Object, @This());
 
+fn floatC(p: *const Pd, f: Float) callconv(.c) void {
+	const self = Box.stateConst(p);
+	(if (f > self.f) self.out_l else self.out_r).float(f);
+}
+
 fn createC(f: Float) callconv(.c) ?*Pd {
 	return pd.wrap(*Pd, create(f), name);
 }
@@ -28,11 +33,6 @@ inline fn create(f: Float) pd.Oom!*Pd {
 		.f = f,
 	};
 	return &obj.g.pd;
-}
-
-fn floatC(p: *const Pd, f: Float) callconv(.c) void {
-	const self = Box.stateConst(p);
-	(if (f > self.f) self.out_l else self.out_r).float(f);
 }
 
 inline fn setup() pd.Class.Error!void {

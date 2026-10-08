@@ -127,7 +127,11 @@ pub fn build(b: *Build) !void {
 
 	//---------------------------------------------------------------------------
 	// Dependencies and modules
-	const pd_dep = b.dependency("pd", .{ .float_size = opt.float_size });
+	const pd_dep = b.dependency("pd", .{
+		.target = target,
+		.optimize = optimize,
+		.float_size = opt.float_size,
+	});
 	const pd_mod = pd_dep.module("pd");
 
 	const gme = getModule(b, "gme", .{
