@@ -116,10 +116,6 @@ pub fn installLink(b: *Build, symlink: *Build.Step.Compile, src: []const u8) voi
 	b.getInstallStep().dependOn(&run.step);
 }
 
-pub fn installFile(b: *Build, _: *Build.Step.Compile, src: []const u8) void {
-	b.installFile(src, std.fs.path.basename(src));
-}
-
 pub fn build(b: *Build) !void {
 	const target = b.standardTargetOptions(.{});
 	const optimize = b.standardOptimizeOption(.{});
@@ -221,40 +217,44 @@ pub fn build(b: *Build) !void {
 
 	//---------------------------------------------------------------------------
 	// Install help patches and abstractions
-	const symlink = b.addExecutable(.{
-		.name = "symlink",
-		.root_module = b.createModule(.{
-			.root_source_file = pd_dep.path("src/build/symlink.zig"),
-			.target = b.graph.host,
-		}),
-	});
-	switch (opt.patches) {
-		.copy => b.installDirectory(.{
+	if (opt.patches == .skip) {
+		return;
+	}
+	const io = b.graph.io;
+	if (opt.patches == .copy) {
+		b.installDirectory(.{
 			.source_dir = b.path("help/plist"),
 			.install_dir = .prefix,
 			.install_subdir = "plist",
-		}),
-		.symbolic => installLink(b, symlink, "help/plist"),
-		.skip => {},
-	}
-	const io = b.graph.io;
-	const InstallFunc = fn(*Build, *Build.Step.Compile, src: []const u8) void;
-	const install: *const InstallFunc = switch (opt.patches) {
-		.symbolic => installLink,
-		.copy => installFile,
-		.skip => return,
-	};
-
-	for ([_][]const u8{ "help", "abstractions" }) |dir_name| {
-		var dir = try std.Io.Dir.cwd().openDir(io, dir_name, .{ .iterate = true });
-		defer dir.close(io);
-
-		var iter = dir.iterate();
-		while (try iter.next(io)) |file| {
-			if (file.kind != .file) {
-				continue;
+		});
+		for ([_][]const u8{ "help", "abstractions" }) |dir_name| {
+			var dir = try std.Io.Dir.cwd().openDir(io, dir_name, .{ .iterate = true });
+			defer dir.close(io);
+			var iter = dir.iterate();
+			while (try iter.next(io)) |file| {
+				if (file.kind == .file) {
+					b.installFile(b.fmt("{s}/{s}", .{ dir_name, file.name }), file.name);
+				}
 			}
-			install(b, symlink, b.fmt("{s}/{s}", .{ dir_name, file.name }));
+		}
+	} else {
+		const symlink = b.addExecutable(.{
+			.name = "symlink",
+			.root_module = b.createModule(.{
+				.root_source_file = pd_dep.path("src/build/symlink.zig"),
+				.target = b.graph.host,
+			}),
+		});
+		installLink(b, symlink, "help/plist");
+		for ([_][]const u8{ "help", "abstractions" }) |dir_name| {
+			var dir = try std.Io.Dir.cwd().openDir(io, dir_name, .{ .iterate = true });
+			defer dir.close(io);
+			var iter = dir.iterate();
+			while (try iter.next(io)) |file| {
+				if (file.kind == .file) {
+					installLink(b, symlink, b.fmt("{s}/{s}", .{ dir_name, file.name }));
+				}
+			}
 		}
 	}
 }
