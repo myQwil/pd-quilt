@@ -82,7 +82,8 @@ inline fn dump(p: *Pd, av: []const Atom) !void {
 		var chaps: tx.Chapters = try .fromPath(gpa, io, self.plist.get(i));
 		defer chaps.deinit(gpa);
 		const chap = chaps.get(indexFromFloat(g, chaps.tbl.items.len) catch return);
-		pd.post.log(p, .normal, "at %g:", .{ chap.time });
+		const ftime: f64 = @as(f64, @floatFromInt(chap.time)) / 1_000_000.0;
+		pd.post.log(p, .normal, "at %g:", .{ ftime });
 		break :blk try .fromPath(gpa, io, chap.trax);
 	} else |_| try .fromPath(gpa, io, self.plist.get(i));
 	defer meta.deinit(gpa);

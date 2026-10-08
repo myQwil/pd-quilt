@@ -5,7 +5,7 @@ inline fn isDigit(c: u8) bool {
 	return '0' <= c and c <= '9';
 }
 
-pub fn iParse(buf: []const u8, len: ?*usize) std.fmt.ParseIntError!i32 {
+pub fn iParse(buf: []const u8, len: ?*usize) std.fmt.ParseIntError!i64 {
 	var s = buf;
 	if (s.len > 0 and (s[0] == '-' or s[0] == '+')) {
 		s = s[1..];
@@ -15,11 +15,11 @@ pub fn iParse(buf: []const u8, len: ?*usize) std.fmt.ParseIntError!i32 {
 	if (len) |l| {
 		l.* = used;
 	}
-	return std.fmt.parseInt(i32, buf[0..used], 10);
+	return std.fmt.parseInt(i64, buf[0..used], 10);
 }
 
 test iParse {
-	for ([_]struct{ str: []const u8, num: std.fmt.ParseIntError!i32, len: usize }{
+	for ([_]struct{ str: []const u8, num: std.fmt.ParseIntError!i64, len: usize }{
 		.{ .str = "123", .num = 123, .len = 3 },
 		.{ .str = "-456abc", .num = -456, .len = 4 },
 		.{ .str = "-abc", .num = error.InvalidCharacter, .len = 1 },

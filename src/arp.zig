@@ -25,8 +25,8 @@ inline fn iDiv(g: Float, len: usize) struct {num: i32, den: i32, quo: i32 } {
 	return .{ .num = num, .den = den, .quo = quo };
 }
 
-fn onset(i: i32, len: usize) usize {
-	const j: u32 = @min(@max(0, @abs(i)), len);
+fn onset(i: i64, len: usize) usize {
+	const j: u64 = @min(@max(0, @abs(i)), len);
 	return if (i < 0) len - j else j;
 }
 
@@ -84,7 +84,7 @@ const Arp = struct {
 		else try fParse(s, null);
 	}
 
-	fn list(self: *const Arp, vec: []Word, av: []const Atom, on: i32) pd.Oom!void {
+	fn list(self: *const Arp, vec: []Word, av: []const Atom, on: i64) pd.Oom!void {
 		const temp = try gpa.dupe(Word, vec); // vec in its initial state
 		defer gpa.free(temp);
 

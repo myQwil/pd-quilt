@@ -2,11 +2,13 @@ const Chapters = @This();
 
 const std = @import("std");
 const tx = @import("trax.zig");
-const iParse = @import("numparse.zig").iParse;
+const np = @import("numparse.zig");
 
 const Io = std.Io;
 const Allocator = std.mem.Allocator;
 const StringMap = tx.StringMap;
+const iParse = np.iParse;
+const fParse = np.fParse;
 
 /// byte array
 buf: tx.Buffer = .empty,
@@ -14,14 +16,14 @@ buf: tx.Buffer = .empty,
 tbl: std.ArrayList(Entry) = .empty,
 
 const Entry = struct {
-	time: f64,
+	time: i64,
 	trax: tx.Offset,
 	title: ?tx.Offset = null,
 };
 
 const Chapter = struct {
-	/// start time
-	time: f64,
+	/// start time in microseconds
+	time: i64,
 	/// chapter metadata trax file
 	trax: [:0]const u8,
 	/// chapter title
@@ -42,13 +44,83 @@ pub fn deinit(self: *Chapters, gpa: Allocator) void {
 	self.tbl.deinit(gpa);
 }
 
+const to_usec = 1_000_000;
+
+fn parseTime(str: []const u8, len: ?*usize) ?i64 {
+	if (str.len == 0) {
+		return null;
+	}
+	var s = str;
+
+	// chapter start time in seconds
+	var l: usize = undefined;
+	var no_digits: bool = true;
+	var usec: i64 = if (iParse(s, &l)) |i| blk: {
+		s = s[l..];
+		no_digits = false;
+		break :blk i * to_usec;
+	} else |_| 0;
+
+	// minute/hour syntax
+	while (s.len > 0 and s[0] == ':') {
+		s = s[1..];
+		usec *= 60;
+		if (iParse(s, &l)) |i| {
+			usec += i * to_usec;
+			no_digits = false;
+			s = s[l..];
+		} else |_| {}
+	}
+
+	// milliseconds
+	if (s.len > 0 and s[0] == '.') {
+		s = s[1..];
+		if (iParse(s, &l)) |i| {
+			const ilen: i64 = @intCast(l);
+			if (ilen > 6) {
+				usec += @divTrunc(i, std.math.powi(i64, 10, ilen - 6) catch 1);
+			} else {
+				usec += i * (std.math.powi(i64, 10, 6 - ilen) catch 1);
+			}
+			no_digits = false;
+			s = s[l..];
+		} else |_| {}
+	}
+
+	if (no_digits) {
+		return null;
+	}
+	if (len) |length| {
+		length.* = str.len - s.len;
+	}
+	return usec;
+}
+
+test parseTime {
+	for ([_]struct{ str: []const u8, num: ?i64, len: usize }{
+		.{ .str = "123.", .num = 123_000_000, .len = 4 },
+		.{ .str = ".125", .num = 125_000, .len = 4 },
+		.{ .str = "01:23.125432", .num = 83_125_432, .len = 12 },
+		.{ .str = "1:2:34.125", .num = 3_754_125_000, .len = 10 },
+		.{ .str = "1::34.125", .num = 3_634_125_000, .len = 9 },
+		.{ .str = "0.123456789", .num = 123_456, .len = 11 },
+		.{ .str = ":.", .num = null, .len = 0 },
+		.{ .str = "2562047788::54.775807", .num = std.math.maxInt(i64), .len = 21 },
+	}) |case| {
+		var len: usize = 0;
+		const num = parseTime(case.str, &len);
+		try std.testing.expectEqual(case.num, num);
+		try std.testing.expectEqual(case.len, len);
+	}
+}
+
 fn traverse(
 	self: *Chapters,
 	gpa: Allocator,
 	io: Io,
 	parents: *StringMap,
 	path: [:0]const u8,
-	time: f64,
+	time: i64,
 ) tx.TravError!void {
 	const file = tx.pathCheck(parents, gpa, io, path)
 		catch |e| return tx.err(0, e, path.ptr, "chapter");
@@ -72,38 +144,14 @@ fn traverse(
 		}
 		line = std.mem.trimStart(u8, line[1..], tx.wspace);
 
-		// chapter start time in seconds
-		var sec: f64 = -1;
 		var len: usize = undefined;
-		if (iParse(line, &len)) |i| {
-			sec = @floatFromInt(i);
-			line = line[len..];
-		} else |_| {}
+		const usec = parseTime(line, &len) orelse -1;
+		line = std.mem.trimStart(u8, line[len + 1 ..], tx.wspace);
 
-		// minute/hour syntax
-		while (line[0] == ':') {
-			line = line[1..];
-			if (iParse(line, &len)) |i| {
-				sec = (sec * 60) + @as(f64, @floatFromInt(i));
-				line = line[len..];
-			} else |_| {}
-		}
-
-		// milliseconds
-		if (line[0] == '.') {
-			line = line[1..];
-			if (iParse(line, &len)) |i| {
-				const scale: f64 = @floatFromInt(std.math.powi(usize, 10, len) catch 1);
-				sec += @as(f64, @floatFromInt(i)) / scale;
-				line = line[len..];
-			} else |_| {}
-		}
-		line = std.mem.trimStart(u8, line[1..], tx.wspace);
-
-		if (sec == 0 and self.tbl.items.len > 0) {
+		if (usec == 0 and self.tbl.items.len > 0) {
 			self.tbl.items.len -= 1;
 		}
-		const agg = time + sec;
+		const agg = time + usec;
 		if (line[0] == '>') {
 			const resolved = try tx.resolveZ(gpa, &.{ dir, line[1..] });
 			defer gpa.free(resolved);
