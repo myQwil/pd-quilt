@@ -45,12 +45,9 @@ fn traverse(
 
 	var buf: [std.fs.max_path_bytes:0]u8 = undefined;
 	var r = file.reader(io, &buf);
-	while (r.interface.takeDelimiterExclusive('\n')) |slice| {
+	while (r.interface.takeDelimiterExclusive('\n')) |slc| {
 		defer _ = r.interface.take(1) catch {};
-		const line = blk: {
-			const trim = tx.trimRange(slice, 0);
-			break :blk slice[trim[0]..trim[1]];
-		};
+		const line = std.mem.trimStart(u8, std.mem.trimEnd(u8, slc, "\r"), tx.wspace);
 
 		// empty or not >path
 		if (line.len == 0 or line[0] != '>') {

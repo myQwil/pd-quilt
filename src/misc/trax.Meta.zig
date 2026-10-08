@@ -123,31 +123,52 @@ pub fn putGet(
 	return result;
 }
 
+fn trimStart(str: []const u8, offset: usize) usize {
+	const s = str[offset..];
+	var a: usize = 0;
+	while (a < s.len and std.mem.findScalar(u8, tx.wspace, s[a]) != null) : (a += 1) {}
+	return offset + a;
+}
+
+fn trimEnd(s: []const u8) usize {
+	var z: usize = s.len;
+	while (z > 0 and std.mem.findScalar(u8, tx.wspace, s[z - 1]) != null) : (z -= 1) {}
+	return z;
+}
+
+test "trim" {
+	const str = "   abc  def  ";
+	try std.testing.expectEqual(3, trimStart(str, 0));
+	try std.testing.expectEqual(8, trimStart(str, 6));
+
+	try std.testing.expectEqual(11, trimEnd(str));
+	try std.testing.expectEqual(6, trimEnd(str[0..8]));
+}
+
 const KlvResult = struct { [:0]const u8, [:0]const u8, ?[]const u8 };
 
 fn keyLangVal(line: [:0]u8) KlvResult {
 	const eq = std.mem.findScalar(u8, line, '=');
-	const value = if (eq) |i| line[i + 1 ..] else null;
-	const end = tx.trimEnd(line[0..(eq orelse line.len)], tx.wspace);
+	const end = trimEnd(line[0 .. eq orelse line.len]);
 	if (end < line.len) {
 		line[end] = 0;
 	}
 
-	const key, const lang = if (std.mem.findScalar(u8, line[0..end], '[')) |brac| blk: {
-		const kend = tx.trimEnd(line[0..brac], tx.wspace);
+	const key, const lang = if (std.mem.findScalar(u8, line[0..end], '[')) |bracl| blk: {
+		const kend = trimEnd(line[0..bracl]);
 		line[kend] = 0;
-		const lb = brac + 1 + tx.trimStart(line[brac + 1 ..], tx.wspace);
-		const lend = if (std.mem.findScalar(u8, line[lb..end], ']')) |b| lend: {
-			const lend = lb + tx.trimEnd(line[lb..][0..b], tx.wspace);
+		const lstart = trimStart(line, bracl + 1);
+		const lend = if (std.mem.findScalar(u8, line[lstart..end], ']')) |bracr| lend: {
+			const lend = lstart + trimEnd(line[lstart..][0..bracr]);
 			line[lend] = 0;
 			break :lend lend;
 		} else end;
-		break :blk .{ line[0..kend :0], line[lb..lend :0] };
+		break :blk .{ line[0..kend :0], line[lstart..lend :0] };
 	} else .{ line[0..end :0], line[end..end :0] };
 
 	tx.makeLowerCase(key);
 	tx.makeLowerCase(lang);
-	return .{ key, lang, value };
+	return .{ key, lang, if (eq) |i| line[i + 1 ..] else null };
 }
 
 test keyLangVal {
@@ -189,12 +210,13 @@ fn traverse(
 	var typ: enum { tag, include } = .tag;
 	var buf: [std.fs.max_path_bytes:0]u8 = undefined;
 	var r = file.reader(io, &buf);
-	while (r.interface.takeDelimiterExclusive('\n')) |slice| {
+	while (r.interface.takeDelimiterExclusive('\n')) |slc| {
 		defer _ = r.interface.take(1) catch {};
 		var line: [:0]u8 = blk: {
-			const trim = tx.trimRange(slice, r.interface.seek - slice.len);
-			buf[trim[1]] = 0;
-			break :blk buf[trim[0]..trim[1] :0];
+			const end: usize = r.interface.seek
+				- @as(usize, if (slc.len > 0 and slc[slc.len - 1] == '\r') 1 else 0);
+			buf[end] = 0;
+			break :blk buf[trimStart(&buf, r.interface.seek - slc.len)..end :0];
 		};
 
 		// empty or #comment

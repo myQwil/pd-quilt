@@ -62,20 +62,15 @@ fn traverse(
 
 	var buf: [std.fs.max_path_bytes:0]u8 = undefined;
 	var r = file.reader(io, &buf);
-	while (r.interface.takeDelimiterExclusive('\n')) |slice| {
+	while (r.interface.takeDelimiterExclusive('\n')) |slc| {
 		defer _ = r.interface.take(1) catch {};
-		var line: [:0]u8 = blk: {
-			const trim = tx.trimRange(slice, r.interface.seek - slice.len);
-			buf[trim[1]] = 0;
-			break :blk buf[trim[0]..trim[1] :0];
-		};
+		var line = std.mem.trimStart(u8, std.mem.trimEnd(u8, slc, "\r"), tx.wspace);
 
 		// empty or not [01:23.456]
 		if (line.len == 0 or line[0] != '[') {
 			continue;
 		}
-		line = line[1..];
-		line = line[tx.trimStart(line, " \t")..];
+		line = std.mem.trimStart(u8, line[1..], tx.wspace);
 
 		// chapter start time in seconds
 		var sec: f64 = -1;
@@ -103,8 +98,7 @@ fn traverse(
 				line = line[len..];
 			} else |_| {}
 		}
-		line = line[1..];
-		line = line[tx.trimStart(line, " \t")..];
+		line = std.mem.trimStart(u8, line[1..], tx.wspace);
 
 		if (sec == 0 and self.tbl.items.len > 0) {
 			self.tbl.items.len -= 1;
@@ -115,13 +109,11 @@ fn traverse(
 			defer gpa.free(resolved);
 			try self.tbl.append(gpa, .{ .time = agg, .trax = .{} });
 			try self.traverse(gpa, io, parents, resolved, agg);
+		} else if (line[0] == '=') {
+			const title = try tx.appendSliceZ(&self.buf, gpa, line[1..]);
+			try self.tbl.append(gpa, .{ .time = agg, .trax = trax, .title = title });
 		} else {
-			if (line[0] == '=') {
-				const title = try tx.appendSliceZ(&self.buf, gpa, line[1..]);
-				try self.tbl.append(gpa, .{ .time = agg, .trax = trax, .title = title });
-			} else {
-				try self.tbl.append(gpa, .{ .time = agg, .trax = trax });
-			}
+			try self.tbl.append(gpa, .{ .time = agg, .trax = trax });
 		}
 	} else |e| if (e != error.EndOfStream) {
 		return e;

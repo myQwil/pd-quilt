@@ -21,25 +21,7 @@ pub inline fn isTrax(filename: []const u8) bool {
 	return std.mem.endsWith(u8, filename, trext);
 }
 
-pub fn trimStart(s: []const u8, exclude: []const u8) usize {
-	var a: usize = 0;
-	while (a < s.len and std.mem.findScalar(u8, exclude, s[a]) != null) : (a += 1) {}
-	return a;
-}
-
-pub fn trimEnd(s: []const u8, exclude: []const u8) usize {
-	var z: usize = s.len;
-	while (z > 0 and std.mem.findScalar(u8, exclude, s[z - 1]) != null) : (z -= 1) {}
-	return z;
-}
-
 pub const wspace = " \t";
-
-pub fn trimRange(line: []const u8, offset: usize) [2]usize {
-	const a: usize = trimStart(line, wspace);
-	const r: usize = if (line.len > 0 and line[line.len - 1] == '\r') 1 else 0;
-	return .{ offset + a, offset + (line.len - r) };
-}
 
 pub fn makeLowerCase(s: []u8) void {
 	for (s) |*c| {
