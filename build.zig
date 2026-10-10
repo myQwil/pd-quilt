@@ -86,27 +86,18 @@ const externals = [_]External{
 	.{ .name = "unpaq" },
 };
 
-fn getModule(
+fn installDynamicLib(
 	b: *Build,
+	dep: *Build.Dependency,
 	name: []const u8,
-	args: anytype,
-) *Build.Module {
-	const dep = b.dependency(name, args);
-
-	const linkage: LinkMode = args.linkage;
-	if (linkage == .dynamic) {
-		const lib = dep.artifact(name);
-		const target: Build.ResolvedTarget = args.target;
-		const install = b.addInstallFile(lib.getEmittedBin(), b.fmt("{s}{s}{s}", .{
-			target.result.os.tag.libPrefix(target.result.abi),
-			name,
-			target.result.dynamicLibSuffix(),
-		}));
-		install.step.dependOn(&lib.step);
-		b.getInstallStep().dependOn(&install.step);
-	}
-
-	return dep.module(name);
+	target: std.Target,
+) void {
+	const lib = dep.artifact(name);
+	const install = b.addInstallFile(lib.getEmittedBin(), b.fmt("{s}{s}{s}", .{
+		target.os.tag.libPrefix(target.abi), name, target.dynamicLibSuffix(),
+	}));
+	install.step.dependOn(&lib.step);
+	b.getInstallStep().dependOn(&install.step);
 }
 
 pub fn installLink(b: *Build, symlink: *Build.Step.Compile, src: []const u8) void {
@@ -130,28 +121,46 @@ pub fn build(b: *Build) !void {
 	});
 	const pd_mod = pd_dep.module("pd");
 
-	const gme = getModule(b, "gme", .{
+	const av = b.dependency("ffmpeg", .{
+		.target = target,
+		.optimize = optimize,
+	}).module("av");
+
+	const gme_dep = b.dependency("gme", .{
 		.target = target,
 		.optimize = .ReleaseFast,
 		.linkage = opt.linkage,
 		.ym2612_emu = .mame,
 	});
-	const unrar = getModule(b, "unrar", .{
+	const gme = gme_dep.module("gme");
+
+	const unrar_dep = gme_dep.builder.dependency("unrar", .{
 		.target = target,
 		.optimize = .ReleaseFast,
 		.linkage = opt.linkage,
 	});
-	const rabbit = getModule(b, "samplerate", .{
+	const unrar = unrar_dep.module("unrar");
+
+	const rabbit_dep = b.dependency("samplerate", .{
 		.target = target,
 		.optimize = .ReleaseFast,
 		.linkage = opt.linkage,
 	});
-	const rubber = getModule(b, "rubberband", .{
+	const rabbit = rabbit_dep.module("samplerate");
+
+	const rubber_dep = b.dependency("rubberband", .{
 		.target = target,
 		.optimize = .ReleaseFast,
 		.linkage = opt.linkage,
 	});
-	const av = b.dependency("ffmpeg", .{}).module("av");
+	const rubber = rubber_dep.module("rubberband");
+
+	if (opt.linkage == .dynamic) {
+		installDynamicLib(b, gme_dep, "gme", target.result);
+		installDynamicLib(b, unrar_dep, "unrar", target.result);
+		installDynamicLib(b, rabbit_dep, "samplerate", target.result);
+		installDynamicLib(b, rubber_dep, "rubberband", target.result);
+	}
 
 	//---------------------------------------------------------------------------
 	// Install externals
