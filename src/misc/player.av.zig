@@ -343,10 +343,10 @@ pub fn Base(frames: comptime_int) type { return struct {
 		}
 		var buf: [24]u8 = undefined;
 		fn ftime(self: *const Av) *const Pile {
-			return .string(pr.bufTime(&buf, @divTrunc(self.format.duration, 1000), false));
+			return .string(pr.bufTime(&buf, self.format.duration, false));
 		}
 		fn ptime(self: *const Av) *const Pile {
-			return .string(pr.bufTime(&buf, @divTrunc(self.format.duration, 1000), true));
+			return .string(pr.bufTime(&buf, self.format.duration, true));
 		}
 		fn tracks(self: *const Av) *const Pile {
 			return .float(@floatFromInt(self.trackCount()));

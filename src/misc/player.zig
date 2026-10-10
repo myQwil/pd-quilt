@@ -84,15 +84,15 @@ pub const Player = struct {
 	}
 };
 
-const secs = 1000;
+const secs = 1_000_000;
 const mins = 60 * secs;
 const hours = 60 * mins;
 
-fn printTime(writer: *Writer, ms: i64, precise: bool) Writer.Error!void {
-	if (ms < 0) {
+fn printTime(writer: *Writer, usec: i64, precise: bool) Writer.Error!void {
+	if (usec < 0) {
 		return;
 	}
-	const t: u63 = @truncate(@as(u64, @bitCast(ms)));
+	const t: u63 = @truncate(@as(u64, @bitCast(usec)));
 	const hr: u42 = @truncate(@divFloor(t, hours));
 	const mn: u8 = @truncate(@mod(@divFloor(t, mins), 60));
 	const sc: u8 = @truncate(@mod(@divFloor(t, secs), 60));
@@ -102,23 +102,28 @@ fn printTime(writer: *Writer, ms: i64, precise: bool) Writer.Error!void {
 	}
 	try writer.print("{:0>2}:{:0>2}", .{ mn, sc });
 	if (precise) {
-		try writer.print(".{}", .{ @mod(t, secs) });
+		try writer.print(".{:06}", .{ @mod(t, secs) });
+		writer.end = std.mem.trimEnd(u8, writer.buffered(), "0").len;
 	}
 }
 
-pub fn bufTime(buf: []u8, ms: i64, precise: bool) [:0]u8 {
+pub fn bufTime(buf: []u8, usec: i64, precise: bool) [:0]u8 {
 	var w: Writer = .fixed(buf[0 .. buf.len - 1]);
-	printTime(&w, ms, precise) catch { w.end = 0; };
+	printTime(&w, usec, precise) catch { w.end = 0; };
 	buf[w.end] = 0;
 	return buf[0..w.end :0];
 }
 
 test bufTime {
 	var buf: [24]u8 = undefined;
-	try std.testing.expectEqualStrings("01:03",
-		bufTime(&buf, 1*mins + 3*secs + 123, false));
-	try std.testing.expectEqualStrings("2562047788015:12:55.807",
-		bufTime(&buf, 2562047788015*hours + 12*mins + 55*secs + 807, true));
+	for ([_]struct{ us: i64, prec: bool, str: []const u8 }{
+		.{ .us = 1*mins + 3*secs + 123, .prec = false, .str = "01:03" },
+		.{ .us = 1*mins + 3*secs + 123, .prec = true, .str = "01:03.000123" },
+		.{ .us = 1*mins + 3*secs + 123_000, .prec = true, .str = "01:03.123" },
+		.{ .us = std.math.maxInt(i64), .prec = true, .str = "2562047788:00:54.775807" },
+	}) |case| {
+		try std.testing.expectEqualStrings(case.str, bufTime(&buf, case.us, case.prec));
+	}
 }
 
 inline fn isDigit(c: u8) bool {

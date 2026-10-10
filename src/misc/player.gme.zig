@@ -373,10 +373,10 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 		}
 		var buf: [24]u8 = undefined;
 		fn ftime(self: *const Gme) *const Pile {
-			return .string(pr.bufTime(&buf, self.length(), false));
+			return .string(pr.bufTime(&buf, self.length() * 1000, false));
 		}
 		fn ptime(self: *const Gme) *const Pile {
-			return .string(pr.bufTime(&buf, self.length(), true));
+			return .string(pr.bufTime(&buf, self.length() * 1000, true));
 		}
 		fn fade(self: *const Gme) *const Pile {
 			return .float(@floatFromInt(self.fade_length));
