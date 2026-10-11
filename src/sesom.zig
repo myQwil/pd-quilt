@@ -1,7 +1,5 @@
 //! Reverse `[moses]`. Outputs numbers to the left if they're greater than control value.
-
 const pd = @import("pd");
-
 const Pd = pd.Pd;
 const Float = pd.Float;
 

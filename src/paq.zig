@@ -1,13 +1,11 @@
 //! `[pack]` with `anything` inlets and passive mismatch error handling.
-
 const pd = @import("pd");
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
-
 const gpa = pd.gpa;
+
 var dot: *Symbol = undefined; // skips args
 
 fn set(self: []Atom, s: *Symbol, source: []const Atom) void {
@@ -73,8 +71,8 @@ const Paq = struct {
 
 	fn bangC(p: *const Pd) callconv(.c) void {
 		const self = Box.stateConst(p);
-		const vec = gpa.dupe(Atom, self.vec) catch |e|
-			return pd.post.err(p, name ++ ": %s", .{ @errorName(e).ptr });
+		const vec = gpa.dupe(Atom, self.vec)
+			catch |e| return pd.post.err(p, name ++ ": %s", .{ @errorName(e).ptr });
 		defer gpa.free(vec);
 		self.out.list(pd.s.list(), vec);
 	}

@@ -1,7 +1,5 @@
 //! Non-gui slider objects.
-
 const pd = @import("pd");
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
@@ -18,7 +16,7 @@ pub fn Slope(T: type) type { return struct {
 	var class: *pd.Class = undefined;
 	pub const Box = pd.Box(pd.Object, Self);
 
-	const getK: fn(min: f64, max: f64, run: f64) callconv(.@"inline") f64 = T.getK;
+	const getK: fn (min: f64, max: f64, run: f64) callconv(.@"inline") f64 = T.getK;
 
 	fn minC(p: *Pd, f: Float) callconv(.c) void {
 		const self = Box.state(p);
@@ -42,11 +40,16 @@ pub fn Slope(T: type) type { return struct {
 		sw: switch (@min(av.len + onset, 3)) {
 			3 => {
 				if (av[2 - onset].getFloat()) |f| self.run = f;
-			continue :sw 2; }, 2 => {
+				continue :sw 2;
+			},
+			2 => {
 				if (av[1 - onset].getFloat()) |f| self.max = f;
-			continue :sw 1; }, 1 => if (onset == 0) {
+				continue :sw 1;
+			},
+			1 => if (onset == 0) {
 				if (av[0].getFloat()) |f| self.min = f;
-			}, else => {},
+			},
+			else => {},
 		}
 		self.k = getK(self.min, self.max, self.run);
 	}
@@ -82,12 +85,17 @@ pub fn Slope(T: type) type { return struct {
 		var run: f64 = 1;
 
 		sw: switch (@min(av.len, 3)) {
-			3 => { if (av[2].getFloat()) |f| run = f; continue :sw 2; },
+			3 => {
+				if (av[2].getFloat()) |f| run = f;
+				continue :sw 2;
+			},
 			2 => {
 				if (av[1].getFloat()) |f| max = f;
 				if (av[0].getFloat()) |f| min = f;
 			},
-			1 => { if (av[0].getFloat()) |f| max = f; },
+			1 => {
+				if (av[0].getFloat()) |f| max = f;
+			},
 			else => {},
 		}
 		self.* = .{

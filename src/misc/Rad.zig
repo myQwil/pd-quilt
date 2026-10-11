@@ -1,11 +1,37 @@
-const Rad = @This();
+const std = @import("std");
 
 const pd = @import("pd");
-const std = @import("std");
-const bf = @import("bitfloat.zig");
-
-const UnFloat = bf.UnFloat;
 const Float = pd.Float;
+
+const bf = @import("bitfloat.zig");
+const UnFloat = bf.UnFloat;
+
+const Rad = @This();
+
+/// current value
+value: Float = 0,
+/// largest base power inside of int bits
+pwr: UInt,
+/// digits per slot
+dps: u16,
+/// bits per slot
+bps: u16,
+/// current radix
+base: u16,
+/// precision
+prec: u16,
+/// character limit. zero means auto.
+width: u16 = 0,
+/// number buffer
+buf: [std.fmt.float.bufferSize(.decimal, Float) :0]u8 = blk: {
+	var tmp: [std.fmt.float.bufferSize(.decimal, Float) :0]u8 = undefined;
+	@memcpy(tmp[0..2], "0\x00");
+	break :blk tmp;
+},
+/// the amount of buffered bytes
+end: u16 = 1,
+resize: bool = false,
+
 const FBig = f128;
 const UInt = u32;
 
@@ -137,7 +163,8 @@ inline fn diff(lhs: anytype, rhs: anytype) isize {
 	};
 	return if (swap)
 		-@as(isize, @as(usze, @truncate(rhs - lhs)))
-	else @as(isize, @as(usze, @truncate(lhs - rhs)));
+	else
+		@as(isize, @as(usze, @truncate(lhs - rhs)));
 }
 
 test diff {
@@ -152,7 +179,8 @@ inline fn offset(base: anytype, n: isize) @TypeOf(base) {
 	// we can't add a negative to unsigned, but we can subtract a positive.
 	return if (n < 0)
 		base - @as(usize, @bitCast(-n))
-	else base + @as(usize, @bitCast(n));
+	else
+		base + @as(usize, @bitCast(n));
 }
 
 test offset {
@@ -160,30 +188,6 @@ test offset {
 	try std.testing.expectEqual(offset(ptr, 1), ptr + 1);
 	try std.testing.expectEqual(offset(ptr, -1), ptr - 1);
 }
-
-/// current value
-value: Float = 0,
-/// largest base power inside of int bits
-pwr: UInt,
-/// digits per slot
-dps: u16,
-/// bits per slot
-bps: u16,
-/// current radix
-base: u16,
-/// precision
-prec: u16,
-/// character limit. zero means auto.
-width: u16 = 0,
-/// number buffer
-buf: [std.fmt.float.bufferSize(.decimal, Float) :0]u8 = blk: {
-	var tmp: [std.fmt.float.bufferSize(.decimal, Float) :0]u8 = undefined;
-	@memcpy(tmp[0..2], "0\x00");
-	break :blk tmp;
-},
-/// the amount of buffered bytes
-end: u16 = 1,
-resize: bool = false,
 
 pub fn init(base: u16, prec: u16) Rad {
 	const b: u16 = @min(@max(2, base), dgt.char.len);
@@ -261,7 +265,8 @@ pub fn write(self: *Rad) std.Io.Writer.Error!void {
 	var y: FBig = if (neg) -self.value else self.value;
 	var p: i32 = if (self.width != 0 and self.prec >= self.width)
 		self.width - uf.b.sign
-	else self.prec;
+	else
+		self.prec;
 
 	var e2: i32 = blk: {
 		const frexp = std.math.frexp(y);
@@ -362,10 +367,9 @@ pub fn write(self: *Rad) std.Io.Writer.Error!void {
 		// Are there any significant digits past j?
 		if (u != 0 or d + 1 != z) {
 			var round: FBig = 2 / std.math.floatEps(FBig);
-			if (
-				(d[0] / i & 1 != 0) or
-				(i == pwr and @intFromPtr(d) > @intFromPtr(a) and ((d - 1)[0] & 1 != 0))
-			) {
+			if ((d[0] / i & 1 != 0) or
+				(i == pwr and @intFromPtr(d) > @intFromPtr(a) and ((d - 1)[0] & 1 != 0)))
+			{
 				round += 2;
 			}
 			var small: FBig = if (u < i / 2)

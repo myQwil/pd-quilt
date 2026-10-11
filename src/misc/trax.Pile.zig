@@ -1,21 +1,21 @@
 //! A list of strings and floats that stores all values
 //! in a single buffer for fast deallocation.
-const Pile = @This();
+const std = @import("std");
+const Writer = std.Io.Writer;
+const Allocator = std.mem.Allocator;
+const Oom = Allocator.Error;
+const WriteError = Writer.Error;
 
 const pd = @import("pd");
-const std = @import("std");
-const tx = @import("trax.zig");
-const wr = @import("write.zig");
-
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
 const Outlet = pd.Outlet;
-const Writer = std.Io.Writer;
-const Allocator = std.mem.Allocator;
 
-const Oom = Allocator.Error;
-const WriteError = Writer.Error;
+const tx = @import("trax.zig");
+const wr = @import("write.zig");
+
+const Pile = @This();
 
 /// byte array
 buf: tx.Buffer = .empty,

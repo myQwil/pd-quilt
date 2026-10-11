@@ -1,8 +1,6 @@
 //! Similar to `[mtof]` and `[ftom]`
 //! but with adjustable reference pitch and number of tones in an octave.
-
 const pd = @import("pd");
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
@@ -23,8 +21,8 @@ pub fn Tet(T: type) type { return struct {
 	var class: *pd.Class = undefined;
 	pub const Box = pd.Box(pd.Object, Self);
 
-	const getK: fn(tet: Float) callconv(.@"inline") f64 = T.getK;
-	const getMin: fn(k: f64, ref: Float) callconv(.@"inline") f64 = T.getMin;
+	const getK: fn (tet: Float) callconv(.@"inline") f64 = T.getK;
+	const getMin: fn (k: f64, ref: Float) callconv(.@"inline") f64 = T.getMin;
 
 	fn refC(p: *Pd, f: Float) callconv(.c) void {
 		const self = Box.state(p);

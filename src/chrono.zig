@@ -1,12 +1,12 @@
 //! Timer with pause and lap features.
-const Chrono = @This();
-
 const pd = @import("pd");
-const Timer = @import("misc/timer.zig");
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Symbol = pd.Symbol;
+
+const Timer = @import("misc/timer.zig");
+
+const Chrono = @This();
 
 timer: Timer,
 /// outputs total duration
@@ -58,14 +58,18 @@ fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
 fn bang2C(p: *const Pd) callconv(.c) void {
 	const self = Box.stateConst(p);
 	const result = self.setmore + if (self.timer.paused)
-		0 else self.timer.timeSince(self.settime);
+		0
+	else
+		self.timer.timeSince(self.settime);
 	self.out_total.float(@floatCast(result));
 }
 
 fn lapC(p: *Pd) callconv(.c) void {
 	const self = Box.state(p);
 	const result = self.lapmore + if (self.timer.paused)
-		0 else self.timer.timeSince(self.laptime);
+		0
+	else
+		self.timer.timeSince(self.laptime);
 	self.out_lap.float(@floatCast(result));
 	self.laptime = pd.time();
 	self.lapmore = 0;

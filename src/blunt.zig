@@ -1,9 +1,8 @@
 //! Objects that can be triggered by load/init/close bang events.
 //! Objects based on pre-existing ones start with '`'
-
-const pd = @import("pd");
 const std = @import("std");
 
+const pd = @import("pd");
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Class = pd.Class;
@@ -74,7 +73,6 @@ const Blunt = struct {
 	};}
 };
 
-
 // ------------------------------ Binary operator ------------------------------
 // -----------------------------------------------------------------------------
 const BinOp = struct {
@@ -103,8 +101,13 @@ const BinOp = struct {
 	fn setC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
 		const self = Box.state(p);
 		sw: switch (@min(ac, 2)) {
-			2 => { if (av[1].getFloat()) |f| self.f2 = f; continue :sw 1; },
-			1 => { if (av[0].getFloat()) |f| self.f1 = f; },
+			2 => {
+				if (av[1].getFloat()) |f| self.f2 = f;
+				continue :sw 1;
+			},
+			1 => {
+				if (av[0].getFloat()) |f| self.f1 = f;
+			},
 			else => {},
 		}
 	}
@@ -138,7 +141,9 @@ const BinOp = struct {
 				if (av[0].getFloat()) |f| f1 = f;
 				if (av[1].getFloat()) |f| f2 = f;
 			},
-			1 => { if (av[0].getFloat()) |f| f2 = f; },
+			1 => {
+				if (av[0].getFloat()) |f| f2 = f;
+			},
 			else => {},
 		}
 		return .{
@@ -194,7 +199,7 @@ const BinOp = struct {
 
 	const Obj = struct {
 		name: [:0]const u8,
-		op: fn(Float, Float) callconv(.@"inline") Float,
+		op: fn (Float, Float) callconv(.@"inline") Float,
 	};
 
 	fn Impl(comptime ob: Obj, comptime t: Type) type { return struct {
@@ -227,17 +232,16 @@ const BinOp = struct {
 			const name = switch (t) {
 				.reverse_op => "@",
 				.hot_inlets => "#",
-				.alias      => "`",
-				.none       => "",
+				.alias => "`",
+				.none => "",
 			} ++ ob.name;
-			class = try .create(name, &.{ .gimme }, createC, null,  @sizeOf(Box), .{});
+			class = try .create(name, &.{ .gimme }, createC, null, @sizeOf(Box), .{});
 			class.addBang(bangC);
 			class.addMethod(&.{ .symbol }, sendC, .gen("send"));
 			extend(class);
 		}
 	};}
 };
-
 
 // ------------------------------ Unary operator -------------------------------
 // -----------------------------------------------------------------------------
@@ -281,7 +285,7 @@ const UnOp = struct {
 
 	const Type = struct {
 		name: [:0]const u8,
-		op: fn(Float) callconv(.@"inline") Float,
+		op: fn (Float) callconv(.@"inline") Float,
 		inlet: bool = false,
 		new: bool = false,
 	};
@@ -330,7 +334,6 @@ const UnOp = struct {
 		}
 	};}
 };
-
 
 // ----------------------------------- Bang ------------------------------------
 // -----------------------------------------------------------------------------
@@ -382,7 +385,6 @@ const Bang = struct {
 		BluntImpl.extend(class);
 	}
 };
-
 
 // ---------------------------------- Symbol -----------------------------------
 // -----------------------------------------------------------------------------
@@ -453,7 +455,6 @@ const Sym = struct {
 	}
 };
 
-
 // -------------------------------- Operations ---------------------------------
 // -----------------------------------------------------------------------------
 const Int = @Int(.signed, @bitSizeOf(Float));
@@ -481,14 +482,16 @@ inline fn max(f1: Float, f2: Float) Float {
 inline fn log(f1: Float, f2: Float) Float {
 	return if (f2 <= 0)
 		@log(f1)
-	else std.math.log(Float, f2, f1);
+	else
+		std.math.log(Float, f2, f1);
 }
 
 inline fn pow(f1: Float, f2: Float) Float {
 	const d2: Float = @floatFromInt(@as(Int, @trunc(f2)));
 	return if (f1 == 0 or (f1 < 0 and f2 - d2 != 0))
 		0
-	else std.math.pow(Float, f1, f2);
+	else
+		std.math.pow(Float, f1, f2);
 }
 
 // binop2:  <  >  <=  >=  ==  !=
@@ -522,16 +525,16 @@ inline fn ba(f1: Float, f2: Float) Float {
 	return @floatFromInt(@as(Int, @trunc(f1)) & @as(Int, @trunc(f2)));
 }
 inline fn bo(f1: Float, f2: Float) Float {
-	 return @floatFromInt(@as(Int, @trunc(f1)) | @as(Int, @trunc(f2)));
+	return @floatFromInt(@as(Int, @trunc(f1)) | @as(Int, @trunc(f2)));
 }
 inline fn bx(f1: Float, f2: Float) Float {
-	 return @floatFromInt(@as(Int, @trunc(f1)) ^ @as(Int, @trunc(f2)));
+	return @floatFromInt(@as(Int, @trunc(f1)) ^ @as(Int, @trunc(f2)));
 }
 inline fn ls(f1: Float, f2: Float) Float {
-	 return @floatFromInt(@as(Int, @trunc(f1)) << @trunc(f2));
+	return @floatFromInt(@as(Int, @trunc(f1)) << @trunc(f2));
 }
 inline fn rs(f1: Float, f2: Float) Float {
-	 return @floatFromInt(@as(Int, @trunc(f1)) >> @trunc(f2));
+	return @floatFromInt(@as(Int, @trunc(f1)) >> @trunc(f2));
 }
 
 inline fn rem(f1: Float, f2: Float) Float {
@@ -623,33 +626,33 @@ inline fn setup() ClassError!void {
 	};
 
 	inline for ([_]BinOpPlan{
-		.{ .ob = .{ .name = "+",     .op = plus } },
-		.{ .ob = .{ .name = "*",     .op = times } },
-		.{ .ob = .{ .name = "min",   .op = min } },
-		.{ .ob = .{ .name = "max",   .op = max } },
-		.{ .ob = .{ .name = "<",     .op = lt } },
-		.{ .ob = .{ .name = ">",     .op = gt } },
-		.{ .ob = .{ .name = "<=",    .op = le } },
-		.{ .ob = .{ .name = ">=",    .op = ge } },
-		.{ .ob = .{ .name = "==",    .op = ee } },
-		.{ .ob = .{ .name = "!=",    .op = ne } },
-		.{ .ob = .{ .name = "&&",    .op = la } },
-		.{ .ob = .{ .name = "||",    .op = lo } },
-		.{ .ob = .{ .name = "&",     .op = ba } },
-		.{ .ob = .{ .name = "|",     .op = bo } },
-		.{ .ob = .{ .name = "^",     .op = bx }, .uniq = true },
-		.{ .ob = .{ .name = "-",     .op = minus }, .rev = true },
-		.{ .ob = .{ .name = "/",     .op = over },  .rev = true },
-		.{ .ob = .{ .name = "log",   .op = log },   .rev = true },
-		.{ .ob = .{ .name = "pow",   .op = pow },   .rev = true },
-		.{ .ob = .{ .name = "<<",    .op = ls },    .rev = true },
-		.{ .ob = .{ .name = ">>",    .op = rs },    .rev = true },
-		.{ .ob = .{ .name = "%",     .op = rem },   .rev = true },
-		.{ .ob = .{ .name = "mod",   .op = mod },   .rev = true },
-		.{ .ob = .{ .name = "div",   .op = div },   .rev = true },
+		.{ .ob = .{ .name = "+", .op = plus } },
+		.{ .ob = .{ .name = "*", .op = times } },
+		.{ .ob = .{ .name = "min", .op = min } },
+		.{ .ob = .{ .name = "max", .op = max } },
+		.{ .ob = .{ .name = "<", .op = lt } },
+		.{ .ob = .{ .name = ">", .op = gt } },
+		.{ .ob = .{ .name = "<=", .op = le } },
+		.{ .ob = .{ .name = ">=", .op = ge } },
+		.{ .ob = .{ .name = "==", .op = ee } },
+		.{ .ob = .{ .name = "!=", .op = ne } },
+		.{ .ob = .{ .name = "&&", .op = la } },
+		.{ .ob = .{ .name = "||", .op = lo } },
+		.{ .ob = .{ .name = "&", .op = ba } },
+		.{ .ob = .{ .name = "|", .op = bo } },
+		.{ .ob = .{ .name = "^", .op = bx }, .uniq = true },
+		.{ .ob = .{ .name = "-", .op = minus }, .rev = true },
+		.{ .ob = .{ .name = "/", .op = over }, .rev = true },
+		.{ .ob = .{ .name = "log", .op = log }, .rev = true },
+		.{ .ob = .{ .name = "pow", .op = pow }, .rev = true },
+		.{ .ob = .{ .name = "<<", .op = ls }, .rev = true },
+		.{ .ob = .{ .name = ">>", .op = rs }, .rev = true },
+		.{ .ob = .{ .name = "%", .op = rem }, .rev = true },
+		.{ .ob = .{ .name = "mod", .op = mod }, .rev = true },
+		.{ .ob = .{ .name = "div", .op = div }, .rev = true },
 		.{ .ob = .{ .name = "atan2", .op = atan2 }, .rev = true },
-		.{ .ob = .{ .name = "f%",    .op = frem },  .rev = true, .uniq = true },
-		.{ .ob = .{ .name = "fmod",  .op = fmod },  .rev = true, .uniq = true },
+		.{ .ob = .{ .name = "f%", .op = frem }, .rev = true, .uniq = true },
+		.{ .ob = .{ .name = "fmod", .op = fmod }, .rev = true, .uniq = true },
 	}) |p| {
 		try BinOp.Impl(p.ob, if (p.uniq) .none else .alias).setup();
 		try BinOp.Impl(p.ob, .hot_inlets).setup();
@@ -659,22 +662,22 @@ inline fn setup() ClassError!void {
 	}
 
 	inline for ([_]UnOp.Type{
-		.{ .name = "f",     .op = float, .inlet = true },
-		.{ .name = "i",     .op = int,   .inlet = true },
-		.{ .name = "sin",   .op = sin },
-		.{ .name = "cos",   .op = cos },
-		.{ .name = "tan",   .op = tan },
-		.{ .name = "atan",  .op = atan },
-		.{ .name = "sqrt",  .op = sqrt },
-		.{ .name = "exp",   .op = exp },
-		.{ .name = "abs",   .op = abs },
+		.{ .name = "f", .op = float, .inlet = true },
+		.{ .name = "i", .op = int, .inlet = true },
+		.{ .name = "sin", .op = sin },
+		.{ .name = "cos", .op = cos },
+		.{ .name = "tan", .op = tan },
+		.{ .name = "atan", .op = atan },
+		.{ .name = "sqrt", .op = sqrt },
+		.{ .name = "exp", .op = exp },
+		.{ .name = "abs", .op = abs },
 		.{ .name = "floor", .op = floor, .new = true },
-		.{ .name = "ceil",  .op = ceil,  .new = true },
-		.{ .name = "~",     .op = bnot,  .new = true },
-		.{ .name = "!",     .op = lnot,  .new = true },
-		.{ .name = "n!",    .op = fact,  .new = true },
-		.{ .name = "exp2",  .op = exp2,  .new = true },
-		.{ .name = "log2",  .op = log2,  .new = true },
+		.{ .name = "ceil", .op = ceil, .new = true },
+		.{ .name = "~", .op = bnot, .new = true },
+		.{ .name = "!", .op = lnot, .new = true },
+		.{ .name = "n!", .op = fact, .new = true },
+		.{ .name = "exp2", .op = exp2, .new = true },
+		.{ .name = "log2", .op = log2, .new = true },
 	}) |t| {
 		try UnOp.Impl(t).setup();
 	}

@@ -1,13 +1,20 @@
 //! Float-encode. Creates floats out of sign, exponent, and mantissa integers.
+const std = @import("std");
 
 const pd = @import("pd");
-const std = @import("std");
-const bf = @import("misc/bitfloat.zig");
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
+
+const bf = @import("misc/bitfloat.zig");
+
+out: *pd.Outlet,
+uf: bf.UnFloat,
+
+const name = "flenc";
+var class: *pd.Class = undefined;
+const Box = pd.Box(pd.Object, @This());
 
 const fmt = blk: {
 	var buf: [127:0]u8 = undefined;
@@ -24,21 +31,19 @@ fn getUf(uf: bf.UnFloat, onset: u2, av: []const Atom) bf.UnFloat {
 	sw: switch (@min(av.len + onset, 3)) {
 		3 => {
 			if (av[2 - onset].getFloat()) |f| u.b.sign = @trunc(f);
-		continue :sw 2; }, 2 => {
+			continue :sw 2;
+		},
+		2 => {
 			if (av[1 - onset].getFloat()) |f| u.b.exponent = @trunc(f);
-		continue :sw 1; }, 1 => if (onset == 0) {
+			continue :sw 1;
+		},
+		1 => if (onset == 0) {
 			if (av[0].getFloat()) |f| u.b.mantissa = @trunc(f);
-		}, else => {},
+		},
+		else => {},
 	}
 	return u;
 }
-
-out: *pd.Outlet,
-uf: bf.UnFloat,
-
-const name = "flenc";
-var class: *pd.Class = undefined;
-const Box = pd.Box(pd.Object, @This());
 
 fn printC(p: *const Pd) callconv(.c) void {
 	print(p) catch |e| pd.post.err(p, name ++ ": %s", .{ @errorName(e).ptr });

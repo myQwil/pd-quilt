@@ -1,14 +1,15 @@
-const pd = @import("pd");
 const std = @import("std");
-const pr = @import("player.zig");
-const av = @import("player.av.zig");
-const ra = @import("player.rabbit.zig");
-const ru = @import("player.rubber.zig");
 
+const pd = @import("pd");
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
+
+const av = @import("player.av.zig");
+const pr = @import("player.zig");
+const ra = @import("player.rabbit.zig");
+const ru = @import("player.rubber.zig");
 
 pub fn Impl(Root: type) type { return struct {
 	base: Base,

@@ -1,17 +1,15 @@
 //! Playlist reader.
+const std = @import("std");
 
 const pd = @import("pd");
-const std = @import("std");
-const tx = @import("misc/trax.zig");
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
-const Meta = tx.Meta;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
-
 const gpa = pd.gpa;
-const io = std.Io.Threaded.global_single_threaded.io();
+
+const tx = @import("misc/trax.zig");
+const Meta = tx.Meta;
 
 out_val: *pd.Outlet,
 out_idx: *pd.Outlet,
@@ -21,6 +19,7 @@ langs: []*Symbol = &.{},
 const name = "plist";
 var class: *pd.Class = undefined;
 pub const Box = pd.Box(pd.Object, @This());
+const io = std.Io.Threaded.global_single_threaded.io();
 
 inline fn err(p: *const Pd, e: anyerror) void {
 	pd.post.err(p, name ++ ": %s", .{ @errorName(e).ptr });

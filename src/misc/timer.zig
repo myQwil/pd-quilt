@@ -1,13 +1,18 @@
-const Timer = @This();
-
 const pd = @import("pd");
-const tg = @import("toggle.zig");
-
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
 const TimeUnit = pd.TimeUnit;
 const TUError = TimeUnit.Error;
+
+const tg = @import("toggle.zig");
+
+const Timer = @This();
+
+/// Outputs the state of `paused`.
+outlet: *pd.Outlet,
+unit: TimeUnit,
+paused: bool = true,
 
 fn unitFromArgs(av: []const Atom) TUError!TimeUnit {
 	var amount: Float = 1;
@@ -21,11 +26,6 @@ fn unitFromArgs(av: []const Atom) TUError!TimeUnit {
 	}
 	return try .init(amount, name);
 }
-
-/// Outputs the state of `paused`.
-outlet: *pd.Outlet,
-unit: TimeUnit,
-paused: bool = true,
 
 pub fn init(obj: *pd.Object, av: []const Atom) (pd.Oom || TUError)!Timer {
 	return .{

@@ -1,8 +1,8 @@
 const pd = @import("pd");
+const Float = pd.Float;
+
 const Tet = @import("misc/tet.zig").Tet(@This());
 pub const name = "fton";
-
-const Float = pd.Float;
 
 pub inline fn getK(tet: Float) f64 {
 	return tet;

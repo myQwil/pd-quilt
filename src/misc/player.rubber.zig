@@ -1,14 +1,15 @@
-const pd = @import("pd");
 const std = @import("std");
-const ru = @import("rubber");
-const pr = @import("player.zig");
-const Inlet = @import("inlet.zig").Inlet;
+const Allocator = std.mem.Allocator;
 
+const pd = @import("pd");
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
-const Allocator = std.mem.Allocator;
+const ru = @import("rubber");
+
+const Inlet = @import("inlet.zig").Inlet;
+const pr = @import("player.zig");
 
 var s_delay: *Symbol = undefined;
 
@@ -56,7 +57,7 @@ pub const Rubber = struct {
 	}
 };
 
-const FieldSetFunc = fn(*ru.Options, *Symbol) void;
+const FieldSetFunc = fn (*ru.Options, *Symbol) void;
 var dict: std.AutoHashMapUnmanaged(*Symbol, *const FieldSetFunc) = .empty;
 pub fn freeDict(gpa: Allocator) void {
 	dict.deinit(gpa);
@@ -167,7 +168,7 @@ pub fn Impl(Self: type) type { return struct {
 		errdefer dict.deinit(gpa);
 		inline for ([_][:0]const u8{
 			"transients", "detector", "phase", "threading", "window",
-			"smoothing", "formant", "pitch", "channels", "engine",
+			"smoothing",  "formant",  "pitch", "channels",  "engine",
 		}) |name| {
 			try dict.put(gpa, .gen(name), &FieldSetter(name).set);
 		}

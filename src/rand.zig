@@ -1,18 +1,18 @@
 //! Similar to `[random]` but the seed is initialized with Zig's `io.random()`.
+const std = @import("std");
+const Writer = std.Io.Writer;
 
 const pd = @import("pd");
-const std = @import("std");
-const Rng = @import("misc/Rng.zig");
-const wr = @import("misc/write.zig");
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
-const Writer = std.Io.Writer;
 const ClassError = pd.Class.Error;
-
 const gpa = pd.gpa;
+
+const Rng = @import("misc/Rng.zig");
+const wr = @import("misc/write.zig");
+
 const io = std.Io.Threaded.global_single_threaded.io();
 
 fn setWords(vec: []pd.Word, av: []const Atom) error{NotEnoughArgs}!void {
@@ -122,8 +122,13 @@ const Range = struct {
 	fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
 		const self = Box.state(p);
 		sw: switch (@min(ac, 2)) {
-			2 => { if (av[1].getFloat()) |f| self.max = f; continue :sw 1; },
-			1 => { if (av[0].getFloat()) |f| self.min = f; },
+			2 => {
+				if (av[1].getFloat()) |f| self.max = f;
+				continue :sw 1;
+			},
+			1 => {
+				if (av[0].getFloat()) |f| self.min = f;
+			},
 			else => {},
 		}
 	}

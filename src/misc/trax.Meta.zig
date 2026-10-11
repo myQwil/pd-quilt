@@ -1,14 +1,15 @@
-const Meta = @This();
-
-const pd = @import("pd");
 const std = @import("std");
-const tx = @import("trax.zig");
-const Pile = @import("trax.Pile.zig");
-
-const Symbol = pd.Symbol;
 const Io = std.Io;
 const Allocator = std.mem.Allocator;
+
+const pd = @import("pd");
+const Symbol = pd.Symbol;
+
+const Pile = @import("trax.Pile.zig");
+const tx = @import("trax.zig");
 const StringMap = tx.StringMap;
+
+const Meta = @This();
 
 data: Data = .empty,
 

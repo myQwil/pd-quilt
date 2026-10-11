@@ -1,24 +1,23 @@
 //! Arpeggiator and music scale constructor.
+const std = @import("std");
+const Writer = std.Io.Writer;
 
 const pd = @import("pd");
-const std = @import("std");
-const wr = @import("misc/write.zig");
-const np = @import("misc/numparse.zig");
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
 const Word = pd.Word;
-const Writer = std.Io.Writer;
 const ClassError = pd.Class.Error;
-const iParse = np.iParse;
-const fParse = np.fParse;
-
-const epsilon = std.math.floatEps(Float);
 const gpa = pd.gpa;
 
-inline fn iDiv(g: Float, len: usize) struct {num: i32, den: i32, quo: i32 } {
+const np = @import("misc/numparse.zig");
+const iParse = np.iParse;
+const fParse = np.fParse;
+const wr = @import("misc/write.zig");
+
+const epsilon = std.math.floatEps(Float);
+inline fn iDiv(g: Float, len: usize) struct { num: i32, den: i32, quo: i32 } {
 	const num: i32 = @trunc(g);
 	const den: i32 = @as(u31, @truncate(len));
 	const quo: i32 = @divFloor(num, den);
@@ -30,7 +29,7 @@ fn onset(i: i64, len: usize) usize {
 	return if (i < 0) len - j else j;
 }
 
-var ops: std.AutoHashMapUnmanaged(u8, *const fn(Float, Float) Float) = .empty;
+var ops: std.AutoHashMapUnmanaged(u8, *const fn (Float, Float) Float) = .empty;
 
 fn opPlus(f1: Float, f2: Float) Float {
 	return f1 + f2;
@@ -81,7 +80,8 @@ const Arp = struct {
 	inline fn refParse(self: *const Arp, vec: []const Word, s: []const u8) !Float {
 		return if (s.len > 0 and s[0] == '&')
 			self.interval(vec, try fParse(s[1..], null))
-		else try fParse(s, null);
+		else
+			try fParse(s, null);
 	}
 
 	fn list(self: *const Arp, vec: []Word, av: []const Atom, on: i64) pd.Oom!void {
@@ -174,7 +174,7 @@ const Arp = struct {
 								v.float = (tb.float - b - min) * frac + min;
 							}
 							// interpolate between a's last item and b's first item
-							min = tp[n-1].float - a;
+							min = tp[n - 1].float - a;
 							vp[p].float = (ob - min) * frac + min;
 						}
 						if (mvrt) {

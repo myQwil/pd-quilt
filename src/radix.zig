@@ -1,11 +1,10 @@
 //! A number box with options for specifying base, precision, and dragging sensitivity.
+const std = @import("std");
+const Writer = std.Io.Writer;
+const BufPrintError = std.fmt.BufPrintError;
 
 const pd = @import("pd");
-const std = @import("std");
-const Rad = @import("misc/Rad.zig");
-const bf = @import("misc/bitfloat.zig");
 const cnv = pd.cnv;
-
 const Pd = pd.Pd;
 const uint = pd.uint;
 const Atom = pd.Atom;
@@ -14,8 +13,61 @@ const Float = pd.Float;
 const GList = pd.GList;
 const Object = pd.Object;
 const Symbol = pd.Symbol;
-const Writer = std.Io.Writer;
-const BufPrintError = std.fmt.BufPrintError;
+
+const bf = @import("misc/bitfloat.zig");
+const Rad = @import("misc/Rad.zig");
+
+gl: *GList,
+/// label text
+lbl: *Symbol,
+/// receive (inlet) binding
+rcv: *Symbol,
+/// send (outlet) binding
+snd: *Symbol,
+/// expanded form of `snd`
+sndx: *Symbol,
+/// last character in the tag (indicates type)
+tag_type: *TagType,
+/// min-max range of possible values
+range: Range,
+/// number of pixels per motion step
+step: [2]Float,
+/// position at the start of a grab
+grab: [2]Float = .{ 0, 0 },
+/// value at the start of a grab, or the toggle value
+alt: Float = 0,
+/// radix context
+rad: Rad,
+/// font size (pt)
+font_size: u16,
+/// tcl tag
+tag: [@sizeOf(usize) * 2 + 2 :0]u8,
+/// bit field
+b: packed struct(u8) {
+	where: WhereLabel,
+	/// true if we've grabbed the keyboard and want a thicker border
+	grabbed: bool = false,
+	/// whether shift key was down when drag started
+	shift: bool = false,
+	_unused: u4 = 0,
+},
+
+const name = "radix";
+var class: *pd.Class = undefined;
+const Box = pd.Box(Object, @This());
+
+const WhereLabel = enum(u2) {
+	left = 0,
+	right = 1,
+	up = 2,
+	down = 3,
+};
+
+const TagType = enum(u8) {
+	border = 'b',
+	label = 'l',
+	text = 't',
+};
 
 const IVec2 = @Vector(2, c_int);
 const SVec2 = @Vector(2, c_short);
@@ -48,7 +100,8 @@ pub inline fn getDlrSym(self: Atom) ?*Symbol {
 pub inline fn dlrSymArg(idx: usize, av: []const Atom) pd.ArgError!*Symbol {
 	return if (idx < av.len)
 		getDlrSym(av[idx]) orelse error.WrongAtomType
-	else error.IndexOutOfBounds;
+	else
+		error.IndexOutOfBounds;
 }
 
 fn deleteLine(gl: *GList, oc: *pd.OutConnect) void {
@@ -75,19 +128,6 @@ fn deleteLinesForIo(x: *GList, text: *Object, inp: ?*pd.Inlet, outp: ?*pd.Outlet
 		}
 	}
 }
-
-const WhereLabel = enum(u2) {
-	left = 0,
-	right = 1,
-	up = 2,
-	down = 3,
-};
-
-const TagType = enum(u8) {
-	border = 'b',
-	label = 'l',
-	text = 't',
-};
 
 inline fn maybeAtom(self: ?Float) Atom {
 	return if (self) |f| .float(f) else .symbol(.gen("_"));
@@ -129,45 +169,6 @@ const Range = struct {
 	}
 };
 
-gl: *GList,
-/// label text
-lbl: *Symbol,
-/// receive (inlet) binding
-rcv: *Symbol,
-/// send (outlet) binding
-snd: *Symbol,
-/// expanded form of `snd`
-sndx: *Symbol,
-/// last character in the tag (indicates type)
-tag_type: *TagType,
-/// min-max range of possible values
-range: Range,
-/// number of pixels per motion step
-step: [2]Float,
-/// position at the start of a grab
-grab: [2]Float = .{ 0, 0 },
-/// value at the start of a grab, or the toggle value
-alt: Float = 0,
-/// radix context
-rad: Rad,
-/// font size (pt)
-font_size: u16,
-/// tcl tag
-tag: [@sizeOf(usize) * 2 + 2 :0]u8,
-/// bit field
-b: packed struct(u8) {
-	where: WhereLabel,
-	/// true if we've grabbed the keyboard and want a thicker border
-	grabbed: bool = false,
-	/// whether shift key was down when drag started
-	shift: bool = false,
-	_unused: u4 = 0,
-},
-
-const name = "radix";
-var class: *pd.Class = undefined;
-const Box = pd.Box(Object, @This());
-
 inline fn err(p: *const Pd, e: anyerror) void {
 	pd.post.err(p, name ++ ": %s", .{ @errorName(e).ptr });
 }
@@ -176,7 +177,9 @@ fn getRect(obj: *Object, glist: *GList) pd.Rect(c_int) {
 	const self = Box.state(&obj.g.pd);
 	const fontsize: uint = if (self.font_size != 0) self.font_size else glist.getFont();
 	const len: uint = if (self.rad.width == 0)
-		@max(3, self.rad.end) else self.rad.width;
+		@max(3, self.rad.end)
+	else
+		self.rad.width;
 	const size: IVec2 = blk: {
 		const uz = glist.getZoom();
 		const iz: c_int = uz;
@@ -191,7 +194,8 @@ fn getRect(obj: *Object, glist: *GList) pd.Rect(c_int) {
 }
 
 fn getRectC(
-	g: *GObj, glist: *GList,
+	g: *GObj,
+	glist: *GList,
 	xp1: *c_int, yp1: *c_int,
 	xp2: *c_int, yp2: *c_int,
 ) callconv(.c) void {
@@ -208,7 +212,8 @@ fn selectC(g: *GObj, glist: *GList, selected: c_int) callconv(.c) void {
 	}
 	const color = if (selected != 0)
 		pd.this().gui.selectcolor
-	else pd.this().gui.foregroundcolor;
+	else
+		pd.this().gui.foregroundcolor;
 
 	const self = Box.state(&g.pd);
 	self.tag_type.* = .text;
@@ -222,7 +227,8 @@ fn deleteC(g: *GObj, glist: *GList) callconv(.c) void {
 }
 
 fn drawBorder(
-	obj: *Object, glist: *GList,
+	obj: *Object,
+	glist: *GList,
 	rect: pd.Rect(c_int),
 	firsttime: bool,
 ) void {
@@ -340,7 +346,8 @@ fn visC(g: *GObj, glist: *GList, visible: c_int) callconv(.c) void {
 			@as(c_uint, pd.hostFontSize(fontsize, uz)),
 			if (glist.isSelected(g))
 				pd.this().gui.selectcolor
-			else pd.this().gui.foregroundcolor,
+			else
+				pd.this().gui.foregroundcolor,
 		});
 	}
 	if (self.lbl == pd.s.empty()) {
@@ -488,7 +495,8 @@ fn motionC(p: *Pd, dx: Float, dy: Float, released: Float) callconv(.c) void {
 
 /// called when clicked on in run mode
 fn clickC(
-	g: *GObj, gl: *GList,
+	g: *GObj,
+	gl: *GList,
 	xpos: c_int, ypos: c_int,
 	shift: c_int, alt: c_int, _: c_int, doit: c_int,
 ) callconv(.c) c_int {
@@ -678,9 +686,17 @@ inline fn param(p: *Pd, av: []const Atom) ParamError!void {
 	if (obj.binbuf) |binbuf| {
 		const slc = binbuf.getSlice();
 		sw: switch (@min(slc.len, 12)) {
-			12 => { slc[11] = .dollsym(lbl_raw); continue :sw 11; },
-			11 => { slc[10] = .dollsym(snd_raw); continue :sw 10; },
-			10 => { slc[9] = .dollsym(rcv_raw); },
+			12 => {
+				slc[11] = .dollsym(lbl_raw);
+				continue :sw 11;
+			},
+			11 => {
+				slc[10] = .dollsym(snd_raw);
+				continue :sw 10;
+			},
+			10 => {
+				slc[9] = .dollsym(rcv_raw);
+			},
 			else => {},
 		}
 	}
@@ -719,7 +735,8 @@ fn read(p: *Pd, base: u16, av: []const Atom) ReadError!void {
 	var res: [32]u8 = undefined;
 	const cp: [*:0]const u8 = if (av[0].type == .float)
 		try std.fmt.bufPrintSentinel(&res, "{}", .{ av[0].w.float }, 0)
-	else av[0].w.symbol.name;
+	else
+		av[0].w.symbol.name;
 	floatC(p, try Rad.parseFloat(cp, base));
 }
 
@@ -824,29 +841,52 @@ inline fn create(av: []const Atom) CreateError!*Pd {
 	sw: switch (@min(av.len, 12)) {
 		12 => {
 			if (av[11].getFloat()) |f| where = @fromBackingInt(@as(u2, @trunc(f)));
-		continue :sw 11; }, 11 => {
+			continue :sw 11;
+		},
+		11 => {
 			if (av[10].getSymbol()) |s| rsl[2] = unescape(s);
-		continue :sw 10; }, 10 => {
+			continue :sw 10;
+		},
+		10 => {
 			if (av[9].getSymbol()) |s| rsl[1] = unescape(s);
-		continue :sw 9; }, 9 => {
+			continue :sw 9;
+		},
+		9 => {
 			if (av[8].getSymbol()) |s| rsl[0] = unescape(s);
-		continue :sw 8; }, 8 => {
+			continue :sw 8;
+		},
+		8 => {
 			if (av[7].getFloat()) |f| font_size = @trunc(@min(f, 36));
-		continue :sw 7; }, 7 => {
+			continue :sw 7;
+		},
+		7 => {
 			if (av[6].getFloat()) |f| width = @trunc(@min(f, 500));
-		continue :sw 6; }, 6 => {
+			continue :sw 6;
+		},
+		6 => {
 			if (av[5].getFloat()) |f| range.hi = f;
-		continue :sw 5; }, 5 => {
+			continue :sw 5;
+		},
+		5 => {
 			if (av[4].getFloat()) |f| range.lo = f;
-		continue :sw 4; }, 4 => {
+			continue :sw 4;
+		},
+		4 => {
 			if (av[3].getFloat()) |f| step[1] = -f;
-		continue :sw 3; }, 3 => {
+			continue :sw 3;
+		},
+		3 => {
 			if (av[2].getFloat()) |f| step[0] = f;
-		continue :sw 2; }, 2 => {
+			continue :sw 2;
+		},
+		2 => {
 			if (av[1].getFloat()) |f| prec = @trunc(f);
-		continue :sw 1; }, 1 => {
+			continue :sw 1;
+		},
+		1 => {
 			if (av[0].getFloat()) |f| base = @trunc(f);
-		}, else => {},
+		},
+		else => {},
 	}
 
 	range.sort();

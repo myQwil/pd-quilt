@@ -1,14 +1,14 @@
-const Chapters = @This();
-
 const std = @import("std");
-const tx = @import("trax.zig");
-const np = @import("numparse.zig");
-
 const Io = std.Io;
 const Allocator = std.mem.Allocator;
-const StringMap = tx.StringMap;
+
+const np = @import("numparse.zig");
 const iParse = np.iParse;
 const fParse = np.fParse;
+const tx = @import("trax.zig");
+const StringMap = tx.StringMap;
+
+const Chapters = @This();
 
 /// byte array
 buf: tx.Buffer = .empty,
@@ -97,7 +97,7 @@ fn parseTime(str: []const u8, len: ?*usize) ?i64 {
 }
 
 test parseTime {
-	for ([_]struct{ str: []const u8, num: ?i64, len: usize }{
+	for ([_]struct { str: []const u8, num: ?i64, len: usize }{
 		.{ .str = "123.", .num = 123_000_000, .len = 4 },
 		.{ .str = ".125", .num = 125_000, .len = 4 },
 		.{ .str = "01:23.125432", .num = 83_125_432, .len = 12 },

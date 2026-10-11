@@ -1,11 +1,10 @@
 //! Checks if a list contains a specific atom value.
-
 const pd = @import("pd");
-const Uf = @import("misc/bitfloat.zig").Uf;
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Symbol = pd.Symbol;
+
+const Uf = @import("misc/bitfloat.zig").Uf;
 
 out: *pd.Outlet,
 atom: Atom,
@@ -28,8 +27,7 @@ fn listC(p: *const Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) v
 			continue;
 		}
 		// pointer comparison for float types results in false negatives
-		if (
-			(a.type == .float // compare float-size number of bits
+		if ((a.type == .float // compare float-size number of bits
 			and @as(Uf, @bitCast(a.w.float)) == @as(Uf, @bitCast(b.w.float)))
 			or a.w.gpointer == b.w.gpointer // compare pointer-size number of bits
 		) {

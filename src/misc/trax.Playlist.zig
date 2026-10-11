@@ -1,13 +1,14 @@
-const Playlist = @This();
-
-const pd = @import("pd");
 const std = @import("std");
-const tx = @import("trax.zig");
-
-const Atom = pd.Atom;
 const Io = std.Io;
 const Allocator = std.mem.Allocator;
+
+const pd = @import("pd");
+const Atom = pd.Atom;
+
+const tx = @import("trax.zig");
 const StringMap = tx.StringMap;
+
+const Playlist = @This();
 
 /// byte array
 buf: tx.Buffer = .empty,

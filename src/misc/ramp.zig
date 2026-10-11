@@ -1,5 +1,4 @@
 const pd = @import("pd");
-
 const Float = pd.Float;
 const Sample = pd.Sample;
 
@@ -14,7 +13,8 @@ pub fn Ramp(Owner: type) type { return struct {
 	pub inline fn setInc(self: *const Self, owner: *Owner) void {
 		owner.inc = if (self.remain > 0)
 			(self.target - owner.value) / @as(Sample, @floatFromInt(self.remain))
-		else 0;
+		else
+			0;
 	}
 
 	pub inline fn reset(self: *Self, samples: Float, target: Sample) void {

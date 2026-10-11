@@ -1,8 +1,8 @@
-const pd = @import("pd");
 const std = @import("std");
-
-const Float = pd.Float;
 const Writer = std.Io.Writer;
+
+const pd = @import("pd");
+const Float = pd.Float;
 
 const prec = if (@bitSizeOf(Float) == 64) 14 else 6;
 

@@ -1,19 +1,18 @@
 //! Linear interpolating table oscillator.
 //! Uses the largest power of 2 + 1 points in an array and ignores leftovers.
-const TabOsc2 = @This();
-
 const pd = @import("pd");
-const tf = @import("misc/tabfudge.zig");
-const Tab2 = @import("misc/Tab2.zig");
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
 
+const Tab2 = @import("misc/Tab2.zig");
+const tf = @import("misc/tabfudge.zig");
 const unitbit32 = tf.unitbit32;
 const hioffset = tf.hioffset;
+
+const TabOsc2 = @This();
 
 tab2: Tab2,
 phase: f64 = 0,
@@ -73,8 +72,10 @@ inline fn set(self: *TabOsc2, s: *Symbol) SetError!u32 {
 	errdefer self.tab2.vec = null;
 	self.tab2.arrayname = s;
 
-	const array: *pd.GArray = if (pd.garray_class.find(s)) |ga| @ptrCast(ga)
-		else return error.GArrayNotFound;
+	const array: *pd.GArray = if (pd.garray_class.find(s)) |ga|
+		@ptrCast(ga)
+	else
+		return error.GArrayNotFound;
 
 	const vec = try array.floatWords();
 	if (vec.len < 2) {

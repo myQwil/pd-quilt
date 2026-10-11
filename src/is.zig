@@ -1,7 +1,5 @@
 //! Checks an atom's type.
-
 const pd = @import("pd");
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Symbol = pd.Symbol;

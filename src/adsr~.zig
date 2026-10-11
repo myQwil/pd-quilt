@@ -1,14 +1,12 @@
 //! Attack/decay/sustain/release envelope generator.
-const Adsr = @This();
-
 const pd = @import("pd");
-const Ramp = @import("misc/ramp.zig").Ramp(Adsr);
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
 const Float = pd.Float;
+
+const Adsr = @This();
 
 /// ramp periods
 ramps: [3]Ramp = @splat(.{}),
@@ -42,6 +40,7 @@ b: packed struct(u8) {
 const name = "adsr~";
 var class: *pd.Class = undefined;
 const Box = pd.Box(pd.Object, Adsr);
+const Ramp = @import("misc/ramp.zig").Ramp(Adsr);
 
 fn performC(w: [*]usize) callconv(.c) [*]usize {
 	const self: *Adsr = @ptrFromInt(w[1]);
@@ -102,10 +101,21 @@ fn stopC(p: *Pd) callconv(.c) void {
 
 fn list(self: *Adsr, av: []const Atom) void {
 	sw: switch (@min(av.len, 4)) {
-		4 => { if (av[3].getFloat()) |f| self.release = f; continue :sw 3; },
-		3 => { if (av[2].getFloat()) |f| self.sustain = f; continue :sw 2; },
-		2 => { if (av[1].getFloat()) |f| self.decay = f; continue :sw 1; },
-		1 => { if (av[0].getFloat()) |f| self.attack = f; },
+		4 => {
+			if (av[3].getFloat()) |f| self.release = f;
+			continue :sw 3;
+		},
+		3 => {
+			if (av[2].getFloat()) |f| self.sustain = f;
+			continue :sw 2;
+		},
+		2 => {
+			if (av[1].getFloat()) |f| self.decay = f;
+			continue :sw 1;
+		},
+		1 => {
+			if (av[0].getFloat()) |f| self.attack = f;
+		},
 		else => {},
 	}
 }

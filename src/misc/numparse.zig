@@ -1,4 +1,5 @@
 const std = @import("std");
+
 const Float = @import("pd").Float;
 
 inline fn isDigit(c: u8) bool {
@@ -19,7 +20,7 @@ pub fn iParse(buf: []const u8, len: ?*usize) std.fmt.ParseIntError!i64 {
 }
 
 test iParse {
-	for ([_]struct{ str: []const u8, num: std.fmt.ParseIntError!i64, len: usize }{
+	for ([_]struct { str: []const u8, num: std.fmt.ParseIntError!i64, len: usize }{
 		.{ .str = "123", .num = 123, .len = 3 },
 		.{ .str = "-456abc", .num = -456, .len = 4 },
 		.{ .str = "-abc", .num = error.InvalidCharacter, .len = 1 },
@@ -43,14 +44,14 @@ pub fn fParse(buf: []const u8, len: ?*usize) std.fmt.ParseFloatError!Float {
 		while (s.len > 0 and isDigit(s[0])) : (s = s[1..]) {}
 	}
 	const used = buf.len - s.len;
-		if (len) |l| {
+	if (len) |l| {
 		l.* = used;
 	}
 	return std.fmt.parseFloat(Float, buf[0..used]);
 }
 
 test fParse {
-	for ([_]struct{ str: []const u8, num: std.fmt.ParseFloatError!Float, len: usize }{
+	for ([_]struct { str: []const u8, num: std.fmt.ParseFloatError!Float, len: usize }{
 		.{ .str = "123.456", .num = 123.456, .len = 7 },
 		.{ .str = "-654.321", .num = -654.321, .len = 8 },
 		.{ .str = "-.123", .num = -0.123, .len = 5 },

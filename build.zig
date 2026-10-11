@@ -1,7 +1,8 @@
-const pd = @import("pd");
 const std = @import("std");
 const LinkMode = std.builtin.LinkMode;
 const Build = std.Build;
+
+const pd = @import("pd");
 
 const PatchMode = enum {
 	/// Install copies of patches.
@@ -196,7 +197,7 @@ pub fn build(b: *Build) !void {
 				mod.linkSystemLibrary("avformat", linkopt);
 				mod.linkSystemLibrary("swresample", linkopt);
 				mod.addImport("av", av);
-			}
+			},
 		};
 		if (os == .windows) {
 			mod.addObjectFile(b.path("build-win/pd/bin/pd.dll"));

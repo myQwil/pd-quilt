@@ -1,11 +1,8 @@
 //! `[unpack]` with `anything` outlets and passive mismatch error handling.
-
 const pd = @import("pd");
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Symbol = pd.Symbol;
-
 const gpa = pd.gpa;
 
 vec: []Outlet,

@@ -1,12 +1,12 @@
-const Tab2 = @This();
-
 const pd = @import("pd");
-const Inlet = @import("inlet.zig").Inlet;
-
 const Pd = pd.Pd;
 const Float = pd.Float;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
+
+const Inlet = @import("inlet.zig").Inlet;
+
+const Tab2 = @This();
 
 hold: *Float,
 vec: ?[*]pd.Word = null,

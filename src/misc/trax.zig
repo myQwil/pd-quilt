@@ -1,20 +1,20 @@
-const pd = @import("pd");
 const std = @import("std");
-pub const Pile = @import("trax.Pile.zig");
-pub const Meta = @import("trax.Meta.zig");
-pub const Playlist = @import("trax.Playlist.zig");
-pub const Chapters = @import("trax.Chapters.zig");
-
 const Io = std.Io;
 const Allocator = std.mem.Allocator;
-pub const StringMap = std.StringHashMapUnmanaged(void);
-pub const Buffer = std.ArrayList(u8);
-pub const putGet = Meta.putGet;
-
 const Oom = Allocator.Error;
-pub const TravError = Oom || std.Io.Reader.DelimiterError;
+
+const pd = @import("pd");
+
+pub const Chapters = @import("trax.Chapters.zig");
+pub const Meta = @import("trax.Meta.zig");
+pub const putGet = Meta.putGet;
+pub const Pile = @import("trax.Pile.zig");
+pub const Playlist = @import("trax.Playlist.zig");
 pub const AppendError = Playlist.AppendError;
 
+pub const StringMap = std.StringHashMapUnmanaged(void);
+pub const Buffer = std.ArrayList(u8);
+pub const TravError = Oom || std.Io.Reader.DelimiterError;
 const trext = ".trax";
 
 pub inline fn isTrax(filename: []const u8) bool {

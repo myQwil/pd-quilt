@@ -1,14 +1,12 @@
 //! Attack/decay envelope generator.
-const AttackDecay = @This();
-
 const pd = @import("pd");
-const Ramp = @import("misc/ramp.zig").Ramp(AttackDecay);
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
 const Float = pd.Float;
+
+const AttackDecay = @This();
 
 /// ramp periods
 ramps: [3]Ramp = @splat(.{}),
@@ -40,6 +38,7 @@ b: packed struct(u8) {
 const name = "ad~";
 var class: *pd.Class = undefined;
 const Box = pd.Box(pd.Object, AttackDecay);
+const Ramp = @import("misc/ramp.zig").Ramp(AttackDecay);
 
 fn performC(w: [*]usize) callconv(.c) [*]usize {
 	const self: *AttackDecay = @ptrFromInt(w[1]);
@@ -99,8 +98,13 @@ fn stopC(p: *Pd) callconv(.c) void {
 
 fn list(self: *AttackDecay, av: []const Atom) void {
 	sw: switch (@min(av.len, 2)) {
-		2 => { if (av[1].getFloat()) |f| self.decay = f; continue :sw 1; },
-		1 => { if (av[0].getFloat()) |f| self.attack = f; },
+		2 => {
+			if (av[1].getFloat()) |f| self.decay = f;
+			continue :sw 1;
+		},
+		1 => {
+			if (av[0].getFloat()) |f| self.attack = f;
+		},
 		else => {},
 	}
 }

@@ -1,16 +1,15 @@
 //! Signal-based metronome.
 //! Works by generating a sawtooth wave and sending a bang on each new ramp.
-const MetroSignal = @This();
-
 const pd = @import("pd");
-const tb = @import("misc/tabfudge.zig");
-
 const Pd = pd.Pd;
 const Float = pd.Float;
 const Sample = pd.Sample;
 
+const tb = @import("misc/tabfudge.zig");
 const unitbit32 = tb.unitbit32;
 const hioffset = tb.hioffset;
+
+const MetroSignal = @This();
 
 out: *pd.Outlet,
 phase: f64 = 0,

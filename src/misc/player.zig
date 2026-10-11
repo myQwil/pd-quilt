@@ -1,21 +1,21 @@
-const pd = @import("pd");
 const std = @import("std");
-const tx = @import("trax.zig");
-const wr = @import("write.zig");
+const Allocator = std.mem.Allocator;
+const Io = std.Io;
+const Writer = Io.Writer;
+const find = std.mem.findScalar;
 
+const pd = @import("pd");
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
-const Allocator = std.mem.Allocator;
-const Io = std.Io;
-const Writer = Io.Writer;
-const Meta = tx.Meta;
-const Pile = tx.Pile;
 
 const toggle = @import("toggle.zig").toggle;
-const find = std.mem.findScalar;
+const tx = @import("trax.zig");
+const Meta = tx.Meta;
+const Pile = tx.Pile;
+const wr = @import("write.zig");
 
 var s_open: *Symbol = undefined;
 pub var s_play: *Symbol = undefined;
@@ -109,17 +109,19 @@ fn printTime(writer: *Writer, usec: i64, precise: bool) Writer.Error!void {
 
 pub fn bufTime(buf: []u8, usec: i64, precise: bool) [:0]u8 {
 	var w: Writer = .fixed(buf[0 .. buf.len - 1]);
-	printTime(&w, usec, precise) catch { w.end = 0; };
+	printTime(&w, usec, precise) catch {
+		w.end = 0;
+	};
 	buf[w.end] = 0;
 	return buf[0..w.end :0];
 }
 
 test bufTime {
 	var buf: [24]u8 = undefined;
-	for ([_]struct{ us: i64, prec: bool, str: []const u8 }{
-		.{ .us = 1*mins + 3*secs + 123, .prec = false, .str = "01:03" },
-		.{ .us = 1*mins + 3*secs + 123, .prec = true, .str = "01:03.000123" },
-		.{ .us = 1*mins + 3*secs + 123_000, .prec = true, .str = "01:03.123" },
+	for ([_]struct { us: i64, prec: bool, str: []const u8 }{
+		.{ .us = 1 * mins + 3 * secs + 123, .prec = false, .str = "01:03" },
+		.{ .us = 1 * mins + 3 * secs + 123, .prec = true, .str = "01:03.000123" },
+		.{ .us = 1 * mins + 3 * secs + 123_000, .prec = true, .str = "01:03.123" },
 		.{ .us = std.math.maxInt(i64), .prec = true, .str = "2562047788:00:54.775807" },
 	}) |case| {
 		try std.testing.expectEqualStrings(case.str, bufTime(&buf, case.us, case.prec));
@@ -162,29 +164,29 @@ pub inline fn leavedToPlanar(
 
 pub fn Impl(Self: type) type { return struct {
 	/// Perform this after seeking or loading a new track.
-	const resetBuffers: fn(*Pd) void = Self.resetBuffers;
+	const resetBuffers: fn (*Pd) void = Self.resetBuffers;
 	/// Perform this after loading a new track.
-	const prepNewTrack: fn(*Pd) void = Self.prepNewTrack;
+	const prepNewTrack: fn (*Pd) void = Self.prepNewTrack;
 	/// Print error to Pd console
-	const err: fn(*const Pd, anyerror) callconv(.@"inline") void = Self.err;
+	const err: fn (*const Pd, anyerror) callconv(.@"inline") void = Self.err;
 	const gpa = Self.gpa;
 	const io = Self.io;
 	const Box = Self.Box;
 
 	const Base = Self.Base;
-	const GetMetaFn = fn(*const Base, *Symbol) ?*const Pile;
+	const GetMetaFn = fn (*const Base, *Symbol) ?*const Pile;
 	/// Seek to a time in milliseconds.
-	const bSeek: fn(*Base, Float) anyerror!void = Base.seek;
+	const bSeek: fn (*Base, Float) anyerror!void = Base.seek;
 	/// Load a track in the playlist by index.
-	const bLoadTrack: fn(*Base, Allocator, Io, usize) anyerror!void = Base.loadTrack;
+	const bLoadTrack: fn (*Base, Allocator, Io, usize) anyerror!void = Base.loadTrack;
 	/// Open a file or playlist and load the first track.
-	const bOpen: fn(*Base, Allocator, Io, []const Atom) callconv(.@"inline") anyerror!void
+	const bOpen: fn (*Base, Allocator, Io, []const Atom) callconv(.@"inline") anyerror!void
 		= Base.open;
 	/// Print function for when no args are specified.
 	const bPrint: fn (*const Base, *Writer) callconv(.@"inline") anyerror!void
 		= Base.printAuto;
 	/// Returns the number of tracks in the current playlist.
-	const bTrackCount: fn(*const Base) callconv(.@"inline") usize = Base.trackCount;
+	const bTrackCount: fn (*const Base) callconv(.@"inline") usize = Base.trackCount;
 
 	pub fn getSome(self: *const Base, s: *Symbol) ?*const Pile {
 		if (Base.dict.get(s)) |func| {
@@ -385,7 +387,8 @@ pub fn Impl(Self: type) type { return struct {
 	}
 
 	/// toggle the play/pause state, or set to arg if one is given
-	fn playC(p: *Pd,
+	fn playC(
+		p: *Pd,
 		_: *Symbol, ac: c_uint, av: [*]const Atom,
 	) callconv(.c) void {
 		const self = Box.state(p);

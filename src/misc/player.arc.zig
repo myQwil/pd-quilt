@@ -36,7 +36,7 @@ const RarReader = struct {
 	gpa: Allocator,
 
 	const rar = @import("unrar");
-	pub const signature: u32 = @bitCast([4]u8{'R', 'a', 'r', '!'});
+	pub const signature: u32 = @bitCast([4]u8{ 'R', 'a', 'r', '!' });
 
 	const vtable: ArcReader.VTable = .{
 		.next = &next,
@@ -121,8 +121,8 @@ const ZipReader = struct {
 	gpa: Allocator,
 	io: Io,
 
-	pub const signature: u32 = @bitCast([4]u8{'P', 'K', 0x3, 0x4});
-	const gz_signature: u24 = @bitCast([3]u8{0x1f, 0x8b, 0x08});
+	pub const signature: u32 = @bitCast([4]u8{ 'P', 'K', 0x3, 0x4 });
+	const gz_signature: u24 = @bitCast([3]u8{ 0x1f, 0x8b, 0x08 });
 	const Decompress = std.compress.flate.Decompress;
 	const Header = std.zip.LocalFileHeader;
 
@@ -182,7 +182,7 @@ const ZipReader = struct {
 					const buf = try gpa.alloc(u8, entry.uncompressed_size - 3);
 					defer gpa.free(buf);
 					try flate.reader.readSliceAll(buf);
-					break :blk @as(u32, @bitCast(buf[buf.len - 4..][0..4].*));
+					break :blk @as(u32, @bitCast(buf[buf.len - 4 ..][0..4].*));
 				},
 				_ => return error.UnsupportedCompressionMethod,
 			};
@@ -265,7 +265,7 @@ const ZipReader = struct {
 	}
 };
 
-pub const types = [_]type {
+pub const types = [_]type{
 	RarReader,
 	ZipReader,
 };

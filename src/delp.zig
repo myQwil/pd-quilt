@@ -1,13 +1,13 @@
 //! `[delay]` with pause/resume functionality.
-const DelP = @This();
-
 const pd = @import("pd");
-const Timer = @import("misc/timer.zig");
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Outlet = pd.Outlet;
 const Symbol = pd.Symbol;
+
+const Timer = @import("misc/timer.zig");
+
+const DelP = @This();
 
 tmr: Timer,
 /// sends bang when delay time has passed
@@ -43,7 +43,9 @@ fn delayC(p: *Pd, f: pd.Float) callconv(.c) void {
 fn timeC(p: *const Pd) callconv(.c) void {
 	const self = Box.stateConst(p);
 	const result = self.setmore + if (self.tmr.paused)
-		0 else self.tmr.timeSince(self.settime);
+		0
+	else
+		self.tmr.timeSince(self.settime);
 	self.out_f.float(@floatCast(result));
 }
 
@@ -154,7 +156,7 @@ inline fn create(av: []const Atom) (pd.Oom || pd.TimeUnit.Error)!*Pd {
 }
 
 fn destroyC(p: *const Pd) callconv(.c) void {
-	 Box.stateConst(p).clock.destroy();
+	Box.stateConst(p).clock.destroy();
 }
 
 inline fn setup() pd.Class.Error!void {

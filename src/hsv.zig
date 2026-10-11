@@ -1,15 +1,7 @@
 //! Translate hue-saturation-value to a 24-bit rgb integer.
-
 const pd = @import("pd");
-
 const Pd = pd.Pd;
 const Float = pd.Float;
-
-const Rgb = struct {
-	r: Float,
-	g: Float,
-	b: Float,
-};
 
 out: *pd.Outlet,
 h: Float,
@@ -19,6 +11,12 @@ v: Float,
 const name = "hsv";
 var class: *pd.Class = undefined;
 const Box = pd.Box(pd.Object, @This());
+
+const Rgb = struct {
+	r: Float,
+	g: Float,
+	b: Float,
+};
 
 fn bangC(pp: *const Pd) callconv(.c) void {
 	const self = Box.stateConst(pp);

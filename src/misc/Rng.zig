@@ -1,10 +1,10 @@
-const Rng = @This();
-
-const pd = @import("pd");
 const std = @import("std");
 
+const pd = @import("pd");
 const Pd = pd.Pd;
 const Float = pd.Float;
+
+const Rng = @This();
 
 state: u32,
 

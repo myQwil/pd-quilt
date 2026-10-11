@@ -1,12 +1,13 @@
-const WordInlets = @This();
-
-const pd = @import("pd");
 const std = @import("std");
-const Inlet = @import("inlet.zig").Inlet;
-
-const Word = pd.Word;
 const Allocator = std.mem.Allocator;
 const Writer = std.Io.Writer;
+
+const pd = @import("pd");
+const Word = pd.Word;
+
+const Inlet = @import("inlet.zig").Inlet;
+
+const WordInlets = @This();
 
 owner: *pd.Object,
 vec: []Word,

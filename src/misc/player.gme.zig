@@ -1,28 +1,27 @@
 //! An implementation of the Game Music Emu library.
 //! Compatible formats include: AY, GBS, GYM, HES, KSS, NSF/NSFE, AP, SPC, RSN, VGM/VGZ.
-
-const pd = @import("pd");
-const gm = @import("gme");
 const std = @import("std");
-const tx = @import("trax.zig");
-const pr = @import("player.zig");
-const arc = @import("player.arc.zig");
+const Allocator = std.mem.Allocator;
+const Io = std.Io;
 
+const gm = @import("gme");
+const pd = @import("pd");
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
-const Allocator = std.mem.Allocator;
-const Io = std.Io;
+
+const arc = @import("player.arc.zig");
+const ArcInitFn = arc.ArcReader.InitFn;
+const pr = @import("player.zig");
+const tx = @import("trax.zig");
 const Meta = tx.Meta;
 const Pile = tx.Pile;
 
 var s_mask: *Symbol = undefined;
 
-const EmuCreateFn = fn(*const gm.Type, c_uint) anyerror!*gm.Emu;
-const ArcInitFn = arc.ArcReader.InitFn;
-
+const EmuCreateFn = fn (*const gm.Type, c_uint) anyerror!*gm.Emu;
 inline fn sampleRate(t: *const gm.Type) Float {
 	return if (t == gm.gme_spc_type) 32000.0 else pd.sampleRate();
 }
@@ -52,7 +51,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 
 	const Gme = @This();
 
-	pub var dict: std.AutoHashMapUnmanaged(*Symbol, *const fn(*const Gme) *const Pile)
+	pub var dict: std.AutoHashMapUnmanaged(*Symbol, *const fn (*const Gme) *const Pile)
 		= .empty;
 	pub fn freeDict(gpa: Allocator) void {
 		dict.deinit(gpa);
@@ -113,7 +112,7 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 			if (!meta.data.contains(.gen(field))) {
 				const name = std.mem.sliceTo(@field(info, field), 0);
 				_ = try tx.putGet(&meta.data, gpa, .gen(field), pd.s.empty(), name, false);
-			} 
+			}
 		}
 		self.player.meta = meta;
 	}
@@ -131,7 +130,8 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 
 		const createEmu: EmuCreateFn = if (nch > 2)
 			gm.Emu.createMultiChannel
-		else gm.Emu.create;
+		else
+			gm.Emu.create;
 		var arc_reader: ?arc.ArcReader = inline for (arc.types) |t| {
 			const sig: u32 = t.signature;
 			if (signature == sig) {
@@ -252,9 +252,9 @@ pub fn Base(nch: comptime_int, frames: comptime_int) type { return struct {
 	}
 
 	pub fn Impl(Self: type) type { return struct {
-		const perform: fn(*Self, [*]usize, *usize) callconv(.@"inline") anyerror!void
+		const perform: fn (*Self, [*]usize, *usize) callconv(.@"inline") anyerror!void
 			= Self.perform;
-		const err: fn(*const Pd, anyerror) callconv(.@"inline") void = Self.err;
+		const err: fn (*const Pd, anyerror) callconv(.@"inline") void = Self.err;
 		const gpa = Self.gpa;
 		const Box = Self.Box;
 

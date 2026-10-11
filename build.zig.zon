@@ -5,24 +5,24 @@
 	.minimum_zig_version = "0.17.0",
 	.dependencies = .{
 		.pd = .{
-			.url = "git+https://github.com/myQwil/pd#54f2e478cc99983c9313e833c61e8667bb55443c",
-			.hash = "pd-0.57.0-DC007QpeAgCz5t8-dA0XP29YBMOX2hwj3NUIWtflQChv",
+			.url = "git+https://github.com/myQwil/pd#16ceab60a9da1f9cc1b2bc997791415bc98ed468",
+			.hash = "pd-0.57.0-DC007f9dAgBXguOYrgIZY6SR9OCF5DLIWCE6T62jERvj",
 		},
 		.gme = .{
-			.url = "git+https://codeberg.org/myQwil/gme#dc91a281ac14687de12011cb7b120d9f5970dd3a",
-			.hash = "game_music_emu-0.6.6-YdNlAMF0AADrgE1qtc8Trzq9fe8ZhAKAwbddCfpRHiDc",
+			.url = "git+https://codeberg.org/myQwil/gme#1667eede12e7b364e988c7239c43d690d373c6ad",
+			.hash = "game_music_emu-0.6.6-YdNlAMt0AADphYQOLjQ3-w646sadAyKKz0iTKZp9qe94",
 		},
 		.samplerate = .{
-			.url = "git+https://github.com/myQwil/libsamplerate#32c583312c4b48251a5cb217ed1383aeafe7ba0c",
-			.hash = "libsamplerate-0.2.3-f8m6blk2AADSBW1EUJaSjKDMR93YQ3_t8IjnmUBS1UIE",
+			.url = "git+https://github.com/myQwil/libsamplerate#817f4f0220efacf9a6ac73dcd6c7063e1388a0c6",
+			.hash = "libsamplerate-0.2.3-f8m6bkM2AAA-8XR3b-mQ5hBJuatr20C3-H77h1qDC-jq",
 		},
 		.rubberband = .{
-			.url = "git+https://github.com/myQwil/rubberband#6251da3362326f025d597cf985dee7cad28e0cfd",
-			.hash = "rubberband-4.0.0-RbnorGQbAQBJ0qiE0H94mtuMABGkzfKIAc-mWfaX3cIG",
+			.url = "git+https://github.com/myQwil/rubberband#d317889ac8ea8f4274cce3c226b6efe95810e8bb",
+			.hash = "rubberband-4.0.0-RbnorD8bAQCU9ajzrh2QQjg1hbSL2Ut8_Q6xCSHmz0OP",
 		},
 		.ffmpeg = .{
-			.url = "git+https://github.com/myQwil/ffmpeg#593c1e3c5c4ed17fa8755fdfcc6687168dec62ea",
-			.hash = "ffmpeg-8.1.2-1kurk_kFAgC8fiCKas8VHjNrhKeWb5Cv0tQyonwhGOC9",
+			.url = "git+https://github.com/myQwil/ffmpeg#6d882a1cf47f03ccb1ab0ff84cc629c17d0f17fa",
+			.hash = "ffmpeg-8.1.2-1kurkw7LAQDZBsLeo36nYbCL6iCsJZXOK9eOGCrWU4Yh",
 		},
 	},
 	.paths = .{

@@ -1,11 +1,12 @@
 const pd = @import("pd");
-const ra = @import("rabbit");
-const Inlet = @import("inlet.zig").Inlet;
-pub const uint = ra.uint;
-pub const InitError = ra.Error || pd.Oom;
-
 const Pd = pd.Pd;
 const Float = pd.Float;
+const ra = @import("rabbit");
+pub const uint = ra.uint;
+
+const Inlet = @import("inlet.zig").Inlet;
+
+pub const InitError = ra.Error || pd.Oom;
 
 pub const frames = 0x10;
 
@@ -54,7 +55,7 @@ pub const Rabbit = struct {
 };
 
 pub fn Impl(Self: type) type { return struct {
-	const conv: fn(*Pd, uint) callconv(.@"inline") void = Self.conv;
+	const conv: fn (*Pd, uint) callconv(.@"inline") void = Self.conv;
 	const Box = Self.Box;
 
 	fn convC(p: *Pd, f: Float) callconv(.c) void {

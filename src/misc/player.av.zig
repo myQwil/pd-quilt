@@ -1,21 +1,21 @@
 //! An implementation of the FFmpeg libraries for the audio playback
 //! of various media formats. Includes playlist functionality and
 //! playback speed manipulation.
-
-const pd = @import("pd");
-const av = @import("av");
 const std = @import("std");
-const tx = @import("trax.zig");
-const pr = @import("player.zig");
+const Allocator = std.mem.Allocator;
+const Io = std.Io;
 
+const av = @import("av");
+pub const Subtitle = av.Subtitle;
+const pd = @import("pd");
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
-const Allocator = std.mem.Allocator;
-const Io = std.Io;
-pub const Subtitle = av.Subtitle;
+
+const pr = @import("player.zig");
+const tx = @import("trax.zig");
 const Meta = tx.Meta;
 const Pile = tx.Pile;
 
@@ -23,10 +23,8 @@ var s_pos: *Symbol = undefined;
 var s_append: *Symbol = undefined;
 pub var s_done: *Symbol = undefined;
 
-pub const stereo = (
-	(1 << @backingInt(av.Channel.front_left)) |
-	(1 << @backingInt(av.Channel.front_right))
-);
+pub const stereo = ((1 << @backingInt(av.Channel.front_left)) |
+	(1 << @backingInt(av.Channel.front_right)));
 
 const Stream = struct {
 	ctx: *av.Codec.Context = undefined,
@@ -79,7 +77,7 @@ pub fn Base(frames: comptime_int) type { return struct {
 
 	const Av = @This();
 
-	pub var dict: std.AutoHashMapUnmanaged(*Symbol, *const fn(*const Av) *const Pile)
+	pub var dict: std.AutoHashMapUnmanaged(*Symbol, *const fn (*const Av) *const Pile)
 		= .empty;
 	pub fn freeDict(gpa: Allocator) void {
 		dict.deinit(gpa);
@@ -88,7 +86,8 @@ pub fn Base(frames: comptime_int) type { return struct {
 	pub inline fn init(gpa: Allocator, obj: *pd.Object, arg: Atom) !Av {
 		const layout: av.ChannelLayout = try .fromMask(if (arg.getSymbol()) |s|
 			std.fmt.parseInt(u64, std.mem.sliceTo(s.name, 0), 0) catch stereo
-		else @as(u64, @trunc(arg.w.float)));
+		else
+			@as(u64, @trunc(arg.w.float)));
 
 		const nch: u8 = @truncate(@as(c_uint, @bitCast(layout.nb_channels)));
 		for (0..nch) |_| {
@@ -125,7 +124,7 @@ pub fn Base(frames: comptime_int) type { return struct {
 	pub inline fn deinit(self: *Av, gpa: Allocator) void {
 		gpa.free(self.ibuf[0 .. self.nch * frames]);
 		gpa.free(self.obuf[0 .. self.nch * frames]);
-		gpa.free(self.outs[0 .. self.nch]);
+		gpa.free(self.outs[0..self.nch]);
 		self.playlist.deinit(gpa);
 		self.player.deinit(gpa);
 		self.packet.destroy();
@@ -143,7 +142,8 @@ pub fn Base(frames: comptime_int) type { return struct {
 	fn newSwr(self: *Av, a: *const av.Codec.Context) !*av.SwrContext {
 		var cl: av.ChannelLayout = if (a.ch_layout.u.mask != 0)
 			try .fromMask(a.ch_layout.u.mask)
-		else .default(pd.uFromI(a.ch_layout.nb_channels));
+		else
+			.default(pd.uFromI(a.ch_layout.nb_channels));
 		const sf: av.SampleFormat = if (@bitSizeOf(Float) == 64) .dbl else .flt;
 		return .create(&self.layout, sf, 1, &cl, a.sample_fmt, 1, 0, null);
 	}
@@ -250,9 +250,9 @@ pub fn Base(frames: comptime_int) type { return struct {
 	}
 
 	pub fn Impl(Self: type) type { return struct {
-		const perform: fn(*Self, [*]usize, *usize) callconv(.@"inline") anyerror!void
+		const perform: fn (*Self, [*]usize, *usize) callconv(.@"inline") anyerror!void
 			= Self.perform;
-		const err: fn(*const Pd, anyerror) callconv(.@"inline") void = Self.err;
+		const err: fn (*const Pd, anyerror) callconv(.@"inline") void = Self.err;
 		const gpa = Self.gpa;
 		const io = Self.io;
 		const Box = Self.Box;
@@ -320,7 +320,7 @@ pub fn Base(frames: comptime_int) type { return struct {
 
 			errdefer dict.deinit(gpa);
 			inline for ([_][:0]const u8{
-				"path", "time", "ftime", "ptime", "tracks",
+				"path",      "time",       "ftime",   "ptime", "tracks",
 				"samplefmt", "samplerate", "bitrate", "codec",
 			}) |field_name| {
 				try dict.put(gpa, .gen(field_name), @field(dispatch, field_name));

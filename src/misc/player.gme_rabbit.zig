@@ -1,15 +1,16 @@
-const pd = @import("pd");
 const std = @import("std");
-const pr = @import("player.zig");
-const gm = @import("player.gme.zig");
-const ra = @import("player.rabbit.zig");
-const Inlet = @import("inlet.zig").Inlet;
+const Allocator = std.mem.Allocator;
 
+const pd = @import("pd");
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
-const Allocator = std.mem.Allocator;
+
+const gm = @import("player.gme.zig");
+const Inlet = @import("inlet.zig").Inlet;
+const pr = @import("player.zig");
+const ra = @import("player.rabbit.zig");
 
 pub fn Impl(Root: type) type { return struct {
 	base: Base,

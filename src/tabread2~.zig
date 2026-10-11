@@ -1,15 +1,15 @@
 //! Linear interpolating table lookup.
 //! Uses the largest power of 2 + 1 points in an array and ignores leftovers.
-const TabRead2 = @This();
-
 const pd = @import("pd");
-const Tab2 = @import("misc/Tab2.zig");
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
+
+const Tab2 = @import("misc/Tab2.zig");
+
+const TabRead2 = @This();
 
 tab2: Tab2,
 onset: Float = 0,
@@ -57,8 +57,10 @@ inline fn set(self: *TabRead2, s: *Symbol) pd.GArray.GetError!u32 {
 	errdefer self.tab2.vec = null;
 	self.tab2.arrayname = s;
 
-	const array: *pd.GArray = if (pd.garray_class.find(s)) |ga| @ptrCast(ga)
-		else return error.GArrayNotFound;
+	const array: *pd.GArray = if (pd.garray_class.find(s)) |ga|
+		@ptrCast(ga)
+	else
+		return error.GArrayNotFound;
 
 	const vec = try array.floatWords();
 	self.tab2.vec = vec.ptr;

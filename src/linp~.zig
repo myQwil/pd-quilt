@@ -1,12 +1,12 @@
 //! `[line~]` with pause/resume functionality.
-const LinPSignal = @This();
-
 const pd = @import("pd");
-const tg = @import("misc/toggle.zig");
-
 const Pd = pd.Pd;
 const Sample = pd.Sample;
 const Float = pd.Float;
+
+const tg = @import("misc/toggle.zig");
+
+const LinPSignal = @This();
 
 o_pause: *pd.Outlet,
 target: Sample = 0,
@@ -41,11 +41,9 @@ fn performC(w: [*]usize) callconv(.c) [*]usize {
 		self.value = 0;
 	}
 	if (self.retarget) {
-		const nticks = @max(1,
-			@as(u32, @trunc(self.inletwas * self.dspticktomsec)));
+		const nticks = @max(1, @as(u32, @trunc(self.inletwas * self.dspticktomsec)));
 		self.ticksleft = nticks;
-		self.biginc = (self.target - self.value)
-			/ @as(Sample, @floatFromInt(nticks));
+		self.biginc = (self.target - self.value) / @as(Sample, @floatFromInt(nticks));
 		self.inc = self.invn * self.biginc;
 		self.retarget = false;
 	}
@@ -72,8 +70,7 @@ fn dspC(p: *Pd, sp: [*]*pd.Signal) callconv(.c) void {
 	const self = Box.state(p);
 	pd.dsp.add(performC, .{ self, sp[0].len, sp[0].vec });
 	self.invn = 1 / @as(Float, @floatFromInt(sp[0].len));
-	self.dspticktomsec = sp[0].srate
-		/ @as(Float, @floatFromInt(1000 * sp[0].len));
+	self.dspticktomsec = sp[0].srate / @as(Float, @floatFromInt(1000 * sp[0].len));
 }
 
 fn stopC(p: *Pd) callconv(.c) void {

@@ -1,16 +1,15 @@
 //! Float random number generator. Seed is initialized with Zig's `io.random()`.
-const Rind = @This();
+const std = @import("std");
 
 const pd = @import("pd");
-const std = @import("std");
-const Rng = @import("misc/Rng.zig");
-
 const Pd = pd.Pd;
 const Atom = pd.Atom;
 const Float = pd.Float;
 const Symbol = pd.Symbol;
 
-const io = std.Io.Threaded.global_single_threaded.io();
+const Rng = @import("misc/Rng.zig");
+
+const Rind = @This();
 
 out: *pd.Outlet,
 min: Float,
@@ -20,6 +19,7 @@ rng: Rng,
 const name = "rind";
 pub var class: *pd.Class = undefined;
 pub const Box = pd.Box(pd.Object, Rind);
+const io = std.Io.Threaded.global_single_threaded.io();
 
 fn printC(p: *const Pd) callconv(.c) void {
 	const self = Box.stateConst(p);
@@ -36,8 +36,13 @@ fn bangC(p: *Pd) callconv(.c) void {
 fn listC(p: *Pd, _: *Symbol, ac: c_uint, av: [*]const Atom) callconv(.c) void {
 	const self = Box.state(p);
 	sw: switch (@min(ac, 2)) {
-		2 => { if (av[1].getFloat()) |f| self.min = f; continue :sw 1; },
-		1 => { if (av[0].getFloat()) |f| self.max = f; },
+		2 => {
+			if (av[1].getFloat()) |f| self.min = f;
+			continue :sw 1;
+		},
+		1 => {
+			if (av[0].getFloat()) |f| self.max = f;
+		},
 		else => {},
 	}
 }

@@ -1,10 +1,9 @@
 //! Float-decode. Splits the sign, exponent, and mantissa of a float.
-
 const pd = @import("pd");
-const UnFloat = @import("misc/bitfloat.zig").UnFloat;
-
 const Pd = pd.Pd;
 const Float = pd.Float;
+
+const UnFloat = @import("misc/bitfloat.zig").UnFloat;
 
 out_m: *pd.Outlet,
 out_e: *pd.Outlet,
