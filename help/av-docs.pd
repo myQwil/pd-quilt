@@ -95,9 +95,9 @@
 #N canvas 760 200 360 270 streams 0;
 #X obj 50 120 cupqb;
 #X obj 170 120 cupqb;
-#X msg 170 180 subtitle \$1;
-#X msg 50 180 audio \$1;
-#X text 30 10 Some file formats allow for multiple streams of the same media type \, such as language dubs for movies., f 29;
+#X msg 170 180 sid \$1;
+#X msg 50 180 aid \$1;
+#X text 30 10 Select specific audio and subtitle streams.;
 #X obj 50 210 s \$1msg;
 #X obj 170 210 s \$1msg;
 #X connect 0 0 3 0;

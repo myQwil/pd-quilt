@@ -103,9 +103,9 @@ pub fn Impl(Root: type) type { return struct {
 					if (data.input_frames <= 0) {
 						while (b.format.readFrame(pkt)) {
 							defer pkt.unref();
-							if (pkt.stream_index == b.audio.idx) {
-								try b.audio.ctx.sendPacket(pkt);
-								try b.audio.ctx.receiveFrame(frm);
+							if (pkt.stream_index == b.aid) {
+								try b.actx.sendPacket(pkt);
+								try b.actx.receiveFrame(frm);
 								data.input_frames = try b.swr.convert(
 									@ptrCast(&in), ra.frames,
 									@ptrCast(frm.extended_data), frm.nb_samples.u,
@@ -113,9 +113,9 @@ pub fn Impl(Root: type) type { return struct {
 								data.data_in = in;
 								data.input_frames = ra.frames;
 								break;
-							} else if (b.sub_open and pkt.stream_index == b.subtitle.idx) {
+							} else if (pkt.stream_index == b.sid) {
 								var sub: av.Subtitle = undefined;
-								if (try b.subtitle.ctx.decodeSubtitle(&sub, pkt)) {
+								if (try b.sctx.decodeSubtitle(&sub, pkt)) {
 									const p: *Pd = @ptrFromInt(
 										@intFromPtr(self) - @offsetOf(Box, "body"));
 									pd.post.log(p, .normal, "\n%s", .{ pkt.data });

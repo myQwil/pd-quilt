@@ -13,6 +13,7 @@ const Atom = pd.Atom;
 const Float = pd.Float;
 const Sample = pd.Sample;
 const Symbol = pd.Symbol;
+const uint = pd.uint;
 
 const pr = @import("player.zig");
 const tx = @import("trax.zig");
@@ -26,43 +27,37 @@ pub var s_done: *Symbol = undefined;
 pub const stereo = ((1 << @backingInt(av.Channel.front_left)) |
 	(1 << @backingInt(av.Channel.front_right)));
 
-const Stream = struct {
-	ctx: *av.Codec.Context = undefined,
-	idx: usize = 0,
-
-	fn init(ic: *const av.FormatContext, t: av.MediaType, i: usize) !Stream {
-		if (i >= ic.nb_streams) {
-			return error.StreamIndexOutOfBounds;
-		}
-		if (ic.streams[i].codecpar.codec_type != t) {
-			return error.StreamTypeMismatch;
-		}
-		const stream = ic.streams[i];
-
-		const ctx: *av.Codec.Context = try .create(try stream.codecpar.codec_id.decoder());
-		errdefer ctx.destroy();
-
-		try ctx.parametersToContext(stream.codecpar);
-		ctx.pkt_timebase = stream.time_base;
-		try ctx.open(null, null);
-
-		return .{
-			.ctx = ctx,
-			.idx = i,
-		};
+fn initStream(
+	ic: *const av.FormatContext,
+	t: av.MediaType,
+	i: uint,
+) !struct { ctx: *av.Codec.Context, id: uint } {
+	if (i >= ic.nb_streams) {
+		return error.StreamIndexOutOfBounds;
 	}
-
-	pub fn deinit(self: *Stream) void {
-		self.ctx.destroy();
+	if (ic.streams[i].codecpar.codec_type != t) {
+		return error.StreamTypeMismatch;
 	}
-};
+	const stream = ic.streams[i];
+
+	const ctx: *av.Codec.Context = try .create(try stream.codecpar.codec_id.decoder());
+	errdefer ctx.destroy();
+
+	try ctx.parametersToContext(stream.codecpar);
+	ctx.pkt_timebase = stream.time_base;
+	try ctx.open(null, null);
+
+	return .{ .ctx = ctx, .id = i };
+}
 
 pub fn Base(frames: comptime_int) type { return struct {
 	layout: av.ChannelLayout,
 	playlist: tx.Playlist = .{},
 	player: pr.Player,
-	audio: Stream = .{},
-	subtitle: Stream = .{},
+	actx: *av.Codec.Context = undefined,
+	aid: uint = 0,
+	sctx: *av.Codec.Context = undefined,
+	sid: c_int = -1,
 	ibuf: [*]Sample,
 	obuf: [*]Sample,
 	outs: [*][*]Sample,
@@ -73,7 +68,6 @@ pub fn Base(frames: comptime_int) type { return struct {
 	/// ratio between file samplerate and pd samplerate
 	ratio: f64 = 1,
 	nch: u8,
-	sub_open: bool = false,
 
 	const Av = @This();
 
@@ -131,11 +125,11 @@ pub fn Base(frames: comptime_int) type { return struct {
 		self.frame.destroy();
 		if (self.player.open) {
 			self.format.closeInput();
-			self.audio.deinit();
+			self.actx.destroy();
 			self.swr.destroy();
 		}
-		if (self.sub_open) {
-			self.subtitle.deinit();
+		if (self.sid >= 0) {
+			self.sctx.destroy();
 		}
 	}
 
@@ -159,24 +153,25 @@ pub fn Base(frames: comptime_int) type { return struct {
 		try format.findStreamInfo(null);
 		format.seek2any = 1;
 
-		var audio: Stream = try .init(format, .audio, for (0..format.nb_streams) |i| {
+		var audio = try initStream(format, .audio, for (0..format.nb_streams) |i| {
 			if (format.streams[i].codecpar.codec_type == .audio) {
-				break i;
+				break @truncate(i);
 			}
 		} else {
 			return error.NoAudioStreamFound;
 		});
-		errdefer audio.deinit();
+		errdefer audio.ctx.destroy();
 		const swr: *av.SwrContext = try self.newSwr(audio.ctx);
 
 		// safe to delete the previous track
 		if (self.player.open) {
 			self.format.closeInput();
-			self.audio.deinit();
+			self.actx.destroy();
 			self.swr.destroy();
 		}
 		self.format = format;
-		self.audio = audio;
+		self.actx = audio.ctx;
+		self.aid = audio.id;
 		self.swr = swr;
 		self.ratio = @as(f64, @floatFromInt(audio.ctx.sample_rate)) / pd.sampleRate();
 		self.frame.pts = 0;
@@ -215,7 +210,7 @@ pub fn Base(frames: comptime_int) type { return struct {
 	}
 
 	pub inline fn reset(self: *Av) void {
-		self.audio.ctx.flushBuffers();
+		self.actx.flushBuffers();
 		// empty out the current frame
 		while (self.swr.convert(@ptrCast(&self.ibuf), frames, null, 0)) |n| {
 			if (n <= 0) {
@@ -232,7 +227,7 @@ pub fn Base(frames: comptime_int) type { return struct {
 		const ts: i64 = @trunc(f * 1000);
 		try self.format.seekFile(-1, 0, ts, self.format.duration, .{});
 
-		const ratio = self.format.streams[self.audio.idx].time_base;
+		const ratio = self.format.streams[self.aid].time_base;
 		const num: f64 = @floatFromInt(ratio.num);
 		const den: f64 = @floatFromInt(ratio.den);
 		self.frame.pts = @trunc(f * den / (num * 1000));
@@ -240,7 +235,7 @@ pub fn Base(frames: comptime_int) type { return struct {
 
 	pub inline fn pos(self: *Av) !void {
 		try self.player.assertFileOpened();
-		const ratio = self.format.streams[self.audio.idx].time_base.q2d();
+		const ratio = self.format.streams[self.aid].time_base.q2d();
 		const f = @as(f64, @floatFromInt(self.frame.pts)) * ratio * 1000;
 		self.player.outlet.anything(s_pos, &.{ .float(@floatCast(f)) });
 	}
@@ -271,46 +266,47 @@ pub fn Base(frames: comptime_int) type { return struct {
 			base.player.outlet.anything(s_append, &.{ .float(count) });
 		}
 
-		fn audioC(p: *Pd, f: Float) callconv(.c) void {
-			audio(p, f) catch |e| err(p, e);
+		fn aidC(p: *Pd, f: Float) callconv(.c) void {
+			aid(p, f) catch |e| err(p, e);
 		}
-		inline fn audio(p: *Pd, f: Float) !void {
+		inline fn aid(p: *Pd, f: Float) !void {
 			const self = Box.state(p);
 			const base: *Av = &self.base;
 			try base.player.assertFileOpened();
-			var a: Stream = try .init(base.format, .audio, @trunc(f));
-			errdefer a.deinit();
-			const swr = try base.newSwr(a.ctx);
+			var audio = try initStream(base.format, .audio, @trunc(f));
+			errdefer audio.ctx.destroy();
+			const swr = try base.newSwr(audio.ctx);
 
-			base.audio.deinit();
+			base.actx.destroy();
 			base.swr.destroy();
-			base.audio = a;
+			base.actx = audio.ctx;
+			base.aid = audio.id;
 			base.swr = swr;
-			base.ratio = @as(f64, @floatFromInt(a.ctx.sample_rate)) / pd.sampleRate();
-			pd.post.log(p, .normal, "audio stream set to %u", .{ a.idx });
+			base.ratio = @as(f64, @floatFromInt(audio.ctx.sample_rate)) / pd.sampleRate();
+			pd.post.log(p, .normal, "audio stream set to %u", .{ @as(c_uint, audio.id) });
 		}
 
-		fn subtitleC(p: *Pd, f: Float) callconv(.c) void {
-			subtitle(p, f) catch |e| err(p, e);
+		fn sidC(p: *Pd, f: Float) callconv(.c) void {
+			sid(p, f) catch |e| err(p, e);
 		}
-		inline fn subtitle(p: *Pd, f: Float) !void {
+		inline fn sid(p: *Pd, f: Float) !void {
 			const self = Box.state(p);
 			const base: *Av = &self.base;
 			try base.player.assertFileOpened();
 			if (f < 0) {
-				if (base.sub_open) {
-					base.subtitle.deinit();
-					base.sub_open = false;
+				if (base.sid >= 0) {
+					base.sctx.destroy();
+					base.sid = -1;
 				}
 				return;
 			}
-			const s: Stream = try .init(base.format, .subtitle, @trunc(f));
-			if (base.sub_open) {
-				base.subtitle.deinit();
+			const sub = try initStream(base.format, .subtitle, @trunc(f));
+			if (base.sid >= 0) {
+				base.sctx.destroy();
 			}
-			base.subtitle = s;
-			base.sub_open = true;
-			pd.post.log(p, .normal, "subtitle stream set to %u", .{ s.idx });
+			base.sctx = sub.ctx;
+			base.sid = sub.id;
+			pd.post.log(p, .normal, "subtitle stream set to %u", .{ @as(c_uint, sub.id) });
 		}
 
 		pub inline fn extend() Allocator.Error!void {
@@ -328,8 +324,8 @@ pub fn Base(frames: comptime_int) type { return struct {
 
 			const class: *pd.Class = Self.class;
 			class.addMethod(&.{}, posC, s_pos);
-			class.addMethod(&.{ .float }, audioC, .gen("audio"));
-			class.addMethod(&.{ .float }, subtitleC, .gen("subtitle"));
+			class.addMethod(&.{ .float }, aidC, .gen("aid"));
+			class.addMethod(&.{ .float }, sidC, .gen("sid"));
 			class.addMethod(&.{ .gimme }, appendC, .gen("append"));
 		}
 	};}
@@ -352,18 +348,18 @@ pub fn Base(frames: comptime_int) type { return struct {
 			return .float(@floatFromInt(self.trackCount()));
 		}
 		fn samplefmt(self: *const Av) *const Pile {
-			const name = self.audio.ctx.sample_fmt.getName();
+			const name = self.actx.sample_fmt.getName();
 			return .string(if (name) |s| std.mem.sliceTo(s, 0) else "unknown");
 		}
 		fn samplerate(self: *const Av) *const Pile {
-			return .float(@floatFromInt(self.audio.ctx.sample_rate));
+			return .float(@floatFromInt(self.actx.sample_rate));
 		}
 		fn bitrate(self: *const Av) *const Pile {
 			const bit_rate: Float = @floatFromInt(self.format.bit_rate);
 			return .float(bit_rate / 1000);
 		}
 		fn codec(self: *const Av) *const Pile {
-			return .string(@tagName(self.audio.ctx.codec_id));
+			return .string(@tagName(self.actx.codec_id));
 		}
 	};
 };}
